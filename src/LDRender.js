@@ -4,10 +4,10 @@
 LDRender = (function() {
 'use strict';
 
-var renderer, camera;
+let renderer, camera;
 
 function contextBoundingBox(data, w, h) {
-	var x, y, minX, minY, maxX, maxY;
+	let x, y, minX, minY, maxX, maxY;
 	o1:
 		for (y = h; y--;) {
 			for (x = w; x--;) {
@@ -54,22 +54,11 @@ function contextBoundingBox(data, w, h) {
 	};
 }
 
-function getImageData(image) {
-	var canvas = document.createElement('canvas');
-	canvas.width = image.width;
-	canvas.height = image.height;
-
-	var ctx = canvas.getContext('2d');
-	ctx.drawImage(image, 0, 0);
-
-	return ctx.getImageData(0, 0, image.width, image.height);
-}
-
-var isInitialized = false;
+let isInitialized = false;
 
 function initialize() {
 
-	var offscreenContainer = document.createElement('div');
+	const offscreenContainer = document.createElement('div');
 	offscreenContainer.setAttribute('style', 'position: absolute; left: -10000px; top: -10000px;');
 	offscreenContainer.setAttribute('id', 'offscreen_render_container');
 	document.body.appendChild(offscreenContainer);
@@ -81,56 +70,70 @@ function initialize() {
 	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.1, 10000);
 	camera.up = new THREE.Vector3(0, -1, 0);  // -1 because LDraw coordinate space has -y as UP
 	camera.position.x = viewBox;
-	camera.position.y = -viewBox;
+	camera.position.y = -viewBox + 150;
 	camera.position.z = -viewBox;
 
-	var controls = new THREE.OrbitControls(camera, renderer.domElement);
-	controls.addEventListener('change', render);
-	controls.enableZoom = true;
+	// TODO: KILL THISSSSSSS!!  It's shitting all over my life.
+	new THREE.OrbitControls(camera, renderer.domElement);
+	isInitialized = true;
 }
 
-function render(scene, containerID, size) {
+// Render the specified scene in a size x size viewport, then crop it of all whitespace
+// if containerID refers to an SVG image or HTML5 canvas, copy rendered image there
+// return a {width, height} object specifying the final rendered image size, tightly cropped
+function render(scene, size, containerID, getData) {
 
 	renderer.setSize(size, size);
-
 	renderer.render(scene, camera);
 
-	var data = getImageData(renderer.domElement);
-	var bounds = contextBoundingBox(data.data, size, size, 5);
+	// Create a new 2D canvas so we can convert the full 3D canvas into a 2D canvas, and retrieve its image data
+	// TODO: create this canvas just once way offscreen
+	const canvas = document.createElement('canvas');
+	canvas.width = canvas.height = size;
+
+	const ctx = canvas.getContext('2d');
+	ctx.drawImage(renderer.domElement, 0, 0);
+	const data = ctx.getImageData(0, 0, size, size);
+
+	const bounds = contextBoundingBox(data.data, size, size, 5);
 	if (!bounds) {
-		return;
+		return null;
 	}
 
-	var canvas = document.getElementById(containerID);
-	var ctx = canvas.getContext('2d');
-	canvas.width = bounds.w + 1;
-	canvas.height = bounds.h + 1;
-	ctx.drawImage(renderer.domElement, -bounds.x, -bounds.y);
-	ctx.rect(0.5, 0.5, bounds.w, bounds.h);
-	ctx.stroke();
+	const container = document.getElementById(containerID);
+	if (container instanceof SVGImageElement || (containerID == null && getData)) {
+		// Resize image to fit bounds then redraw image inside those bounds
+		canvas.width = bounds.w + 1;
+		canvas.height = bounds.h + 1;
+		ctx.drawImage(renderer.domElement, -bounds.x, -bounds.y);
+		const data2D = canvas.toDataURL('image/png');
+		if (containerID == null && getData) {
+			return {width: canvas.width, height: canvas.height, image: data2D};
+		}
+		container.setAttributeNS('http://www.w3.org/1999/xlink', 'href', data2D);
+		container.setAttribute('width', canvas.width);
+		container.setAttribute('height', canvas.height);
+	} else if (container instanceof HTMLCanvasElement) {
+		const ctx2 = container.getContext('2d');
+		container.width = bounds.w + 1;
+		container.height = bounds.h + 1;
+		ctx2.drawImage(renderer.domElement, -bounds.x, -bounds.y);
+		//ctx2.rect(0.5, 0.5, bounds.w, bounds.h);
+		//ctx2.stroke();
+	}
+	return {width: bounds.w, height: bounds.h};
 }
 
 function initScene() {
 
-	var scene = new THREE.Scene();
+	const scene = new THREE.Scene();
 	scene.add(new THREE.AmbientLight(0x404040));
 	return scene;
 }
 
-function LDQuadToArray(p) {
-	return [
-		p[0], p[ 1], p[ 2],
-		p[3], p[ 4], p[ 5],
-		p[6], p[ 7], p[ 8],
-
-		p[6], p[ 7], p[ 8],
-		p[9], p[10], p[11],
-		p[0], p[ 1], p[ 2]
-	];
-}
-
+/* eslint-disable no-multi-spaces, no-mixed-spaces-and-tabs */
 function LDMatrixToMatrix(m) {
-	var matrix = new THREE.Matrix4();
+	const matrix = new THREE.Matrix4();
 	matrix.set(
 		m[3], m[ 4], m[ 5], m[0],
 		m[6], m[ 7], m[ 8], m[1],
@@ -139,17 +142,15 @@ function LDMatrixToMatrix(m) {
 	);
 	return matrix;
 }
+/* eslint-enable no-multi-spaces, no-mixed-spaces-and-tabs */
 
 function getPartGeometry(abstractPart, color) {
 
-	if (abstractPart.geometry != null) {
-		var faceGeometry = abstractPart.geometry.faces;
+	if (0 && abstractPart.geometry != null) {
+		const faceGeometry = abstractPart.geometry.faces;
 		if (color != null && !abstractPart.isSubModel) {
-			for (var i = 0; i < faceGeometry.faces.length; i++) {
-				var face = faceGeometry.faces[i];
-				if (1 || !face.preserveColor) {
-					face.color.setHex(color);
-				}
+			for (let i = 0; i < faceGeometry.faces.length; i++) {
+				faceGeometry.faces[i].color.setHex(color);
 			}
 		}
 
@@ -165,62 +166,39 @@ function getPartGeometry(abstractPart, color) {
 	};
 
 	var colorObj = (color == null) ? null : new THREE.Color(color);
-	abstractPart.primitives.forEach(function(primitive) {
-		var p = primitive.points;
-		if (primitive.shape === 'linexx') {
-			var geometry = new THREE.Geometry();
-			geometry.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
-			geometry.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
-			var line = new MeshLine();
-			line.setGeometry(geometry);
-			var material = new MeshLineMaterial({
-				useMap: false,
-				color: new THREE.Color((color == null) ? 0x000000 : color),
-				lineWidth: 0.004,
-				opacity: 1,
-				resolution: new THREE.Vector2(w, h),
-				sizeAttenuation: true
-			});
-			var mesh = new THREE.Mesh(line.geometry, material);
-			scene.add(mesh);
-		} else if (primitive.shape === 'line') {
-			abstractPart.geometry.lines.vertices.push(new THREE.Vector3(p[0], p[ 1], p[ 2]));
-			abstractPart.geometry.lines.vertices.push(new THREE.Vector3(p[3], p[ 4], p[ 5]));
+	for (let i = 0; i < abstractPart.primitives.length; i++) {
+		const primitive = abstractPart.primitives[i];
+		const p = primitive.points;
+		if (primitive.shape === 'line') {
+			abstractPart.geometry.lines.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
+			abstractPart.geometry.lines.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
 		} else {
-			var vIdx = abstractPart.geometry.faces.vertices.length;
+
+			const vIdx = abstractPart.geometry.faces.vertices.length;
+			const face1 = new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, colorObj);
+			abstractPart.geometry.faces.faces.push(face1);
+
+			abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
+			abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
+			abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[6], p[7], p[8]));
+
 			if (primitive.shape === 'quad') {
-				abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[0], p[ 1], p[ 2]));
-				abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[3], p[ 4], p[ 5]));
-				abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[6], p[ 7], p[ 8]));
 				abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[9], p[10], p[11]));
-				var face1 = new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, colorObj);
-				var face2 = new THREE.Face3(vIdx, vIdx + 2, vIdx + 3, null, colorObj);
-				if (color != null) {
-					face1.preserveColor = face2.preserveColor = true;
-				}
-				abstractPart.geometry.faces.faces.push(face1);
+				const face2 = new THREE.Face3(vIdx, vIdx + 2, vIdx + 3, null, colorObj);
 				abstractPart.geometry.faces.faces.push(face2);
-			} else if (primitive.shape === 'triangle') {
-				abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[0], p[ 1], p[ 2]));
-				abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[3], p[ 4], p[ 5]));
-				abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[6], p[ 7], p[ 8]));
-				var face = new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, colorObj);
-				if (color != null) {
-					face.preserveColor = true;
-				}
-				abstractPart.geometry.faces.faces.push(face);
 			}
 		}
-	});
+	}
 
-	abstractPart.parts.forEach(function(part) {
-		var matrix = LDMatrixToMatrix(part.matrix);
-		var res = getPartGeometry(part.abstractPart, part.color >= 0 ? part.color : color);
-		var faces = res.faces.clone().applyMatrix(matrix);
-		var lines = res.lines.clone().applyMatrix(matrix);
+	for (let i = 0; i < abstractPart.parts.length; i++) {
+		const part = abstractPart.parts[i];
+		const matrix = LDMatrixToMatrix(part.matrix);
+		const res = getPartGeometry(part.abstractPart, part.color >= 0 ? part.color : color, part.color);
+		const faces = res.faces.clone().applyMatrix(matrix);
+		const lines = res.lines.clone().applyMatrix(matrix);
 		abstractPart.geometry.faces.merge(faces);
 		abstractPart.geometry.lines.merge(lines);
-	});
+	}
 
 	return abstractPart.geometry;
 }
@@ -228,27 +206,28 @@ function getPartGeometry(abstractPart, color) {
 const faceMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors, side: THREE.DoubleSide});
 const lineMaterial = new THREE.LineBasicMaterial({color: 0x000000, linewidth: 5});
 
-function addModelToScene(scene, model) {
+function addModelToScene(scene, model, startPart, endPart) {
 
-	model.parts.forEach(function(part) {
+	for (var i = startPart; i <= endPart; i++) {
+		var part = model.parts[i];
 
-		var matrix = LDMatrixToMatrix(part.matrix);
-		var partGeometry = getPartGeometry(part.abstractPart, part.color >= 0 ? part.color : null);
+		const matrix = LDMatrixToMatrix(part.matrix);
+		const partGeometry = getPartGeometry(part.abstractPart, part.color >= 0 ? part.color : null, null);
 
-		var mesh = new THREE.Mesh(partGeometry.faces, faceMaterial);
+		const mesh = new THREE.Mesh(partGeometry.faces, faceMaterial);
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
 
-		var line = new THREE.LineSegments(partGeometry.lines, lineMaterial);
+		const line = new THREE.LineSegments(partGeometry.lines, lineMaterial);
 		line.applyMatrix(matrix);
 		scene.add(line);
-	});
+	}
 }
 
 function addPartToScene(scene, abstractPart, color, config) {
-	var partGeometry = getPartGeometry(abstractPart, color);
+	const partGeometry = getPartGeometry(abstractPart, color);
 
-	var mesh = new THREE.Mesh(partGeometry.faces.clone(), faceMaterial);
+	const mesh = new THREE.Mesh(partGeometry.faces.clone(), faceMaterial);
 	if (config && config.rotation) {
 		mesh.rotation.x = config.rotation.x * Math.PI / 180;
 		mesh.rotation.y = config.rotation.y * Math.PI / 180;
@@ -256,7 +235,7 @@ function addPartToScene(scene, abstractPart, color, config) {
 	}
 	scene.add(mesh);
 
-	var line = new THREE.LineSegments(partGeometry.lines.clone(), lineMaterial);
+	const line = new THREE.LineSegments(partGeometry.lines.clone(), lineMaterial);
 	if (config && config.rotation) {
 		line.rotation.x = config.rotation.x * Math.PI / 180;
 		line.rotation.y = config.rotation.y * Math.PI / 180;
@@ -265,37 +244,55 @@ function addPartToScene(scene, abstractPart, color, config) {
 	scene.add(line);
 }
 
-function renderModel(part, containerID, size) {
+function renderModel(part, containerID, size, endPart, startPart, getData) {
 
 	if (!isInitialized) {
 		initialize();
 	}
-	var start = Date.now();
-	var scene = initScene();
-	addModelToScene(scene, part);
-	render(scene, containerID, size);
+	const scene = initScene();
+	startPart = (startPart == null) ? 0 : startPart;
+	endPart = (endPart == null) ? part.parts.length - 1 : endPart;
 
-	var end = Date.now();
-	console.log('Render time: ' + (end - start) + 'ms');
+	addModelToScene(scene, part, startPart, endPart);
+	return render(scene, size, containerID, getData);
 }
 
-function renderPart(part, containerID, size, color, config) {
-
+function renderPart(part, containerID, size, config, getData) {
 	if (!isInitialized) {
 		initialize();
 	}
-	var start = Date.now();
-	var scene = initScene();
-	addPartToScene(scene, part, color, config);
-	render(scene, containerID, size);
+	const scene = initScene();
+	addPartToScene(scene, part.abstractPart, part.color, config);
+	return render(scene, size, containerID, getData);
+}
 
-	var end = Date.now();
-	console.log('Render time: ' + (end - start) + 'ms');
+// Like renderModel, except it doesn't copy the rendered image to a
+// target node, it only returns a {width, height} object instead
+function measureModel(part, size, endPart, startPart) {
+	return renderModel(part, null, size, endPart, startPart);
+}
+
+function measurePart(part, size, config) {
+	return renderPart(part, null, size, config);
+}
+
+// Like renderModel, except it doesn't copy the rendered image to a target
+// node, it only returns the raw image data as a base64 encoded string
+function renderModelData(part, size, endPart, startPart) {
+	return renderModel(part, null, size, endPart, startPart, true);
+}
+
+function renderPartData(part, size, config) {
+	return renderPart(part, null, size, config, true);
 }
 
 return {
 	renderPart: renderPart,
-	renderModel: renderModel
+	renderModel: renderModel,
+	measureModel: measureModel,
+	measurePart: measurePart,
+	renderPartData: renderPartData,
+	renderModelData: renderModelData
 };
 
 })();
