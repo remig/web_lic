@@ -7,6 +7,7 @@ const start = Date.now();
 
 let model;  // Global LDraw model - contains full part data
 
+const pageMargin = 20;  // This will end up in the template page, when we have one
 const undoStack = [];  // Can't store this in app because then it becomes observed, which is slow and a massive memory hit
 
 // Stores anything that must work with undo / redo, and all state that is saved to the binary .lic (except static stuff in model, like part geometries)
@@ -55,8 +56,8 @@ const store = new Vuex.Store({
 					var idx = state.pages[i].steps.indexOf(stepNumber);
 					state.pages[i].steps.splice(idx, 1);
 					state.pages[i - 1].steps.push(stepNumber);
-					layoutPage(state.pages[i - 1]);
-					layoutPage(state.pages[i]);
+//					layoutPage(state.pages[i - 1]);
+//					layoutPage(state.pages[i]);
 					break;
 				}
 			}
@@ -94,6 +95,147 @@ const store = new Vuex.Store({
 						y: null
 					}
 				});
+			}
+		},
+		layoutStep(state, opts) {
+
+			const {step, box} = opts;
+
+			step.pos.x = box.x + pageMargin;
+			step.pos.y = box.y + pageMargin;
+			step.pos.width = box.width - pageMargin - pageMargin;
+			step.pos.height = box.height - pageMargin - pageMargin;
+
+			const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
+			const csiSize = LDRender.measureModel(model, 1000, lastPart);
+			step.csi.x = Math.floor((step.pos.width - csiSize.width) / 2);
+			step.csi.y = Math.floor((step.pos.height - csiSize.height) / 2);
+
+			const pliMargin = 10;
+			let maxHeight = 0;
+			let left = pliMargin;
+
+			//pliList.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
+			for (var i = 0; i < step.pliList.length; i++) {
+
+				const pliItem = step.pliList[i];
+				const pliSize = LDRender.measurePart(model.parts[pliItem.partNumber], 1000);
+				pliItem.x = Math.floor(left);
+				pliItem.y = Math.floor(pliMargin);
+				pliItem.quantityLabel.x = -5;
+				pliItem.quantityLabel.y = pliSize.height + 5;
+
+				left += Math.floor(pliSize.width + pliMargin);
+				maxHeight = Math.max(maxHeight, pliSize.height);
+			}
+
+			if (step.pli) {
+				step.pli.x = 0;
+				step.pli.y = 0;
+				step.pli.width = left;
+				step.pli.height = maxHeight + pageMargin;
+			}
+
+			if (step.numberLabel) {
+				step.numberLabel.x = 0;
+				step.numberLabel.y = maxHeight + pageMargin + pageMargin;
+			}
+		},
+		layoutPage(state, page) {
+			const pageSize = state.pageSize;
+			const stepCount = page.steps.length;
+			const cols = Math.ceil(Math.sqrt(stepCount));
+			const rows = Math.ceil(stepCount / cols);
+			const colSize = Math.floor(pageSize.width / cols);
+			const rowSize = Math.floor(pageSize.height / rows);
+
+			const box = {x: 0, y: 0, width: colSize, height: rowSize};
+
+			for (var i = 0; i < stepCount; i++) {
+				box.x = colSize * (i % cols);
+				box.y = rowSize * (i % rows);
+				store._mutations.layoutStep[0]({step: state.steps[page.steps[i]], box});
+			}
+
+			if (page.numberLabel) {
+				page.numberLabel.x = pageSize.width - pageMargin;
+				page.numberLabel.y = pageSize.height - pageMargin;
+			}
+		},
+		addInitialPages(state, model) {
+
+			if (!model.steps) {
+				return;
+			}
+
+			model.steps.unshift(null);  // Add one empty step to the begining of the model's step list as a placeholder for the title page (until we have a proper title page, anyway)
+
+			state.steps.push({
+				number: 0,
+				pos: {x: null, y: null, width: null, height: null},
+				csi: {x: null, y: null},
+				pli: null,
+				pliList: [],
+				parts: []
+			});
+
+			const titlePage = {
+				number: 0,
+				steps: [0]
+			};
+			store._mutations.layoutPage[0](titlePage);
+			state.pages.push(titlePage);
+
+			for (let i = 1; i < model.steps.length; i++) {
+
+				const step = {
+					number: i,
+					pos: {x: null, y: null, width: null, height: null},
+					numberLabel: {x: null, y: null},
+					parts: clone(model.steps[i].parts),
+					csi: {x: null, y: null},
+					pli: {x: null, y: null, width: null, height: null},
+					pliList: []
+				};
+				state.steps.push(step);
+
+				model.steps[i].parts.forEach(partNumber => {
+
+					const part = model.parts[partNumber];
+					const target = step.pliList.filter(pli => pli.name === part.name && pli.color === part.color)[0];
+					if (target) {
+						target.quantity++;
+					} else {
+						step.pliList.push({
+							name: part.name,
+							partNumber: partNumber,
+							color: part.color,
+							x: null,
+							y: null,
+							quantity: 1,
+							quantityLabel: {
+								x: null,
+								y: null
+							}
+						});
+					}
+				});
+
+				let stepsToAdd;
+				if (i % 2 === 0) {
+					stepsToAdd = [i - 1, i];
+				} else if (i === model.steps.length - 1) {
+					stepsToAdd = [i];
+				}
+				if (stepsToAdd) {
+					const page = {
+						number: Math.ceil(i / 2),
+						numberLabel: {x: null, y: null},
+						steps: stepsToAdd
+					};
+					store._mutations.layoutPage[0](page);
+					state.pages.push(page);
+				}
 			}
 		}
 	}
@@ -507,202 +649,12 @@ onSplitterDrag();
 document.body.addEventListener('keyup', e => app.globalKeyPress(e));
 window.onresize = onSplitterDrag;
 
-function setItemXY(direct, opts) {
-	if (direct) {
-		opts.item.x = opts.x;
-		opts.item.y = opts.y;
-	} else {
-		store.commit('setItemXY', opts);
-	}
-}
-
-function setItemXYWH(direct, opts) {
-	if (direct) {
-		opts.item.x = opts.x;
-		opts.item.y = opts.y;
-		opts.item.width = opts.width;
-		opts.item.height = opts.height;
-	} else {
-		store.commit('setItemXY', opts);
-	}
-}
-
-const pageMargin = 20;
-
-function layoutStep(step, box, direct) {
-
-	setItemXYWH(direct, {
-		item: step.pos,
-		x: box.x + pageMargin,
-		y: box.y + pageMargin,
-		width: box.width - pageMargin - pageMargin,
-		height: box.height - pageMargin - pageMargin
-	});
-
-	const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
-	const csiSize = LDRender.measureModel(model, 1000, lastPart);
-	setItemXY(direct, {
-		item: step.csi,
-		x: Math.floor((step.pos.width - csiSize.width) / 2),
-		y: Math.floor((step.pos.height - csiSize.height) / 2)
-	});
-
-	const pliMargin = 10;
-	let maxHeight = 0;
-	let left = pliMargin;
-
-	//pliList.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
-	for (var i = 0; i < step.pliList.length; i++) {
-
-
-		const pliItem = step.pliList[i];
-		const pliSize = LDRender.measurePart(model.parts[pliItem.partNumber], 1000);
-		setItemXY(direct, {
-			item: pliItem,
-			x: Math.floor(left),
-			y: Math.floor(pliMargin)
-		});
-		setItemXY(direct, {
-			item: pliItem.quantityLabel,
-			x: -5,
-			y: pliSize.height + 5
-		});
-
-		left += Math.floor(pliSize.width + pliMargin);
-		maxHeight = Math.max(maxHeight, pliSize.height);
-	}
-
-	if (step.pli) {
-		setItemXYWH(direct, {
-			item: step.pli,
-			x: 0,
-			y: 0,
-			width: left,
-			height: maxHeight + pageMargin
-		});
-	}
-
-	if (step.numberLabel) {
-		setItemXY(direct, {
-			item: step.numberLabel,
-			x: 0,
-			y: maxHeight + pageMargin + pageMargin
-		});
-	}
-}
-
-function layoutPage(page, state, direct) {
-
-	state = state || store.state;
-	const pageSize = state.pageSize;
-	const stepCount = page.steps.length;
-	const cols = Math.ceil(Math.sqrt(stepCount));
-	const rows = Math.ceil(stepCount / cols);
-	const colSize = Math.floor(pageSize.width / cols);
-	const rowSize = Math.floor(pageSize.height / rows);
-
-	const box = {x: 0, y: 0, width: colSize, height: rowSize};
-
-	for (var i = 0; i < stepCount; i++) {
-		box.x = colSize * (i % cols);
-		box.y = rowSize * (i % rows);
-		layoutStep(state.steps[page.steps[i]], box, direct);
-	}
-
-	if (page.numberLabel) {
-		setItemXY(direct, {
-			item: page.numberLabel,
-			x: pageSize.width - pageMargin,
-			y: pageSize.height - pageMargin
-		});
-	}
-}
-
 function formatTime(start, end) {
 	const t = end - start;
 	if (t >= 1000) {
 		return (t / 1000).toFixed(2) + 's';
 	}
 	return t + 'ms';
-}
-
-// Add one new page for each step in model
-function addInitialPages(model, initialState) {
-
-	if (!model.steps) {
-		return model;
-	}
-
-	model.steps.unshift(null);  // Add one empty step to the begining of the model's step list as a placeholder for the title page (until we have a proper title page, anyway)
-
-	initialState.steps.push({
-		number: 0,
-		pos: {x: null, y: null, width: null, height: null},
-		csi: {x: null, y: null},
-		pli: null,
-		pliList: [],
-		parts: []
-	});
-
-	const titlePage = {
-		number: 0,
-		steps: [0]
-	};
-	layoutPage(titlePage, initialState, true);
-	initialState.pages.push(titlePage);
-
-	for (let i = 1; i < model.steps.length; i++) {
-
-		const step = {
-			number: i,
-			pos: {x: null, y: null, width: null, height: null},
-			numberLabel: {x: null, y: null},
-			parts: clone(model.steps[i].parts),
-			csi: {x: null, y: null},
-			pli: {x: null, y: null, width: null, height: null},
-			pliList: []
-		};
-		initialState.steps.push(step);
-
-		model.steps[i].parts.forEach(partNumber => {
-
-			const part = model.parts[partNumber];
-			const target = step.pliList.filter(pli => pli.name === part.name && pli.color === part.color)[0];
-			if (target) {
-				target.quantity++;
-			} else {
-				step.pliList.push({
-					name: part.name,
-					partNumber: partNumber,
-					color: part.color,
-					x: null,
-					y: null,
-					quantity: 1,
-					quantityLabel: {
-						x: null,
-						y: null
-					}
-				});
-			}
-		});
-
-		let stepsToAdd;
-		if (i % 2 === 0) {
-			stepsToAdd = [i - 1, i];
-		} else if (i === model.steps.length - 1) {
-			stepsToAdd = [i];
-		}
-		if (stepsToAdd) {
-			const page = {
-				number: Math.ceil(i / 2),
-				numberLabel: {x: null, y: null},
-				steps: stepsToAdd
-			};
-			layoutPage(page, initialState, true);
-			initialState.pages.push(page);
-		}
-	}
-	return model;
 }
 
 function clone(state) {
@@ -712,18 +664,12 @@ function clone(state) {
 function importLDrawModel(modelName) {
 
 	model = LDParse.loadPart(modelName);
-	var initialState = {
-		modelName,
-		pages: [],
-		steps: [],
-		pageSize: {width: 800, height: 600}
-	};
 
-	addInitialPages(model, initialState);
+	store.commit('setModelName', modelName);
+	store.commit('addInitialPages', model);
 
 	app.undoIndex = 0;
-	undoStack.push(initialState);
-	store.replaceState(clone(initialState));
+	undoStack.push(clone(store.state));
 
 	app.currentPage = store.state.pages[0];
 
