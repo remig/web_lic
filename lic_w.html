@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Web Lic!</title>
+    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+	<script type="text/javascript" src="lib/jquery.js"></script>
+    <script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="lib/three.js-master/build/three.js"></script>
+    <script type="text/javascript" src="lib/vue.js"></script>
+    <script type="text/javascript" src="lib/vuex.js"></script>
+    <script type="text/javascript" src="lib/split.js"></script>
+    <script type="text/javascript" src="lib/jspdf.js"></script>
+	<script type="text/javascript" src="lib/THREE.MeshLine.js"></script>
+	<script type="text/javascript" src="lib/three.js-master/examples/js/controls/OrbitControls.js"></script>
+    <script type="text/javascript" src="lib/FileSaver.js"></script>
+    <script type="text/javascript" src="lib/jszip.js"></script>
+	<script type="text/javascript" src="src/LDParse.js"></script>
+	<script type="text/javascript" src="src/LDRender.js"></script>
+</head>
+<body>
+	<div id="container">
+		<nav class="navbar navbar-default">
+			<ul class="nav navbar-nav">
+				<li v-for="menu in menuEntries" class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li v-for="child in menu.children" v-bind:class="{divider: child.text == 'separator', disabled: child.disabled ? menuDisabled(child.text) : false}">
+							<a v-if="child.text !== 'separator'" v-on:click="child.cb($event)" class="clickable">{{child.text}}</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="http://bugeyedmonkeys.com" target="_blank">Web Lic 0.1</a></li>
+			</ul>
+		</nav>
+		<div class="mainBody" v-on:click="globalClick($event)" v-on:contextmenu.stop.prevent="rightClick($event)">
+			<div id="leftPane" class="split split-horizontal">
+				<ul>
+					<li v-for="page in pages" v-bind:class="['clickable', {selected: page.number === currentPage.number}]" v-on:click.stop.prevent="drawPage(page)">{{page.number > 0 ? 'Page ' + page.number : 'Title Page'}}</li>
+				</ul>
+			</div>
+			<div id="rightPane" class="split split-horizontal">
+				<div class="pageContainer">
+					<svg xmlns="http://www.w3.org/2000/svg" id="svgContainer" class="selectable" data-obj-type="page">
+						<g class="stepGroup" v-for="step in getSteps(currentPage)" v-bind:transform="'translate(' + step.pos.x + ', ' + step.pos.y + ')'">
+							<rect class="svgStepHolder selectable moveable" x="0" y="0" v-bind:width="step.pos.width" v-bind:height="step.pos.height" data-obj-type="step" v-bind:data-state-item="step.number"></rect>
+							<image v-bind:id="'CSI_' + step.number" class="selectable moveable" v-bind:x="step.csi.x" v-bind:y="step.csi.y" data-obj-type="csi" v-bind:data-state-item="step.number"></image>
+							<g class="pliGroup" v-if="step.number > 0" v-bind:transform="'translate(' + step.pli.x + ', ' + step.pli.y + ')'">
+								<rect class="svgPLIBorder selectable moveable" x="0" y="0" v-bind:width="step.pli.width" v-bind:height="step.pli.height" rx="10" ry="10" data-obj-type="pli" v-bind:data-state-item="step.number"></rect>
+								<g class="pliItemGroup" v-for="(pliItem, i) in step.pliList" v-bind:transform="'translate(' + pliItem.x + ', ' + pliItem.y + ')'">
+									<image v-bind:id="'PLI_' + step.number + '_' + i" class="selectable moveable" x="0" y="0" data-obj-type="pliItem" v-bind:data-state-item="step.number + ',' + i"></image>
+									<text v-bind:class="'svgPLIQtyLabel_' + i + ' selectable moveable'" v-bind:x="pliItem.quantityLabel.x" v-bind:y="pliItem.quantityLabel.y" data-obj-type="pliQty" v-bind:data-state-item="step.number + ',' + i">x{{pliItem.quantity}}</text>
+								</g>
+							</g>
+							<text v-if="step.number > 0" class="svgStepNumber selectable" v-bind:x="step.numberLabel.x" v-bind:y="step.numberLabel.y" dy="0.71em" data-obj-type="stepNumber">{{step.number}}</text>
+						</g>
+						<text v-if="currentPage.number > 0" class="svgPageNumber selectable" v-bind:x="currentPage.numberLabel.x" v-bind:y="currentPage.numberLabel.y" text-anchor="end" data-obj-type="pageNumber">{{(currentPage || {}).number}}</text>
+					</svg>
+				</div>
+			</div>
+			<div id="highlight" v-bind:style="highlightStyle"></div>
+		</div>
+		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
+		<div id="contextMenu" class="dropdown" tabindex="-1" v-on:blur="closeMenu" v-on:click="closeMenu">
+			<ul class="dropdown-menu">
+				<li v-for="menu in contextMenu" v-bind:class="{divider: menu.text == 'separator'}" v-bind:role="{separator: menu.text == 'separator'}">
+					<a v-if="menu.text !== 'separator'" v-on:click="menu.cb($event)" class="clickable">{{menu.text}}</a>
+				</li>
+			</ul>
+		</div>
+		<div id="statusBar">{{statusText}}</div>
+	</div>
+	<script type="text/javascript" src="src/lic_w.js"></script>
+</body>
+</html>

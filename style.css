@@ -1,0 +1,131 @@
+/* Overwrite Bootstrap stuff */
+.navbar {
+	margin-bottom: 0px;
+	min-height: 0;
+}
+
+.navbar-right {
+	margin-right: 0px;
+}
+
+.navbar-nav li a {
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
+
+.dropdown-menu > .disabled > a {
+	pointer-events: none;
+	color: #bbb;
+}
+
+/* Splitter stuff */
+.gutter.gutter-horizontal {
+	cursor: ew-resize;
+}
+
+.split {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 10px;
+}
+
+.gutter.gutter-horizontal {
+	background-color: #777;
+}
+
+.split, .gutter.gutter-horizontal {
+	height: 100%;
+	float: left;
+	position: relative;
+}
+
+/* Lic stuff */
+ul {
+	-webkit-padding-start: 0px;
+}
+
+canvas {
+	position: absolute;
+}
+
+li.clickable.selected {
+	border: 1px dashed #2eb9ce;
+}
+
+.clickable, .selectable {
+	cursor: pointer;
+}
+
+.mainBody {
+	height: 1055px;  /* WTF CSS, just fill the bloody page */
+}
+
+#rightPane {
+	background-color: #bbb;
+	width: 100%;
+}
+
+.pageContainer {
+	background-color: #fff;
+	position: absolute;
+	box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
+}
+
+#statusBar {
+	background-color: #bbb;
+	border-top: 1px solid #333;
+	position: fixed;
+	left: 0px;
+	bottom: 0px;
+	width: 100%;
+	height: 25px;
+	padding: 5px 0px 0px 10px;
+	font: bold 10pt Helvetica;
+}
+
+#contextMenu {
+	position: absolute;
+	left: 300px;
+	top: 50px;
+	display: none;
+}
+
+#contextMenu > ul {
+	display: block;
+}
+
+#highlight {  /* Style the border around selected items */
+	display: none;
+	position: absolute;
+	pointer-events:none;
+	border: 3px dashed #2eb9ce;
+}
+
+.svgStepHolder {
+	fill: transparent;
+}
+
+.svgStepNumber {
+	font: bold 20pt Helvetica;
+	fill: black;
+	stroke: transparent;
+}
+
+.svgPageNumber {
+	font: bold 20pt Helvetica;
+	fill: black;
+	stroke: transparent;
+}
+
+.svgPLIBorder {
+	stroke: black;
+	stroke-width: 1.5;
+	fill: transparent;
+}
+
+text[class^="svgPLIQtyLabel"] {
+	font: bold 10pt Helvetica;
+	fill: black;
+	stroke: transparent;
+}
