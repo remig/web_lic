@@ -78,10 +78,12 @@ function initialize() {
 	isInitialized = true;
 }
 
-// Render the specified scene in a size x size viewport, then crop it of all whitespace
-// if containerID refers to an SVG image or HTML5 canvas, copy rendered image there
-// return a {width, height} object specifying the final rendered image size, tightly cropped
-function render(scene, size, containerID, getData) {
+// Render the specified scene in a size x size viewport, then crop it of all whitespace.
+// If containerID refers to an SVG image or HTML5 canvas, copy rendered image there.
+// Return a {width, height} object specifying the final tightly cropped rendered image size.
+function render(scene, size, containerID, config) {
+
+	config = config || {};
 
 	renderer.setSize(size, size);
 	renderer.render(scene, camera);
@@ -100,26 +102,32 @@ function render(scene, size, containerID, getData) {
 		return null;
 	}
 
-	const container = document.getElementById(containerID);
-	if (container instanceof SVGImageElement || (containerID == null && getData)) {
+	const container = (typeof containerID === 'string') ? document.getElementById(containerID) : containerID;
+	if (container instanceof SVGImageElement || (containerID == null && config.getData)) {
 		// Resize image to fit bounds then redraw image inside those bounds
 		canvas.width = bounds.w + 1;
 		canvas.height = bounds.h + 1;
 		ctx.drawImage(renderer.domElement, -bounds.x, -bounds.y);
 		const data2D = canvas.toDataURL('image/png');
-		if (containerID == null && getData) {
+		if (containerID == null && config.getData) {
 			return {width: canvas.width, height: canvas.height, image: data2D};
 		}
 		container.setAttributeNS('http://www.w3.org/1999/xlink', 'href', data2D);
 		container.setAttribute('width', canvas.width);
 		container.setAttribute('height', canvas.height);
 	} else if (container instanceof HTMLCanvasElement) {
+		if (config.resizeContainer) {
+			container.width = bounds.w + 1;
+			container.height = bounds.h + 1;
+		}
 		const ctx2 = container.getContext('2d');
-		container.width = bounds.w + 1;
-		container.height = bounds.h + 1;
-		ctx2.drawImage(renderer.domElement, -bounds.x, -bounds.y);
-		//ctx2.rect(0.5, 0.5, bounds.w, bounds.h);
-		//ctx2.stroke();
+		ctx2.drawImage(
+			renderer.domElement,
+			bounds.x, bounds.y,
+			bounds.w + 1, bounds.h + 1,
+			config.dx || 0, config.dy || 0,
+			bounds.w + 1, bounds.h + 1
+		);
 	}
 	return {width: bounds.w, height: bounds.h};
 }
@@ -244,32 +252,34 @@ function addPartToScene(scene, abstractPart, color, config) {
 	scene.add(line);
 }
 
-function renderModel(part, containerID, size, endPart, startPart, getData) {
+function renderModel(part, containerID, size, config) {
 
 	if (!isInitialized) {
 		initialize();
 	}
+
+	config = config || {};
 	const scene = initScene();
-	startPart = (startPart == null) ? 0 : startPart;
-	endPart = (endPart == null) ? part.parts.length - 1 : endPart;
+	const startPart = (config.startPart == null) ? 0 : config.startPart;
+	const endPart = (config.endPart == null) ? part.parts.length - 1 : config.endPart;
 
 	addModelToScene(scene, part, startPart, endPart);
-	return render(scene, size, containerID, getData);
+	return render(scene, size, containerID, config);
 }
 
-function renderPart(part, containerID, size, config, getData) {
+function renderPart(part, containerID, size, config) {
 	if (!isInitialized) {
 		initialize();
 	}
 	const scene = initScene();
 	addPartToScene(scene, part.abstractPart, part.color, config);
-	return render(scene, size, containerID, getData);
+	return render(scene, size, containerID, config);
 }
 
 // Like renderModel, except it doesn't copy the rendered image to a
 // target node, it only returns a {width, height} object instead
 function measureModel(part, size, endPart, startPart) {
-	return renderModel(part, null, size, endPart, startPart);
+	return renderModel(part, null, size, {endPart: endPart, startPart: startPart});
 }
 
 function measurePart(part, size, config) {
@@ -279,11 +289,13 @@ function measurePart(part, size, config) {
 // Like renderModel, except it doesn't copy the rendered image to a target
 // node, it only returns the raw image data as a base64 encoded string
 function renderModelData(part, size, endPart, startPart) {
-	return renderModel(part, null, size, endPart, startPart, true);
+	return renderModel(part, null, size, {endPart: endPart, startPart: startPart, getData: true});
 }
 
 function renderPartData(part, size, config) {
-	return renderPart(part, null, size, config, true);
+	config = config || {};
+	config.getData = true;
+	return renderPart(part, null, size, config);
 }
 
 return {

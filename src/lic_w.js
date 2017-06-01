@@ -5,7 +5,8 @@
 
 const start = Date.now();
 
-let model;  // Global LDraw model - contains full part data
+var app;    // Global vue app
+var model;  // Global LDraw model - contains full part data
 
 const pageMargin = 20;  // This will end up in the template page, when we have one
 const undoStack = [];  // Can't store this in app because then it becomes observed, which is slow and a massive memory hit
@@ -15,27 +16,15 @@ const store = new Vuex.Store({
 	strict: true,
 	state: {
 		modelName: '',
-		pages: [],  // page: {number: 1, steps: [1,2,3]}
-		steps: [],  // step: {number: 2, csi: {x, y, w, h}}
+		pages: [],
+		steps: [],
+		csis: [],
+		plis: [],
+		pliItems: [],
+		pliQtys: [],
 		pageSize: {width: 800, height: 600}
 	},
 	getters: {
-		stateItem: (state) => (stateType, idx) => {  // stateType = step, csi, pli, pliItem; idx = stepNumber, pliItemIndex
-			if (stateType === 'csi') {
-				return state.steps[idx].csi;
-			} else if (stateType === 'step') {
-				return state.steps[idx].pos;
-			} else if (stateType === 'pli') {
-				return state.steps[idx].pli;
-			} else if (stateType === 'pliItem') {
-				const [stepNumber, pliIdx] = idx.split(',').map(i => parseInt(i, 10));
-				return state.steps[stepNumber].pliList[pliIdx];
-			} else if (stateType === 'pliQty') {
-				const [stepNumber, pliIdx] = idx.split(',').map(i => parseInt(i, 10));
-				return state.steps[stepNumber].pliList[pliIdx].quantityLabel;
-			}
-			return null;
-		},
 		step: (state) => (stepNumber) => {
 			return state.steps[stepNumber];
 		}
@@ -44,101 +33,104 @@ const store = new Vuex.Store({
 		setModelName(state, name) {
 			state.modelName = name;
 		},
-		addPage(state, page) {
-			state.pages.push(page);
-		},
-		addStep(state, step) {
-			state.steps.push(step);
-		},
-		moveStepToPreviousPage(state, stepNumber) {
-			for (var i = 2; i < state.pages.length; i++) {
-				if (state.pages[i].steps.includes(stepNumber)) {
-					var idx = state.pages[i].steps.indexOf(stepNumber);
-					state.pages[i].steps.splice(idx, 1);
-					state.pages[i - 1].steps.push(stepNumber);
-//					layoutPage(state.pages[i - 1]);
-//					layoutPage(state.pages[i]);
-					break;
-				}
-			}
+		moveStepToPreviousPage(state, step) {
+			const currentPage = state.pages[step.parent.index];
+			const prevPage = state.pages[step.parent.index - 1];
+			var stepIdx = currentPage.steps.indexOf(step.number);
+			currentPage.steps.splice(stepIdx, 1);
+			prevPage.steps.push(step.number);
+			store._mutations.layoutPage[0](prevPage);
+			store._mutations.layoutPage[0](currentPage);
 		},
 		setItemXY(state, opts) {
 			opts.item.x = opts.x;
 			opts.item.y = opts.y;
-			Vue.nextTick(() => app.refreshSelected());
 		},
 		setItemXYWH(state, opts) {
 			opts.item.x = opts.x;
 			opts.item.y = opts.y;
 			opts.item.width = opts.width;
 			opts.item.height = opts.height;
-			Vue.nextTick(() => app.refreshSelected());
-		},
-		addPLI(state, pli) {
-			state.pliList.push(pli);
-		},
-		addPartToStep(state, opts) {
-			const step = state.steps[opts.stepNumber];
-			const target = step.pliList.filter(pli => pli.name === opts.part.name && pli.color === opts.part.color)[0];
-			if (target) {
-				target.quantity++;
-			} else {
-				step.pliList.push({
-					name: opts.part.name,
-					partNumber: opts.partNumber,
-					color: opts.part.color,
-					x: null,
-					y: null,
-					quantity: 1,
-					quantityLabel: {
-						x: null,
-						y: null
-					}
-				});
-			}
 		},
 		layoutStep(state, opts) {
 
 			const {step, box} = opts;
 
-			step.pos.x = box.x + pageMargin;
-			step.pos.y = box.y + pageMargin;
-			step.pos.width = box.width - pageMargin - pageMargin;
-			step.pos.height = box.height - pageMargin - pageMargin;
+			step.x = box.x + pageMargin;
+			step.y = box.y + pageMargin;
+			step.width = box.width - pageMargin - pageMargin;
+			step.height = box.height - pageMargin - pageMargin;
 
-			const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
-			const csiSize = LDRender.measureModel(model, 1000, lastPart);
-			step.csi.x = Math.floor((step.pos.width - csiSize.width) / 2);
-			step.csi.y = Math.floor((step.pos.height - csiSize.height) / 2);
+			if (step.csi != null) {
+
+				const csi_ID = `CSI_${step.number}`;
+				let csiContainer = document.getElementById(csi_ID);
+				if (!csiContainer) {
+					csiContainer = document.createElement('canvas');
+					csiContainer.setAttribute('id', csi_ID);
+					document.getElementById('canvasHolder').appendChild(csiContainer);
+				}
+				const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
+				const csiSize = LDRender.renderModel(model, csiContainer, 1000, {endPart: lastPart, resizeContainer: true});
+
+				const csi = state.csis[step.csi];
+				csi.x = Math.floor((step.width - csiSize.width) / 2);
+				csi.y = Math.floor((step.height - csiSize.height) / 2);
+				csi.width = csiSize.width;
+				csi.height = csiSize.height;
+			}
 
 			const pliMargin = 10;
 			let maxHeight = 0;
-			let left = pliMargin;
+			let left = pliMargin + 5;  // 5 for qty label
 
-			//pliList.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
-			for (var i = 0; i < step.pliList.length; i++) {
+			if (step.pli != null) {
 
-				const pliItem = step.pliList[i];
-				const pliSize = LDRender.measurePart(model.parts[pliItem.partNumber], 1000);
-				pliItem.x = Math.floor(left);
-				pliItem.y = Math.floor(pliMargin);
-				pliItem.quantityLabel.x = -5;
-				pliItem.quantityLabel.y = pliSize.height + 5;
+				const pli = state.plis[step.pli];
 
-				left += Math.floor(pliSize.width + pliMargin);
-				maxHeight = Math.max(maxHeight, pliSize.height);
-			}
+				//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
+				for (var i = 0; i < pli.pliItems.length; i++) {
 
-			if (step.pli) {
-				step.pli.x = 0;
-				step.pli.y = 0;
-				step.pli.width = left;
-				step.pli.height = maxHeight + pageMargin;
+					const idx = pli.pliItems[i];
+					const pliItem = state.pliItems[idx];
+					const part = model.parts[pliItem.partNumber];
+
+					const pli_ID = `PLI_${part.name}_${part.color}`;
+					let pliContainer = document.getElementById(pli_ID);
+					if (!pliContainer) {
+						pliContainer = document.createElement('canvas');
+						pliContainer.setAttribute('id', pli_ID);
+						document.getElementById('canvasHolder').appendChild(pliContainer);
+					}
+					const pliSize = LDRender.renderPart(part, pliContainer, 1000, {resizeContainer: true});
+
+					pliItem.x = Math.floor(left);
+					pliItem.y = Math.floor(pliMargin);
+					pliItem.width = pliSize.width;
+					pliItem.height = pliSize.height;
+
+					const lblSize = measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
+					const pliQty = state.pliQtys[pliItem.quantityLabel];
+					pliQty.x = -5;
+					pliQty.y = pliSize.height - 5;
+					pliQty.width = lblSize.width;
+					pliQty.height = lblSize.height;
+
+					left += Math.floor(pliSize.width + pliMargin);
+					maxHeight = Math.max(maxHeight, pliSize.height - 5 + pliQty.height);
+				}
+
+				pli.x = pli.y = 0;
+				pli.width = left;
+				pli.height = maxHeight + pageMargin;
 			}
 
 			if (step.numberLabel) {
+				const lblSize = measureLabel('bold 20pt Helvetica', step.number);
 				step.numberLabel.x = 0;
-				step.numberLabel.y = maxHeight + pageMargin + pageMargin;
+				step.numberLabel.y = maxHeight + pageMargin;
+				step.numberLabel.width = lblSize.width;
+				step.numberLabel.height = lblSize.height;
 			}
 		},
 		layoutPage(state, page) {
@@ -153,13 +145,16 @@ const store = new Vuex.Store({
 
 			for (var i = 0; i < stepCount; i++) {
 				box.x = colSize * (i % cols);
-				box.y = rowSize * (i % rows);
+				box.y = rowSize * Math.floor(i / cols);
 				store._mutations.layoutStep[0]({step: state.steps[page.steps[i]], box});
 			}
 
 			if (page.numberLabel) {
-				page.numberLabel.x = pageSize.width - pageMargin;
-				page.numberLabel.y = pageSize.height - pageMargin;
+				const lblSize = measureLabel('bold 20pt Helvetica', page.number);
+				page.numberLabel.x = pageSize.width - pageMargin - lblSize.width;
+				page.numberLabel.y = pageSize.height - pageMargin - lblSize.height;
+				page.numberLabel.width = lblSize.width;
+				page.numberLabel.height = lblSize.height;
 			}
 		},
 		addInitialPages(state, model) {
@@ -170,16 +165,26 @@ const store = new Vuex.Store({
 
 			model.steps.unshift(null);  // Add one empty step to the begining of the model's step list as a placeholder for the title page (until we have a proper title page, anyway)
 
+			state.csis.push({
+				type: 'csi',
+				parent: {type: 'step', index: 0},
+				x: null, y: null,
+				width: null, height: null
+			});
+
 			state.steps.push({
+				type: 'step',
+				parent: {type: 'page', index: 0},
 				number: 0,
-				pos: {x: null, y: null, width: null, height: null},
-				csi: {x: null, y: null},
-				pli: null,
-				pliList: [],
-				parts: []
+				parts: [],
+				x: null, y: null,
+				width: null, height: null,
+				csi: 0,
+				pli: null
 			});
 
 			const titlePage = {
+				type: 'page',
 				number: 0,
 				steps: [0]
 			};
@@ -188,51 +193,94 @@ const store = new Vuex.Store({
 
 			for (let i = 1; i < model.steps.length; i++) {
 
+				const csi = {
+					type: 'csi',
+					parent: {type: 'step', index: i},
+					x: null, y: null,
+					width: null, height: null
+				};
+				state.csis.push(csi);
+
+				const pli = {
+					type: 'pli',
+					parent: {type: 'step', index: i},
+					pliItems: [],
+					x: null, y: null,
+					width: null, height: null
+				};
+				state.plis.push(pli);
+
 				const step = {
+					type: 'step',
+					parent: {type: 'page', index: null},
 					number: i,
-					pos: {x: null, y: null, width: null, height: null},
-					numberLabel: {x: null, y: null},
 					parts: clone(model.steps[i].parts),
-					csi: {x: null, y: null},
-					pli: {x: null, y: null, width: null, height: null},
-					pliList: []
+					x: null, y: null,
+					width: null, height: null,
+					numberLabel: {
+						type: 'stepNumber',
+						parent: {type: 'step', index: i},
+						x: null, y: null,
+						width: null, height: null
+					},
+					csi: state.csis.length - 1,
+					pli: state.plis.length - 1
 				};
 				state.steps.push(step);
 
 				model.steps[i].parts.forEach(partNumber => {
 
 					const part = model.parts[partNumber];
-					const target = step.pliList.filter(pli => pli.name === part.name && pli.color === part.color)[0];
+					const target = pli.pliItems.map(idx => state.pliItems[idx])
+						.filter(pliItem => pliItem.name === part.name && pliItem.color === part.color)[0];
+
 					if (target) {
 						target.quantity++;
 					} else {
-						step.pliList.push({
+						const pliQty = {
+							type: 'pliQty',
+							parent: {type: 'pliItem', index: null},
+							x: null, y: null, width: null, height: null
+						};
+						state.pliQtys.push(pliQty);
+
+						const pliItem = {
+							type: 'pliItem',
+							parent: {type: 'pli', index: step.pli},
 							name: part.name,
 							partNumber: partNumber,
 							color: part.color,
-							x: null,
-							y: null,
+							x: null, y: null,
+							width: null, height: null,
 							quantity: 1,
-							quantityLabel: {
-								x: null,
-								y: null
-							}
-						});
+							quantityLabel: state.pliQtys.length - 1
+						};
+						state.pliItems.push(pliItem);
+						pli.pliItems.push(state.pliItems.length - 1);
+						pliQty.parent.index = state.pliItems.length - 1;
 					}
 				});
 
 				let stepsToAdd;
-				if (i % 2 === 0) {
-					stepsToAdd = [i - 1, i];
-				} else if (i === model.steps.length - 1) {
-					stepsToAdd = [i];
+				if (i % 3 === 0) {
+					stepsToAdd = [i - 2, i - 1, i];
 				}
 				if (stepsToAdd) {
+					const pageNumber = Math.ceil(i / 3);
 					const page = {
-						number: Math.ceil(i / 2),
-						numberLabel: {x: null, y: null},
+						type: 'page',
+						number: pageNumber,
+						numberLabel: {
+							type: 'pageNumber',
+							parent: {type: 'page', index: pageNumber},
+							x: null, y: null,
+							width: null, height: null
+						},
 						steps: stepsToAdd
 					};
+					stepsToAdd.forEach(stepNumber => {
+						state.steps[stepNumber].parent.index = pageNumber;
+					});
 					store._mutations.layoutPage[0](page);
 					state.pages.push(page);
 				}
@@ -265,7 +313,10 @@ const menu = [
 				if (app.undoIndex > 0) {
 					app.undoIndex--;
 					store.replaceState(clone(undoStack[app.undoIndex]));
-					Vue.nextTick(() => app.refreshSelected());
+					Vue.nextTick(() => {
+						app.clearSelected();
+						app.drawCurrentPage();
+					});
 				}
 			}
 		},
@@ -277,7 +328,10 @@ const menu = [
 				if (app.undoIndex < undoStack.length - 1) {
 					app.undoIndex++;
 					store.replaceState(clone(undoStack[app.undoIndex]));
-					Vue.nextTick(() => app.refreshSelected());
+					Vue.nextTick(() => {
+						app.clearSelected();
+						app.drawCurrentPage();
+					});
 				}
 			}
 		},
@@ -304,7 +358,6 @@ const menu = [
 			cb: () => {
 
 				const r = 0.75;  // = 72 / 96
-				const fontHeight = 20;
 				const pageSize = {width: store.state.pageSize.width * r, height: store.state.pageSize.height * r};
 
 				const doc = new jsPDF(
@@ -323,11 +376,12 @@ const menu = [
 					if (pageIdx > 0) {
 						doc.addPage(pageSize.width, pageSize.height);
 					}
-					page.steps.forEach((stepNumber) => {
+					page.steps.forEach(stepNumber => {
 
 						const step = store.state.steps[stepNumber];
 
-						if (step.csi) {
+						if (step.csi != null) {
+							const csi = store.state.csis[step.csi];
 							let renderResult;
 							if (stepNumber === 0) {
 								renderResult = LDRender.renderModelData(model, 1000);
@@ -337,48 +391,51 @@ const menu = [
 							}
 							doc.addImage(
 								renderResult.image, 'PNG',
-								(step.pos.x + step.csi.x) * r,
-								(step.pos.y + step.csi.y) * r,
+								(step.x + csi.x) * r,
+								(step.y + csi.y) * r,
 								renderResult.width * r,
 								renderResult.height * r
 							);
 						}
 
-						if (step.pli) {
+						if (step.pli != null) {
+							const pli = store.state.plis[step.pli];
 							doc.roundedRect(
-								(step.pos.x + step.pli.x) * r,
-								(step.pos.y + step.pli.y) * r,
-								(step.pli.width) * r,
-								(step.pli.height) * r,
+								(step.x + pli.x) * r,
+								(step.y + pli.y) * r,
+								(pli.width) * r,
+								(pli.height) * r,
 								10 * r, 10 * r, 'S'
 							);
+
+							pli.pliItems.forEach(idx => {
+
+								const pliItem = store.state.pliItems[idx];
+								const part = model.parts[pliItem.partNumber];
+								const renderResult = LDRender.renderPartData(part, 1000);
+								doc.addImage(
+									renderResult.image, 'PNG',
+									(step.x + pli.x + pliItem.x) * r,
+									(step.y + pli.y + pliItem.y) * r,
+									renderResult.width * r,
+									renderResult.height * r
+								);
+
+								const pliQty = store.state.pliQtys[pliItem.quantityLabel];
+								doc.setFontSize(10);
+								doc.text(
+									(step.x + pli.x + pliItem.x + pliQty.x) * r,
+									(step.y + pli.y + pliItem.y + pliQty.y + pliQty.height) * r,
+									'x' + pliItem.quantity
+								);
+							});
 						}
-
-						step.pliList.forEach(pliItem => {
-
-							const part = model.parts[pliItem.partNumber];
-							const renderResult = LDRender.renderPartData(part, 1000);
-							doc.addImage(
-								renderResult.image, 'PNG',
-								(step.pos.x + step.pli.x + pliItem.x) * r,
-								(step.pos.y + step.pli.y + pliItem.y) * r,
-								renderResult.width * r,
-								renderResult.height * r
-							);
-
-							doc.setFontSize(10);
-							doc.text(
-								(step.pos.x + pliItem.x + pliItem.quantityLabel.x) * r,
-								(step.pos.y + pliItem.y + pliItem.quantityLabel.y) * r,
-								'x' + pliItem.quantity
-							);
-						});
 
 						if (step.numberLabel) {
 							doc.setFontSize(20);
 							doc.text(
-								(step.pos.x + step.numberLabel.x) * r,
-								(step.pos.y + step.numberLabel.y + fontHeight) * r,
+								(step.x + step.numberLabel.x) * r,
+								(step.y + step.numberLabel.y + step.numberLabel.height) * r,
 								step.number + ''
 							);
 						}
@@ -388,7 +445,7 @@ const menu = [
 						doc.setFontSize(20);
 						doc.text(
 							(page.numberLabel.x) * r,
-							(page.numberLabel.y) * r,
+							(page.numberLabel.y + page.numberLabel.height) * r,
 							page.number + ''
 						);
 					}
@@ -400,18 +457,14 @@ const menu = [
 	]}
 ];
 
-const app = new Vue({
+app = new Vue({
 	el: '#container',
 	store,
 	data: {  // Store any transient UI state data here
-		currentPage: {steps: []},
+		currentPageNumber: 0,
 		statusText: '',
 		undoIndex: -1,
-		selectedItem: {
-			node: null,
-			nodeType: null,
-			stateItem: null
-		},
+		selectedItem: null,
 		contextMenu: null,
 		contextMenuEntries: {
 			page: [
@@ -431,8 +484,11 @@ const app = new Vue({
 			],
 			step: [
 				{text: 'Move Step to Previous Page', cb: () => {
-					const stepNumber = parseInt(app.selectedItem.stateItem, 10);
-					store.commit('moveStepToPreviousPage', stepNumber);
+					store.commit('moveStepToPreviousPage', app.selectedItem);
+					Vue.nextTick(() => {
+						app.clearSelected();
+						app.drawCurrentPage();
+					});
 				}},
 				{text: 'Move Step to Next Page', cb: () => {}},
 				{text: 'separator'},
@@ -457,6 +513,22 @@ const app = new Vue({
 		}
 	},
 	methods: {
+		importLDrawModel(modelName) {
+
+			model = LDParse.loadPart(modelName);
+
+			store.commit('setModelName', modelName);
+			store.commit('addInitialPages', model);
+
+			this.currentPageNumber = store.state.pages[0].number;
+			undoStack.splice(0, undoStack.length - 1);
+			app.undoIndex = 0;
+
+			Vue.nextTick(() => this.drawCurrentPage());
+
+			var end = Date.now();
+			this.statusText = `"${store.state.modelName}" loaded successfully (${formatTime(start, end)})`;
+		},
 		menuDisabled(menuName) {
 			if (menuName === 'Undo') {
 				return this.undoDisabled;
@@ -468,40 +540,95 @@ const app = new Vue({
 		getSteps(page) {
 			return page.steps.map(s => this.$store.state.steps[s]);
 		},
+		setCurrentPage(pageNumber) {
+			if (pageNumber !== app.currentPageNumber) {
+				this.clearSelected();
+				app.currentPageNumber = pageNumber;
+			}
+			Vue.nextTick(() => this.drawCurrentPage());
+		},
 		setSelected(target) {
-			this.$data.selectedItem.node = target;
-			this.$data.selectedItem.nodeType = target.dataset.objType;
-			this.$data.selectedItem.stateItem = target.dataset.stateItem;
-		},
-		refreshSelected() {
-			// Hacky way to force an update on anything that depends on the currently selected item changing in any way
-			const tmp = this.$data.selectedItem.node;
-			this.$data.selectedItem.node = null;
-			this.$data.selectedItem.node = tmp;
-		},
-		setCurrentPage(page) {
-			app.currentPage = page;
+			this.selectedItem = target;
 		},
 		clearSelected() {
-			this.$data.selectedItem.node = null;
-			this.$data.selectedItem.nodeType = null;
-			this.$data.selectedItem.stateItem = null;
+			this.selectedItem = null;
+		},
+		targetBox(t) {
+			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
+			let parent = t.parent;
+			while (parent) {
+				const parentList = store.state[parent.type + 's'];
+				if (parentList) {
+					parent = parentList[parent.index];
+					box.x += parent.x || 0;
+					box.y += parent.y || 0;
+					parent = parent.parent;
+				} else {
+					parent = null;
+				}
+			}
+			return box;
+		},
+		findClickTarget(mx, my) {
+			function inBox(x, y, t) {
+				const box = app.targetBox(t);
+				return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
+			}
+			const page = store.state.pages[this.currentPageNumber];
+			if (page.numberLabel && inBox(mx, my, page.numberLabel)) {
+				return page.numberLabel;
+			}
+			for (let i = 0; i < page.steps.length; i++) {
+				const step = store.state.steps[page.steps[i]];
+				if (step.csi != null && inBox(mx, my, store.state.csis[step.csi])) {
+					return store.state.csis[step.csi];
+				}
+				if (step.numberLabel && inBox(mx, my, step.numberLabel)) {
+					return step.numberLabel;
+				}
+				if (step.pli != null) {
+					const pli = store.state.plis[step.pli];
+					for (let j = 0; j < pli.pliItems.length; j++) {
+						const idx = pli.pliItems[j];
+						const pliItem = store.state.pliItems[idx];
+						if (inBox(mx, my, pliItem)) {
+							return pliItem;
+						}
+						const pliQty = store.state.pliQtys[pliItem.quantityLabel];
+						if (inBox(mx, my, pliQty)) {
+							return pliQty;
+						}
+					}
+					if (inBox(mx, my, pli)) {
+						return pli;
+					}
+				}
+				if (inBox(mx, my, step)) {
+					return step;
+				}
+			}
+			return page;
+		},
+		isMoveable(nodeType) {
+			return ['step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber'].includes(nodeType);
 		},
 		globalClick(e) {
 			this.closeMenu();
-			const target = e.target;
-			if (target.classList.contains('selectable')) {
+			let target;
+			if (e.target.id === 'pageCanvas') {
+				target = this.findClickTarget(e.offsetX, e.offsetY);
+			}
+			if (target) {
 				this.setSelected(target);
 			} else {
 				this.clearSelected();
 			}
 		},
 		rightClick(e) {
-			const selectedType = this.$data.selectedItem.nodeType;
-			if (selectedType != null) {
-				const menu = this.$data.contextMenuEntries[selectedType];
+			if (this.selectedItem != null) {
+				const menu = this.contextMenuEntries[this.selectedItem.type];
 				if (menu && menu.length) {
-					this.$data.contextMenu = menu;
+					this.contextMenu = menu;
 					$('#contextMenu')
 						.css({
 							'outline-style': 'none',
@@ -517,36 +644,29 @@ const app = new Vue({
 		},
 		globalKeyPress(e) {
 			this.closeMenu();
-			const selectedItem = this.$data.selectedItem;
-			const currentPageNumber = app.currentPage.number;
-			if (e.key === 'PageDown') {
-				if (currentPageNumber + 1 < this.$store.state.pages.length) {
-					this.drawPage(this.$store.state.pages[currentPageNumber + 1]);
+			const selectedItem = this.selectedItem;
+			if (e.key === 'PageDown' && this.currentPageNumber + 1 < this.$store.state.pages.length) {
+				this.setCurrentPage(this.currentPageNumber + 1);
+			} else if (e.key === 'PageUp' && this.currentPageNumber > 0) {
+				this.setCurrentPage(this.currentPageNumber - 1);
+			} else if (selectedItem && e.key.startsWith('Arrow') && this.isMoveable(selectedItem.type)) {
+				let dx = 0, dy = 0;
+				const dv = 30;
+				if (e.key === 'ArrowUp') {
+					dy = -dv;
+				} else if (e.key === 'ArrowDown') {
+					dy = dv;
+				} else if (e.key === 'ArrowLeft') {
+					dx = -dv;
+				} else if (e.key === 'ArrowRight') {
+					dx = dv;
 				}
-			} else if (e.key === 'PageUp') {
-				if (currentPageNumber > 0) {
-					this.drawPage(this.$store.state.pages[currentPageNumber - 1]);
-				}
-			} else if (e.key.startsWith('Arrow') && selectedItem.node.classList.contains('moveable')) {
-				const stateItem = this.$store.getters.stateItem(selectedItem.nodeType, selectedItem.stateItem);
-				if (stateItem) {
-					let dx = 0, dy = 0;
-					const dv = 30;
-					if (e.key === 'ArrowUp') {
-						dy = -dv;
-					} else if (e.key === 'ArrowDown') {
-						dy = dv;
-					} else if (e.key === 'ArrowLeft') {
-						dx = -dv;
-					} else if (e.key === 'ArrowRight') {
-						dx = dv;
-					}
-					this.$store.commit('setItemXY', {
-						item: stateItem,
-						x: stateItem.x + dx,
-						y: stateItem.y + dy
-					});
-				}
+				this.$store.commit('setItemXY', {
+					item: selectedItem,
+					x: selectedItem.x + dx,
+					y: selectedItem.y + dy
+				});
+				Vue.nextTick(() => this.drawCurrentPage());
 			} else {
 				// Check if key is a menu shortcut
 				const key = (e.ctrlKey ? 'ctrl+' : '') + e.key;
@@ -560,36 +680,63 @@ const app = new Vue({
 				}
 			}
 		},
-		drawPage(page) {
-			if (page === app.currentPage) {
-				return;
+		drawCurrentPage() {
+
+			const page = store.state.pages[this.currentPageNumber];
+			const pageSize = store.state.pageSize;
+			const canvas = document.getElementById('pageCanvas');
+			const ctx = canvas.getContext('2d');
+			ctx.fillStyle = 'white';
+			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
+
+			if (page.numberLabel) {
+				ctx.fillStyle = 'black';
+				ctx.font = 'bold 20pt Helvetica';
+				ctx.fillText(page.number, page.numberLabel.x, page.numberLabel.y + page.numberLabel.height);
 			}
 
-			this.clearSelected();
-			this.setCurrentPage(page);
+			page.steps.forEach(stepNumber => {
 
-			Vue.nextTick((function(page) {
-				return function() {
-					page.steps.forEach(stepNumber => {
-						if (stepNumber === 0) {
-							LDRender.renderModel(model, 'CSI_0', 1000);
-						} else {
-							let parts = store.state.steps[stepNumber].parts;
-							LDRender.renderModel(model, `CSI_${stepNumber}`, 1000, parts[parts.length - 1]);
+				const step = store.state.steps[stepNumber];
+				ctx.save();
+				ctx.translate(step.x, step.y);
 
-							const uniqueParts = {};
-							parts = parts.map(p => model.parts[p]);
-							parts.forEach(function(part) {
-								uniqueParts[part.name] = uniqueParts[part.name] || {part, quantity: 0};
-								uniqueParts[part.name].quantity += 1;
-							});
-							parts = Object.values(uniqueParts);
+				if (step.csi != null) {
+					const csi = store.state.csis[step.csi];
+					const csiCanvas = document.getElementById(`CSI_${step.number}`);
+					ctx.drawImage(csiCanvas, csi.x, csi.y);
+				}
 
-							parts.forEach((pliItem, i) => LDRender.renderPart(pliItem.part, `PLI_${stepNumber}_${i}`, 1000));
-						}
+				if (step.pli != null) {
+					const pli = store.state.plis[step.pli];
+					ctx.strokeStyle = 'black';
+					ctx.lineWidth = 2;
+					roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
+					ctx.stroke();
+
+					pli.pliItems.forEach(idx => {
+						const pliItem = store.state.pliItems[idx];
+						const part = model.parts[pliItem.partNumber];
+						const pliCanvas = document.getElementById(`PLI_${part.name}_${part.color}`);
+						ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
+
+						const pliQty = store.state.pliQtys[pliItem.quantityLabel];
+						ctx.font = 'bold 10pt Helvetica';
+						ctx.fillText(
+							'x' + pliItem.quantity,
+							pli.x + pliItem.x + pliQty.x,
+							pli.y + pliItem.y + pliQty.y + pliQty.height
+						);
 					});
-				};
-			})(page));
+				}
+
+				if (step.numberLabel) {
+					ctx.font = 'bold 20pt Helvetica';
+					ctx.fillText(step.number + '', step.numberLabel.x, step.numberLabel.y + step.numberLabel.height);
+				}
+
+				ctx.restore();
+			});
 		}
 	},
 	computed: {
@@ -602,17 +749,28 @@ const app = new Vue({
 		redoDisabled() {
 			return this.undoIndex >= undoStack.length - 1;
 		},
+		pageWidth() {
+			return this.$store.state.pageSize.width;
+		},
+		pageHeight() {
+			return this.$store.state.pageSize.height;
+		},
 		pages() {
 			return this.$store.state.pages;
 		},
 		highlightStyle() {
-			const target = this.$data.selectedItem.node;
-			if (target) {
-				const box = target.getBoundingClientRect();
+			const selectedItem = this.selectedItem;
+			if (selectedItem) {
+				let box;
+				if (selectedItem.type === 'page') {
+					box = {x: 0, y: 0, width: this.$store.state.pageSize.width, height: this.$store.state.pageSize.height};
+				} else {
+					box = this.targetBox(selectedItem);
+				}
 				return {
 					display: 'block',
-					left: `${box.left - 3}px`,
-					top: `${box.top - 3}px`,
+					left: `${box.x - 3}px`,
+					top: `${box.y - 3}px`,
 					width: `${box.width + 6}px`,
 					height: `${box.height + 6}px`
 				};
@@ -661,36 +819,43 @@ function clone(state) {
 	return JSON.parse(JSON.stringify(state));
 }
 
-function importLDrawModel(modelName) {
-
-	model = LDParse.loadPart(modelName);
-
-	store.commit('setModelName', modelName);
-	store.commit('addInitialPages', model);
-
-	app.undoIndex = 0;
-	undoStack.push(clone(store.state));
-
-	app.currentPage = store.state.pages[0];
-
-	Vue.nextTick(() => LDRender.renderModel(model, 'CSI_0', 1000));
-
-	var end = Date.now();
-	app.statusText = `"${store.state.modelName}" loaded successfully (${formatTime(start, end)})`;
-
-	store.subscribe((mutation, state) => {
-		if (app.undoIndex < undoStack.length - 1) {
-			undoStack.splice(app.undoIndex + 1);
-		}
-		undoStack.push(clone(state));
-		app.undoIndex++;
-	});
+function roundedRect(ctx, x, y, w, h, r) {
+	ctx.beginPath();
+	ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
+	ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);
+	ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
+	ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
+	ctx.closePath();
 }
 
-//importLDrawModel('Adventurers/5935 - Island Hopper.mpd');
-importLDrawModel('Creator/20015 - Alligator.mpd');
-//importLDrawModel('Star Wars/7140 - X-Wing Fighter.mpd');
-//importLDrawModel('Architecture/21010 - Robie House.mpd');
+const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
+function measureLabel(font, text) {
+	if (labelSizeCache[font] && labelSizeCache[font][text]) {
+		return labelSizeCache[font][text];
+	}
+	const container = document.getElementById('fontMeasureContainer');
+	container.style.font = font;
+	container.firstChild.textContent = text;
+	const res = container.getBBox();
+	res.width = Math.ceil(res.width);
+	res.height = Math.ceil(res.height);
+	labelSizeCache[font] = labelSizeCache[font] || {};
+	labelSizeCache[font][text] = res;
+	return res;
+}
+
+store.subscribe((mutation, state) => {
+	if (app.undoIndex < undoStack.length - 1) {
+		undoStack.splice(app.undoIndex + 1);
+	}
+	undoStack.push(clone(state));
+	app.undoIndex++;
+});
+
+//app.importLDrawModel('Adventurers/5935 - Island Hopper.mpd');
+app.importLDrawModel('Creator/20015 - Alligator.mpd');
+//app.importLDrawModel('Star Wars/7140 - X-Wing Fighter.mpd');
+//app.importLDrawModel('Architecture/21010 - Robie House.mpd');
 
 window.app = app;
 window.store = store;
