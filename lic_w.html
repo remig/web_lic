@@ -28,7 +28,7 @@
 				<li v-for="menu in menuEntries" class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
 					<ul class="dropdown-menu">
-						<li v-for="child in menu.children" :class="{divider: child.text == 'separator', disabled: child.disabled ? menuDisabled(child.text) : false}">
+						<li v-for="child in menu.children" :class="{divider: child.text == 'separator', disabled: child.disabled ? child.disabled() : false}">
 							<a v-if="child.text !== 'separator'" v-on:click="child.cb($event)" class="clickable">{{child.text}}</a>
 						</li>
 					</ul>
@@ -41,7 +41,7 @@
 		<div class="mainBody" v-on:click="globalClick($event)" v-on:contextmenu.stop.prevent="rightClick($event)">
 			<div id="leftPane" class="split split-horizontal">
 				<ul>
-					<li v-for="page in pages" :class="['clickable', {selected: page.number === currentPageNumber}]" v-on:click.stop.prevent="setCurrentPage(page.number)">{{page.number > 0 ? 'Page ' + page.number : 'Title Page'}}</li>
+					<li v-for="page in pages" :class="['clickable', {selected: page.id === currentPageID}]" v-on:click.stop.prevent="setCurrentPage(page.id)">{{page.number == null ? 'Title Page' : 'Page ' + page.number}}</li>
 				</ul>
 			</div>
 			<div id="rightPane" class="split split-horizontal">
@@ -54,7 +54,7 @@
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
 		<div id="contextMenu" class="dropdown" tabindex="-1" v-on:blur="closeMenu" v-on:click="closeMenu">
 			<ul class="dropdown-menu">
-				<li v-for="menu in contextMenu" :class="{divider: menu.text == 'separator'}" :role="{separator: menu.text == 'separator'}">
+				<li v-for="menu in contextMenu" v-if="menu.enabled ? menu.enabled() : true" :class="{divider: menu.text == 'separator'}">
 					<a v-if="menu.text !== 'separator'" v-on:click="menu.cb($event)" class="clickable">{{menu.text}}</a>
 				</li>
 			</ul>
@@ -62,9 +62,11 @@
 		<div id="statusBar">{{statusText}}</div>
 	</div>
 	<div id="offscreenCache" style="position: absolute; left: -1000px; top: -1000px;">
+		<input type="file" name="fileUploader" id="fileUploader" style="display: none;">
 		<svg xmlns="http://www.w3.org/2000/svg">
 			<text id="fontMeasureContainer">gW</text>
 		</svg>
+		<canvas id="generateImagesCanvas"></canvas>
 		<div id="canvasHolder"></div>
 	</div>
 	<script type="text/javascript" src="src/lic_w.js"></script>

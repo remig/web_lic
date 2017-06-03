@@ -91,21 +91,23 @@ function parseFloatList(a) {
 
 // These parsers get called *a lot*.  Keep them fast, at the expense of readibility
 function parseComment(abstractPart, line) {
-	if (line[1] === 'BFC') {
+	const command = line[1];
+	if (command === 'BFC') {
 		if (line[2] === 'CERTIFY') {
 			abstractPart.winding = line[3];
 		} else if (line[2] === 'INVERTNEXT') {
 			// NYI
 		}
-	} else if (line[1] === 'FILE') {
+	} else if (command === 'FILE') {
 		// NYI
-	} else if (line[1] === 'STEP') {
+	} else if (command === 'STEP') {
 		if (abstractPart.steps == null) {
 			abstractPart.steps = [];
 			abstractPart.steps.lastPart = 0;
 		}
 		abstractPart.steps.push({
-			parts: abstractPart.parts.slice(abstractPart.steps.lastPart).map((v, i) => i + abstractPart.steps.lastPart)
+			parts: abstractPart.parts.slice(abstractPart.steps.lastPart)
+				.map((v, i) => i + abstractPart.steps.lastPart)
 		});
 		abstractPart.steps.lastPart = abstractPart.parts.length;
 	}
@@ -115,11 +117,16 @@ function parsePart(abstractPart, line) {
 	const partName = line.slice(14).join(' ');
 	let color = colorTable.get(line[1], 'color');
 	color = forceBlack(color, abstractPart.name, partName);
+	const part = loadPart(partName);
+	if (part.isSubModel) {
+		abstractPart.submodels = abstractPart.submodels || [];
+		abstractPart.submodels.push(part);
+	}
 	abstractPart.parts.push({
 		color: color,
 		name: partName,
 		matrix: parseFloatList(line.slice(2, 14)),
-		abstractPart: loadPart(partName)
+		abstractPart: part
 	});
 }
 
@@ -194,25 +201,25 @@ function loadSubModels(lineList) {
 	return null;
 }
 
-function loadPart(fn) {
+function loadPart(fn, content) {
 	let part;
 	if (needLDConfig) {
 		loadLDConfig();
 		needLDConfig = false;
 	}
-	if (fn in loadedParts) {
+	if (fn && fn in loadedParts) {
 		return loadedParts[fn];
-	} else if (fn in unloadedSubModels) {
+	} else if (fn && fn in unloadedSubModels) {
 		part = lineListToAbstractPart(fn, unloadedSubModels[fn]);
 		part.isSubModel = true;
 		delete unloadedSubModels[fn];
 	} else {
-		const content = req(fn);
+		content = content || req(fn);
 		const lineList = content.split('\n');
 		for (let i = 0; i < lineList.length; i++) {
 			lineList[i] = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
 		}
-		if (fn.endsWith('mpd')) {
+		if (!fn || fn.endsWith('mpd')) {
 			part = loadSubModels(lineList);
 		}
 		if (part == null) {
@@ -222,6 +229,13 @@ function loadPart(fn) {
 	loadedParts[fn] = part;
 	if (part.steps) {
 		delete part.steps.lastPart;
+		const lastStepParts = part.steps[part.steps.length - 1].parts;
+		if (lastStepParts[lastStepParts.length - 1] < part.parts.length - 1) {
+			part.steps.push({parts: []});
+			for (var i = lastStepParts[lastStepParts.length - 1] + 1; i < part.parts.length; i++) {
+				part.steps[part.steps.length - 1].parts.push(i);
+			}
+		}
 	}
 	return part;
 }
@@ -250,9 +264,14 @@ function loadLDConfig() {
 	}
 }
 
+function importModelFromContent(content) {
+	return loadPart(null, content);
+}
+
 return {
-	loadPart: loadPart,
-	loadLDConfig: loadLDConfig
+	loadPart,
+	loadLDConfig,
+	importModelFromContent
 };
 
 })();
