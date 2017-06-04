@@ -54,6 +54,11 @@ function contextBoundingBox(data, w, h) {
 	};
 }
 
+let partDictionary;
+function setPartDictionary(dict) {
+	partDictionary = dict;
+}
+
 let isInitialized = false;
 
 function initialize() {
@@ -201,7 +206,7 @@ function getPartGeometry(abstractPart, color) {
 	for (let i = 0; i < abstractPart.parts.length; i++) {
 		const part = abstractPart.parts[i];
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const res = getPartGeometry(part.abstractPart, part.color >= 0 ? part.color : color, part.color);
+		const res = getPartGeometry(partDictionary[part.name], part.color >= 0 ? part.color : color, part.color);
 		const faces = res.faces.clone().applyMatrix(matrix);
 		const lines = res.lines.clone().applyMatrix(matrix);
 		abstractPart.geometry.faces.merge(faces);
@@ -220,7 +225,7 @@ function addModelToScene(scene, model, startPart, endPart) {
 		var part = model.parts[i];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const partGeometry = getPartGeometry(part.abstractPart, part.color >= 0 ? part.color : null, null);
+		const partGeometry = getPartGeometry(partDictionary[part.name], part.color >= 0 ? part.color : null, null);
 
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMaterial);
 		mesh.applyMatrix(matrix);
@@ -254,7 +259,9 @@ function addPartToScene(scene, abstractPart, color, config) {
 
 function renderModel(part, containerID, size, config) {
 
-	if (!isInitialized) {
+	if (partDictionary == null) {
+		throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a model.';
+	} else if (!isInitialized) {
 		initialize();
 	}
 
@@ -268,11 +275,14 @@ function renderModel(part, containerID, size, config) {
 }
 
 function renderPart(part, containerID, size, config) {
-	if (!isInitialized) {
+
+	if (partDictionary == null) {
+		throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a part.';
+	} else if (!isInitialized) {
 		initialize();
 	}
 	const scene = initScene();
-	addPartToScene(scene, part.abstractPart, part.color, config);
+	addPartToScene(scene, partDictionary[part.name], part.color, config);
 	return render(scene, size, containerID, config);
 }
 
@@ -299,12 +309,13 @@ function renderPartData(part, size, config) {
 }
 
 return {
-	renderPart: renderPart,
-	renderModel: renderModel,
-	measureModel: measureModel,
-	measurePart: measurePart,
-	renderPartData: renderPartData,
-	renderModelData: renderModelData
+	setPartDictionary,
+	renderPart,
+	renderModel,
+	measureModel,
+	measurePart,
+	renderPartData,
+	renderModelData
 };
 
 })();

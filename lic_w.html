@@ -40,7 +40,7 @@
 		<div class="mainBody" v-on:click="globalClick($event)" v-on:contextmenu.stop.prevent="rightClick($event)">
 			<div id="leftPane" class="split split-horizontal">
 				<ul>
-					<li v-for="page in pages" :class="['clickable', {selected: page.id === currentPageID}]" v-on:click.stop.prevent="setCurrentPage(page.id)">{{page.number == null ? 'Title Page' : 'Page ' + page.number}}</li>
+					<li v-for="page in pages()" :class="['clickable', {selected: page.id === currentPageID}]" v-on:click.stop.prevent="setCurrentPage(page.id)">{{page.number == null ? 'Title Page' : 'Page ' + page.number}}</li>
 				</ul>
 			</div>
 			<div id="rightPane" class="split split-horizontal">

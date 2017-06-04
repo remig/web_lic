@@ -48,20 +48,16 @@ function req(partName) {
 	return resp || '';
 }
 
-// JSON representation of the LDraw file content for a given part, keyed by filename
-const loadedParts = {};
+// key: filename, value: abstractPart content.
+// JSON representation of the LDraw file content for a given part.
+const partDictionary = {};
 
 // key: submodel name, value: lineList to be loaded
 const unloadedSubModels = {};
 
+// key: LDraw color code, value: {name, color, edge}.
 // JSON representation of the LDConfig.ldr file, which defines RGB colors for each LDraw color code
-const colorTable = {};
-colorTable.get = function(colorCode, key) {
-	if (colorCode in this) {
-		return this[colorCode][key || 'color'];
-	}
-	return 0;  // black
-};
+let colorTable;
 
 let needLDConfig = true;
 
@@ -117,16 +113,11 @@ function parsePart(abstractPart, line) {
 	const partName = line.slice(14).join(' ');
 	let color = colorTable.get(line[1], 'color');
 	color = forceBlack(color, abstractPart.name, partName);
-	const part = loadPart(partName);
-	if (part.isSubModel) {
-		abstractPart.submodels = abstractPart.submodels || [];
-		abstractPart.submodels.push(part);
-	}
+	loadPart(partName);
 	abstractPart.parts.push({
 		color: color,
 		name: partName,
-		matrix: parseFloatList(line.slice(2, 14)),
-		abstractPart: part
+		matrix: parseFloatList(line.slice(2, 14))
 	});
 }
 
@@ -204,11 +195,11 @@ function loadSubModels(lineList) {
 function loadPart(fn, content) {
 	let part;
 	if (needLDConfig) {
-		loadLDConfig();
+		colorTable = loadLDConfig();
 		needLDConfig = false;
 	}
-	if (fn && fn in loadedParts) {
-		return loadedParts[fn];
+	if (fn && fn in partDictionary) {
+		return partDictionary[fn];
 	} else if (fn && fn in unloadedSubModels) {
 		part = lineListToAbstractPart(fn, unloadedSubModels[fn]);
 		part.isSubModel = true;
@@ -226,9 +217,11 @@ function loadPart(fn, content) {
 			part = lineListToAbstractPart(fn, lineList);
 		}
 	}
-	loadedParts[fn] = part;
+	partDictionary[fn] = part;
 	if (part.steps) {
 		delete part.steps.lastPart;
+		// Check if any parts were left out of the last step; add them to new step if so.
+		// This happens often when a model / submodel does not end with a 'STEP 0' command.
 		const lastStepParts = part.steps[part.steps.length - 1].parts;
 		if (lastStepParts[lastStepParts.length - 1] < part.parts.length - 1) {
 			part.steps.push({parts: []});
@@ -243,35 +236,48 @@ function loadPart(fn, content) {
 function loadLDConfig() {
 	const content = ajax('../ldraw/LDConfig.ldr');
 	if (!content) {
-		return;
+		return {};
 	}
+	const colors = {};
 	const lineList = content.split('\n');
 	for (let i = 0; i < lineList.length; i++) {
 		const line = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
 		if (line && line[1] === '!COLOUR') {
-			colorTable[line[4]] = {
+			colors[line[4]] = {
 				name: line[2],
 				color: parseInt(line[6].slice(1), 16),
 				edge: parseInt(line[8].slice(1), 16)
 			};
 		}
 	}
-	if (colorTable[16]) {
-		colorTable[16].color = colorTable[16].edge = -1;
+	if (colors[16]) {
+		colors[16].color = colors[16].edge = -1;
 	}
-	if (colorTable[24]) {
-		colorTable[24].color = colorTable[24].edge = -1;
+	if (colors[24]) {
+		colors[24].color = colors[24].edge = -1;
 	}
+	colors.get = function(colorCode, key) {
+		if (colorCode in this) {
+			return this[colorCode][key || 'color'];
+		}
+		return 0;  // Treat any unrecognized colors as black
+	};
+	return colors;
 }
 
-function importModelFromContent(content) {
+function loadPartContent(content) {
 	return loadPart(null, content);
 }
 
+function loadRemotePart(url) {
+	return loadPart(url);
+}
+
 return {
-	loadPart,
+	loadRemotePart,
+	loadPartContent,
 	loadLDConfig,
-	importModelFromContent
+	partDictionary
 };
 
 })();
