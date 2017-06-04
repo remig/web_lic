@@ -1,4 +1,4 @@
-/* global Vue: false, Vuex: false, $: false, Split: false, jsPDF: false, JSZip: false, saveAs: false, LDParse: false, LDRender: false */
+/* global Vue: false, $: false, Split: false, jsPDF: false, JSZip: false, saveAs: false, LDParse: false, LDRender: false */
 
 (function() {
 'use strict';
@@ -16,8 +16,7 @@ const pageMargin = 20;
 const pliMargin = pageMargin / 2;
 
 // Stores anything that must work with undo / redo, and all state that is saved to the binary .lic (except static stuff in model, like part geometries)
-const store = new Vuex.Store({
-	strict: true,
+const store = {
 	state: {
 		modelName: '',
 		pages: [],
@@ -28,42 +27,51 @@ const store = new Vuex.Store({
 		pliQtys: [],
 		pageSize: {width: 800, height: 600}
 	},
-	getters: {
-		step: (state) => (stepID) => {
-			return state.steps[stepID];
+	replaceState: function(state) {
+		store.state = state;
+	},
+	commit: function(mutationName, opts) {
+
+		store.mutations[mutationName](opts);
+
+		if (app.undoIndex < undoStack.length - 1) {
+			undoStack.splice(app.undoIndex + 1);
 		}
+		undoStack.push(clone(store.state));
+		app.undoIndex++;
+
 	},
 	mutations: {
-		setModelName(state, name) {
-			state.modelName = name;
+		setModelName(name) {
+			store.state.modelName = name;
 		},
-		moveStepToPreviousPage(state, step) {
-			const currentPage = state.pages[step.parent.index];
-			const prevPage = state.pages[step.parent.index - 1];
+		moveStepToPreviousPage(step) {
+			const currentPage = store.state.pages[step.parent.index];
+			const prevPage = store.state.pages[step.parent.index - 1];
 			var stepIdx = currentPage.steps.indexOf(step.id);
 			currentPage.steps.splice(stepIdx, 1);
 			prevPage.steps.push(step.id);
 			step.parent.index = prevPage.id;
-			store._mutations.layoutPage[0](prevPage);
-			store._mutations.layoutPage[0](currentPage);
+			store.mutations.layoutPage(prevPage);
+			store.mutations.layoutPage(currentPage);
 		},
-		deletePage(state, pageID) {
+		deletePage(pageID) {
 			store.state.pages.splice(pageID, 1);
 		},
-		setItemXY(state, opts) {
+		setItemXY(opts) {
 			opts.item.x = opts.x;
 			opts.item.y = opts.y;
 		},
-		setItemXYWH(state, opts) {
+		setItemXYWH(opts) {
 			opts.item.x = opts.x;
 			opts.item.y = opts.y;
 			opts.item.width = opts.width;
 			opts.item.height = opts.height;
 		},
-		layoutStep(state, opts) {
+		layoutStep(opts) {
 
 			const {step, box} = opts;
-			const localModel = model.submodels[step.submodel] || model;
+			const localModel = getSubmodel(step.submodel);
 
 			step.x = box.x + pageMargin;
 			step.y = box.y + pageMargin;
@@ -82,7 +90,7 @@ const store = new Vuex.Store({
 				const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
 				const csiSize = LDRender.renderModel(localModel, csiContainer, 1000, {endPart: lastPart, resizeContainer: true});
 
-				const csi = state.csis[step.csiID];
+				const csi = store.state.csis[step.csiID];
 				csi.x = Math.floor((step.width - csiSize.width) / 2);
 				csi.y = Math.floor((step.height - csiSize.height) / 2);
 				csi.width = csiSize.width;
@@ -95,13 +103,13 @@ const store = new Vuex.Store({
 
 			if (step.pliID != null) {
 
-				const pli = state.plis[step.pliID];
+				const pli = store.state.plis[step.pliID];
 
 				//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
 				for (var i = 0; i < pli.pliItems.length; i++) {
 
 					const idx = pli.pliItems[i];
-					const pliItem = state.pliItems[idx];
+					const pliItem = store.state.pliItems[idx];
 					const part = localModel.parts[pliItem.partNumber];
 
 					const pli_ID = `PLI_${part.name}_${part.color}`;
@@ -119,7 +127,7 @@ const store = new Vuex.Store({
 					pliItem.height = pliSize.height;
 
 					const lblSize = measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
-					const pliQty = state.pliQtys[pliItem.quantityLabel];
+					const pliQty = store.state.pliQtys[pliItem.quantityLabel];
 					pliQty.x = -qtyLabelOffset;
 					pliQty.y = pliSize.height - qtyLabelOffset;
 					pliQty.width = lblSize.width;
@@ -143,8 +151,8 @@ const store = new Vuex.Store({
 				step.numberLabel.height = lblSize.height;
 			}
 		},
-		layoutPage(state, page) {
-			const pageSize = state.pageSize;
+		layoutPage(page) {
+			const pageSize = store.state.pageSize;
 			const stepCount = page.steps.length;
 			const cols = Math.ceil(Math.sqrt(stepCount));
 			const rows = Math.ceil(stepCount / cols);
@@ -156,7 +164,7 @@ const store = new Vuex.Store({
 			for (var i = 0; i < stepCount; i++) {
 				box.x = colSize * (i % cols);
 				box.y = rowSize * Math.floor(i / cols);
-				store._mutations.layoutStep[0]({step: state.steps[page.steps[i]], box});
+				store.mutations.layoutStep({step: store.state.steps[page.steps[i]], box});
 			}
 
 			if (page.numberLabel) {
@@ -167,15 +175,15 @@ const store = new Vuex.Store({
 				page.numberLabel.height = lblSize.height;
 			}
 		},
-		addStateItem(state, item) {
-			const stateList = state[item.type + 's'];
+		addStateItem(item) {
+			const stateList = store.state[item.type + 's'];
 			item.id = stateList.length;
 			stateList.push(item);
 		},
 		addTitlePage() {
 
 			const addStateItem = item => {
-				store._mutations.addStateItem[0](item);
+				store.mutations.addStateItem(item);
 				return item;
 			};
 
@@ -201,16 +209,19 @@ const store = new Vuex.Store({
 
 			step.csiID = csi.id;
 			page.steps.push(step.id);
-			store._mutations.layoutPage[0](page);
+			store.mutations.layoutPage(page);
 		},
-		addInitialPages(state, localModel) {
+		addInitialPages(localModelIDList) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
 
-			if (!localModel.steps) {
+			localModelIDList = localModelIDList || [];
+			const localModel = getSubmodel(localModelIDList);
+
+			if (!localModel || !localModel.steps) {
 				return;
 			}
 
 			const addStateItem = item => {
-				store._mutations.addStateItem[0](item);
+				store.mutations.addStateItem(item);
 				return item;
 			};
 
@@ -218,8 +229,7 @@ const store = new Vuex.Store({
 
 				const parts = clone(modelStep.parts || []);
 				const subModels = parts.filter(p => localModel.parts[p].abstractPart.isSubModel);
-				subModels.map(submodel => localModel.parts[submodel].abstractPart)
-					.forEach(submodel => store._mutations.addInitialPages[0](submodel));
+				subModels.forEach(submodel => store.mutations.addInitialPages(localModelIDList.concat(submodel)));
 
 				const page = addStateItem({
 					type: 'page',
@@ -227,7 +237,7 @@ const store = new Vuex.Store({
 					steps: [],
 					numberLabel: {
 						type: 'pageNumber',
-						parent: {type: 'page', index: state.pages.length},
+						parent: {type: 'page', index: store.state.pages.length},
 						x: null, y: null,
 						width: null, height: null
 					}
@@ -239,7 +249,7 @@ const store = new Vuex.Store({
 					parent: {type: 'page', index: page.id},
 					number: null,
 					parts: parts,
-					submodel: model.submodels.indexOf(localModel),
+					submodel: localModelIDList,
 					x: null, y: null,
 					width: null, height: null,
 					numberLabel: {
@@ -275,7 +285,7 @@ const store = new Vuex.Store({
 
 					const part = localModel.parts[partNumber];
 					const target = pli.pliItems
-						.map(idx => state.pliItems[idx])
+						.map(idx => store.state.pliItems[idx])
 						.filter(pliItem => pliItem.name === part.name && pliItem.color === part.color)[0];
 
 					if (target) {
@@ -303,11 +313,15 @@ const store = new Vuex.Store({
 					}
 				});
 
-				store._mutations.layoutPage[0](page);
+				if (page.id < 3) {
+					store.mutations.layoutPage(page);
+				} else {
+					page.needsLayout = true;
+				}
 			});
 		}
 	}
-});
+};
 
 function disableIfNoModel() {
 	return model == null;
@@ -325,6 +339,7 @@ const menu = [
 				model = null;
 				store.replaceState(clone(originalState));
 				app.clearState();
+				emptyNode(document.getElementById('canvasHolder'));
 				Vue.nextTick(() => {
 					app.clearSelected();
 					app.clearPage();
@@ -561,7 +576,7 @@ const contextMenuEntries = {
 				store.commit('deletePage', app.selectedItem.id);
 				Vue.nextTick(() => app.setCurrentPage(app.selectedItem.id + 1));
 			}
-		},
+		}
 	],
 	pageNumber: [
 		{text: 'Change Page Number', cb: () => {}}
@@ -598,7 +613,6 @@ const contextMenuEntries = {
 
 app = new Vue({
 	el: '#container',
-	store,
 	data: {  // Store any transient UI state data here
 		currentPageID: null,
 		statusText: '',
@@ -620,7 +634,7 @@ app = new Vue({
 
 			store.commit('setModelName', modelName);
 			store.commit('addTitlePage');
-			store.commit('addInitialPages', model);
+			store.commit('addInitialPages');
 
 			this.currentPageID = store.state.pages[0].id;
 			undoStack.splice(0, undoStack.length - 1);
@@ -632,7 +646,7 @@ app = new Vue({
 			this.statusText = `"${store.state.modelName}" loaded successfully (${formatTime(start, end)})`;
 		},
 		getSteps(page) {
-			return page.steps.map(s => this.$store.state.steps[s]);
+			return page.steps.map(s => store.state.steps[s]);
 		},
 		goToPrevPage() {
 		},
@@ -675,11 +689,10 @@ app = new Vue({
 			return box;
 		},
 		findClickTarget(mx, my) {
-			function inBox(x, y, t) {
-				const box = app.targetBox(t);
-				return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
-			}
 			const page = store.state.pages[this.currentPageID];
+			if (!page) {
+				return null;
+			}
 			if (page.numberLabel && inBox(mx, my, page.numberLabel)) {
 				return page.numberLabel;
 			}
@@ -750,7 +763,7 @@ app = new Vue({
 		globalKeyPress(e) {
 			this.closeMenu();
 			const selectedItem = this.selectedItem;
-			if (e.key === 'PageDown' && this.currentPageID + 1 < this.$store.state.pages.length) {
+			if (e.key === 'PageDown' && this.currentPageID + 1 < store.state.pages.length) {
 				this.setCurrentPage(this.currentPageID + 1);
 			} else if (e.key === 'PageUp' && this.currentPageID > 0) {
 				this.setCurrentPage(this.currentPageID - 1);
@@ -766,7 +779,7 @@ app = new Vue({
 				} else if (e.key === 'ArrowRight') {
 					dx = dv;
 				}
-				this.$store.commit('setItemXY', {
+				store.commit('setItemXY', {
 					item: selectedItem,
 					x: selectedItem.x + dx,
 					y: selectedItem.y + dy
@@ -802,6 +815,11 @@ app = new Vue({
 		},
 		drawPage(page, canvas) {
 
+			if (page.needsLayout) {
+				store.mutations.layoutPage(page);
+				page.needsLayout = false;
+			}
+
 			const pageSize = store.state.pageSize;
 			const ctx = canvas.getContext('2d');
 			ctx.fillStyle = 'white';
@@ -816,7 +834,7 @@ app = new Vue({
 			page.steps.forEach(stepID => {
 
 				const step = store.state.steps[stepID];
-				const localModel = model.submodels[step.submodel] || model;
+				const localModel = getSubmodel(step.submodel);
 
 				ctx.save();
 				ctx.translate(step.x, step.y);
@@ -868,20 +886,20 @@ app = new Vue({
 			return menu;
 		},
 		pageWidth() {
-			return this.$store.state.pageSize.width;
+			return store.state.pageSize.width;
 		},
 		pageHeight() {
-			return this.$store.state.pageSize.height;
+			return store.state.pageSize.height;
 		},
 		pages() {
-			return this.$store.state.pages;
+			return store.state.pages;
 		},
 		highlightStyle() {
 			const selectedItem = this.selectedItem;
 			if (selectedItem) {
 				let box;
 				if (selectedItem.type === 'page') {
-					box = {x: 0, y: 0, width: this.$store.state.pageSize.width, height: this.$store.state.pageSize.height};
+					box = {x: 0, y: 0, width: store.state.pageSize.width, height: store.state.pageSize.height};
 				} else {
 					box = this.targetBox(selectedItem);
 				}
@@ -937,6 +955,11 @@ function clone(state) {
 	return JSON.parse(JSON.stringify(state));
 }
 
+function inBox(x, y, t) {
+	const box = app.targetBox(t);
+	return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
+}
+
 function roundedRect(ctx, x, y, w, h, r) {
 	ctx.beginPath();
 	ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
@@ -944,6 +967,16 @@ function roundedRect(ctx, x, y, w, h, r) {
 	ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
 	ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
 	ctx.closePath();
+}
+
+function getSubmodel(submodelIDList) {
+	return (submodelIDList || []).reduce((p, id) => p.parts[id].abstractPart, model);
+}
+
+function emptyNode(node) {
+	while (node && node.firstChild) {
+		node.removeChild(node.firstChild);
+	}
 }
 
 const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
@@ -961,14 +994,6 @@ function measureLabel(font, text) {
 	labelSizeCache[font][text] = res;
 	return res;
 }
-
-store.subscribe((mutation, state) => {
-	if (app.undoIndex < undoStack.length - 1) {
-		undoStack.splice(app.undoIndex + 1);
-	}
-	undoStack.push(clone(state));
-	app.undoIndex++;
-});
 
 originalState = clone(store.state);
 
