@@ -28,7 +28,10 @@
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
 					<ul class="dropdown-menu">
 						<li v-for="child in menu.children" :class="{divider: child.text == 'separator', disabled: child.disabled ? child.disabled() : false}">
-							<a v-if="child.text !== 'separator'" v-on:click="child.cb($event)" class="clickable">{{child.text}}</a>
+							<a v-if="child.text !== 'separator'" v-on:click="child.cb($event)" class="clickable">
+								<span>{{typeof child.text === 'function' ? child.text() : child.text}}</span>
+								<span v-if="child.shortcut">{{child.shortcut}}</span>
+							</a>
 						</li>
 					</ul>
 				</li>

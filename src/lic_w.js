@@ -15,6 +15,79 @@ const undoStack = [];  // Can't store this in app because then it becomes observ
 const pageMargin = 20;
 const pliMargin = pageMargin / 2;
 
+const util = {
+	renderCSI(localModel, step) {
+		const csiID = `CSI_${step.csiID}`;
+		let csiCanvas = document.getElementById(csiID);
+		if (!csiCanvas) {
+			csiCanvas = document.createElement('canvas');
+			csiCanvas.setAttribute('id', csiID);
+			document.getElementById('canvasHolder').appendChild(csiCanvas);
+		}
+		const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
+		return LDRender.renderModel(localModel, csiCanvas, 1000, {endPart: lastPart, resizeContainer: true});
+	},
+	renderPLI(part) {
+		const pliID = `PLI_${part.name}_${part.color}`;
+		let pliContainer = document.getElementById(pliID);
+		if (!pliContainer) {
+			pliContainer = document.createElement('canvas');
+			pliContainer.setAttribute('id', pliID);
+			document.getElementById('canvasHolder').appendChild(pliContainer);
+		}
+		return LDRender.renderPart(part, pliContainer, 1000, {resizeContainer: true});
+	},
+	measureLabel: (() => {
+		const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
+		return function(font, text) {
+			if (labelSizeCache[font] && labelSizeCache[font][text]) {
+				return labelSizeCache[font][text];
+			}
+			const container = document.getElementById('fontMeasureContainer');
+			container.style.font = font;
+			container.firstChild.textContent = text;
+			const res = container.getBBox();
+			res.width = Math.ceil(res.width);
+			res.height = Math.ceil(res.height);
+			labelSizeCache[font] = labelSizeCache[font] || {};
+			labelSizeCache[font][text] = res;
+			return res;
+		};
+	})(),
+	emptyNode(node) {
+		if (node) {
+			while (node.firstChild) {
+				node.removeChild(node.firstChild);
+			}
+		}
+	},
+	roundedRect(ctx, x, y, w, h, r) {
+		ctx.beginPath();
+		ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
+		ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);
+		ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
+		ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
+		ctx.closePath();
+	},
+	clone(state) {
+		return JSON.parse(JSON.stringify(state));
+	},
+	inBox(x, y, t) {
+		const box = app.targetBox(t);
+		return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
+	},
+	formatTime(start, end) {
+		const t = end - start;
+		if (t >= 1000) {
+			return (t / 1000).toFixed(2) + 's';
+		}
+		return t + 'ms';
+	},
+	getSubmodel(submodelIDList) {
+		return (submodelIDList || []).reduce((p, id) => LDParse.partDictionary[p.parts[id].name], model);
+	}
+};
+
 // Stores anything that must work with undo / redo, and all state that is saved to the binary .lic (except static stuff in model, like part geometries)
 const store = {
 	state: {
@@ -27,19 +100,18 @@ const store = {
 		pliQtys: [],
 		pageSize: {width: 800, height: 600}
 	},
-	replaceState: function(state) {
+	replaceState(state) {
 		store.state = state;
 	},
-	commit: function(mutationName, opts) {
+	commit(mutationName, opts, undoText) {
 
 		store.mutations[mutationName](opts);
 
 		if (app.undoIndex < undoStack.length - 1) {
 			undoStack.splice(app.undoIndex + 1);
 		}
-		undoStack.push(clone(store.state));
+		undoStack.push({state: util.clone(store.state), text: undoText || ''});
 		app.undoIndex++;
-
 	},
 	get: {
 		pageCount() {
@@ -78,33 +150,27 @@ const store = {
 		},
 		deletePage(pageID) {
 			delete store.state.pages[pageID];
+			store.mutations.renumberPages();
 		},
-		setItemXY(opts) {
+		renumberPages() {
+			let prevPageNumber;
+			store.state.pages.forEach(page => {
+				if (page && page.number != null) {
+					if (prevPageNumber != null && prevPageNumber < page.number - 1) {
+						page.number = prevPageNumber + 1;
+					}
+					prevPageNumber = page.number;
+				}
+			});
+		},
+		moveItem(opts) {
 			opts.item.x = opts.x;
 			opts.item.y = opts.y;
-		},
-		setItemXYWH(opts) {
-			opts.item.x = opts.x;
-			opts.item.y = opts.y;
-			opts.item.width = opts.width;
-			opts.item.height = opts.height;
-		},
-		renderCSI(localModel, step) {
-			const csi_ID = `CSI_${step.csiID}`;
-			let csiCanvas = document.getElementById(csi_ID);
-			if (!csiCanvas) {
-				csiCanvas = document.createElement('canvas');
-				csiCanvas.setAttribute('id', csi_ID);
-				document.getElementById('canvasHolder').appendChild(csiCanvas);
-			}
-			const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
-			return LDRender.renderModel(localModel, csiCanvas, 1000, {endPart: lastPart, resizeContainer: true}
-			);
 		},
 		layoutStep(opts) {
 
 			const {step, box} = opts;
-			const localModel = getSubmodel(step.submodel);
+			const localModel = util.getSubmodel(step.submodel);
 
 			step.x = box.x + pageMargin;
 			step.y = box.y + pageMargin;
@@ -112,7 +178,7 @@ const store = {
 			step.height = box.height - pageMargin - pageMargin;
 
 			if (step.csiID != null) {
-				const csiSize = store.mutations.renderCSI(localModel, step);
+				const csiSize = util.renderCSI(localModel, step);
 				const csi = store.state.csis[step.csiID];
 				csi.x = Math.floor((step.width - csiSize.width) / 2);
 				csi.y = Math.floor((step.height - csiSize.height) / 2);
@@ -135,21 +201,13 @@ const store = {
 					const pliItem = store.state.pliItems[idx];
 					const part = localModel.parts[pliItem.partNumber];
 
-					const pli_ID = `PLI_${part.name}_${part.color}`;
-					let pliContainer = document.getElementById(pli_ID);
-					if (!pliContainer) {
-						pliContainer = document.createElement('canvas');
-						pliContainer.setAttribute('id', pli_ID);
-						document.getElementById('canvasHolder').appendChild(pliContainer);
-					}
-					const pliSize = LDRender.renderPart(part, pliContainer, 1000, {resizeContainer: true});
-
+					const pliSize = util.renderPLI(part);
 					pliItem.x = Math.floor(left);
 					pliItem.y = Math.floor(pliMargin);
 					pliItem.width = pliSize.width;
 					pliItem.height = pliSize.height;
 
-					const lblSize = measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
+					const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
 					const pliQty = store.state.pliQtys[pliItem.quantityLabel];
 					pliQty.x = -qtyLabelOffset;
 					pliQty.y = pliSize.height - qtyLabelOffset;
@@ -167,7 +225,7 @@ const store = {
 			}
 
 			if (step.numberLabel) {
-				const lblSize = measureLabel('bold 20pt Helvetica', step.number);
+				const lblSize = util.measureLabel('bold 20pt Helvetica', step.number);
 				step.numberLabel.x = 0;
 				step.numberLabel.y = maxHeight + pageMargin;
 				step.numberLabel.width = lblSize.width;
@@ -191,7 +249,7 @@ const store = {
 			}
 
 			if (page.numberLabel) {
-				const lblSize = measureLabel('bold 20pt Helvetica', page.number);
+				const lblSize = util.measureLabel('bold 20pt Helvetica', page.number);
 				page.numberLabel.x = pageSize.width - pageMargin - lblSize.width;
 				page.numberLabel.y = pageSize.height - pageMargin - lblSize.height;
 				page.numberLabel.width = lblSize.width;
@@ -235,7 +293,7 @@ const store = {
 		addInitialPages(localModelIDList) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
 
 			localModelIDList = localModelIDList || [];
-			const localModel = getSubmodel(localModelIDList);
+			const localModel = util.getSubmodel(localModelIDList);
 
 			if (!localModel || !localModel.steps) {
 				return;
@@ -245,7 +303,7 @@ const store = {
 
 			localModel.steps.forEach(modelStep => {
 
-				const parts = clone(modelStep.parts || []);
+				const parts = util.clone(modelStep.parts || []);
 				const subModels = parts.filter(p => LDParse.partDictionary[localModel.parts[p].name].isSubModel);
 				subModels.forEach(submodel => store.mutations.addInitialPages(localModelIDList.concat(submodel)));
 
@@ -351,15 +409,17 @@ const menu = [
 				uploader.onchange = function() {
 					const reader = new FileReader();
 					reader.onload = function(e) {
-						const newState = JSON.parse(e.target.result);
-						store.replaceState(newState);
-						app.currentPageID = store.state.pages[0].id;
+						const fileJSON = JSON.parse(e.target.result);
+						model = fileJSON.model;
+						LDParse.setPartDictionary(fileJSON.partDictionary);
+						LDRender.setPartDictionary(fileJSON.partDictionary);
+						store.replaceState(fileJSON.state);
 						undoStack.splice(0, undoStack.length - 1);
 						app.undoIndex = 0;
-						Vue.nextTick(() => {
-							app.clearSelected();
-							app.drawCurrentPage();
-						});
+						app.currentPageID = store.state.pages[0].id;
+						app.clearSelected();
+						app.drawCurrentPage();
+						app.$forceUpdate();  // Necessary to force page tree to recalculate
 					};
 					reader.readAsText(uploader.files[0]);
 					uploader.value = '';
@@ -374,9 +434,9 @@ const menu = [
 			disabled: disableIfNoModel,
 			cb: () => {
 				model = null;
-				store.replaceState(clone(originalState));
+				store.replaceState(util.clone(originalState));
 				app.clearState();
-				emptyNode(document.getElementById('canvasHolder'));
+				util.emptyNode(document.getElementById('canvasHolder'));
 				Vue.nextTick(() => {
 					app.clearSelected();
 					app.clearPage();
@@ -387,8 +447,12 @@ const menu = [
 			text: 'Save',
 			disabled: disableIfNoModel,
 			cb: () => {
-				const content = JSON.stringify(store.state);
-				const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+				const content = {
+					partDictionary: LDParse.partDictionary,
+					model,
+					state: store.state
+				};
+				const blob = new Blob([JSON.stringify(content)], {type: 'text/plain;charset=utf-8'});
 				saveAs(blob, store.state.modelName.replace(/\..+$/, '.lic'));
 			}
 		},
@@ -416,7 +480,9 @@ const menu = [
 	]},
 	{name: 'Edit', children: [
 		{
-			text: 'Undo',
+			text: function() {
+				return this.disabled() ? 'Undo' : `Undo ${undoStack[undoStack.length - 1].text}`;
+			},
 			shortcut: 'ctrl+z',
 			disabled: () => {
 				return app ? app.undoIndex < 1 : true;
@@ -424,7 +490,7 @@ const menu = [
 			cb: () => {
 				if (app.undoIndex > 0) {
 					app.undoIndex--;
-					store.replaceState(clone(undoStack[app.undoIndex]));
+					store.replaceState(util.clone(undoStack[app.undoIndex].state));
 					Vue.nextTick(() => {
 						app.clearSelected();
 						app.drawCurrentPage();
@@ -433,7 +499,9 @@ const menu = [
 			}
 		},
 		{
-			text: 'Redo',
+			text: function() {
+				return this.disabled() ? 'Redo' : `Redo ${undoStack[app.undoIndex + 1].text}`;
+			},
 			shortcut: 'ctrl+y',
 			disabled: () => {
 				return app ? app.undoIndex >= undoStack.length - 1 : true;
@@ -441,7 +509,7 @@ const menu = [
 			cb: () => {
 				if (app.undoIndex < undoStack.length - 1) {
 					app.undoIndex++;
-					store.replaceState(clone(undoStack[app.undoIndex]));
+					store.replaceState(util.clone(undoStack[app.undoIndex].state));
 					Vue.nextTick(() => {
 						app.clearSelected();
 						app.drawCurrentPage();
@@ -687,8 +755,8 @@ app = new Vue({
 
 			LDRender.setPartDictionary(LDParse.partDictionary);
 
-			store.commit('setModelName', modelName);
-			store.commit('addTitlePage');
+			store.mutations.setModelName(modelName);
+			store.mutations.addTitlePage();
 			store.commit('addInitialPages');
 
 			this.currentPageID = store.state.pages[0].id;
@@ -698,7 +766,7 @@ app = new Vue({
 			Vue.nextTick(() => this.drawCurrentPage());
 
 			var end = Date.now();
-			this.statusText = `"${store.state.modelName}" loaded successfully (${formatTime(start, end)})`;
+			this.statusText = `"${store.state.modelName}" loaded successfully (${util.formatTime(start, end)})`;
 		},
 		getSteps(page) {
 			return page.steps.map(s => store.state.steps[s]);
@@ -748,15 +816,15 @@ app = new Vue({
 			if (!page) {
 				return null;
 			}
-			if (page.numberLabel && inBox(mx, my, page.numberLabel)) {
+			if (page.numberLabel && util.inBox(mx, my, page.numberLabel)) {
 				return page.numberLabel;
 			}
 			for (let i = 0; i < page.steps.length; i++) {
 				const step = store.state.steps[page.steps[i]];
-				if (step.csiID != null && inBox(mx, my, store.state.csis[step.csiID])) {
+				if (step.csiID != null && util.inBox(mx, my, store.state.csis[step.csiID])) {
 					return store.state.csis[step.csiID];
 				}
-				if (step.numberLabel && inBox(mx, my, step.numberLabel)) {
+				if (step.numberLabel && util.inBox(mx, my, step.numberLabel)) {
 					return step.numberLabel;
 				}
 				if (step.pliID != null) {
@@ -764,19 +832,19 @@ app = new Vue({
 					for (let j = 0; j < pli.pliItems.length; j++) {
 						const idx = pli.pliItems[j];
 						const pliItem = store.state.pliItems[idx];
-						if (inBox(mx, my, pliItem)) {
+						if (util.inBox(mx, my, pliItem)) {
 							return pliItem;
 						}
 						const pliQty = store.state.pliQtys[pliItem.quantityLabel];
-						if (inBox(mx, my, pliQty)) {
+						if (util.inBox(mx, my, pliQty)) {
 							return pliQty;
 						}
 					}
-					if (inBox(mx, my, pli)) {
+					if (util.inBox(mx, my, pli)) {
 						return pli;
 					}
 				}
-				if (inBox(mx, my, step)) {
+				if (util.inBox(mx, my, step)) {
 					return step;
 				}
 			}
@@ -834,11 +902,11 @@ app = new Vue({
 				} else if (e.key === 'ArrowRight') {
 					dx = dv;
 				}
-				store.commit('setItemXY', {
+				store.commit('moveItem', {
 					item: selectedItem,
 					x: selectedItem.x + dx,
 					y: selectedItem.y + dy
-				});
+				}, 'Move Item');
 				Vue.nextTick(() => this.drawCurrentPage());
 			} else {
 				// Check if key is a menu shortcut
@@ -888,18 +956,18 @@ app = new Vue({
 			page.steps.forEach(stepID => {
 
 				const step = store.state.steps[stepID];
-				const localModel = getSubmodel(step.submodel);
+				const localModel = util.getSubmodel(step.submodel);
 
 				ctx.save();
 				ctx.translate(step.x, step.y);
 
 				if (step.csiID != null) {
 					const csi = store.state.csis[step.csiID];
-					const csi_ID = `CSI_${step.csiID}`;
-					let csiCanvas = document.getElementById(csi_ID);
+					const csiID = `CSI_${step.csiID}`;
+					let csiCanvas = document.getElementById(csiID);
 					if (csiCanvas == null) {
-						store.mutations.renderCSI(localModel, step);
-						csiCanvas = document.getElementById(csi_ID);
+						util.renderCSI(localModel, step);
+						csiCanvas = document.getElementById(csiID);
 					}
 					ctx.drawImage(csiCanvas, csi.x, csi.y);
 				}
@@ -908,13 +976,18 @@ app = new Vue({
 					const pli = store.state.plis[step.pliID];
 					ctx.strokeStyle = 'black';
 					ctx.lineWidth = 2;
-					roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
+					util.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
 					ctx.stroke();
 
 					pli.pliItems.forEach(idx => {
 						const pliItem = store.state.pliItems[idx];
 						const part = localModel.parts[pliItem.partNumber];
-						const pliCanvas = document.getElementById(`PLI_${part.name}_${part.color}`);
+						const pliID = `PLI_${part.name}_${part.color}`;
+						let pliCanvas = document.getElementById(pliID);
+						if (pliCanvas == null) {
+							util.renderPLI(part);
+							pliCanvas = document.getElementById(pliID);
+						}
 						ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
 
 						const pliQty = store.state.pliQtys[pliItem.quantityLabel];
@@ -1007,61 +1080,7 @@ document.body.addEventListener('keydown', e => {
 onSplitterDrag();
 window.onresize = onSplitterDrag;
 
-function formatTime(start, end) {
-	const t = end - start;
-	if (t >= 1000) {
-		return (t / 1000).toFixed(2) + 's';
-	}
-	return t + 'ms';
-}
-
-function clone(state) {
-	return JSON.parse(JSON.stringify(state));
-}
-
-function inBox(x, y, t) {
-	const box = app.targetBox(t);
-	return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
-}
-
-function roundedRect(ctx, x, y, w, h, r) {
-	ctx.beginPath();
-	ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
-	ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);
-	ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
-	ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
-	ctx.closePath();
-}
-
-function getSubmodel(submodelIDList) {
-	return (submodelIDList || []).reduce((p, id) => LDParse.partDictionary[p.parts[id].name], model);
-}
-
-function emptyNode(node) {
-	if (node) {
-		while (node.firstChild) {
-			node.removeChild(node.firstChild);
-		}
-	}
-}
-
-const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
-function measureLabel(font, text) {
-	if (labelSizeCache[font] && labelSizeCache[font][text]) {
-		return labelSizeCache[font][text];
-	}
-	const container = document.getElementById('fontMeasureContainer');
-	container.style.font = font;
-	container.firstChild.textContent = text;
-	const res = container.getBBox();
-	res.width = Math.ceil(res.width);
-	res.height = Math.ceil(res.height);
-	labelSizeCache[font] = labelSizeCache[font] || {};
-	labelSizeCache[font][text] = res;
-	return res;
-}
-
-originalState = clone(store.state);
+originalState = util.clone(store.state);
 
 //app.openRemoteLDrawModel('Creator/20015 - Alligator.mpd');
 //app.openRemoteLDrawModel('Star Wars/7140 - X-Wing Fighter.mpd');

@@ -50,7 +50,7 @@ function req(partName) {
 
 // key: filename, value: abstractPart content.
 // JSON representation of the LDraw file content for a given part.
-const partDictionary = {};
+let partDictionary = {};
 
 // key: submodel name, value: lineList to be loaded
 const unloadedSubModels = {};
@@ -273,10 +273,15 @@ function loadRemotePart(url) {
 	return loadPart(url);
 }
 
+function setPartDictionary(dict) {
+	partDictionary = dict;
+}
+
 return {
 	loadRemotePart,
 	loadPartContent,
 	loadLDConfig,
+	setPartDictionary,
 	partDictionary
 };
 

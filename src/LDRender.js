@@ -54,10 +54,13 @@ function contextBoundingBox(data, w, h) {
 	};
 }
 
-let partDictionary;
+let partDictionary;  // Part dictionary {partName : abstractPart} as created by LDParse
 function setPartDictionary(dict) {
 	partDictionary = dict;
 }
+
+// key: part filename, value: part's geometry
+const geometryDictionary = {};
 
 let isInitialized = false;
 
@@ -173,7 +176,7 @@ function getPartGeometry(abstractPart, color) {
 		};
 	}
 
-	abstractPart.geometry = {
+	const geometry = geometryDictionary[abstractPart.name] = {
 		faces: new THREE.Geometry(),
 		lines: new THREE.Geometry()
 	};
@@ -183,22 +186,22 @@ function getPartGeometry(abstractPart, color) {
 		const primitive = abstractPart.primitives[i];
 		const p = primitive.points;
 		if (primitive.shape === 'line') {
-			abstractPart.geometry.lines.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
-			abstractPart.geometry.lines.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
+			geometry.lines.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
+			geometry.lines.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
 		} else {
 
-			const vIdx = abstractPart.geometry.faces.vertices.length;
+			const vIdx = geometry.faces.vertices.length;
 			const face1 = new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, colorObj);
-			abstractPart.geometry.faces.faces.push(face1);
+			geometry.faces.faces.push(face1);
 
-			abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
-			abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
-			abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[6], p[7], p[8]));
+			geometry.faces.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
+			geometry.faces.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
+			geometry.faces.vertices.push(new THREE.Vector3(p[6], p[7], p[8]));
 
 			if (primitive.shape === 'quad') {
-				abstractPart.geometry.faces.vertices.push(new THREE.Vector3(p[9], p[10], p[11]));
+				geometry.faces.vertices.push(new THREE.Vector3(p[9], p[10], p[11]));
 				const face2 = new THREE.Face3(vIdx, vIdx + 2, vIdx + 3, null, colorObj);
-				abstractPart.geometry.faces.faces.push(face2);
+				geometry.faces.faces.push(face2);
 			}
 		}
 	}
@@ -209,11 +212,11 @@ function getPartGeometry(abstractPart, color) {
 		const res = getPartGeometry(partDictionary[part.name], part.color >= 0 ? part.color : color, part.color);
 		const faces = res.faces.clone().applyMatrix(matrix);
 		const lines = res.lines.clone().applyMatrix(matrix);
-		abstractPart.geometry.faces.merge(faces);
-		abstractPart.geometry.lines.merge(lines);
+		geometry.faces.merge(faces);
+		geometry.lines.merge(lines);
 	}
 
-	return abstractPart.geometry;
+	return geometry;
 }
 
 const faceMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors, side: THREE.DoubleSide});
@@ -315,7 +318,8 @@ return {
 	measureModel,
 	measurePart,
 	renderPartData,
-	renderModelData
+	renderModelData,
+	geometryDictionary
 };
 
 })();
