@@ -5,6 +5,82 @@ LDRender = (function() {
 'use strict';
 
 let renderer, camera;
+let isInitialized = false;
+
+function initialize() {
+
+	const offscreenContainer = document.createElement('div');
+	offscreenContainer.setAttribute('style', 'position: absolute; left: -10000px; top: -10000px;');
+	offscreenContainer.setAttribute('id', 'offscreen_render_container');
+	document.body.appendChild(offscreenContainer);
+
+	renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+	offscreenContainer.appendChild(renderer.domElement);
+
+	const viewBox = 500;
+	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.1, 10000);
+	camera.up = new THREE.Vector3(0, -1, 0);  // -1 because LDraw coordinate space has -y as UP
+	camera.position.x = viewBox;
+	camera.position.y = -viewBox + 150;
+	camera.position.z = -viewBox;
+
+	// TODO: KILL THISSSSSSS!!  It's shitting all over my life.
+	new THREE.OrbitControls(camera, renderer.domElement);
+	isInitialized = true;
+}
+
+const api = {
+	renderPart(part, containerID, size, config) {
+
+		if (api.partDictionary == null) {
+			throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a part.';
+		} else if (!isInitialized) {
+			initialize();
+		}
+		const scene = initScene();
+		addPartToScene(scene, api.partDictionary[part.name], part.color, config);
+		return render(scene, size, containerID, config);
+	},
+	renderModel(part, containerID, size, config) {
+
+		if (api.partDictionary == null) {
+			throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a model.';
+		} else if (!isInitialized) {
+			initialize();
+		}
+
+		config = config || {};
+		const scene = initScene();
+		const startPart = (config.startPart == null) ? 0 : config.startPart;
+		const endPart = (config.endPart == null) ? part.parts.length - 1 : config.endPart;
+
+		addModelToScene(scene, part, startPart, endPart);
+		return render(scene, size, containerID, config);
+	},
+
+	// Like renderModel, except it doesn't copy the rendered image to a
+	// target node, it only returns a {width, height} object instead
+	measureModel(part, size, endPart, startPart) {
+		return api.renderModel(part, null, size, {endPart: endPart, startPart: startPart});
+	},
+	measurePart(part, size, config) {
+		return api.renderPart(part, null, size, config);
+	},
+	// Like renderModel, except it doesn't copy the rendered image to a target
+	// node, it only returns the raw image data as a base64 encoded string
+	renderModelData(part, size, endPart, startPart) {
+		return api.renderModel(part, null, size, {endPart: endPart, startPart: startPart, getData: true});
+	},
+	renderPartData(part, size, config) {
+		config = config || {};
+		config.getData = true;
+		return api.renderPart(part, null, size, config);
+	},
+	setPartDictionary(dict) {
+		api.partDictionary = dict;    // Part dictionary {partName : abstractPart} as created by LDParse
+	},
+	geometryDictionary: {}  // key: part filename, value: part's geometry
+};
 
 function contextBoundingBox(data, w, h) {
 	let x, y, minX, minY, maxX, maxY;
@@ -52,38 +128,6 @@ function contextBoundingBox(data, w, h) {
 		maxX: maxX, maxY: maxY,
 		w: maxX - minX, h: maxY - minY
 	};
-}
-
-let partDictionary;  // Part dictionary {partName : abstractPart} as created by LDParse
-function setPartDictionary(dict) {
-	partDictionary = dict;
-}
-
-// key: part filename, value: part's geometry
-const geometryDictionary = {};
-
-let isInitialized = false;
-
-function initialize() {
-
-	const offscreenContainer = document.createElement('div');
-	offscreenContainer.setAttribute('style', 'position: absolute; left: -10000px; top: -10000px;');
-	offscreenContainer.setAttribute('id', 'offscreen_render_container');
-	document.body.appendChild(offscreenContainer);
-
-	renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-	offscreenContainer.appendChild(renderer.domElement);
-
-	const viewBox = 500;
-	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.1, 10000);
-	camera.up = new THREE.Vector3(0, -1, 0);  // -1 because LDraw coordinate space has -y as UP
-	camera.position.x = viewBox;
-	camera.position.y = -viewBox + 150;
-	camera.position.z = -viewBox;
-
-	// TODO: KILL THISSSSSSS!!  It's shitting all over my life.
-	new THREE.OrbitControls(camera, renderer.domElement);
-	isInitialized = true;
 }
 
 // Render the specified scene in a size x size viewport, then crop it of all whitespace.
@@ -176,7 +220,7 @@ function getPartGeometry(abstractPart, color) {
 		};
 	}
 
-	const geometry = geometryDictionary[abstractPart.name] = {
+	const geometry = api.geometryDictionary[abstractPart.name] = {
 		faces: new THREE.Geometry(),
 		lines: new THREE.Geometry()
 	};
@@ -209,7 +253,7 @@ function getPartGeometry(abstractPart, color) {
 	for (let i = 0; i < abstractPart.parts.length; i++) {
 		const part = abstractPart.parts[i];
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const res = getPartGeometry(partDictionary[part.name], part.color >= 0 ? part.color : color, part.color);
+		const res = getPartGeometry(api.partDictionary[part.name], part.color >= 0 ? part.color : color, part.color);
 		const faces = res.faces.clone().applyMatrix(matrix);
 		const lines = res.lines.clone().applyMatrix(matrix);
 		geometry.faces.merge(faces);
@@ -228,7 +272,7 @@ function addModelToScene(scene, model, startPart, endPart) {
 		var part = model.parts[i];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const partGeometry = getPartGeometry(partDictionary[part.name], part.color >= 0 ? part.color : null, null);
+		const partGeometry = getPartGeometry(api.partDictionary[part.name], part.color >= 0 ? part.color : null, null);
 
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMaterial);
 		mesh.applyMatrix(matrix);
@@ -260,66 +304,6 @@ function addPartToScene(scene, abstractPart, color, config) {
 	scene.add(line);
 }
 
-function renderModel(part, containerID, size, config) {
-
-	if (partDictionary == null) {
-		throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a model.';
-	} else if (!isInitialized) {
-		initialize();
-	}
-
-	config = config || {};
-	const scene = initScene();
-	const startPart = (config.startPart == null) ? 0 : config.startPart;
-	const endPart = (config.endPart == null) ? part.parts.length - 1 : config.endPart;
-
-	addModelToScene(scene, part, startPart, endPart);
-	return render(scene, size, containerID, config);
-}
-
-function renderPart(part, containerID, size, config) {
-
-	if (partDictionary == null) {
-		throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a part.';
-	} else if (!isInitialized) {
-		initialize();
-	}
-	const scene = initScene();
-	addPartToScene(scene, partDictionary[part.name], part.color, config);
-	return render(scene, size, containerID, config);
-}
-
-// Like renderModel, except it doesn't copy the rendered image to a
-// target node, it only returns a {width, height} object instead
-function measureModel(part, size, endPart, startPart) {
-	return renderModel(part, null, size, {endPart: endPart, startPart: startPart});
-}
-
-function measurePart(part, size, config) {
-	return renderPart(part, null, size, config);
-}
-
-// Like renderModel, except it doesn't copy the rendered image to a target
-// node, it only returns the raw image data as a base64 encoded string
-function renderModelData(part, size, endPart, startPart) {
-	return renderModel(part, null, size, {endPart: endPart, startPart: startPart, getData: true});
-}
-
-function renderPartData(part, size, config) {
-	config = config || {};
-	config.getData = true;
-	return renderPart(part, null, size, config);
-}
-
-return {
-	setPartDictionary,
-	renderPart,
-	renderModel,
-	measureModel,
-	measurePart,
-	renderPartData,
-	renderModelData,
-	geometryDictionary
-};
+return api;
 
 })();

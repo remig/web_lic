@@ -19,16 +19,21 @@
     <script type="text/javascript" src="lib/jszip.js"></script>
 	<script type="text/javascript" src="src/LDParse.js"></script>
 	<script type="text/javascript" src="src/LDRender.js"></script>
+	<script type="text/javascript" src="src/util.js"></script>
+	<script type="text/javascript" src="src/store.js"></script>
+	<script type="text/javascript" src="src/UndoStack.js"></script>
+	<script type="text/javascript" src="src/menu.js"></script>
+	<script type="text/javascript" src="src/contextMenu.js"></script>
 </head>
 <body>
 	<div id="container">
 		<nav class="navbar navbar-default">
 			<ul class="nav navbar-nav">
-				<li v-for="menu in menuEntries" class="dropdown">
+				<li v-for="menu in menuEntries" :id="menu.id || menu.name | sanitizeMenuID" class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
 					<ul class="dropdown-menu">
-						<li v-for="child in menu.children" :class="{divider: child.text == 'separator', disabled: child.disabled ? child.disabled() : false}">
-							<a v-if="child.text !== 'separator'" v-on:click="child.cb($event)" class="clickable">
+						<li v-for="child in menu.children" :id="child.id || child.text | sanitizeMenuID" :class="{divider: child.text == 'separator', disabled: child.enabled ? !child.enabled() : false}">
+							<a v-if="child.text !== 'separator'" @click="child.cb($event)" class="clickable">
 								<span>{{typeof child.text === 'function' ? child.text() : child.text}}</span>
 								<span v-if="child.shortcut">{{child.shortcut}}</span>
 							</a>
@@ -40,10 +45,10 @@
 				<li><a href="http://bugeyedmonkeys.com" target="_blank">Web Lic 0.1</a></li>
 			</ul>
 		</nav>
-		<div class="mainBody" v-on:click="globalClick($event)" v-on:contextmenu.stop.prevent="rightClick($event)">
+		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
 			<div id="leftPane" class="split split-horizontal">
 				<ul>
-					<li v-for="page in pages()" :class="['clickable', {selected: page.id === currentPageID}]" v-on:click.stop.prevent="setCurrentPage(page.id)">{{page.number == null ? 'Title Page' : 'Page ' + page.number}}</li>
+					<li v-for="page in pages()" :class="['clickable', {selected: page.id === currentPageID}]" @click.stop.prevent="setCurrentPage(page.id)">{{page.number == null ? 'Title Page' : 'Page ' + page.number}}</li>
 				</ul>
 			</div>
 			<div id="rightPane" class="split split-horizontal">
@@ -54,10 +59,10 @@
 			</div>
 		</div>
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
-		<div id="contextMenu" class="dropdown" tabindex="-1" v-on:blur="closeMenu" v-on:click="closeMenu">
+		<div id="contextMenu" class="dropdown" tabindex="-1" @blur="closeMenu" @click="closeMenu">
 			<ul class="dropdown-menu">
 				<li v-for="menu in contextMenu" v-if="menu.enabled ? menu.enabled() : true" :class="{divider: menu.text == 'separator'}">
-					<a v-if="menu.text !== 'separator'" v-on:click="menu.cb($event)" class="clickable">{{menu.text}}</a>
+					<a v-if="menu.text !== 'separator'" @click="menu.cb($event)" class="clickable">{{menu.text}}</a>
 				</li>
 			</ul>
 		</div>

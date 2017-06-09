@@ -2,6 +2,52 @@
 LDParse = (function() {
 'use strict';
 
+const api = {
+	loadRemotePart(url) {
+		return loadPart(url);
+	},
+	loadPartContent(content) {
+		return loadPart(null, content);
+	},
+	loadLDConfig() {
+		const content = ajax('../ldraw/LDConfig.ldr');
+		if (!content) {
+			return {};
+		}
+		const colors = {};
+		const lineList = content.split('\n');
+		for (let i = 0; i < lineList.length; i++) {
+			const line = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
+			if (line && line[1] === '!COLOUR') {
+				colors[line[4]] = {
+					name: line[2],
+					color: parseInt(line[6].slice(1), 16),
+					edge: parseInt(line[8].slice(1), 16)
+				};
+			}
+		}
+		if (colors[16]) {
+			colors[16].color = colors[16].edge = -1;
+		}
+		if (colors[24]) {
+			colors[24].color = colors[24].edge = -1;
+		}
+		colors.get = function(colorCode, key) {
+			if (colorCode in this) {
+				return this[colorCode][key || 'color'];
+			}
+			return 0;  // Treat any unrecognized colors as black
+		};
+		return colors;
+	},
+	setPartDictionary(dict) {
+		api.partDictionary = dict;
+	},
+	// key: filename, value: abstractPart content.
+	// JSON representation of the LDraw file content for a given part.
+	partDictionary: {}
+};
+
 /* eslint-disable max-len */
 const partPathLookup = ['../ldraw/parts/', '../ldraw/p/'];
 const partPaths = {
@@ -47,10 +93,6 @@ function req(partName) {
 	}
 	return resp || '';
 }
-
-// key: filename, value: abstractPart content.
-// JSON representation of the LDraw file content for a given part.
-let partDictionary = {};
 
 // key: submodel name, value: lineList to be loaded
 const unloadedSubModels = {};
@@ -195,11 +237,11 @@ function loadSubModels(lineList) {
 function loadPart(fn, content) {
 	let part;
 	if (needLDConfig) {
-		colorTable = loadLDConfig();
+		colorTable = api.loadLDConfig();
 		needLDConfig = false;
 	}
-	if (fn && fn in partDictionary) {
-		return partDictionary[fn];
+	if (fn && fn in api.partDictionary) {
+		return api.partDictionary[fn];
 	} else if (fn && fn in unloadedSubModels) {
 		part = lineListToAbstractPart(fn, unloadedSubModels[fn]);
 		part.isSubModel = true;
@@ -217,7 +259,7 @@ function loadPart(fn, content) {
 			part = lineListToAbstractPart(fn, lineList);
 		}
 	}
-	partDictionary[fn] = part;
+	api.partDictionary[fn] = part;
 	if (part.steps) {
 		delete part.steps.lastPart;
 		// Check if any parts were left out of the last step; add them to new step if so.
@@ -233,56 +275,6 @@ function loadPart(fn, content) {
 	return part;
 }
 
-function loadLDConfig() {
-	const content = ajax('../ldraw/LDConfig.ldr');
-	if (!content) {
-		return {};
-	}
-	const colors = {};
-	const lineList = content.split('\n');
-	for (let i = 0; i < lineList.length; i++) {
-		const line = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
-		if (line && line[1] === '!COLOUR') {
-			colors[line[4]] = {
-				name: line[2],
-				color: parseInt(line[6].slice(1), 16),
-				edge: parseInt(line[8].slice(1), 16)
-			};
-		}
-	}
-	if (colors[16]) {
-		colors[16].color = colors[16].edge = -1;
-	}
-	if (colors[24]) {
-		colors[24].color = colors[24].edge = -1;
-	}
-	colors.get = function(colorCode, key) {
-		if (colorCode in this) {
-			return this[colorCode][key || 'color'];
-		}
-		return 0;  // Treat any unrecognized colors as black
-	};
-	return colors;
-}
-
-function loadPartContent(content) {
-	return loadPart(null, content);
-}
-
-function loadRemotePart(url) {
-	return loadPart(url);
-}
-
-function setPartDictionary(dict) {
-	partDictionary = dict;
-}
-
-return {
-	loadRemotePart,
-	loadPartContent,
-	loadLDConfig,
-	setPartDictionary,
-	partDictionary
-};
+return api;
 
 })();

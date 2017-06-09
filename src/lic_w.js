@@ -1,767 +1,50 @@
-/* global Vue: false, $: false, Split: false, jsPDF: false, JSZip: false, saveAs: false, LDParse: false, LDRender: false */
+/* global Vue: false, $: false, Split: false, UndoStack: false, LDParse: false, LDRender: false, util: false, store: false, Menu: false, ContextMenu: false */
 
 (function() {
 'use strict';
 
 const start = Date.now();
 
-// Globals
-var app;    // Global vue app
-var model;  // Global LDraw model - contains full part data
-var originalState;
-const undoStack = [];  // Can't store this in app because then it becomes observed, which is slow and a massive memory hit
+const undoStack = new UndoStack(store);
 
-// These will end up in the template page, when we have one
-const pageMargin = 20;
-const pliMargin = pageMargin / 2;
-
-const util = {
-	renderCSI(localModel, step) {
-		const csiID = `CSI_${step.csiID}`;
-		let csiCanvas = document.getElementById(csiID);
-		if (!csiCanvas) {
-			csiCanvas = document.createElement('canvas');
-			csiCanvas.setAttribute('id', csiID);
-			document.getElementById('canvasHolder').appendChild(csiCanvas);
-		}
-		const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
-		return LDRender.renderModel(localModel, csiCanvas, 1000, {endPart: lastPart, resizeContainer: true});
-	},
-	renderPLI(part) {
-		const pliID = `PLI_${part.name}_${part.color}`;
-		let pliContainer = document.getElementById(pliID);
-		if (!pliContainer) {
-			pliContainer = document.createElement('canvas');
-			pliContainer.setAttribute('id', pliID);
-			document.getElementById('canvasHolder').appendChild(pliContainer);
-		}
-		return LDRender.renderPart(part, pliContainer, 1000, {resizeContainer: true});
-	},
-	measureLabel: (() => {
-		const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
-		return function(font, text) {
-			if (labelSizeCache[font] && labelSizeCache[font][text]) {
-				return labelSizeCache[font][text];
-			}
-			const container = document.getElementById('fontMeasureContainer');
-			container.style.font = font;
-			container.firstChild.textContent = text;
-			const res = container.getBBox();
-			res.width = Math.ceil(res.width);
-			res.height = Math.ceil(res.height);
-			labelSizeCache[font] = labelSizeCache[font] || {};
-			labelSizeCache[font][text] = res;
-			return res;
-		};
-	})(),
-	emptyNode(node) {
-		if (node) {
-			while (node.firstChild) {
-				node.removeChild(node.firstChild);
-			}
-		}
-	},
-	roundedRect(ctx, x, y, w, h, r) {
-		ctx.beginPath();
-		ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
-		ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);
-		ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
-		ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
-		ctx.closePath();
-	},
-	clone(state) {
-		return JSON.parse(JSON.stringify(state));
-	},
-	inBox(x, y, t) {
-		const box = app.targetBox(t);
-		return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
-	},
-	formatTime(start, end) {
-		const t = end - start;
-		if (t >= 1000) {
-			return (t / 1000).toFixed(2) + 's';
-		}
-		return t + 'ms';
-	},
-	getSubmodel(submodelIDList) {
-		return (submodelIDList || []).reduce((p, id) => LDParse.partDictionary[p.parts[id].name], model);
+Vue.filter('sanitizeMenuID', id => {
+	if (!id || id === 'separator' || typeof id !== 'string') {
+		return null;
 	}
-};
+	return id.toLowerCase()
+		.replace('(nyi)', '')
+		.trim()
+		.replace(/\s/g, '_')
+		.replace(/[^a-z_]/g, '') + '_menu';
+});
 
-// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic (except static stuff in model, like part geometries)
-const store = {
-	state: {
-		modelName: '',
-		pages: [],
-		steps: [],
-		csis: [],
-		plis: [],
-		pliItems: [],
-		pliQtys: [],
-		pageSize: {width: 800, height: 600}
-	},
-	replaceState(state) {
-		store.state = state;
-	},
-	commit(mutationName, opts, undoText) {
-
-		store.mutations[mutationName](opts);
-
-		if (app.undoIndex < undoStack.length - 1) {
-			undoStack.splice(app.undoIndex + 1);
-		}
-		undoStack.push({state: util.clone(store.state), text: undoText || ''});
-		app.undoIndex++;
-	},
-	get: {
-		pageCount() {
-			return Object.keys(store.state.pages).length;
-		},
-		nextPage(currentPageID) {
-			for (let i = currentPageID + 1; i < store.state.pages.length; i++) {
-				if (store.state.pages[i] != null) {
-					return store.state.pages[i];
-				}
-			}
-			return null;
-		},
-		prevPage(currentPageID) {
-			for (let i = currentPageID - 1; i >= 0; i--) {
-				if (store.state.pages[i] != null) {
-					return store.state.pages[i];
-				}
-			}
-			return null;
-		}
-	},
-	mutations: {
-		setModelName(name) {
-			store.state.modelName = name;
-		},
-		moveStepToPreviousPage(step) {
-			const currentPage = store.state.pages[step.parent.id];
-			const prevPage = store.state.pages[step.parent.id - 1];
-			const stepIdx = currentPage.steps.indexOf(step.id);
-			currentPage.steps.splice(stepIdx, 1);
-			prevPage.steps.push(step.id);
-			step.parent.id = prevPage.id;
-			store.mutations.layoutPage(prevPage);
-			store.mutations.layoutPage(currentPage);
-		},
-		deletePage(pageID) {
-			delete store.state.pages[pageID];
-			store.mutations.renumberPages();
-		},
-		renumberPages() {
-			let prevPageNumber;
-			store.state.pages.forEach(page => {
-				if (page && page.number != null) {
-					if (prevPageNumber != null && prevPageNumber < page.number - 1) {
-						page.number = prevPageNumber + 1;
-					}
-					prevPageNumber = page.number;
-				}
-			});
-		},
-		moveItem(opts) {
-			opts.item.x = opts.x;
-			opts.item.y = opts.y;
-		},
-		layoutStep(opts) {
-
-			const {step, box} = opts;
-			const localModel = util.getSubmodel(step.submodel);
-
-			step.x = box.x + pageMargin;
-			step.y = box.y + pageMargin;
-			step.width = box.width - pageMargin - pageMargin;
-			step.height = box.height - pageMargin - pageMargin;
-
-			if (step.csiID != null) {
-				const csiSize = util.renderCSI(localModel, step);
-				const csi = store.state.csis[step.csiID];
-				csi.x = Math.floor((step.width - csiSize.width) / 2);
-				csi.y = Math.floor((step.height - csiSize.height) / 2);
-				csi.width = csiSize.width;
-				csi.height = csiSize.height;
-			}
-
-			const qtyLabelOffset = 5;
-			let maxHeight = 0;
-			let left = pliMargin + qtyLabelOffset;
-
-			if (step.pliID != null) {
-
-				const pli = store.state.plis[step.pliID];
-
-				//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
-				for (var i = 0; i < pli.pliItems.length; i++) {
-
-					const idx = pli.pliItems[i];
-					const pliItem = store.state.pliItems[idx];
-					const part = localModel.parts[pliItem.partNumber];
-
-					const pliSize = util.renderPLI(part);
-					pliItem.x = Math.floor(left);
-					pliItem.y = Math.floor(pliMargin);
-					pliItem.width = pliSize.width;
-					pliItem.height = pliSize.height;
-
-					const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
-					const pliQty = store.state.pliQtys[pliItem.quantityLabel];
-					pliQty.x = -qtyLabelOffset;
-					pliQty.y = pliSize.height - qtyLabelOffset;
-					pliQty.width = lblSize.width;
-					pliQty.height = lblSize.height;
-
-					left += Math.floor(pliSize.width + pliMargin);
-					maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + pliQty.height);
-				}
-
-				maxHeight = pliMargin + maxHeight + pliMargin;
-				pli.x = pli.y = 0;
-				pli.width = left;
-				pli.height = maxHeight;
-			}
-
-			if (step.numberLabel) {
-				const lblSize = util.measureLabel('bold 20pt Helvetica', step.number);
-				step.numberLabel.x = 0;
-				step.numberLabel.y = maxHeight + pageMargin;
-				step.numberLabel.width = lblSize.width;
-				step.numberLabel.height = lblSize.height;
-			}
-		},
-		layoutPage(page) {
-			const pageSize = store.state.pageSize;
-			const stepCount = page.steps.length;
-			const cols = Math.ceil(Math.sqrt(stepCount));
-			const rows = Math.ceil(stepCount / cols);
-			const colSize = Math.floor(pageSize.width / cols);
-			const rowSize = Math.floor(pageSize.height / rows);
-
-			const box = {x: 0, y: 0, width: colSize, height: rowSize};
-
-			for (var i = 0; i < stepCount; i++) {
-				box.x = colSize * (i % cols);
-				box.y = rowSize * Math.floor(i / cols);
-				store.mutations.layoutStep({step: store.state.steps[page.steps[i]], box});
-			}
-
-			if (page.numberLabel) {
-				const lblSize = util.measureLabel('bold 20pt Helvetica', page.number);
-				page.numberLabel.x = pageSize.width - pageMargin - lblSize.width;
-				page.numberLabel.y = pageSize.height - pageMargin - lblSize.height;
-				page.numberLabel.width = lblSize.width;
-				page.numberLabel.height = lblSize.height;
-			}
-			page.needsLayout = false;
-		},
-		addStateItem(item) {
-			const stateList = store.state[item.type + 's'];
-			item.id = stateList.length;
-			stateList.push(item);
-			return item;
-		},
-		addTitlePage() {
-
-			const addStateItem = store.mutations.addStateItem;
-			const page = addStateItem({
-				type: 'page',
-				steps: []
-			});
-
-			const step = addStateItem({
-				type: 'step',
-				parent: {type: 'page', id: page.id},
-				x: null, y: null,
-				width: null, height: null,
-				csiID: null
-			});
-
-			const csi = addStateItem({
-				type: 'csi',
-				parent: {type: 'step', id: step.id},
-				x: null, y: null,
-				width: null, height: null
-			});
-
-			step.csiID = csi.id;
-			page.steps.push(step.id);
-			store.mutations.layoutPage(page);
-		},
-		addInitialPages(localModelIDList) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
-
-			localModelIDList = localModelIDList || [];
-			const localModel = util.getSubmodel(localModelIDList);
-
-			if (!localModel || !localModel.steps) {
-				return;
-			}
-
-			const addStateItem = store.mutations.addStateItem;
-
-			localModel.steps.forEach(modelStep => {
-
-				const parts = util.clone(modelStep.parts || []);
-				const subModels = parts.filter(p => LDParse.partDictionary[localModel.parts[p].name].isSubModel);
-				subModels.forEach(submodel => store.mutations.addInitialPages(localModelIDList.concat(submodel)));
-
-				const page = addStateItem({
-					type: 'page',
-					number: null,
-					steps: [],
-					needsLayout: true,
-					numberLabel: {
-						type: 'pageNumber',
-						parent: {type: 'page', id: null},
-						x: null, y: null,
-						width: null, height: null
-					}
-				});
-				page.number = page.numberLabel.parent.id = page.id;
-
-				const step = addStateItem({
-					type: 'step',
-					parent: {type: 'page', id: page.id},
-					number: null,
-					parts: parts,
-					submodel: localModelIDList,
-					x: null, y: null,
-					width: null, height: null,
-					numberLabel: {
-						type: 'stepNumber',
-						parent: {type: 'step', id: null},
-						x: null, y: null,
-						width: null, height: null
-					}
-				});
-				step.number = step.numberLabel.parent.id = step.id;
-
-				page.steps.push(step.id);
-
-				const csi = addStateItem({
-					type: 'csi',
-					parent: {type: 'step', id: step.id},
-					x: null, y: null,
-					width: null, height: null
-				});
-
-				const pli = addStateItem({
-					type: 'pli',
-					parent: {type: 'step', id: step.id},
-					pliItems: [],
-					x: null, y: null,
-					width: null, height: null
-				});
-
-				step.csiID = csi.id;
-				step.pliID = pli.id;
-
-				parts.forEach(partNumber => {
-
-					const part = localModel.parts[partNumber];
-					const target = pli.pliItems
-						.map(idx => store.state.pliItems[idx])
-						.filter(pliItem => pliItem.name === part.name && pliItem.color === part.color)[0];
-
-					if (target) {
-						target.quantity++;
-					} else {
-						const pliQty = addStateItem({
-							type: 'pliQty',
-							parent: {type: 'pliItem', id: null},
-							x: null, y: null, width: null, height: null
-						});
-
-						const pliItem = addStateItem({
-							type: 'pliItem',
-							parent: {type: 'pli', id: pli.id},
-							name: part.name,
-							partNumber: partNumber,
-							color: part.color,
-							x: null, y: null,
-							width: null, height: null,
-							quantity: 1,
-							quantityLabel: pliQty.id
-						});
-						pli.pliItems.push(pliItem.id);
-						pliQty.parent.id = pliItem.id;
-					}
-				});
-
-				//store.mutations.layoutPage(page);
-			});
-		}
-	}
-};
-
-function disableIfNoModel() {
-	return model == null;
-}
-
-const menu = [
-	{name: 'File', children: [
-		{
-			text: 'Open... ',
-			cb: () => {
-				const uploader = document.getElementById('fileUploader');
-				uploader.onchange = function() {
-					const reader = new FileReader();
-					reader.onload = function(e) {
-						const fileJSON = JSON.parse(e.target.result);
-						model = fileJSON.model;
-						LDParse.setPartDictionary(fileJSON.partDictionary);
-						LDRender.setPartDictionary(fileJSON.partDictionary);
-						store.replaceState(fileJSON.state);
-						undoStack.splice(0, undoStack.length - 1);
-						app.undoIndex = 0;
-						app.currentPageID = store.state.pages[0].id;
-						app.clearSelected();
-						app.drawCurrentPage();
-						app.$forceUpdate();  // Necessary to force page tree to recalculate
-					};
-					reader.readAsText(uploader.files[0]);
-					uploader.value = '';
-				};
-				uploader.click();
-			}
-		},
-		{text: 'Open Recent (NYI)', cb: () => {}},
-		{text: 'separator'},
-		{
-			text: 'Close',
-			disabled: disableIfNoModel,
-			cb: () => {
-				model = null;
-				store.replaceState(util.clone(originalState));
-				app.clearState();
-				util.emptyNode(document.getElementById('canvasHolder'));
-				Vue.nextTick(() => {
-					app.clearSelected();
-					app.clearPage();
-				});
-			}
-		},
-		{
-			text: 'Save',
-			disabled: disableIfNoModel,
-			cb: () => {
-				const content = {
-					partDictionary: LDParse.partDictionary,
-					model,
-					state: store.state
-				};
-				const blob = new Blob([JSON.stringify(content)], {type: 'text/plain;charset=utf-8'});
-				saveAs(blob, store.state.modelName.replace(/\..+$/, '.lic'));
-			}
-		},
-		{text: 'Save As... (NYI)', disabled: disableIfNoModel, cb: () => {}},
-		{
-			text: 'Import Model...',
-			cb: () => {
-				const uploader = document.getElementById('fileUploader');
-				uploader.onchange = function() {
-					const reader = new FileReader();
-					reader.onload = function(e) {
-						app.importLDrawModelFromContent(e.target.result);
-					};
-					reader.readAsText(uploader.files[0]);
-					uploader.value = '';
-				};
-				uploader.click();
-			}
-		},
-		{text: 'separator'},
-		{text: 'Save Template (NYI)', disabled: () => true, cb: () => {}},
-		{text: 'Save Template As... (NYI)', disabled: () => true, cb: () => {}},
-		{text: 'Load Template (NYI)', disabled: () => true, cb: () => {}},
-		{text: 'Reset Template (NYI)', disabled: () => true, cb: () => {}}
-	]},
-	{name: 'Edit', children: [
-		{
-			text: function() {
-				return this.disabled() ? 'Undo' : `Undo ${undoStack[undoStack.length - 1].text}`;
-			},
-			shortcut: 'ctrl+z',
-			disabled: () => {
-				return app ? app.undoIndex < 1 : true;
-			},
-			cb: () => {
-				if (app.undoIndex > 0) {
-					app.undoIndex--;
-					store.replaceState(util.clone(undoStack[app.undoIndex].state));
-					Vue.nextTick(() => {
-						app.clearSelected();
-						app.drawCurrentPage();
-					});
-				}
-			}
-		},
-		{
-			text: function() {
-				return this.disabled() ? 'Redo' : `Redo ${undoStack[app.undoIndex + 1].text}`;
-			},
-			shortcut: 'ctrl+y',
-			disabled: () => {
-				return app ? app.undoIndex >= undoStack.length - 1 : true;
-			},
-			cb: () => {
-				if (app.undoIndex < undoStack.length - 1) {
-					app.undoIndex++;
-					store.replaceState(util.clone(undoStack[app.undoIndex].state));
-					Vue.nextTick(() => {
-						app.clearSelected();
-						app.drawCurrentPage();
-					});
-				}
-			}
-		},
-		{text: 'separator'},
-		{text: 'Snap To (NYI)', disabled: disableIfNoModel, cb: () => {}},
-		{text: 'Brick Colors... (NYI)', disabled: disableIfNoModel, cb: () => {}}
-	]},
-	{name: 'View (NYI)', children: [
-		{text: 'Add Horizontal Guide', disabled: disableIfNoModel, cb: () => {}},
-		{text: 'Add Vertical Guide', disabled: disableIfNoModel, cb: () => {}},
-		{text: 'Remove Guides', disabled: disableIfNoModel, cb: () => {}},
-		{text: 'separator'},
-		{text: 'Zoom 100%', disabled: disableIfNoModel, cb: () => {}},
-		{text: 'Zoom To Fit', disabled: disableIfNoModel, cb: () => {}},
-		{text: 'Zoom In', disabled: disableIfNoModel, cb: () => {}},
-		{text: 'Zoom Out', disabled: disableIfNoModel, cb: () => {}},
-		{text: 'separator'},
-		{text: 'Show One Page', disabled: disableIfNoModel, cb: () => {}},
-		{text: 'Show Two Pages', disabled: disableIfNoModel, cb: () => {}}
-	]},
-	{name: 'Export', children: [
-		{
-			text: 'Generate PDF',
-			disabled: disableIfNoModel,
-			cb: () => {
-
-				const r = 0.75;  // = 72 / 96
-				const pageSize = {width: store.state.pageSize.width * r, height: store.state.pageSize.height * r};
-
-				const doc = new jsPDF(
-					pageSize.width > pageSize.height ? 'landscape' : 'portrait',
-					'pt',
-					[pageSize.width, pageSize.height]
-				);
-
-				doc.setTextColor(0);
-				doc.setFont('Helvetica');
-				doc.setFontType('bold');
-				doc.setLineWidth(1.5);
-				doc.setDrawColor(0);
-
-				store.state.pages.forEach(page => {
-					if (!page) {
-						return;
-					}
-					if (page.id > 0) {
-						doc.addPage(pageSize.width, pageSize.height);
-					}
-					page.steps.forEach(stepID => {
-
-						const step = store.state.steps[stepID];
-
-						if (step.csiID != null) {
-							const csi = store.state.csis[step.csiID];
-							let renderResult;
-							if (stepID === 0) {
-								renderResult = LDRender.renderModelData(model, 1000);
-							} else {
-								const parts = store.state.steps[stepID].parts;
-								renderResult = LDRender.renderModelData(model, 1000, parts[parts.length - 1]);
-							}
-							doc.addImage(
-								renderResult.image, 'PNG',
-								(step.x + csi.x) * r,
-								(step.y + csi.y) * r,
-								renderResult.width * r,
-								renderResult.height * r
-							);
-						}
-
-						if (step.pliID != null) {
-							const pli = store.state.plis[step.pliID];
-							doc.roundedRect(
-								(step.x + pli.x) * r,
-								(step.y + pli.y) * r,
-								(pli.width) * r,
-								(pli.height) * r,
-								10 * r, 10 * r, 'S'
-							);
-
-							pli.pliItems.forEach(idx => {
-
-								const pliItem = store.state.pliItems[idx];
-								const part = model.parts[pliItem.partNumber];
-								const renderResult = LDRender.renderPartData(part, 1000);
-								doc.addImage(
-									renderResult.image, 'PNG',
-									(step.x + pli.x + pliItem.x) * r,
-									(step.y + pli.y + pliItem.y) * r,
-									renderResult.width * r,
-									renderResult.height * r
-								);
-
-								const pliQty = store.state.pliQtys[pliItem.quantityLabel];
-								doc.setFontSize(10);
-								doc.text(
-									(step.x + pli.x + pliItem.x + pliQty.x) * r,
-									(step.y + pli.y + pliItem.y + pliQty.y + pliQty.height) * r,
-									'x' + pliItem.quantity
-								);
-							});
-						}
-
-						if (step.numberLabel) {
-							doc.setFontSize(20);
-							doc.text(
-								(step.x + step.numberLabel.x) * r,
-								(step.y + step.numberLabel.y + step.numberLabel.height) * r,
-								step.number + ''
-							);
-						}
-					});
-
-					if (page.numberLabel) {
-						doc.setFontSize(20);
-						doc.text(
-							(page.numberLabel.x) * r,
-							(page.numberLabel.y + page.numberLabel.height) * r,
-							page.number + ''
-						);
-					}
-				});
-
-				doc.save(store.state.modelName.replace(/\..+$/, '.pdf'));
-			}
-		},
-		{
-			text: 'Generate PNG Images',
-			disabled: disableIfNoModel,
-			cb: () => {
-
-				const modelName = store.state.modelName.replace(/\..+$/, '').replace(/\//g, '-');
-				const zip = new JSZip();
-				var imgFolder = zip.folder(modelName);
-
-				const canvas = document.getElementById('generateImagesCanvas');
-				canvas.width = store.state.pageSize.width;
-				canvas.height = store.state.pageSize.height;
-
-				store.state.pages.forEach(page => {
-					if (!page) {
-						return;
-					}
-					app.drawPage(page, canvas);
-					const pageName = (page.id === 0) ? 'Title Page.png' : `Page ${page.number}.png`;
-					let data = canvas.toDataURL();
-					data = data.substr(data.indexOf(',') + 1);
-					imgFolder.file(pageName, data, {base64: true});
-				});
-
-				zip.generateAsync({type: 'blob'})
-					.then(content => saveAs(content, `${modelName}.zip`));
-			}
-		}
-	]}
-];
-
-const contextMenuEntries = {
-	page: [
-		{text: 'Auto Layout', cb: () => {}},
-		{text: 'Use Vertical Layout', cb: () => {}},
-		{text: 'Layout By Row and Column', cb: () => {}},
-		{text: 'separator'},
-		{text: 'Prepend Blank Page', cb: () => {}},
-		{text: 'Append Blank Page', cb: () => {}},
-		{text: 'separator'},
-		{text: 'Hide Step Separators', cb: () => {}},
-		{text: 'Add Blank Step', cb: () => {}},
-		{text: 'Add Annotation', cb: () => {}},
-		{
-			text: 'Delete This Blank Page',
-			enabled: () => {
-				if (app && app.selectedItem && app.selectedItem.type === 'page') {
-					const page = store.state.pages[app.selectedItem.id];
-					if (page) {
-						return page.steps.length < 1;
-					}
-				}
-				return false;
-			},
-			cb: () => {
-				store.commit('deletePage', app.selectedItem.id);
-				Vue.nextTick(() => app.setCurrentPage(app.selectedItem.id + 1));
-			}
-		}
-	],
-	pageNumber: [
-		{text: 'Change Page Number', cb: () => {}}
-	],
-	step: [
-		{text: 'Move Step to Previous Page', cb: () => {
-			store.commit('moveStepToPreviousPage', app.selectedItem);
-			Vue.nextTick(() => {
-				app.clearSelected();
-				app.drawCurrentPage();
-			});
-		}},
-		{text: 'Move Step to Next Page', cb: () => {}},
-		{text: 'separator'},
-		{text: 'Merge Step with Previous Step', cb: () => {}},
-		{text: 'Merge Step with Next Step', cb: () => {}}
-	],
-	stepNumber: [
-		{text: 'Change Step Number', cb: () => {}}
-	],
-	csi: [
-		{text: 'Rotate CSI', cb: () => {}},
-		{text: 'Scale CSI', cb: () => {}},
-		{text: 'separator'},
-		{text: 'Select Part', cb: () => {}},
-		{text: 'Add New Part', cb: () => {}}
-	],
-	pli: [],
-	pliItem: [
-		{text: 'Rotate PLI Part', cb: () => {}},
-		{text: 'Scale PLI Part', cb: () => {}}
-	]
-};
-
-app = new Vue({
+var app = new Vue({
 	el: '#container',
 	data: {  // Store any transient UI state data here
 		currentPageID: null,
 		statusText: '',
-		undoIndex: -1,
 		selectedItem: null,
 		contextMenu: null
 	},
 	methods: {
 		openRemoteLDrawModel(modelName) {
-			model = LDParse.loadRemotePart(modelName);
-			this.importLDrawModel(model, modelName);
+			store.model = LDParse.loadRemotePart(modelName);
+			this.importLDrawModel(modelName);
 		},
 		importLDrawModelFromContent(content) {
-			model = LDParse.loadPartContent(content);
-			this.importLDrawModel(model, model.name);
+			store.model = LDParse.loadPartContent(content);
+			this.importLDrawModel(store.model.name);
 		},
-		importLDrawModel(model, modelName) {
+		importLDrawModel(modelName) {
 
 			LDRender.setPartDictionary(LDParse.partDictionary);
 
 			store.mutations.setModelName(modelName);
 			store.mutations.addTitlePage();
-			store.commit('addInitialPages');
+			store.mutations.addInitialPages();
 
 			this.currentPageID = store.state.pages[0].id;
-			undoStack.splice(0, undoStack.length - 1);
-			app.undoIndex = 0;
+			undoStack.saveBaseState();
 
 			Vue.nextTick(() => this.drawCurrentPage());
 
@@ -788,7 +71,6 @@ app = new Vue({
 		clearState() {
 			this.currentPageID = null;
 			this.statusText = '';
-			this.undoIndex = -1;
 			this.selectedItem = null;
 			this.contextMenu = null;
 		},
@@ -811,20 +93,24 @@ app = new Vue({
 			}
 			return box;
 		},
+		inBox(x, y, t) {
+			const box = app.targetBox(t);
+			return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
+		},
 		findClickTarget(mx, my) {
 			const page = store.state.pages[this.currentPageID];
 			if (!page) {
 				return null;
 			}
-			if (page.numberLabel && util.inBox(mx, my, page.numberLabel)) {
+			if (page.numberLabel && app.inBox(mx, my, page.numberLabel)) {
 				return page.numberLabel;
 			}
 			for (let i = 0; i < page.steps.length; i++) {
 				const step = store.state.steps[page.steps[i]];
-				if (step.csiID != null && util.inBox(mx, my, store.state.csis[step.csiID])) {
+				if (step.csiID != null && app.inBox(mx, my, store.state.csis[step.csiID])) {
 					return store.state.csis[step.csiID];
 				}
-				if (step.numberLabel && util.inBox(mx, my, step.numberLabel)) {
+				if (step.numberLabel && app.inBox(mx, my, step.numberLabel)) {
 					return step.numberLabel;
 				}
 				if (step.pliID != null) {
@@ -832,19 +118,19 @@ app = new Vue({
 					for (let j = 0; j < pli.pliItems.length; j++) {
 						const idx = pli.pliItems[j];
 						const pliItem = store.state.pliItems[idx];
-						if (util.inBox(mx, my, pliItem)) {
+						if (app.inBox(mx, my, pliItem)) {
 							return pliItem;
 						}
 						const pliQty = store.state.pliQtys[pliItem.quantityLabel];
-						if (util.inBox(mx, my, pliQty)) {
+						if (app.inBox(mx, my, pliQty)) {
 							return pliQty;
 						}
 					}
-					if (util.inBox(mx, my, pli)) {
+					if (app.inBox(mx, my, pli)) {
 						return pli;
 					}
 				}
-				if (util.inBox(mx, my, step)) {
+				if (app.inBox(mx, my, step)) {
 					return step;
 				}
 			}
@@ -867,7 +153,7 @@ app = new Vue({
 		},
 		rightClick(e) {
 			if (this.selectedItem != null) {
-				const menu = contextMenuEntries[this.selectedItem.type];
+				const menu = ContextMenu(this.selectedItem.type, app, store, undoStack);
 				if (menu && menu.length) {
 					this.contextMenu = menu;
 					$('#contextMenu')
@@ -902,14 +188,15 @@ app = new Vue({
 				} else if (e.key === 'ArrowRight') {
 					dx = dv;
 				}
-				store.commit('moveItem', {
+				undoStack.commit('moveItem', {
 					item: selectedItem,
 					x: selectedItem.x + dx,
 					y: selectedItem.y + dy
-				}, 'Move Item');
+				}, `Move ${util.titleCase(selectedItem.type)}`);
 				Vue.nextTick(() => this.drawCurrentPage());
 			} else {
 				// Check if key is a menu shortcut
+				const menu = this.menuEntries;
 				const key = (e.ctrlKey ? 'ctrl+' : '') + e.key;
 				for (let i = 0; i < menu.length; i++) {
 					for (let j = 0; j < menu[i].children.length; j++) {
@@ -956,20 +243,15 @@ app = new Vue({
 			page.steps.forEach(stepID => {
 
 				const step = store.state.steps[stepID];
-				const localModel = util.getSubmodel(step.submodel);
+				const localModel = util.getSubmodel(store.model, step.submodel);
 
 				ctx.save();
 				ctx.translate(step.x, step.y);
 
 				if (step.csiID != null) {
 					const csi = store.state.csis[step.csiID];
-					const csiID = `CSI_${step.csiID}`;
-					let csiCanvas = document.getElementById(csiID);
-					if (csiCanvas == null) {
-						util.renderCSI(localModel, step);
-						csiCanvas = document.getElementById(csiID);
-					}
-					ctx.drawImage(csiCanvas, csi.x, csi.y);
+					const csiCanvas = util.renderCSI(localModel, step).container;
+					ctx.drawImage(csiCanvas, csi.x, csi.y);  // TODO: profile performance if every x, y, w, h argument is passed in
 				}
 
 				if (step.pliID != null) {
@@ -982,12 +264,7 @@ app = new Vue({
 					pli.pliItems.forEach(idx => {
 						const pliItem = store.state.pliItems[idx];
 						const part = localModel.parts[pliItem.partNumber];
-						const pliID = `PLI_${part.name}_${part.color}`;
-						let pliCanvas = document.getElementById(pliID);
-						if (pliCanvas == null) {
-							util.renderPLI(part);
-							pliCanvas = document.getElementById(pliID);
-						}
+						const pliCanvas = util.renderPLI(part).container;
 						ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
 
 						const pliQty = store.state.pliQtys[pliItem.quantityLabel];
@@ -1018,7 +295,7 @@ app = new Vue({
 	},
 	computed: {
 		menuEntries() {
-			return menu;
+			return Menu(this, store, undoStack);
 		},
 		pageWidth() {
 			return store.state.pageSize.width;
@@ -1080,8 +357,6 @@ document.body.addEventListener('keydown', e => {
 onSplitterDrag();
 window.onresize = onSplitterDrag;
 
-originalState = util.clone(store.state);
-
 //app.openRemoteLDrawModel('Creator/20015 - Alligator.mpd');
 //app.openRemoteLDrawModel('Star Wars/7140 - X-Wing Fighter.mpd');
 //app.openRemoteLDrawModel('Architecture/21010 - Robie House.mpd');
@@ -1089,6 +364,5 @@ originalState = util.clone(store.state);
 
 window.app = app;
 window.store = store;
-window.model = model;
 
 })();
