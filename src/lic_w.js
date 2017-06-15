@@ -41,7 +41,7 @@ var app = new Vue({
 
 			store.mutations.setModelName(modelName);
 			store.mutations.addTitlePage();
-			store.mutations.addInitialPages();
+			store.mutations.addInitialPages(LDParse.partDictionary);
 
 			this.currentPageID = store.state.pages[0].id;
 			undoStack.saveBaseState();
@@ -50,6 +50,31 @@ var app = new Vue({
 
 			var end = Date.now();
 			this.statusText = `"${store.state.modelName}" loaded successfully (${util.formatTime(start, end)})`;
+		},
+		triggerModelImport(e) {
+			const reader = new FileReader();
+			reader.onload = function(e) {
+				app.importLDrawModelFromContent(e.target.result);
+			};
+			reader.readAsText(e.target.files[0]);
+			e.target.value = '';
+		},
+		triggerOpenFile(e) {
+			const reader = new FileReader();
+			reader.onload = function(e) {
+				const fileJSON = JSON.parse(e.target.result);
+				store.model = fileJSON.model;
+				LDParse.setPartDictionary(fileJSON.partDictionary);
+				LDRender.setPartDictionary(fileJSON.partDictionary);
+				store.replaceState(fileJSON.state);
+				app.currentPageID = store.state.pages[0].id;
+				undoStack.saveBaseState();
+				app.clearSelected();
+				app.drawCurrentPage();
+				app.$forceUpdate();  // Necessary to force page tree to recalculate
+			};
+			reader.readAsText(e.target.files[0]);
+			e.target.value = '';
 		},
 		getSteps(page) {
 			return page.steps.map(s => store.state.steps[s]);

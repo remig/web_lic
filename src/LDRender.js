@@ -1,8 +1,15 @@
-/* global THREE: false */
+/*global module: false, require: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 LDRender = (function() {
 'use strict';
+
+let THREE;
+if (typeof window !== 'undefined' && window.THREE) {
+	THREE = window.THREE;
+} else if (typeof require !== 'undefined') {
+	THREE = require('../lib/three');
+}
 
 let renderer, camera;
 let isInitialized = false;
@@ -79,6 +86,7 @@ const api = {
 	setPartDictionary(dict) {
 		api.partDictionary = dict;    // Part dictionary {partName : abstractPart} as created by LDParse
 	},
+	partDictionary: {},
 	geometryDictionary: {}  // key: part filename, value: part's geometry
 };
 
@@ -302,6 +310,10 @@ function addPartToScene(scene, abstractPart, color, config) {
 		line.rotation.z = config.rotation.z * Math.PI / 180;
 	}
 	scene.add(line);
+}
+
+if (typeof module !== 'undefined' && module.exports != null) {
+	module.exports = api;
 }
 
 return api;

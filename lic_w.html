@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
 	<script type="text/javascript" src="lib/jquery.js"></script>
     <script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="lib/three.js-master/build/three.js"></script>
+    <script type="text/javascript" src="lib/three.js"></script>
     <script type="text/javascript" src="lib/vue.js"></script>
     <script type="text/javascript" src="lib/split.js"></script>
     <script type="text/javascript" src="lib/jspdf.js"></script>
@@ -67,14 +67,15 @@
 			</ul>
 		</div>
 		<div id="statusBar">{{statusText}}</div>
-	</div>
-	<div id="offscreenCache" style="position: absolute; left: -1000px; top: -1000px;">
-		<input type="file" name="fileUploader" id="fileUploader" style="display: none;">
-		<svg xmlns="http://www.w3.org/2000/svg">
-			<text id="fontMeasureContainer">gW</text>
-		</svg>
-		<canvas id="generateImagesCanvas"></canvas>
-		<div id="canvasHolder"></div>
+		<div id="offscreenCache" style="position: absolute; left: -1000px; top: -1000px;">
+			<input type="file" name="openFileChooser" id="openFileChooser" @change="triggerOpenFile($event)" style="display: none;">
+			<input type="file" name="uploadModelChooser" id="uploadModelChooser" @change="triggerModelImport($event)" style="display: none;">
+			<svg xmlns="http://www.w3.org/2000/svg">
+				<text id="fontMeasureContainer">gW</text>
+			</svg>
+			<canvas id="generateImagesCanvas"></canvas>
+			<div id="canvasHolder"></div>
+		</div>
 	</div>
 	<script type="text/javascript" src="src/lic_w.js"></script>
 </body>

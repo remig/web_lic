@@ -15,25 +15,7 @@ const menu = [
 		{
 			text: 'Open...',
 			cb: () => {
-				const uploader = document.getElementById('fileUploader');
-				uploader.onchange = function() {
-					const reader = new FileReader();
-					reader.onload = function(e) {
-						const fileJSON = JSON.parse(e.target.result);
-						store.model = fileJSON.model;
-						LDParse.setPartDictionary(fileJSON.partDictionary);
-						LDRender.setPartDictionary(fileJSON.partDictionary);
-						store.replaceState(fileJSON.state);
-						app.currentPageID = store.state.pages[0].id;
-						undoStack.saveBaseState();
-						app.clearSelected();
-						app.drawCurrentPage();
-						app.$forceUpdate();  // Necessary to force page tree to recalculate
-					};
-					reader.readAsText(uploader.files[0]);
-					uploader.value = '';
-				};
-				uploader.click();
+				document.getElementById('openFileChooser').click();
 			}
 		},
 		{text: 'Open Recent (NYI)', cb: () => {}},
@@ -70,16 +52,7 @@ const menu = [
 		{
 			text: 'Import Model...',
 			cb: () => {
-				const uploader = document.getElementById('fileUploader');
-				uploader.onchange = function() {
-					const reader = new FileReader();
-					reader.onload = function(e) {
-						app.importLDrawModelFromContent(e.target.result);
-					};
-					reader.readAsText(uploader.files[0]);
-					uploader.value = '';
-				};
-				uploader.click();
+				document.getElementById('uploadModelChooser').click();
 			}
 		},
 		{text: 'separator'},
@@ -90,7 +63,7 @@ const menu = [
 	]},
 	{name: 'Edit', children: [
 		{
-			id: 'undo_menu',
+			id: 'undo',
 			text: () => 'Undo' + undoStack.undoText(),
 			shortcut: 'ctrl+z',
 			enabled: () => undoStack.isUndoAvailable(),
@@ -106,7 +79,7 @@ const menu = [
 			}
 		},
 		{
-			id: 'redo_menu',
+			id: 'redo',
 			text: () => 'Redo' + undoStack.redoText(),
 			shortcut: 'ctrl+y',
 			enabled: () => undoStack.isRedoAvailable(),

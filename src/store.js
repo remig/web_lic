@@ -1,4 +1,4 @@
-/* global util: false, LDParse: false */
+/* global util: false, module: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 store = (function() {
@@ -204,7 +204,7 @@ const store = {
 			page.steps.push(step.id);
 			store.mutations.layoutPage(page);
 		},
-		addInitialPages(localModelIDList) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
+		addInitialPages(partDictionary, localModelIDList) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
 
 			localModelIDList = localModelIDList || [];
 			const localModel = util.getSubmodel(store.model, localModelIDList);
@@ -218,8 +218,8 @@ const store = {
 			localModel.steps.forEach(modelStep => {
 
 				const parts = util.clone(modelStep.parts || []);
-				const subModels = parts.filter(p => LDParse.partDictionary[localModel.parts[p].name].isSubModel);
-				subModels.forEach(submodel => store.mutations.addInitialPages(localModelIDList.concat(submodel)));
+				const subModels = parts.filter(p => partDictionary[localModel.parts[p].name].isSubModel);
+				subModels.forEach(submodel => store.mutations.addInitialPages(partDictionary, localModelIDList.concat(submodel)));
 
 				const page = addStateItem({
 					type: 'page',
@@ -307,6 +307,10 @@ const store = {
 		}
 	}
 };
+
+if (typeof module !== 'undefined' && module.exports != null) {
+	module.exports = store;
+}
 
 return store;
 
