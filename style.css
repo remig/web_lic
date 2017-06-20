@@ -113,6 +113,7 @@ ul {
 }
 
 #pageCanvas {
+	background-color: #fff;
     display: block;
     position: absolute;
     padding: 0;
