@@ -1,4 +1,4 @@
-/* global LDRender: false, LDParse: false */
+/* global module: false, LDRender: false, LDParse: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 util = (function() {
@@ -22,7 +22,7 @@ const util = {
 		if (!submodelIDList) {
 			return mainModel;
 		}
-		return (submodelIDList || []).reduce((p, id) => LDParse.partDictionary[p.parts[id].name], mainModel);
+		return (submodelIDList || []).reduce((p, id) => LDParse.partDictionary[p.parts[id].filename], mainModel);
 	},
 	renderCSI(localModel, step, forceRedraw) {
 		const domID = `CSI_${step.csiID}`;
@@ -32,7 +32,7 @@ const util = {
 		});
 	},
 	renderPLI(part, forceRedraw) {
-		const domID = `PLI_${part.name}_${part.color}`;
+		const domID = `PLI_${part.filename}_${part.colorCode}`;
 		return renderPart(domID, forceRedraw, container => {
 			LDRender.renderPart(part, container, 1000, {resizeContainer: true});
 		});
@@ -69,8 +69,8 @@ const util = {
 		ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
 		ctx.closePath();
 	},
-	clone(state) {
-		return JSON.parse(JSON.stringify(state));
+	clone(obj) {
+		return JSON.parse(JSON.stringify(obj));
 	},
 	formatTime(start, end) {
 		const t = end - start;
@@ -100,6 +100,10 @@ const util = {
 		});
 	}
 };
+
+if (typeof module !== 'undefined' && module.exports != null) {
+	module.exports = util;
+}
 
 return util;
 

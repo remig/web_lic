@@ -81,32 +81,32 @@ function ajax(url) {
 	return null;
 }
 
-function req(partName) {
-	partName = (partName || '').replace(/\\/g, '/').toLowerCase();
+function req(fn) {
+	fn = (fn || '').replace(/\\/g, '/').toLowerCase();
 	let resp, path;
-	if (partName.startsWith('48/')) {
+	if (fn.startsWith('48/')) {
 		path = partPathLookup[1];
 	} else {
-		path = partPathLookup[partsInPFolder[partName] || 0];
+		path = partPathLookup[partsInPFolder[fn] || 0];
 	}
-	resp = ajax(path + partName);
+	resp = ajax(path + fn);
 	if (resp == null) {
 		if (path.includes('/parts/')) {
-			resp = ajax(partPathLookup[1] + partName);
+			resp = ajax(partPathLookup[1] + fn);
 		} else {
-			resp = ajax(partPathLookup[0] + partName);
+			resp = ajax(partPathLookup[0] + fn);
 		}
 	}
 	if (resp == null) {
-		resp = ajax(`../ldraw/models/${partName}`);
+		resp = ajax(`../ldraw/models/${fn}`);
 	}
 	if (resp == null) {
-		console.log(`   *** FAILED TO LOAD: ${partName}`);
+		console.log(`   *** FAILED TO LOAD: ${fn}`);
 	}
 	return resp || '';
 }
 
-// key: submodel name, value: lineList to be loaded
+// key: submodel filename, value: lineList to be loaded
 const unloadedSubModels = {};
 
 let needLDConfig = true;
@@ -118,13 +118,13 @@ const primitiveTypes = {
 	'5': 'line'
 };
 
-function forceBlack(color, abstractPartName, partName) {
+function forceBlack(colorCode, abstractPartName, partName) {
 	if (partName === '4-4cyli.dat') {
 		if (abstractPartName === 'stud.dat' || abstractPartName === 'stud2.dat' || abstractPartName === 'stud2a.dat') {
-			return api.getColor(0, 'color');
+			return 0;
 		}
 	}
-	return color;
+	return colorCode;
 }
 
 // Noticeably faster than a.map(parseFloat)
@@ -159,14 +159,22 @@ function parseComment(abstractPart, line) {
 	}
 }
 
+function parseColorCode(code) {
+	code = parseInt(code, 10);
+	if (code === 16 || code === 24) {
+		return -1;
+	}
+	return code;
+}
+
 function parsePart(abstractPart, line) {
 	const partName = line.slice(14).join(' ');
-	let color = api.getColor(line[1], 'color');
-	color = forceBlack(color, abstractPart.name, partName);
+	let colorCode = parseColorCode(line[1]);
+	colorCode = forceBlack(colorCode, abstractPart.filename, partName);
 	loadPart(partName);
 	abstractPart.parts.push({
-		color: color,
-		name: partName,
+		colorCode: colorCode,
+		filename: partName,
 		matrix: parseFloatList(line.slice(2, 14))
 	});
 }
@@ -174,7 +182,7 @@ function parsePart(abstractPart, line) {
 function parseLine(abstractPart, line) {
 	abstractPart.primitives.push({
 		shape: primitiveTypes[line[0]],
-		color: api.getColor(line[1], 'edge'),
+		colorCode: parseColorCode(line[1]),
 		points: [
 			parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
 			parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
@@ -185,7 +193,7 @@ function parseLine(abstractPart, line) {
 function parseFace(abstractPart, line) {
 	abstractPart.primitives.push({
 		shape: primitiveTypes[line[0]],
-		color: api.getColor(line[1], 'color'),
+		colorCode: parseColorCode(line[1]),
 		points: parseFloatList(line.slice(2))
 	});
 }
@@ -201,11 +209,20 @@ const lineParsers = {
 
 function lineListToAbstractPart(fn, lineList) {
 	const abstractPart = {
-		name: fn,
+		filename: fn,
+		name: '',
 		winding: 'CW',
 		parts: [],
 		primitives: []
 	};
+	// First line in any LDraw file is assumed to be the part / main model's colloquial name
+	if (lineList[0] && lineList[0][0] === '0') {
+		if (lineList[0][1] === 'FILE') {
+			abstractPart.name = lineList[0].slice(2).join(' ');
+		} else {
+			abstractPart.name = lineList[0].slice(1).join(' ');
+		}
+	}
 	for (let i = 0; i < lineList.length; i++) {
 		const line = lineList[i];
 		if (line && line[0] in lineParsers) {

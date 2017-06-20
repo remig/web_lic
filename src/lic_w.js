@@ -24,7 +24,8 @@ var app = new Vue({
 		currentPageID: null,
 		statusText: '',
 		selectedItem: null,
-		contextMenu: null
+		contextMenu: null,
+		storeUpdate: 0
 	},
 	methods: {
 		openRemoteLDrawModel(modelName) {
@@ -33,7 +34,7 @@ var app = new Vue({
 		},
 		importLDrawModelFromContent(content) {
 			store.model = LDParse.loadPartContent(content);
-			this.importLDrawModel(store.model.name);
+			this.importLDrawModel(store.model.filename);
 		},
 		importLDrawModel(modelName) {
 
@@ -45,6 +46,7 @@ var app = new Vue({
 
 			this.currentPageID = store.state.pages[0].id;
 			undoStack.saveBaseState();
+			this.storeUpdate++;
 
 			Vue.nextTick(() => this.drawCurrentPage());
 
@@ -91,7 +93,13 @@ var app = new Vue({
 			Vue.nextTick(() => this.drawCurrentPage());
 		},
 		setSelected(target) {
-			this.selectedItem = target;
+			if (target !== this.selectedItem) {
+				var targetPage = store.get.pageForItem(target);
+				if (targetPage && targetPage.id !== app.currentPageID) {
+					app.setCurrentPage(targetPage.id);
+				}
+				this.selectedItem = target;
+			}
 		},
 		clearState() {
 			this.currentPageID = null;
@@ -319,6 +327,12 @@ var app = new Vue({
 		}
 	},
 	computed: {
+		treeData() {
+			return {
+				state: store.state,
+				storeUpdate: this.storeUpdate
+			};
+		},
 		menuEntries() {
 			return Menu(this, store, undoStack);
 		},

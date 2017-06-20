@@ -1,4 +1,4 @@
-/*global module: false, require: false */
+/*global module: false, require: false, LDParse: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 LDRender = (function() {
@@ -45,7 +45,7 @@ const api = {
 			initialize();
 		}
 		const scene = initScene();
-		addPartToScene(scene, api.partDictionary[part.name], part.color, config);
+		addPartToScene(scene, api.partDictionary[part.filename], part.colorCode, config);
 		return render(scene, size, containerID, config);
 	},
 	renderModel(part, containerID, size, config) {
@@ -212,13 +212,13 @@ function LDMatrixToMatrix(m) {
 }
 /* eslint-enable no-multi-spaces, no-mixed-spaces-and-tabs */
 
-function getPartGeometry(abstractPart, color) {
+function getPartGeometry(abstractPart, colorCode) {
 
 	if (0 && abstractPart.geometry != null) {
 		const faceGeometry = abstractPart.geometry.faces;
-		if (color != null && !abstractPart.isSubModel) {
+		if (colorCode != null && !abstractPart.isSubModel) {
 			for (let i = 0; i < faceGeometry.faces.length; i++) {
-				faceGeometry.faces[i].color.setHex(color);
+				faceGeometry.faces[i].color.setHex(LDParse.getColor(colorCode));
 			}
 		}
 
@@ -228,12 +228,12 @@ function getPartGeometry(abstractPart, color) {
 		};
 	}
 
-	const geometry = api.geometryDictionary[abstractPart.name] = {
+	const geometry = api.geometryDictionary[abstractPart.filename] = {
 		faces: new THREE.Geometry(),
 		lines: new THREE.Geometry()
 	};
 
-	var colorObj = (color == null) ? null : new THREE.Color(color);
+	var colorObj = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode));
 	for (let i = 0; i < abstractPart.primitives.length; i++) {
 		const primitive = abstractPart.primitives[i];
 		const p = primitive.points;
@@ -261,7 +261,7 @@ function getPartGeometry(abstractPart, color) {
 	for (let i = 0; i < abstractPart.parts.length; i++) {
 		const part = abstractPart.parts[i];
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const res = getPartGeometry(api.partDictionary[part.name], part.color >= 0 ? part.color : color, part.color);
+		const res = getPartGeometry(api.partDictionary[part.filename], part.colorCode >= 0 ? part.colorCode : colorCode, part.colorCode);
 		const faces = res.faces.clone().applyMatrix(matrix);
 		const lines = res.lines.clone().applyMatrix(matrix);
 		geometry.faces.merge(faces);
@@ -280,7 +280,7 @@ function addModelToScene(scene, model, startPart, endPart) {
 		var part = model.parts[i];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const partGeometry = getPartGeometry(api.partDictionary[part.name], part.color >= 0 ? part.color : null, null);
+		const partGeometry = getPartGeometry(api.partDictionary[part.filename], part.colorCode >= 0 ? part.colorCode : null, null);
 
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMaterial);
 		mesh.applyMatrix(matrix);
@@ -292,8 +292,8 @@ function addModelToScene(scene, model, startPart, endPart) {
 	}
 }
 
-function addPartToScene(scene, abstractPart, color, config) {
-	const partGeometry = getPartGeometry(abstractPart, color);
+function addPartToScene(scene, abstractPart, colorCode, config) {
+	const partGeometry = getPartGeometry(abstractPart, colorCode);
 
 	const mesh = new THREE.Mesh(partGeometry.faces.clone(), faceMaterial);
 	if (config && config.rotation) {

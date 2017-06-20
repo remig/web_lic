@@ -3,20 +3,20 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Web Lic!</title>
-    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="style.css">
 	<script type="text/javascript" src="lib/jquery.js"></script>
-    <script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="lib/three.js"></script>
-    <script type="text/javascript" src="lib/vue.js"></script>
-    <script type="text/javascript" src="lib/split.js"></script>
-    <script type="text/javascript" src="lib/jspdf.js"></script>
+	<script type="text/javascript" src="lib/bootstrap.js"></script>
+	<script type="text/javascript" src="lib/three.js"></script>
+	<script type="text/javascript" src="lib/vue.js"></script>
+	<script type="text/javascript" src="lib/split.js"></script>
+	<script type="text/javascript" src="lib/jspdf.js"></script>
 	<script type="text/javascript" src="lib/THREE.MeshLine.js"></script>
-	<script type="text/javascript" src="lib/three.js-master/examples/js/controls/OrbitControls.js"></script>
-    <script type="text/javascript" src="lib/FileSaver.js"></script>
-    <script type="text/javascript" src="lib/jszip.js"></script>
+	<script type="text/javascript" src="lib/OrbitControls.js"></script>
+	<script type="text/javascript" src="lib/FileSaver.js"></script>
+	<script type="text/javascript" src="lib/jszip.js"></script>
 	<script type="text/javascript" src="src/LDParse.js"></script>
 	<script type="text/javascript" src="src/LDRender.js"></script>
 	<script type="text/javascript" src="src/util.js"></script>
@@ -24,6 +24,7 @@
 	<script type="text/javascript" src="src/UndoStack.js"></script>
 	<script type="text/javascript" src="src/menu.js"></script>
 	<script type="text/javascript" src="src/contextMenu.js"></script>
+	<script type="text/javascript" src="src/tree.js"></script>
 </head>
 <body>
 	<div id="container">
@@ -47,9 +48,9 @@
 		</nav>
 		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
 			<div id="leftPane" class="split split-horizontal">
-				<ul>
-					<li v-for="page in pages()" :class="['clickable', {selected: page.id === currentPageID}]" @click.stop.prevent="setCurrentPage(page.id)">{{page.number == null ? 'Title Page' : 'Page ' + page.number}}</li>
-				</ul>
+				<div id="tree">
+					<tree :store="treeData" :current-item="selectedItem"></tree>
+				</div>
 			</div>
 			<div id="rightPane" class="split split-horizontal">
 				<div class="pageContainer">

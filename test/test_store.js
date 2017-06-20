@@ -1,9 +1,9 @@
-/* global require: false, describe: false, before: false, after: false */
+/* global require: false, describe: false, it: false, before: false, after: false */
 
 'use strict';
-var chai = require('chai');
+const chai = require('chai');
 chai.use(require('chai-string'));
-var assert = chai.assert;
+const assert = chai.assert;
 
 const store = require('../src/store');
 
@@ -35,8 +35,9 @@ describe('Test state store module', function() {
 	it('Should store state via mutations', () => {
 		store.mutations.setModelName('foobar');
 		assert.equal(store.state.modelName, 'foobar');
+		store.replaceState({a: 10, b: 20});
+		assert.deepEqual(store.state, {a: 10, b: 20});
 	});
 
-	after(function() {
-	});
+	after(function() { });
 });

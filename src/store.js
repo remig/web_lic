@@ -1,4 +1,4 @@
-/* global util: false, module: false */
+/* global module: false, util: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 store = (function() {
@@ -46,6 +46,21 @@ const store = {
 				}
 			}
 			return null;
+		},
+		parent(item) {
+			if (item && item.parent) {
+				var itemList = store.state[item.parent.type + 's'];
+				if (itemList) {
+					return itemList[item.parent.id];
+				}
+			}
+			return null;
+		},
+		pageForItem(item) {
+			while (item && item.type !== 'page') {
+				item = store.get.parent(item);
+			}
+			return item;
 		}
 	},
 	mutations: {
@@ -218,7 +233,7 @@ const store = {
 			localModel.steps.forEach(modelStep => {
 
 				const parts = util.clone(modelStep.parts || []);
-				const subModels = parts.filter(p => partDictionary[localModel.parts[p].name].isSubModel);
+				const subModels = parts.filter(p => partDictionary[localModel.parts[p].filename].isSubModel);
 				subModels.forEach(submodel => store.mutations.addInitialPages(partDictionary, localModelIDList.concat(submodel)));
 
 				const page = addStateItem({
@@ -277,7 +292,7 @@ const store = {
 					const part = localModel.parts[partNumber];
 					const target = pli.pliItems
 						.map(idx => store.state.pliItems[idx])
-						.filter(pliItem => pliItem.name === part.name && pliItem.color === part.color)[0];
+						.filter(pliItem => pliItem.filename === part.filename && pliItem.colorCode === part.colorCode)[0];
 
 					if (target) {
 						target.quantity++;
@@ -291,9 +306,9 @@ const store = {
 						const pliItem = addStateItem({
 							type: 'pliItem',
 							parent: {type: 'pli', id: pli.id},
-							name: part.name,
+							filename: part.filename,
 							partNumber: partNumber,
-							color: part.color,
+							colorCode: part.colorCode,
 							x: null, y: null,
 							width: null, height: null,
 							quantity: 1,
