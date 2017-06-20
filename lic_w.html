@@ -53,10 +53,8 @@
 				</div>
 			</div>
 			<div id="rightPane" class="split split-horizontal">
-				<div class="pageContainer">
-					<canvas id="pageCanvas" :width="pageWidth" :height="pageHeight" style="position: absolute"></canvas>
-					<div id="highlight" :style="highlightStyle"></div>
-				</div>
+				<canvas id="pageCanvas" :width="pageWidth" :height="pageHeight"></canvas>
+				<div id="highlight" :style="highlightStyle"></div>
 			</div>
 		</div>
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->

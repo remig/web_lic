@@ -50,6 +50,10 @@ div#container {
 }
 
 /* Nav Tree */
+#tree {
+	padding: 10px 5px;
+}
+
 .indent {
 	margin-left: 40px;
 	list-style-type: none;
@@ -63,17 +67,17 @@ div#container {
 .treeIcon {
 	display: inline-block;
 	width: 15px;
-	height: 18px;
+	height: 15px;
 	background-image: url(icons.png);
-	background-position: -6px -8px;
+	background-position: -6px -10px;
 }
 
 .treeIconOpen {
-	background-position: -38px -6px;
+	background-position: -38px -8px;
 }
 
 .treeText {
-	font: 10pt Helvetica;
+	font: 9pt Helvetica;
 	white-space:nowrap;
 	overflow: hidden;
 	position: relative;
@@ -93,11 +97,6 @@ div#container {
 /* misc Lic stuff */
 ul {
 	-webkit-padding-start: 0px;
-	display: table;
-}
-
-canvas {
-	position: absolute;
 }
 
 .mainBody {
@@ -105,7 +104,6 @@ canvas {
 }
 
 #leftPane {
-	overflow-x: hidden;
 	overflow-y: scroll;
 }
 
@@ -114,10 +112,16 @@ canvas {
 	width: 100%;
 }
 
-.pageContainer {
-	background-color: #fff;
-	position: absolute;
-	box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
+#pageCanvas {
+    display: block;
+    position: absolute;
+    padding: 0;
+    margin: auto;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
 }
 
 #statusBar {

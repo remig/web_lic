@@ -351,10 +351,16 @@ var app = new Vue({
 				} else {
 					box = this.targetBox(selectedItem);
 				}
+				if (selectedItem.type === 'pageNumber' || selectedItem.type === 'stepNumber') {
+					box.y += 5;  // Text is aligned to the bottom of the box; offset highlight to center nicely
+				} else if (selectedItem.type === 'pliQty') {
+					box.y += 3;
+				}
+				var canvas = document.getElementById('pageCanvas');
 				return {
 					display: 'block',
-					left: `${box.x - 3}px`,
-					top: `${box.y - 3}px`,
+					left: `${box.x - 3 + canvas.offsetLeft}px`,
+					top: `${box.y - 3 + canvas.offsetTop}px`,
 					width: `${box.width + 6}px`,
 					height: `${box.height + 6}px`
 				};
@@ -365,26 +371,11 @@ var app = new Vue({
 	}
 });
 
-function onSplitterDrag() {
-	const rightPaneBox = document.getElementById('rightPane').getBoundingClientRect();
-	$('.pageContainer').css({
-		left: ((rightPaneBox.width - store.state.pageSize.width) / 2) + 'px',
-		top: ((rightPaneBox.height - store.state.pageSize.height) / 2) + 'px'
-	});
-}
-
 // Enable splitter between tree and page view
 Split(['#leftPane', '#rightPane'], {
-	sizes: [10, 90], minSize: [100, store.state.pageSize.width + 10], direction: 'horizontal',
-	gutterSize: 5, snapOffset: 0, onDrag: onSplitterDrag
+	sizes: [20, 80], minSize: [100, store.state.pageSize.width + 10], direction: 'horizontal',
+	gutterSize: 5, snapOffset: 0
 });
-
-// Size and position page in the middle of page view
-$('.pageContainer').css({
-	width: store.state.pageSize.width,
-	height: store.state.pageSize.height
-});
-$('#svgContainer').attr(store.state.pageSize);
 
 document.body.addEventListener('keyup', e => app.globalKeyPress(e));
 document.body.addEventListener('keydown', e => {
@@ -392,9 +383,6 @@ document.body.addEventListener('keydown', e => {
 		e.preventDefault();
 	}
 });
-
-onSplitterDrag();
-window.onresize = onSplitterDrag;
 
 //app.openRemoteLDrawModel('Creator/20015 - Alligator.mpd');
 //app.openRemoteLDrawModel('Star Wars/7140 - X-Wing Fighter.mpd');

@@ -52,8 +52,8 @@ describe('Import Trivial Model', function() {
 	it('Click center of Page should highlight CSI', function *() {
 		page.click(page.page_canvas);
 		assert.equal(yield page.getCss(page.highlight, 'display'), 'block');
-		assert.equal(yield page.getCss(page.highlight, 'left'), '205px');
-		assert.equal(yield page.getCss(page.highlight, 'top'), '194px');
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'left'), 10), 5);
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'top'), 10), 5);
 		assert.equal(yield page.getCss(page.highlight, 'width'), '390px');
 		assert.equal(yield page.getCss(page.highlight, 'height'), '211px');
 	});
@@ -61,8 +61,8 @@ describe('Import Trivial Model', function() {
 	it('Click just outside CSI should highlight Step', function *() {
 		page.click(page.page_canvas, {x: 150, y: 150});
 		assert.equal(yield page.getCss(page.highlight, 'display'), 'block');
-		assert.equal(yield page.getCss(page.highlight, 'left'), '17px');
-		assert.equal(yield page.getCss(page.highlight, 'top'), '17px');
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'left'), 10), 5);
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'top'), 10), 5);
 		assert.equal(yield page.getCss(page.highlight, 'width'), '766px');
 		assert.equal(yield page.getCss(page.highlight, 'height'), '566px');
 	});
@@ -70,8 +70,8 @@ describe('Import Trivial Model', function() {
 	it('Click near edge of Page should highlight Page', function *() {
 		page.click(page.page_canvas, {x: 5, y: 5});
 		assert.equal(yield page.getCss(page.highlight, 'display'), 'block');
-		assert.equal(yield page.getCss(page.highlight, 'left'), '-3px');
-		assert.equal(yield page.getCss(page.highlight, 'top'), '-3px');
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'left'), 10), 5);
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'top'), 10), 5);
 		assert.equal(yield page.getCss(page.highlight, 'width'), '806px');
 		assert.equal(yield page.getCss(page.highlight, 'height'), '606px');
 	});
