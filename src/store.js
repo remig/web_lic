@@ -16,7 +16,7 @@ const emptyState = {
 	plis: [],
 	pliItems: [],
 	pliQtys: [],
-	pageSize: {width: 1200, height: 1000}
+	pageSize: {width: 800, height: 600}
 };
 
 const store = {
