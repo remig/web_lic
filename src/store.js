@@ -8,24 +8,29 @@ store = (function() {
 const pageMargin = 20;
 const pliMargin = pageMargin / 2;
 
+const emptyState = {
+	modelName: '',
+	pages: [],
+	steps: [],
+	csis: [],
+	plis: [],
+	pliItems: [],
+	pliQtys: [],
+	pageSize: {width: 1200, height: 1000}
+};
+
 const store = {
 
 	// The currently loaded LDraw model, as returned from LDParse
 	model: null,  // Not in state because it is saved separately, and not affected by undo / redo
 
 	// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic (except static stuff in model, like part geometries)
-	state: {
-		modelName: '',
-		pages: [],
-		steps: [],
-		csis: [],
-		plis: [],
-		pliItems: [],
-		pliQtys: [],
-		pageSize: {width: 800, height: 600}
-	},
+	state: util.clone(emptyState),
 	replaceState(state) {
 		store.state = state;
+	},
+	resetState() {
+		store.state = util.clone(emptyState);
 	},
 	get: {
 		pageCount() {
@@ -64,6 +69,16 @@ const store = {
 		}
 	},
 	mutations: {
+		addStateItem(item) {
+			const stateList = store.state[item.type + 's'];
+			item.id = stateList.length;
+			stateList.push(item);
+			return item;
+		},
+		moveItem(opts) {
+			opts.item.x = opts.x;
+			opts.item.y = opts.y;
+		},
 		setModelName(name) {
 			store.state.modelName = name;
 		},
@@ -76,6 +91,26 @@ const store = {
 			step.parent.id = prevPage.id;
 			store.mutations.layoutPage(prevPage);
 			store.mutations.layoutPage(currentPage);
+		},
+		mergeSteps(opts) {
+			const sourceStep = store.state.steps[opts.sourceStepID];
+			const destStep = store.state.steps[opts.destStepID];
+			if (!sourceStep || !destStep) {
+				return;
+			}
+			destStep.parts = destStep.parts.concat(sourceStep.parts);
+			const sourcePLI = store.state.plis[sourceStep.pliID];
+			const destPLI = store.state.plis[destStep.pliID];
+			if (sourcePLI && destPLI) {
+				sourcePLI.pliItems.forEach(id => {
+					store.state.pliItems[id].parent.id = destPLI.id;
+				});
+				destPLI.pliItems = destPLI.pliItems.concat(sourcePLI.pliItems);
+			}
+			const sourcePage = store.get.pageForItem(destStep);
+			sourcePage.steps = sourcePage.steps.slice(0, 1);
+			delete store.state.steps[sourceStep.id];
+			store.mutations.layoutPage(sourcePage);
 		},
 		deletePage(pageID) {
 			delete store.state.pages[pageID];
@@ -91,10 +126,6 @@ const store = {
 					prevPageNumber = page.number;
 				}
 			});
-		},
-		moveItem(opts) {
-			opts.item.x = opts.x;
-			opts.item.y = opts.y;
 		},
 		layoutStep(opts) {
 
@@ -185,12 +216,6 @@ const store = {
 				page.numberLabel.height = lblSize.height;
 			}
 			delete page.needsLayout;
-		},
-		addStateItem(item) {
-			const stateList = store.state[item.type + 's'];
-			item.id = stateList.length;
-			stateList.push(item);
-			return item;
 		},
 		addTitlePage() {
 

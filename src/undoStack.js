@@ -8,7 +8,7 @@ function clone(state) {
 	return JSON.parse(JSON.stringify(state));
 }
 
-// stack is an array of state; undoStack[0] is the initial 'base' state that cannot be undone.
+// stack is an array of state; undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone.
 // index points to the currently visible state in the UI.
 function UndoStack(store) {
 	if (this instanceof UndoStack) {

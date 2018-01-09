@@ -10,6 +10,7 @@ function renderPart(domID, forceRedraw, renderCB) {
 		if (!container) {
 			container = document.createElement('canvas');
 			container.setAttribute('id', domID);
+			container.setAttribute('class', 'offscreen');
 			document.getElementById('canvasHolder').appendChild(container);
 		}
 		renderCB(container);
@@ -18,6 +19,9 @@ function renderPart(domID, forceRedraw, renderCB) {
 }
 
 const util = {
+	array(fakeArray) {
+		return [].slice.apply(fakeArray);
+	},
 	getSubmodel(mainModel, submodelIDList) {
 		if (!submodelIDList) {
 			return mainModel;

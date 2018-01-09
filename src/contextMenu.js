@@ -8,16 +8,16 @@ let undoStack, app, store;
 
 const contextMenu = {
 	page: [
-		{text: 'Auto Layout', cb: () => {}},
-		{text: 'Use Vertical Layout', cb: () => {}},
-		{text: 'Layout By Row and Column', cb: () => {}},
+		{text: 'Auto Layout (NYI)', cb: () => {}},
+		{text: 'Use Vertical Layout (NYI)', cb: () => {}},
+		{text: 'Layout By Row and Column (NYI)', cb: () => {}},
 		{text: 'separator'},
-		{text: 'Prepend Blank Page', cb: () => {}},
-		{text: 'Append Blank Page', cb: () => {}},
+		{text: 'Prepend Blank Page (NYI)', cb: () => {}},
+		{text: 'Append Blank Page (NYI)', cb: () => {}},
 		{text: 'separator'},
-		{text: 'Hide Step Separators', cb: () => {}},
-		{text: 'Add Blank Step', cb: () => {}},
-		{text: 'Add Annotation', cb: () => {}},
+		{text: 'Hide Step Separators (NYI)', cb: () => {}},
+		{text: 'Add Blank Step (NYI)', cb: () => {}},
+		{text: 'Add Annotation (NYI)', cb: () => {}},
 		{
 			text: 'Delete This Blank Page',
 			enabled: () => {
@@ -36,35 +36,51 @@ const contextMenu = {
 		}
 	],
 	pageNumber: [
-		{text: 'Change Page Number', cb: () => {}}
+		{text: 'Change Page Number (NYI)', cb: () => {}}
 	],
 	step: [
-		{text: 'Move Step to Previous Page', cb: () => {
-			undoStack.commit('moveStepToPreviousPage', app.selectedItem, 'Move Step to Page');
-			Vue.nextTick(() => {
-				app.clearSelected();
-				app.drawCurrentPage();
-			});
-		}},
-		{text: 'Move Step to Next Page', cb: () => {}},
+		{
+			text: 'Move Step to Previous Page',
+			cb: function() {
+				undoStack.commit('moveStepToPreviousPage', app.selectedItem, this.text);
+				Vue.nextTick(() => {
+					app.clearSelected();
+					app.drawCurrentPage();
+				});
+			}
+		},
+		{text: 'Move Step to Next Page (NYI)', cb: () => {}},
 		{text: 'separator'},
-		{text: 'Merge Step with Previous Step', cb: () => {}},
-		{text: 'Merge Step with Next Step', cb: () => {}}
+		{
+			text: 'Merge Step with Previous Step',
+			cb: function() {
+				undoStack.commit(
+					'mergeSteps',
+					{sourceStepID: app.selectedItem.id, destStepID: app.selectedItem.id - 1},
+					this.text
+				);
+				Vue.nextTick(() => {
+					app.clearSelected();
+					app.drawCurrentPage();
+				});
+			}
+		},
+		{text: 'Merge Step with Next Step (NYI)', cb: () => {}}
 	],
 	stepNumber: [
-		{text: 'Change Step Number', cb: () => {}}
+		{text: 'Change Step Number (NYI)', cb: () => {}}
 	],
 	csi: [
-		{text: 'Rotate CSI', cb: () => {}},
-		{text: 'Scale CSI', cb: () => {}},
+		{text: 'Rotate CSI (NYI)', cb: () => {}},
+		{text: 'Scale CSI (NYI)', cb: () => {}},
 		{text: 'separator'},
-		{text: 'Select Part', cb: () => {}},
-		{text: 'Add New Part', cb: () => {}}
+		{text: 'Select Part (NYI)', cb: () => {}},
+		{text: 'Add New Part (NYI)', cb: () => {}}
 	],
 	pli: [],
 	pliItem: [
-		{text: 'Rotate PLI Part', cb: () => {}},
-		{text: 'Scale PLI Part', cb: () => {}}
+		{text: 'Rotate PLI Part (NYI)', cb: () => {}},
+		{text: 'Scale PLI Part (NYI)', cb: () => {}}
 	]
 };
 

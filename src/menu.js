@@ -4,7 +4,7 @@
 Menu = (function() {
 'use strict';
 
-let undoStack, app, store, originalState;
+let undoStack, app, store;
 
 function enableIfModel() {
 	return store != null && store.model != null;
@@ -25,7 +25,7 @@ const menu = [
 			enabled: enableIfModel,
 			cb: () => {
 				store.model = null;
-				store.replaceState(util.clone(originalState));
+				store.resetState();
 				undoStack.clear();
 				app.clearState();
 				util.emptyNode(document.getElementById('canvasHolder'));
@@ -252,7 +252,6 @@ return function(localApp, localStore, localUndoStack) {
 	app = localApp;
 	store = localStore;
 	undoStack = localUndoStack;
-	originalState = util.clone(store.state);
 	return menu;
 };
 

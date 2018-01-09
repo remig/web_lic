@@ -5,6 +5,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Web Lic!</title>
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
 	<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="style.css">
 	<script type="text/javascript" src="lib/jquery.js"></script>
@@ -53,20 +54,22 @@
 				</div>
 			</div>
 			<div id="rightPane" class="split split-horizontal">
-				<canvas id="pageCanvas" :width="pageWidth" :height="pageHeight"></canvas>
-				<div id="highlight" :style="highlightStyle"></div>
+				<div id="pageContainer" :style="{width: pageWidth + 'px', height: pageHeight + 'px'}">
+					<canvas id="pageCanvas" :width="pageWidth" :height="pageHeight"></canvas>
+					<div id="highlight" :style="highlightStyle"></div>
+				</div>
 			</div>
 		</div>
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
 		<div id="contextMenu" class="dropdown" tabindex="-1" @blur="closeMenu" @click="closeMenu">
 			<ul class="dropdown-menu">
 				<li v-for="menu in contextMenu" v-if="menu.enabled ? menu.enabled() : true" :class="{divider: menu.text == 'separator'}">
-					<a v-if="menu.text !== 'separator'" @click="menu.cb($event)" class="clickable">{{menu.text}}</a>
+					<a v-if="menu.text !== 'separator'" @click="menu.cb.call(menu, $event)" class="clickable">{{menu.text}}</a>
 				</li>
 			</ul>
 		</div>
 		<div id="statusBar">{{statusText}}</div>
-		<div id="offscreenCache" style="position: absolute; left: -1000px; top: -1000px;">
+		<div id="offscreenCache" class="offscreen">
 			<input type="file" name="openFileChooser" id="openFileChooser" @change="triggerOpenFile($event)" style="display: none;">
 			<input type="file" name="uploadModelChooser" id="uploadModelChooser" @change="triggerModelImport($event)" style="display: none;">
 			<svg xmlns="http://www.w3.org/2000/svg">

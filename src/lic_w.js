@@ -106,6 +106,8 @@ var app = new Vue({
 			this.statusText = '';
 			this.selectedItem = null;
 			this.contextMenu = null;
+			this.storeUpdate = 0;
+
 		},
 		clearSelected() {
 			this.selectedItem = null;
@@ -356,11 +358,10 @@ var app = new Vue({
 				} else if (selectedItem.type === 'pliQty') {
 					box.y += 3;
 				}
-				var canvas = document.getElementById('pageCanvas');
 				return {
 					display: 'block',
-					left: `${box.x - 3 + canvas.offsetLeft}px`,
-					top: `${box.y - 3 + canvas.offsetTop}px`,
+					left: `${box.x - 3}px`,
+					top: `${box.y - 3}px`,
 					width: `${box.width + 6}px`,
 					height: `${box.height + 6}px`
 				};

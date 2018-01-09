@@ -69,11 +69,11 @@ div#container {
 	width: 15px;
 	height: 15px;
 	background-image: url(icons.png);
-	background-position: -6px -10px;
+	background-position: -38px -8px;
 }
 
-.treeIconOpen {
-	background-position: -38px -8px;
+.treeIconClosed {
+	background-position: -6px -10px;
 }
 
 .treeText {
@@ -112,8 +112,8 @@ ul {
 	width: 100%;
 }
 
-#pageCanvas {
-	background-color: #fff;
+#pageContainer {
+    background-color: #fff;
     display: block;
     position: absolute;
     padding: 0;
@@ -157,4 +157,10 @@ ul {
 
 .hidden {
 	display: none;
+}
+
+.offscreen {
+	position: absolute;
+	left: -1000px;
+	top: -1000px;
 }

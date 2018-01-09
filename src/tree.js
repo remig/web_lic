@@ -4,13 +4,24 @@
 tree = (function() {
 'use strict';
 
-// TODO: page down to a new page then click CSI: must expand that page in the tree to show selected CSI
-
 Vue.component('treeRowItem', {
 	props: ['currentItem', 'target'],
 	methods: {
 		itemClick() {
 			app.setSelected(this.target);
+		}
+	},
+	watch: {
+		currentItem: function(newItem) {
+			if (newItem === this.target) {
+				var el = this.$el.parentElement;
+				while (el) {
+					if (el.nodeName === 'UL') {
+						$(el).removeClass('hidden').prev().children().first().removeClass('treeIconClosed');
+					}
+					el = el.parentElement;
+				}
+			}
 		}
 	},
 	computed: {
@@ -26,7 +37,7 @@ Vue.component('treeRowItem', {
 				var part = LDParse.partDictionary[t.filename];
 				if (!part || !part.name) {
 					return 'Unknown Part';
-				} if (part.isSubModel) {
+				} else if (part.isSubModel) {
 					return part.name.replace(/\.(mpd|ldr)/ig, '');
 				}
 				var partName = part.name.replace(' x ', 'x');
@@ -48,13 +59,13 @@ Vue.component('treeParentRowItem', {
 	props: ['currentItem', 'target'],
 	methods: {
 		arrowClick(target) {
-			$(this.$el.firstElementChild).toggleClass('treeIconOpen');
+			$(this.$el.firstElementChild).toggleClass('treeIconClosed');
 			$('#' + target.type + 'ListItem' + target.id).toggleClass('hidden');
 		}
 	},
 	template: `
 		<div>
-			<i class="treeIcon" @click.stop.prevent="arrowClick(target)" />
+			<i class="treeIcon treeIconClosed" @click.stop.prevent="arrowClick(target)" />
 			<treeRowItem :currentItem="currentItem" :target="target" />
 		</div>
 	`
