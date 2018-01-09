@@ -273,6 +273,7 @@ function getPartGeometry(abstractPart, colorCode) {
 
 const faceMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors, side: THREE.DoubleSide});
 const lineMaterial = new THREE.LineBasicMaterial({color: 0x000000, linewidth: 5});
+const scaleDownVector3 = new THREE.Vector3(0.98, 0.98, 0.98);  // TODO: this is only applied to parts in a model; must apply to parts in submodel drawn as a single part inside a model
 
 function addModelToScene(scene, model, startPart, endPart) {
 
@@ -280,7 +281,9 @@ function addModelToScene(scene, model, startPart, endPart) {
 		var part = model.parts[i];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const partGeometry = getPartGeometry(api.partDictionary[part.filename], part.colorCode >= 0 ? part.colorCode : null, null);
+		matrix.scale(scaleDownVector3);
+		const color = (part.colorCode >= 0) ? part.colorCode : null;
+		const partGeometry = getPartGeometry(api.partDictionary[part.filename], color, null);
 
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMaterial);
 		mesh.applyMatrix(matrix);
