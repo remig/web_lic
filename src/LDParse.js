@@ -115,7 +115,7 @@ const primitiveTypes = {
 	'2': 'line',
 	'3': 'triangle',
 	'4': 'quad',
-	'5': 'line'
+	'5': 'condline'
 };
 
 function forceBlack(colorCode, abstractPartName, partName) {
@@ -190,6 +190,21 @@ function parseLine(abstractPart, line) {
 	});
 }
 
+function parseCondLine(abstractPart, line) {
+	abstractPart.primitives.push({
+		shape: primitiveTypes[line[0]],
+		colorCode: parseColorCode(line[1]),
+		points: [
+			parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
+			parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
+		],
+		conditionalPoints: [
+			parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
+			parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13])
+		]
+	});
+}
+
 function parseFace(abstractPart, line) {
 	abstractPart.primitives.push({
 		shape: primitiveTypes[line[0]],
@@ -204,7 +219,7 @@ const lineParsers = {
 	'2': parseLine,
 	'3': parseFace,
 	'4': parseFace,
-	'5': parseLine
+	'5': parseCondLine
 };
 
 function lineListToAbstractPart(fn, lineList) {

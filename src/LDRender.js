@@ -61,7 +61,11 @@ const api = {
 		const startPart = (config.startPart == null) ? 0 : config.startPart;
 		const endPart = (config.endPart == null) ? part.parts.length - 1 : config.endPart;
 
-		addModelToScene(scene, part, startPart, endPart);
+		// These three calls must be made before addModelToScene(), to correctly project points to screen (for conditional line rendering)
+		renderer.setSize(size, size);
+		camera.updateMatrixWorld();
+		camera.updateProjectionMatrix();
+		addModelToScene(scene, part, startPart, endPart, size);
 		return render(scene, size, containerID, config);
 	},
 
@@ -145,7 +149,6 @@ function render(scene, size, containerID, config) {
 
 	config = config || {};
 
-	renderer.setSize(size, size);
 	renderer.render(scene, camera);
 
 	// Create a new 2D canvas so we can convert the full 3D canvas into a 2D canvas, and retrieve its image data
@@ -230,7 +233,8 @@ function getPartGeometry(abstractPart, colorCode) {
 
 	const geometry = api.geometryDictionary[abstractPart.filename] = {
 		faces: new THREE.Geometry(),
-		lines: new THREE.Geometry()
+		lines: new THREE.Geometry(),
+		condlines: []
 	};
 
 	var colorObj = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode));
@@ -240,12 +244,20 @@ function getPartGeometry(abstractPart, colorCode) {
 		if (primitive.shape === 'line') {
 			geometry.lines.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
 			geometry.lines.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
+		} else if (primitive.shape === 'condline') {
+			const cp = primitive.conditionalPoints;
+			const condLine = new THREE.Geometry();
+			condLine.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
+			condLine.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
+			geometry.condlines.push({
+				line: condLine,
+				c1: new THREE.Vector3(cp[0], cp[1], cp[2]),
+				c2: new THREE.Vector3(cp[3], cp[4], cp[5])
+			});
 		} else {
 
 			const vIdx = geometry.faces.vertices.length;
-			const face1 = new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, colorObj);
-			geometry.faces.faces.push(face1);
-
+			geometry.faces.faces.push(new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, colorObj));
 			geometry.faces.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
 			geometry.faces.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
 			geometry.faces.vertices.push(new THREE.Vector3(p[6], p[7], p[8]));
@@ -261,27 +273,57 @@ function getPartGeometry(abstractPart, colorCode) {
 	for (let i = 0; i < abstractPart.parts.length; i++) {
 		const part = abstractPart.parts[i];
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const res = getPartGeometry(api.partDictionary[part.filename], part.colorCode >= 0 ? part.colorCode : colorCode, part.colorCode);
-		const faces = res.faces.clone().applyMatrix(matrix);
-		const lines = res.lines.clone().applyMatrix(matrix);
+		const subPartGeometry = getPartGeometry(api.partDictionary[part.filename], part.colorCode >= 0 ? part.colorCode : colorCode, part.colorCode);
+
+		const faces = subPartGeometry.faces.clone().applyMatrix(matrix);
 		geometry.faces.merge(faces);
+
+		const lines = subPartGeometry.lines.clone().applyMatrix(matrix);
 		geometry.lines.merge(lines);
+
+		for (let l = 0; l < subPartGeometry.condlines.length; l++) {
+			const condline = subPartGeometry.condlines[l];
+			geometry.condlines.push({
+				line: condline.line.clone().applyMatrix(matrix),
+				c1: condline.c1.clone().applyMatrix4(matrix),
+				c2: condline.c2.clone().applyMatrix4(matrix)
+			});
+		}
 	}
 
 	return geometry;
 }
 
-const faceMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors, side: THREE.DoubleSide});
-const lineMaterial = new THREE.LineBasicMaterial({color: 0x000000, linewidth: 5});
-const scaleDownVector3 = new THREE.Vector3(0.98, 0.98, 0.98);  // TODO: this is only applied to parts in a model; must apply to parts in submodel drawn as a single part inside a model
+const lineMaterial = new THREE.LineBasicMaterial({color: 0x000000});
+const faceMaterial = new THREE.MeshBasicMaterial({
+	vertexColors: THREE.FaceColors,
+	side: THREE.DoubleSide,
+	polygonOffset: true,
+	polygonOffsetFactor: 1,
+	polygonOffsetUnits: 1
+});
 
-function addModelToScene(scene, model, startPart, endPart) {
+function project(vec, camera, size) {
+	vec = vec.clone();
+	vec.project(camera);
+	vec.x = (vec.x * size) + size;
+	vec.y = -(vec.y * size) + size;
+	vec.z = 0;
+	return vec;
+}
 
-	for (var i = startPart; i <= endPart; i++) {
-		var part = model.parts[i];
+function lineSide(p, l1, l2) {
+	var res = ((p.x - l1.x) * (l2.y - l1.y)) - ((p.y - l1.y) * (l2.x - l1.x));
+	return (res > 0) ? 1 : -1;
+}
+
+function addModelToScene(scene, model, startPart, endPart, size) {
+
+	size = size / 2;
+	for (let i = startPart; i <= endPart; i++) {
+		const part = model.parts[i];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
-		matrix.scale(scaleDownVector3);
 		const color = (part.colorCode >= 0) ? part.colorCode : null;
 		const partGeometry = getPartGeometry(api.partDictionary[part.filename], color, null);
 
@@ -292,6 +334,21 @@ function addModelToScene(scene, model, startPart, endPart) {
 		const line = new THREE.LineSegments(partGeometry.lines, lineMaterial);
 		line.applyMatrix(matrix);
 		scene.add(line);
+
+		for (let l = 0; l < partGeometry.condlines.length; l++) {
+
+			const condline = partGeometry.condlines[l];
+			const cline = condline.line.clone().applyMatrix(matrix);
+			const l1 = project(cline.vertices[0], camera, size);
+			const l2 = project(cline.vertices[1], camera, size);
+
+			const c1 = project(condline.c1.clone().applyMatrix4(matrix), camera, size);
+			const c2 = project(condline.c2.clone().applyMatrix4(matrix), camera, size);
+
+			if (lineSide(c1, l1, l2) === lineSide(c2, l1, l2)) {
+				scene.add(new THREE.LineSegments(cline, lineMaterial));
+			}
+		}
 	}
 }
 
