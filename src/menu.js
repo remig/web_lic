@@ -15,24 +15,16 @@ const menu = [
 		{
 			text: 'Open...',
 			cb: () => {
-				document.getElementById('openFileChooser').click();
+				document.getElementById('openFileChooser').click();  // Triggers app.triggerOpenFile
 			}
 		},
-		{text: 'Open Recent (NYI)', cb: () => {}},
+		{text: 'Open Recent (NYI)', enabled: () => false, cb: () => {}},
 		{text: 'separator'},
 		{
 			text: 'Close',
 			enabled: enableIfModel,
-			cb: () => {
-				store.model = null;
-				store.resetState();
-				undoStack.clear();
-				app.clearState();
-				util.emptyNode(document.getElementById('canvasHolder'));
-				Vue.nextTick(() => {
-					app.clearSelected();
-					app.clearPage();
-				});
+			cb: function() {
+				app.closeModel();
 			}
 		},
 		{
@@ -41,6 +33,7 @@ const menu = [
 			cb: () => {
 				const content = {
 					partDictionary: LDParse.partDictionary,
+					colorTable: LDParse.colorTable,
 					model: store.model,
 					state: store.state
 				};
@@ -48,7 +41,7 @@ const menu = [
 				saveAs(blob, store.state.modelName.replace(/\..+$/, '.lic'));
 			}
 		},
-		{text: 'Save As... (NYI)', enabled: enableIfModel, cb: () => {}},
+		{text: 'Save As... (NYI)', enabled: () => false, cb: () => {}},
 		{
 			text: 'Import Model...',
 			cb: () => {
@@ -64,7 +57,7 @@ const menu = [
 	{name: 'Edit', children: [
 		{
 			id: 'undo',
-			text: () => 'Undo' + undoStack.undoText(),
+			text: () => 'Undo ' + undoStack.undoText(),
 			shortcut: 'ctrl+z',
 			enabled: () => undoStack.isUndoAvailable(),
 			cb: () => {
@@ -80,7 +73,7 @@ const menu = [
 		},
 		{
 			id: 'redo',
-			text: () => 'Redo' + undoStack.redoText(),
+			text: () => 'Redo ' + undoStack.redoText(),
 			shortcut: 'ctrl+y',
 			enabled: () => undoStack.isRedoAvailable(),
 			cb: () => {
@@ -95,21 +88,21 @@ const menu = [
 			}
 		},
 		{text: 'separator'},
-		{text: 'Snap To (NYI)', enabled: enableIfModel, cb: () => {}},
-		{text: 'Brick Colors... (NYI)', enabled: enableIfModel, cb: () => {}}
+		{text: 'Snap To (NYI)', enabled: () => false, cb: () => {}},
+		{text: 'Brick Colors... (NYI)', enabled: () => false, cb: () => {}}
 	]},
-	{name: 'View', children: [
-		{text: 'Add Horizontal Guide', enabled: enableIfModel, cb: () => {}},
-		{text: 'Add Vertical Guide', enabled: enableIfModel, cb: () => {}},
-		{text: 'Remove Guides', enabled: enableIfModel, cb: () => {}},
+	{name: 'View (NYI)', children: [
+		{text: 'Add Horizontal Guide', enabled: () => false, cb: () => {}},
+		{text: 'Add Vertical Guide', enabled: () => false, cb: () => {}},
+		{text: 'Remove Guides', enabled: () => false, cb: () => {}},
 		{text: 'separator'},
-		{text: 'Zoom 100%', enabled: enableIfModel, cb: () => {}},
-		{text: 'Zoom To Fit', enabled: enableIfModel, cb: () => {}},
-		{text: 'Zoom In', enabled: enableIfModel, cb: () => {}},
-		{text: 'Zoom Out', enabled: enableIfModel, cb: () => {}},
+		{text: 'Zoom 100%', enabled: () => false, cb: () => {}},
+		{text: 'Zoom To Fit', enabled: () => false, cb: () => {}},
+		{text: 'Zoom In', enabled: () => false, cb: () => {}},
+		{text: 'Zoom Out', enabled: () => false, cb: () => {}},
 		{text: 'separator'},
-		{text: 'Show One Page', enabled: enableIfModel, cb: () => {}},
-		{text: 'Show Two Pages', enabled: enableIfModel, cb: () => {}}
+		{text: 'Show One Page', enabled: () => false, cb: () => {}},
+		{text: 'Show Two Pages', enabled: () => false, cb: () => {}}
 	]},
 	{name: 'Export', children: [
 		{
@@ -136,20 +129,23 @@ const menu = [
 					if (!page) {
 						return;
 					}
+					if (page.needsLayout) {
+						store.mutations.layoutPage(page);
+					}
 					if (page.id > 0) {
 						doc.addPage(pageSize.width, pageSize.height);
 					}
 					page.steps.forEach(stepID => {
 
-						const step = store.state.steps[stepID];
+						const step = store.get.step(stepID);
 
 						if (step.csiID != null) {
-							const csi = store.state.csis[step.csiID];
+							const csi = store.get.csi(step.csiID);
 							let renderResult;
 							if (stepID === 0) {
 								renderResult = LDRender.renderModelData(store.model, 1000);
 							} else {
-								const parts = store.state.steps[stepID].parts;
+								const parts = store.get.step(stepID).parts;
 								renderResult = LDRender.renderModelData(store.model, 1000, parts[parts.length - 1]);
 							}
 							doc.addImage(
@@ -162,7 +158,7 @@ const menu = [
 						}
 
 						if (step.pliID != null) {
-							const pli = store.state.plis[step.pliID];
+							const pli = store.get.pli(step.pliID);
 							doc.roundedRect(
 								(step.x + pli.x) * r,
 								(step.y + pli.y) * r,
@@ -173,7 +169,7 @@ const menu = [
 
 							pli.pliItems.forEach(idx => {
 
-								const pliItem = store.state.pliItems[idx];
+								const pliItem = store.get.pliItem(idx);
 								const part = store.model.parts[pliItem.partNumber];
 								const renderResult = LDRender.renderPartData(part, 1000);
 								doc.addImage(
@@ -184,7 +180,7 @@ const menu = [
 									renderResult.height * r
 								);
 
-								const pliQty = store.state.pliQtys[pliItem.quantityLabel];
+								const pliQty = store.get.pliQty(pliItem.quantityLabel);
 								doc.setFontSize(10);
 								doc.text(
 									(step.x + pli.x + pliItem.x + pliQty.x) * r,
@@ -194,21 +190,23 @@ const menu = [
 							});
 						}
 
-						if (step.numberLabel) {
+						if (step.numberLabel != null) {
+							const lbl = store.get.stepNumber(step.numberLabel);
 							doc.setFontSize(20);
 							doc.text(
-								(step.x + step.numberLabel.x) * r,
-								(step.y + step.numberLabel.y + step.numberLabel.height) * r,
+								(step.x + lbl.x) * r,
+								(step.y + lbl.y + lbl.height) * r,
 								step.number + ''
 							);
 						}
 					});
 
-					if (page.numberLabel) {
+					if (page.numberLabel != null) {
+						const lbl = store.get.pageNumber(page.numberLabel);
 						doc.setFontSize(20);
 						doc.text(
-							(page.numberLabel.x) * r,
-							(page.numberLabel.y + page.numberLabel.height) * r,
+							lbl.x * r,
+							(lbl.y + lbl.height) * r,
 							page.number + ''
 						);
 					}
@@ -233,6 +231,9 @@ const menu = [
 				store.state.pages.forEach(page => {
 					if (!page) {
 						return;
+					}
+					if (page.needsLayout) {
+						store.mutations.layoutPage(page);
 					}
 					app.drawPage(page, canvas);
 					const pageName = (page.id === 0) ? 'Title Page.png' : `Page ${page.number}.png`;

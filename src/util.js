@@ -76,6 +76,16 @@ const util = {
 	clone(obj) {
 		return JSON.parse(JSON.stringify(obj));
 	},
+	sort: {
+		numeric: {
+			ascending(a, b) {
+				return a - b;
+			},
+			descending(a, b) {
+				return b - a;
+			}
+		}
+	},
 	formatTime(start, end) {
 		const t = end - start;
 		if (t >= 1000) {

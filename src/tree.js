@@ -49,7 +49,9 @@ Vue.component('treeRowItem', {
 	},
 	template: `
 		<span
-			:class="['clickable', 'treeText', {selected: target === currentItem}]"
+			:class="['clickable', 'treeText', {
+				selected: target && currentItem && target.id === currentItem.id && target.type === currentItem.type
+			}]"
 			@click.stop.prevent="itemClick"
 		>{{text}}</span>
 	`
@@ -72,31 +74,31 @@ Vue.component('treeParentRowItem', {
 });
 
 var tree = Vue.component('tree', {
-	props: ['store', 'currentItem'],
+	props: ['treeData', 'currentItem'],
 	template: `
 	<ul>
-		<li v-for="page in store.state.pages">
+		<li v-for="page in treeData.store.state.pages">
 			<treeParentRowItem :currentItem="currentItem" :target="page" />
 			<ul :id="'pageListItem' + page.id" class="indent hidden">
-				<li v-if="page.numberLabel">
-					<treeRowItem :currentItem="currentItem" :target="page.numberLabel" />
+				<li v-if="page.numberLabel != null">
+					<treeRowItem :currentItem="currentItem" :target="treeData.store.get.pageNumber(page.numberLabel)" />
 				</li>
-				<li class="unindent" v-for="step in page.steps.map(s => store.state.steps[s])">
+				<li class="unindent" v-for="step in page.steps.map(stepID => treeData.store.get.step(stepID))">
 					<treeParentRowItem :currentItem="currentItem" :target="step" />
 					<ul :id="'stepListItem' + step.id" class="indent hidden">
 						<li v-if="step.csiID != null">
-							<treeRowItem :currentItem="currentItem" :target="store.state.csis[step.csiID]" />
+							<treeRowItem :currentItem="currentItem" :target="treeData.store.get.csi(step.csiID)" />
 						</li>
 						<li class="unindent" v-if="step.pliID != null">
-							<treeParentRowItem :currentItem="currentItem" :target="store.state.plis[step.pliID]" />
+							<treeParentRowItem :currentItem="currentItem" :target="treeData.store.get.pli(step.pliID)" />
 							<ul :id="'pliListItem' + step.pliID" class="indent hidden">
-								<li v-for="pliItemID in store.state.plis[step.pliID].pliItems">
-									<treeRowItem :currentItem="currentItem" :target="store.state.pliItems[pliItemID]" />
+								<li v-for="pliItemID in treeData.store.get.pli(step.pliID).pliItems">
+									<treeRowItem :currentItem="currentItem" :target="treeData.store.get.pliItem(pliItemID)" />
 								</li>
 							</ul>
 						</li>
-						<li v-if="step.numberLabel">
-							<treeRowItem :currentItem="currentItem" :target="step.numberLabel" />
+						<li v-if="step.numberLabel != null">
+							<treeRowItem :currentItem="currentItem" :target="treeData.store.get.stepNumber(step.numberLabel)" />
 						</li>
 					</ul>
 				</li>

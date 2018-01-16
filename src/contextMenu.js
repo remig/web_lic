@@ -21,17 +21,18 @@ const contextMenu = {
 		{
 			text: 'Delete This Blank Page',
 			enabled: () => {
-				if (app && app.selectedItem && app.selectedItem.type === 'page') {
-					const page = store.state.pages[app.selectedItem.id];
-					if (page) {
-						return page.steps.length < 1;
-					}
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
+					const page = store.get.lookupToItem(app.selectedItemLookup);
+					return page.steps.length < 1;
 				}
 				return false;
 			},
 			cb: () => {
-				undoStack.commit('deletePage', app.selectedItem.id, 'Delete Page');
-				Vue.nextTick(() => app.setCurrentPage(app.selectedItem.id + 1));
+				const nextPage = store.get.nextPage(app.selectedItemLookup) || store.get.lastPage();
+				undoStack.commit('deletePage', app.selectedItemLookup.id, 'Delete Page');
+				Vue.nextTick(() => {
+					app.setCurrentPage(nextPage);
+				});
 			}
 		}
 	],
@@ -41,22 +42,64 @@ const contextMenu = {
 	step: [
 		{
 			text: 'Move Step to Previous Page',
+			enabled: () => {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+					const page = store.get.pageForItem(app.selectedItemLookup);
+					if (store.get.isFirstPage(page) || store.get.isTitlePage(page)) {
+						return false;  // Previous page doesn't exist
+					} else if (page.steps.indexOf(app.selectedItemLookup.id) !== 0) {
+						return false;  // Can only move first step on a page to the previous page
+					}
+					return true;
+				}
+				return false;
+			},
 			cb: function() {
-				undoStack.commit('moveStepToPreviousPage', app.selectedItem, this.text);
+				const step = store.get.lookupToItem(app.selectedItemLookup);
+				undoStack.commit('moveStepToPreviousPage', step, this.text);
 				Vue.nextTick(() => {
 					app.clearSelected();
 					app.drawCurrentPage();
 				});
 			}
 		},
-		{text: 'Move Step to Next Page (NYI)', cb: () => {}},
+		{
+			text: 'Move Step to Next Page',
+			enabled: () => {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+					const page = store.get.pageForItem(app.selectedItemLookup);
+					if (store.get.isLastPage(page)) {
+						return false;  // Previous page doesn't exist
+					} else if (page.steps.indexOf(app.selectedItemLookup.id) !== page.steps.length - 1) {
+						return false;  // Can only move last step on a page to the next page
+					}
+					return true;
+				}
+				return false;
+			},
+			cb: function() {
+				const step = store.get.lookupToItem(app.selectedItemLookup);
+				undoStack.commit('moveStepToNextPage', step, this.text);
+				Vue.nextTick(() => {
+					app.clearSelected();
+					app.drawCurrentPage();
+				});
+			}
+		},
 		{text: 'separator'},
 		{
 			text: 'Merge Step with Previous Step',
+			enabled: () => {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+					const step = store.get.lookupToItem(app.selectedItemLookup);
+					return store.state.steps.indexOf(step) > 1;  // First 'step' is the title page content, which can't be merged
+				}
+				return false;
+			},
 			cb: function() {
 				undoStack.commit(
 					'mergeSteps',
-					{sourceStepID: app.selectedItem.id, destStepID: app.selectedItem.id - 1},
+					{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id - 1},
 					this.text
 				);
 				Vue.nextTick(() => {
@@ -65,7 +108,27 @@ const contextMenu = {
 				});
 			}
 		},
-		{text: 'Merge Step with Next Step (NYI)', cb: () => {}}
+		{
+			text: 'Merge Step with Next Step',
+			enabled: () => {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+					const step = store.get.lookupToItem(app.selectedItemLookup);
+					return store.state.steps.indexOf(step) < store.state.steps.length - 1;
+				}
+				return false;
+			},
+			cb: function() {
+				undoStack.commit(
+					'mergeSteps',
+					{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id + 1},
+					this.text
+				);
+				Vue.nextTick(() => {
+					app.clearSelected();
+					app.drawCurrentPage();
+				});
+			}
+		}
 	],
 	stepNumber: [
 		{text: 'Change Step Number (NYI)', cb: () => {}}

@@ -20,21 +20,24 @@ Vue.filter('sanitizeMenuID', id => {
 
 var app = new Vue({
 	el: '#container',
-	data: {  // Store any transient UI state data here
-		currentPageID: null,
+	data: {  // Store any transient UI state data here.  Do *not* store state items here; Vue turns these into observers
+		currentPageLookup: null,
 		statusText: '',
-		selectedItem: null,
+		selectedItemLookup: null,
 		contextMenu: null,
-		storeUpdate: 0
+		treeUpdateState: false  // Not used by tree directly, only used to force the tree to redraw
 	},
 	methods: {
 		openRemoteLDrawModel(modelName) {
 			store.model = LDParse.loadRemotePart(modelName);
-			this.importLDrawModel(modelName);
+			app.importLDrawModel(modelName);
 		},
 		importLDrawModelFromContent(content) {
+			if (store.model) {
+				app.closeModel();
+			}
 			store.model = LDParse.loadPartContent(content);
-			this.importLDrawModel(store.model.filename);
+			app.importLDrawModel(store.model.filename);
 		},
 		importLDrawModel(modelName) {
 
@@ -44,14 +47,13 @@ var app = new Vue({
 			store.mutations.addTitlePage();
 			store.mutations.addInitialPages(LDParse.partDictionary);
 
-			this.currentPageID = store.state.pages[0].id;
+			app.currentPageLookup = store.get.itemToLookup(store.state.pages[0]);
 			undoStack.saveBaseState();
-			this.storeUpdate++;
-
-			Vue.nextTick(() => this.drawCurrentPage());
+			app.forceTreeUpdate();
+			Vue.nextTick(() => app.drawCurrentPage());
 
 			var end = Date.now();
-			this.statusText = `"${store.state.modelName}" loaded successfully (${util.formatTime(start, end)})`;
+			app.statusText = `"${store.state.modelName}" loaded successfully (${util.formatTime(start, end)})`;
 		},
 		triggerModelImport(e) {
 			const reader = new FileReader();
@@ -67,63 +69,65 @@ var app = new Vue({
 				const fileJSON = JSON.parse(e.target.result);
 				store.model = fileJSON.model;
 				LDParse.setPartDictionary(fileJSON.partDictionary);
+				LDParse.setColorTable(fileJSON.colorTable);
 				LDRender.setPartDictionary(fileJSON.partDictionary);
 				store.replaceState(fileJSON.state);
-				app.currentPageID = store.state.pages[0].id;
+				app.currentPageLookup = store.get.itemToLookup(store.state.pages[0]);
 				undoStack.saveBaseState();
 				app.clearSelected();
 				app.drawCurrentPage();
-				app.$forceUpdate();  // Necessary to force page tree to recalculate
+				app.forceTreeUpdate();
 			};
 			reader.readAsText(e.target.files[0]);
 			e.target.value = '';
 		},
-		getSteps(page) {
-			return page.steps.map(s => store.state.steps[s]);
+		closeModel() {
+			store.model = null;
+			store.resetState();
+			undoStack.clear();
+			app.clearState();
+			util.emptyNode(document.getElementById('canvasHolder'));
+			Vue.nextTick(() => {
+				app.clearSelected();
+				app.clearPageCanvas();
+			});
 		},
-		goToPrevPage() {
-		},
-		goToNextPage() {
-		},
-		setCurrentPage(pageID) {
-			if (pageID !== app.currentPageID) {
-				this.clearSelected();
-				app.currentPageID = pageID;
+		setCurrentPage(page) {
+			if (page.id !== app.currentPageLookup.id) {
+				app.clearSelected();
+				app.currentPageLookup = store.get.itemToLookup(page);
 			}
-			Vue.nextTick(() => this.drawCurrentPage());
+			Vue.nextTick(() => app.drawCurrentPage());
 		},
 		setSelected(target) {
-			if (target !== this.selectedItem) {
+			if (!app.selectedItemLookup || target.id !== app.selectedItemLookup.id || target.type !== app.selectedItemLookup.type) {
 				var targetPage = store.get.pageForItem(target);
-				if (targetPage && targetPage.id !== app.currentPageID) {
-					app.setCurrentPage(targetPage.id);
+				if (targetPage && targetPage.id !== app.currentPageLookup.id) {
+					app.setCurrentPage(targetPage);
 				}
-				this.selectedItem = target;
+				app.selectedItemLookup = store.get.itemToLookup(target);
 			}
 		},
+		forceTreeUpdate() {
+			app.treeUpdateState = !app.treeUpdateState;
+		},
 		clearState() {
-			this.currentPageID = null;
-			this.statusText = '';
-			this.selectedItem = null;
-			this.contextMenu = null;
-			this.storeUpdate = 0;
-
+			app.currentPageLookup = null;
+			app.statusText = '';
+			app.selectedItemLookup = null;
+			app.contextMenu = null;
+			app.forceTreeUpdate();
 		},
 		clearSelected() {
-			this.selectedItem = null;
+			app.selectedItemLookup = null;
 		},
 		targetBox(t) {
 			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
-			let parent = t.parent;
-			while (parent) {
-				const parentList = store.state[parent.type + 's'];
-				if (parentList) {
-					parent = parentList[parent.id];
-					box.x += parent.x || 0;
-					box.y += parent.y || 0;
-					parent = parent.parent;
-				} else {
-					parent = null;
+			while (t) {
+				t = store.get.parent(t);
+				if (t) {
+					box.x += t.x || 0;
+					box.y += t.y || 0;
 				}
 			}
 			return box;
@@ -133,30 +137,37 @@ var app = new Vue({
 			return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
 		},
 		findClickTarget(mx, my) {
-			const page = store.state.pages[this.currentPageID];
+			const page = store.get.lookupToItem(app.currentPageLookup);
 			if (!page) {
 				return null;
 			}
-			if (page.numberLabel && app.inBox(mx, my, page.numberLabel)) {
-				return page.numberLabel;
+			if (page.numberLabel != null) {
+				const lbl = store.get.pageNumber(page.numberLabel);
+				if (app.inBox(mx, my, lbl)) {
+					return lbl;
+				}
 			}
 			for (let i = 0; i < page.steps.length; i++) {
-				const step = store.state.steps[page.steps[i]];
-				if (step.csiID != null && app.inBox(mx, my, store.state.csis[step.csiID])) {
-					return store.state.csis[step.csiID];
+				const step = store.get.step(page.steps[i]);
+				const csi = store.get.csi(step.csiID);
+				if (step.csiID != null && app.inBox(mx, my, csi)) {
+					return csi;
 				}
-				if (step.numberLabel && app.inBox(mx, my, step.numberLabel)) {
-					return step.numberLabel;
+				if (step.numberLabel != null) {
+					const lbl = store.get.stepNumber(step.numberLabel);
+					if (app.inBox(mx, my, lbl)) {
+						return lbl;
+					}
 				}
 				if (step.pliID != null) {
-					const pli = store.state.plis[step.pliID];
+					const pli = store.get.pli(step.pliID);
 					for (let j = 0; j < pli.pliItems.length; j++) {
 						const idx = pli.pliItems[j];
-						const pliItem = store.state.pliItems[idx];
+						const pliItem = store.get.pliItem(idx);
 						if (app.inBox(mx, my, pliItem)) {
 							return pliItem;
 						}
-						const pliQty = store.state.pliQtys[pliItem.quantityLabel];
+						const pliQty = store.get.pliQty(pliItem.quantityLabel);
 						if (app.inBox(mx, my, pliQty)) {
 							return pliQty;
 						}
@@ -175,22 +186,22 @@ var app = new Vue({
 			return ['step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber'].includes(nodeType);
 		},
 		globalClick(e) {
-			this.closeMenu();
+			app.closeMenu();
 			let target;
 			if (e.target.id === 'pageCanvas') {
-				target = this.findClickTarget(e.offsetX, e.offsetY);
+				target = app.findClickTarget(e.offsetX, e.offsetY);
 			}
 			if (target) {
-				this.setSelected(target);
+				app.setSelected(target);
 			} else {
-				this.clearSelected();
+				app.clearSelected();
 			}
 		},
 		rightClick(e) {
-			if (this.selectedItem != null) {
-				const menu = ContextMenu(this.selectedItem.type, app, store, undoStack);
+			if (app.selectedItemLookup != null) {
+				const menu = ContextMenu(app.selectedItemLookup.type, app, store, undoStack);
 				if (menu && menu.length) {
-					this.contextMenu = menu;
+					app.contextMenu = menu;
 					$('#contextMenu')
 						.css({
 							'outline-style': 'none',
@@ -205,13 +216,13 @@ var app = new Vue({
 			$('#contextMenu').css('display', 'none');
 		},
 		globalKeyPress(e) {
-			this.closeMenu();
-			const selectedItem = this.selectedItem;
-			if (e.key === 'PageDown' && this.currentPageID + 1 < store.get.pageCount()) {
-				this.setCurrentPage(store.get.nextPage(this.currentPageID).id);
-			} else if (e.key === 'PageUp' && this.currentPageID > 0) {
-				this.setCurrentPage(store.get.prevPage(this.currentPageID).id);
-			} else if (selectedItem && e.key.startsWith('Arrow') && this.isMoveable(selectedItem.type)) {
+			app.closeMenu();
+			const selItem = app.selectedItemLookup;
+			if (e.key === 'PageDown' && !store.get.isLastPage(app.currentPageLookup)) {
+				app.setCurrentPage(store.get.nextPage(app.currentPageLookup));
+			} else if (e.key === 'PageUp' && !store.get.isTitlePage(app.currentPageLookup)) {
+				app.setCurrentPage(store.get.prevPage(app.currentPageLookup));
+			} else if (selItem && e.key.startsWith('Arrow') && app.isMoveable(selItem.type)) {
 				let dx = 0, dy = 0;
 				const dv = 30;
 				if (e.key === 'ArrowUp') {
@@ -223,15 +234,20 @@ var app = new Vue({
 				} else if (e.key === 'ArrowRight') {
 					dx = dv;
 				}
+				const item = store.get.lookupToItem(selItem);
 				undoStack.commit('moveItem', {
-					item: selectedItem,
-					x: selectedItem.x + dx,
-					y: selectedItem.y + dy
-				}, `Move ${util.titleCase(selectedItem.type)}`);
-				Vue.nextTick(() => this.drawCurrentPage());
+					item: item,
+					x: item.x + dx,
+					y: item.y + dy
+				}, `Move ${util.titleCase(selItem.type)}`);
+				Vue.nextTick(() => {
+					app.drawCurrentPage();
+					app.selectedItemLookup.id++;  // TODO: UGH. This forces Vue to update selectedItem, which triggers highlight recalculation.  Need a cleaner way to do this.
+					app.selectedItemLookup.id--;
+				});
 			} else {
 				// Check if key is a menu shortcut
-				const menu = this.menuEntries;
+				const menu = app.menuEntries;
 				const key = (e.ctrlKey ? 'ctrl+' : '') + e.key;
 				for (let i = 0; i < menu.length; i++) {
 					for (let j = 0; j < menu[i].children.length; j++) {
@@ -243,7 +259,7 @@ var app = new Vue({
 				}
 			}
 		},
-		clearPage() {
+		clearPageCanvas() {
 			const pageSize = store.state.pageSize;
 			const canvas = document.getElementById('pageCanvas');
 			const ctx = canvas.getContext('2d');
@@ -251,11 +267,10 @@ var app = new Vue({
 			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
 		},
 		drawCurrentPage() {
-			if (this.currentPageID != null) {
-				const page = store.state.pages[this.currentPageID];
+			if (app.currentPageLookup != null) {
 				const canvas = document.getElementById('pageCanvas');
 				canvas.width = canvas.width;
-				app.drawPage(page, canvas);
+				app.drawPage(store.get.lookupToItem(app.currentPageLookup), canvas);
 			}
 		},
 		drawPage(page, canvas) {
@@ -269,40 +284,41 @@ var app = new Vue({
 			ctx.fillStyle = 'white';
 			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
 
-			if (page.numberLabel) {
+			if (page.numberLabel != null) {
+				const lbl = store.get.pageNumber(page.numberLabel);
 				ctx.fillStyle = 'black';
 				ctx.font = 'bold 20pt Helvetica';
-				ctx.fillText(page.number, page.numberLabel.x, page.numberLabel.y + page.numberLabel.height);
+				ctx.fillText(page.number, lbl.x, lbl.y + lbl.height);
 			}
 
 			page.steps.forEach(stepID => {
 
-				const step = store.state.steps[stepID];
+				const step = store.get.step(stepID);
 				const localModel = util.getSubmodel(store.model, step.submodel);
 
 				ctx.save();
 				ctx.translate(step.x, step.y);
 
 				if (step.csiID != null) {
-					const csi = store.state.csis[step.csiID];
+					const csi = store.get.csi(step.csiID);
 					const csiCanvas = util.renderCSI(localModel, step).container;
 					ctx.drawImage(csiCanvas, csi.x, csi.y);  // TODO: profile performance if every x, y, w, h argument is passed in
 				}
 
 				if (step.pliID != null) {
-					const pli = store.state.plis[step.pliID];
+					const pli = store.get.pli(step.pliID);
 					ctx.strokeStyle = 'black';
 					ctx.lineWidth = 2;
 					util.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
 					ctx.stroke();
 
 					pli.pliItems.forEach(idx => {
-						const pliItem = store.state.pliItems[idx];
+						const pliItem = store.get.pliItem(idx);
 						const part = localModel.parts[pliItem.partNumber];
 						const pliCanvas = util.renderPLI(part).container;
 						ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
 
-						const pliQty = store.state.pliQtys[pliItem.quantityLabel];
+						const pliQty = store.get.pliQty(pliItem.quantityLabel);
 						ctx.font = 'bold 10pt Helvetica';
 						ctx.fillText(
 							'x' + pliItem.quantity,
@@ -312,13 +328,10 @@ var app = new Vue({
 					});
 				}
 
-				if (step.numberLabel) {
+				if (step.numberLabel != null) {
+					const lbl = store.get.stepNumber(step.numberLabel);
 					ctx.font = 'bold 20pt Helvetica';
-					ctx.fillText(
-						step.number + '',
-						step.numberLabel.x,
-						step.numberLabel.y + step.numberLabel.height
-					);
+					ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
 				}
 
 				ctx.restore();
@@ -331,8 +344,8 @@ var app = new Vue({
 	computed: {
 		treeData() {
 			return {
-				state: store.state,
-				storeUpdate: this.storeUpdate
+				store: store,
+				treeUpdateState: this.treeUpdateState
 			};
 		},
 		menuEntries() {
@@ -345,17 +358,17 @@ var app = new Vue({
 			return store.state.pageSize.height;
 		},
 		highlightStyle() {
-			const selectedItem = this.selectedItem;
-			if (selectedItem) {
+			const selItem = this.selectedItemLookup;
+			if (selItem) {
 				let box;
-				if (selectedItem.type === 'page') {
+				if (selItem.type === 'page') {
 					box = {x: 0, y: 0, width: store.state.pageSize.width, height: store.state.pageSize.height};
 				} else {
-					box = this.targetBox(selectedItem);
+					box = this.targetBox(store.get.lookupToItem(selItem));
 				}
-				if (selectedItem.type === 'pageNumber' || selectedItem.type === 'stepNumber') {
+				if (selItem.type === 'pageNumber' || selItem.type === 'stepNumber') {
 					box.y += 5;  // Text is aligned to the bottom of the box; offset highlight to center nicely
-				} else if (selectedItem.type === 'pliQty') {
+				} else if (selItem.type === 'pliQty') {
 					box.y += 3;
 				}
 				return {
@@ -365,9 +378,8 @@ var app = new Vue({
 					width: `${box.width + 6}px`,
 					height: `${box.height + 6}px`
 				};
-			} else {
-				return {display: 'none'};
 			}
+			return {display: 'none'};
 		}
 	}
 });
@@ -387,6 +399,8 @@ document.body.addEventListener('keydown', e => {
 
 //app.openRemoteLDrawModel('Creator/20015 - Alligator.mpd');
 //app.openRemoteLDrawModel('Star Wars/7140 - X-Wing Fighter.mpd');
+//app.openRemoteLDrawModel('Star Wars/4491 - MTT.mpd');
+//app.openRemoteLDrawModel('Star Wars/4489 - AT-AT.mpd');
 //app.openRemoteLDrawModel('Architecture/21010 - Robie House.mpd');
 //app.openRemoteLDrawModel('Adventurers/5935 - Island Hopper.mpd');
 

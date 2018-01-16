@@ -11,12 +11,14 @@ const pliMargin = pageMargin / 2;
 const emptyState = {
 	modelName: '',
 	pages: [],
+	pageNumbers: [],
 	steps: [],
+	stepNumbers: [],
 	csis: [],
 	plis: [],
 	pliItems: [],
 	pliQtys: [],
-	pageSize: {width: 800, height: 600}
+	pageSize: {width: 800, height: 700}
 };
 
 const store = {
@@ -34,38 +36,86 @@ const store = {
 	},
 	get: {
 		pageCount() {
-			return Object.keys(store.state.pages).length;
+			return store.state.pages.length;
 		},
-		nextPage(currentPageID) {
-			for (let i = currentPageID + 1; i < store.state.pages.length; i++) {
-				if (store.state.pages[i] != null) {
-					return store.state.pages[i];
-				}
+		isTitlePage(page) {
+			if (!page || page.id == null) {
+				return null;
 			}
-			return null;
+			return page.id === store.state.pages[0].id;
 		},
-		prevPage(currentPageID) {
-			for (let i = currentPageID - 1; i >= 0; i--) {
-				if (store.state.pages[i] != null) {
-					return store.state.pages[i];
-				}
+		isFirstPage(page) {
+			if (!page || page.id == null) {
+				return null;
 			}
-			return null;
+			return page.id === store.state.pages[1].id;
+		},
+		isLastPage(page) {
+			if (!page || page.id == null) {
+				return null;
+			}
+			return page.id === store.state.pages[store.state.pages.length - 1].id;
+		},
+		nextPage(page) {
+			if (store.get.isLastPage(page)) {
+				return null;
+			}
+			const idx = store.state.pages.findIndex(el => el.id === page.id);
+			if (idx < 0) {
+				return null;
+			}
+			return store.state.pages[idx + 1];
+		},
+		prevPage(page) {
+			if (store.get.isTitlePage(page)) {
+				return null;
+			}
+			const idx = store.state.pages.findIndex(el => el.id === page.id);
+			if (idx < 0) {
+				return null;
+			}
+			return store.state.pages[idx - 1];
+		},
+		titlePage() {
+			return store.state.pages[0];
+		},
+		firstPage() {
+			return store.state.pages[1];
+		},
+		lastPage() {
+			return store.state.pages[store.state.pages.length - 1];
 		},
 		parent(item) {
 			if (item && item.parent) {
 				var itemList = store.state[item.parent.type + 's'];
 				if (itemList) {
-					return itemList[item.parent.id];
+					return itemList.find(el => el.id === item.parent.id);
 				}
 			}
 			return null;
 		},
 		pageForItem(item) {
+			item = store.get.lookupToItem(item);
 			while (item && item.type !== 'page') {
 				item = store.get.parent(item);
 			}
 			return item;
+		},
+		lookupToItem(lookup) {
+			if (!lookup || !lookup.type || lookup.id == null) {
+				return null;
+			}
+			var itemList = store.state[lookup.type + 's'];
+			if (itemList) {
+				return itemList.find(el => el.id === lookup.id);
+			}
+			return null;
+		},
+		itemToLookup(item) {
+			return {
+				id: item.id,
+				type: item.type
+			};
 		}
 	},
 	mutations: {
@@ -83,8 +133,8 @@ const store = {
 			store.state.modelName = name;
 		},
 		moveStepToPreviousPage(step) {
-			const currentPage = store.state.pages[step.parent.id];
-			const prevPage = store.state.pages[step.parent.id - 1];
+			const currentPage = store.get.parent(step);
+			const prevPage = store.get.prevPage(currentPage);
 			const stepIdx = currentPage.steps.indexOf(step.id);
 			currentPage.steps.splice(stepIdx, 1);
 			prevPage.steps.push(step.id);
@@ -92,40 +142,70 @@ const store = {
 			store.mutations.layoutPage(prevPage);
 			store.mutations.layoutPage(currentPage);
 		},
+		moveStepToNextPage(step) {
+			const currentPage = store.get.parent(step);
+			const nextPage = store.get.nextPage(currentPage);
+			const stepIdx = currentPage.steps.indexOf(step.id);
+			currentPage.steps.splice(stepIdx, 1);
+			nextPage.steps.unshift(step.id);
+			step.parent.id = nextPage.id;
+			store.mutations.layoutPage(nextPage);
+			store.mutations.layoutPage(currentPage);
+		},
 		mergeSteps(opts) {
-			const sourceStep = store.state.steps[opts.sourceStepID];
-			const destStep = store.state.steps[opts.destStepID];
+			const sourceStep = store.get.step(opts.sourceStepID);
+			const destStep = store.get.step(opts.destStepID);
 			if (!sourceStep || !destStep) {
 				return;
 			}
 			destStep.parts = destStep.parts.concat(sourceStep.parts);
-			const sourcePLI = store.state.plis[sourceStep.pliID];
-			const destPLI = store.state.plis[destStep.pliID];
+			destStep.parts.sort(util.sort.numeric.ascending);
+			const sourcePLI = store.get.pli(sourceStep.pliID);
+			const destPLI = store.get.pli(destStep.pliID);
 			if (sourcePLI && destPLI) {
 				sourcePLI.pliItems.forEach(id => {
-					store.state.pliItems[id].parent.id = destPLI.id;
+					store.get.pliItem(id).parent.id = destPLI.id;
 				});
 				destPLI.pliItems = destPLI.pliItems.concat(sourcePLI.pliItems);
 			}
-			const sourcePage = store.get.pageForItem(destStep);
-			sourcePage.steps = sourcePage.steps.slice(0, 1);
-			delete store.state.steps[sourceStep.id];
+			const sourcePage = store.get.pageForItem(sourceStep);
+			const destPage = store.get.pageForItem(destStep);
+			store.mutations.deleteStep(sourceStep);
 			store.mutations.layoutPage(sourcePage);
+			store.mutations.layoutPage(destPage);
 		},
 		deletePage(pageID) {
-			delete store.state.pages[pageID];
+			store.state.pages.splice(pageID, 1);
 			store.mutations.renumberPages();
 		},
-		renumberPages() {
-			let prevPageNumber;
-			store.state.pages.forEach(page => {
-				if (page && page.number != null) {
-					if (prevPageNumber != null && prevPageNumber < page.number - 1) {
-						page.number = prevPageNumber + 1;
+		deleteStep(step) {
+			const page = store.get.pageForItem(step);
+			page.steps.splice(page.steps.indexOf(step), 1);
+			const csi = store.get.csi(step.csiID);
+			store.state.csis.splice(store.state.csis.indexOf(csi), 1);
+			store.state.steps.splice(store.state.steps.indexOf(step), 1);
+			store.mutations.renumberSteps();
+		},
+		renumber(type) {
+			let prevNumber;
+			store.state[type + 's'].forEach(el => {
+				if (el && el.number != null) {
+					if (prevNumber == null && el.number > 1) {
+						el.number = 1;
+					} else if (prevNumber != null && prevNumber < el.number - 1) {
+						el.number = prevNumber + 1;
 					}
-					prevPageNumber = page.number;
+					prevNumber = el.number;
 				}
 			});
+		},
+		renumberSteps() {
+			store.mutations.renumber('step');
+		},
+		renumberPages() {
+			store.mutations.renumber('page');
+		},
+		setNumber(target, number) {
 		},
 		layoutStep(opts) {
 
@@ -139,7 +219,7 @@ const store = {
 
 			if (step.csiID != null) {
 				const csiSize = util.renderCSI(localModel, step, true);
-				const csi = store.state.csis[step.csiID];
+				const csi = store.get.csi(step.csiID);
 				csi.x = Math.floor((step.width - csiSize.width) / 2);
 				csi.y = Math.floor((step.height - csiSize.height) / 2);
 				csi.width = csiSize.width;
@@ -152,13 +232,13 @@ const store = {
 
 			if (step.pliID != null) {
 
-				const pli = store.state.plis[step.pliID];
+				const pli = store.get.pli(step.pliID);
 
 				//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
 				for (var i = 0; i < pli.pliItems.length; i++) {
 
 					const idx = pli.pliItems[i];
-					const pliItem = store.state.pliItems[idx];
+					const pliItem = store.get.pliItem(idx);
 					const part = localModel.parts[pliItem.partNumber];
 
 					const pliSize = util.renderPLI(part, true);
@@ -168,7 +248,7 @@ const store = {
 					pliItem.height = pliSize.height;
 
 					const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
-					const pliQty = store.state.pliQtys[pliItem.quantityLabel];
+					const pliQty = store.get.pliQty(pliItem.quantityLabel);
 					pliQty.x = -qtyLabelOffset;
 					pliQty.y = pliSize.height - qtyLabelOffset;
 					pliQty.width = lblSize.width;
@@ -184,12 +264,13 @@ const store = {
 				pli.height = maxHeight;
 			}
 
-			if (step.numberLabel) {
+			if (step.numberLabel != null) {
 				const lblSize = util.measureLabel('bold 20pt Helvetica', step.number);
-				step.numberLabel.x = 0;
-				step.numberLabel.y = maxHeight + pageMargin;
-				step.numberLabel.width = lblSize.width;
-				step.numberLabel.height = lblSize.height;
+				const lbl = store.get.stepNumber(step.numberLabel);
+				lbl.x = 0;
+				lbl.y = maxHeight + pageMargin;
+				lbl.width = lblSize.width;
+				lbl.height = lblSize.height;
 			}
 		},
 		layoutPage(page) {
@@ -205,15 +286,16 @@ const store = {
 			for (var i = 0; i < stepCount; i++) {
 				box.x = colSize * (i % cols);
 				box.y = rowSize * Math.floor(i / cols);
-				store.mutations.layoutStep({step: store.state.steps[page.steps[i]], box});
+				store.mutations.layoutStep({step: store.get.step(page.steps[i]), box});
 			}
 
-			if (page.numberLabel) {
+			if (page.numberLabel != null) {
 				const lblSize = util.measureLabel('bold 20pt Helvetica', page.number);
-				page.numberLabel.x = pageSize.width - pageMargin - lblSize.width;
-				page.numberLabel.y = pageSize.height - pageMargin - lblSize.height;
-				page.numberLabel.width = lblSize.width;
-				page.numberLabel.height = lblSize.height;
+				const lbl = store.get.pageNumber(page.numberLabel);
+				lbl.x = pageSize.width - pageMargin - lblSize.width;
+				lbl.y = pageSize.height - pageMargin - lblSize.height;
+				lbl.width = lblSize.width;
+				lbl.height = lblSize.height;
 			}
 			delete page.needsLayout;
 		},
@@ -266,14 +348,17 @@ const store = {
 					number: null,
 					steps: [],
 					needsLayout: true,
-					numberLabel: {
-						type: 'pageNumber',
-						parent: {type: 'page', id: null},
-						x: null, y: null,
-						width: null, height: null
-					}
+					numberLabel: null
 				});
-				page.number = page.numberLabel.parent.id = page.id;
+
+				const pageNumber = addStateItem({
+					type: 'pageNumber',
+					parent: {type: 'page', id: page.id},
+					x: null, y: null,
+					width: null, height: null
+				});
+				page.number = page.id;
+				page.numberLabel = pageNumber.id;
 
 				const step = addStateItem({
 					type: 'step',
@@ -283,14 +368,17 @@ const store = {
 					submodel: util.clone(localModelIDList),
 					x: null, y: null,
 					width: null, height: null,
-					numberLabel: {
-						type: 'stepNumber',
-						parent: {type: 'step', id: null},
-						x: null, y: null,
-						width: null, height: null
-					}
+					numberLabel: null
 				});
-				step.number = step.numberLabel.parent.id = step.id;
+
+				const stepNumber = addStateItem({
+					type: 'stepNumber',
+					parent: {type: 'step', id: step.id},
+					x: null, y: null,
+					width: null, height: null
+				});
+				step.number = step.id;
+				step.numberLabel = stepNumber.id;
 
 				page.steps.push(step.id);
 
@@ -316,7 +404,7 @@ const store = {
 
 					const part = localModel.parts[partNumber];
 					const target = pli.pliItems
-						.map(idx => store.state.pliItems[idx])
+						.map(id => store.get.pliItem(id))
 						.filter(pliItem => pliItem.filename === part.filename && pliItem.colorCode === part.colorCode)[0];
 
 					if (target) {
@@ -347,6 +435,18 @@ const store = {
 		}
 	}
 };
+
+// Add store.get.page, store.get.step, etc; one getter for each state list
+for (let el in store.state) {
+	if (store.state.hasOwnProperty(el) && Array.isArray(store.state[el])) {
+		el = el.slice(0, -1);
+		store.get[el] = (function(s) {
+			return function(id) {
+				return store.get.lookupToItem({type: s, id: id});
+			};
+		})(el);
+	}
+}
 
 if (typeof module !== 'undefined' && module.exports != null) {
 	module.exports = store;

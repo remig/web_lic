@@ -24,11 +24,11 @@ function initialize() {
 	renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 	offscreenContainer.appendChild(renderer.domElement);
 
-	const viewBox = 500;
+	const viewBox = (500 / 1);
 	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.1, 10000);
 	camera.up = new THREE.Vector3(0, -1, 0);  // -1 because LDraw coordinate space has -y as UP
 	camera.position.x = viewBox;
-	camera.position.y = -viewBox + 150;
+	camera.position.y = -viewBox + (150 / 1);
 	camera.position.z = -viewBox;
 
 	// TODO: KILL THISSSSSSS!!  It's shitting all over my life.
@@ -295,6 +295,7 @@ function getPartGeometry(abstractPart, colorCode) {
 }
 
 const lineMaterial = new THREE.LineBasicMaterial({color: 0x000000});
+const lineMaterialWhite = new THREE.LineBasicMaterial({color: 0x888888});
 const faceMaterial = new THREE.MeshBasicMaterial({
 	vertexColors: THREE.FaceColors,
 	side: THREE.DoubleSide,
@@ -331,7 +332,8 @@ function addModelToScene(scene, model, startPart, endPart, size) {
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
 
-		const line = new THREE.LineSegments(partGeometry.lines, lineMaterial);
+		const mat = (partGeometry.faces.faces[0].color.getHexString() === '05131d') ? lineMaterialWhite : lineMaterial;
+		const line = new THREE.LineSegments(partGeometry.lines, mat);
 		line.applyMatrix(matrix);
 		scene.add(line);
 
@@ -363,13 +365,16 @@ function addPartToScene(scene, abstractPart, colorCode, config) {
 	}
 	scene.add(mesh);
 
-	const line = new THREE.LineSegments(partGeometry.lines.clone(), lineMaterial);
+	const mat = (colorCode === 0) ? lineMaterialWhite : lineMaterial;
+	const line = new THREE.LineSegments(partGeometry.lines.clone(), mat);
 	if (config && config.rotation) {
 		line.rotation.x = config.rotation.x * Math.PI / 180;
 		line.rotation.y = config.rotation.y * Math.PI / 180;
 		line.rotation.z = config.rotation.z * Math.PI / 180;
 	}
 	scene.add(line);
+
+	// TODO: draw conditional lines here too
 }
 
 if (typeof module !== 'undefined' && module.exports != null) {

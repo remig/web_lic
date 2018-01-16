@@ -22,7 +22,7 @@
 	<script type="text/javascript" src="src/LDRender.js"></script>
 	<script type="text/javascript" src="src/util.js"></script>
 	<script type="text/javascript" src="src/store.js"></script>
-	<script type="text/javascript" src="src/UndoStack.js"></script>
+	<script type="text/javascript" src="src/undoStack.js"></script>
 	<script type="text/javascript" src="src/menu.js"></script>
 	<script type="text/javascript" src="src/contextMenu.js"></script>
 	<script type="text/javascript" src="src/tree.js"></script>
@@ -50,7 +50,7 @@
 		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
 			<div id="leftPane" class="split split-horizontal">
 				<div id="tree">
-					<tree :store="treeData" :current-item="selectedItem"></tree>
+					<tree :tree-data="treeData" :current-item="selectedItemLookup"></tree>
 				</div>
 			</div>
 			<div id="rightPane" class="split split-horizontal">

@@ -37,16 +37,19 @@ const api = {
 		}
 		return colors;
 	},
-	setPartDictionary(dict) {
-		api.partDictionary = dict;
-	},
 	// key: filename, value: abstractPart content.
 	// JSON representation of the LDraw file content for a given part.
 	partDictionary: {},
+	setPartDictionary(dict) {
+		api.partDictionary = dict;
+	},
 
 	// key: LDraw color code, value: {name, color, edge}.
 	// JSON representation of the LDConfig.ldr file, which defines RGB colors for each LDraw color code
 	colorTable: {},
+	setColorTable(dict) {
+		api.colorTable = dict;
+	},
 
 	// colorID: an LDraw color to lookup
 	// type: either 'color' or 'edge'
