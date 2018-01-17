@@ -6,7 +6,7 @@ store = (function() {
 
 // These will end up in the template page, when we have one
 const pageMargin = 20;
-const pliMargin = pageMargin / 2;
+const pliMargin = pageMargin / 1.2;
 
 const emptyState = {
 	modelName: '',
@@ -237,8 +237,7 @@ const store = {
 				//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
 				for (var i = 0; i < pli.pliItems.length; i++) {
 
-					const idx = pli.pliItems[i];
-					const pliItem = store.get.pliItem(idx);
+					const pliItem = store.get.pliItem(pli.pliItems[i]);
 					const part = localModel.parts[pliItem.partNumber];
 
 					const pliSize = util.renderPLI(part, true);

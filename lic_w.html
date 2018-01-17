@@ -34,11 +34,15 @@
 				<li v-for="menu in menuEntries" :id="menu.id || menu.name | sanitizeMenuID" class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
 					<ul class="dropdown-menu">
-						<li v-for="child in menu.children" :id="child.id || child.text | sanitizeMenuID" :class="{divider: child.text == 'separator', disabled: child.enabled ? !child.enabled() : false}">
-							<a v-if="child.text !== 'separator'" @click="child.cb($event)" class="clickable">
-								<span>{{typeof child.text === 'function' ? child.text() : child.text}}</span>
-								<span v-if="child.shortcut">{{child.shortcut}}</span>
+						<li v-for="child in menu.children" :id="child.id || child.text | sanitizeMenuID"
+								:class="{divider: child.text == 'separator', disabled: child.enabled ? !child.enabled() : false, 'dropdown-submenu': child.children}">
+							<a v-if="child.text !== 'separator'" @click="child.children ? toggleSubMenu($event) : child.cb($event)" class="clickable" data-toggle="dropdown">
+								<span class="menu-text">{{typeof child.text === 'function' ? child.text() : child.text}}</span>
+								<span class="menu-text" v-if="child.shortcut">{{child.shortcut}}</span>
 							</a>
+							<ul v-if="child.children" class="dropdown-menu">
+								<li v-for="c in child.children" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
+							</ul>
 						</li>
 					</ul>
 				</li>
@@ -70,7 +74,7 @@
 		</div>
 		<div id="statusBar">{{statusText}}</div>
 		<div id="offscreenCache" class="offscreen">
-			<input type="file" name="openFileChooser" id="openFileChooser" @change="triggerOpenFile($event)" style="display: none;">
+			<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" @change="triggerOpenFile($event)" style="display: none;">
 			<input type="file" name="uploadModelChooser" id="uploadModelChooser" @change="triggerModelImport($event)" style="display: none;">
 			<svg xmlns="http://www.w3.org/2000/svg">
 				<text id="fontMeasureContainer">gW</text>

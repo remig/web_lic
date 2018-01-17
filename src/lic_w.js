@@ -29,6 +29,9 @@ var app = new Vue({
 	},
 	methods: {
 		openRemoteLDrawModel(modelName) {
+			if (store.model) {
+				app.closeModel();
+			}
 			store.model = LDParse.loadRemotePart(modelName);
 			app.importLDrawModel(modelName);
 		},
@@ -214,6 +217,11 @@ var app = new Vue({
 		},
 		closeMenu() {
 			$('#contextMenu').css('display', 'none');
+		},
+		toggleSubMenu(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$(e.target.parentElement).toggleClass('open');
 		},
 		globalKeyPress(e) {
 			app.closeMenu();
@@ -403,6 +411,7 @@ document.body.addEventListener('keydown', e => {
 //app.openRemoteLDrawModel('Star Wars/4489 - AT-AT.mpd');
 //app.openRemoteLDrawModel('Architecture/21010 - Robie House.mpd');
 //app.openRemoteLDrawModel('Adventurers/5935 - Island Hopper.mpd');
+//app.openRemoteLDrawModel('Space/894 - Mobile Ground Tracking Station.mpd');
 
 window.app = app;
 window.store = store;

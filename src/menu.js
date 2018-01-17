@@ -46,7 +46,27 @@ const menu = [
 			text: 'Import Model...',
 			cb: () => {
 				document.getElementById('uploadModelChooser').click();
-			}
+			},
+			childrenXX: [
+				{
+					text: 'Creator Alligator',
+					cb: () => {
+						app.openRemoteLDrawModel('Creator/20015 - Alligator.mpd');
+					}
+				},
+				{
+					text: 'X-Wing',
+					cb: () => {
+						app.openRemoteLDrawModel('Star Wars/7140 - X-Wing Fighter.mpd');
+					}
+				},
+				{
+					text: 'Mobile Lab',
+					cb: () => {
+						app.openRemoteLDrawModel('Space/6901 - Mobile Lab.mpd');
+					}
+				}
+			]
 		},
 		{text: 'separator'},
 		{text: 'Save Template (NYI)', enabled: () => false, cb: () => {}},
