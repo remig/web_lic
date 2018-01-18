@@ -39,16 +39,12 @@ const api = {
 				page.steps.forEach(stepID => {
 
 					const step = store.get.step(stepID);
+					const model = util.getSubmodel(store.model, step.submodel);
 
 					if (step.csiID != null) {
 						const csi = store.get.csi(step.csiID);
-						let renderResult;
-						if (stepID === 0) {
-							renderResult = LDRender.renderModelData(store.model, 1000);
-						} else {
-							const parts = store.get.step(stepID).parts;
-							renderResult = LDRender.renderModelData(store.model, 1000, parts[parts.length - 1]);
-						}
+						const lastPart = (stepID === 0) ? null : step.parts[step.parts.length - 1];
+						const renderResult = LDRender.renderModelData(model, 1000, lastPart);
 						doc.addImage(
 							renderResult.image, 'PNG',
 							(step.x + csi.x) * r,
@@ -71,7 +67,7 @@ const api = {
 						pli.pliItems.forEach(id => {
 
 							const pliItem = store.get.pliItem(id);
-							const part = store.model.parts[pliItem.partNumber];
+							const part = model.parts[pliItem.partNumber];
 							const renderResult = LDRender.renderPartData(part, 1000);
 							doc.addImage(
 								renderResult.image, 'PNG',
@@ -123,6 +119,7 @@ const api = {
 	generatePNGZip: function(app, store) {
 
 		app.busyText = 'Generating PNG Zip';
+
 		window.setTimeout(function() {
 			const start = Date.now();
 			const modelName = store.state.modelName.replace(/\..+$/, '').replace(/\//g, '-');
