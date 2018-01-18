@@ -23,12 +23,16 @@
 	<script type="text/javascript" src="src/util.js"></script>
 	<script type="text/javascript" src="src/store.js"></script>
 	<script type="text/javascript" src="src/undoStack.js"></script>
+	<script type="text/javascript" src="src/export.js"></script>
 	<script type="text/javascript" src="src/menu.js"></script>
 	<script type="text/javascript" src="src/contextMenu.js"></script>
 	<script type="text/javascript" src="src/tree.js"></script>
 </head>
 <body>
 	<div id="container">
+		<div id="busyOverlay" :class="{hidden: busyText === ''}">
+			<div id="busyText">{{busyText}}<div id="spinner"></div></div>
+		</div>
 		<nav class="navbar navbar-default">
 			<ul class="nav navbar-nav">
 				<li v-for="menu in menuEntries" :id="menu.id || menu.name | sanitizeMenuID" class="dropdown">

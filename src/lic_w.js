@@ -3,8 +3,6 @@
 (function() {
 'use strict';
 
-const start = Date.now();
-
 const undoStack = new UndoStack(store);
 
 Vue.filter('sanitizeMenuID', id => {
@@ -23,6 +21,7 @@ var app = new Vue({
 	data: {  // Store any transient UI state data here.  Do *not* store state items here; Vue turns these into observers
 		currentPageLookup: null,
 		statusText: '',
+		busyText: '',
 		selectedItemLookup: null,
 		contextMenu: null,
 		treeUpdateState: false  // Not used by tree directly, only used to force the tree to redraw
@@ -32,17 +31,24 @@ var app = new Vue({
 			if (store.model) {
 				app.closeModel();
 			}
-			store.model = LDParse.loadRemotePart(modelName);
-			app.importLDrawModel(modelName);
+			app.busyText = 'Loading Model';
+			window.setTimeout(function() {
+				const start = Date.now();
+				store.model = LDParse.loadRemotePart(modelName);
+				app.importLDrawModel(modelName, start);
+			}, 0);
 		},
 		importLDrawModelFromContent(content) {
 			if (store.model) {
 				app.closeModel();
 			}
+			const start = Date.now();
 			store.model = LDParse.loadPartContent(content);
-			app.importLDrawModel(store.model.filename);
+			app.importLDrawModel(store.model.filename, start);
 		},
-		importLDrawModel(modelName) {
+		importLDrawModel(modelName, start) {
+
+			start = start || Date.now();
 
 			LDRender.setPartDictionary(LDParse.partDictionary);
 
@@ -53,10 +59,11 @@ var app = new Vue({
 			app.currentPageLookup = store.get.itemToLookup(store.state.pages[0]);
 			undoStack.saveBaseState();
 			app.forceTreeUpdate();
-			Vue.nextTick(() => app.drawCurrentPage());
 
 			var end = Date.now();
+			app.busyText = '';
 			app.statusText = `"${store.state.modelName}" loaded successfully (${util.formatTime(start, end)})`;
+			Vue.nextTick(() => app.drawCurrentPage());
 		},
 		triggerModelImport(e) {
 			const reader = new FileReader();

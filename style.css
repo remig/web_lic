@@ -83,6 +83,45 @@ div#container {
 	position: relative;
 }
 
+/* Loader overlay */
+#busyOverlay {
+	background: rgba(0, 0, 0, 0.4);
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+}
+
+#busyText {
+	display: inline-block;
+	position: absolute;
+	top: 48%;
+	left: 50%;
+	background: white;
+	font: 18pt Helvetica;
+	padding: 20px;
+	border-radius: 5px;
+}
+
+#spinner {
+	display: inline-block;
+	vertical-align: middle;
+	border: 7px solid #d5d5d5;
+	border-top: 7px solid #3498db;
+	border-radius: 50%;
+	width: 35px;
+	height: 35px;
+	animation: spin 1.5s linear infinite;
+	margin-left: 20px;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
 /* Nav Tree */
 #tree {
 	padding: 10px 5px;
