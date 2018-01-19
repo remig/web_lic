@@ -144,6 +144,16 @@ const contextMenu = {
 	pliItem: [
 		{text: 'Rotate PLI Part (NYI)', cb: () => {}},
 		{text: 'Scale PLI Part (NYI)', cb: () => {}}
+	],
+	label: [
+		{
+			text: 'Set...',
+			children: [
+				{text: 'Text (NYI)', cb: () => {}},
+				{text: 'Font (NYI)', cb: () => {}},
+				{text: 'Color (NYI)', cb: () => {}}
+			]
+		}
 	]
 };
 

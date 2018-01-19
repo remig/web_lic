@@ -71,8 +71,12 @@
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
 		<div id="contextMenu" class="dropdown" tabindex="-1" @blur="closeMenu" @click="closeMenu">
 			<ul class="dropdown-menu">
-				<li v-for="menu in contextMenu" v-if="menu.enabled ? menu.enabled() : true" :class="{divider: menu.text == 'separator'}">
-					<a v-if="menu.text !== 'separator'" @click="menu.cb.call(menu, $event)" class="clickable">{{menu.text}}</a>
+				<li v-for="menu in contextMenu" v-if="menu.enabled ? menu.enabled() : true"
+						:class="{divider: menu.text == 'separator', 'dropdown-submenu': menu.children}">
+					<a v-if="menu.text !== 'separator'" @click="menu.children ? toggleSubMenu($event) : menu.cb.call(menu, $event)" class="clickable" data-toggle="dropdown">{{menu.text}}</a>
+					<ul v-if="menu.children" class="dropdown-menu">
+						<li v-for="c in menu.children" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
+					</ul>
 				</li>
 			</ul>
 		</div>
