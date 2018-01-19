@@ -10,6 +10,7 @@ const pliMargin = pageMargin / 1.2;
 
 const emptyState = {
 	modelName: '',
+	pageSize: {width: 900, height: 700},
 	pages: [],
 	pageNumbers: [],
 	steps: [],
@@ -18,7 +19,7 @@ const emptyState = {
 	plis: [],
 	pliItems: [],
 	pliQtys: [],
-	pageSize: {width: 900, height: 700}
+	labels: []
 };
 
 const store = {
@@ -37,6 +38,12 @@ const store = {
 	get: {
 		pageCount() {
 			return store.state.pages.length;
+		},
+		modelName() {
+			return store.state.modelName.replace(/\//g, '-');
+		},
+		modelNameBase(ext) {
+			return store.get.modelName().replace(/\..+$/, '') + (ext || '');
 		},
 		isTitlePage(page) {
 			if (!page || page.id == null) {
@@ -121,7 +128,7 @@ const store = {
 	mutations: {
 		addStateItem(item) {
 			const stateList = store.state[item.type + 's'];
-			item.id = stateList.length;
+			item.id = stateList.length ? Math.max.apply(null, stateList.map(el => el.id)) + 1 : 0;
 			stateList.push(item);
 			return item;
 		},
@@ -298,12 +305,40 @@ const store = {
 			}
 			delete page.needsLayout;
 		},
+		layoutTitlePage(page) {
+			const pageSize = store.state.pageSize;
+			const step = store.get.step(page.steps[0]);
+			const csi = store.get.csi(step.csiID);
+			const box = {x: 0, y: 0, width: pageSize.width, height: pageSize.height};
+			store.mutations.layoutStep({step: step, box});
+			step.width = csi.width + 40;
+			step.height = csi.height + 40;
+			step.x = (pageSize.width - step.width) / 2;
+			step.y = (pageSize.height - step.height) / 2;
+			csi.x = csi.y = 20;
+
+			const title = store.get.label(page.labels[0]);
+			const titleSize = util.measureLabel(title.font, title.text);
+			title.x = (pageSize.width - titleSize.width) / 2;
+			title.y = (step.x - titleSize.height) / 2;
+			title.width = titleSize.width;
+			title.height = titleSize.height;
+
+			const modelInfo = store.get.label(page.labels[1]);
+			const modelInfoSize = util.measureLabel(modelInfo.font, modelInfo.text);
+			modelInfo.x = (pageSize.width - modelInfoSize.width) / 2;
+			modelInfo.y = ((step.x - modelInfoSize.height) / 2) + step.x + step.height;
+			modelInfo.width = modelInfoSize.width;
+			modelInfo.height = modelInfoSize.height;
+			delete page.needsLayout;
+		},
 		addTitlePage() {
 
 			const addStateItem = store.mutations.addStateItem;
 			const page = addStateItem({
 				type: 'page',
-				steps: []
+				steps: [],
+				labels: []
 			});
 
 			const step = addStateItem({
@@ -320,10 +355,30 @@ const store = {
 				x: null, y: null,
 				width: null, height: null
 			});
-
 			step.csiID = csi.id;
 			page.steps.push(step.id);
-			store.mutations.layoutPage(page);
+
+			const title = addStateItem({
+				type: 'label',
+				parent: {type: 'page', id: page.id},
+				x: null, y: null,
+				width: null, height: null,
+				text: store.get.modelNameBase(),
+				font: '20pt Helvetica',
+				color: 'black'
+			});
+			page.labels.push(title.id);
+
+			const modelInfo = addStateItem({
+				type: 'label',
+				parent: {type: 'page', id: page.id},
+				x: null, y: null,
+				width: null, height: null,
+				text: '',
+				font: '16pt Helvetica',
+				color: 'black'
+			});
+			page.labels.push(modelInfo.id);
 		},
 		addInitialPages(partDictionary, localModelIDList) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
 

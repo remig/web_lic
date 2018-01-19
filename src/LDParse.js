@@ -58,6 +58,17 @@ const api = {
 			return api.colorTable[colorCode][type || 'color'];
 		}
 		return 0;  // Treat any unrecognized colors as black
+	},
+
+	model: {
+		get: {
+			partCount(model) {
+				return model.parts.reduce((acc, p) => {
+					p = api.partDictionary[p.filename];
+					return (p.isSubModel ? p.parts.length : 1) + acc;
+				}, 0);
+			}
+		}
 	}
 };
 

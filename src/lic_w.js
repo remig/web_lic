@@ -57,6 +57,8 @@ var app = new Vue({
 			store.mutations.setModelName(modelName);
 			store.mutations.addTitlePage();
 			store.mutations.addInitialPages(LDParse.partDictionary);
+			store.get.label(1).text = `${LDParse.model.get.partCount(store.model)} Parts, ${store.state.pages.length - 1} Pages`;
+			store.mutations.layoutTitlePage(store.get.titlePage());
 
 			app.currentPageLookup = store.get.itemToLookup(store.state.pages[0]);
 			undoStack.saveBaseState();
@@ -159,6 +161,14 @@ var app = new Vue({
 					return lbl;
 				}
 			}
+			if (page.labels != null) {
+				for (let i = 0; i < page.labels.length; i++) {
+					const lbl = store.get.label(page.labels[i]);
+					if (app.inBox(mx, my, lbl)) {
+						return lbl;
+					}
+				}
+			}
 			for (let i = 0; i < page.steps.length; i++) {
 				const step = store.get.step(page.steps[i]);
 				const csi = store.get.csi(step.csiID);
@@ -195,7 +205,7 @@ var app = new Vue({
 			return page;
 		},
 		isMoveable(nodeType) {
-			return ['step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber'].includes(nodeType);
+			return ['step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'label'].includes(nodeType);
 		},
 		globalClick(e) {
 			app.closeMenu();
@@ -308,6 +318,15 @@ var app = new Vue({
 				ctx.fillText(page.number, lbl.x, lbl.y + lbl.height);
 			}
 
+			if (page.labels != null) {
+				page.labels.forEach(labelID => {
+					const lbl = store.get.label(labelID);
+					ctx.fillStyle = lbl.color || 'black';
+					ctx.font = lbl.font || 'bold 20pt Helvetica';
+					ctx.fillText(lbl.text, lbl.x, lbl.y + lbl.height);
+				});
+			}
+
 			page.steps.forEach(stepID => {
 
 				const step = store.get.step(stepID);
@@ -383,7 +402,7 @@ var app = new Vue({
 				} else {
 					box = this.targetBox(store.get.lookupToItem(selItem));
 				}
-				if (selItem.type === 'pageNumber' || selItem.type === 'stepNumber') {
+				if (selItem.type === 'pageNumber' || selItem.type === 'stepNumber' || selItem.type === 'label') {
 					box.y += 5;  // Text is aligned to the bottom of the box; offset highlight to center nicely
 				} else if (selItem.type === 'pliQty') {
 					box.y += 3;

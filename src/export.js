@@ -109,7 +109,7 @@ const api = {
 				}
 			});
 
-			doc.save(store.state.modelName.replace(/\..+$/, '.pdf'));
+			doc.save(store.get.modelNameBase('.pdf'));
 
 			app.busyText = '';
 			const end = Date.now();
@@ -122,7 +122,7 @@ const api = {
 
 		window.setTimeout(function() {
 			const start = Date.now();
-			const modelName = store.state.modelName.replace(/\..+$/, '').replace(/\//g, '-');
+			const modelName = store.get.modelNameBase();
 			const zip = new JSZip();
 			var imgFolder = zip.folder(modelName);
 
@@ -145,7 +145,7 @@ const api = {
 			});
 
 			zip.generateAsync({type: 'blob'})
-				.then(content => saveAs(content, `${modelName}.zip`))
+				.then(content => saveAs(content, modelName + '.zip'))
 				.then(() => {
 					app.busyText = '';
 					const end = Date.now();

@@ -33,6 +33,8 @@ Vue.component('treeRowItem', {
 				return t.number == null ? 'Title Page' : 'Page ' + t.number;
 			} else if (t.type === 'step') {
 				return 'Step ' + (t.number || '');
+			} else if (t.type === 'label') {
+				return t.text;
 			} else if (t.type === 'pliItem') {
 				var part = LDParse.partDictionary[t.filename];
 				if (!part || !part.name) {
@@ -82,6 +84,9 @@ var tree = Vue.component('tree', {
 			<ul :id="'pageListItem' + page.id" class="indent hidden">
 				<li v-if="page.numberLabel != null">
 					<treeRowItem :currentItem="currentItem" :target="treeData.store.get.pageNumber(page.numberLabel)" />
+				</li>
+				<li v-if="page.labels != null" v-for="labelID in page.labels">
+					<treeRowItem :currentItem="currentItem" :target="treeData.store.get.label(labelID)" />
 				</li>
 				<li class="unindent" v-for="step in page.steps.map(stepID => treeData.store.get.step(stepID))">
 					<treeParentRowItem :currentItem="currentItem" :target="step" />
