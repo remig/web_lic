@@ -107,6 +107,17 @@ const api = {
 						page.number + ''
 					);
 				}
+				if (page.labels != null) {
+					page.labels.forEach(lblID => {
+						const lbl = store.get.label(lblID);
+						doc.setFontSize(parseInt(util.fontToFontParts(lbl.font).fontSize, 10));
+						doc.text(
+							lbl.x * r,
+							(lbl.y + lbl.height) * r,
+							lbl.text
+						);
+					});
+				}
 			});
 
 			doc.save(store.get.modelNameBase('.pdf'));

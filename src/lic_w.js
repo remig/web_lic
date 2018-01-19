@@ -311,22 +311,6 @@ var app = new Vue({
 			ctx.fillStyle = 'white';
 			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
 
-			if (page.numberLabel != null) {
-				const lbl = store.get.pageNumber(page.numberLabel);
-				ctx.fillStyle = 'black';
-				ctx.font = 'bold 20pt Helvetica';
-				ctx.fillText(page.number, lbl.x, lbl.y + lbl.height);
-			}
-
-			if (page.labels != null) {
-				page.labels.forEach(labelID => {
-					const lbl = store.get.label(labelID);
-					ctx.fillStyle = lbl.color || 'black';
-					ctx.font = lbl.font || 'bold 20pt Helvetica';
-					ctx.fillText(lbl.text, lbl.x, lbl.y + lbl.height);
-				});
-			}
-
 			page.steps.forEach(stepID => {
 
 				const step = store.get.step(stepID);
@@ -355,6 +339,7 @@ var app = new Vue({
 						ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
 
 						const pliQty = store.get.pliQty(pliItem.quantityLabel);
+						ctx.fillStyle = 'black';
 						ctx.font = 'bold 10pt Helvetica';
 						ctx.fillText(
 							'x' + pliItem.quantity,
@@ -366,12 +351,29 @@ var app = new Vue({
 
 				if (step.numberLabel != null) {
 					const lbl = store.get.stepNumber(step.numberLabel);
+					ctx.fillStyle = 'black';
 					ctx.font = 'bold 20pt Helvetica';
 					ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
 				}
 
 				ctx.restore();
 			});
+
+			if (page.numberLabel != null) {
+				const lbl = store.get.pageNumber(page.numberLabel);
+				ctx.fillStyle = 'black';
+				ctx.font = 'bold 20pt Helvetica';
+				ctx.fillText(page.number, lbl.x, lbl.y + lbl.height);
+			}
+
+			if (page.labels != null) {
+				page.labels.forEach(labelID => {
+					const lbl = store.get.label(labelID);
+					ctx.fillStyle = lbl.color || 'black';
+					ctx.font = lbl.font || 'bold 20pt Helvetica';
+					ctx.fillText(lbl.text, lbl.x, lbl.y + lbl.height);
+				});
+			}
 		},
 		pages() {
 			return store.state.pages.filter(p => p != null);
