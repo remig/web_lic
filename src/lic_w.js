@@ -5,6 +5,8 @@
 
 const undoStack = new UndoStack(store);
 
+Vue.config.performance = false;
+
 Vue.filter('sanitizeMenuID', id => {
 	if (!id || id === 'separator' || typeof id !== 'string') {
 		return null;
