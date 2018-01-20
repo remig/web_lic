@@ -313,8 +313,8 @@ const store = {
 			store.mutations.layoutStep({step: step, box});
 			step.width = csi.width + 40;
 			step.height = csi.height + 40;
-			step.x = (pageSize.width - step.width) / 2;
-			step.y = (pageSize.height - step.height) / 2;
+			step.x = Math.floor((pageSize.width - step.width) / 2);
+			step.y = Math.floor((pageSize.height - step.height) / 2);
 			csi.x = csi.y = 20;
 
 			const title = store.get.label(page.labels[0]);

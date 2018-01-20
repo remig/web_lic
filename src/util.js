@@ -58,6 +58,41 @@ const util = {
 			return res;
 		};
 	})(),
+	fontToFontParts(font) {
+		// Convert a CSS2 font string (like "italic 12pt Arial") to a font object with 5 members: fontStyle, fontVariant, fontWeight, fontSize, fontFamily
+		// Returned object includes a handy toString(), which converts the object back to a CSS2 font string.
+		var fullFontParts = {fontStyle: '', fontVariant: '', fontWeight: '', fontSize: '', fontFamily: ''};
+		var boldList = ['bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+		var haveFontSize = false;
+		font = (font || '') + '';
+
+		var fontParts = font.split(/ (?=(?:[^'"]|'[^']*'|"[^"]*")*$)/);
+		fontParts.map(function(el) {
+			if (el === 'italic' || el === 'oblique') {
+				fullFontParts.fontStyle = el;
+			} else if (el === 'small-caps') {
+				fullFontParts.fontVariant = el;
+			} else if (boldList.indexOf(el) >= 0) {
+				fullFontParts.fontWeight = el;
+			} else if (el) {
+				if (!haveFontSize) {
+					fullFontParts.fontSize = el;
+					haveFontSize = true;
+				} else {
+					fullFontParts.fontFamily = el;
+				}
+			}
+		});
+
+		fullFontParts.toString = function() {
+			var family = this.fontFamily.trim();  // If font family name contains a space, need to enclose it in quotes
+			if (family.indexOf(' ') >= 0 && family[0] !== '"' && family[0] !== "'") {
+				family = '"' + family + '"';
+			}
+			return [this.fontStyle, this.fontVariant, this.fontWeight, this.fontSize, family].join(' ').trim();
+		};
+		return fullFontParts;
+	},
 	emptyNode(node) {
 		if (node) {
 			while (node.firstChild) {
