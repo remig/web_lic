@@ -15,7 +15,7 @@ describe('Import Trivial Model', function() {
 	this.timeout(7500);
 
 	before(done => {
-		driver.navigate().to('http://192.168.1.101:9988/lic_w/lic_w.html');
+		driver.navigate().to('http://192.168.1.101:9977/lic_w/lic_w.html');
 		page.get(page.file_uploader_button)
 			.sendKeys('C:\\Users\\remi\\Downloads\\20015 - Alligator.mpd')
 			.then(() => done());
@@ -39,8 +39,8 @@ describe('Import Trivial Model', function() {
 		assert.equal(yield c(m.file.save), '');
 		assert.equal(yield c(m.edit.undo), 'disabled');
 		assert.equal(yield c(m.edit.redo), 'disabled');
-		assert.equal(yield c(m.edit.snap_to), '');
-		assert.equal(yield c(m.view.add_horizontal_guide), '');
+		assert.equal(yield c(m.edit.snap_to), 'disabled');
+		assert.equal(yield c(m.view.add_horizontal_guide), 'disabled');
 		assert.equal(yield c(m.export.generate_pdf), '');
 		assert.equal(yield c(m.export.generate_png_images), '');
 	});
@@ -52,28 +52,28 @@ describe('Import Trivial Model', function() {
 	it('Click center of Page should highlight CSI', function *() {
 		page.click(page.page_canvas);
 		assert.equal(yield page.getCss(page.highlight, 'display'), 'block');
-		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'left'), 10), 5);
-		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'top'), 10), 5);
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'left'), 10), 250);
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'top'), 10), 240);
 		assert.equal(yield page.getCss(page.highlight, 'width'), '390px');
 		assert.equal(yield page.getCss(page.highlight, 'height'), '211px');
 	});
 
 	it('Click just outside CSI should highlight Step', function *() {
-		page.click(page.page_canvas, {x: 150, y: 150});
+		page.click(page.page_canvas, {x: 240, y: 300});
 		assert.equal(yield page.getCss(page.highlight, 'display'), 'block');
-		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'left'), 10), 5);
-		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'top'), 10), 5);
-		assert.equal(yield page.getCss(page.highlight, 'width'), '766px');
-		assert.equal(yield page.getCss(page.highlight, 'height'), '566px');
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'left'), 10), 230);
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'top'), 10), 220);
+		assert.equal(yield page.getCss(page.highlight, 'width'), '430px');
+		assert.equal(yield page.getCss(page.highlight, 'height'), '251px');
 	});
 
 	it('Click near edge of Page should highlight Page', function *() {
 		page.click(page.page_canvas, {x: 5, y: 5});
 		assert.equal(yield page.getCss(page.highlight, 'display'), 'block');
-		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'left'), 10), 5);
-		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'top'), 10), 5);
-		assert.equal(yield page.getCss(page.highlight, 'width'), '806px');
-		assert.equal(yield page.getCss(page.highlight, 'height'), '606px');
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'left'), 10), -3);
+		assert.isAtLeast(parseInt(yield page.getCss(page.highlight, 'top'), 10), -3);
+		assert.equal(yield page.getCss(page.highlight, 'width'), '906px');
+		assert.equal(yield page.getCss(page.highlight, 'height'), '706px');
 	});
 
 	it('Click off page should remove highlight', () => {

@@ -38,7 +38,7 @@ describe('Test state store module', function() {
 		assert.isEmpty(store.state.plis);
 		assert.isEmpty(store.state.pliItems);
 		assert.isEmpty(store.state.pliQtys);
-		assert.deepEqual(store.state.pageSize, {width: 800, height: 600});
+		assert.deepEqual(store.state.pageSize, {width: 900, height: 700});
 		assert.equal(store.get.pageCount(), 0);
 	};
 
@@ -68,15 +68,15 @@ describe('Test state store module', function() {
 	});
 
 	it('Add a Title Page', () => {
-		var pageState = {type: 'page', id: 0, steps: [0]};
+		var pageState = {type: 'page', id: 0, steps: [0], labels: [0, 1]};
 		var stepState = {
 			type: 'step', id: 0, parent: {type: 'page', id: 0},
-			x: pageMargin, y: pageMargin, width: 760, height: 560, csiID: 0
+			x: null, y: null, width: null, height: null, csiID: 0
 		}
 		var csiState = {
 			type: 'csi', id: 0, parent: {type: 'step', id: 0},
-			x: (800 - 200) / 2 - pageMargin, y: (600 - 100) / 2 - pageMargin,
-			width: 200, height: 100
+			x: null, y: null,
+			width: null, height: null
 		};
 		store.mutations.addTitlePage();
 		assert.equal(store.state.pages.length, 1);

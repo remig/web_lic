@@ -1,4 +1,5 @@
 /* global require: false, module: false */
+// To run tests, cd to lic_w folder then 'mocha', or mocha test/test_foo.js to run one test
 
 'use strict';
 

@@ -15,7 +15,7 @@ describe('Launch empty Page', function() {
 	this.timeout(7500);
 
 	before(done => {
-		driver.navigate().to('http://192.168.1.101:9988/lic_w/lic_w.html')
+		driver.navigate().to('http://192.168.1.101:9977/lic_w/lic_w.html')
 			.then(() => done());
 	});
 
@@ -56,11 +56,11 @@ describe('Launch empty Page', function() {
 
 		it('\'File -> Open\' and \'File -> Import\' should be enabled, everything else disabled', function *() {
 			assert.equal(yield page.getClass(page.sub_menu.file.open), '');
-			assert.equal(yield page.getClass(page.sub_menu.file.open_recent), '');
+			assert.equal(yield page.getClass(page.sub_menu.file.open_recent), 'disabled');
 			assert.equal(yield page.getClass(page.sub_menu.file.close), 'disabled');
 			assert.equal(yield page.getClass(page.sub_menu.file.save), 'disabled');
 			assert.equal(yield page.getClass(page.sub_menu.file.save_as), 'disabled');
-			assert.equal(yield page.getClass(page.sub_menu.file.import_model), '');
+			assert.notEqual(yield page.getClass(page.sub_menu.file.import_model), 'disabled');
 			assert.equal(yield page.getClass(page.sub_menu.file.save_template), 'disabled');
 		});
 
