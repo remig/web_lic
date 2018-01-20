@@ -8,8 +8,12 @@ const api = {
 	loadRemotePart(url) {
 		return loadPart(url);
 	},
-	loadPartContent(content) {
-		return loadPart(null, content);
+	loadPartContent(content, modelName) {
+		const part = loadPart(null, content);
+		if (part && modelName && part.filename == null) {
+			part.filename = modelName;
+		}
+		return part;
 	},
 	loadLDConfig(url) {
 		url = url || '../ldraw/LDConfig.ldr';
@@ -67,6 +71,12 @@ const api = {
 					p = api.partDictionary[p.filename];
 					return (p.isSubModel ? p.parts.length : 1) + acc;
 				}, 0);
+			},
+			submodels(model) {
+				return model.parts.map(p => {
+					p = api.partDictionary[p.filename];
+					return p.isSubModel ? p : null;
+				}).filter(p => p != null);
 			}
 		}
 	}

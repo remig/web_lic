@@ -43,11 +43,14 @@ const menu = [
 		},
 		{text: 'Save As... (NYI)', enabled: () => false, cb: () => {}},
 		{
-			text: 'Import Model...',
+			text: 'Import Custom Model...',
 			cb: () => {
 				document.getElementById('uploadModelChooser').click();
-			},
-			childrenXX: [
+			}
+		},
+		{
+			text: 'Import Built-in Model...',
+			children: [
 				{
 					text: 'Creator Alligator',
 					cb: () => {

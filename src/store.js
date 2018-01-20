@@ -1,4 +1,4 @@
-/* global module: false, util: false */
+/* global module: false, util: false, LDParse: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 store = (function() {
@@ -320,14 +320,14 @@ const store = {
 			const title = store.get.label(page.labels[0]);
 			const titleSize = util.measureLabel(title.font, title.text);
 			title.x = (pageSize.width - titleSize.width) / 2;
-			title.y = (step.x - titleSize.height) / 2;
+			title.y = (step.y - titleSize.height) / 2;
 			title.width = titleSize.width;
 			title.height = titleSize.height;
 
 			const modelInfo = store.get.label(page.labels[1]);
 			const modelInfoSize = util.measureLabel(modelInfo.font, modelInfo.text);
 			modelInfo.x = (pageSize.width - modelInfoSize.width) / 2;
-			modelInfo.y = ((step.x - modelInfoSize.height) / 2) + step.x + step.height;
+			modelInfo.y = ((step.y - modelInfoSize.height) / 2) + step.y + step.height;
 			modelInfo.width = modelInfoSize.width;
 			modelInfo.height = modelInfoSize.height;
 			delete page.needsLayout;
@@ -385,8 +385,18 @@ const store = {
 			localModelIDList = localModelIDList || [];
 			const localModel = util.getSubmodel(store.model, localModelIDList);
 
-			if (!localModel || !localModel.steps) {
+			if (!localModel) {
 				return;
+			}
+
+			if (!localModel.steps) {
+				const submodels = LDParse.model.get.submodels(localModel);
+				if (submodels.some(p => p.steps && p.steps.length)) {
+					// If main model contains no steps but contains submodels that contain steps, add one step per part in main model.
+					localModel.steps = localModel.parts.map((p, idx) => ({parts: [idx]}));
+				} else {
+					return;  // No steps; can't add any pages.  TODO: big complicated automatic step insertion algorithm goes here.
+				}
 			}
 
 			const addStateItem = store.mutations.addStateItem;
