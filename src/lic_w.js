@@ -316,7 +316,7 @@ var app = new Vue({
 			page.steps.forEach(stepID => {
 
 				const step = store.get.step(stepID);
-				const localModel = util.getSubmodel(store.model, step.submodel);
+				const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
 
 				ctx.save();
 				ctx.translate(step.x, step.y);

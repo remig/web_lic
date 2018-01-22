@@ -1,4 +1,4 @@
-/* global module: false, LDRender: false, LDParse: false */
+/* global module: false, LDRender: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 util = (function() {
@@ -21,12 +21,6 @@ function renderPart(domID, forceRedraw, renderCB) {
 const util = {
 	array(fakeArray) {
 		return [].slice.apply(fakeArray);
-	},
-	getSubmodel(mainModel, submodelIDList) {
-		if (!submodelIDList) {
-			return mainModel;
-		}
-		return (submodelIDList || []).reduce((p, id) => LDParse.partDictionary[p.parts[id].filename], mainModel);
 	},
 	renderCSI(localModel, step, forceRedraw) {
 		const domID = `CSI_${step.csiID}`;
@@ -129,7 +123,7 @@ const util = {
 		return t + 'ms';
 	},
 	titleCase(s) {  // Human readable versions of common internal strings
-		s = s || '';
+		s = s + '';
 		switch (s.toLowerCase()) {
 			case 'csi':
 				return 'CSI';
@@ -138,13 +132,13 @@ const util = {
 			case 'pliitem':
 				return 'PLI Item';
 			case 'pliqty':
-				return 'PLI Quantiy Label';
+				return 'PLI Quantity Label';
 			case 'stepnumber':
 				return 'Step Number';
 			case 'pagenumber':
 				return 'Page Number';
 		}
-		return (s + '').replace(/([^\W_]+[^\s-]*) */g, function(el) {
+		return s.replace(/([^\W_]+[^\s-]*) */g, function(el) {
 			return el.charAt(0).toUpperCase() + el.substr(1).toLowerCase();
 		});
 	}

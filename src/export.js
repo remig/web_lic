@@ -1,4 +1,4 @@
-/* global module: false, jsPDF: false, JSZip: false, saveAs: false, LDRender: false, util: false */
+/* global module: false, jsPDF: false, JSZip: false, saveAs: false, LDRender: false, LDParse: false, util: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 InstructionExporter = (function() {
@@ -39,7 +39,7 @@ const api = {
 				page.steps.forEach(stepID => {
 
 					const step = store.get.step(stepID);
-					const model = util.getSubmodel(store.model, step.submodel);
+					const model = LDParse.model.get.submodelDescendant(store.model, step.submodel);
 
 					if (step.csiID != null) {
 						const csi = store.get.csi(step.csiID);

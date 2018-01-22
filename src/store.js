@@ -217,7 +217,7 @@ const store = {
 		layoutStep(opts) {
 
 			const {step, box} = opts;
-			const localModel = util.getSubmodel(store.model, step.submodel);
+			const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
 
 			step.x = box.x + pageMargin;
 			step.y = box.y + pageMargin;
@@ -383,7 +383,7 @@ const store = {
 		addInitialPages(partDictionary, localModelIDList) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
 
 			localModelIDList = localModelIDList || [];
-			const localModel = util.getSubmodel(store.model, localModelIDList);
+			const localModel = LDParse.model.get.submodelDescendant(store.model, localModelIDList);
 
 			if (!localModel) {
 				return;

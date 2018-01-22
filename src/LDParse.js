@@ -72,6 +72,12 @@ const api = {
 					return (p.isSubModel ? p.parts.length : 1) + acc;
 				}, 0);
 			},
+			submodelDescendant(mainModel, submodelIDList) {
+				if (!submodelIDList) {
+					return mainModel;
+				}
+				return (submodelIDList || []).reduce((p, id) => LDParse.partDictionary[p.parts[id].filename], mainModel);
+			},
 			submodels(model) {
 				return model.parts.map(p => {
 					p = api.partDictionary[p.filename];
