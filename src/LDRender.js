@@ -323,16 +323,17 @@ function addModelToScene(scene, model, startPart, endPart, size) {
 	size = size / 2;
 	for (let i = startPart; i <= endPart; i++) {
 		const part = model.parts[i];
+		const abstractPart = api.partDictionary[part.filename];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
 		const color = (part.colorCode >= 0) ? part.colorCode : null;
-		const partGeometry = getPartGeometry(api.partDictionary[part.filename], color, null);
+		const partGeometry = getPartGeometry(abstractPart, color, null);
 
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMaterial);
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
 
-		const mat = (partGeometry.faces.faces[0].color.getHexString() === '05131d') ? lineMaterialWhite : lineMaterial;
+		const mat = (part.colorCode === 0 && !abstractPart.isSubModel) ? lineMaterialWhite : lineMaterial;
 		const line = new THREE.LineSegments(partGeometry.lines, mat);
 		line.applyMatrix(matrix);
 		scene.add(line);
@@ -365,7 +366,7 @@ function addPartToScene(scene, abstractPart, colorCode, config) {
 	}
 	scene.add(mesh);
 
-	const mat = (colorCode === 0) ? lineMaterialWhite : lineMaterial;
+	const mat = (colorCode === 0 && !abstractPart.isSubModel) ? lineMaterialWhite : lineMaterial;
 	const line = new THREE.LineSegments(partGeometry.lines.clone(), mat);
 	if (config && config.rotation) {
 		line.rotation.x = config.rotation.x * Math.PI / 180;
