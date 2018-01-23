@@ -6,6 +6,7 @@ chai.use(require('chai-string'));
 const assert = chai.assert;
 const sinon = require('sinon');
 
+const LDParse = require('../src/LDParse');
 const util = require('../src/util');
 const store = require('../src/store');
 
@@ -16,7 +17,7 @@ const pliMargin = pageMargin / 2;
 describe('Test state store module', function() {
 
 	before(function() {
-		sinon.stub(util, 'getSubmodel').callsFake(() => {
+		sinon.stub(LDParse.model.get, 'submodelDescendant').callsFake(() => {
 			return 'hi';
 		});
 		sinon.stub(util, 'renderCSI').callsFake(() => {

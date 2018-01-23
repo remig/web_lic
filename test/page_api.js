@@ -1,5 +1,6 @@
 /* global require: false, module: false */
 // To run tests, cd to lic_w folder then 'mocha', or mocha test/test_foo.js to run one test
+// To debug tests, cd to lic_w folder then 'mocha --inspect-brk test/test.foo', then open Chrome to 'chrome://inspect'
 
 'use strict';
 
@@ -26,7 +27,7 @@ module.exports = driver => {
 				close: id('close_menu'),
 				save: id('save_menu'),
 				save_as: id('save_as_menu'),
-				import_model: id('import_model_menu'),
+				import_model: id('import_custom_model_menu'),
 				save_template: id('save_template_menu'),
 				save_template_as: id('save_template_as_menu'),
 				load_template: id('load_template_menu'),

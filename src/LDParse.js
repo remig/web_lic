@@ -5,9 +5,11 @@ LDParse = (function() {
 'use strict';
 
 const api = {
+	// Load the specified url via AJAX and return an abstractPart representing the content of url.
 	loadRemotePart(url) {
 		return loadPart(url);
 	},
+	// Create an abstractPart from the specified 'content' of an LDraw part file
 	loadPartContent(content, modelName) {
 		const part = loadPart(null, content);
 		if (part && modelName && part.filename == null) {
@@ -15,8 +17,7 @@ const api = {
 		}
 		return part;
 	},
-	loadLDConfig(url) {
-		url = url || '../ldraw/LDConfig.ldr';
+	loadLDConfig(url = '../ldraw/LDConfig.ldr') {
 		const content = ajax(url);
 		if (!content) {
 			return {};
@@ -64,20 +65,24 @@ const api = {
 		return 0;  // Treat any unrecognized colors as black
 	},
 
-	model: {
+	model: {  // All 'model' arguments below are abstractParts
 		get: {
+			// Return the total number of parts in this model, including parts in submodels
 			partCount(model) {
 				return model.parts.reduce((acc, p) => {
 					p = api.partDictionary[p.filename];
 					return (p.isSubModel ? p.parts.length : 1) + acc;
 				}, 0);
 			},
-			submodelDescendant(mainModel, submodelIDList) {
+			// submodelIDList is an array of submodel IDs representing a deeply nested submodel hierarchy.
+			// Traverse the submodel tree in submodelIDList and return the abstractPart associated with the final submodelIDList entry.
+			submodelDescendant(model, submodelIDList) {
 				if (!submodelIDList) {
-					return mainModel;
+					return model;
 				}
-				return (submodelIDList || []).reduce((p, id) => LDParse.partDictionary[p.parts[id].filename], mainModel);
+				return (submodelIDList || []).reduce((p, id) => api.partDictionary[p.parts[id].filename], model);
 			},
+			// Return an array of abstractParts, one for each submodel in this model.
 			submodels(model) {
 				return model.parts.map(p => {
 					p = api.partDictionary[p.filename];
@@ -157,15 +162,14 @@ function forceBlack(colorCode, abstractPartName, partName) {
 	return colorCode;
 }
 
-// Noticeably faster than a.map(parseFloat)
+// These parsers get called *a lot*.  Keep them fast, at the expense of readibility
 function parseFloatList(a) {
-	for (let i = 0; i < a.length; i++) {
+	for (let i = 0; i < a.length; i++) {  // Noticeably faster than a.map(parseFloat)
 		a[i] = parseFloat(a[i]);
 	}
 	return a;
 }
 
-// These parsers get called *a lot*.  Keep them fast, at the expense of readibility
 function parseComment(abstractPart, line) {
 	const command = line[1];
 	if (command === 'BFC') {
@@ -191,10 +195,7 @@ function parseComment(abstractPart, line) {
 
 function parseColorCode(code) {
 	code = parseInt(code, 10);
-	if (code === 16 || code === 24) {
-		return -1;
-	}
-	return code;
+	return (code === 16 || code === 24) ? -1 : code;
 }
 
 function parsePart(abstractPart, line) {
@@ -268,6 +269,9 @@ function lineListToAbstractPart(fn, lineList) {
 			abstractPart.name = lineList[0].slice(1).join(' ');
 		}
 	}
+	if (!fn && lineList[1] && lineList[1][0] === '0' && lineList[1][1] === 'Name:') {
+		abstractPart.filename = lineList[1][2];  // If we don't have a filename but line 2 includes 'Name', use it
+	}
 	for (let i = 0; i < lineList.length; i++) {
 		const line = lineList[i];
 		if (line && line[0] in lineParsers) {
@@ -322,6 +326,9 @@ function loadPart(fn, content) {
 		for (let i = 0; i < lineList.length; i++) {
 			lineList[i] = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
 		}
+		while (!lineList[0] || !lineList[0][0]) {
+			lineList.shift();  // Remove leading empty lines
+		}
 		if (!fn || fn.endsWith('mpd')) {
 			part = loadSubModels(lineList);
 		}
@@ -329,7 +336,7 @@ function loadPart(fn, content) {
 			part = lineListToAbstractPart(fn, lineList);
 		}
 	}
-	api.partDictionary[fn] = part;
+	api.partDictionary[fn || part.filename] = part;
 	if (part.steps) {
 		delete part.steps.lastPart;
 		// Check if any parts were left out of the last step; add them to new step if so.
