@@ -1,0 +1,4 @@
+test/node_modules/*
+*.sublime-project
+*.sublime-workspace
+src/snippets.js
