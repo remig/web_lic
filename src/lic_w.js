@@ -29,51 +29,44 @@ var app = new Vue({
 		treeUpdateState: false  // Not used by tree directly, only used to force the tree to redraw
 	},
 	methods: {
-		openRemoteLDrawModel(modelName) {
+		importRemoteModel(url) {
+			app.importModel(() => LDParse.loadRemotePart(url));
+		},
+		importLocalModel(content, filename) {
+			app.importModel(() => LDParse.loadPartContent(content, filename));
+		},
+		importModel(modelGenerator) {
+
+			const start = Date.now();
 			if (store.model) {
 				app.closeModel();
 			}
 			app.busyText = 'Loading Model';
-			window.setTimeout(function() {
-				const start = Date.now();
-				store.model = LDParse.loadRemotePart(modelName);
-				app.importLDrawModel(modelName, start);
+			window.setTimeout(() => {  // Timeout needed to let Vue catch up and draw the busy spinner.  Or something.  Damned if I can't find a better way. Ugh.
+				store.model = modelGenerator();
+				LDRender.setPartDictionary(LDParse.partDictionary);
+
+				store.mutations.setModelName(store.model.filename);
+				store.mutations.addTitlePage();
+				store.mutations.addInitialPages(LDParse.partDictionary);
+				store.get.label(1).text = `${LDParse.model.get.partCount(store.model)} Parts, ${store.state.pages.length - 1} Pages`;
+				store.mutations.layoutTitlePage(store.get.titlePage());
+
+				app.currentPageLookup = store.get.itemToLookup(store.state.pages[0]);
+				undoStack.saveBaseState();
+				app.forceTreeUpdate();
+
+				var end = Date.now();
+				app.busyText = '';
+				app.statusText = `"${store.state.modelName}" loaded successfully (${util.formatTime(start, end)})`;
+				Vue.nextTick(() => app.drawCurrentPage());
 			}, 0);
-		},
-		importLDrawModelFromContent(content, filename) {
-			if (store.model) {
-				app.closeModel();
-			}
-			const start = Date.now();
-			store.model = LDParse.loadPartContent(content, filename);
-			app.importLDrawModel(store.model.filename, start);
-		},
-		importLDrawModel(modelName, start) {
-
-			start = start || Date.now();
-
-			LDRender.setPartDictionary(LDParse.partDictionary);
-
-			store.mutations.setModelName(modelName);
-			store.mutations.addTitlePage();
-			store.mutations.addInitialPages(LDParse.partDictionary);
-			store.get.label(1).text = `${LDParse.model.get.partCount(store.model)} Parts, ${store.state.pages.length - 1} Pages`;
-			store.mutations.layoutTitlePage(store.get.titlePage());
-
-			app.currentPageLookup = store.get.itemToLookup(store.state.pages[0]);
-			undoStack.saveBaseState();
-			app.forceTreeUpdate();
-
-			var end = Date.now();
-			app.busyText = '';
-			app.statusText = `"${store.state.modelName}" loaded successfully (${util.formatTime(start, end)})`;
-			Vue.nextTick(() => app.drawCurrentPage());
 		},
 		triggerModelImport(e) {
 			const reader = new FileReader();
 			reader.onload = (function(filename) {
 				return function(e) {
-					app.importLDrawModelFromContent(e.target.result, filename);
+					app.importLocalModel(e.target.result, filename);
 				};
 			})(e.target.files[0].name);
 			reader.readAsText(e.target.files[0]);
@@ -437,14 +430,14 @@ document.body.addEventListener('keydown', e => {
 	}
 });
 
-//app.openRemoteLDrawModel('Creator/20015 - Alligator.mpd');
-//app.openRemoteLDrawModel('Star Wars/7140 - X-Wing Fighter.mpd');
-//app.openRemoteLDrawModel('Star Wars/4491 - MTT.mpd');
-//app.openRemoteLDrawModel('Star Wars/4489 - AT-AT.mpd');
-//app.openRemoteLDrawModel('Architecture/21010 - Robie House.mpd');
-//app.openRemoteLDrawModel('Adventurers/5935 - Island Hopper.mpd');
-//app.openRemoteLDrawModel('Space/894 - Mobile Ground Tracking Station.mpd');
-//app.openRemoteLDrawModel('Star Wars/4487 - Jedi Starfighter & Slave I.mpd');
+//app.importRemoteModel('Creator/20015 - Alligator.mpd');
+//app.importRemoteModel('Star Wars/7140 - X-Wing Fighter.mpd');
+//app.importRemoteModel('Star Wars/4491 - MTT.mpd');
+//app.importRemoteModel('Star Wars/4489 - AT-AT.mpd');
+//app.importRemoteModel('Architecture/21010 - Robie House.mpd');
+//app.importRemoteModel('Adventurers/5935 - Island Hopper.mpd');
+//app.importRemoteModel('Space/894 - Mobile Ground Tracking Station.mpd');
+//app.importRemoteModel('Star Wars/4487 - Jedi Starfighter & Slave I.mpd');
 
 window.app = app;
 window.store = store;
