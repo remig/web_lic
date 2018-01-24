@@ -163,6 +163,13 @@ describe('Test LDParse module', function() {
 
 	describe('Load basic part content', () => {
 
+		it('Gracefully handle empty / bad part content', () => {
+			LDParse.setPartDictionary({});
+			assert.isEmpty(LDParse.partDictionary);
+			assert.isNull(LDParse.loadPartContent(''));
+			assert.isNull(LDParse.loadPartContent('\n'));
+		});
+
 		it('Load non-nested part', () => {
 			LDParse.setPartDictionary({});
 			assert.isEmpty(LDParse.partDictionary);
@@ -174,6 +181,9 @@ describe('Test LDParse module', function() {
 			assert.equal(part.primitives.length, 16);
 			assert.deepEqual(part.primitives[0], {shape: 'line', colorCode: -1, points: [1, 0, 0, 0.9239, 0, 0.3827]});
 			assert.deepEqual(LDParse.partDictionary, {'4-4edge.dat': part});
+		});
+
+		it('Load nested parts', () => {
 		});
 	});
 

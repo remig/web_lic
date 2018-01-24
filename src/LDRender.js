@@ -366,6 +366,7 @@ function addPartToScene(scene, abstractPart, colorCode, config) {
 	}
 	scene.add(mesh);
 
+	// TODO: If abstractPart is a submodel, can't use one single edge color for all of it...
 	const mat = (colorCode === 0 && !abstractPart.isSubModel) ? lineMaterialWhite : lineMaterial;
 	const line = new THREE.LineSegments(partGeometry.lines.clone(), mat);
 	if (config && config.rotation) {

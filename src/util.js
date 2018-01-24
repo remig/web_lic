@@ -19,6 +19,21 @@ function renderPart(domID, forceRedraw, renderCB) {
 }
 
 const util = {
+	isEmpty(p) {
+		if (typeof p === 'number') {
+			return false;
+		} else if (typeof p === 'boolean') {
+			return !p;
+		} else if (Array.isArray(p) || typeof p === 'string') {
+			return p.length <= 0;
+		}
+		for (var x in p) {
+			if (p.hasOwnProperty(x)) {
+				return false;
+			}
+		}
+		return true;
+	},
 	array(fakeArray) {
 		return [].slice.apply(fakeArray);
 	},

@@ -77,7 +77,7 @@ const api = {
 			// submodelIDList is an array of submodel IDs representing a deeply nested submodel hierarchy.
 			// Traverse the submodel tree in submodelIDList and return the abstractPart associated with the final submodelIDList entry.
 			submodelDescendant(model, submodelIDList) {
-				if (!submodelIDList) {
+				if (!submodelIDList || !submodelIDList.length) {
 					return model;
 				}
 				return (submodelIDList || []).reduce((p, id) => api.partDictionary[p.parts[id].filename], model);
@@ -106,6 +106,9 @@ const partsInPFolder = {
 /* eslint-enable max-len */
 
 function ajax(url) {
+	if (!url || typeof url !== 'string') {
+		return null;
+	}
 	const xhttp = new XMLHttpRequest();
 	xhttp.open('GET', url.toLowerCase(), false);
 	xhttp.setRequestHeader('Content-type', 'text/plain');
@@ -117,7 +120,10 @@ function ajax(url) {
 }
 
 function req(fn) {
-	fn = (fn || '').replace(/\\/g, '/').toLowerCase();
+	if (!fn || typeof fn !== 'string') {
+		return '';
+	}
+	fn = fn.replace(/\\/g, '/').toLowerCase();
 	let resp, path;
 	if (fn.startsWith('48/')) {
 		path = partPathLookup[1];
@@ -322,12 +328,15 @@ function loadPart(fn, content) {
 		delete unloadedSubModels[fn];
 	} else {
 		content = content || req(fn);
-		const lineList = content.split('\n');
-		for (let i = 0; i < lineList.length; i++) {
-			lineList[i] = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
+		const lineList = [], tmpList = content.split('\n');
+		for (let i = 0; i < tmpList.length; i++) {
+			const line = tmpList[i].trim().replace(/\s\s+/g, ' ').split(' ');
+			if (line && line.length > 2) {  // 3 is shortest meaningful LDraw line
+				lineList.push(line);
+			}
 		}
-		while (!lineList[0] || !lineList[0][0]) {
-			lineList.shift();  // Remove leading empty lines
+		if (lineList.length < 1) {
+			return null;  // No content, nothing to create
 		}
 		if (!fn || fn.endsWith('mpd')) {
 			part = loadSubModels(lineList);

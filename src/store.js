@@ -380,9 +380,8 @@ const store = {
 			});
 			page.labels.push(modelInfo.id);
 		},
-		addInitialPages(partDictionary, localModelIDList) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
+		addInitialPages(partDictionary, localModelIDList = []) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
 
-			localModelIDList = localModelIDList || [];
 			const localModel = LDParse.model.get.submodelDescendant(store.model, localModelIDList);
 
 			if (!localModel) {
