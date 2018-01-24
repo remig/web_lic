@@ -1,6 +1,6 @@
 /* global require: false, module: false */
-// To run tests, cd to lic_w folder then 'mocha', or mocha test/test_foo.js to run one test
-// To debug tests, cd to lic_w folder then 'mocha --inspect-brk test/test.foo', then open Chrome to 'chrome://inspect'
+// To run tests, cd to lic_w/test folder then 'npm test' or 'mocha', or mocha test/test_foo.js to run one test
+// To debug tests, cd to lic_w/test folder then 'mocha --inspect-brk test/test.foo', then open Chrome to 'chrome://inspect'
 
 'use strict';
 
