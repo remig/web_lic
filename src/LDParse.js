@@ -204,16 +204,19 @@ function parseColorCode(code) {
 	return (code === 16 || code === 24) ? -1 : code;
 }
 
-function parsePart(abstractPart, line) {
+function parsePart(abstractPartParent, line) {
 	const partName = line.slice(14).join(' ');
+	if (partName === "92013.dat") debugger;
 	let colorCode = parseColorCode(line[1]);
-	colorCode = forceBlack(colorCode, abstractPart.filename, partName);
-	loadPart(partName);
-	abstractPart.parts.push({
-		colorCode: colorCode,
-		filename: partName,
-		matrix: parseFloatList(line.slice(2, 14))
-	});
+	colorCode = forceBlack(colorCode, abstractPartParent.filename, partName);
+	const part = loadPart(partName);
+	if (part) {
+		abstractPartParent.parts.push({
+			colorCode: colorCode,
+			filename: partName,
+			matrix: parseFloatList(line.slice(2, 14))
+		});
+	}
 }
 
 function parseLine(abstractPart, line) {
@@ -328,10 +331,13 @@ function loadPart(fn, content) {
 		delete unloadedSubModels[fn];
 	} else {
 		content = content || req(fn);
+		if (!content) {
+			return null;  // No content, nothing to create
+		}
 		const lineList = [], tmpList = content.split('\n');
 		for (let i = 0; i < tmpList.length; i++) {
 			const line = tmpList[i].trim().replace(/\s\s+/g, ' ').split(' ');
-			if (line && line.length > 2) {  // 3 is shortest meaningful LDraw line
+			if (line && line.length > 1) {
 				lineList.push(line);
 			}
 		}

@@ -183,6 +183,9 @@ describe('Test LDParse module', function() {
 			assert.deepEqual(LDParse.partDictionary, {'4-4edge.dat': part});
 		});
 
+		it('Gracefully handle missing parts', () => {
+		});
+
 		it('Load nested parts', () => {
 		});
 	});
