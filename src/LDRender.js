@@ -30,9 +30,7 @@ function initialize() {
 	camera.position.x = viewBox;
 	camera.position.y = -viewBox + (150 / 1);
 	camera.position.z = -viewBox;
-
-	// TODO: KILL THISSSSSSS!!  It's shitting all over my life.
-	new THREE.OrbitControls(camera, renderer.domElement);
+	camera.lookAt(0, 0, 0);
 	isInitialized = true;
 }
 
