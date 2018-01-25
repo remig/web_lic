@@ -206,7 +206,6 @@ function parseColorCode(code) {
 
 function parsePart(abstractPartParent, line) {
 	const partName = line.slice(14).join(' ');
-	if (partName === "92013.dat") debugger;
 	let colorCode = parseColorCode(line[1]);
 	colorCode = forceBlack(colorCode, abstractPartParent.filename, partName);
 	const part = loadPart(partName);
@@ -359,7 +358,7 @@ function loadPart(fn, content) {
 		const lastStepParts = part.steps[part.steps.length - 1].parts;
 		if (lastStepParts[lastStepParts.length - 1] < part.parts.length - 1) {
 			part.steps.push({parts: []});
-			for (var i = lastStepParts[lastStepParts.length - 1] + 1; i < part.parts.length; i++) {
+			for (let i = lastStepParts[lastStepParts.length - 1] + 1; i < part.parts.length; i++) {
 				part.steps[part.steps.length - 1].parts.push(i);
 			}
 		}

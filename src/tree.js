@@ -14,7 +14,7 @@ Vue.component('treeRowItem', {
 	watch: {
 		currentItem: function(newItem) {
 			if (newItem === this.target) {
-				var el = this.$el.parentElement;
+				let el = this.$el.parentElement;
 				while (el) {
 					if (el.nodeName === 'UL') {
 						$(el).removeClass('hidden').prev().children().first().removeClass('treeIconClosed');
@@ -26,7 +26,7 @@ Vue.component('treeRowItem', {
 	},
 	computed: {
 		text() {
-			var t = this.target;
+			const t = this.target;
 			if (!t) {
 				return '';
 			} else if (t.type === 'page') {
@@ -36,14 +36,14 @@ Vue.component('treeRowItem', {
 			} else if (t.type === 'label') {
 				return t.text;
 			} else if (t.type === 'pliItem') {
-				var part = LDParse.partDictionary[t.filename];
+				const part = LDParse.partDictionary[t.filename];
 				if (!part || !part.name) {
 					return 'Unknown Part';
 				} else if (part.isSubModel) {
 					return part.name.replace(/\.(mpd|ldr)/ig, '');
 				}
-				var partName = part.name.replace(' x ', 'x');
-				var partColor = LDParse.colorTable[t.colorCode].name.replace('_', ' ');
+				const partName = part.name.replace(' x ', 'x');
+				const partColor = LDParse.colorTable[t.colorCode].name.replace('_', ' ');
 				return partName + ' - ' + partColor;
 			}
 			return util.titleCase(t.type);

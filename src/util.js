@@ -27,7 +27,7 @@ const util = {
 		} else if (Array.isArray(p) || typeof p === 'string') {
 			return p.length <= 0;
 		}
-		for (var x in p) {
+		for (const x in p) {
 			if (p.hasOwnProperty(x)) {
 				return false;
 			}
@@ -67,41 +67,47 @@ const util = {
 			return res;
 		};
 	})(),
-	fontToFontParts(font) {
-		// Convert a CSS2 font string (like "italic 12pt Arial") to a font object with 5 members: fontStyle, fontVariant, fontWeight, fontSize, fontFamily
-		// Returned object includes a handy toString(), which converts the object back to a CSS2 font string.
-		var fullFontParts = {fontStyle: '', fontVariant: '', fontWeight: '', fontSize: '', fontFamily: ''};
-		var boldList = ['bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
-		var haveFontSize = false;
-		font = (font || '') + '';
+	fontToFontParts: (() => {
 
-		var fontParts = font.split(/ (?=(?:[^'"]|'[^']*'|"[^"]*")*$)/);
-		fontParts.map(function(el) {
-			if (el === 'italic' || el === 'oblique') {
-				fullFontParts.fontStyle = el;
-			} else if (el === 'small-caps') {
-				fullFontParts.fontVariant = el;
-			} else if (boldList.indexOf(el) >= 0) {
-				fullFontParts.fontWeight = el;
-			} else if (el) {
-				if (!haveFontSize) {
-					fullFontParts.fontSize = el;
-					haveFontSize = true;
-				} else {
-					fullFontParts.fontFamily = el;
+		const boldList = ['bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+
+		return function(font = '') {
+			const fullFontParts = {fontStyle: '', fontVariant: '', fontWeight: '', fontSize: '', fontFamily: ''};
+			var haveFontSize = false;
+			font += '';
+
+			var fontParts = font.split(/ (?=(?:[^'"]|'[^']*'|"[^"]*")*$)/);
+			fontParts.map(el => {
+				if (!el || typeof el !== 'string') {
+					return;
 				}
-			}
-		});
+				const elLower = el.toLowerCase();
+				if (elLower === 'italic' || elLower === 'oblique') {
+					fullFontParts.fontStyle = el;
+				} else if (elLower === 'small-caps') {
+					fullFontParts.fontVariant = el;
+				} else if (boldList.includes(elLower)) {
+					fullFontParts.fontWeight = el;
+				} else {
+					if (!haveFontSize) {
+						fullFontParts.fontSize = el;
+						haveFontSize = true;
+					} else {
+						fullFontParts.fontFamily = el;
+					}
+				}
+			});
 
-		fullFontParts.toString = function() {
-			var family = this.fontFamily.trim();  // If font family name contains a space, need to enclose it in quotes
-			if (family.indexOf(' ') >= 0 && family[0] !== '"' && family[0] !== "'") {
-				family = '"' + family + '"';
-			}
-			return [this.fontStyle, this.fontVariant, this.fontWeight, this.fontSize, family].join(' ').trim();
+			fullFontParts.toString = function() {
+				let family = this.fontFamily.trim();
+				if (family.includes(' ') && family[0] !== '"' && family[0] !== "'") {
+					family = `"${family}"`;  // Font families that contain spaces must be quoted
+				}
+				return [this.fontStyle, this.fontVariant, this.fontWeight, this.fontSize, family].join(' ').trim();
+			};
+			return fullFontParts;
 		};
-		return fullFontParts;
-	},
+	})(),
 	emptyNode(node) {
 		if (node) {
 			while (node.firstChild) {

@@ -135,7 +135,7 @@ const api = {
 			const start = Date.now();
 			const modelName = store.get.modelNameBase();
 			const zip = new JSZip();
-			var imgFolder = zip.folder(modelName);
+			const imgFolder = zip.folder(modelName);
 
 			const canvas = document.getElementById('generateImagesCanvas');
 			canvas.width = store.state.pageSize.width;

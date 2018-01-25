@@ -235,7 +235,7 @@ function getPartGeometry(abstractPart, colorCode) {
 		condlines: []
 	};
 
-	var colorObj = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode));
+	const colorObj = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode));
 	for (let i = 0; i < abstractPart.primitives.length; i++) {
 		const primitive = abstractPart.primitives[i];
 		const p = primitive.points;

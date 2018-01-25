@@ -56,7 +56,7 @@ var app = new Vue({
 				undoStack.saveBaseState();
 				app.forceTreeUpdate();
 
-				var end = Date.now();
+				const end = Date.now();
 				app.busyText = '';
 				app.statusText = `"${store.state.modelName}" loaded successfully (${util.formatTime(start, end)})`;
 				Vue.nextTick(() => app.drawCurrentPage());
@@ -110,7 +110,7 @@ var app = new Vue({
 		},
 		setSelected(target) {
 			if (!app.selectedItemLookup || target.id !== app.selectedItemLookup.id || target.type !== app.selectedItemLookup.type) {
-				var targetPage = store.get.pageForItem(target);
+				const targetPage = store.get.pageForItem(target);
 				if (targetPage && targetPage.id !== app.currentPageLookup.id) {
 					app.setCurrentPage(targetPage);
 				}
@@ -273,7 +273,7 @@ var app = new Vue({
 				const key = (e.ctrlKey ? 'ctrl+' : '') + e.key;
 				for (let i = 0; i < menu.length; i++) {
 					for (let j = 0; j < menu[i].children.length; j++) {
-						var entry = menu[i].children[j];
+						const entry = menu[i].children[j];
 						if (entry.shortcut === key) {
 							entry.cb();
 						}
@@ -438,6 +438,7 @@ document.body.addEventListener('keydown', e => {
 //app.importRemoteModel('Adventurers/5935 - Island Hopper.mpd');
 //app.importRemoteModel('Space/894 - Mobile Ground Tracking Station.mpd');
 //app.importRemoteModel('Star Wars/4487 - Jedi Starfighter & Slave I.mpd');
+//app.importRemoteModel('trivial_model.ldr');
 
 window.app = app;
 window.store = store;

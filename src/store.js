@@ -94,7 +94,7 @@ const store = {
 		},
 		parent(item) {
 			if (item && item.parent) {
-				var itemList = store.state[item.parent.type + 's'];
+				const itemList = store.state[item.parent.type + 's'];
 				if (itemList) {
 					return itemList.find(el => el.id === item.parent.id);
 				}
@@ -112,7 +112,7 @@ const store = {
 			if (!lookup || !lookup.type || lookup.id == null) {
 				return null;
 			}
-			var itemList = store.state[lookup.type + 's'];
+			const itemList = store.state[lookup.type + 's'];
 			if (itemList) {
 				return itemList.find(el => el.id === lookup.id);
 			}
@@ -242,7 +242,7 @@ const store = {
 				const pli = store.get.pli(step.pliID);
 
 				//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
-				for (var i = 0; i < pli.pliItems.length; i++) {
+				for (let i = 0; i < pli.pliItems.length; i++) {
 
 					const pliItem = store.get.pliItem(pli.pliItems[i]);
 					const part = localModel.parts[pliItem.partNumber];
@@ -289,7 +289,7 @@ const store = {
 
 			const box = {x: 0, y: 0, width: colSize, height: rowSize};
 
-			for (var i = 0; i < stepCount; i++) {
+			for (let i = 0; i < stepCount; i++) {
 				box.x = colSize * (i % cols);
 				box.y = rowSize * Math.floor(i / cols);
 				store.mutations.layoutStep({step: store.get.step(page.steps[i]), box});
