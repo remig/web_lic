@@ -35,18 +35,7 @@
 			<ul class="nav navbar-nav">
 				<li v-for="menu in menuEntries" :id="menu.id || menu.name | sanitizeMenuID" class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
-					<ul class="dropdown-menu">
-						<li v-for="child in menu.children" :id="child.id || child.text | sanitizeMenuID"
-								:class="{divider: child.text == 'separator', disabled: child.enabled ? !child.enabled() : false, 'dropdown-submenu': child.children}">
-							<a v-if="child.text !== 'separator'" @click="child.children ? toggleSubMenu($event) : child.cb($event)" class="clickable" data-toggle="dropdown">
-								<span class="menu-text">{{typeof child.text === 'function' ? child.text() : child.text}}</span>
-								<span class="menu-text" v-if="child.shortcut">{{child.shortcut}}</span>
-							</a>
-							<ul v-if="child.children" class="dropdown-menu">
-								<li v-for="c in child.children" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
-							</ul>
-						</li>
-					</ul>
+					<menu-list :menu-entries="menu.children"></menu-list>
 				</li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
@@ -67,16 +56,8 @@
 			</div>
 		</div>
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
-		<div id="contextMenu" class="dropdown" tabindex="-1" @blur="closeMenu" @click="closeMenu">
-			<ul class="dropdown-menu">
-				<li v-for="menu in contextMenu" v-if="menu.enabled ? menu.enabled() : true"
-						:class="{divider: menu.text == 'separator', 'dropdown-submenu': menu.children}">
-					<a v-if="menu.text !== 'separator'" @click="menu.children ? toggleSubMenu($event) : menu.cb.call(menu, $event)" class="clickable" data-toggle="dropdown">{{menu.text}}</a>
-					<ul v-if="menu.children" class="dropdown-menu">
-						<li v-for="c in menu.children" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
-					</ul>
-				</li>
-			</ul>
+		<div id="contextMenu" class="dropdown" tabindex="-1" @blur="closeContextMenu" @click="closeContextMenu">
+			<menu-list :menu-entries="contextMenu"></menu-list>
 		</div>
 		<div id="statusBar">{{statusText}}</div>
 		<div id="offscreenCache" class="offscreen">
@@ -89,6 +70,80 @@
 			<div id="canvasHolder"></div>
 		</div>
 	</div>
+
+	<!-- Component Templates -->
+
+	<script type="text/x-template" id="menuTemplate">
+		<ul class="dropdown-menu">
+			<li v-for="child in menuEntries" :id="child.id || child.text | sanitizeMenuID" v-if="child.shown ? child.shown() : true"
+					:class="{divider: child.text == 'separator', 'dropdown-submenu': child.children, disabled: child.enabled ? !child.enabled() : false}">
+				<a v-if="child.text !== 'separator'" @click="child.children ? toggleSubMenu($event) : child.cb.call(child, $event)" class="clickable" data-toggle="dropdown">
+					<span class="menu-text">{{typeof child.text === 'function' ? child.text() : child.text}}</span>
+					<span class="menu-text" v-if="child.shortcut">{{child.shortcut}}</span>
+				</a>
+				<ul v-if="child.children" class="dropdown-menu">
+					<li v-for="c in child.children" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
+				</ul>
+			</li>
+		</ul>
+	</script>
+
+	<script type="text/x-template" id="treeRowTemplate">
+		<span
+			:class="[
+				'clickable',
+				'treeText',
+				{selected: target && currentItem && target.id === currentItem.id && target.type === currentItem.type}
+			]"
+			@click.stop.prevent="itemClick"
+		>
+			{{text}}
+	</span>
+	</script>
+
+	<script type="text/x-template" id="treeParentRowTemplate">
+		<div>
+			<i class="treeIcon treeIconClosed" @click.stop.prevent="arrowClick(target)" />
+			<treeRow :currentItem="currentItem" :target="target" />
+		</div>
+	</script>
+
+	<script type="text/x-template" id="treeTemplate">
+		<ul>
+			<li v-for="page in treeData.store.state.pages">
+				<treeParentRow :currentItem="currentItem" :target="page" />
+				<ul :id="'pageListItem' + page.id" class="indent hidden">
+					<li v-if="page.numberLabel != null">
+						<treeRow :currentItem="currentItem" :target="treeData.store.get.pageNumber(page.numberLabel)" />
+					</li>
+					<li v-if="page.labels != null" v-for="labelID in page.labels">
+						<treeRow :currentItem="currentItem" :target="treeData.store.get.label(labelID)" />
+					</li>
+					<li class="unindent" v-for="step in page.steps.map(stepID => treeData.store.get.step(stepID))">
+						<treeParentRow :currentItem="currentItem" :target="step" />
+						<ul :id="'stepListItem' + step.id" class="indent hidden">
+							<li v-if="step.csiID != null">
+								<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(step.csiID)" />
+							</li>
+							<li class="unindent" v-if="step.pliID != null">
+								<treeParentRow :currentItem="currentItem" :target="treeData.store.get.pli(step.pliID)" />
+								<ul :id="'pliListItem' + step.pliID" class="indent hidden">
+									<li v-for="pliItemID in treeData.store.get.pli(step.pliID).pliItems">
+										<treeRow :currentItem="currentItem" :target="treeData.store.get.pliItem(pliItemID)" />
+									</li>
+								</ul>
+							</li>
+							<li v-if="step.numberLabel != null">
+								<treeRow :currentItem="currentItem" :target="treeData.store.get.stepNumber(step.numberLabel)" />
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</script>
+
 	<script type="text/javascript" src="src/ui.js"></script>
+
 </body>
 </html>

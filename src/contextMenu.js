@@ -20,7 +20,7 @@ const contextMenu = {
 		{text: 'Add Annotation (NYI)', cb: () => {}},
 		{
 			text: 'Delete This Blank Page',
-			enabled: () => {
+			shown: () => {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
 					const page = store.get.lookupToItem(app.selectedItemLookup);
 					return page.steps.length < 1;
@@ -42,7 +42,7 @@ const contextMenu = {
 	step: [
 		{
 			text: 'Move Step to Previous Page',
-			enabled: () => {
+			shown: () => {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 					const page = store.get.pageForItem(app.selectedItemLookup);
 					if (store.get.isFirstPage(page) || store.get.isTitlePage(page)) {
@@ -65,7 +65,7 @@ const contextMenu = {
 		},
 		{
 			text: 'Move Step to Next Page',
-			enabled: () => {
+			shown: () => {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 					const page = store.get.pageForItem(app.selectedItemLookup);
 					if (store.get.isLastPage(page)) {
@@ -89,7 +89,7 @@ const contextMenu = {
 		{text: 'separator'},
 		{
 			text: 'Merge Step with Previous Step',
-			enabled: () => {
+			shown: () => {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 					const step = store.get.lookupToItem(app.selectedItemLookup);
 					return store.state.steps.indexOf(step) > 1;  // First 'step' is the title page content, which can't be merged
@@ -110,7 +110,7 @@ const contextMenu = {
 		},
 		{
 			text: 'Merge Step with Next Step',
-			enabled: () => {
+			shown: () => {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 					const step = store.get.lookupToItem(app.selectedItemLookup);
 					return store.state.steps.indexOf(step) < store.state.steps.length - 1;

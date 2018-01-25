@@ -1,8 +1,20 @@
-/* global Vue: false, saveAs: false, LDParse: false, InstructionExporter: false */
+/* global Vue: false, $: false, saveAs: false, LDParse: false, InstructionExporter: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 Menu = (function() {
 'use strict';
+
+Vue.component('menu-list', {
+	props: ['menuEntries'],
+	template: '#menuTemplate',
+	methods: {
+		toggleSubMenu(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$(e.target.parentElement).toggleClass('open');
+		}
+	}
+});
 
 let undoStack, app, store;
 

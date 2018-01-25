@@ -203,7 +203,7 @@ var app = new Vue({
 			return ['step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'label'].includes(nodeType);
 		},
 		globalClick(e) {
-			app.closeMenu();
+			app.closeContextMenu();
 			let target;
 			if (e.target.id === 'pageCanvas') {
 				target = app.findClickTarget(e.offsetX, e.offsetY);
@@ -229,16 +229,11 @@ var app = new Vue({
 				}
 			}
 		},
-		closeMenu() {
+		closeContextMenu() {
 			$('#contextMenu').css('display', 'none');
 		},
-		toggleSubMenu(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			$(e.target.parentElement).toggleClass('open');
-		},
 		globalKeyPress(e) {
-			app.closeMenu();
+			app.closeContextMenu();
 			const selItem = app.selectedItemLookup;
 			if (e.key === 'PageDown' && !store.get.isLastPage(app.currentPageLookup)) {
 				app.setCurrentPage(store.get.nextPage(app.currentPageLookup));
