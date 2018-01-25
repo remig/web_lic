@@ -82,7 +82,7 @@
 					<span class="menu-text" v-if="child.shortcut">{{child.shortcut}}</span>
 				</a>
 				<ul v-if="child.children" class="dropdown-menu">
-					<li v-for="c in child.children" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
+					<li v-for="c in (typeof child.children === 'function' ? child.children() : child.children)" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
 				</ul>
 			</li>
 		</ul>

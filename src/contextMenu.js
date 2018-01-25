@@ -1,4 +1,4 @@
-/* global Vue: false */
+/* global Vue: false, LDParse: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 ContextMenu = (function() {
@@ -137,7 +137,30 @@ const contextMenu = {
 		{text: 'Rotate CSI (NYI)', cb: () => {}},
 		{text: 'Scale CSI (NYI)', cb: () => {}},
 		{text: 'separator'},
-		{text: 'Select Part (NYI)', cb: () => {}},
+		{
+			text: 'Select Part (NYI)',
+			shown: () => {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
+					const step = store.get.parent(app.selectedItemLookup);
+					return step && step.parts && step.parts.length;
+				}
+				return false;
+			},
+			children: () => {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
+					const step = store.get.parent(app.selectedItemLookup);
+					return step.parts.map(el => {
+						var part = store.model.parts[el];
+						part = LDParse.partDictionary[part.filename];
+						return {
+							text: part.name,
+							cb: () => {}
+						};
+					});
+				}
+				return null;
+			}
+		},
 		{text: 'Add New Part (NYI)', cb: () => {}}
 	],
 	pli: [],

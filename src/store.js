@@ -93,6 +93,9 @@ const store = {
 			return store.state.pages[store.state.pages.length - 1];
 		},
 		parent(item) {
+			if (item && item.id != null && item.type != null && item.parent == null) {
+				item = store.get.lookupToItem(item);
+			}
 			if (item && item.parent) {
 				const itemList = store.state[item.parent.type + 's'];
 				if (itemList) {
