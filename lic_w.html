@@ -78,11 +78,11 @@
 			<li v-for="child in menuEntries" :id="child.id || child.text | sanitizeMenuID" v-if="child.shown ? child.shown() : true"
 					:class="{divider: child.text == 'separator', 'dropdown-submenu': child.children, disabled: child.enabled ? !child.enabled() : false}">
 				<a v-if="child.text !== 'separator'" @click="child.children ? toggleSubMenu($event) : child.cb.call(child, $event)" class="clickable" data-toggle="dropdown">
-					<span class="menu-text">{{typeof child.text === 'function' ? child.text() : child.text}}</span>
+					<span class="menu-text">{{resolveProperty(child.text)}}</span>
 					<span class="menu-text" v-if="child.shortcut">{{child.shortcut}}</span>
 				</a>
 				<ul v-if="child.children" class="dropdown-menu">
-					<li v-for="c in (typeof child.children === 'function' ? child.children() : child.children)" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
+					<li v-for="c in resolveProperty(child.children)" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
 				</ul>
 			</li>
 		</ul>

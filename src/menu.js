@@ -8,6 +8,9 @@ Vue.component('menu-list', {
 	props: ['menuEntries'],
 	template: '#menuTemplate',
 	methods: {
+		resolveProperty(p) {
+			return (typeof p === 'function') ? p() : p;
+		},
 		toggleSubMenu(e) {
 			e.preventDefault();
 			e.stopPropagation();
