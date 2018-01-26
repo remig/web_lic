@@ -30,7 +30,7 @@ function initialize() {
 	camera.position.x = viewBox;
 	camera.position.y = -viewBox + (150 / 1);
 	camera.position.z = -viewBox;
-	camera.lookAt(0, 0, 0);
+	camera.lookAt(new THREE.Vector3());
 	isInitialized = true;
 }
 
