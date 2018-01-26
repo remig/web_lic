@@ -64,7 +64,7 @@ Vue.component('treeParentRow', {
 });
 
 Vue.component('tree', {
-	props: ['treeData', 'currentItem'],
+	props: ['store', 'currentItem'],
 	template: '#treeTemplate'
 });
 

@@ -26,7 +26,8 @@ var app = new Vue({
 		busyText: '',
 		selectedItemLookup: null,
 		contextMenu: null,
-		treeUpdateState: false  // Not used by tree directly, only used to force the tree to redraw
+		treeUpdateState: false,  // Not used directly, only used to force the tree to redraw
+		menuUpdateState: false   // Not used directly, only used to force the tree to redraw
 	},
 	methods: {
 		importRemoteModel(url) {
@@ -54,7 +55,7 @@ var app = new Vue({
 
 				app.currentPageLookup = store.get.itemToLookup(store.state.pages[0]);
 				undoStack.saveBaseState();
-				app.forceTreeUpdate();
+				app.forceUIUpdate();
 
 				const end = Date.now();
 				app.busyText = '';
@@ -85,7 +86,7 @@ var app = new Vue({
 				undoStack.saveBaseState();
 				app.clearSelected();
 				app.drawCurrentPage();
-				app.forceTreeUpdate();
+				app.forceUIUpdate();
 			};
 			reader.readAsText(e.target.files[0]);
 			e.target.value = '';
@@ -117,15 +118,21 @@ var app = new Vue({
 				app.selectedItemLookup = store.get.itemToLookup(target);
 			}
 		},
-		forceTreeUpdate() {
+		forceUIUpdate() {
+			// If I understood Vue better, I'd create components that damn well updated themselves properly.
 			app.treeUpdateState = !app.treeUpdateState;
+			app.menuUpdateState = !app.menuUpdateState;
+			if (app.selectedItemLookup && app.selectedItemLookup.id != null) {
+				app.selectedItemLookup.id++;
+				app.selectedItemLookup.id--;
+			}
 		},
 		clearState() {
 			app.currentPageLookup = null;
 			app.statusText = '';
 			app.selectedItemLookup = null;
 			app.contextMenu = null;
-			app.forceTreeUpdate();
+			app.forceUIUpdate();
 		},
 		clearSelected() {
 			app.selectedItemLookup = null;
@@ -259,12 +266,11 @@ var app = new Vue({
 				}, `Move ${util.titleCase(selItem.type)}`);
 				Vue.nextTick(() => {
 					app.drawCurrentPage();
-					app.selectedItemLookup.id++;  // TODO: UGH. This forces Vue to update selectedItem, which triggers highlight recalculation.  Need a cleaner way to do this.
-					app.selectedItemLookup.id--;
+					app.forceUIUpdate();
 				});
 			} else {
 				// Check if key is a menu shortcut
-				const menu = app.menuEntries;
+				const menu = app.navBarContent;
 				const key = (e.ctrlKey ? 'ctrl+' : '') + e.key;
 				for (let i = 0; i < menu.length; i++) {
 					for (let j = 0; j < menu[i].children.length; j++) {
@@ -371,12 +377,9 @@ var app = new Vue({
 	},
 	computed: {
 		treeData() {
-			return {
-				store: store,
-				treeUpdateState: this.treeUpdateState
-			};
+			return store;
 		},
-		menuEntries() {
+		navBarContent() {
 			return Menu(this, store, undoStack);
 		},
 		pageWidth() {

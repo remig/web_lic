@@ -31,21 +31,11 @@
 		<div id="busyOverlay" :class="{hidden: busyText === ''}">
 			<div id="busyText">{{busyText}}<div id="spinner"></div></div>
 		</div>
-		<nav class="navbar navbar-default">
-			<ul class="nav navbar-nav">
-				<li v-for="menu in menuEntries" :id="menu.id || menu.name | sanitizeMenuID" class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
-					<menu-list :menu-entries="menu.children"></menu-list>
-				</li>
-			</ul>
-			<ul class="nav navbar-nav navbar-right">
-				<li><a href="http://bugeyedmonkeys.com" target="_blank">Web Lic 0.1</a></li>
-			</ul>
-		</nav>
+		<nav-menu :menu-entry-list="navBarContent" :key="menuUpdateState"></nav-menu>
 		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
 			<div id="leftPane" class="split split-horizontal">
 				<div id="tree">
-					<tree :tree-data="treeData" :current-item="selectedItemLookup"></tree>
+					<tree :store="treeData" :current-item="selectedItemLookup" :key="treeUpdateState"></tree>
 				</div>
 			</div>
 			<div id="rightPane" class="split split-horizontal">
@@ -72,6 +62,20 @@
 	</div>
 
 	<!-- Component Templates -->
+
+	<script type="text/x-template" id="navMenuTemplate">
+		<nav class="navbar navbar-default">
+			<ul class="nav navbar-nav">
+				<li v-for="menu in menuEntryList" :id="menu.id || menu.name | sanitizeMenuID" class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
+					<menu-list :menu-entries="menu.children"></menu-list>
+				</li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="http://bugeyedmonkeys.com" target="_blank">Web Lic 0.1</a></li>
+			</ul>
+		</nav>
+	</script>
 
 	<script type="text/x-template" id="menuTemplate">
 		<ul class="dropdown-menu">
@@ -110,31 +114,31 @@
 
 	<script type="text/x-template" id="treeTemplate">
 		<ul>
-			<li v-for="page in treeData.store.state.pages">
+			<li v-for="page in store.state.pages">
 				<treeParentRow :currentItem="currentItem" :target="page" />
 				<ul :id="'pageListItem' + page.id" class="indent hidden">
 					<li v-if="page.numberLabel != null">
-						<treeRow :currentItem="currentItem" :target="treeData.store.get.pageNumber(page.numberLabel)" />
+						<treeRow :currentItem="currentItem" :target="store.get.pageNumber(page.numberLabel)" />
 					</li>
 					<li v-if="page.labels != null" v-for="labelID in page.labels">
-						<treeRow :currentItem="currentItem" :target="treeData.store.get.label(labelID)" />
+						<treeRow :currentItem="currentItem" :target="store.get.label(labelID)" />
 					</li>
-					<li class="unindent" v-for="step in page.steps.map(stepID => treeData.store.get.step(stepID))">
+					<li class="unindent" v-for="step in page.steps.map(stepID => store.get.step(stepID))">
 						<treeParentRow :currentItem="currentItem" :target="step" />
 						<ul :id="'stepListItem' + step.id" class="indent hidden">
 							<li v-if="step.csiID != null">
-								<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(step.csiID)" />
+								<treeRow :currentItem="currentItem" :target="store.get.csi(step.csiID)" />
 							</li>
 							<li class="unindent" v-if="step.pliID != null">
-								<treeParentRow :currentItem="currentItem" :target="treeData.store.get.pli(step.pliID)" />
+								<treeParentRow :currentItem="currentItem" :target="store.get.pli(step.pliID)" />
 								<ul :id="'pliListItem' + step.pliID" class="indent hidden">
-									<li v-for="pliItemID in treeData.store.get.pli(step.pliID).pliItems">
-										<treeRow :currentItem="currentItem" :target="treeData.store.get.pliItem(pliItemID)" />
+									<li v-for="pliItemID in store.get.pli(step.pliID).pliItems">
+										<treeRow :currentItem="currentItem" :target="store.get.pliItem(pliItemID)" />
 									</li>
 								</ul>
 							</li>
 							<li v-if="step.numberLabel != null">
-								<treeRow :currentItem="currentItem" :target="treeData.store.get.stepNumber(step.numberLabel)" />
+								<treeRow :currentItem="currentItem" :target="store.get.stepNumber(step.numberLabel)" />
 							</li>
 						</ul>
 					</li>

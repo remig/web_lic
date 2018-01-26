@@ -19,6 +19,11 @@ Vue.component('menu-list', {
 	}
 });
 
+Vue.component('nav-menu', {
+	props: ['menuEntryList'],
+	template: '#navMenuTemplate'
+});
+
 let undoStack, app, store;
 
 function enableIfModel() {
@@ -102,7 +107,7 @@ const menu = [
 				if (undoStack.isUndoAvailable()) {
 					undoStack.undo();
 					Vue.nextTick(() => {
-						app.$forceUpdate();
+						app.forceUIUpdate();
 						app.clearSelected();
 						app.drawCurrentPage();
 					});
@@ -118,7 +123,7 @@ const menu = [
 				if (undoStack.isRedoAvailable()) {
 					undoStack.redo();
 					Vue.nextTick(() => {
-						app.$forceUpdate();
+						app.forceUIUpdate();
 						app.clearSelected();
 						app.drawCurrentPage();
 					});
