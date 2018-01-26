@@ -15,7 +15,7 @@ describe('Import Trivial Model', function() {
 	this.timeout(7500);
 
 	before(done => {
-		driver.navigate().to('http://192.168.1.101:9977/lic_w/lic_w.html');
+		driver.navigate().to('http://192.168.1.101:9977/web_lic/web_lic.html');
 		page.get(page.file_uploader_button)
 			.sendKeys('C:\\Users\\remi\\Downloads\\20015 - Alligator.mpd')
 			.then(() => done());

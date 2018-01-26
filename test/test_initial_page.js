@@ -15,7 +15,7 @@ describe('Launch empty Page', function() {
 	this.timeout(7500);
 
 	before(done => {
-		driver.navigate().to('http://192.168.1.101:9977/lic_w/lic_w.html')
+		driver.navigate().to('http://192.168.1.101:9977/web_lic/web_lic.html')
 			.then(() => done());
 	});
 
