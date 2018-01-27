@@ -10,6 +10,8 @@ const id = webdriver.By.id;
 module.exports = driver => {
 	return {
 		status_bar: id('statusBar'),
+		left_pane: id('leftPane'),
+		tree: id('tree'),
 		right_pane: id('rightPane'),
 		page_canvas: id('pageCanvas'),
 		highlight: id('highlight'),

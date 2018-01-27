@@ -116,7 +116,7 @@
 		<ul>
 			<li v-for="page in store.state.pages">
 				<treeParentRow :currentItem="currentItem" :target="page" />
-				<ul :id="'pageListItem' + page.id" class="indent hidden">
+				<ul class="indent hidden">
 					<li v-if="page.numberLabel != null">
 						<treeRow :currentItem="currentItem" :target="store.get.pageNumber(page.numberLabel)" />
 					</li>

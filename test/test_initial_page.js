@@ -16,12 +16,12 @@ describe('Launch empty Page', function() {
 
 	before(done => {
 		driver.navigate().to('http://192.168.1.101:9977/web_lic/web_lic.html')
-			.then(() => done());
+			.then(done);
 	});
 
 	after(done => {
 		driver.quit()
-			.then(() => done());
+			.then(done);
 	});
 
 	it('Page title should be \'Web Lic!\'', () => {
@@ -34,24 +34,23 @@ describe('Launch empty Page', function() {
 			.catch(error => done());
 	});
 
-	it('Page Canvas should be blank', () => {
-		return assert.eventually.isTrue(page.isPageCanvasBlank());
-	});
-
-	it('highlight should be invisible', () => {
-		return assert.eventually.equal(page.getCss(page.highlight, 'display'), 'none');
-	});
-
-	it('click initial empty page should not highlight', () => {
-		page.click(page.page_canvas);
-		return assert.eventually.equal(page.getCss(page.highlight, 'display'), 'none');
-	});
-
 	describe('Test top level menu', () => {
 
-		it('click \'File\' should open top level menu', () => {
+		it('All top level menu entries exist', function *() {
+			for (var k in page.menu) {
+				if (page.menu.hasOwnProperty(k)) {
+					assert.equal(yield page.get(page.menu[k]).isDisplayed(), true);
+				}
+			}
+		});
+
+		it('Click on File menu should open it', function *() {
 			page.click(page.menu.file);
-			return assert.eventually.equal(page.getClass(page.menu.file), 'dropdown open');
+			assert.equal(yield page.getClass(page.menu.file), 'dropdown open');
+			assert.equal(yield page.getClass(page.menu.edit), 'dropdown');
+			page.click(page.menu.edit);
+			assert.equal(yield page.getClass(page.menu.file), 'dropdown');
+			assert.equal(yield page.getClass(page.menu.edit), 'dropdown open');
 		});
 
 		it('\'File -> Open\' and \'File -> Import\' should be enabled, everything else disabled', function *() {
@@ -76,34 +75,37 @@ describe('Launch empty Page', function() {
 			}
 		});
 
-		it('click outside menu should close menu', () => {
+		it('Click outside menu should close menu', () => {
 			return page.get(page.sub_menu.file.open).getSize()
 				.then(size => driver.actions()
 					.mouseMove(page.get(page.sub_menu.file.open), {x: size.width + 10, y: size.height})
 					.click().perform()
 				)
-				.then(() => driver.findElement({id: 'file_menu'}).getAttribute('class'))
+				.then(() => page.get(page.menu.file).getAttribute('class'))
 				.then(attr => assert.strictEqual(attr, 'dropdown'));
 		});
 	});
 
-	/*
-	it('Model\'s base CSI should exist and contain an image', function(done) {
-		driver.findElement({id: 'CSI_0'})
-			.then(el => el.getAttribute('href'))
-			.then(attr => assert.startsWith(attr, 'data:image/png;base64'))
-			.then(() => done())
+	it('Tree container should exist and be empty', function *() {
+		assert.equal(yield page.get(page.tree).isDisplayed(), true);
+		assert.equal(yield page.get(page.tree).findElement({css: 'ul'}).getText(), '');
 	});
 
-	it('click CSI should highlight', function(done) {
-		driver.actions().mouseMove(driver.findElement({id: 'pageCanvas'}), {x: 400, y: 300})
-			.click().perform()
-			.then(() => {
-				driver.findElement({id: 'highlight'})
-					.then(el => el.getCssValue('display'))
-					.then(attr => assert.strictEqual(attr, 'block'))
-					.then(() => done());
-			});
+	it('Page Canvas should be blank', () => {
+		return assert.eventually.isTrue(page.isPageCanvasBlank());
 	});
-	*/
+
+	it('Highlight should be invisible', () => {
+		return assert.eventually.equal(page.getCss(page.highlight, 'display'), 'none');
+	});
+
+	it('Click initial empty page should not highlight', () => {
+		page.click(page.page_canvas);
+		return assert.eventually.equal(page.getCss(page.highlight, 'display'), 'none');
+	});
+
+	it('Status bar should exist and be empty', function *() {
+		assert.equal(yield page.get(page.status_bar).isDisplayed(), true);
+		assert.equal(yield page.get(page.status_bar).getText(), '');
+	});
 });
