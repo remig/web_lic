@@ -111,6 +111,13 @@ const store = {
 			}
 			return item;
 		},
+		numberLabel(item) {
+			item = store.get.lookupToItem(item);
+			if (item && item.numberLabel != null) {
+				return store.state[item.type + 'Numbers'][item.numberLabel];
+			}
+			return null;
+		},
 		lookupToItem(lookup) {
 			if (!lookup || !lookup.type || lookup.id == null) {
 				return null;

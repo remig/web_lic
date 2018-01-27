@@ -1,4 +1,4 @@
-/* global module: false, $: false, Vue: false, app: false, util: false, LDParse: false */
+/* global $: false, Vue: false, app: false, util: false, LDParse: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 (function() {
@@ -58,12 +58,13 @@ Vue.component('treeRow', {
 });
 
 Vue.component('treeParentRow', {
-	props: ['currentItem', 'target'],
+	props: ['store', 'currentItem', 'target'],
 	template: '#treeParentRowTemplate',
 	methods: {
 		arrowClick() {
-			$(this.$el.firstElementChild).toggleClass('treeIconClosed');
-			$('#' + this.target.type + 'ListItem' + this.target.id).toggleClass('hidden');
+			const el = $(this.$el);
+			el.children('.treeIcon').toggleClass('treeIconClosed');
+			el.children('.treeChildren').toggleClass('hidden');
 		}
 	}
 });
