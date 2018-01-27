@@ -93,21 +93,14 @@
 	</script>
 
 	<script type="text/x-template" id="treeRowTemplate">
-		<span
-			:class="[
-				'clickable',
-				'treeText',
-				{selected: target && currentItem && target.id === currentItem.id && target.type === currentItem.type}
-			]"
-			@click.stop.prevent="itemClick"
-		>
+		<span :class="['clickable', 'treeText', {selected: selected}]" @click.stop.prevent="itemClick">
 			{{text}}
-	</span>
+		</span>
 	</script>
 
 	<script type="text/x-template" id="treeParentRowTemplate">
 		<div>
-			<i class="treeIcon treeIconClosed" @click.stop.prevent="arrowClick(target)" />
+			<i class="treeIcon treeIconClosed" @click.stop.prevent="arrowClick()" />
 			<treeRow :currentItem="currentItem" :target="target" />
 		</div>
 	</script>
@@ -116,7 +109,7 @@
 		<ul>
 			<li v-for="page in store.state.pages">
 				<treeParentRow :currentItem="currentItem" :target="page" />
-				<ul class="indent hidden">
+				<ul :id="'pageListItem' + page.id" class="indent hidden">
 					<li v-if="page.numberLabel != null">
 						<treeRow :currentItem="currentItem" :target="store.get.pageNumber(page.numberLabel)" />
 					</li>

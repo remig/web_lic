@@ -26,6 +26,11 @@ Vue.component('treeRow', {
 		}
 	},
 	computed: {
+		selected() {
+			return this.currentItem && this.target &&
+				this.target.id === this.currentItem.id &&
+				this.target.type === this.currentItem.type;
+		},
 		text() {
 			const t = this.target;
 			if (!t) {
@@ -56,9 +61,9 @@ Vue.component('treeParentRow', {
 	props: ['currentItem', 'target'],
 	template: '#treeParentRowTemplate',
 	methods: {
-		arrowClick(target) {
+		arrowClick() {
 			$(this.$el.firstElementChild).toggleClass('treeIconClosed');
-			$('#' + target.type + 'ListItem' + target.id).toggleClass('hidden');
+			$('#' + this.target.type + 'ListItem' + this.target.id).toggleClass('hidden');
 		}
 	}
 });
