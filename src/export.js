@@ -120,7 +120,7 @@ const api = {
 				}
 			});
 
-			doc.save(store.get.modelNameBase('.pdf'));
+			doc.save(store.get.modelFilenameBase('.pdf'));
 
 			app.busyText = '';
 			const end = Date.now();
@@ -133,9 +133,9 @@ const api = {
 
 		window.setTimeout(function() {
 			const start = Date.now();
-			const modelName = store.get.modelNameBase();
+			const fn = store.get.modelFilenameBase();
 			const zip = new JSZip();
-			const imgFolder = zip.folder(modelName);
+			const imgFolder = zip.folder(fn);
 
 			const canvas = document.getElementById('generateImagesCanvas');
 			canvas.width = store.state.pageSize.width;
@@ -156,7 +156,7 @@ const api = {
 			});
 
 			zip.generateAsync({type: 'blob'})
-				.then(content => saveAs(content, modelName + '.zip'))
+				.then(content => saveAs(content, fn + '.zip'))
 				.then(() => {
 					app.busyText = '';
 					const end = Date.now();

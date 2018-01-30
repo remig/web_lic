@@ -9,7 +9,6 @@ const pageMargin = 20;
 const pliMargin = pageMargin / 1.2;
 
 const emptyState = {
-	modelName: '',
 	pageSize: {width: 900, height: 700},
 	pages: [],
 	pageNumbers: [],
@@ -26,7 +25,9 @@ const store = {
 
 	// The currently loaded LDraw model, as returned from LDParse
 	model: null,  // Not in state because it is saved separately, and not affected by undo / redo
-
+	setModel(model) {
+		store.model = model;
+	},
 	// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic (except static stuff in model, like part geometries)
 	state: util.clone(emptyState),
 	replaceState(state) {
@@ -39,27 +40,45 @@ const store = {
 		pageCount() {
 			return store.state.pages.length;
 		},
-		modelName() {
-			return store.state.modelName.replace(/\//g, '-');
+		modelName(nice) {
+			if (!store.model) {
+				return '';
+			} else if (store.model.name) {
+				return store.model.name;
+			}
+			const name = store.get.modelFilenameBase();
+			if (nice) {
+				return util.titleCase(name.replace(/\//g, '-').replace(/_/g, ' '));
+			}
+			return name;
 		},
-		modelNameBase(ext) {
-			return store.get.modelName().replace(/\..+$/, '') + (ext || '');
+		modelFilename() {
+			if (!store.model || !store.model.filename) {
+				return '';
+			}
+			return store.model.filename;
+		},
+		modelFilenameBase(ext) {
+			if (!store.model || !store.model.filename) {
+				return '';
+			}
+			return store.model.filename.replace(/\..+$/, '') + (ext || '');
 		},
 		isTitlePage(page) {
 			if (!page || page.id == null) {
-				return null;
+				return false;
 			}
 			return page.id === store.state.pages[0].id;
 		},
 		isFirstPage(page) {
 			if (!page || page.id == null) {
-				return null;
+				return false;
 			}
 			return page.id === store.state.pages[1].id;
 		},
 		isLastPage(page) {
 			if (!page || page.id == null) {
-				return null;
+				return false;
 			}
 			return page.id === store.state.pages[store.state.pages.length - 1].id;
 		},
@@ -145,9 +164,6 @@ const store = {
 		moveItem(opts) {
 			opts.item.x = opts.x;
 			opts.item.y = opts.y;
-		},
-		setModelName(name) {
-			store.state.modelName = name;
 		},
 		moveStepToPreviousPage(step) {
 			const currentPage = store.get.parent(step);
@@ -373,7 +389,7 @@ const store = {
 				parent: {type: 'page', id: page.id},
 				x: null, y: null,
 				width: null, height: null,
-				text: store.get.modelNameBase(),
+				text: store.get.modelName(true),
 				font: '20pt Helvetica',
 				color: 'black'
 			});

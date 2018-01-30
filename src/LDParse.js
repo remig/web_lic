@@ -10,10 +10,10 @@ const api = {
 		return loadPart(url);
 	},
 	// Create an abstractPart from the specified 'content' of an LDraw part file
-	loadPartContent(content, modelName) {
+	loadPartContent(content, fn) {
 		const part = loadPart(null, content);
-		if (part && modelName && part.filename == null) {
-			part.filename = modelName;
+		if (part && fn && part.filename == null) {
+			part.filename = fn;
 		}
 		return part;
 	},
@@ -275,6 +275,7 @@ function lineListToAbstractPart(fn, lineList) {
 			abstractPart.name = lineList[0].slice(2).join(' ');
 		} else {
 			abstractPart.name = lineList[0].slice(1).join(' ');
+			abstractPart.name = abstractPart.name.replace(/^Name:\s*/ig, '');  // Trim leading 'Name: ', if any
 		}
 	}
 	if (!fn && lineList[1] && lineList[1][0] === '0' && lineList[1][1] === 'Name:') {

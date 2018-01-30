@@ -58,7 +58,7 @@ const menu = [
 					state: store.state
 				};
 				const blob = new Blob([JSON.stringify(content)], {type: 'text/plain;charset=utf-8'});
-				saveAs(blob, store.get.modelNameBase('.lic'));
+				saveAs(blob, store.get.modelFilenameBase('.lic'));
 			}
 		},
 		{text: 'Save As... (NYI)', enabled: () => false, cb: () => {}},

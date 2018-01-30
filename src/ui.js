@@ -44,10 +44,9 @@ var app = new Vue({
 			}
 			app.busyText = 'Loading Model';
 			window.setTimeout(() => {  // Timeout needed to let Vue catch up and draw the busy spinner.  Or something.  Damned if I can't find a better way. Ugh.
-				store.model = modelGenerator();
+				store.setModel(modelGenerator());
 				LDRender.setPartDictionary(LDParse.partDictionary);
 
-				store.mutations.setModelName(store.model.filename);
 				store.mutations.addTitlePage();
 				store.mutations.addInitialPages(LDParse.partDictionary);
 				store.get.label(1).text = `${LDParse.model.get.partCount(store.model)} Parts, ${store.state.pages.length - 1} Pages`;
@@ -59,7 +58,7 @@ var app = new Vue({
 
 				const end = Date.now();
 				app.busyText = '';
-				app.statusText = `"${store.state.modelName}" loaded successfully (${util.formatTime(start, end)})`;
+				app.statusText = `"${store.get.modelFilename()}" loaded successfully (${util.formatTime(start, end)})`;
 				Vue.nextTick(() => app.drawCurrentPage());
 			}, 0);
 		},

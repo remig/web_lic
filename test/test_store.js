@@ -30,7 +30,6 @@ describe('Test state store module', function() {
 	});
 
 	function verifyInitialState() {
-		assert.isEmpty(store.state.modelName);
 		assert.isEmpty(store.state.pages);
 		assert.isEmpty(store.state.steps);
 		assert.isEmpty(store.state.csis);
@@ -49,7 +48,8 @@ describe('Test state store module', function() {
 		assert.exists(store.get);
 		assert.exists(store.get.pageCount);
 		assert.exists(store.get.modelName);
-		assert.exists(store.get.modelNameBase);
+		assert.exists(store.get.modelFilename);
+		assert.exists(store.get.modelFilenameBase);
 		assert.exists(store.get.isTitlePage);
 		assert.exists(store.get.isFirstPage);
 		assert.exists(store.get.isLastPage);
@@ -65,7 +65,6 @@ describe('Test state store module', function() {
 		assert.exists(store.mutations);
 		assert.exists(store.mutations.addStateItem);
 		assert.exists(store.mutations.moveItem);
-		assert.exists(store.mutations.setModelName);
 		assert.exists(store.mutations.moveStepToPreviousPage);
 		assert.exists(store.mutations.moveStepToNextPage);
 		assert.exists(store.mutations.mergeSteps);
@@ -97,8 +96,9 @@ describe('Test state store module', function() {
 	});
 
 	it('Store state via mutations', () => {
-		store.mutations.setModelName('foobar');
-		assert.equal(store.state.modelName, 'foobar');
+		store.mutations.addStateItem({type: 'page'});
+		assert.equal(store.state.pages.length, 1);
+		assert.deepEqual(store.state.pages[0], {type: 'page', id: 0});
 		store.replaceState({a: 10, b: 20});
 		assert.deepEqual(store.state, {a: 10, b: 20});
 	});
@@ -120,8 +120,11 @@ describe('Test state store module', function() {
 	};
 	const csiState = {
 		type: 'csi', id: 0, parent: {type: 'step', id: 0},
-		x: null, y: null,
-		width: null, height: null
+		x: null, y: null, width: null, height: null
+	};
+	const titleLabel = {
+		type: 'label', id: 0, parent: {type: 'page', id: 0}, text: '', color: 'black', font: '20pt Helvetica',
+		x: null, y: null, width: null, height: null
 	};
 	it('Add a Title Page', () => {
 		store.mutations.addTitlePage();
@@ -139,11 +142,13 @@ describe('Test state store module', function() {
 		assert.deepEqual(store.get.parent(store.state.csis[0]), step0State);
 		assert.deepEqual(store.get.pageForItem(store.state.steps[0]), titlePageState);
 		assert.deepEqual(store.get.pageForItem(store.state.csis[0]), titlePageState);
+		assert.equal(store.state.labels.length, 2);
+		assert.deepEqual(store.state.labels[0], titleLabel);
 	});
 
 	it('Import trivial model', () => {
 		store.resetState();
-		store.model = trivial_part_dict['trivial_model.ldr'];
+		store.setModel(trivial_part_dict['trivial_model.ldr']);
 		store.mutations.addTitlePage();
 		store.mutations.addInitialPages(trivial_part_dict);
 		assert.equal(store.state.pages.length, 4);
@@ -152,6 +157,8 @@ describe('Test state store module', function() {
 		assert.equal(store.state.steps.length, 4);
 		assert.deepEqual(store.state.steps[0], step0State);
 		assert.deepEqual(store.state.steps[1], step1State);
+		assert.equal(store.state.csis.length, 4);
+		assert.deepEqual(store.state.csis[0], csiState);
 	});
 
 	after(function() { });
