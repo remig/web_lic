@@ -62,6 +62,13 @@ describe('Test state store module', function() {
 		assert.exists(store.get.pageForItem);
 		assert.exists(store.get.lookupToItem);
 		assert.exists(store.get.itemToLookup);
+		assert.exists(store.get.page);
+		assert.exists(store.get.step);
+		assert.exists(store.get.csi);
+		assert.exists(store.get.pli);
+		assert.exists(store.get.pliItem);
+		assert.exists(store.get.pliQty);
+		assert.exists(store.get.label);
 		assert.exists(store.mutations);
 		assert.exists(store.mutations.addStateItem);
 		assert.exists(store.mutations.moveItem);
@@ -86,24 +93,30 @@ describe('Test state store module', function() {
 		verifyInitialState();
 	});
 
-	it('Don\'t crash on invalid page navigation', () => {
-		assert.isNull(store.get.prevPage());
-		assert.isNull(store.get.prevPage(null));
-		assert.isNull(store.get.prevPage(1));
-		assert.isNull(store.get.nextPage());
-		assert.isNull(store.get.nextPage(null));
-		assert.isNull(store.get.nextPage(1));
+	it('Insert simple state items', () => {
+		verifyInitialState();
+		assert.deepEqual(store.mutations.addStateItem({type: 'page'}), {type: 'page', id: 0});
+		assert.deepEqual(store.state.pages[0], {type: 'page', id: 0});
+		assert.deepEqual(store.mutations.addStateItem({type: 'page'}), {type: 'page', id: 1});
+		assert.deepEqual(store.mutations.addStateItem({type: 'page'}), {type: 'page', id: 2});
+		assert.equal(store.state.pages.length, 3);
+		assert.deepEqual(store.state.pages[1], {type: 'page', id: 1});
+		assert.deepEqual(store.mutations.addStateItem({type: 'step'}), {type: 'step', id: 0});
+		assert.deepEqual(store.state.steps[0], {type: 'step', id: 0});
+
+		store.resetState();
+		verifyInitialState();
+		assert.isNull(store.mutations.addStateItem());
+		verifyInitialState();
+		assert.isNull(store.mutations.addStateItem({foo: 'page'}));
+		verifyInitialState();
+		assert.isNull(store.mutations.addStateItem({type: 'foo'}));
+		verifyInitialState();
 	});
 
-	it('Store state via mutations', () => {
-		store.mutations.addStateItem({type: 'page'});
-		assert.equal(store.state.pages.length, 1);
-		assert.deepEqual(store.state.pages[0], {type: 'page', id: 0});
+	it('Replace and reset state', () => {
 		store.replaceState({a: 10, b: 20});
 		assert.deepEqual(store.state, {a: 10, b: 20});
-	});
-
-	it('Clear applied state', () => {
 		store.resetState();
 		verifyInitialState();
 	});
@@ -159,6 +172,92 @@ describe('Test state store module', function() {
 		assert.deepEqual(store.state.steps[1], step1State);
 		assert.equal(store.state.csis.length, 4);
 		assert.deepEqual(store.state.csis[0], csiState);
+		const newTitleLabel = util.clone(titleLabel);
+		newTitleLabel.text = 'Trivial Model';
+		assert.deepEqual(store.state.labels[0], newTitleLabel);
+	});
+
+	it('Verify page navigation', () => {
+		assert.isTrue(store.get.isTitlePage(store.state.pages[0]));
+		assert.isFalse(store.get.isTitlePage());
+		assert.isFalse(store.get.isTitlePage(null));
+		assert.isFalse(store.get.isTitlePage({id: null}));
+		assert.isFalse(store.get.isTitlePage(store.state.pages[1]));
+
+		assert.isTrue(store.get.isFirstPage(store.state.pages[1]));
+		assert.isFalse(store.get.isFirstPage());
+		assert.isFalse(store.get.isFirstPage(null));
+		assert.isFalse(store.get.isFirstPage({id: null}));
+		assert.isFalse(store.get.isFirstPage(store.state.pages[0]));
+
+		assert.isTrue(store.get.isLastPage(store.state.pages[3]));
+		assert.isFalse(store.get.isLastPage());
+		assert.isFalse(store.get.isLastPage(null));
+		assert.isFalse(store.get.isLastPage({id: null}));
+		assert.isFalse(store.get.isLastPage(store.state.pages[0]));
+
+		assert.equal(store.get.nextPage(store.state.pages[0]), store.state.pages[1]);
+		assert.equal(store.get.nextPage(store.state.pages[2]), store.state.pages[3]);
+		assert.isNull(store.get.nextPage(store.state.pages[3]));
+		assert.isNull(store.get.nextPage());
+		assert.isNull(store.get.nextPage(null));
+		assert.isNull(store.get.nextPage({id: null}));
+
+		assert.equal(store.get.prevPage(store.state.pages[1]), store.state.pages[0]);
+		assert.equal(store.get.prevPage(store.state.pages[3]), store.state.pages[2]);
+		assert.isNull(store.get.prevPage(store.state.pages[0]));
+		assert.isNull(store.get.prevPage());
+		assert.isNull(store.get.prevPage(null));
+		assert.isNull(store.get.prevPage({id: null}));
+
+		assert.equal(store.get.titlePage(), store.state.pages[0]);
+		assert.equal(store.get.firstPage(), store.state.pages[1]);
+		assert.equal(store.get.lastPage(), store.state.pages[3]);
+	});
+
+	it('Verify general purpose lookup methods', () => {
+		assert.equal(store.get.parent(store.state.steps[0]), store.state.pages[0]);
+		assert.equal(store.get.parent({type: 'step', id: 0}), store.state.pages[0]);
+		assert.equal(store.get.parent(store.state.csis[0]), store.state.steps[0]);
+		assert.equal(store.get.parent({type: 'csi', id: 0}), store.state.steps[0]);
+		assert.isNull(store.get.parent());
+		assert.isNull(store.get.parent(null));
+		assert.isNull(store.get.parent({id: null}));
+		assert.isNull(store.get.parent({id: 0, parent: null}));
+		assert.isNull(store.get.parent({id: 0, parent: {id: 0, type: null}}));
+
+		assert.equal(store.get.pageForItem(store.state.steps[0]), store.state.pages[0]);
+		assert.equal(store.get.pageForItem({type: 'step', id: 0}), store.state.pages[0]);
+		assert.equal(store.get.pageForItem(store.state.plis[2]), store.state.pages[3]);
+		assert.equal(store.get.pageForItem({type: 'pli', id: 2}), store.state.pages[3]);
+		assert.isNull(store.get.pageForItem());
+		assert.isNull(store.get.pageForItem(null));
+		assert.isNull(store.get.pageForItem({type: 'step', id: null}));
+		assert.isNull(store.get.pageForItem({type: 'foo', id: 0}));
+
+		assert.equal(store.get.numberLabel(store.state.pages[1]), store.state.pageNumbers[0]);
+		assert.equal(store.get.numberLabel({type: 'page', id: 1}), store.state.pageNumbers[0]);
+		assert.equal(store.get.numberLabel(store.state.steps[1]), store.state.stepNumbers[0]);
+		assert.equal(store.get.numberLabel({type: 'step', id: 1}), store.state.stepNumbers[0]);
+		assert.isNull(store.get.numberLabel());
+		assert.isNull(store.get.numberLabel(null));
+		assert.isNull(store.get.numberLabel({type: 'step', id: null}));
+		assert.isNull(store.get.numberLabel({type: 'foo', id: 0}));
+		assert.isNull(store.get.numberLabel({type: 'page', id: 0}));
+
+		assert.equal(store.get.lookupToItem({type: 'page', id: 0}), store.state.pages[0]);
+		assert.equal(store.get.lookupToItem({type: 'step', id: 0}), store.state.steps[0]);
+		assert.isNull(store.get.lookupToItem());
+		assert.isNull(store.get.lookupToItem(null));
+		assert.isNull(store.get.lookupToItem({type: 'page', id: null}));
+		assert.isNull(store.get.lookupToItem({type: 'foo', id: 0}));
+
+		assert.deepEqual(store.get.itemToLookup(store.state.pages[0]), {type: 'page', id: 0});
+		assert.deepEqual(store.get.itemToLookup(store.state.steps[1]), {type: 'step', id: 1});
+		assert.deepEqual(store.get.itemToLookup(store.state.labels[0]), {type: 'label', id: 0});
+		assert.isNull(store.get.itemToLookup());
+		assert.isNull(store.get.itemToLookup({}));
+		assert.isNull(store.get.itemToLookup({type: 'foo', id: 0}));
 	});
 
 	after(function() { });

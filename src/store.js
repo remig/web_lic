@@ -83,7 +83,7 @@ const store = {
 			return page.id === store.state.pages[store.state.pages.length - 1].id;
 		},
 		nextPage(page) {
-			if (store.get.isLastPage(page)) {
+			if (!page || page.id == null || store.get.isLastPage(page)) {
 				return null;
 			}
 			const idx = store.state.pages.findIndex(el => el.id === page.id);
@@ -93,7 +93,7 @@ const store = {
 			return store.state.pages[idx + 1];
 		},
 		prevPage(page) {
-			if (store.get.isTitlePage(page)) {
+			if (!page || page.id == null || store.get.isTitlePage(page)) {
 				return null;
 			}
 			const idx = store.state.pages.findIndex(el => el.id === page.id);
@@ -112,9 +112,7 @@ const store = {
 			return store.state.pages[store.state.pages.length - 1];
 		},
 		parent(item) {
-			if (item && item.id != null && item.type != null && item.parent == null) {
-				item = store.get.lookupToItem(item);
-			}
+			item = store.get.lookupToItem(item);
 			if (item && item.parent) {
 				const itemList = store.state[item.parent.type + 's'];
 				if (itemList) {
@@ -140,6 +138,8 @@ const store = {
 		lookupToItem(lookup) {
 			if (!lookup || !lookup.type || lookup.id == null) {
 				return null;
+			} else if (lookup.parent) {
+				return lookup;  // lookup is already an item
 			}
 			const itemList = store.state[lookup.type + 's'];
 			if (itemList) {
@@ -148,22 +148,29 @@ const store = {
 			return null;
 		},
 		itemToLookup(item) {
-			return {
-				id: item.id,
-				type: item.type
-			};
+			if (!item || item.id == null || item.type == null) {
+				return null;
+			} else if (!store.state.hasOwnProperty(item.type + 's')) {
+				return null;
+			}
+			return {id: item.id, type: item.type};
 		}
 	},
 	mutations: {
 		addStateItem(item) {
+			if (!item || !item.type || !store.state.hasOwnProperty(item.type + 's')) {
+				return null;
+			}
 			const stateList = store.state[item.type + 's'];
 			item.id = stateList.length ? Math.max.apply(null, stateList.map(el => el.id)) + 1 : 0;
 			stateList.push(item);
 			return item;
 		},
 		moveItem(opts) {
-			opts.item.x = opts.x;
-			opts.item.y = opts.y;
+			if (opts && opts.item) {
+				opts.item.x = opts.x;
+				opts.item.y = opts.y;
+			}
 		},
 		moveStepToPreviousPage(step) {
 			const currentPage = store.get.parent(step);
