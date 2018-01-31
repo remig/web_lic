@@ -1,4 +1,4 @@
-/* global require: false, describe: false, it: false, before: false, after: false */
+/* global require: false, describe: false, it: false, before: false */
 
 'use strict';
 const chai = require('chai');
@@ -10,10 +10,6 @@ const LDParse = require('../src/LDParse');
 const util = require('../src/util');
 const store = require('../src/store');
 const trivial_part_dict = require('./trivial_part_dict.json');
-
-// These will come from the template page, when we have one
-const pageMargin = 20;
-const pliMargin = pageMargin / 2;
 
 describe('Test state store module', function() {
 
@@ -215,7 +211,7 @@ describe('Test state store module', function() {
 		assert.equal(store.get.lastPage(), store.state.pages[3]);
 	});
 
-	it('Verify general purpose lookup methods', () => {
+	it('Verify store.get lookup methods', () => {
 		assert.equal(store.get.parent(store.state.steps[0]), store.state.pages[0]);
 		assert.equal(store.get.parent({type: 'step', id: 0}), store.state.pages[0]);
 		assert.equal(store.get.parent(store.state.csis[0]), store.state.steps[0]);
@@ -260,5 +256,35 @@ describe('Test state store module', function() {
 		assert.isNull(store.get.itemToLookup({type: 'foo', id: 0}));
 	});
 
-	after(function() { });
+	it('Verify store item lookups', () => {
+		assert.deepEqual(store.get.page(0), store.state.pages[0]);
+		assert.deepEqual(store.get.page(3), store.state.pages[3]);
+		assert.deepEqual(store.get.page({type: 'page', id: 0}), store.state.pages[0]);
+		assert.isNull(store.get.page({type: 'foo', id: 0}));
+		assert.isNull(store.get.page(10));
+
+		assert.deepEqual(store.get.step(0), store.state.steps[0]);
+		assert.deepEqual(store.get.step(3), store.state.steps[3]);
+		assert.deepEqual(store.get.step({type: 'step', id: 0}), store.state.steps[0]);
+
+		assert.deepEqual(store.get.csi(0), store.state.csis[0]);
+		assert.deepEqual(store.get.csi(2), store.state.csis[2]);
+		assert.deepEqual(store.get.csi({type: 'csi', id: 0}), store.state.csis[0]);
+
+		assert.deepEqual(store.get.pli(1), store.state.plis[1]);
+		assert.deepEqual(store.get.pliQty(0), store.state.pliQtys[0]);
+		assert.deepEqual(store.get.label(0), store.state.labels[0]);
+		assert.deepEqual(store.get.pageNumber(0), store.state.pageNumbers[0]);
+		assert.deepEqual(store.get.stepNumber(0), store.state.stepNumbers[0]);
+	});
+
+	describe('Verify complex mutations', () => {
+
+		it('Move 2nd Step to 1st Page', () => {
+			const step = {type: 'step', id: 2};
+			assert.equal(store.get.parent(step).id, 2);
+			store.mutations.moveStepToPreviousPage(step);
+			assert.deepEqual(store.get.step(step).parent, {type: 'page', id: 1});
+		});
+	});
 });

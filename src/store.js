@@ -114,10 +114,7 @@ const store = {
 		parent(item) {
 			item = store.get.lookupToItem(item);
 			if (item && item.parent) {
-				const itemList = store.state[item.parent.type + 's'];
-				if (itemList) {
-					return itemList.find(el => el.id === item.parent.id);
-				}
+				return store.get.lookupToItem(item.parent);
 			}
 			return null;
 		},
@@ -143,7 +140,7 @@ const store = {
 			}
 			const itemList = store.state[lookup.type + 's'];
 			if (itemList) {
-				return itemList.find(el => el.id === lookup.id);
+				return itemList.find(el => el.id === lookup.id) || null;
 			}
 			return null;
 		},
@@ -166,13 +163,16 @@ const store = {
 			stateList.push(item);
 			return item;
 		},
-		moveItem(opts) {
+		moveItem(opts) {  // opts: {item, x, y}
 			if (opts && opts.item) {
 				opts.item.x = opts.x;
 				opts.item.y = opts.y;
 			}
 		},
+		moveStepToPage(opts) {  // opts: {step, destPage, insertionIndex = 0}
+		},
 		moveStepToPreviousPage(step) {
+			step = store.get.lookupToItem(step);
 			const currentPage = store.get.parent(step);
 			const prevPage = store.get.prevPage(currentPage);
 			const stepIdx = currentPage.steps.indexOf(step.id);
@@ -183,6 +183,7 @@ const store = {
 			store.mutations.layoutPage(currentPage);
 		},
 		moveStepToNextPage(step) {
+			step = store.get.lookupToItem(step);
 			const currentPage = store.get.parent(step);
 			const nextPage = store.get.nextPage(currentPage);
 			const stepIdx = currentPage.steps.indexOf(step.id);
@@ -192,7 +193,7 @@ const store = {
 			store.mutations.layoutPage(nextPage);
 			store.mutations.layoutPage(currentPage);
 		},
-		mergeSteps(opts) {
+		mergeSteps(opts) {  // opts: {sourceStepID, destStepID}
 			const sourceStep = store.get.step(opts.sourceStepID);
 			const destStep = store.get.step(opts.destStepID);
 			if (!sourceStep || !destStep) {
@@ -245,9 +246,9 @@ const store = {
 		renumberPages() {
 			store.mutations.renumber('page');
 		},
-		setNumber(target, number) {
+		setNumber(opts) {  // opts: {target, number}
 		},
-		layoutStep(opts) {
+		layoutStep(opts) {  // opts: {step, box}
 
 			const {step, box} = opts;
 			const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
@@ -343,7 +344,7 @@ const store = {
 			const step = store.get.step(page.steps[0]);
 			const csi = store.get.csi(step.csiID);
 			const box = {x: 0, y: 0, width: pageSize.width, height: pageSize.height};
-			store.mutations.layoutStep({step: step, box});
+			store.mutations.layoutStep({step, box});
 			step.width = csi.width + 40;
 			step.height = csi.height + 40;
 			step.x = Math.floor((pageSize.width - step.width) / 2);
@@ -532,15 +533,18 @@ const store = {
 	}
 };
 
+function getter(s) {
+	return (item) => {
+		item = (typeof item === 'number') ? {type: s, id: item} : item;
+		return store.get.lookupToItem(item);
+	};
+}
+
 // Add store.get.page, store.get.step, etc; one getter for each state list
 for (let el in store.state) {
 	if (store.state.hasOwnProperty(el) && Array.isArray(store.state[el])) {
-		el = el.slice(0, -1);
-		store.get[el] = (function(s) {
-			return function(id) {
-				return store.get.lookupToItem({type: s, id: id});
-			};
-		})(el);
+		el = el.slice(0, -1);  // trim trailing 's' (steps -> step)
+		store.get[el] = getter(el);
 	}
 }
 
