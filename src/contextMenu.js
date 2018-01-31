@@ -55,12 +55,8 @@ const contextMenu = {
 				return false;
 			},
 			cb: function() {
-				const step = store.get.lookupToItem(app.selectedItemLookup);
-				undoStack.commit('moveStepToPreviousPage', step, this.text);
-				Vue.nextTick(() => {
-					app.clearSelected();
-					app.drawCurrentPage();
-				});
+				undoStack.commit('moveStepToPreviousPage', app.selectedItemLookup, this.text);
+				app.redrawUI(true);
 			}
 		},
 		{
@@ -78,12 +74,8 @@ const contextMenu = {
 				return false;
 			},
 			cb: function() {
-				const step = store.get.lookupToItem(app.selectedItemLookup);
-				undoStack.commit('moveStepToNextPage', step, this.text);
-				Vue.nextTick(() => {
-					app.clearSelected();
-					app.drawCurrentPage();
-				});
+				undoStack.commit('moveStepToNextPage', app.selectedItemLookup, this.text);
+				app.redrawUI(true);
 			}
 		},
 		{text: 'separator'},

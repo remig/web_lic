@@ -48,7 +48,7 @@ const store = {
 			}
 			const name = store.get.modelFilenameBase();
 			if (nice) {
-				return util.titleCase(name.replace(/\//g, '-').replace(/_/g, ' '));
+				return util.prettyPrint(name.replace(/\//g, '-').replace(/_/g, ' '));
 			}
 			return name;
 		},
@@ -170,28 +170,27 @@ const store = {
 			}
 		},
 		moveStepToPage(opts) {  // opts: {step, destPage, insertionIndex = 0}
+			const step = store.get.lookupToItem(opts.step);
+			const currentPage = store.get.parent(step);
+			const destPage = store.get.lookupToItem(opts.destPage);
+			const insertionIndex = opts.insertionIndex || 0;
+			const stepIdx = currentPage.steps.indexOf(step.id);
+			currentPage.steps.splice(stepIdx, 1);
+			destPage.steps.splice(insertionIndex, 0, step.id);
+			step.parent.id = destPage.id;
+			store.mutations.layoutPage(currentPage);
+			store.mutations.layoutPage(destPage);
 		},
 		moveStepToPreviousPage(step) {
 			step = store.get.lookupToItem(step);
-			const currentPage = store.get.parent(step);
-			const prevPage = store.get.prevPage(currentPage);
-			const stepIdx = currentPage.steps.indexOf(step.id);
-			currentPage.steps.splice(stepIdx, 1);
-			prevPage.steps.push(step.id);
-			step.parent.id = prevPage.id;
-			store.mutations.layoutPage(prevPage);
-			store.mutations.layoutPage(currentPage);
+			const destPage = store.get.prevPage(step.parent);
+			const insertionIndex = destPage.steps.length;
+			store.mutations.moveStepToPage({step, destPage, insertionIndex});
 		},
 		moveStepToNextPage(step) {
 			step = store.get.lookupToItem(step);
-			const currentPage = store.get.parent(step);
-			const nextPage = store.get.nextPage(currentPage);
-			const stepIdx = currentPage.steps.indexOf(step.id);
-			currentPage.steps.splice(stepIdx, 1);
-			nextPage.steps.unshift(step.id);
-			step.parent.id = nextPage.id;
-			store.mutations.layoutPage(nextPage);
-			store.mutations.layoutPage(currentPage);
+			const destPage = store.get.nextPage(step.parent);
+			store.mutations.moveStepToPage({step, destPage, insertionIndex: 0});
 		},
 		mergeSteps(opts) {  // opts: {sourceStepID, destStepID}
 			const sourceStep = store.get.step(opts.sourceStepID);

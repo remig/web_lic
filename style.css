@@ -27,6 +27,10 @@ div#container {
 	pointer-events: none;
 }
 
+.shortcut {
+	float:right;
+}
+
 .dropdown-menu > .disabled > a {
 	pointer-events: none;
 	color: #bbb;

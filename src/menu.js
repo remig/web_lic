@@ -106,11 +106,7 @@ const menu = [
 			cb: () => {
 				if (undoStack.isUndoAvailable()) {
 					undoStack.undo();
-					Vue.nextTick(() => {
-						app.forceUIUpdate();
-						app.clearSelected();
-						app.drawCurrentPage();
-					});
+					app.redrawUI(true);
 				}
 			}
 		},
@@ -122,11 +118,7 @@ const menu = [
 			cb: () => {
 				if (undoStack.isRedoAvailable()) {
 					undoStack.redo();
-					Vue.nextTick(() => {
-						app.forceUIUpdate();
-						app.clearSelected();
-						app.drawCurrentPage();
-					});
+					app.redrawUI(true);
 				}
 			}
 		},

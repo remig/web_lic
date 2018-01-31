@@ -52,7 +52,7 @@ Vue.component('treeRow', {
 				const partColor = LDParse.colorTable[t.colorCode].name.replace('_', ' ');
 				return partName + ' - ' + partColor;
 			}
-			return util.titleCase(t.type);
+			return util.prettyPrint(t.type);
 		}
 	}
 });

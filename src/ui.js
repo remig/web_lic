@@ -18,6 +18,8 @@ Vue.filter('sanitizeMenuID', id => {
 		.replace(/[^a-z_]/g, '') + '_menu';
 });
 
+Vue.filter('prettyPrint', util.prettyPrint);
+
 var app = new Vue({
 	el: '#container',
 	data: {  // Store any transient UI state data here.  Do *not* store state items here; Vue turns these into observers
@@ -125,6 +127,15 @@ var app = new Vue({
 				app.selectedItemLookup.id++;
 				app.selectedItemLookup.id--;
 			}
+		},
+		redrawUI(clearSelection) {
+			Vue.nextTick(() => {
+				if (clearSelection) {
+					app.clearSelected();
+				}
+				app.forceUIUpdate();
+				app.drawCurrentPage();
+			});
 		},
 		clearState() {
 			app.currentPageLookup = null;
@@ -262,11 +273,8 @@ var app = new Vue({
 					item: item,
 					x: item.x + dx,
 					y: item.y + dy
-				}, `Move ${util.titleCase(selItem.type)}`);
-				Vue.nextTick(() => {
-					app.drawCurrentPage();
-					app.forceUIUpdate();
-				});
+				}, `Move ${util.prettyPrint(selItem.type)}`);
+				app.redrawUI();
 			} else {
 				// Check if key is a menu shortcut
 				const menu = app.navBarContent;

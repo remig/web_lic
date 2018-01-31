@@ -283,8 +283,20 @@ describe('Test state store module', function() {
 		it('Move 2nd Step to 1st Page', () => {
 			const step = {type: 'step', id: 2};
 			assert.equal(store.get.parent(step).id, 2);
+			assert.equal(store.get.lookupToItem(step).id, 2);
 			store.mutations.moveStepToPreviousPage(step);
+			assert.equal(store.state.steps[2].parent.id, 1);
 			assert.deepEqual(store.get.step(step).parent, {type: 'page', id: 1});
+			assert.deepEqual(store.state.pages[1].steps, [1, 2]);
+			assert.equal(store.state.pages[2].steps.length, 0);
+		});
+
+		it('Move 2nd Step back to 2nd Page', () => {
+			const step = {type: 'step', id: 2};
+			store.mutations.moveStepToNextPage(step);
+			assert.deepEqual(store.state.pages[1].steps, [1]);
+			assert.deepEqual(store.state.pages[2].steps, [2]);
+			assert.equal(store.state.steps[2].parent.id, 2);
 		});
 	});
 });

@@ -143,7 +143,7 @@ const util = {
 		}
 		return t + 'ms';
 	},
-	titleCase(s) {  // Human readable versions of common internal strings
+	prettyPrint(s) {  // Human readable versions of common internal strings
 		s = s + '';
 		switch (s.toLowerCase()) {
 			case 'csi':
@@ -159,7 +159,11 @@ const util = {
 			case 'pagenumber':
 				return 'Page Number';
 		}
+		if (s.startsWith('ctrl+')) {
+			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();
+		}
 		return s.replace(/([^\W_]+[^\s-]*) */g, function(el) {
+			// Use Title Case for generic strings
 			return el.charAt(0).toUpperCase() + el.substr(1).toLowerCase();
 		});
 	}
