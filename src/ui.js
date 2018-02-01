@@ -51,10 +51,10 @@ var app = new Vue({
 
 				store.mutations.addTitlePage();
 				store.mutations.addInitialPages(LDParse.partDictionary);
-				store.get.label(1).text = `${LDParse.model.get.partCount(store.model)} Parts, ${store.state.pages.length - 1} Pages`;
+				store.get.label(1).text = `${LDParse.model.get.partCount(store.model)} Parts, ${store.get.pageCount()} Pages`;
 				store.mutations.layoutTitlePage(store.get.titlePage());
 
-				app.currentPageLookup = store.get.itemToLookup(store.state.pages[0]);
+				app.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
 				undoStack.saveBaseState();
 				app.forceUIUpdate();
 
@@ -83,7 +83,7 @@ var app = new Vue({
 				LDParse.setColorTable(fileJSON.colorTable);
 				LDRender.setPartDictionary(fileJSON.partDictionary);
 				store.replaceState(fileJSON.state);
-				app.currentPageLookup = store.get.itemToLookup(store.state.pages[0]);
+				app.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
 				undoStack.saveBaseState();
 				app.clearSelected();
 				app.drawCurrentPage();
@@ -104,16 +104,16 @@ var app = new Vue({
 			});
 		},
 		setCurrentPage(page) {
-			if (page.id !== app.currentPageLookup.id) {
+			if (!util.itemEq(page, app.currentPageLookup.type)) {
 				app.clearSelected();
 				app.currentPageLookup = store.get.itemToLookup(page);
 			}
-			Vue.nextTick(() => app.drawCurrentPage());
+			Vue.nextTick(app.drawCurrentPage);
 		},
 		setSelected(target) {
-			if (!app.selectedItemLookup || target.id !== app.selectedItemLookup.id || target.type !== app.selectedItemLookup.type) {
+			if (!app.selectedItemLookup || !util.itemEq(target, app.selectedItemLookup)) {
 				const targetPage = store.get.pageForItem(target);
-				if (targetPage && targetPage.id !== app.currentPageLookup.id) {
+				if (targetPage && !util.itemEq(targetPage, app.currentPageLookup)) {
 					app.setCurrentPage(targetPage);
 				}
 				app.selectedItemLookup = store.get.itemToLookup(target);
@@ -400,27 +400,27 @@ var app = new Vue({
 		},
 		highlightStyle() {
 			const selItem = this.selectedItemLookup;
-			if (selItem) {
-				let box;
-				if (selItem.type === 'page') {
-					box = {x: 0, y: 0, width: store.state.pageSize.width, height: store.state.pageSize.height};
-				} else {
-					box = this.targetBox(store.get.lookupToItem(selItem));
-				}
-				if (selItem.type === 'pageNumber' || selItem.type === 'stepNumber' || selItem.type === 'label') {
-					box.y += 5;  // Text is aligned to the bottom of the box; offset highlight to center nicely
-				} else if (selItem.type === 'pliQty') {
-					box.y += 3;
-				}
-				return {
-					display: 'block',
-					left: `${box.x - 3}px`,
-					top: `${box.y - 3}px`,
-					width: `${box.width + 6}px`,
-					height: `${box.height + 6}px`
-				};
+			if (!selItem) {
+				return {display: 'none'};
 			}
-			return {display: 'none'};
+			let box;
+			if (selItem.type === 'page' || selItem.type === 'titlePage') {
+				box = {x: 0, y: 0, width: store.state.pageSize.width, height: store.state.pageSize.height};
+			} else {
+				box = this.targetBox(store.get.lookupToItem(selItem));
+			}
+			if (selItem.type === 'pageNumber' || selItem.type === 'stepNumber' || selItem.type === 'label') {
+				box.y += 5;  // Text is aligned to the bottom of the box; offset highlight to center nicely
+			} else if (selItem.type === 'pliQty') {
+				box.y += 3;
+			}
+			return {
+				display: 'block',
+				left: `${box.x - 3}px`,
+				top: `${box.y - 3}px`,
+				width: `${box.width + 6}px`,
+				height: `${box.height + 6}px`
+			};
 		}
 	}
 });

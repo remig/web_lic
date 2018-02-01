@@ -98,7 +98,7 @@
 
 	<script type="text/x-template" id="treeParentRowTemplate">
 		<div>
-			<i :class="['treeIcon', {treeIconClosed: !expanded}]" @click.stop.prevent="arrowClick()" />
+			<i :class="['treeIcon', {treeIconClosed: !expanded}]" @click.stop.prevent="arrowClick" />
 			<treeRow :currentItem="currentItem" :target="target" />
 			<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">
 				<li v-if="target.numberLabel != null">
@@ -131,6 +131,9 @@
 
 	<script type="text/x-template" id="treeTemplate">
 		<ul>
+			<li v-if="treeData.store.get.titlePage() != null">
+				<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.titlePage()" />
+			</li>
 			<li v-for="page in treeData.store.state.pages">
 				<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="page" />
 			</li>

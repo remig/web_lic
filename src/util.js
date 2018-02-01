@@ -37,6 +37,9 @@ const util = {
 	array(fakeArray) {
 		return [].slice.apply(fakeArray);
 	},
+	itemEq(a, b) {
+		return a && b && a.id === b.id && a.type === b.type;
+	},
 	renderCSI(localModel, step, forceRedraw) {
 		const domID = `CSI_${step.csiID}`;
 		return renderPart(domID, forceRedraw, container => {

@@ -19,14 +19,16 @@ Vue.component('treeRow', {
 	},
 	computed: {
 		selected() {
-			return itemEq(this.currentItem, this.target);
+			return util.itemEq(this.currentItem, this.target);
 		},
 		text() {
 			const t = this.target;
 			if (!t) {
 				return '';
+			} else if (t.type === 'titlePage') {
+				return 'Title Page';
 			} else if (t.type === 'page') {
-				return t.number == null ? 'Title Page' : 'Page ' + t.number;
+				return 'Page ' + (t.number || '');
 			} else if (t.type === 'step') {
 				return 'Step ' + (t.number || '');
 			} else if (t.type === 'label') {
@@ -68,17 +70,13 @@ Vue.component('tree', {
 });
 
 function expandParents(node, newItem) {
-	if (itemEq(newItem, node.target)) {
+	if (util.itemEq(newItem, node.target)) {
 		let parent = node.$parent;
 		while (parent && parent.hasOwnProperty('expanded')) {
 			parent.expanded = true;
 			parent = parent.$parent;
 		}
 	}
-}
-
-function itemEq(a, b) {
-	return a && b && a.id === b.id && a.type === b.type;
 }
 
 })();

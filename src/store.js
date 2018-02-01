@@ -10,6 +10,7 @@ const pliMargin = pageMargin / 1.2;
 
 const emptyState = {
 	pageSize: {width: 900, height: 700},
+	titlePage: null,
 	pages: [],
 	pageNumbers: [],
 	steps: [],
@@ -65,16 +66,13 @@ const store = {
 			return store.model.filename.replace(/\..+$/, '') + (ext || '');
 		},
 		isTitlePage(page) {
-			if (!page || page.id == null) {
-				return false;
-			}
-			return page.id === store.state.pages[0].id;
+			return (page || {}).type === 'titlePage';
 		},
 		isFirstPage(page) {
 			if (!page || page.id == null) {
 				return false;
 			}
-			return page.id === store.state.pages[1].id;
+			return page.id === store.state.pages[0].id;
 		},
 		isLastPage(page) {
 			if (!page || page.id == null) {
@@ -83,8 +81,10 @@ const store = {
 			return page.id === store.state.pages[store.state.pages.length - 1].id;
 		},
 		nextPage(page) {
-			if (!page || page.id == null || store.get.isLastPage(page)) {
+			if (!page || store.get.isLastPage(page)) {
 				return null;
+			} else if (store.get.isTitlePage(page)) {
+				return store.state.pages[0];
 			}
 			const idx = store.state.pages.findIndex(el => el.id === page.id);
 			if (idx < 0) {
@@ -93,8 +93,10 @@ const store = {
 			return store.state.pages[idx + 1];
 		},
 		prevPage(page) {
-			if (!page || page.id == null || store.get.isTitlePage(page)) {
+			if (!page || store.get.isTitlePage(page)) {
 				return null;
+			} else if (store.get.isFirstPage(page)) {
+				return store.get.titlePage();
 			}
 			const idx = store.state.pages.findIndex(el => el.id === page.id);
 			if (idx < 0) {
@@ -103,10 +105,10 @@ const store = {
 			return store.state.pages[idx - 1];
 		},
 		titlePage() {
-			return store.state.pages[0];
+			return store.state.titlePage;
 		},
 		firstPage() {
-			return store.state.pages[1];
+			return store.state.pages[0];
 		},
 		lastPage() {
 			return store.state.pages[store.state.pages.length - 1];
@@ -120,7 +122,7 @@ const store = {
 		},
 		pageForItem(item) {
 			item = store.get.lookupToItem(item);
-			while (item && item.type !== 'page') {
+			while (item && item.type !== 'page' && item.type !== 'titlePage') {
 				item = store.get.parent(item);
 			}
 			return item;
@@ -133,10 +135,12 @@ const store = {
 			return null;
 		},
 		lookupToItem(lookup) {
-			if (!lookup || !lookup.type || lookup.id == null) {
+			if (!lookup || !lookup.type) {
 				return null;
 			} else if (lookup.parent) {
 				return lookup;  // lookup is already an item
+			} else if (store.state.hasOwnProperty(lookup.type)) {
+				return store.state[lookup.type];
 			}
 			const itemList = store.state[lookup.type + 's'];
 			if (itemList) {
@@ -145,8 +149,10 @@ const store = {
 			return null;
 		},
 		itemToLookup(item) {
-			if (!item || item.id == null || item.type == null) {
+			if (!item || item.type == null) {
 				return null;
+			} else if (store.state.hasOwnProperty(item.type)) {
+				return {type: item.type, id: item.id || 0};
 			} else if (!store.state.hasOwnProperty(item.type + 's')) {
 				return null;
 			}
@@ -368,15 +374,16 @@ const store = {
 		addTitlePage() {
 
 			const addStateItem = store.mutations.addStateItem;
-			const page = addStateItem({
-				type: 'page',
+			const page = store.state.titlePage = {
+				id: 0,
+				type: 'titlePage',
 				steps: [],
 				labels: []
-			});
+			};
 
 			const step = addStateItem({
 				type: 'step',
-				parent: {type: 'page', id: page.id},
+				parent: {type: 'titlePage'},
 				x: null, y: null,
 				width: null, height: null,
 				csiID: null
@@ -393,7 +400,7 @@ const store = {
 
 			const title = addStateItem({
 				type: 'label',
-				parent: {type: 'page', id: page.id},
+				parent: {type: 'titlePage'},
 				x: null, y: null,
 				width: null, height: null,
 				text: store.get.modelName(true),
@@ -404,7 +411,7 @@ const store = {
 
 			const modelInfo = addStateItem({
 				type: 'label',
-				parent: {type: 'page', id: page.id},
+				parent: {type: 'titlePage'},
 				x: null, y: null,
 				width: null, height: null,
 				text: '',
@@ -453,7 +460,7 @@ const store = {
 					x: null, y: null,
 					width: null, height: null
 				});
-				page.number = page.id;
+				page.number = page.id + 1;
 				page.numberLabel = pageNumber.id;
 
 				const step = addStateItem({
