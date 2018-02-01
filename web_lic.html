@@ -35,7 +35,7 @@
 		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
 			<div id="leftPane" class="split split-horizontal">
 				<div id="tree">
-					<tree :store="treeData" :current-item="selectedItemLookup" :key="treeUpdateState"></tree>
+					<tree :tree-data="treeData" :current-item="selectedItemLookup"></tree>
 				</div>
 			</div>
 			<div id="rightPane" class="split split-horizontal">
@@ -98,30 +98,30 @@
 
 	<script type="text/x-template" id="treeParentRowTemplate">
 		<div>
-			<i class="treeIcon treeIconClosed" @click.stop.prevent="arrowClick()" />
+			<i :class="['treeIcon', {treeIconClosed: !expanded}]" @click.stop.prevent="arrowClick()" />
 			<treeRow :currentItem="currentItem" :target="target" />
-			<ul class="treeChildren indent hidden">
+			<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">
 				<li v-if="target.numberLabel != null">
-					<treeRow :currentItem="currentItem" :target="store.get.numberLabel(target)" />
+					<treeRow :currentItem="currentItem" :target="treeData.store.get.numberLabel(target)" />
 				</li>
 				<template v-if="target.labels != null">
 					<li v-for="labelID in target.labels">
-						<treeRow :currentItem="currentItem" :target="store.get.label(labelID)" />
+						<treeRow :currentItem="currentItem" :target="treeData.store.get.label(labelID)" />
 					</li>
 				</template>
 				<template v-if="target.steps != null">
-					<li v-for="step in this.target.steps.map(id => store.get.step(id))" class="unindent">
-						<treeParentRow :store="store" :currentItem="currentItem" :target="step"/>
+					<li v-for="step in this.target.steps.map(id => treeData.store.get.step(id))" class="unindent">
+						<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="step" />
 					</li>
 				</template>
 				<li v-if="target.csiID != null">
-					<treeRow :currentItem="currentItem" :target="store.get.csi(target.csiID)" />
+					<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(target.csiID)" />
 				</li>
 				<li v-if="target.pliID != null" class="unindent">
-					<treeParentRow :store="store" :currentItem="currentItem" :target="store.get.pli(target.pliID)" />
+					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.pli(target.pliID)" />
 				</li>
 				<template v-if="target.pliItems != null">
-					<li v-for="pliItem in target.pliItems.map(id => store.get.pliItem(id))">
+					<li v-for="pliItem in target.pliItems.map(id => treeData.store.get.pliItem(id))">
 						<treeRow :currentItem="currentItem" :target="pliItem" />
 					</li>
 				</template>
@@ -131,8 +131,8 @@
 
 	<script type="text/x-template" id="treeTemplate">
 		<ul>
-			<li v-for="page in store.state.pages">
-				<treeParentRow :store="store" :currentItem="currentItem" :target="page"/>
+			<li v-for="page in treeData.store.state.pages">
+				<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="page" />
 			</li>
 		</ul>
 	</script>

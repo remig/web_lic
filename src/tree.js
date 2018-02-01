@@ -1,4 +1,4 @@
-/* global $: false, Vue: false, app: false, util: false, LDParse: false */
+/* global Vue: false, app: false, util: false, LDParse: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 (function() {
@@ -13,23 +13,13 @@ Vue.component('treeRow', {
 		}
 	},
 	watch: {
-		currentItem: function(newItem) {
-			if (newItem === this.target) {
-				let el = this.$el.parentElement;
-				while (el) {
-					if (el.nodeName === 'UL') {
-						$(el).removeClass('hidden').prev().children().first().removeClass('treeIconClosed');
-					}
-					el = el.parentElement;
-				}
-			}
+		currentItem(newItem) {
+			expandParents(this, newItem);
 		}
 	},
 	computed: {
 		selected() {
-			return this.currentItem && this.target &&
-				this.target.id === this.currentItem.id &&
-				this.target.type === this.currentItem.type;
+			return itemEq(this.currentItem, this.target);
 		},
 		text() {
 			const t = this.target;
@@ -58,20 +48,37 @@ Vue.component('treeRow', {
 });
 
 Vue.component('treeParentRow', {
-	props: ['store', 'currentItem', 'target'],
+	props: ['treeData', 'currentItem', 'target'],
 	template: '#treeParentRowTemplate',
+	data() {
+		return {
+			expanded: false
+		};
+	},
 	methods: {
 		arrowClick() {
-			const el = $(this.$el);
-			el.children('.treeIcon').toggleClass('treeIconClosed');
-			el.children('.treeChildren').toggleClass('hidden');
+			this.expanded = !this.expanded;
 		}
 	}
 });
 
 Vue.component('tree', {
-	props: ['store', 'currentItem'],
+	props: ['treeData', 'currentItem'],
 	template: '#treeTemplate'
 });
+
+function expandParents(node, newItem) {
+	if (itemEq(newItem, node.target)) {
+		let parent = node.$parent;
+		while (parent && parent.hasOwnProperty('expanded')) {
+			parent.expanded = true;
+			parent = parent.$parent;
+		}
+	}
+}
+
+function itemEq(a, b) {
+	return a && b && a.id === b.id && a.type === b.type;
+}
 
 })();

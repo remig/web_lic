@@ -384,7 +384,10 @@ var app = new Vue({
 	},
 	computed: {
 		treeData() {
-			return store;
+			return {
+				store,
+				treeUpdateState: this.treeUpdateState  // Reactive property used to trigger tree update
+			};
 		},
 		navBarContent() {
 			return Menu(this, store, undoStack);
