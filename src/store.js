@@ -383,7 +383,7 @@ const store = {
 
 			const step = addStateItem({
 				type: 'step',
-				parent: {type: 'titlePage'},
+				parent: {type: 'titlePage', id: 0},
 				x: null, y: null,
 				width: null, height: null,
 				csiID: null
@@ -400,7 +400,7 @@ const store = {
 
 			const title = addStateItem({
 				type: 'label',
-				parent: {type: 'titlePage'},
+				parent: {type: 'titlePage', id: 0},
 				x: null, y: null,
 				width: null, height: null,
 				text: store.get.modelName(true),
@@ -411,7 +411,7 @@ const store = {
 
 			const modelInfo = addStateItem({
 				type: 'label',
-				parent: {type: 'titlePage'},
+				parent: {type: 'titlePage', id: 0},
 				x: null, y: null,
 				width: null, height: null,
 				text: '',

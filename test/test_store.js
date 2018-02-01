@@ -26,6 +26,7 @@ describe('Test state store module', function() {
 	});
 
 	function verifyInitialState() {
+		assert.isNull(store.state.titlePage);
 		assert.isEmpty(store.state.pages);
 		assert.isEmpty(store.state.steps);
 		assert.isEmpty(store.state.csis);
@@ -56,6 +57,7 @@ describe('Test state store module', function() {
 		assert.exists(store.get.lastPage);
 		assert.exists(store.get.parent);
 		assert.exists(store.get.pageForItem);
+		assert.exists(store.get.numberLabel);
 		assert.exists(store.get.lookupToItem);
 		assert.exists(store.get.itemToLookup);
 		assert.exists(store.get.page);
@@ -68,6 +70,7 @@ describe('Test state store module', function() {
 		assert.exists(store.mutations);
 		assert.exists(store.mutations.addStateItem);
 		assert.exists(store.mutations.moveItem);
+		assert.exists(store.mutations.moveStepToPage);
 		assert.exists(store.mutations.moveStepToPreviousPage);
 		assert.exists(store.mutations.moveStepToNextPage);
 		assert.exists(store.mutations.mergeSteps);
@@ -117,14 +120,14 @@ describe('Test state store module', function() {
 		verifyInitialState();
 	});
 
-	const titlePageState = {type: 'page', id: 0, steps: [0], labels: [0, 1]};
-	const pageState = {type: 'page', id: 1, needsLayout: true, number: 1, numberLabel: 0, steps: [1]};
+	const titlePageState = {type: 'titlePage', id: 0, steps: [0], labels: [0, 1]};
+	const pageState = {type: 'page', id: 0, needsLayout: true, number: 1, numberLabel: 0, steps: [1]};
 	const step0State = {
-		type: 'step', id: 0, parent: {type: 'page', id: 0},
+		type: 'step', id: 0, parent: {type: 'titlePage', id: 0},
 		x: null, y: null, width: null, height: null, csiID: 0
 	};
 	const step1State = {
-		type: 'step', id: 1, parent: {type: 'page', id: 1}, number: 1, numberLabel: 0,
+		type: 'step', id: 1, parent: {type: 'page', id: 0}, number: 1, numberLabel: 0,
 		x: null, y: null, width: null, height: null, csiID: 1, parts: [0], pliID: 0, submodel: []
 	};
 	const csiState = {
@@ -132,19 +135,19 @@ describe('Test state store module', function() {
 		x: null, y: null, width: null, height: null
 	};
 	const titleLabel = {
-		type: 'label', id: 0, parent: {type: 'page', id: 0}, text: '', color: 'black', font: '20pt Helvetica',
+		type: 'label', id: 0, parent: {type: 'titlePage', id: 0}, text: '', color: 'black', font: '20pt Helvetica',
 		x: null, y: null, width: null, height: null
 	};
 	it('Add a Title Page', () => {
 		store.mutations.addTitlePage();
-		assert.equal(store.state.pages.length, 1);
+		assert.equal(store.state.pages.length, 0);
 		assert.equal(store.state.steps.length, 1);
 		assert.equal(store.state.csis.length, 1);
 		assert.equal(store.state.plis.length, 0);
-		assert.deepEqual(store.state.pages[0], titlePageState);
+		assert.deepEqual(store.state.titlePage, titlePageState);
 		assert.deepEqual(store.state.steps[0], step0State);
 		assert.deepEqual(store.state.csis[0], csiState);
-		assert.equal(store.get.pageCount(), 1);
+		assert.equal(store.get.pageCount(), 0);
 		assert.isNull(store.get.nextPage(0));
 		assert.isNull(store.get.prevPage(0));
 		assert.deepEqual(store.get.parent(store.state.steps[0]), titlePageState);
@@ -160,9 +163,9 @@ describe('Test state store module', function() {
 		store.setModel(trivial_part_dict['trivial_model.ldr']);
 		store.mutations.addTitlePage();
 		store.mutations.addInitialPages(trivial_part_dict);
-		assert.equal(store.state.pages.length, 4);
-		assert.deepEqual(store.state.pages[0], titlePageState);
-		assert.deepEqual(store.state.pages[1], pageState);
+		assert.equal(store.state.pages.length, 3);
+		assert.deepEqual(store.state.titlePage, titlePageState);
+		assert.deepEqual(store.state.pages[0], pageState);
 		assert.equal(store.state.steps.length, 4);
 		assert.deepEqual(store.state.steps[0], step0State);
 		assert.deepEqual(store.state.steps[1], step1State);
@@ -174,24 +177,26 @@ describe('Test state store module', function() {
 	});
 
 	it('Verify page navigation', () => {
-		assert.isTrue(store.get.isTitlePage(store.state.pages[0]));
+		assert.isTrue(store.get.isTitlePage(store.state.titlePage));
 		assert.isFalse(store.get.isTitlePage());
 		assert.isFalse(store.get.isTitlePage(null));
 		assert.isFalse(store.get.isTitlePage({id: null}));
+		assert.isFalse(store.get.isTitlePage(store.state.pages[0]));
 		assert.isFalse(store.get.isTitlePage(store.state.pages[1]));
 
-		assert.isTrue(store.get.isFirstPage(store.state.pages[1]));
+		assert.isTrue(store.get.isFirstPage(store.state.pages[0]));
 		assert.isFalse(store.get.isFirstPage());
 		assert.isFalse(store.get.isFirstPage(null));
 		assert.isFalse(store.get.isFirstPage({id: null}));
-		assert.isFalse(store.get.isFirstPage(store.state.pages[0]));
+		assert.isFalse(store.get.isFirstPage(store.state.pages[1]));
 
-		assert.isTrue(store.get.isLastPage(store.state.pages[3]));
+		assert.isTrue(store.get.isLastPage(store.state.pages[2]));
 		assert.isFalse(store.get.isLastPage());
 		assert.isFalse(store.get.isLastPage(null));
 		assert.isFalse(store.get.isLastPage({id: null}));
 		assert.isFalse(store.get.isLastPage(store.state.pages[0]));
 
+		assert.equal(store.get.nextPage(store.state.titlePage), store.state.pages[0]);
 		assert.equal(store.get.nextPage(store.state.pages[0]), store.state.pages[1]);
 		assert.equal(store.get.nextPage(store.state.pages[2]), store.state.pages[3]);
 		assert.isNull(store.get.nextPage(store.state.pages[3]));
@@ -199,21 +204,22 @@ describe('Test state store module', function() {
 		assert.isNull(store.get.nextPage(null));
 		assert.isNull(store.get.nextPage({id: null}));
 
+		assert.equal(store.get.prevPage(store.state.pages[0]), store.state.titlePage);
 		assert.equal(store.get.prevPage(store.state.pages[1]), store.state.pages[0]);
-		assert.equal(store.get.prevPage(store.state.pages[3]), store.state.pages[2]);
-		assert.isNull(store.get.prevPage(store.state.pages[0]));
+		assert.equal(store.get.prevPage(store.state.pages[2]), store.state.pages[1]);
+		assert.isNull(store.get.prevPage(store.state.titlePage));
 		assert.isNull(store.get.prevPage());
 		assert.isNull(store.get.prevPage(null));
 		assert.isNull(store.get.prevPage({id: null}));
 
-		assert.equal(store.get.titlePage(), store.state.pages[0]);
-		assert.equal(store.get.firstPage(), store.state.pages[1]);
-		assert.equal(store.get.lastPage(), store.state.pages[3]);
+		assert.equal(store.get.titlePage(), store.state.titlePage);
+		assert.equal(store.get.firstPage(), store.state.pages[0]);
+		assert.equal(store.get.lastPage(), store.state.pages[2]);
 	});
 
 	it('Verify store.get lookup methods', () => {
-		assert.equal(store.get.parent(store.state.steps[0]), store.state.pages[0]);
-		assert.equal(store.get.parent({type: 'step', id: 0}), store.state.pages[0]);
+		assert.equal(store.get.parent(store.state.steps[0]), store.state.titlePage);
+		assert.equal(store.get.parent({type: 'step', id: 0}), store.state.titlePage);
 		assert.equal(store.get.parent(store.state.csis[0]), store.state.steps[0]);
 		assert.equal(store.get.parent({type: 'csi', id: 0}), store.state.steps[0]);
 		assert.isNull(store.get.parent());
@@ -222,24 +228,24 @@ describe('Test state store module', function() {
 		assert.isNull(store.get.parent({id: 0, parent: null}));
 		assert.isNull(store.get.parent({id: 0, parent: {id: 0, type: null}}));
 
-		assert.equal(store.get.pageForItem(store.state.steps[0]), store.state.pages[0]);
-		assert.equal(store.get.pageForItem({type: 'step', id: 0}), store.state.pages[0]);
-		assert.equal(store.get.pageForItem(store.state.plis[2]), store.state.pages[3]);
-		assert.equal(store.get.pageForItem({type: 'pli', id: 2}), store.state.pages[3]);
+		assert.equal(store.get.pageForItem(store.state.steps[0]), store.state.titlePage);
+		assert.equal(store.get.pageForItem({type: 'step', id: 0}), store.state.titlePage);
+		assert.equal(store.get.pageForItem(store.state.plis[2]), store.state.pages[2]);
+		assert.equal(store.get.pageForItem({type: 'pli', id: 2}), store.state.pages[2]);
 		assert.isNull(store.get.pageForItem());
 		assert.isNull(store.get.pageForItem(null));
 		assert.isNull(store.get.pageForItem({type: 'step', id: null}));
 		assert.isNull(store.get.pageForItem({type: 'foo', id: 0}));
 
-		assert.equal(store.get.numberLabel(store.state.pages[1]), store.state.pageNumbers[0]);
-		assert.equal(store.get.numberLabel({type: 'page', id: 1}), store.state.pageNumbers[0]);
+		assert.equal(store.get.numberLabel(store.state.pages[0]), store.state.pageNumbers[0]);
+		assert.equal(store.get.numberLabel({type: 'page', id: 0}), store.state.pageNumbers[0]);
 		assert.equal(store.get.numberLabel(store.state.steps[1]), store.state.stepNumbers[0]);
 		assert.equal(store.get.numberLabel({type: 'step', id: 1}), store.state.stepNumbers[0]);
 		assert.isNull(store.get.numberLabel());
 		assert.isNull(store.get.numberLabel(null));
 		assert.isNull(store.get.numberLabel({type: 'step', id: null}));
 		assert.isNull(store.get.numberLabel({type: 'foo', id: 0}));
-		assert.isNull(store.get.numberLabel({type: 'page', id: 0}));
+		assert.isNull(store.get.numberLabel({type: 'titlePage', id: 0}));
 
 		assert.equal(store.get.lookupToItem({type: 'page', id: 0}), store.state.pages[0]);
 		assert.equal(store.get.lookupToItem({type: 'step', id: 0}), store.state.steps[0]);
@@ -258,7 +264,7 @@ describe('Test state store module', function() {
 
 	it('Verify store item lookups', () => {
 		assert.deepEqual(store.get.page(0), store.state.pages[0]);
-		assert.deepEqual(store.get.page(3), store.state.pages[3]);
+		assert.deepEqual(store.get.page(2), store.state.pages[2]);
 		assert.deepEqual(store.get.page({type: 'page', id: 0}), store.state.pages[0]);
 		assert.isNull(store.get.page({type: 'foo', id: 0}));
 		assert.isNull(store.get.page(10));
@@ -282,21 +288,21 @@ describe('Test state store module', function() {
 
 		it('Move 2nd Step to 1st Page', () => {
 			const step = {type: 'step', id: 2};
-			assert.equal(store.get.parent(step).id, 2);
+			assert.equal(store.get.parent(step).id, 1);
 			assert.equal(store.get.lookupToItem(step).id, 2);
 			store.mutations.moveStepToPreviousPage(step);
-			assert.equal(store.state.steps[2].parent.id, 1);
-			assert.deepEqual(store.get.step(step).parent, {type: 'page', id: 1});
-			assert.deepEqual(store.state.pages[1].steps, [1, 2]);
-			assert.equal(store.state.pages[2].steps.length, 0);
+			assert.equal(store.state.steps[2].parent.id, 0);
+			assert.deepEqual(store.get.step(step).parent, {type: 'page', id: 0});
+			assert.deepEqual(store.state.pages[0].steps, [1, 2]);
+			assert.equal(store.state.pages[1].steps.length, 0);
 		});
 
 		it('Move 2nd Step back to 2nd Page', () => {
 			const step = {type: 'step', id: 2};
 			store.mutations.moveStepToNextPage(step);
-			assert.deepEqual(store.state.pages[1].steps, [1]);
-			assert.deepEqual(store.state.pages[2].steps, [2]);
-			assert.equal(store.state.steps[2].parent.id, 2);
+			assert.deepEqual(store.state.pages[0].steps, [1]);
+			assert.deepEqual(store.state.pages[1].steps, [2]);
+			assert.equal(store.state.steps[2].parent.id, 1);
 		});
 	});
 });
