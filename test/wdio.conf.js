@@ -2,14 +2,14 @@
 
 exports.config = {
 	specs: [
-		'./test_LDParse.js',
-		'./test_LDRender.js',
-		'./test_util.js',
-		'./test_store.js',
-		'./test_undoStack.js',
-		'./test_initial_page.js',
-		'./test_import_model.js'
-		'./test_tree.js',
+		'./specs/test_LDParse.js',
+		'./specs/test_LDRender.js',
+		'./specs/test_util.js',
+		'./specs/test_store.js',
+		'./specs/test_undoStack.js',
+		'./specs/test_initial_page.js',
+		'./specs/test_import_model.js',
+		'./specs/test_tree.js'
 	],
 	exclude: [],
 	maxInstances: 1,

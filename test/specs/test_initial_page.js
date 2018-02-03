@@ -4,7 +4,7 @@
 const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
-const page = require('./page_api')(browser);
+const page = require('../page_api')(browser);
 
 describe('Launch empty Page', function() {
 
@@ -12,7 +12,7 @@ describe('Launch empty Page', function() {
 		browser.url('http://192.168.1.101:9977/web_lic/web_lic.html');
 	});
 
-	it('Page title should be \'Web Lic!\'', () => {
+	it("Page title should be 'Web Lic!'", () => {
 		assert.equal(browser.getTitle(), 'Web Lic!');
 	});
 

@@ -4,8 +4,8 @@
 const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
-const page = require('./page_api')(browser);
-const trivial_model = require('./trivial_model.json').model;
+const page = require('../page_api')(browser);
+const trivial_model = require('../trivial_model.json').model;
 
 describe('Import Trivial Model', function() {
 

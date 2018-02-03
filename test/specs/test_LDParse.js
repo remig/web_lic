@@ -6,7 +6,7 @@ chai.use(require('chai-string'));
 const assert = chai.assert;
 const sinon = require('sinon');
 
-const LDParse = require('../src/LDParse');
+const LDParse = require('../../src/LDParse');
 
 const fakeLDConfig = `
 0 LDraw.org Configuration File

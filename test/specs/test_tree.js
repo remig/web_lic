@@ -3,9 +3,8 @@
 'use strict';
 const chai = require('chai');
 chai.use(require('chai-string'));
-chai.use(require('chai-as-promised'));
 const assert = chai.assert;
-const trivial_model = require('./trivial_model.json').model;
+const trivial_model = require('../trivial_model.json').model;
 
 describe('Import Trivial Model', function() {
 

@@ -5,9 +5,9 @@ const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
 
-const THREE = require('../lib/three');
-const LDParse = require('../src/LDParse');
-const LDRender = require('../src/LDRender');
+const THREE = require('../../lib/three');
+const LDParse = require('../../src/LDParse');
+const LDRender = require('../../src/LDRender');
 
 describe('Test LDRender module', function() {
 

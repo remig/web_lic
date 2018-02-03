@@ -5,7 +5,7 @@ const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
 
-const UndoStack = require('../src/undoStack');
+const UndoStack = require('../../src/undoStack');
 const fakeStore = {
 	state: {
 		foo: 0,

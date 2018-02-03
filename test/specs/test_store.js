@@ -6,10 +6,10 @@ chai.use(require('chai-string'));
 const assert = chai.assert;
 const sinon = require('sinon');
 
-const LDParse = require('../src/LDParse');
-const util = require('../src/util');
-const store = require('../src/store');
-const trivial_part_dict = require('./trivial_part_dict.json');
+const LDParse = require('../../src/LDParse');
+const util = require('../../src/util');
+const store = require('../../src/store');
+const trivial_part_dict = require('../trivial_part_dict.json');
 
 describe('Test state store module', function() {
 

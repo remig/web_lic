@@ -5,7 +5,7 @@ const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
 
-const util = require('../src/util');
+const util = require('../../src/util');
 
 describe('Test util module', function() {
 
