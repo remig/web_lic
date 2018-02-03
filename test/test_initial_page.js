@@ -1,111 +1,91 @@
-/* global require: false, describe: false, before: false, after: false, it: false */
+/* global require: false, browser: false, before: false, describe: false, it: false */
 
 'use strict';
-require('co-mocha');
 const chai = require('chai');
 chai.use(require('chai-string'));
-chai.use(require('chai-as-promised'));
 const assert = chai.assert;
-const webdriver = require('selenium-webdriver');
-const driver = new webdriver.Builder().forBrowser('chrome').build();
-const page = require('./page_api')(driver);
+const page = require('./page_api')(browser);
 
 describe('Launch empty Page', function() {
 
-	this.timeout(7500);
-
-	before(done => {
-		driver.navigate().to('http://192.168.1.101:9977/web_lic/web_lic.html')
-			.then(done);
-	});
-
-	after(done => {
-		driver.quit()
-			.then(done);
+	before(() => {
+		browser.url('http://192.168.1.101:9977/web_lic/web_lic.html');
 	});
 
 	it('Page title should be \'Web Lic!\'', () => {
-		return assert.eventually.equal(driver.getTitle(), 'Web Lic!');
-	});
-
-	it('non-existent ID should not crash', done => {
-		driver.findElement({id: 'foo_bar'})
-			.then(() => done("ID 'foo_bar' should not exist"))
-			.catch(error => done());
+		assert.equal(browser.getTitle(), 'Web Lic!');
 	});
 
 	describe('Test top level menu', () => {
 
-		it('All top level menu entries exist', function *() {
-			for (var k in page.menu) {
-				if (page.menu.hasOwnProperty(k)) {
-					assert.equal(yield page.get(page.menu[k]).isDisplayed(), true);
+		it('All top level menu entries exist and are closed', () => {
+			for (var k in page.ids.menu) {
+				if (page.ids.menu.hasOwnProperty(k)) {
+					assert.isTrue(browser.isVisible(page.ids.menu[k]));
+					assert.equal(browser.getClass(page.ids.menu[k]), page.classes.menu.closed);
 				}
 			}
 		});
 
-		it('Click on File menu should open it', function *() {
-			page.click(page.menu.file);
-			assert.equal(yield page.getClass(page.menu.file), 'dropdown open');
-			assert.equal(yield page.getClass(page.menu.edit), 'dropdown');
-			page.click(page.menu.edit);
-			assert.equal(yield page.getClass(page.menu.file), 'dropdown');
-			assert.equal(yield page.getClass(page.menu.edit), 'dropdown open');
+		it('Click on File menu should open it', () => {
+			browser.click(page.ids.menu.file);
+			assert.equal(browser.getClass(page.ids.menu.file), page.classes.menu.open);
+			assert.equal(browser.getClass(page.ids.menu.edit), page.classes.menu.closed);
+			browser.click(page.ids.menu.edit);
+			assert.equal(browser.getClass(page.ids.menu.file), page.classes.menu.closed);
+			assert.equal(browser.getClass(page.ids.menu.edit), page.classes.menu.open);
 		});
 
-		it('\'File -> Open\' and \'File -> Import\' should be enabled, everything else disabled', function *() {
-			assert.equal(yield page.getClass(page.sub_menu.file.open), '');
-			assert.equal(yield page.getClass(page.sub_menu.file.open_recent), 'disabled');
-			assert.equal(yield page.getClass(page.sub_menu.file.close), 'disabled');
-			assert.equal(yield page.getClass(page.sub_menu.file.save), 'disabled');
-			assert.equal(yield page.getClass(page.sub_menu.file.save_as), 'disabled');
-			assert.notEqual(yield page.getClass(page.sub_menu.file.import_model), 'disabled');
-			assert.equal(yield page.getClass(page.sub_menu.file.save_template), 'disabled');
+		it("'File -> Open' and 'File -> Import' should be enabled, everything else disabled", () => {
+			assert.equal(browser.getClass(page.ids.sub_menu.file.open), page.classes.menu.enabled);
+			assert.equal(browser.getClass(page.ids.sub_menu.file.open_recent), page.classes.menu.disabled);
+			assert.equal(browser.getClass(page.ids.sub_menu.file.close), page.classes.menu.disabled);
+			assert.equal(browser.getClass(page.ids.sub_menu.file.save), page.classes.menu.disabled);
+			assert.equal(browser.getClass(page.ids.sub_menu.file.save_as), page.classes.menu.disabled);
+			assert.notEqual(browser.getClass(page.ids.sub_menu.file.import_model), page.classes.menu.disabled);
+			assert.equal(browser.getClass(page.ids.sub_menu.file.save_template), page.classes.menu.disabled);
 		});
 
-		it('\'Edit\', \'View\' and \'Export\' menus should all be disabled', function *() {
-			const menu = page.sub_menu;
+		it("'Edit', 'View' and 'Export' menus should all be disabled", () => {
+			const menu = page.ids.sub_menu;
 			const menus = [
 				menu.edit.undo, menu.edit.redo, menu.edit.snap_to, menu.edit.brick_colors,
 				menu.view.add_horizontal_guide,
 				menu.export.generate_pdf, menu.export.generate_png_images
 			];
 			for (let i = 0; i < menus.length; i++) {
-				assert.equal(yield page.getClass(menus[i]), 'disabled');
+				assert.equal(browser.getClass(menus[i]), page.classes.menu.disabled);
 			}
 		});
 
 		it('Click outside menu should close menu', () => {
-			return page.get(page.sub_menu.file.open).getSize()
-				.then(size => driver.actions()
-					.mouseMove(page.get(page.sub_menu.file.open), {x: size.width + 10, y: size.height})
-					.click().perform()
-				)
-				.then(() => page.get(page.menu.file).getAttribute('class'))
-				.then(attr => assert.strictEqual(attr, 'dropdown'));
+			browser.click(page.ids.page_canvas);
+			assert.equal(browser.getClass(page.ids.menu.file), page.classes.menu.closed);
 		});
 	});
 
-	it('Tree container should exist and be empty', function *() {
-		assert.equal(yield page.get(page.tree).isDisplayed(), true);
-		assert.equal(yield page.get(page.tree).findElement({css: 'ul'}).getText(), '');
+	it('Tree container should exist and be empty', () => {
+		assert.isTrue(browser.isVisible(page.ids.tree));
+		assert.isEmpty(browser.getText(page.ids.tree));
 	});
 
-	it('Page Canvas should be blank', () => {
-		return assert.eventually.isTrue(page.isPageCanvasBlank());
+	it('Page Canvas should exist and be blank', () => {
+		assert.isTrue(browser.isVisible(page.ids.page_canvas));
+		assert.isTrue(page.isPageCanvasBlank());
 	});
 
 	it('Highlight should be invisible', () => {
-		return assert.eventually.equal(page.getCss(page.highlight, 'display'), 'none');
+		assert.isTrue(browser.isExisting(page.ids.highlight));
+		assert.isFalse(page.highlight.isVisible());
 	});
 
 	it('Click initial empty page should not highlight', () => {
-		page.click(page.page_canvas);
-		return assert.eventually.equal(page.getCss(page.highlight, 'display'), 'none');
+		browser.click(page.ids.page_canvas);
+		assert.isFalse(page.highlight.isVisible());
 	});
 
-	it('Status bar should exist and be empty', function *() {
-		assert.equal(yield page.get(page.status_bar).isDisplayed(), true);
-		assert.equal(yield page.get(page.status_bar).getText(), '');
+	it('Status bar should exist and be empty', () => {
+		assert.isTrue(browser.isVisible(page.ids.status_bar));
+		assert.isEmpty(browser.getText(page.ids.status_bar));
 	});
 });

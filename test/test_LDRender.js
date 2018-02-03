@@ -1,4 +1,4 @@
-/* global require: false, describe: false, before: false, after: false, it: false */
+/* global require: false, describe: false, it: false */
 
 'use strict';
 const chai = require('chai');
@@ -10,8 +10,6 @@ const LDParse = require('../src/LDParse');
 const LDRender = require('../src/LDRender');
 
 describe('Test LDRender module', function() {
-
-	before(function() { });
 
 	it('Three.js imported successfully', () => {
 		assert.exists(THREE);
@@ -34,12 +32,4 @@ describe('Test LDRender module', function() {
 		assert.exists(LDRender.geometryDictionary);
 		assert.isEmpty(LDRender.geometryDictionary);
 	});
-
-	it('Don\'t crash on invalid page navigation', () => {
-	});
-
-	it('Should store state via mutations', () => {
-	});
-
-	after(function() { });
 });

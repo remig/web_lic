@@ -1,4 +1,4 @@
-/* global require: false, describe: false, it: false, before: false, after: false */
+/* global require: false, describe: false, it: false */
 
 'use strict';
 const chai = require('chai');
@@ -26,14 +26,12 @@ const fakeStore = {
 
 describe('Test undoStack module', function() {
 
-	before(function() { });
-
 	it('Instantiate new empty undoStack', () => {
-		let stack = new UndoStack();
+		const stack = new UndoStack();
 		assert.isEmpty(stack.stack);
 		assert.equal(stack.index, -1);
 		assert.notExists(stack.store);
-		let stack2 = UndoStack(fakeStore);
+		const stack2 = UndoStack(fakeStore);
 		assert.equal(stack2.store, fakeStore);
 	});
 
@@ -46,7 +44,7 @@ describe('Test undoStack module', function() {
 	}
 
 	it('Test methods on empty stack', () => {
-		let stack = new UndoStack(fakeStore);
+		const stack = new UndoStack(fakeStore);
 		assert.isFalse(stack.isUndoAvailable());
 		assert.isFalse(stack.isRedoAvailable());
 		assert.isEmpty(stack.undoText());
@@ -63,11 +61,11 @@ describe('Test undoStack module', function() {
 	});
 
 	it('Test setting base state', () => {
-		let stack = new UndoStack(fakeStore);
+		const stack = new UndoStack(fakeStore);
 		stack.saveBaseState();
 		assert.equal(stack.index, 0);
 		assert.equal(stack.stack.length, 1);
-		let baseState = stack.stack[0];
+		const baseState = stack.stack[0];
 		assert.isNull(baseState.text);
 		assert.equal(baseState.state.bar, 5);
 		fakeStore.state.bar = 30;
@@ -81,13 +79,13 @@ describe('Test undoStack module', function() {
 	});
 
 	it('Test commit', () => {
-		let eStack = new UndoStack();
+		const eStack = new UndoStack();
 		eStack.commit();
 		assertStackEmpty(eStack);
 		eStack.commit('fakeMutation1');
 		assertStackEmpty(eStack);
 
-		let stack = new UndoStack(fakeStore);
+		const stack = new UndoStack(fakeStore);
 		stack.saveBaseState();
 		assert.equal(fakeStore.state.foo, 0);
 		stack.commit('fakeMutation1', null, 'Fake Mutation');
@@ -131,6 +129,4 @@ describe('Test undoStack module', function() {
 		assert.equal(fakeStore.state.bar, 550);
 		assert.equal(stack.undoText(), 'Another Fake Mutation');
 	});
-
-	after(function() { });
 });
