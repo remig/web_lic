@@ -38,9 +38,15 @@ exports.config = {
 	},
 	before: function() {
 		browser.addCommand('getClass', function(selector) {
+			if (typeof selector === 'object' && selector.hasOwnProperty('ELEMENT')) {
+				return this.elementIdAttribute(selector.ELEMENT, 'class').value;
+			}
 			return this.getAttribute(selector, 'class');
 		});
 		browser.addCommand('getCss', function(selector, property) {
+			if (typeof selector === 'object' && selector.hasOwnProperty('ELEMENT')) {
+				return this.elementIdCssProperty(selector.ELEMENT, property).value;
+			}
 			return this.getCssProperty(selector, property).value;
 		});
 	}

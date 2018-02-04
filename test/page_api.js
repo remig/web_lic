@@ -55,6 +55,24 @@ module.exports = browser => {
 				open: 'dropdown open',
 				enabled: '',
 				disabled: 'disabled'
+			},
+			tree: {
+				parentRow: {
+					closed: 'treeIcon treeIconClosed',
+					open: 'treeIcon'
+				},
+				childRow: {
+					hidden: 'treeChildren indent hidden',
+					visible: 'treeChildren indent'
+				}
+			}
+		},
+		selectors: {
+			tree: {
+				arrowIcons: '#tree .treeIcon',
+				topLevelRows: '#tree > ul > li',
+				childRows: '#tree .treeChildren',
+				textContainers: '#tree .treeText'
 			}
 		},
 		highlight: {
