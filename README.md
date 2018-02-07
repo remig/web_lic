@@ -2,6 +2,8 @@
 
 Web Lic is a web browser based application for creating and editing LEGO instruction books. Lic imports 3D models, organizes them into submodels, pages & steps, and exports the end result as images or PDF.
 
+[Try Web Lic out here](http://bugeyedmonkeys.com/alpha/web_lic/web_lic.html)
+
 Highlights:
 
 - A rich, WYSIWYG UI editor, which provides a fully interactive preview window along side a simple navigation tree, to help organize and layout your instructions.
