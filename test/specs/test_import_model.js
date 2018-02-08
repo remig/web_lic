@@ -27,45 +27,36 @@ describe('Import Trivial Model', function() {
 
 	it('Menus should reflect imported model', () => {
 		const m = page.ids.sub_menu, v = page.classes.menu;
-		assert.equal(browser.getClass(m.file.close), v.enabled);
-		assert.equal(browser.getClass(m.file.save), v.enabled);
-		assert.equal(browser.getClass(m.edit.undo), v.disabled);
-		assert.equal(browser.getClass(m.edit.redo), v.disabled);
-		assert.equal(browser.getClass(m.edit.snap_to), v.disabled);
-		assert.equal(browser.getClass(m.view.add_horizontal_guide), v.disabled);
-		assert.equal(browser.getClass(m.export.generate_pdf), v.enabled);
-		assert.equal(browser.getClass(m.export.generate_png_images), v.enabled);
+		assert.equal(browser.getClass2(m.file.close), v.enabled);
+		assert.equal(browser.getClass2(m.file.save), v.enabled);
+		assert.equal(browser.getClass2(m.edit.undo), v.disabled);
+		assert.equal(browser.getClass2(m.edit.redo), v.disabled);
+		assert.equal(browser.getClass2(m.edit.snap_to), v.disabled);
+		assert.equal(browser.getClass2(m.view.add_horizontal_guide), v.disabled);
+		assert.equal(browser.getClass2(m.export.generate_pdf), v.enabled);
+		assert.equal(browser.getClass2(m.export.generate_png_images), v.enabled);
 	});
 
 	it('Canvas should not be blank', () => {
 		assert.isFalse(page.isPageCanvasBlank());
 	});
 
-	function validateHighlight(x, y, width, height) {
-		assert.isTrue(page.highlight.isVisible());
-		const highlightBox = page.highlight.bbox();
-		assert.isAtLeast(highlightBox.x, x);
-		assert.isAtLeast(highlightBox.y, y);
-		assert.equal(highlightBox.width, width);
-		assert.equal(highlightBox.height, height);
-	}
-
 	describe('Test highlight', () => {
 
 		it('Click center of Page should highlight CSI', () => {
 			const canvasSize = browser.getElementSize(page.ids.page_canvas);
 			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
-			validateHighlight(385, 305, 122, 80);
+			assert.isTrue(page.highlight.isValid(385, 305, 122, 80));
 		});
 
 		it('Click just outside CSI should highlight Step', () => {
 			browser.leftClick(page.ids.page_canvas, 385, 305);
-			validateHighlight(365, 285, 162, 120);
+			assert.isTrue(page.highlight.isValid(365, 285, 162, 120));
 		});
 
 		it('Click near edge of Page should highlight Page', () => {
 			browser.leftClick(page.ids.page_canvas, 5, 5);
-			validateHighlight(-5, -5, 906, 706);
+			assert.isTrue(page.highlight.isValid(-5, -5, 906, 706));
 		});
 
 		it('Click off page should remove highlight', () => {

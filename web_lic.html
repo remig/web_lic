@@ -93,11 +93,11 @@
 	</script>
 
 	<script type="text/x-template" id="treeRowTemplate">
-		<span :class="['clickable', 'treeText', {selected: selected}]" @click.stop.prevent="itemClick">{{text}}</span>
+		<span :id="`treeRow_${target.type}_${target.id}`" :class="['clickable', 'treeText', {selected: selected}]" @click.stop.prevent="itemClick">{{text}}</span>
 	</script>
 
 	<script type="text/x-template" id="treeParentRowTemplate">
-		<div>
+		<div :id="`treeParent_${target.type}_${target.id}`">
 			<i :class="['treeIcon', {treeIconClosed: !expanded}]" @click.stop.prevent="arrowClick" />
 			<treeRow :currentItem="currentItem" :target="target" />
 			<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">

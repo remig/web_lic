@@ -62,6 +62,10 @@ module.exports = browser => {
 					open: 'treeIcon'
 				},
 				childRow: {
+					highlighted: 'clickable treeText selected',
+					unhighlighted: 'clickable treeText'
+				},
+				subMenu: {
 					hidden: 'treeChildren indent hidden',
 					visible: 'treeChildren indent'
 				}
@@ -72,20 +76,48 @@ module.exports = browser => {
 				arrowIcons: '#tree .treeIcon',
 				topLevelRows: '#tree > ul > li',
 				childRows: '#tree .treeChildren',
-				textContainers: '#tree .treeText'
+				textContainers: '#tree .treeText',
+				parentRow(type, n) {
+					if (n == null) {
+						return 'div[id^=treeParent_page_]';
+					}
+					const selector = `#treeParent_${type}_${n}`;
+					return {
+						selector,
+						arrow: selector + ' > i',
+						text: selector + ' > span',
+						subMenu: selector + ' > ul'
+					};
+				},
+				childRow(type, n) {
+					return `#treeRow_${type}_${n}`;
+				}
 			}
 		},
 		highlight: {
 			isVisible() {
-				return browser.getCss(page.ids.highlight, 'display') === 'block';
+				return browser.getCss2(page.ids.highlight, 'display') === 'block';
 			},
 			bbox() {
 				return {
-					x: parseFloat(browser.getCss(page.ids.highlight, 'left')),
-					y: parseFloat(browser.getCss(page.ids.highlight, 'top')),
-					width: parseFloat(browser.getCss(page.ids.highlight, 'width')),
-					height: parseFloat(browser.getCss(page.ids.highlight, 'height'))
+					x: parseFloat(browser.getCss2(page.ids.highlight, 'left')),
+					y: parseFloat(browser.getCss2(page.ids.highlight, 'top')),
+					width: parseFloat(browser.getCss2(page.ids.highlight, 'width')),
+					height: parseFloat(browser.getCss2(page.ids.highlight, 'height'))
 				};
+			},
+			isValid(x, y, width, height) {
+				if (!page.highlight.isVisible()) {
+					return false;
+				}
+				const highlightBox = page.highlight.bbox();
+				if (highlightBox.x < x || highlightBox.y < y) {
+					return false;
+				}
+				if (highlightBox.width !== width || highlightBox.height !== height) {
+					return false;
+				}
+				return true;
 			}
 		},
 		isPageCanvasBlank() {
@@ -102,6 +134,5 @@ module.exports = browser => {
 			}).value;
 		}
 	};
-
 	return page;
 };

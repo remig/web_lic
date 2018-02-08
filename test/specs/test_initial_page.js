@@ -22,28 +22,28 @@ describe('Launch empty Page', function() {
 			for (var k in page.ids.menu) {
 				if (page.ids.menu.hasOwnProperty(k)) {
 					assert.isTrue(browser.isVisible(page.ids.menu[k]));
-					assert.equal(browser.getClass(page.ids.menu[k]), page.classes.menu.closed);
+					assert.equal(browser.getClass2(page.ids.menu[k]), page.classes.menu.closed);
 				}
 			}
 		});
 
 		it('Click on File menu should open it', () => {
 			browser.click(page.ids.menu.file);
-			assert.equal(browser.getClass(page.ids.menu.file), page.classes.menu.open);
-			assert.equal(browser.getClass(page.ids.menu.edit), page.classes.menu.closed);
+			assert.equal(browser.getClass2(page.ids.menu.file), page.classes.menu.open);
+			assert.equal(browser.getClass2(page.ids.menu.edit), page.classes.menu.closed);
 			browser.click(page.ids.menu.edit);
-			assert.equal(browser.getClass(page.ids.menu.file), page.classes.menu.closed);
-			assert.equal(browser.getClass(page.ids.menu.edit), page.classes.menu.open);
+			assert.equal(browser.getClass2(page.ids.menu.file), page.classes.menu.closed);
+			assert.equal(browser.getClass2(page.ids.menu.edit), page.classes.menu.open);
 		});
 
 		it("'File -> Open' and 'File -> Import' should be enabled, everything else disabled", () => {
-			assert.equal(browser.getClass(page.ids.sub_menu.file.open), page.classes.menu.enabled);
-			assert.equal(browser.getClass(page.ids.sub_menu.file.open_recent), page.classes.menu.disabled);
-			assert.equal(browser.getClass(page.ids.sub_menu.file.close), page.classes.menu.disabled);
-			assert.equal(browser.getClass(page.ids.sub_menu.file.save), page.classes.menu.disabled);
-			assert.equal(browser.getClass(page.ids.sub_menu.file.save_as), page.classes.menu.disabled);
-			assert.notEqual(browser.getClass(page.ids.sub_menu.file.import_model), page.classes.menu.disabled);
-			assert.equal(browser.getClass(page.ids.sub_menu.file.save_template), page.classes.menu.disabled);
+			assert.equal(browser.getClass2(page.ids.sub_menu.file.open), page.classes.menu.enabled);
+			assert.equal(browser.getClass2(page.ids.sub_menu.file.open_recent), page.classes.menu.disabled);
+			assert.equal(browser.getClass2(page.ids.sub_menu.file.close), page.classes.menu.disabled);
+			assert.equal(browser.getClass2(page.ids.sub_menu.file.save), page.classes.menu.disabled);
+			assert.equal(browser.getClass2(page.ids.sub_menu.file.save_as), page.classes.menu.disabled);
+			assert.notEqual(browser.getClass2(page.ids.sub_menu.file.import_model), page.classes.menu.disabled);
+			assert.equal(browser.getClass2(page.ids.sub_menu.file.save_template), page.classes.menu.disabled);
 		});
 
 		it("'Edit', 'View' and 'Export' menus should all be disabled", () => {
@@ -54,13 +54,13 @@ describe('Launch empty Page', function() {
 				menu.export.generate_pdf, menu.export.generate_png_images
 			];
 			for (let i = 0; i < menus.length; i++) {
-				assert.equal(browser.getClass(menus[i]), page.classes.menu.disabled);
+				assert.equal(browser.getClass2(menus[i]), page.classes.menu.disabled);
 			}
 		});
 
 		it('Click outside menu should close menu', () => {
 			browser.click(page.ids.page_canvas);
-			assert.equal(browser.getClass(page.ids.menu.file), page.classes.menu.closed);
+			assert.equal(browser.getClass2(page.ids.menu.file), page.classes.menu.closed);
 		});
 	});
 
