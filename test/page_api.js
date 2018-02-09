@@ -21,13 +21,13 @@ module.exports = browser => {
 				view: '#view_menu',
 				export: '#export_menu'
 			},
+			filename_container: '#filename',
 			sub_menu: {
 				file: {
 					open: '#open_menu',
 					open_recent: '#open_recent_menu',
 					close: '#close_menu',
 					save: '#save_menu',
-					save_as: '#save_as_menu',
 					import_model: '#import_custom_model_menu',
 					save_template: '#save_template_menu',
 					save_template_as: '#save_template_as_menu',

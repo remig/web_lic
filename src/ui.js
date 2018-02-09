@@ -28,6 +28,7 @@ var app = new Vue({
 		busyText: '',
 		selectedItemLookup: null,
 		contextMenu: null,
+		filename: null,
 		treeUpdateState: false,  // Not used directly, only used to force the tree to redraw
 		menuUpdateState: false   // Not used directly, only used to force the tree to redraw
 	},
@@ -47,6 +48,7 @@ var app = new Vue({
 			app.busyText = 'Loading Model';
 			window.setTimeout(() => {  // Timeout needed to let Vue catch up and draw the busy spinner.  Or something.  Damned if I can't find a better way. Ugh.
 				store.setModel(modelGenerator());
+				app.filename = store.model.filename;
 				LDRender.setPartDictionary(LDParse.partDictionary);
 
 				store.mutations.addTitlePage();
@@ -93,7 +95,7 @@ var app = new Vue({
 			e.target.value = '';
 		},
 		closeModel() {
-			store.model = null;
+			store.model = app.filename = null;
 			store.resetState();
 			undoStack.clear();
 			app.clearState();

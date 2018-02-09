@@ -20,7 +20,7 @@ Vue.component('menu-list', {
 });
 
 Vue.component('nav-menu', {
-	props: ['menuEntryList'],
+	props: ['menuEntryList', 'filename'],
 	template: '#navMenuTemplate'
 });
 
@@ -61,7 +61,6 @@ const menu = [
 				saveAs(blob, store.get.modelFilenameBase('.lic'));
 			}
 		},
-		{text: 'Save As... (NYI)', enabled: () => false, cb: () => {}},
 		{
 			text: 'Import Custom Model...',
 			cb: () => {
@@ -71,6 +70,12 @@ const menu = [
 		{
 			text: 'Import Built-in Model...',
 			children: [
+				{
+					text: 'Trivial Model',
+					cb: () => {
+						app.importRemoteModel('trivial_model.ldr');
+					}
+				},
 				{
 					text: 'Creator Alligator',
 					cb: () => {

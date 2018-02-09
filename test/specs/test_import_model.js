@@ -21,6 +21,11 @@ describe('Import Trivial Model', function() {
 		assert.startsWith(browser.getText(page.ids.status_bar), '"trivial_model.ldr" loaded successfully');
 	});
 
+	it('Filename should be visible in nav bar', () => {
+		assert.isTrue(browser.isExisting(page.ids.filename_container));
+		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr');
+	});
+
 	it('Highlight should be invisible', () => {
 		assert.isFalse(page.highlight.isVisible());
 	});

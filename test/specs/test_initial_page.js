@@ -27,6 +27,10 @@ describe('Launch empty Page', function() {
 			}
 		});
 
+		it('Menu bar filename should not be displayed', () => {
+			assert.isFalse(browser.isExisting(page.ids.filename_container));
+		});
+
 		it('Click on File menu should open it', () => {
 			browser.click(page.ids.menu.file);
 			assert.equal(browser.getClass2(page.ids.menu.file), page.classes.menu.open);
@@ -41,7 +45,6 @@ describe('Launch empty Page', function() {
 			assert.equal(browser.getClass2(page.ids.sub_menu.file.open_recent), page.classes.menu.disabled);
 			assert.equal(browser.getClass2(page.ids.sub_menu.file.close), page.classes.menu.disabled);
 			assert.equal(browser.getClass2(page.ids.sub_menu.file.save), page.classes.menu.disabled);
-			assert.equal(browser.getClass2(page.ids.sub_menu.file.save_as), page.classes.menu.disabled);
 			assert.notEqual(browser.getClass2(page.ids.sub_menu.file.import_model), page.classes.menu.disabled);
 			assert.equal(browser.getClass2(page.ids.sub_menu.file.save_template), page.classes.menu.disabled);
 		});
@@ -66,7 +69,7 @@ describe('Launch empty Page', function() {
 
 	it('Tree container should exist and be empty', () => {
 		assert.isTrue(browser.isVisible(page.ids.tree));
-		assert.isEmpty(browser.getText(page.ids.tree));
+		assert.isEmpty(browser.getText2(page.ids.tree));
 	});
 
 	it('Page Canvas should exist and be blank', () => {
@@ -86,6 +89,6 @@ describe('Launch empty Page', function() {
 
 	it('Status bar should exist and be empty', () => {
 		assert.isTrue(browser.isVisible(page.ids.status_bar));
-		assert.isEmpty(browser.getText(page.ids.status_bar));
+		assert.isEmpty(browser.getText2(page.ids.status_bar));
 	});
 });

@@ -31,7 +31,7 @@
 		<div id="busyOverlay" :class="{hidden: busyText === ''}">
 			<div id="busyText">{{busyText}}<div id="spinner"></div></div>
 		</div>
-		<nav-menu :menu-entry-list="navBarContent" :key="menuUpdateState"></nav-menu>
+		<nav-menu :menu-entry-list="navBarContent" :filename="filename" :key="menuUpdateState"></nav-menu>
 		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
 			<div id="leftPane" class="split split-horizontal">
 				<div id="tree">
@@ -72,6 +72,10 @@
 				</li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
+				<template v-if="filename">
+					<li><span id="filename" class="navbar-text">{{filename}}</span></li>
+					<li><span class="navbar-text">|</span></li>
+				</template>
 				<li><a href="http://bugeyedmonkeys.com" target="_blank">Web Lic 0.1</a></li>
 			</ul>
 		</nav>

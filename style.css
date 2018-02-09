@@ -18,9 +18,14 @@ div#container {
 	margin-right: 0px;
 }
 
-.navbar-nav li a {
+.navbar-nav li > a {
 	padding-top: 8px;
 	padding-bottom: 8px;
+}
+
+.navbar-text {
+	margin: 0px;
+	padding: 8px 0px 8px 15px;
 }
 
 .menu-text {

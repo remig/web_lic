@@ -105,4 +105,18 @@ describe('Import Trivial Model', function() {
 		assert.equal(browser.getClass2(step0Selector.subMenu), page.classes.tree.subMenu.visible);
 		assert.isTrue(page.highlight.isValid(388, 309, 122, 80));
 	});
+
+	it('Move page element should not alter tree open / close state', () => {
+		const page0 = page.selectors.tree.parentRow('page', 0);
+		const page1 = page.selectors.tree.parentRow('page', 1);
+		browser.click(page0.arrow);
+		browser.click(page1.arrow);
+		assert.equal(browser.getClass2(page0.arrow), page.classes.tree.parentRow.open);
+		assert.equal(browser.getClass2(page1.arrow), page.classes.tree.parentRow.open);
+		const canvasSize = browser.getElementSize(page.ids.page_canvas);
+		browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+		browser.keys(['ArrowRight', 'ArrowRight']);
+		assert.equal(browser.getClass2(page0.arrow), page.classes.tree.parentRow.open);
+		assert.equal(browser.getClass2(page1.arrow), page.classes.tree.parentRow.open);
+	});
 });
