@@ -14,6 +14,8 @@ const fakeStore = {
 	replaceState(newState) {
 		fakeStore.state = newState;
 	},
+	save() {
+	},
 	mutations: {
 		fakeMutation1() {
 			fakeStore.state.foo++;

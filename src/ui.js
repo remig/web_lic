@@ -34,21 +34,21 @@ var app = new Vue({
 	},
 	methods: {
 		importRemoteModel(url) {
-			app.importModel(() => LDParse.loadRemotePart(url));
+			this.importModel(() => LDParse.loadRemotePart(url));
 		},
 		importLocalModel(content, filename) {
-			app.importModel(() => LDParse.loadPartContent(content, filename));
+			this.importModel(() => LDParse.loadPartContent(content, filename));
 		},
 		importModel(modelGenerator) {
 
 			const start = Date.now();
 			if (store.model) {
-				app.closeModel();
+				this.closeModel();
 			}
-			app.busyText = 'Loading Model';
+			this.busyText = 'Loading Model';
 			window.setTimeout(() => {  // Timeout needed to let Vue catch up and draw the busy spinner.  Or something.  Damned if I can't find a better way. Ugh.
 				store.setModel(modelGenerator());
-				app.filename = store.model.filename;
+				this.filename = store.model.filename;
 				LDRender.setPartDictionary(LDParse.partDictionary);
 
 				store.mutations.addTitlePage();
@@ -56,15 +56,23 @@ var app = new Vue({
 				store.get.label(1).text = `${LDParse.model.get.partCount(store.model)} Parts, ${store.get.pageCount()} Pages`;
 				store.mutations.layoutTitlePage(store.get.titlePage());
 
-				app.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
+				this.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
 				undoStack.saveBaseState();
-				app.forceUIUpdate();
+				this.forceUIUpdate();
 
 				const end = Date.now();
-				app.busyText = '';
-				app.statusText = `"${store.get.modelFilename()}" loaded successfully (${util.formatTime(start, end)})`;
-				Vue.nextTick(() => app.drawCurrentPage());
+				this.busyText = '';
+				this.statusText = `"${store.get.modelFilename()}" loaded successfully (${util.formatTime(start, end)})`;
+				Vue.nextTick(this.drawCurrentPage);
 			}, 0);
+		},
+		openLicFile(content) {
+			store.load(content);
+			this.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
+			undoStack.saveBaseState();
+			this.clearSelected();
+			this.drawCurrentPage();
+			this.forceUIUpdate();
 		},
 		triggerModelImport(e) {
 			const reader = new FileReader();
@@ -79,75 +87,66 @@ var app = new Vue({
 		triggerOpenFile(e) {
 			const reader = new FileReader();
 			reader.onload = function(e) {
-				const fileJSON = JSON.parse(e.target.result);
-				store.model = fileJSON.model;
-				LDParse.setPartDictionary(fileJSON.partDictionary);
-				LDParse.setColorTable(fileJSON.colorTable);
-				LDRender.setPartDictionary(fileJSON.partDictionary);
-				store.replaceState(fileJSON.state);
-				app.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
-				undoStack.saveBaseState();
-				app.clearSelected();
-				app.drawCurrentPage();
-				app.forceUIUpdate();
+				app.openLicFile(JSON.parse(e.target.result));
 			};
 			reader.readAsText(e.target.files[0]);
 			e.target.value = '';
 		},
 		closeModel() {
-			store.model = app.filename = null;
+			store.model = null;
 			store.resetState();
 			undoStack.clear();
-			app.clearState();
+			this.clearState();
 			util.emptyNode(document.getElementById('canvasHolder'));
 			Vue.nextTick(() => {
-				app.clearSelected();
-				app.clearPageCanvas();
+				this.clearSelected();
+				this.clearPageCanvas();
 			});
 		},
 		setCurrentPage(page) {
-			if (!util.itemEq(page, app.currentPageLookup.type)) {
-				app.clearSelected();
-				app.currentPageLookup = store.get.itemToLookup(page);
+			if (!util.itemEq(page, this.currentPageLookup.type)) {
+				this.clearSelected();
+				this.currentPageLookup = store.get.itemToLookup(page);
 			}
-			Vue.nextTick(app.drawCurrentPage);
+			Vue.nextTick(this.drawCurrentPage);
 		},
 		setSelected(target) {
-			if (!app.selectedItemLookup || !util.itemEq(target, app.selectedItemLookup)) {
+			if (!this.selectedItemLookup || !util.itemEq(target, this.selectedItemLookup)) {
 				const targetPage = store.get.pageForItem(target);
-				if (targetPage && !util.itemEq(targetPage, app.currentPageLookup)) {
-					app.setCurrentPage(targetPage);
+				if (targetPage && !util.itemEq(targetPage, this.currentPageLookup)) {
+					this.setCurrentPage(targetPage);
 				}
-				app.selectedItemLookup = store.get.itemToLookup(target);
+				this.selectedItemLookup = store.get.itemToLookup(target);
 			}
 		},
 		forceUIUpdate() {
 			// If I understood Vue better, I'd create components that damn well updated themselves properly.
-			app.treeUpdateState = !app.treeUpdateState;
-			app.menuUpdateState = !app.menuUpdateState;
-			if (app.selectedItemLookup && app.selectedItemLookup.id != null) {
-				app.selectedItemLookup.id++;
-				app.selectedItemLookup.id--;
+			this.treeUpdateState = !this.treeUpdateState;
+			this.menuUpdateState = !this.menuUpdateState;
+			if (this.selectedItemLookup && this.selectedItemLookup.id != null) {
+				this.selectedItemLookup.id++;
+				this.selectedItemLookup.id--;
 			}
 		},
 		redrawUI(clearSelection) {
 			Vue.nextTick(() => {
 				if (clearSelection) {
-					app.clearSelected();
+					this.clearSelected();
 				}
-				app.forceUIUpdate();
-				app.drawCurrentPage();
+				this.forceUIUpdate();
+				this.drawCurrentPage();
 			});
 		},
 		clearState() {
-			app.currentPageLookup = null;
-			app.statusText = '';
-			app.selectedItemLookup = null;
-			app.contextMenu = null;
-			app.forceUIUpdate();
+			this.currentPageLookup = null;
+			this.statusText = '';
+			this.selectedItemLookup = null;
+			this.contextMenu = null;
+			this.filename = null;
+			this.forceUIUpdate();
 		},
 		clearSelected() {
-			app.selectedItemLookup = null;
+			this.selectedItemLookup = null;
 		},
 		targetBox(t) {
 			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
@@ -161,24 +160,24 @@ var app = new Vue({
 			return box;
 		},
 		inBox(x, y, t) {
-			const box = app.targetBox(t);
+			const box = this.targetBox(t);
 			return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
 		},
 		findClickTarget(mx, my) {
-			const page = store.get.lookupToItem(app.currentPageLookup);
+			const page = store.get.lookupToItem(this.currentPageLookup);
 			if (!page) {
 				return null;
 			}
 			if (page.numberLabel != null) {
 				const lbl = store.get.pageNumber(page.numberLabel);
-				if (app.inBox(mx, my, lbl)) {
+				if (this.inBox(mx, my, lbl)) {
 					return lbl;
 				}
 			}
 			if (page.labels != null) {
 				for (let i = 0; i < page.labels.length; i++) {
 					const lbl = store.get.label(page.labels[i]);
-					if (app.inBox(mx, my, lbl)) {
+					if (this.inBox(mx, my, lbl)) {
 						return lbl;
 					}
 				}
@@ -186,12 +185,12 @@ var app = new Vue({
 			for (let i = 0; i < page.steps.length; i++) {
 				const step = store.get.step(page.steps[i]);
 				const csi = store.get.csi(step.csiID);
-				if (step.csiID != null && app.inBox(mx, my, csi)) {
+				if (step.csiID != null && this.inBox(mx, my, csi)) {
 					return csi;
 				}
 				if (step.numberLabel != null) {
 					const lbl = store.get.stepNumber(step.numberLabel);
-					if (app.inBox(mx, my, lbl)) {
+					if (this.inBox(mx, my, lbl)) {
 						return lbl;
 					}
 				}
@@ -200,19 +199,19 @@ var app = new Vue({
 					for (let j = 0; j < pli.pliItems.length; j++) {
 						const idx = pli.pliItems[j];
 						const pliItem = store.get.pliItem(idx);
-						if (app.inBox(mx, my, pliItem)) {
+						if (this.inBox(mx, my, pliItem)) {
 							return pliItem;
 						}
 						const pliQty = store.get.pliQty(pliItem.quantityLabel);
-						if (app.inBox(mx, my, pliQty)) {
+						if (this.inBox(mx, my, pliQty)) {
 							return pliQty;
 						}
 					}
-					if (app.inBox(mx, my, pli)) {
+					if (this.inBox(mx, my, pli)) {
 						return pli;
 					}
 				}
-				if (app.inBox(mx, my, step)) {
+				if (this.inBox(mx, my, step)) {
 					return step;
 				}
 			}
@@ -222,22 +221,22 @@ var app = new Vue({
 			return ['step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'label'].includes(nodeType);
 		},
 		globalClick(e) {
-			app.closeContextMenu();
+			this.closeContextMenu();
 			let target;
 			if (e.target.id === 'pageCanvas') {
-				target = app.findClickTarget(e.offsetX, e.offsetY);
+				target = this.findClickTarget(e.offsetX, e.offsetY);
 			}
 			if (target) {
-				app.setSelected(target);
+				this.setSelected(target);
 			} else {
-				app.clearSelected();
+				this.clearSelected();
 			}
 		},
 		rightClick(e) {
-			if (app.selectedItemLookup != null) {
-				const menu = ContextMenu(app.selectedItemLookup.type, app, store, undoStack);
+			if (this.selectedItemLookup != null) {
+				const menu = ContextMenu(this.selectedItemLookup.type, this, store, undoStack);
 				if (menu && menu.length) {
-					app.contextMenu = menu;
+					this.contextMenu = menu;
 					$('#contextMenu')
 						.css({
 							'outline-style': 'none',
@@ -252,13 +251,13 @@ var app = new Vue({
 			$('#contextMenu').css('display', 'none');
 		},
 		globalKeyPress(e) {
-			app.closeContextMenu();
-			const selItem = app.selectedItemLookup;
-			if (e.key === 'PageDown' && !store.get.isLastPage(app.currentPageLookup)) {
-				app.setCurrentPage(store.get.nextPage(app.currentPageLookup));
-			} else if (e.key === 'PageUp' && !store.get.isTitlePage(app.currentPageLookup)) {
-				app.setCurrentPage(store.get.prevPage(app.currentPageLookup));
-			} else if (selItem && e.key.startsWith('Arrow') && app.isMoveable(selItem.type)) {
+			this.closeContextMenu();
+			const selItem = this.selectedItemLookup;
+			if (e.key === 'PageDown' && !store.get.isLastPage(this.currentPageLookup)) {
+				this.setCurrentPage(store.get.nextPage(this.currentPageLookup));
+			} else if (e.key === 'PageUp' && !store.get.isTitlePage(this.currentPageLookup)) {
+				this.setCurrentPage(store.get.prevPage(this.currentPageLookup));
+			} else if (selItem && e.key.startsWith('Arrow') && this.isMoveable(selItem.type)) {
 				let dx = 0, dy = 0;
 				const dv = 30;
 				if (e.key === 'ArrowUp') {
@@ -276,10 +275,10 @@ var app = new Vue({
 					x: item.x + dx,
 					y: item.y + dy
 				}, `Move ${util.prettyPrint(selItem.type)}`);
-				app.redrawUI();
+				this.redrawUI();
 			} else {
 				// Check if key is a menu shortcut
-				const menu = app.navBarContent;
+				const menu = this.navBarContent;
 				const key = (e.ctrlKey ? 'ctrl+' : '') + e.key;
 				for (let i = 0; i < menu.length; i++) {
 					for (let j = 0; j < menu[i].children.length; j++) {
@@ -299,10 +298,10 @@ var app = new Vue({
 			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
 		},
 		drawCurrentPage() {
-			if (app.currentPageLookup != null) {
+			if (this.currentPageLookup != null) {
 				const canvas = document.getElementById('pageCanvas');
 				canvas.width = canvas.width;
-				app.drawPage(store.get.lookupToItem(app.currentPageLookup), canvas);
+				this.drawPage(store.get.lookupToItem(this.currentPageLookup), canvas);
 			}
 		},
 		drawPage(page, canvas) {
@@ -424,6 +423,16 @@ var app = new Vue({
 				height: `${box.height + 6}px`
 			};
 		}
+	},
+	mounted: function() {
+
+		window.app = this;
+		window.store = store;
+
+		var localState = localStorage.getItem('lic_state');
+		if (localState) {
+			this.openLicFile(JSON.parse(localState));
+		}
 	}
 });
 
@@ -449,8 +458,5 @@ document.body.addEventListener('keydown', e => {
 //app.importRemoteModel('Space/894 - Mobile Ground Tracking Station.mpd');
 //app.importRemoteModel('Star Wars/4487 - Jedi Starfighter & Slave I.mpd');
 //app.importRemoteModel('trivial_model.ldr');
-
-window.app = app;
-window.store = store;
 
 })();

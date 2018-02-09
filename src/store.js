@@ -1,4 +1,4 @@
-/* global module: false, util: false, LDParse: false */
+/* global module: false, util: false, saveAs: false, LDParse: false, LDRender: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 store = (function() {
@@ -36,6 +36,27 @@ const store = {
 	},
 	resetState() {
 		store.state = util.clone(emptyState);
+	},
+	load(content) {
+		store.model = content.model;
+		LDParse.setPartDictionary(content.partDictionary);
+		LDParse.setColorTable(content.colorTable);
+		LDRender.setPartDictionary(content.partDictionary);
+		store.replaceState(content.state);
+	},
+	save(mode) {  // mode is either 'file' or 'localStorage'
+		const content = JSON.stringify({
+			partDictionary: LDParse.partDictionary,
+			colorTable: LDParse.colorTable,
+			model: store.model,
+			state: store.state
+		});
+		if (mode === 'file') {
+			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+			saveAs(blob, store.get.modelFilenameBase('.lic'));
+		} else if (mode === 'localStorage') {
+			window.localStorage.setItem('lic_state', content);
+		}
 	},
 	get: {
 		pageCount() {

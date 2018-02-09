@@ -16,6 +16,7 @@ function UndoStack(store) {
 		this.stack = [];
 		this.index = -1;
 		this.store = store;
+		this.localStorageTimer = null;
 		return this;
 	}
 	return new UndoStack(store);
@@ -40,6 +41,15 @@ UndoStack.prototype.commit = function(mutationName, opts, undoText) {
 		text: undoText || ''
 	});
 	this.index++;
+
+	// Save the current state to localStorage if we haven't saved it in the last 30 seconds
+	// Need 'typeof setTimeout' check to not crash in unit tests
+	if (typeof setTimeout === 'function' && this.localStorageTimer == null) {
+		this.store.save('localStorage');
+		this.localStorageTimer = setTimeout(() => {
+			this.localStorageTimer = null;
+		}, 30 * 1000);
+	}
 };
 
 // Copy the store's current state into the undoStack's initial base state

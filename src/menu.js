@@ -1,4 +1,4 @@
-/* global Vue: false, $: false, saveAs: false, LDParse: false, InstructionExporter: false */
+/* global Vue: false, $: false, InstructionExporter: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 Menu = (function() {
@@ -43,7 +43,7 @@ const menu = [
 		{
 			text: 'Close',
 			enabled: enableIfModel,
-			cb: function() {
+			cb: () => {
 				app.closeModel();
 			}
 		},
@@ -51,14 +51,7 @@ const menu = [
 			text: 'Save',
 			enabled: enableIfModel,
 			cb: () => {
-				const content = {
-					partDictionary: LDParse.partDictionary,
-					colorTable: LDParse.colorTable,
-					model: store.model,
-					state: store.state
-				};
-				const blob = new Blob([JSON.stringify(content)], {type: 'text/plain;charset=utf-8'});
-				saveAs(blob, store.get.modelFilenameBase('.lic'));
+				store.save('file');
 			}
 		},
 		{
