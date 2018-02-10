@@ -1,6 +1,7 @@
 /* global Vue: false, $: false, Split: false, UndoStack: false, LDParse: false, LDRender: false, util: false, store: false, Menu: false, ContextMenu: false */
 
-(function() {
+// eslint-disable-next-line no-implicit-globals, no-undef
+app = (function() {
 'use strict';
 
 const undoStack = new UndoStack(store);
@@ -24,11 +25,15 @@ var app = new Vue({
 	el: '#container',
 	data: {  // Store any transient UI state data here.  Do *not* store state items here; Vue turns these into observers
 		currentPageLookup: null,
+		selectedItemLookup: null,
 		statusText: '',
 		busyText: '',
-		selectedItemLookup: null,
 		contextMenu: null,
 		filename: null,
+		dirtyState: {
+			undoIndex: 0,
+			lastSaveIndex: 0
+		},
 		treeUpdateState: false,  // Not used directly, only used to force the tree to redraw
 		menuUpdateState: false   // Not used directly, only used to force the tree to redraw
 	},
@@ -68,11 +73,16 @@ var app = new Vue({
 		},
 		openLicFile(content) {
 			store.load(content);
+			this.filename = store.model.filename;
 			this.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
 			undoStack.saveBaseState();
 			this.clearSelected();
 			this.drawCurrentPage();
 			this.forceUIUpdate();
+		},
+		save() {
+			store.save('file');
+			app.dirtyState.lastSaveIndex = undoStack.index;
 		},
 		triggerModelImport(e) {
 			const reader = new FileReader();
@@ -139,10 +149,13 @@ var app = new Vue({
 		},
 		clearState() {
 			this.currentPageLookup = null;
-			this.statusText = '';
 			this.selectedItemLookup = null;
+			this.statusText = '';
+			this.busyText = '';
 			this.contextMenu = null;
 			this.filename = null;
+			this.dirtyState.undoIndex = 0;
+			this.dirtyState.lastSaveIndex = 0;
 			this.forceUIUpdate();
 		},
 		clearSelected() {
@@ -237,7 +250,7 @@ var app = new Vue({
 				const menu = ContextMenu(this.selectedItemLookup.type, this, store, undoStack);
 				if (menu && menu.length) {
 					this.contextMenu = menu;
-					$('#contextMenu')
+					$('#contextMenu')  // TODO: Move this into a menu component method
 						.css({
 							'outline-style': 'none',
 							display: 'block',
@@ -390,6 +403,9 @@ var app = new Vue({
 				treeUpdateState: this.treeUpdateState  // Reactive property used to trigger tree update
 			};
 		},
+		isDirty() {
+			return this.dirtyState.undoIndex !== this.dirtyState.lastSaveIndex;
+		},
 		navBarContent() {
 			return Menu(this, store, undoStack);
 		},
@@ -425,10 +441,9 @@ var app = new Vue({
 		}
 	},
 	mounted: function() {
-
-		window.app = this;
-		window.store = store;
-
+		undoStack.onChange(() => {
+			this.dirtyState.undoIndex = undoStack.index;
+		});
 		var localState = localStorage.getItem('lic_state');
 		if (localState) {
 			this.openLicFile(JSON.parse(localState));
@@ -444,9 +459,18 @@ Split(['#leftPane', '#rightPane'], {
 
 document.body.addEventListener('keyup', e => app.globalKeyPress(e));
 document.body.addEventListener('keydown', e => {
-	if (e.key === 'PageDown' || e.key === 'PageUp' || e.key.startsWith('Arrow')) {
+	if (e.key === 'PageDown' || e.key === 'PageUp' || e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey)) {
 		e.preventDefault();
 	}
+});
+
+window.addEventListener('beforeunload', e => {
+	if (app && app.isDirty) {
+		const msg = 'You have unsaved changes. Leave anyway?';
+		e.returnValue = msg;
+		return msg;
+	}
+	return null;
 });
 
 //app.importRemoteModel('Creator/20015 - Alligator.mpd');
@@ -458,5 +482,7 @@ document.body.addEventListener('keydown', e => {
 //app.importRemoteModel('Space/894 - Mobile Ground Tracking Station.mpd');
 //app.importRemoteModel('Star Wars/4487 - Jedi Starfighter & Slave I.mpd');
 //app.importRemoteModel('trivial_model.ldr');
+
+return app;
 
 })();

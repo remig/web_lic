@@ -69,4 +69,18 @@ describe('Import Trivial Model', function() {
 			assert.isFalse(page.highlight.isVisible());
 		});
 	});
+
+	it('Modify model should set dirty state and save state to localStorage', () => {
+		assert.isNull(browser.localStorage('GET', 'lic_state').value);
+		assert.isTrue(browser.isExisting(page.ids.filename_container));
+		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr');
+		const canvasSize = browser.getElementSize(page.ids.page_canvas);
+		browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+		browser.keys(['ArrowRight']);
+		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr *');
+		let localStorage = browser.localStorage('GET', 'lic_state').value;
+		assert.isNotNull(localStorage);
+		localStorage = JSON.parse(localStorage);
+		assert.containsAllKeys(localStorage, ['colorTable', 'model', 'partDictionary', 'state']);
+	});
 });

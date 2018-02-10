@@ -30,6 +30,10 @@ function enableIfModel() {
 	return store != null && store.model != null;
 }
 
+function defaultCallback() {
+	// TOOD: most menu commands should just call the associated method in app.
+};
+
 const menu = [
 	{name: 'File', children: [
 		{
@@ -49,9 +53,10 @@ const menu = [
 		},
 		{
 			text: 'Save',
+			shortcut: 'ctrl+s',
 			enabled: enableIfModel,
 			cb: () => {
-				store.save('file');
+				app.save();
 			}
 		},
 		{

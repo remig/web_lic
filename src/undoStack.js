@@ -17,10 +17,15 @@ function UndoStack(store) {
 		this.index = -1;
 		this.store = store;
 		this.localStorageTimer = null;
+		this.onChangeCB = null;
 		return this;
 	}
 	return new UndoStack(store);
 }
+
+UndoStack.prototype.onChange = function(onChangeCB) {
+	this.onChangeCB = onChangeCB;
+};
 
 UndoStack.prototype.commit = function(mutationName, opts, undoText) {
 
@@ -30,7 +35,7 @@ UndoStack.prototype.commit = function(mutationName, opts, undoText) {
 		return;  // Do not allow commit without initial base state
 	}
 
-	this.store.mutations[mutationName](opts);
+	this.store.mutations[mutationName](opts);  // Perform the actual action
 
 	if (this.index < this.stack.length - 1) {
 		// If there's undo actions after the 'current' action, delete them
@@ -40,7 +45,7 @@ UndoStack.prototype.commit = function(mutationName, opts, undoText) {
 		state: clone(this.store.state),
 		text: undoText || ''
 	});
-	this.index++;
+	setIndex(this, this.index + 1);
 
 	// Save the current state to localStorage if we haven't saved it in the last 30 seconds
 	// Need 'typeof setTimeout' check to not crash in unit tests
@@ -52,15 +57,22 @@ UndoStack.prototype.commit = function(mutationName, opts, undoText) {
 	}
 };
 
+function setIndex(stack, newIndex) {
+	stack.index = newIndex;
+	if (stack.onChangeCB) {
+		stack.onChangeCB();
+	}
+}
+
 // Copy the store's current state into the undoStack's initial base state
 UndoStack.prototype.saveBaseState = function() {
 	this.stack = [{state: clone(this.store.state), text: null}];
-	this.index = 0;
+	setIndex(this, 0);
 };
 
 UndoStack.prototype.undo = function() {
 	if (this.isUndoAvailable()) {
-		this.index--;
+		setIndex(this, this.index - 1);
 		const newState = clone(this.stack[this.index].state);
 		this.store.replaceState(newState);
 	}
@@ -68,7 +80,7 @@ UndoStack.prototype.undo = function() {
 
 UndoStack.prototype.redo = function() {
 	if (this.isRedoAvailable()) {
-		this.index++;
+		setIndex(this, this.index + 1);
 		const newState = clone(this.stack[this.index].state);
 		this.store.replaceState(newState);
 	}
@@ -76,7 +88,7 @@ UndoStack.prototype.redo = function() {
 
 UndoStack.prototype.clear = function() {
 	this.stack = [];
-	this.index = -1;
+	setIndex(this, -1);
 };
 
 UndoStack.prototype.isUndoAvailable = function() {

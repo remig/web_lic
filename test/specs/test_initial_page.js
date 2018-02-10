@@ -91,4 +91,8 @@ describe('Launch empty Page', function() {
 		assert.isTrue(browser.isVisible(page.ids.status_bar));
 		assert.isEmpty(browser.getText2(page.ids.status_bar));
 	});
+
+	it('Nothing should be saved to localStorage', () => {
+		assert.isNull(browser.localStorage('GET', 'lic_state').value);
+	});
 });
