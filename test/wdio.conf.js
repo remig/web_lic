@@ -1,4 +1,7 @@
-/* global exports: false, browser: false */
+/* global exports: false, require: false, browser: false */
+
+const path = require('path');
+const downloadPath = path.resolve('chromeDownloads');
 
 exports.config = {
 	specs: [
@@ -15,7 +18,12 @@ exports.config = {
 	maxInstances: 1,
 	capabilities: [{
 		maxInstances: 1,
-		browserName: 'chrome'
+		browserName: 'chrome',
+		chromeOptions: {
+			prefs: {
+				'download.default_directory': downloadPath
+			}
+		}
 	}],
 	port: '9515',
 	path: '/',
@@ -25,6 +33,7 @@ exports.config = {
 	deprecationWarnings: false,
 	bail: 0,
 	screenshotPath: './errorShots/',
+	downloadPath: downloadPath,
 	baseUrl: 'http://localhost',
 	waitforTimeout: 1000000,
 	connectionRetryTimeout: 90000,

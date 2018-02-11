@@ -1,5 +1,6 @@
 test/node_modules/*
 test/errorShots
+test/chromeDownloads
 *.sublime-project
 *.sublime-workspace
 src/snippets.js

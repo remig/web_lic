@@ -1,21 +1,38 @@
-/* global browser: false, require: false, before: false, describe: false, it: false, app: false */
+/* global browser: false, require: false, before: false, after: false, describe: false, it: false, app: false */
 
 'use strict';
+const fs = require('fs');
 const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
 const page = require('../page_api')(browser);
 const trivial_model = require('../trivial_model.json').model;
+const downloadPath = browser.options.downloadPath;
+const saveFile = `${downloadPath}/trivial_model.lic`;
+
+const clearDownloads = () => {
+	if (fs.existsSync(downloadPath)) {
+		fs.readdirSync(downloadPath).forEach(fn => {
+			fs.unlinkSync(`${downloadPath}/${fn}`);
+		});
+	}
+};
 
 describe('Import Trivial Model', function() {
 
 	before(() => {
+		if (!fs.existsSync(downloadPath)) {
+			fs.mkdirSync(downloadPath);
+		}
+		clearDownloads();
 		browser.url('http://192.168.1.101:9977/web_lic/web_lic.html');
 		browser.execute(function(model, fn) {
 			app.importLocalModel(model, fn);
 		}, trivial_model, 'trivial_model.ldr');
 		browser.waitForText('#statusBar', 9000);
 	});
+
+	after(clearDownloads);
 
 	it('Status bar should report successful import', () => {
 		assert.startsWith(browser.getText(page.ids.status_bar), '"trivial_model.ldr" loaded successfully');
@@ -82,5 +99,17 @@ describe('Import Trivial Model', function() {
 		assert.isNotNull(localStorage);
 		localStorage = JSON.parse(localStorage);
 		assert.containsAllKeys(localStorage, ['colorTable', 'model', 'partDictionary', 'state']);
+	});
+
+	it('Save file should download a file and reset dirty flag', () => {
+		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr *');
+		browser.click(page.ids.menu.file);
+		browser.click(page.ids.sub_menu.file.save);
+		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr');
+		browser.pause(500);
+		assert.isTrue(fs.existsSync(downloadPath));
+		assert.isTrue(fs.existsSync(saveFile));
+		const content = JSON.parse(fs.readFileSync(saveFile, {encoding: 'utf8', flag: 'r'}).replace(/^\uFEFF/, ''));
+		assert.containsAllKeys(content, ['colorTable', 'model', 'partDictionary', 'state']);
 	});
 });
