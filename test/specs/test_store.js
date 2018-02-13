@@ -25,6 +25,13 @@ describe('Test state store module', function() {
 		});
 	});
 
+	function resetState() {
+		store.resetState();
+		store.setModel(trivial_part_dict['trivial_model.ldr']);
+		store.mutations.addTitlePage();
+		store.mutations.addInitialPages(trivial_part_dict);
+	}
+
 	function verifyInitialState() {
 		assert.isNull(store.state.titlePage);
 		assert.isEmpty(store.state.pages);
@@ -69,13 +76,15 @@ describe('Test state store module', function() {
 		assert.exists(store.get.label);
 		assert.exists(store.mutations);
 		assert.exists(store.mutations.addStateItem);
-		assert.exists(store.mutations.moveItem);
+		assert.exists(store.mutations.deleteItem);
+		assert.exists(store.mutations.repositionItem);
 		assert.exists(store.mutations.moveStepToPage);
 		assert.exists(store.mutations.moveStepToPreviousPage);
 		assert.exists(store.mutations.moveStepToNextPage);
 		assert.exists(store.mutations.mergeSteps);
 		assert.exists(store.mutations.deletePage);
 		assert.exists(store.mutations.deleteStep);
+		assert.exists(store.mutations.deletePLI);
 		assert.exists(store.mutations.renumber);
 		assert.exists(store.mutations.renumberSteps);
 		assert.exists(store.mutations.renumberPages);
@@ -204,7 +213,8 @@ describe('Test state store module', function() {
 		assert.isNull(store.get.nextPage(null));
 		assert.isNull(store.get.nextPage({id: null}));
 
-		assert.equal(store.get.prevPage(store.state.pages[0]), store.state.titlePage);
+		assert.equal(store.get.prevPage(store.state.pages[0], true), store.state.titlePage);
+		assert.isNull(store.get.prevPage(store.state.pages[0], false));
 		assert.equal(store.get.prevPage(store.state.pages[1]), store.state.pages[0]);
 		assert.equal(store.get.prevPage(store.state.pages[2]), store.state.pages[1]);
 		assert.isNull(store.get.prevPage(store.state.titlePage));
@@ -284,9 +294,10 @@ describe('Test state store module', function() {
 		assert.deepEqual(store.get.stepNumber(0), store.state.stepNumbers[0]);
 	});
 
-	describe('Verify complex mutations', () => {
+	describe('Move step to page', () => {
 
-		it('Move 2nd Step to 1st Page', () => {
+		it('Move Step to previous page', () => {
+			resetState();
 			const step = {type: 'step', id: 2};
 			assert.equal(store.get.parent(step).id, 1);
 			assert.equal(store.get.lookupToItem(step).id, 2);
@@ -297,12 +308,64 @@ describe('Test state store module', function() {
 			assert.equal(store.state.pages[1].steps.length, 0);
 		});
 
-		it('Move 2nd Step back to 2nd Page', () => {
+		it('Move Step back to next page', () => {
 			const step = {type: 'step', id: 2};
 			store.mutations.moveStepToNextPage(step);
 			assert.deepEqual(store.state.pages[0].steps, [1]);
 			assert.deepEqual(store.state.pages[1].steps, [2]);
 			assert.equal(store.state.steps[2].parent.id, 1);
 		});
+
+		it('Should not move first step to previous page', () => {
+			store.mutations.moveStepToPreviousPage({type: 'step', id: 1});
+			assert.equal(store.state.steps[1].parent.id, 0);
+			assert.equal(store.state.pages[0].steps[0], 1);
+		});
+
+		it('Should not move last step anywhere', () => {
+			store.mutations.moveStepToNextPage({type: 'step', id: 3});
+			assert.equal(store.state.steps[3].parent.id, 2);
+			assert.equal(store.state.pages[2].steps[0], 3);
+		});
+	});
+
+	describe('Delete blank page', () => {
+
+		it('Should not delete page with steps', () => {
+			resetState();
+			store.mutations.deletePage({type: 'page', id: 2});
+			assert.equal(store.state.pages.length, 3);
+			assert.equal(store.state.pages[2].id, 2);
+			assert.equal(store.state.pages[2].steps.length, 1);
+		});
+
+		it('Delete empty page', () => {
+			store.mutations.moveStepToPreviousPage({type: 'step', id: 2});
+			assert.equal(store.state.pages[0].steps.length, 2);
+			assert.isEmpty(store.state.pages[1].steps);
+			assert.equal(store.state.steps[2].parent.id, 0);
+
+			store.mutations.deletePage({type: 'page', id: 1});
+			assert.equal(store.state.pages.length, 2);
+			assert.equal(store.state.pageNumbers.length, 2);
+			assert.deepEqual(store.state.pageNumbers.map(el => el.id), [0, 2]);
+			assert.isFalse(store.get.isLastPage({type: 'titlePage', id: 0}));
+			assert.equal(store.get.numberLabel(store.state.pages[1]), store.state.pageNumbers[1]);
+		});
+
+		it('Delete another page', () => {
+			store.mutations.deletePage({type: 'page', id: 2});
+			assert.equal(store.state.pages[1].steps.length, 1);
+			store.mutations.moveStepToPreviousPage({type: 'step', id: 3});
+			assert.equal(store.state.pages[1].steps.length, 0);
+			store.mutations.deletePage({type: 'page', id: 2});
+			assert.equal(store.state.pages.length, 1);
+			assert.isFalse(store.get.isLastPage({type: 'titlePage', id: 0}));
+			assert.equal(store.get.numberLabel(store.state.pages[0]), store.state.pageNumbers[0]);
+		});
+	});
+
+	it('Move all steps to 1 page', () => {
+//		store.mutations.moveStepToPreviousPage({type: 'step', id: 3});
 	});
 });

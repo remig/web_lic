@@ -55,6 +55,7 @@ const store = {
 			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
 			saveAs(blob, store.get.modelFilenameBase('.lic'));
 		} else if (mode === 'localStorage') {
+			console.log('Updating localStorage');
 			window.localStorage.setItem('lic_state', content);
 		}
 	},
@@ -98,6 +99,8 @@ const store = {
 		isLastPage(page) {
 			if (!page || page.id == null) {
 				return false;
+			} else if (page.type === 'titlePage') {
+				return store.state.pages.length < 1;
 			}
 			return page.id === store.state.pages[store.state.pages.length - 1].id;
 		},
@@ -113,11 +116,11 @@ const store = {
 			}
 			return store.state.pages[idx + 1];
 		},
-		prevPage(page) {
+		prevPage(page, includeTitlePage) {
 			if (!page || store.get.isTitlePage(page)) {
 				return null;
 			} else if (store.get.isFirstPage(page)) {
-				return store.get.titlePage();
+				return includeTitlePage ? store.get.titlePage() : null;
 			}
 			const idx = store.state.pages.findIndex(el => el.id === page.id);
 			if (idx < 0) {
@@ -151,14 +154,14 @@ const store = {
 		numberLabel(item) {
 			item = store.get.lookupToItem(item);
 			if (item && item.numberLabel != null) {
-				return store.state[item.type + 'Numbers'][item.numberLabel];
+				return store.get[item.type + 'Number'](item.numberLabel);
 			}
 			return null;
 		},
 		lookupToItem(lookup) {
 			if (!lookup || !lookup.type) {
 				return null;
-			} else if (lookup.parent) {
+			} else if (lookup.parent || lookup.number != null) {
 				return lookup;  // lookup is already an item
 			} else if (store.state.hasOwnProperty(lookup.type)) {
 				return store.state[lookup.type];
@@ -190,11 +193,21 @@ const store = {
 			stateList.push(item);
 			return item;
 		},
-		moveItem(opts) {  // opts: {item, x, y}
+		deleteItem(item) {
+			item = store.get.lookupToItem(item);
+			const stateList = store.state[item.type + 's'];
+			const idx = stateList.indexOf(item);
+			if (idx >= 0) {
+				stateList.splice(stateList.indexOf(item), 1);
+			}
+		},
+		repositionItem(opts) {  // opts: {item, x, y}
 			if (opts && opts.item) {
 				opts.item.x = opts.x;
 				opts.item.y = opts.y;
 			}
+		},
+		movePartToStep(opts) {
 		},
 		moveStepToPage(opts) {  // opts: {step, destPage, insertionIndex = 0}
 			const step = store.get.lookupToItem(opts.step);
@@ -210,14 +223,18 @@ const store = {
 		},
 		moveStepToPreviousPage(step) {
 			step = store.get.lookupToItem(step);
-			const destPage = store.get.prevPage(step.parent);
-			const insertionIndex = destPage.steps.length;
-			store.mutations.moveStepToPage({step, destPage, insertionIndex});
+			const destPage = store.get.prevPage(step.parent, false);
+			if (destPage) {
+				const insertionIndex = destPage.steps.length;
+				store.mutations.moveStepToPage({step, destPage, insertionIndex});
+			}
 		},
 		moveStepToNextPage(step) {
 			step = store.get.lookupToItem(step);
 			const destPage = store.get.nextPage(step.parent);
-			store.mutations.moveStepToPage({step, destPage, insertionIndex: 0});
+			if (destPage) {
+				store.mutations.moveStepToPage({step, destPage, insertionIndex: 0});
+			}
 		},
 		mergeSteps(opts) {  // opts: {sourceStepID, destStepID}
 			const sourceStep = store.get.step(opts.sourceStepID);
@@ -241,17 +258,36 @@ const store = {
 			store.mutations.layoutPage(sourcePage);
 			store.mutations.layoutPage(destPage);
 		},
-		deletePage(pageID) {
-			store.state.pages.splice(pageID, 1);
-			store.mutations.renumberPages();
+		deletePage(page) {
+			page = store.get.lookupToItem(page);
+			if (!page.steps.length) {  // Don't delete pages that still have steps
+				if (page.numberLabel != null) {
+					store.mutations.deleteItem(store.get.pageNumber(page.numberLabel));
+				}
+				store.mutations.deleteItem(page);
+				store.mutations.renumberPages();
+			}
 		},
 		deleteStep(step) {
 			const page = store.get.pageForItem(step);
 			page.steps.splice(page.steps.indexOf(step), 1);
-			const csi = store.get.csi(step.csiID);
-			store.state.csis.splice(store.state.csis.indexOf(csi), 1);
-			store.state.steps.splice(store.state.steps.indexOf(step), 1);
+			if (step.numberLabel != null) {
+				store.mutations.deleteItem(store.get.stepNumber(step.numberLabel));
+			}
+			if (step.csIID != null) {
+				store.mutations.deleteItem(store.get.csi(step.csiID));
+			}
+			if (step.pliID != null) {
+				store.mutations.deletePLI(store.get.pli(step.pliID));
+			}
+			store.mutations.deleteItem(step);
 			store.mutations.renumberSteps();
+		},
+		deletePLI(pli) {
+			pli = store.get.lookupToItem(pli);
+			if (!pli.pliiItems.length) {
+				store.mutations.deleteItem(pli);  // Don't delete plis that still have parts
+			}
 		},
 		renumber(type) {
 			let prevNumber;

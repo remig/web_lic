@@ -266,10 +266,16 @@ var app = new Vue({
 		globalKeyPress(e) {
 			this.closeContextMenu();
 			const selItem = this.selectedItemLookup;
-			if (e.key === 'PageDown' && !store.get.isLastPage(this.currentPageLookup)) {
-				this.setCurrentPage(store.get.nextPage(this.currentPageLookup));
-			} else if (e.key === 'PageUp' && !store.get.isTitlePage(this.currentPageLookup)) {
-				this.setCurrentPage(store.get.prevPage(this.currentPageLookup));
+			if (e.key === 'PageDown') {
+				const nextPage = store.get.nextPage(this.currentPageLookup);
+				if (nextPage) {
+					this.setCurrentPage(nextPage);
+				}
+			} else if (e.key === 'PageUp') {
+				const prevPage = store.get.prevPage(this.currentPageLookup, true);
+				if (prevPage) {
+					this.setCurrentPage(prevPage);
+				}
 			} else if (selItem && e.key.startsWith('Arrow') && this.isMoveable(selItem.type)) {
 				let dx = 0, dy = 0;
 				const dv = 30;
@@ -283,7 +289,7 @@ var app = new Vue({
 					dx = dv;
 				}
 				const item = store.get.lookupToItem(selItem);
-				undoStack.commit('moveItem', {
+				undoStack.commit('repositionItem', {
 					item: item,
 					x: item.x + dx,
 					y: item.y + dy

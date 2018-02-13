@@ -1,4 +1,4 @@
-/* global exports: false, require: false, browser: false */
+/* global exports: false, require: false, browser: false, process: false */
 
 const path = require('path');
 const downloadPath = path.resolve('chromeDownloads');
@@ -43,7 +43,7 @@ exports.config = {
 	reporters: ['spec'],
 	mochaOpts: {
 		ui: 'bdd',
-		timeout: 1000000
+		timeout: process.env.DEBUG ? 1000000 : 10000
 	},
 	before: function() {
 		browser.addCommand('getText2', function(selector) {
