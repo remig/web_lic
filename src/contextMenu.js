@@ -28,8 +28,9 @@ const contextMenu = {
 				return false;
 			},
 			cb: () => {
-				undoStack.commit('deletePage', app.selectedItemLookup, 'Delete Page');
-				const nextPage = store.get.nextPage(app.selectedItemLookup) || store.get.lastPage();
+				const page = store.get.lookupToItem(app.selectedItemLookup);
+				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
+				undoStack.commit('deletePage', page, 'Delete Page');
 				Vue.nextTick(() => {
 					app.setCurrentPage(nextPage);
 				});
