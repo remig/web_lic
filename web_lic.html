@@ -90,7 +90,7 @@
 					<span class="menu-text shortcut" v-if="child.shortcut">{{child.shortcut | prettyPrint}}</span>
 				</a>
 				<ul v-if="child.children" class="dropdown-menu">
-					<li v-for="c in resolveProperty(child.children)" ><a @click="c.cb($event)" class="clickable">{{c.text}}</a></li>
+					<li v-for="c in resolveProperty(child.children)" ><a @click="c.cb.call(c, $event)" class="clickable">{{c.text}}</a></li>
 				</ul>
 			</li>
 		</ul>

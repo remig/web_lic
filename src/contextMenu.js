@@ -142,12 +142,14 @@ const contextMenu = {
 			children: () => {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
 					const step = store.get.parent(app.selectedItemLookup);
-					return step.parts.map(el => {
-						var part = store.model.parts[el];
-						part = LDParse.partDictionary[part.filename];
+					return step.parts.map(idx => {
+						const part = store.model.parts[idx];
+						const abstractPart = LDParse.partDictionary[part.filename];
 						return {
-							text: part.name,
-							cb: () => {}
+							text: abstractPart.name,
+							cb: function() {
+								app.setSelected({type: 'part', id: idx, csiID: step.csiID});
+							}
 						};
 					});
 				}
@@ -170,6 +172,10 @@ const contextMenu = {
 				{text: 'Color (NYI)', cb: () => {}}
 			]
 		}
+	],
+	part: [
+		{text: 'Move Part to Previous Step', cb: () => {}},
+		{text: 'Move Part to Next Step', cb: () => {}}
 	]
 };
 

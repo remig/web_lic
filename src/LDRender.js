@@ -294,12 +294,19 @@ function getPartGeometry(abstractPart, colorCode) {
 
 const lineMaterial = new THREE.LineBasicMaterial({color: 0x000000});
 const lineMaterialWhite = new THREE.LineBasicMaterial({color: 0x888888});
+const selectedLineMaterial = new THREE.LineBasicMaterial({color: 0xFF0000});
 const faceMaterial = new THREE.MeshBasicMaterial({
 	vertexColors: THREE.FaceColors,
 	side: THREE.DoubleSide,
 	polygonOffset: true,
 	polygonOffsetFactor: 1,
 	polygonOffsetUnits: 1
+});
+const selectedFaceMaterial = new THREE.MeshBasicMaterial({
+	vertexColors: THREE.FaceColors,
+	opacity: 0.5,
+	transparent: true,
+	side: THREE.DoubleSide
 });
 
 function project(vec, camera, size) {
@@ -327,7 +334,8 @@ function addModelToScene(scene, model, startPart, endPart, size) {
 		const color = (part.colorCode >= 0) ? part.colorCode : null;
 		const partGeometry = getPartGeometry(abstractPart, color, null);
 
-		const mesh = new THREE.Mesh(partGeometry.faces, faceMaterial);
+		const faceMat = part.selected ? selectedFaceMaterial : faceMaterial;
+		const mesh = new THREE.Mesh(partGeometry.faces, faceMat);
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
 
@@ -335,6 +343,12 @@ function addModelToScene(scene, model, startPart, endPart, size) {
 		const line = new THREE.LineSegments(partGeometry.lines, mat);
 		line.applyMatrix(matrix);
 		scene.add(line);
+
+		if (part.selected) {
+			const box = new THREE.Box3().setFromObject(mesh);
+			const boxMesh = new THREE.Box3Helper(box, 0xFF0000);
+			scene.add(boxMesh);
+		}
 
 		for (let l = 0; l < partGeometry.condlines.length; l++) {
 

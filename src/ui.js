@@ -121,13 +121,31 @@ var app = new Vue({
 			Vue.nextTick(this.drawCurrentPage);
 		},
 		setSelected(target) {
-			if (!this.selectedItemLookup || !util.itemEq(target, this.selectedItemLookup)) {
+			if (util.itemEq(target, this.selectedItemLookup)) {
+				return;
+			}
+			if (target.type === 'part') {
+				// TODO: When a part on the edge of the CSI is selected, it changes the CSI bounding box, which moves on redraw.  Fix that.
+				this.selectedItemLookup = target;
+				store.model.parts[target.id].selected = true;
+				store.get.csi(target.csiID).dirty = true;
+				this.drawCurrentPage();
+			} else {
+				this.clearSelected();
 				const targetPage = store.get.pageForItem(target);
 				if (targetPage && !util.itemEq(targetPage, this.currentPageLookup)) {
 					this.setCurrentPage(targetPage);
 				}
 				this.selectedItemLookup = store.get.itemToLookup(target);
 			}
+		},
+		clearSelected() {
+			if (this.selectedItemLookup && this.selectedItemLookup.type === 'part') {
+				delete store.model.parts[this.selectedItemLookup.id].selected;
+				store.get.csi(this.selectedItemLookup.csiID).dirty = true;
+				this.drawCurrentPage();
+			}
+			this.selectedItemLookup = null;
 		},
 		forceUIUpdate() {
 			// If I understood Vue better, I'd create components that damn well updated themselves properly.
@@ -157,9 +175,6 @@ var app = new Vue({
 			this.dirtyState.undoIndex = 0;
 			this.dirtyState.lastSaveIndex = 0;
 			this.forceUIUpdate();
-		},
-		clearSelected() {
-			this.selectedItemLookup = null;
 		},
 		targetBox(t) {
 			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
@@ -344,7 +359,8 @@ var app = new Vue({
 
 				if (step.csiID != null) {
 					const csi = store.get.csi(step.csiID);
-					const csiCanvas = util.renderCSI(localModel, step).container;
+					const csiCanvas = util.renderCSI(localModel, step, csi.dirty).container;
+					delete csi.dirty;
 					ctx.drawImage(csiCanvas, csi.x, csi.y);  // TODO: profile performance if every x, y, w, h argument is passed in
 				}
 
@@ -423,7 +439,7 @@ var app = new Vue({
 		},
 		highlightStyle() {
 			const selItem = this.selectedItemLookup;
-			if (!selItem) {
+			if (!selItem || selItem.type === 'part') {
 				return {display: 'none'};
 			}
 			let box;
