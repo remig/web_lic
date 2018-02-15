@@ -34,17 +34,28 @@ const util = {
 		}
 		return true;
 	},
-	array(fakeArray) {
+	toArray(fakeArray) {
 		return [].slice.apply(fakeArray);
+	},
+	array: {
+		insert(array, item, idx) {
+			array.splice(idx, 0, item);
+		},
+		remove(array, item) {
+			const idx = array.indexOf(item);
+			if (idx >= 0) {
+				array.splice(idx, 1);
+			}
+		}
 	},
 	itemEq(a, b) {
 		return a && b && a.id === b.id && a.type === b.type;
 	},
-	renderCSI(localModel, step, forceRedraw) {
+	renderCSI(localModel, step, forceRedraw, includeSelection) {
 		const domID = `CSI_${step.csiID}`;
 		return renderPart(domID, forceRedraw, container => {
 			const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
-			LDRender.renderModel(localModel, container, 1000, {endPart: lastPart, resizeContainer: true});
+			LDRender.renderModel(localModel, container, 1000, {endPart: lastPart, resizeContainer: true, includeSelection});
 		});
 	},
 	renderPLI(part, forceRedraw) {

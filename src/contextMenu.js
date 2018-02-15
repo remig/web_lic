@@ -20,14 +20,14 @@ const contextMenu = {
 		{text: 'Add Annotation (NYI)', cb: () => {}},
 		{
 			text: 'Delete This Blank Page',
-			shown: () => {
+			shown: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
 					const page = store.get.lookupToItem(app.selectedItemLookup);
 					return page.steps.length < 1;
 				}
 				return false;
 			},
-			cb: () => {
+			cb: function() {
 				const page = store.get.lookupToItem(app.selectedItemLookup);
 				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
 				undoStack.commit('deletePage', page, 'Delete Page');
@@ -43,7 +43,7 @@ const contextMenu = {
 	step: [
 		{
 			text: 'Move Step to Previous Page',
-			shown: () => {
+			shown: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 					const page = store.get.pageForItem(app.selectedItemLookup);
 					if (store.get.isFirstPage(page) || store.get.isTitlePage(page)) {
@@ -62,7 +62,7 @@ const contextMenu = {
 		},
 		{
 			text: 'Move Step to Next Page',
-			shown: () => {
+			shown: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 					const page = store.get.pageForItem(app.selectedItemLookup);
 					if (store.get.isLastPage(page)) {
@@ -82,7 +82,7 @@ const contextMenu = {
 		{text: 'separator'},
 		{
 			text: 'Merge Step with Previous Step',
-			shown: () => {
+			shown: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 					const step = store.get.lookupToItem(app.selectedItemLookup);
 					return store.state.steps.indexOf(step) > 1;  // First 'step' is the title page content, which can't be merged
@@ -95,15 +95,12 @@ const contextMenu = {
 					{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id - 1},
 					this.text
 				);
-				Vue.nextTick(() => {
-					app.clearSelected();
-					app.drawCurrentPage();
-				});
+				app.redrawUI(true);
 			}
 		},
 		{
 			text: 'Merge Step with Next Step',
-			shown: () => {
+			shown: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 					const step = store.get.lookupToItem(app.selectedItemLookup);
 					return store.state.steps.indexOf(step) < store.state.steps.length - 1;
@@ -116,10 +113,7 @@ const contextMenu = {
 					{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id + 1},
 					this.text
 				);
-				Vue.nextTick(() => {
-					app.clearSelected();
-					app.drawCurrentPage();
-				});
+				app.redrawUI(true);
 			}
 		}
 	],
@@ -132,14 +126,14 @@ const contextMenu = {
 		{text: 'separator'},
 		{
 			text: 'Select Part (NYI)',
-			shown: () => {
+			shown: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
 					const step = store.get.parent(app.selectedItemLookup);
 					return step && step.parts && step.parts.length;
 				}
 				return false;
 			},
-			children: () => {
+			children: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
 					const step = store.get.parent(app.selectedItemLookup);
 					return step.parts.map(idx => {
@@ -174,8 +168,46 @@ const contextMenu = {
 		}
 	],
 	part: [
-		{text: 'Move Part to Previous Step', cb: () => {}},
-		{text: 'Move Part to Next Step', cb: () => {}}
+		{
+			text: 'Move Part to Previous Step',
+			shown: function() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
+					const step = store.get.parent({type: 'csi', id: app.selectedItemLookup.csiID});
+					return store.get.prevStep(step) != null;
+				}
+				return false;
+			},
+			cb: function() {
+				const srcStep = store.get.parent({type: 'csi', id: app.selectedItemLookup.csiID});
+				const destStep = store.get.prevStep(srcStep);
+				undoStack.commit(
+					'movePartToStep',
+					{partID: app.selectedItemLookup.id, srcStep, destStep},
+					this.text
+				);
+				app.redrawUI(true);
+			}
+		},
+		{
+			text: 'Move Part to Next Step',
+			shown: function() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
+					const step = store.get.parent({type: 'csi', id: app.selectedItemLookup.csiID});
+					return store.get.nextStep(step) != null;
+				}
+				return false;
+			},
+			cb: function() {
+				const srcStep = store.get.parent({type: 'csi', id: app.selectedItemLookup.csiID});
+				const destStep = store.get.nextStep(srcStep);
+				undoStack.commit(
+					'movePartToStep',
+					{partID: app.selectedItemLookup.id, srcStep, destStep},
+					this.text
+				);
+				app.redrawUI(true);
+			}
+		}
 	]
 };
 

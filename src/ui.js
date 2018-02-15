@@ -128,7 +128,6 @@ var app = new Vue({
 				// TODO: When a part on the edge of the CSI is selected, it changes the CSI bounding box, which moves on redraw.  Fix that.
 				this.selectedItemLookup = target;
 				store.model.parts[target.id].selected = true;
-				store.get.csi(target.csiID).dirty = true;
 				this.drawCurrentPage();
 			} else {
 				this.clearSelected();
@@ -142,7 +141,6 @@ var app = new Vue({
 		clearSelected() {
 			if (this.selectedItemLookup && this.selectedItemLookup.type === 'part') {
 				delete store.model.parts[this.selectedItemLookup.id].selected;
-				store.get.csi(this.selectedItemLookup.csiID).dirty = true;
 				this.drawCurrentPage();
 			}
 			this.selectedItemLookup = null;
@@ -359,9 +357,16 @@ var app = new Vue({
 
 				if (step.csiID != null) {
 					const csi = store.get.csi(step.csiID);
-					const csiCanvas = util.renderCSI(localModel, step, csi.dirty).container;
-					delete csi.dirty;
-					ctx.drawImage(csiCanvas, csi.x, csi.y);  // TODO: profile performance if every x, y, w, h argument is passed in
+					const partIsSelected = step.parts ? step.parts.map(i => localModel.parts[i].selected).some(i => !!i) : false;
+					if (partIsSelected) {
+						const localCanvas = document.getElementById(`CSI_${step.csiID}`);
+						const lastPart = step.parts[step.parts.length - 1];
+						const offset = LDRender.renderAndDeltaSelectedPart(localModel, localCanvas, 1000, {endPart: lastPart, resizeContainer: true});
+						ctx.drawImage(localCanvas, csi.x - offset.dx, csi.y - offset.dy);
+					} else {
+						const csiCanvas = util.renderCSI(localModel, step, true, partIsSelected).container;
+						ctx.drawImage(csiCanvas, csi.x, csi.y);  // TODO: profile performance if every x, y, w, h argument is passed in
+					}
 				}
 
 				if (step.pliID != null) {

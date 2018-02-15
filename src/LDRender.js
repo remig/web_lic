@@ -14,60 +14,66 @@ if (typeof window !== 'undefined' && window.THREE) {
 let renderer, camera;
 let isInitialized = false;
 
-function initialize() {
-
-	const offscreenContainer = document.createElement('div');
-	offscreenContainer.setAttribute('style', 'position: absolute; left: -10000px; top: -10000px;');
-	offscreenContainer.setAttribute('id', 'offscreen_render_container');
-	document.body.appendChild(offscreenContainer);
-
-	renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-	offscreenContainer.appendChild(renderer.domElement);
-
-	const viewBox = (500 / 1);
-	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.1, 10000);
-	camera.up = new THREE.Vector3(0, -1, 0);  // -1 because LDraw coordinate space has -y as UP
-	camera.position.x = viewBox;
-	camera.position.y = -viewBox + (150 / 1);
-	camera.position.z = -viewBox;
-	camera.lookAt(new THREE.Vector3());
-	isInitialized = true;
-}
-
 const api = {
+
+	// Render the chosen abstract part to the chosen container.
+	// Return a {width, height} object representing the size of the rendering.
+	// Optional config: {getData, resizeContainer, dx, dy, rotation: {x, y, z}}
 	renderPart(part, containerID, size, config) {
 
-		if (api.partDictionary == null) {
-			throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a part.';
-		} else if (!isInitialized) {
-			initialize();
-		}
-		const scene = initScene();
+		config = config || {};
+
+		initialize();
+		const scene = initScene(size);
+
 		addPartToScene(scene, api.partDictionary[part.filename], part.colorCode, config);
 		return render(scene, size, containerID, config);
 	},
 	renderModel(part, containerID, size, config) {
 
-		if (api.partDictionary == null) {
-			throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a model.';
-		} else if (!isInitialized) {
-			initialize();
-		}
-
 		config = config || {};
-		const scene = initScene();
-		const startPart = (config.startPart == null) ? 0 : config.startPart;
-		const endPart = (config.endPart == null) ? part.parts.length - 1 : config.endPart;
+		config.startPart = (config.startPart == null) ? 0 : config.startPart;
+		config.endPart = (config.endPart == null) ? part.parts.length - 1 : config.endPart;
+		config.size = size;
 
-		// These three calls must be made before addModelToScene(), to correctly project points to screen (for conditional line rendering)
-		renderer.setSize(size, size);
-		camera.updateMatrixWorld();
-		camera.updateProjectionMatrix();
-		addModelToScene(scene, part, startPart, endPart, size);
+		initialize();
+		const scene = initScene(size);
+
+		addModelToScene(scene, part, config);
 		return render(scene, size, containerID, config);
 	},
 
-	// Like renderModel, except it doesn't copy the rendered image to a
+	// Renders the model twice; once with all parts unselected and once with parts selected.
+	// It renders the selected part to containerID, and returns the difference in position
+	// between the selected and unselected renderings.  This is useful for offsetting renderings
+	// so that they do not change positions when rendered with & without selected parts.
+	renderAndDeltaSelectedPart(part, containerID, size, config) {
+
+		config = config || {};
+		config.startPart = (config.startPart == null) ? 0 : config.startPart;
+		config.endPart = (config.endPart == null) ? part.parts.length - 1 : config.endPart;
+		config.size = size;
+
+		initialize();
+		const scene = initScene(size);
+
+		// Render with no parts selected
+		config.includeSelection = false;
+		addModelToScene(scene, part, config);
+		const noSelectedPartsBounds = render(scene, size, containerID, config);
+
+		// Render again with parts selected
+		config.includeSelection = true;
+		addModelToScene(scene, part, config);
+		const selectedPartsBounds = render(scene, size, containerID, config);
+
+		return {
+			dx: Math.max(0, noSelectedPartsBounds.x - selectedPartsBounds.x),
+			dy: Math.max(0, noSelectedPartsBounds.y - selectedPartsBounds.y)
+		};
+	},
+
+	// Like renderModel / measurePart, except it doesn't copy the rendered image to a
 	// target node, it only returns a {width, height} object instead
 	measureModel(part, size, endPart, startPart) {
 		return api.renderModel(part, null, size, {endPart: endPart, startPart: startPart});
@@ -75,7 +81,7 @@ const api = {
 	measurePart(part, size, config) {
 		return api.renderPart(part, null, size, config);
 	},
-	// Like renderModel, except it doesn't copy the rendered image to a target
+	// Like renderModel / renderPart, except it doesn't copy the rendered image to a target
 	// node, it only returns the raw image data as a base64 encoded string
 	renderModelData(part, size, endPart, startPart) {
 		return api.renderModel(part, null, size, {endPart: endPart, startPart: startPart, getData: true});
@@ -140,6 +146,45 @@ function contextBoundingBox(data, w, h) {
 	};
 }
 
+function initialize() {
+
+	if (api.partDictionary == null) {
+		throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a part.';
+	} else if (isInitialized) {
+		return;
+	}
+
+	const offscreenContainer = document.createElement('div');
+	offscreenContainer.setAttribute('style', 'position: absolute; left: -10000px; top: -10000px;');
+	offscreenContainer.setAttribute('id', 'offscreen_render_container');
+	document.body.appendChild(offscreenContainer);
+
+	renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+	offscreenContainer.appendChild(renderer.domElement);
+
+	const viewBox = (500 / 1);
+	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.1, 10000);
+	camera.up = new THREE.Vector3(0, -1, 0);  // -1 because LDraw coordinate space has -y as UP
+	camera.position.x = viewBox;
+	camera.position.y = -viewBox + (150 / 1);
+	camera.position.z = -viewBox;
+	camera.lookAt(new THREE.Vector3());
+	isInitialized = true;
+}
+
+function initScene(size) {
+
+	const scene = new THREE.Scene();
+	scene.add(new THREE.AmbientLight(0x404040));
+
+	// These three calls must be made before addModelToScene(), to correctly project points to screen (for conditional line rendering)
+	renderer.setSize(size, size);
+	camera.updateMatrixWorld();
+	camera.updateProjectionMatrix();
+
+	return scene;
+}
+
 // Render the specified scene in a size x size viewport, then crop it of all whitespace.
 // If containerID refers to an SVG image or HTML5 canvas, copy rendered image there.
 // Return a {width, height} object specifying the final tightly cropped rendered image size.
@@ -158,7 +203,7 @@ function render(scene, size, containerID, config) {
 	ctx.drawImage(renderer.domElement, 0, 0);
 	const data = ctx.getImageData(0, 0, size, size);
 
-	const bounds = contextBoundingBox(data.data, size, size, 5);
+	const bounds = contextBoundingBox(data.data, size, size);
 	if (!bounds) {
 		return null;
 	}
@@ -190,14 +235,7 @@ function render(scene, size, containerID, config) {
 			bounds.w + 1, bounds.h + 1
 		);
 	}
-	return {width: bounds.w, height: bounds.h};
-}
-
-function initScene() {
-
-	const scene = new THREE.Scene();
-	scene.add(new THREE.AmbientLight(0x404040));
-	return scene;
+	return {x: bounds.x, y: bounds.y, width: bounds.w, height: bounds.h};
 }
 
 /* eslint-disable no-multi-spaces, no-mixed-spaces-and-tabs */
@@ -294,7 +332,7 @@ function getPartGeometry(abstractPart, colorCode) {
 
 const lineMaterial = new THREE.LineBasicMaterial({color: 0x000000});
 const lineMaterialWhite = new THREE.LineBasicMaterial({color: 0x888888});
-const selectedLineMaterial = new THREE.LineBasicMaterial({color: 0xFF0000});
+const selectedLineColor = 0xFF0000;
 const faceMaterial = new THREE.MeshBasicMaterial({
 	vertexColors: THREE.FaceColors,
 	side: THREE.DoubleSide,
@@ -323,18 +361,19 @@ function lineSide(p, l1, l2) {
 	return (res > 0) ? 1 : -1;
 }
 
-function addModelToScene(scene, model, startPart, endPart, size) {
+function addModelToScene(scene, model, config) {
 
-	size = size / 2;
-	for (let i = startPart; i <= endPart; i++) {
+	const size = config.size / 2;
+	for (let i = config.startPart; i <= config.endPart; i++) {
 		const part = model.parts[i];
 		const abstractPart = api.partDictionary[part.filename];
+		const drawSelected = config.includeSelection && part.selected;
 
 		const matrix = LDMatrixToMatrix(part.matrix);
 		const color = (part.colorCode >= 0) ? part.colorCode : null;
 		const partGeometry = getPartGeometry(abstractPart, color, null);
 
-		const faceMat = part.selected ? selectedFaceMaterial : faceMaterial;
+		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMat);
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
@@ -344,9 +383,9 @@ function addModelToScene(scene, model, startPart, endPart, size) {
 		line.applyMatrix(matrix);
 		scene.add(line);
 
-		if (part.selected) {
+		if (drawSelected) {
 			const box = new THREE.Box3().setFromObject(mesh);
-			const boxMesh = new THREE.Box3Helper(box, 0xFF0000);
+			const boxMesh = new THREE.Box3Helper(box, selectedLineColor);
 			scene.add(boxMesh);
 		}
 

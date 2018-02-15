@@ -137,6 +137,26 @@ const store = {
 		lastPage() {
 			return store.state.pages[store.state.pages.length - 1];
 		},
+		prevStep(step, limitToSubmodel) {
+			step = store.get.lookupToItem(step);
+			return store.get.prev(step);
+		},
+		nextStep(step, limitToSubmodel) {
+			step = store.get.lookupToItem(step);
+			return store.get.next(step);
+		},
+		prev(item) {
+			item = store.get.lookupToItem(item);
+			const itemList = store.state[item.type + 's'];
+			const idx = itemList.findIndex(el => el.number === item.number - 1);
+			return (idx < 0) ? null : itemList[idx];
+		},
+		next(item) {
+			item = store.get.lookupToItem(item);
+			const itemList = store.state[item.type + 's'];
+			const idx = itemList.findIndex(el => el.number === item.number + 1);
+			return (idx < 0) ? null : itemList[idx];
+		},
 		parent(item) {
 			item = store.get.lookupToItem(item);
 			if (item && item.parent) {
@@ -196,9 +216,18 @@ const store = {
 		deleteItem(item) {
 			item = store.get.lookupToItem(item);
 			const stateList = store.state[item.type + 's'];
-			const idx = stateList.indexOf(item);
-			if (idx >= 0) {
-				stateList.splice(stateList.indexOf(item), 1);
+			util.array.remove(stateList, item);
+		},
+		reparentItem(opts) {  // opts: {item, newParent, insertionIndex = last}
+			const item = store.get.lookupToItem(opts.item);
+			const oldParent = store.get.parent(item);
+			const newParent = store.get.lookupToItem(opts.newParent);
+			item.parent.id = newParent.id;
+			util.array.remove(oldParent[item.type + 's'], item.id);
+			if (opts.insertionIndex == null) {
+				newParent[item.type + 's'].push(item.id);
+			} else {
+				util.array.insert(newParent[item.type + 's'], item.id, opts.insertionIndex);
 			}
 		},
 		repositionItem(opts) {  // opts: {item, x, y}
@@ -207,17 +236,39 @@ const store = {
 				opts.item.y = opts.y;
 			}
 		},
-		movePartToStep(opts) {
+		movePartToStep(opts) { // opts: {partID, srcStep, destStep}
+			const srcStep = store.get.lookupToItem(opts.srcStep);
+			util.array.remove(srcStep.parts, opts.partID);
+
+			const destStep = store.get.lookupToItem(opts.destStep);
+			destStep.parts.push(opts.partID);
+			destStep.parts.sort(util.sort.numeric.ascending);
+
+			if (srcStep.pliID != null) {
+				const pli = store.get.pli(srcStep.pliID);
+				const pliItems = pli.pliItems.map(i => store.get.pliItem(i));
+				const pliItem = pliItems.filter(i => i.partNumber === opts.partID)[0];
+
+				store.mutations.reparentItem({
+					item: pliItem,
+					newParent: store.get.pli(destStep.pliID)
+				});
+			}
+
+			store.mutations.layoutPage(store.get.pageForItem(srcStep));
+			if (srcStep.parent.id !== destStep.parent.id) {
+				store.mutations.layoutPage(store.get.pageForItem(destStep));
+			}
 		},
 		moveStepToPage(opts) {  // opts: {step, destPage, insertionIndex = 0}
 			const step = store.get.lookupToItem(opts.step);
 			const currentPage = store.get.parent(step);
 			const destPage = store.get.lookupToItem(opts.destPage);
-			const insertionIndex = opts.insertionIndex || 0;
-			const stepIdx = currentPage.steps.indexOf(step.id);
-			currentPage.steps.splice(stepIdx, 1);
-			destPage.steps.splice(insertionIndex, 0, step.id);
-			step.parent.id = destPage.id;
+			store.mutations.reparentItem({
+				item: step,
+				newParent: destPage,
+				insertionIndex: opts.insertionIndex || 0
+			});
 			store.mutations.layoutPage(currentPage);
 			store.mutations.layoutPage(destPage);
 		},
