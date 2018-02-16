@@ -80,7 +80,7 @@ const api = {
 							renderResult.height * r
 						);
 
-						const pliQty = store.get.pliQty(pliItem.quantityLabel);
+						const pliQty = store.get.pliQty(pliItem.pliQtyID);
 						doc.setFontSize(10);
 						doc.text(
 							(step.x + pli.x + pliItem.x + pliQty.x) * r,

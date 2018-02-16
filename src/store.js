@@ -217,12 +217,22 @@ const store = {
 		}
 	},
 	mutations: {
-		addStateItem(item, parent) {  // TODO implement 'parent' argument
+		addStateItem(item, parent) {
 			if (!item || !item.type || !store.state.hasOwnProperty(item.type + 's')) {
 				return null;
 			}
 			item.id = store.get.nextItemID(item);
 			store.state[item.type + 's'].push(item);
+			if (parent) {
+				item.parent = {type: parent.type, id: parent.id};
+				if (parent.hasOwnProperty(item.type + 's')) {
+					parent[item.type + 's'].push(item.id);
+				} else if (parent.hasOwnProperty(item.type + 'ID')) {
+					parent[item.type + 'ID'] = item.id;
+				} else if (parent.hasOwnProperty('numberLabel') && item.type.endsWith('Number')) {
+					parent.numberLabel = item.id;
+				}
+			}
 			return item;
 		},
 		deleteItem(item) {
@@ -269,7 +279,7 @@ const store = {
 						target.quantity++;
 						target.partNumbers.push(partID);
 						util.array.remove(pli.pliItems, pliItem.id);
-						store.mutations.deleteItem(store.get.pliQty(pliItem.quantityLabel));
+						store.mutations.deleteItem(store.get.pliQty(pliItem.pliQtyID));
 						store.mutations.deleteItem(pliItem);
 					} else {
 						store.mutations.reparentItem({item: pliItem, newParent: destPLI});
@@ -284,10 +294,10 @@ const store = {
 					store.mutations.addStateItem(newPLIItem);
 					destPLI.pliItems.push(newPLIItem);
 
-					const newPLIQty = util.clone(store.get.pliQty(pliItem.quantityLabel));
+					const newPLIQty = util.clone(store.get.pliQty(pliItem.pliQtyID));
 					newPLIQty.parent.id = newPLIItem.id;
 					store.mutations.addStateItem(newPLIQty);
-					newPLIItem.quantityLabel = newPLIQty.id;
+					newPLIItem.pliQtyID = newPLIQty.id;
 				}
 			}
 
@@ -438,7 +448,7 @@ const store = {
 						pliItem.height = pliSize.height;
 
 						const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
-						const pliQty = store.get.pliQty(pliItem.quantityLabel);
+						const pliQty = store.get.pliQty(pliItem.pliQtyID);
 						pliQty.x = -qtyLabelOffset;
 						pliQty.y = pliSize.height - qtyLabelOffset;
 						pliQty.width = lblSize.width;
@@ -529,42 +539,30 @@ const store = {
 
 			const step = addStateItem({
 				type: 'step',
-				parent: {type: 'titlePage', id: 0},
-				x: null, y: null,
-				width: null, height: null,
-				csiID: null
-			});
+				csiID: null, pliID: null,
+				x: null, y: null, width: null, height: null
+			}, page);
 
-			const csi = addStateItem({
+			addStateItem({
 				type: 'csi',
-				parent: {type: 'step', id: step.id},
-				x: null, y: null,
-				width: null, height: null
-			});
-			step.csiID = csi.id;
-			page.steps.push(step.id);
+				x: null, y: null, width: null, height: null
+			}, step);
 
-			const title = addStateItem({
+			addStateItem({
 				type: 'label',
-				parent: {type: 'titlePage', id: 0},
-				x: null, y: null,
-				width: null, height: null,
 				text: store.get.modelName(true),
 				font: '20pt Helvetica',
-				color: 'black'
-			});
-			page.labels.push(title.id);
+				color: 'black',
+				x: null, y: null, width: null, height: null
+			}, page);
 
-			const modelInfo = addStateItem({
+			addStateItem({
 				type: 'label',
-				parent: {type: 'titlePage', id: 0},
-				x: null, y: null,
-				width: null, height: null,
 				text: '',
 				font: '16pt Helvetica',
-				color: 'black'
-			});
-			page.labels.push(modelInfo.id);
+				color: 'black',
+				x: null, y: null, width: null, height: null
+			}, page);
 		},
 		addInitialPages(partDictionary, localModelIDList = []) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
 
@@ -600,54 +598,38 @@ const store = {
 					numberLabel: null
 				});
 
-				const pageNumber = addStateItem({
+				addStateItem({
 					type: 'pageNumber',
-					parent: {type: 'page', id: page.id},
-					x: null, y: null,
-					width: null, height: null
-				});
+					x: null, y: null, width: null, height: null
+				}, page);
 				page.number = page.id + 1;
-				page.numberLabel = pageNumber.id;
 
 				const step = addStateItem({
 					type: 'step',
-					parent: {type: 'page', id: page.id},
 					number: null,
+					numberLabel: null,
 					parts: parts,
 					submodel: util.clone(localModelIDList),
-					x: null, y: null,
-					width: null, height: null,
-					numberLabel: null
-				});
+					csiID: null, pliID: null,
+					x: null, y: null, width: null, height: null
+				}, page);
 
-				const stepNumber = addStateItem({
+				addStateItem({
 					type: 'stepNumber',
-					parent: {type: 'step', id: step.id},
-					x: null, y: null,
-					width: null, height: null
-				});
+					x: null, y: null, width: null, height: null
+				}, step);
 				step.number = step.id;
-				step.numberLabel = stepNumber.id;
 
-				page.steps.push(step.id);
-
-				const csi = addStateItem({
+				addStateItem({
 					type: 'csi',
-					parent: {type: 'step', id: step.id},
-					x: null, y: null,
-					width: null, height: null
-				});
+					x: null, y: null, width: null, height: null
+				}, step);
 
 				const pli = addStateItem({
 					type: 'pli',
-					parent: {type: 'step', id: step.id},
 					pliItems: [],
-					x: null, y: null,
-					width: null, height: null
-				});
-
-				step.csiID = csi.id;
-				step.pliID = pli.id;
+					x: null, y: null, width: null, height: null
+				}, step);
 
 				parts.forEach(partID => {
 
@@ -656,26 +638,21 @@ const store = {
 						target.quantity++;
 						target.partNumbers.push(partID);
 					} else {
-						const pliQty = addStateItem({
-							type: 'pliQty',
-							parent: {type: 'pliItem', id: null},
-							x: null, y: null, width: null, height: null
-						});
 
 						const part = localModel.parts[partID];
 						const pliItem = addStateItem({
 							type: 'pliItem',
-							parent: {type: 'pli', id: pli.id},
 							filename: part.filename,
 							partNumbers: [partID],
 							colorCode: part.colorCode,
-							x: null, y: null,
-							width: null, height: null,
-							quantity: 1,
-							quantityLabel: pliQty.id
-						});
-						pli.pliItems.push(pliItem.id);
-						pliQty.parent.id = pliItem.id;
+							quantity: 1, pliQtyID: null,
+							x: null, y: null, width: null, height: null
+						}, pli);
+
+						addStateItem({
+							type: 'pliQty',
+							x: null, y: null, width: null, height: null
+						}, pliItem);
 					}
 				});
 			});

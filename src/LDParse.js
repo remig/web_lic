@@ -164,8 +164,11 @@ const primitiveTypes = {
 };
 
 function forceBlack(colorCode, abstractPartName, partName) {
+	partName = (partName + '').toLowerCase();
+	abstractPartName = (abstractPartName + '').toLowerCase();
 	if (partName === '4-4cyli.dat') {
-		if (abstractPartName === 'stud.dat' || abstractPartName === 'stud2.dat' || abstractPartName === 'stud2a.dat') {
+		if (abstractPartName === 'stud.dat' || abstractPartName === 'stud2.dat' ||
+				abstractPartName === 'stud2a.dat' || abstractPartName === 'stod3.dat') {
 			return 0;
 		}
 	}

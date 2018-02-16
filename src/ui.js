@@ -233,7 +233,7 @@ var app = new Vue({
 						if (this.inBox(mx, my, pliItem)) {
 							return pliItem;
 						}
-						const pliQty = store.get.pliQty(pliItem.quantityLabel);
+						const pliQty = store.get.pliQty(pliItem.pliQtyID);
 						if (this.inBox(mx, my, pliQty)) {
 							return pliQty;
 						}
@@ -388,7 +388,7 @@ var app = new Vue({
 							const pliCanvas = util.renderPLI(part).container;
 							ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
 
-							const pliQty = store.get.pliQty(pliItem.quantityLabel);
+							const pliQty = store.get.pliQty(pliItem.pliQtyID);
 							ctx.fillStyle = 'black';
 							ctx.font = 'bold 10pt Helvetica';
 							ctx.fillText(

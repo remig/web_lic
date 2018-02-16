@@ -133,7 +133,7 @@ describe('Test state store module', function() {
 	const pageState = {type: 'page', id: 0, needsLayout: true, number: 1, numberLabel: 0, steps: [1]};
 	const step0State = {
 		type: 'step', id: 0, parent: {type: 'titlePage', id: 0},
-		x: null, y: null, width: null, height: null, csiID: 0
+		x: null, y: null, width: null, height: null, csiID: 0, pliID: null
 	};
 	const step1State = {
 		type: 'step', id: 1, parent: {type: 'page', id: 0}, number: 1, numberLabel: 0,
