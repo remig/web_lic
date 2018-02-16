@@ -43,6 +43,13 @@ describe('Import Trivial Model', function() {
 		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr');
 	});
 
+	it('LocalStorage should reflect imported model', () => {
+		let localStorage = browser.localStorage('GET', 'lic_state').value;
+		assert.isNotNull(localStorage);
+		localStorage = JSON.parse(localStorage);
+		assert.containsAllKeys(localStorage, ['colorTable', 'model', 'partDictionary', 'state']);
+	});
+
 	it('Highlight should be invisible', () => {
 		assert.isFalse(page.highlight.isVisible());
 	});
@@ -88,7 +95,6 @@ describe('Import Trivial Model', function() {
 	});
 
 	it('Modify model should set dirty state and save state to localStorage', () => {
-		assert.isNull(browser.localStorage('GET', 'lic_state').value);
 		assert.isTrue(browser.isExisting(page.ids.filename_container));
 		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr');
 		const canvasSize = browser.getElementSize(page.ids.page_canvas);

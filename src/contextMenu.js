@@ -136,13 +136,13 @@ const contextMenu = {
 			children: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
 					const step = store.get.parent(app.selectedItemLookup);
-					return step.parts.map(idx => {
-						const part = store.model.parts[idx];
+					return step.parts.map(partID => {
+						const part = LDParse.model.get.partFromID(partID, store.model, step.submodel);
 						const abstractPart = LDParse.partDictionary[part.filename];
 						return {
 							text: abstractPart.name,
 							cb: function() {
-								app.setSelected({type: 'part', id: idx, csiID: step.csiID});
+								app.setSelected({type: 'part', id: partID, stepID: step.id});
 							}
 						};
 					});
@@ -172,13 +172,13 @@ const contextMenu = {
 			text: 'Move Part to Previous Step',
 			shown: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-					const step = store.get.parent({type: 'csi', id: app.selectedItemLookup.csiID});
+					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
 					return store.get.prevStep(step) != null;
 				}
 				return false;
 			},
 			cb: function() {
-				const srcStep = store.get.parent({type: 'csi', id: app.selectedItemLookup.csiID});
+				const srcStep = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
 				const destStep = store.get.prevStep(srcStep);
 				undoStack.commit(
 					'movePartToStep',
@@ -192,13 +192,13 @@ const contextMenu = {
 			text: 'Move Part to Next Step',
 			shown: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-					const step = store.get.parent({type: 'csi', id: app.selectedItemLookup.csiID});
+					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
 					return store.get.nextStep(step) != null;
 				}
 				return false;
 			},
 			cb: function() {
-				const srcStep = store.get.parent({type: 'csi', id: app.selectedItemLookup.csiID});
+				const srcStep = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
 				const destStep = store.get.nextStep(srcStep);
 				undoStack.commit(
 					'movePartToStep',

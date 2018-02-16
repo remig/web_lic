@@ -74,6 +74,10 @@ const api = {
 					return (p.isSubModel ? p.parts.length : 1) + acc;
 				}, 0);
 			},
+			partFromID(partID, model, submodelList) {
+				model = api.model.get.submodelDescendant(model, submodelList);
+				return model.parts[partID];
+			},
 			// submodelIDList is an array of submodel IDs representing a deeply nested submodel hierarchy.
 			// Traverse the submodel tree in submodelIDList and return the abstractPart associated with the final submodelIDList entry.
 			submodelDescendant(model, submodelIDList) {

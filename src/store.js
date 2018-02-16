@@ -45,6 +45,7 @@ const store = {
 		store.replaceState(content.state);
 	},
 	save(mode) {  // mode is either 'file' or 'localStorage'
+		store.model.parts.forEach(p => delete p.selected);
 		const content = JSON.stringify({
 			partDictionary: LDParse.partDictionary,
 			colorTable: LDParse.colorTable,
@@ -145,13 +146,21 @@ const store = {
 			step = store.get.lookupToItem(step);
 			return store.get.next(step);
 		},
-		prev(item) {
+		matchingPLIItem(pli, partID) {  // Given a pli and a part, find a pliItem in the pli that matches the part's filename & color (if any)
+			pli = store.get.lookupToItem(pli);
+			const step = store.get.parent(pli);
+			const part = LDParse.model.get.partFromID(partID, store.model, step.submodel);
+			const targets = pli.pliItems.map(id => store.get.pliItem(id))
+				.filter(i => i.filename === part.filename && i.colorCode === part.colorCode);
+			return targets.length ? targets[0] : null;
+		},
+		prev(item) {  // Get the previous item in the specified item's list
 			item = store.get.lookupToItem(item);
 			const itemList = store.state[item.type + 's'];
 			const idx = itemList.findIndex(el => el.number === item.number - 1);
 			return (idx < 0) ? null : itemList[idx];
 		},
-		next(item) {
+		next(item) {  // Get the next item in the specified item's list
 			item = store.get.lookupToItem(item);
 			const itemList = store.state[item.type + 's'];
 			const idx = itemList.findIndex(el => el.number === item.number + 1);
@@ -178,7 +187,11 @@ const store = {
 			}
 			return null;
 		},
-		lookupToItem(lookup) {
+		nextItemID(item) {  // Get the next unused ID in this item's list
+			const itemList = store.state[item.type + 's'];
+			return itemList.length ? Math.max.apply(null, itemList.map(el => el.id)) + 1 : 0;
+		},
+		lookupToItem(lookup) {  // Convert a {type, id} lookup object into the actual item it refers to
 			if (!lookup || !lookup.type) {
 				return null;
 			} else if (lookup.parent || lookup.number != null) {
@@ -192,7 +205,7 @@ const store = {
 			}
 			return null;
 		},
-		itemToLookup(item) {
+		itemToLookup(item) {  // Create a {type, id} lookup object from the specified item
 			if (!item || item.type == null) {
 				return null;
 			} else if (store.state.hasOwnProperty(item.type)) {
@@ -204,19 +217,17 @@ const store = {
 		}
 	},
 	mutations: {
-		addStateItem(item) {
+		addStateItem(item, parent) {  // TODO implement 'parent' argument
 			if (!item || !item.type || !store.state.hasOwnProperty(item.type + 's')) {
 				return null;
 			}
-			const stateList = store.state[item.type + 's'];
-			item.id = stateList.length ? Math.max.apply(null, stateList.map(el => el.id)) + 1 : 0;
-			stateList.push(item);
+			item.id = store.get.nextItemID(item);
+			store.state[item.type + 's'].push(item);
 			return item;
 		},
 		deleteItem(item) {
 			item = store.get.lookupToItem(item);
-			const stateList = store.state[item.type + 's'];
-			util.array.remove(stateList, item);
+			util.array.remove(store.state[item.type + 's'], item);
 		},
 		reparentItem(opts) {  // opts: {item, newParent, insertionIndex = last}
 			const item = store.get.lookupToItem(opts.item);
@@ -236,23 +247,48 @@ const store = {
 				opts.item.y = opts.y;
 			}
 		},
+		// TODO: what if a step has zero parts?
 		movePartToStep(opts) { // opts: {partID, srcStep, destStep}
+			const partID = opts.partID;
 			const srcStep = store.get.lookupToItem(opts.srcStep);
-			util.array.remove(srcStep.parts, opts.partID);
+			util.array.remove(srcStep.parts, partID);
 
 			const destStep = store.get.lookupToItem(opts.destStep);
-			destStep.parts.push(opts.partID);
+			destStep.parts.push(partID);
 			destStep.parts.sort(util.sort.numeric.ascending);
 
 			if (srcStep.pliID != null) {
+				const destPLI = store.get.pli(destStep.pliID);
 				const pli = store.get.pli(srcStep.pliID);
 				const pliItems = pli.pliItems.map(i => store.get.pliItem(i));
-				const pliItem = pliItems.filter(i => i.partNumber === opts.partID)[0];
+				const pliItem = pliItems.filter(i => i.partNumbers.includes(partID))[0];
 
-				store.mutations.reparentItem({
-					item: pliItem,
-					newParent: store.get.pli(destStep.pliID)
-				});
+				if (pliItem.quantity === 1) {
+					const target = store.get.matchingPLIItem(destPLI, partID);
+					if (target) {
+						target.quantity++;
+						target.partNumbers.push(partID);
+						util.array.remove(pli.pliItems, pliItem.id);
+						store.mutations.deleteItem(store.get.pliQty(pliItem.quantityLabel));
+						store.mutations.deleteItem(pliItem);
+					} else {
+						store.mutations.reparentItem({item: pliItem, newParent: destPLI});
+					}
+				} else {
+					pliItem.quantity -= 1;
+					util.array.remove(pliItem.partNumbers, partID);
+
+					const newPLIItem = util.clone(pliItem);
+					newPLIItem.parent.id = destPLI.id;
+					newPLIItem.partNumbers = [partID];
+					store.mutations.addStateItem(newPLIItem);
+					destPLI.pliItems.push(newPLIItem);
+
+					const newPLIQty = util.clone(store.get.pliQty(pliItem.quantityLabel));
+					newPLIQty.parent.id = newPLIItem.id;
+					store.mutations.addStateItem(newPLIQty);
+					newPLIItem.quantityLabel = newPLIQty.id;
+				}
 			}
 
 			store.mutations.layoutPage(store.get.pageForItem(srcStep));
@@ -387,41 +423,43 @@ const store = {
 			if (step.pliID != null) {
 
 				const pli = store.get.pli(step.pliID);
+				if (util.isEmpty(pli.pliItems)) {
+					pli.x = pli.y = pli.width = pli.height = 0;
+				} else {
 
-				//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
-				for (let i = 0; i < pli.pliItems.length; i++) {
+					//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
+					for (let i = 0; i < pli.pliItems.length; i++) {
 
-					const pliItem = store.get.pliItem(pli.pliItems[i]);
-					const part = localModel.parts[pliItem.partNumber];
+						const pliItem = store.get.pliItem(pli.pliItems[i]);
+						const pliSize = util.renderPLI(localModel.parts[pliItem.partNumbers[0]], true);
+						pliItem.x = Math.floor(left);
+						pliItem.y = Math.floor(pliMargin);
+						pliItem.width = pliSize.width;
+						pliItem.height = pliSize.height;
 
-					const pliSize = util.renderPLI(part, true);
-					pliItem.x = Math.floor(left);
-					pliItem.y = Math.floor(pliMargin);
-					pliItem.width = pliSize.width;
-					pliItem.height = pliSize.height;
+						const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
+						const pliQty = store.get.pliQty(pliItem.quantityLabel);
+						pliQty.x = -qtyLabelOffset;
+						pliQty.y = pliSize.height - qtyLabelOffset;
+						pliQty.width = lblSize.width;
+						pliQty.height = lblSize.height;
 
-					const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
-					const pliQty = store.get.pliQty(pliItem.quantityLabel);
-					pliQty.x = -qtyLabelOffset;
-					pliQty.y = pliSize.height - qtyLabelOffset;
-					pliQty.width = lblSize.width;
-					pliQty.height = lblSize.height;
+						left += Math.floor(pliSize.width + pliMargin);
+						maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + pliQty.height);
+					}
 
-					left += Math.floor(pliSize.width + pliMargin);
-					maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + pliQty.height);
+					maxHeight = pliMargin + maxHeight + pliMargin;
+					pli.x = pli.y = 0;
+					pli.width = left;
+					pli.height = maxHeight;
 				}
-
-				maxHeight = pliMargin + maxHeight + pliMargin;
-				pli.x = pli.y = 0;
-				pli.width = left;
-				pli.height = maxHeight;
 			}
 
 			if (step.numberLabel != null) {
 				const lblSize = util.measureLabel('bold 20pt Helvetica', step.number);
 				const lbl = store.get.stepNumber(step.numberLabel);
 				lbl.x = 0;
-				lbl.y = maxHeight + pageMargin;
+				lbl.y = maxHeight ? maxHeight + pageMargin : 0;
 				lbl.width = lblSize.width;
 				lbl.height = lblSize.height;
 			}
@@ -611,15 +649,12 @@ const store = {
 				step.csiID = csi.id;
 				step.pliID = pli.id;
 
-				parts.forEach(partNumber => {
+				parts.forEach(partID => {
 
-					const part = localModel.parts[partNumber];
-					const target = pli.pliItems
-						.map(id => store.get.pliItem(id))
-						.filter(pliItem => pliItem.filename === part.filename && pliItem.colorCode === part.colorCode)[0];
-
+					const target = store.get.matchingPLIItem(pli, partID);
 					if (target) {
 						target.quantity++;
+						target.partNumbers.push(partID);
 					} else {
 						const pliQty = addStateItem({
 							type: 'pliQty',
@@ -627,11 +662,12 @@ const store = {
 							x: null, y: null, width: null, height: null
 						});
 
+						const part = localModel.parts[partID];
 						const pliItem = addStateItem({
 							type: 'pliItem',
 							parent: {type: 'pli', id: pli.id},
 							filename: part.filename,
-							partNumber: partNumber,
+							partNumbers: [partID],
 							colorCode: part.colorCode,
 							x: null, y: null,
 							width: null, height: null,

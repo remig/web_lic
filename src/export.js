@@ -57,36 +57,38 @@ const api = {
 			}
 
 			if (step.pliID != null) {
+
 				const pli = store.get.pli(step.pliID);
-				doc.roundedRect(
-					(step.x + pli.x) * r,
-					(step.y + pli.y) * r,
-					(pli.width) * r,
-					(pli.height) * r,
-					10 * r, 10 * r, 'S'
-				);
-
-				pli.pliItems.forEach(id => {
-
-					const pliItem = store.get.pliItem(id);
-					const part = model.parts[pliItem.partNumber];
-					const renderResult = LDRender.renderPartData(part, 1000);
-					doc.addImage(
-						renderResult.image, 'PNG',
-						(step.x + pli.x + pliItem.x) * r,
-						(step.y + pli.y + pliItem.y) * r,
-						renderResult.width * r,
-						renderResult.height * r
+				if (!util.isEmpty(pli.pliItems)) {
+					doc.roundedRect(
+						(step.x + pli.x) * r,
+						(step.y + pli.y) * r,
+						(pli.width) * r,
+						(pli.height) * r,
+						10 * r, 10 * r, 'S'
 					);
 
-					const pliQty = store.get.pliQty(pliItem.quantityLabel);
-					doc.setFontSize(10);
-					doc.text(
-						(step.x + pli.x + pliItem.x + pliQty.x) * r,
-						(step.y + pli.y + pliItem.y + pliQty.y + pliQty.height) * r,
-						'x' + pliItem.quantity
-					);
-				});
+					pli.pliItems.forEach(id => {
+						const pliItem = store.get.pliItem(id);
+						const part = model.parts[pliItem.partNumbers[0]];
+						const renderResult = LDRender.renderPartData(part, 1000);
+						doc.addImage(
+							renderResult.image, 'PNG',
+							(step.x + pli.x + pliItem.x) * r,
+							(step.y + pli.y + pliItem.y) * r,
+							renderResult.width * r,
+							renderResult.height * r
+						);
+
+						const pliQty = store.get.pliQty(pliItem.quantityLabel);
+						doc.setFontSize(10);
+						doc.text(
+							(step.x + pli.x + pliItem.x + pliQty.x) * r,
+							(step.y + pli.y + pliItem.y + pliQty.y + pliQty.height) * r,
+							'x' + pliItem.quantity
+						);
+					});
+				}
 			}
 
 			if (step.numberLabel != null) {

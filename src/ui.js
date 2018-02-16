@@ -60,6 +60,7 @@ var app = new Vue({
 				store.mutations.addInitialPages(LDParse.partDictionary);
 				store.get.label(1).text = `${LDParse.model.get.partCount(store.model)} Parts, ${store.get.pageCount()} Pages`;
 				store.mutations.layoutTitlePage(store.get.titlePage());
+				store.save('localStorage');
 
 				this.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
 				undoStack.saveBaseState();
@@ -75,6 +76,7 @@ var app = new Vue({
 			store.load(content);
 			this.filename = store.model.filename;
 			this.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
+			store.save('localStorage');
 			undoStack.saveBaseState();
 			this.clearSelected();
 			this.drawCurrentPage();
@@ -125,9 +127,10 @@ var app = new Vue({
 				return;
 			}
 			if (target.type === 'part') {
-				// TODO: When a part on the edge of the CSI is selected, it changes the CSI bounding box, which moves on redraw.  Fix that.
+				const step = store.get.step(target.stepID);
+				const part = LDParse.model.get.partFromID(target.id, store.model, step.submodel);
+				part.selected = true;
 				this.selectedItemLookup = target;
-				store.model.parts[target.id].selected = true;
 				this.drawCurrentPage();
 			} else {
 				this.clearSelected();
@@ -140,7 +143,9 @@ var app = new Vue({
 		},
 		clearSelected() {
 			if (this.selectedItemLookup && this.selectedItemLookup.type === 'part') {
-				delete store.model.parts[this.selectedItemLookup.id].selected;
+				const step = store.get.step(this.selectedItemLookup.stepID);
+				const part = LDParse.model.get.partFromID(this.selectedItemLookup.id, store.model, step.submodel);
+				delete part.selected;
 				this.drawCurrentPage();
 			}
 			this.selectedItemLookup = null;
@@ -164,8 +169,8 @@ var app = new Vue({
 			});
 		},
 		clearState() {
+			this.clearSelected();
 			this.currentPageLookup = null;
-			this.selectedItemLookup = null;
 			this.statusText = '';
 			this.busyText = '';
 			this.contextMenu = null;
@@ -364,33 +369,35 @@ var app = new Vue({
 						const offset = LDRender.renderAndDeltaSelectedPart(localModel, localCanvas, 1000, {endPart: lastPart, resizeContainer: true});
 						ctx.drawImage(localCanvas, csi.x - offset.dx, csi.y - offset.dy);
 					} else {
-						const csiCanvas = util.renderCSI(localModel, step, true, partIsSelected).container;
+						const csiCanvas = util.renderCSI(localModel, step, true).container;
 						ctx.drawImage(csiCanvas, csi.x, csi.y);  // TODO: profile performance if every x, y, w, h argument is passed in
 					}
 				}
 
 				if (step.pliID != null) {
 					const pli = store.get.pli(step.pliID);
-					ctx.strokeStyle = 'black';
-					ctx.lineWidth = 2;
-					util.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
-					ctx.stroke();
+					if (!util.isEmpty(pli.pliItems)) {
+						ctx.strokeStyle = 'black';
+						ctx.lineWidth = 2;
+						util.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
+						ctx.stroke();
 
-					pli.pliItems.forEach(idx => {
-						const pliItem = store.get.pliItem(idx);
-						const part = localModel.parts[pliItem.partNumber];
-						const pliCanvas = util.renderPLI(part).container;
-						ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
+						pli.pliItems.forEach(idx => {
+							const pliItem = store.get.pliItem(idx);
+							const part = localModel.parts[pliItem.partNumbers[0]];
+							const pliCanvas = util.renderPLI(part).container;
+							ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
 
-						const pliQty = store.get.pliQty(pliItem.quantityLabel);
-						ctx.fillStyle = 'black';
-						ctx.font = 'bold 10pt Helvetica';
-						ctx.fillText(
-							'x' + pliItem.quantity,
-							pli.x + pliItem.x + pliQty.x,
-							pli.y + pliItem.y + pliQty.y + pliQty.height
-						);
-					});
+							const pliQty = store.get.pliQty(pliItem.quantityLabel);
+							ctx.fillStyle = 'black';
+							ctx.font = 'bold 10pt Helvetica';
+							ctx.fillText(
+								'x' + pliItem.quantity,
+								pli.x + pliItem.x + pliQty.x,
+								pli.y + pliItem.y + pliQty.y + pliQty.height
+							);
+						});
+					}
 				}
 
 				if (step.numberLabel != null) {

@@ -51,11 +51,11 @@ const util = {
 	itemEq(a, b) {
 		return a && b && a.id === b.id && a.type === b.type;
 	},
-	renderCSI(localModel, step, forceRedraw, includeSelection) {
+	renderCSI(localModel, step, forceRedraw) {
 		const domID = `CSI_${step.csiID}`;
 		return renderPart(domID, forceRedraw, container => {
 			const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
-			LDRender.renderModel(localModel, container, 1000, {endPart: lastPart, resizeContainer: true, includeSelection});
+			LDRender.renderModel(localModel, container, 1000, {endPart: lastPart, resizeContainer: true});
 		});
 	},
 	renderPLI(part, forceRedraw) {
