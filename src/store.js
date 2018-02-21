@@ -60,6 +60,43 @@ const store = {
 			window.localStorage.setItem('lic_state', content);
 		}
 	},
+	render: (function() {
+
+		function getCanvas(domID) {
+			let container = document.getElementById(domID);
+			if (!container) {
+				container = document.createElement('canvas');
+				container.setAttribute('id', domID);
+				container.setAttribute('class', 'offscreen');
+				document.getElementById('canvasHolder').appendChild(container);
+			}
+			return container;
+		}
+
+		return {
+			csi(localModel, step) {
+				const container = getCanvas(`CSI_${step.csiID}`);
+				if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
+					LDRender.renderModel(localModel, container, 1000, {resizeContainer: true});
+				} else {
+					const partList = store.get.partList(step);
+					LDRender.renderModel(localModel, container, 1000, {partList, resizeContainer: true});
+				}
+				return {width: container.width, height: container.height, dx: 0, dy: 0, container};
+			},
+			csiWithSelection(localModel, step) {
+				const container = getCanvas(`CSI_${step.csiID}`);
+				const partList = store.get.partList(step);
+				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000, {partList, resizeContainer: true});
+				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
+			},
+			pli(part) {
+				const container = getCanvas(`PLI_${part.filename}_${part.colorCode}`);
+				LDRender.renderPart(part, container, 1000, {resizeContainer: true});
+				return {width: container.width, height: container.height, container};
+			}
+		};
+	})(),
 	get: {
 		pageCount() {
 			return store.state.pages.length;
@@ -157,6 +194,17 @@ const store = {
 				}
 			}
 			return nextStep;
+		},
+		partList(step) {  // Return a list of part IDs for every part in this (and previous) step.
+			step = store.get.lookupToItem(step);
+			let partList = [];
+			while (step) {
+				if (step.parts) {
+					partList = partList.concat(step.parts);
+				}
+				step = store.get.prevStep(step, true);
+			}
+			return partList;
 		},
 		matchingPLIItem(pli, partID) {  // Given a pli and a part, find a pliItem in the pli that matches the part's filename & color (if any)
 			pli = store.get.lookupToItem(pli);
@@ -430,7 +478,7 @@ const store = {
 			step.height = box.height - pageMargin - pageMargin;
 
 			if (step.csiID != null) {
-				const csiSize = util.renderCSI(localModel, step, true);
+				const csiSize = store.render.csi(localModel, step);
 				const csi = store.get.csi(step.csiID);
 				csi.x = Math.floor((step.width - csiSize.width) / 2);
 				csi.y = Math.floor((step.height - csiSize.height) / 2);
@@ -453,7 +501,7 @@ const store = {
 					for (let i = 0; i < pli.pliItems.length; i++) {
 
 						const pliItem = store.get.pliItem(pli.pliItems[i]);
-						const pliSize = util.renderPLI(localModel.parts[pliItem.partNumbers[0]], true);
+						const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]]);
 						pliItem.x = Math.floor(left);
 						pliItem.y = Math.floor(pliMargin);
 						pliItem.width = pliSize.width;

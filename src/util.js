@@ -1,22 +1,8 @@
-/* global module: false, LDRender: false */
+/* global module: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 util = (function() {
 'use strict';
-
-function renderPart(domID, forceRedraw, renderCB) {
-	let container = document.getElementById(domID);
-	if (!container || forceRedraw) {
-		if (!container) {
-			container = document.createElement('canvas');
-			container.setAttribute('id', domID);
-			container.setAttribute('class', 'offscreen');
-			document.getElementById('canvasHolder').appendChild(container);
-		}
-		renderCB(container);
-	}
-	return {width: container.width, height: container.height, container};
-}
 
 const util = {
 	isEmpty(p) {
@@ -61,29 +47,6 @@ const util = {
 	},
 	itemEq(a, b) {
 		return a && b && a.id === b.id && a.type === b.type;
-	},
-	renderCSI(localModel, step, forceRedraw) {
-		const domID = `CSI_${step.csiID}`;
-		return renderPart(domID, forceRedraw, container => {
-			if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
-				LDRender.renderModel(localModel, container, 1000, {resizeContainer: true});
-				return;
-			}
-			let partList = [];
-			while (step) {
-				if (step.parts) {
-					partList = partList.concat(step.parts);
-				}
-				step = store.get.prevStep(step, true);
-			}
-			LDRender.renderModel(localModel, container, 1000, {partList, resizeContainer: true});
-		});
-	},
-	renderPLI(part, forceRedraw) {
-		const domID = `PLI_${part.filename}_${part.colorCode}`;
-		return renderPart(domID, forceRedraw, container => {
-			LDRender.renderPart(part, container, 1000, {resizeContainer: true});
-		});
 	},
 	measureLabel: (() => {
 		const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}

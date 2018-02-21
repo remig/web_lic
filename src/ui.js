@@ -364,22 +364,8 @@ var app = new Vue({
 				if (step.csiID != null) {
 					const csi = store.get.csi(step.csiID);
 					const partIsSelected = step.parts ? step.parts.some(i => localModel.parts[i].selected) : false;
-					if (partIsSelected) {
-						const localCanvas = document.getElementById(`CSI_${step.csiID}`);
-						let partList = [], prevStep = step;
-						// TODO: need a clean way to build 'all previous parts' list for a given step
-						while (prevStep) {
-							if (prevStep.parts) {
-								partList = partList.concat(prevStep.parts);
-							}
-							prevStep = store.get.prevStep(prevStep, true);
-						}
-						const offset = LDRender.renderAndDeltaSelectedPart(localModel, localCanvas, 1000, {partList, resizeContainer: true});
-						ctx.drawImage(localCanvas, csi.x - offset.dx, csi.y - offset.dy);
-					} else {
-						const csiCanvas = util.renderCSI(localModel, step, true).container;
-						ctx.drawImage(csiCanvas, csi.x, csi.y);  // TODO: profile performance if every x, y, w, h argument is passed in
-					}
+					const res = store.render[partIsSelected ? 'csiWithSelection' : 'csi'](localModel, step);
+					ctx.drawImage(res.container, csi.x - res.dx, csi.y - res.dy);  // TODO: profile performance if every x, y, w, h argument is passed in
 				}
 
 				if (step.pliID != null) {
@@ -393,7 +379,7 @@ var app = new Vue({
 						pli.pliItems.forEach(idx => {
 							const pliItem = store.get.pliItem(idx);
 							const part = localModel.parts[pliItem.partNumbers[0]];
-							const pliCanvas = util.renderPLI(part).container;
+							const pliCanvas = store.render.pli(part).container;
 							ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
 
 							const pliQty = store.get.pliQty(pliItem.pliQtyID);
