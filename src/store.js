@@ -442,7 +442,7 @@ const store = {
 		},
 		deletePLI(pli) {
 			pli = store.get.lookupToItem(pli);
-			if (!pli.pliiItems.length) {
+			if (!pli.pliItems.length) {
 				store.mutations.deleteItem(pli);  // Don't delete plis that still have parts
 			}
 		},
