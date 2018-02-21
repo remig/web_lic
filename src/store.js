@@ -140,11 +140,23 @@ const store = {
 		},
 		prevStep(step, limitToSubmodel) {
 			step = store.get.lookupToItem(step);
-			return store.get.prev(step);
+			let prevStep = store.get.prev(step);
+			if (limitToSubmodel) {
+				while (prevStep && !util.array.eq(step.submodel, prevStep.submodel)) {
+					prevStep = store.get.prev(prevStep);
+				}
+			}
+			return prevStep;
 		},
 		nextStep(step, limitToSubmodel) {
 			step = store.get.lookupToItem(step);
-			return store.get.next(step);
+			let nextStep = store.get.next(step);
+			if (limitToSubmodel) {
+				while (nextStep && !util.array.eq(step.submodel, nextStep.submodel)) {
+					nextStep = store.get.prev(nextStep);
+				}
+			}
+			return nextStep;
 		},
 		matchingPLIItem(pli, partID) {  // Given a pli and a part, find a pliItem in the pli that matches the part's filename & color (if any)
 			pli = store.get.lookupToItem(pli);

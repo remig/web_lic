@@ -307,6 +307,7 @@ var app = new Vue({
 					dx = dv;
 				}
 				const item = store.get.lookupToItem(selItem);
+				// TODO: If you move a CSI, the Step's bounding box needs to be updated
 				undoStack.commit('repositionItem', {
 					item: item,
 					x: item.x + dx,
@@ -362,11 +363,18 @@ var app = new Vue({
 
 				if (step.csiID != null) {
 					const csi = store.get.csi(step.csiID);
-					const partIsSelected = step.parts ? step.parts.map(i => localModel.parts[i].selected).some(i => !!i) : false;
+					const partIsSelected = step.parts ? step.parts.some(i => localModel.parts[i].selected) : false;
 					if (partIsSelected) {
 						const localCanvas = document.getElementById(`CSI_${step.csiID}`);
-						const lastPart = step.parts[step.parts.length - 1];
-						const offset = LDRender.renderAndDeltaSelectedPart(localModel, localCanvas, 1000, {endPart: lastPart, resizeContainer: true});
+						let partList = [], prevStep = step;
+						// TODO: need a clean way to build 'all previous parts' list for a given step
+						while (prevStep) {
+							if (prevStep.parts) {
+								partList = partList.concat(prevStep.parts);
+							}
+							prevStep = store.get.prevStep(prevStep, true);
+						}
+						const offset = LDRender.renderAndDeltaSelectedPart(localModel, localCanvas, 1000, {partList, resizeContainer: true});
 						ctx.drawImage(localCanvas, csi.x - offset.dx, csi.y - offset.dy);
 					} else {
 						const csiCanvas = util.renderCSI(localModel, step, true).container;

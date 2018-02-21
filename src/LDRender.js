@@ -32,14 +32,15 @@ const api = {
 	renderModel(part, containerID, size, config) {
 
 		config = config || {};
-		config.startPart = (config.startPart == null) ? 0 : config.startPart;
-		config.endPart = (config.endPart == null) ? part.parts.length - 1 : config.endPart;
 		config.size = size;
+		if (!config.partList) {
+			config.partList = part.parts.map((part, idx) => idx);
+		}
 
 		initialize();
 		const scene = initScene(size);
 
-		addModelToScene(scene, part, config);
+		addModelToScene(scene, part, config.partList, config);
 		return render(scene, size, containerID, config);
 	},
 
@@ -59,12 +60,12 @@ const api = {
 
 		// Render with no parts selected
 		config.includeSelection = false;
-		addModelToScene(scene, part, config);
+		addModelToScene(scene, part, config.partList, config);
 		const noSelectedPartsBounds = render(scene, size, containerID, config);
 
 		// Render again with parts selected
 		config.includeSelection = true;
-		addModelToScene(scene, part, config);
+		addModelToScene(scene, part, config.partList, config);
 		const selectedPartsBounds = render(scene, size, containerID, config);
 
 		return {
@@ -361,11 +362,11 @@ function lineSide(p, l1, l2) {
 	return (res > 0) ? 1 : -1;
 }
 
-function addModelToScene(scene, model, config) {
+function addModelToScene(scene, model, partIDList, config) {
 
 	const size = config.size / 2;
-	for (let i = config.startPart; i <= config.endPart; i++) {
-		const part = model.parts[i];
+	for (let i = 0; i < partIDList.length; i++) {
+		const part = model.parts[partIDList[i]];
 		const abstractPart = api.partDictionary[part.filename];
 		const drawSelected = config.includeSelection && part.selected;
 
@@ -406,6 +407,7 @@ function addModelToScene(scene, model, config) {
 	}
 }
 
+// TODO: To fix edge coloring and conditional line rendering, try using addModelToScene to draw abstractParts, with identity matrix & single part lists
 function addPartToScene(scene, abstractPart, colorCode, config) {
 	const partGeometry = getPartGeometry(abstractPart, colorCode);
 

@@ -46,6 +46,17 @@ const util = {
 			if (idx >= 0) {
 				array.splice(idx, 1);
 			}
+		},
+		eq(a, b) {
+			if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+				return false;
+			}
+			for (var i = 0; i < a.length; i++) {
+				if (a[i] !== b[i]) {
+					return false;
+				}
+			}
+			return true;
 		}
 	},
 	itemEq(a, b) {
@@ -54,8 +65,18 @@ const util = {
 	renderCSI(localModel, step, forceRedraw) {
 		const domID = `CSI_${step.csiID}`;
 		return renderPart(domID, forceRedraw, container => {
-			const lastPart = step.parts ? step.parts[step.parts.length - 1] : null;
-			LDRender.renderModel(localModel, container, 1000, {endPart: lastPart, resizeContainer: true});
+			if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
+				LDRender.renderModel(localModel, container, 1000, {resizeContainer: true});
+				return;
+			}
+			let partList = [];
+			while (step) {
+				if (step.parts) {
+					partList = partList.concat(step.parts);
+				}
+				step = store.get.prevStep(step, true);
+			}
+			LDRender.renderModel(localModel, container, 1000, {partList, resizeContainer: true});
 		});
 	},
 	renderPLI(part, forceRedraw) {
@@ -84,11 +105,13 @@ const util = {
 	fontToFontParts: (() => {
 
 		const boldList = ['bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+		const sizeList = ['medium', 'xx-small', 'x-small', 'small', 'large', 'x-large', 'xx-large', 'smaller', 'larger'];
+		const stretchList = ['ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded'];
 
 		return function(font = '') {
-			const fullFontParts = {fontStyle: '', fontVariant: '', fontWeight: '', fontSize: '', fontFamily: ''};
+			const fullFontParts = {fontStyle: '', fontVariant: '', fontWeight: '', fontStretch: '', fontSize: '', fontFamily: ''};
 			var haveFontSize = false;
-			font += '';
+			font = (font || '') + '';
 
 			var fontParts = font.split(/ (?=(?:[^'"]|'[^']*'|"[^"]*")*$)/);
 			fontParts.map(el => {
@@ -102,7 +125,12 @@ const util = {
 					fullFontParts.fontVariant = el;
 				} else if (boldList.includes(elLower)) {
 					fullFontParts.fontWeight = el;
-				} else {
+				} else if (stretchList.includes(elLower)) {
+					fullFontParts.fontStretch = elLower;
+				} else if (sizeList.includes(elLower)) {
+					fullFontParts.fontSize = elLower;
+					haveFontSize = true;
+				} else if (el) {
 					if (!haveFontSize) {
 						fullFontParts.fontSize = el;
 						haveFontSize = true;
@@ -117,7 +145,7 @@ const util = {
 				if (family.includes(' ') && family[0] !== '"' && family[0] !== "'") {
 					family = `"${family}"`;  // Font families that contain spaces must be quoted
 				}
-				return [this.fontStyle, this.fontVariant, this.fontWeight, this.fontSize, family].join(' ').trim();
+				return [this.fontStyle, this.fontVariant, this.fontWeight, this.fontStretch, this.fontSize, family].join(' ').trim();
 			};
 			return fullFontParts;
 		};
