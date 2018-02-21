@@ -22,11 +22,12 @@ const api = {
 	renderPart(part, containerID, size, config) {
 
 		config = config || {};
+		config.size = size;
 
 		initialize();
 		const scene = initScene(size);
 
-		addPartToScene(scene, api.partDictionary[part.filename], part.colorCode, config);
+		addPartToScene(scene, part, config);
 		return render(scene, size, containerID, config);
 	},
 	renderModel(part, containerID, size, config) {
@@ -275,17 +276,26 @@ function getPartGeometry(abstractPart, colorCode) {
 	};
 
 	const colorObj = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode));
+	const lineColor = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode, 'edge'));
 	for (let i = 0; i < abstractPart.primitives.length; i++) {
 		const primitive = abstractPart.primitives[i];
 		const p = primitive.points;
 		if (primitive.shape === 'line') {
 			geometry.lines.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
 			geometry.lines.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
+			if (lineColor) {
+				geometry.lines.colors.push(lineColor);
+				geometry.lines.colors.push(lineColor);
+			}
 		} else if (primitive.shape === 'condline') {
 			const cp = primitive.conditionalPoints;
 			const condLine = new THREE.Geometry();
 			condLine.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
 			condLine.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
+			if (lineColor) {
+				condLine.colors.push(lineColor);
+				condLine.colors.push(lineColor);
+			}
 			geometry.condlines.push({
 				line: condLine,
 				c1: new THREE.Vector3(cp[0], cp[1], cp[2]),
@@ -310,7 +320,8 @@ function getPartGeometry(abstractPart, colorCode) {
 	for (let i = 0; i < abstractPart.parts.length; i++) {
 		const part = abstractPart.parts[i];
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const subPartGeometry = getPartGeometry(api.partDictionary[part.filename], part.colorCode >= 0 ? part.colorCode : colorCode, part.colorCode);
+		const color = part.colorCode >= 0 ? part.colorCode : colorCode;
+		const subPartGeometry = getPartGeometry(api.partDictionary[part.filename], color);
 
 		const faces = subPartGeometry.faces.clone().applyMatrix(matrix);
 		geometry.faces.merge(faces);
@@ -331,8 +342,6 @@ function getPartGeometry(abstractPart, colorCode) {
 	return geometry;
 }
 
-const lineMaterial = new THREE.LineBasicMaterial({color: 0x000000});
-const lineMaterialWhite = new THREE.LineBasicMaterial({color: 0x888888});
 const selectedLineColor = 0xFF0000;
 const faceMaterial = new THREE.MeshBasicMaterial({
 	vertexColors: THREE.FaceColors,
@@ -372,15 +381,14 @@ function addModelToScene(scene, model, partIDList, config) {
 
 		const matrix = LDMatrixToMatrix(part.matrix);
 		const color = (part.colorCode >= 0) ? part.colorCode : null;
-		const partGeometry = getPartGeometry(abstractPart, color, null);
+		const partGeometry = getPartGeometry(abstractPart, color);
 
 		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMat);
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
 
-		const mat = (part.colorCode === 0 && !abstractPart.isSubModel) ? lineMaterialWhite : lineMaterial;
-		const line = new THREE.LineSegments(partGeometry.lines, mat);
+		const line = new THREE.LineSegments(partGeometry.lines, faceMaterial);
 		line.applyMatrix(matrix);
 		scene.add(line);
 
@@ -401,16 +409,15 @@ function addModelToScene(scene, model, partIDList, config) {
 			const c2 = project(condline.c2.clone().applyMatrix4(matrix), camera, size);
 
 			if (lineSide(c1, l1, l2) === lineSide(c2, l1, l2)) {
-				scene.add(new THREE.LineSegments(cline, lineMaterial));
+				scene.add(new THREE.LineSegments(cline, faceMaterial));
 			}
 		}
 	}
 }
 
-// TODO: To fix edge coloring and conditional line rendering, try using addModelToScene to draw abstractParts, with identity matrix & single part lists
-function addPartToScene(scene, abstractPart, colorCode, config) {
-	const partGeometry = getPartGeometry(abstractPart, colorCode);
+function addPartToScene(scene, part, config) {
 
+	/*
 	const mesh = new THREE.Mesh(partGeometry.faces.clone(), faceMaterial);
 	if (config && config.rotation) {
 		mesh.rotation.x = config.rotation.x * Math.PI / 180;
@@ -418,18 +425,21 @@ function addPartToScene(scene, abstractPart, colorCode, config) {
 		mesh.rotation.z = config.rotation.z * Math.PI / 180;
 	}
 	scene.add(mesh);
+	*/
 
-	// TODO: If abstractPart is a submodel, can't use one single edge color for all of it...
-	const mat = (colorCode === 0 && !abstractPart.isSubModel) ? lineMaterialWhite : lineMaterial;
-	const line = new THREE.LineSegments(partGeometry.lines.clone(), mat);
-	if (config && config.rotation) {
-		line.rotation.x = config.rotation.x * Math.PI / 180;
-		line.rotation.y = config.rotation.y * Math.PI / 180;
-		line.rotation.z = config.rotation.z * Math.PI / 180;
-	}
-	scene.add(line);
+	part = {
+		colorCode: part.colorCode,
+		filename: part.filename,
+		matrix: [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+	};
 
-	// TODO: draw conditional lines here too
+	const model = {
+		filename: part.filename,
+		name: part.filename,
+		parts: [part], primitives: [], steps: []
+	};
+
+	return addModelToScene(scene, model, [0], config);
 }
 
 if (typeof module !== 'undefined' && module.exports != null) {
