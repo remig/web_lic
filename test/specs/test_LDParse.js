@@ -1,4 +1,4 @@
-/* global require: false, describe: false, before: false, it: false */
+/* global require: false, describe: false, it: false, beforeEach: false */
 
 'use strict';
 require('isomorphic-fetch');
@@ -26,24 +26,19 @@ const fakeParts = {
 	'3004.dat': `
 0 Brick  1 x  2
 0 Name: 3004.dat
-
 0 BFC INVERTNEXT
 1 16 0 24 0 16 0 0 0 -20 0 0 0 6 box5.dat
-
 4 16 20 24 10 16 24 6 -16 24 6 -20 24 10
 4 16 -20 24 10 -16 24 6 -16 24 -6 -20 24 -10
 4 16 -20 24 -10 -16 24 -6 16 24 -6 20 24 -10
 4 16 20 24 -10 16 24 -6 16 24 6 20 24 10
-
 1 16 0 24 0 20 0 0 0 -24 0 0 0 10 box5.dat
-
 1 16 10 0 0 1 0 0 0 1 0 0 0 1 stud.dat
 1 16 -10 0 0 1 0 0 0 1 0 0 0 1 stud.dat
 0`,
 	'box5.dat': `
 0 Box with 5 Faces and All Edges
 0 Name: box5.dat
-
 0 BFC CERTIFY CCW
 2 24 1 1 1 -1 1 1
 2 24 -1 1 1 -1 1 -1
@@ -65,7 +60,6 @@ const fakeParts = {
 	'stud.dat': `
 0 Stud
 0 Name: stud.dat
-
 0 BFC CERTIFY CCW
 1 16 0 0 0 6 0 0 0 1 0 0 0 6 4-4edge.dat
 1 16 0 -4 0 6 0 0 0 1 0 0 0 6 4-4edge.dat`,
@@ -89,13 +83,20 @@ const fakeParts = {
  2 24 0.3827 0 -0.9239 0.7071 0 -0.7071
  2 24 0.7071 0 -0.7071 0.9239 0 -0.3827
  2 24 0.9239 0 -0.3827 1 0 0
-0`
+0`,
+
+	'caseInsensitiveModel': `
+0 FILE Model with Submodels
+0 Name:  model_submodel.ldr
+1 16 0 0 -20 1 0 0 0 1 0 0 0 1 base
+0 STEP
+0 FILE Base
+0 Name: Base
+1 1 0 -8 0 1 0 0 0 1 0 0 0 1 stud.dat
+0 STEP`
 };
 
 describe('Test LDParse module', function() {
-
-	before(function() {
-	});
 
 	it('LDParse exists with all public API and empty part & color tables', () => {
 		assert.exists(LDParse);
@@ -122,12 +123,13 @@ describe('Test LDParse module', function() {
 
 	describe('loadLDConfig() should work', () => {
 
+		beforeEach(fetchMock.restore);
+
 		it('Non-existent LDConfig should return empty color table', async function() {
 			fetchMock.mock(/ldconfig\.ldr/ig, 404);
 			const colorTable = await LDParse.loadLDConfig();
 			assert.exists(colorTable);
 			assert.isEmpty(colorTable);
-			fetchMock.restore();
 		});
 
 		it('Load sample LDConfig file', async function() {
@@ -142,7 +144,6 @@ describe('Test LDParse module', function() {
 			assert.deepEqual(colorTable[2], {name: 'Green', color: 2456126, edge: 3355443});
 			assert.deepEqual(colorTable[16], {name: 'Main_Colour', color: -1, edge: -1});
 			assert.deepEqual(colorTable[24], {name: 'Edge_Colour', color: -1, edge: -1});
-			fetchMock.restore();
 		});
 
 		it('getColor() should work', async function() {
@@ -156,11 +157,12 @@ describe('Test LDParse module', function() {
 			assert.equal(LDParse.getColor(16), -1);
 			assert.equal(LDParse.getColor(44), 0);
 			assert.equal(LDParse.getColor(null), 0);
-			fetchMock.restore();
 		});
 	});
 
 	describe('Load basic part content', () => {
+
+		beforeEach(fetchMock.restore);
 
 		it('Gracefully handle empty / bad part content', async function() {
 			fetchMock.mock(/ldconfig\.ldr/ig, fakeLDConfig);
@@ -168,7 +170,6 @@ describe('Test LDParse module', function() {
 			assert.isEmpty(LDParse.partDictionary);
 			assert.isNull(await LDParse.loadPartContent(''));
 			assert.isNull(await LDParse.loadPartContent('\n'));
-			fetchMock.restore();
 		});
 
 		it('Load non-nested part', async function() {
@@ -183,13 +184,61 @@ describe('Test LDParse module', function() {
 			assert.equal(part.primitives.length, 16);
 			assert.deepEqual(part.primitives[0], {shape: 'line', colorCode: -1, points: [1, 0, 0, 0.9239, 0, 0.3827]});
 			assert.deepEqual(LDParse.partDictionary, {'4-4edge.dat': part});
-			fetchMock.restore();
+		});
+
+		it('Load basic, nested part', async function() {
+			fetchMock.mock(/ldconfig\.ldr/ig, fakeLDConfig);
+			fetchMock.mock('end:.dat', url => {
+				url = url.split('/');
+				return fakeParts[url[url.length - 1]];
+			});
+			LDParse.setPartDictionary({});
+			const part = await LDParse.loadPartContent(fakeParts['stud.dat']);
+			assert.isNotEmpty(part);
+			assert.equal(part.name, 'Stud');
+			assert.equal(part.filename, 'stud.dat');
+			assert.equal(part.primitives.length, 0);
+			assert.equal(part.parts.length, 2);
+			assert.deepEqual(part.parts[0], {
+				matrix: [0, 0, 0, 6, 0, 0, 0, 1, 0, 0, 0, 6],
+				filename: '4-4edge.dat',
+				colorCode: -1
+			});
+			assert.deepEqual(part.parts[1], {
+				matrix: [0, -4, 0, 6, 0, 0, 0, 1, 0, 0, 0, 6],
+				filename: '4-4edge.dat',
+				colorCode: -1
+			});
+			assert.include(LDParse.partDictionary, {'stud.dat': part});
+			assert.property(LDParse.partDictionary, '4-4edge.dat');
 		});
 
 		it('Gracefully handle missing parts', () => {
 		});
+	});
 
-		it('Load nested parts', () => {
+	describe('Load models with submodels', () => {
+
+		beforeEach(fetchMock.restore);
+
+		it('Models should load internal submodels with case insensitive names', async function() {
+			fetchMock.mock(/ldconfig\.ldr/ig, fakeLDConfig);
+			fetchMock.mock('end:.dat', url => {
+				url = url.split('/');
+				return fakeParts[url[url.length - 1]];
+			});
+			LDParse.setPartDictionary({});
+			const part = await LDParse.loadPartContent(fakeParts['caseInsensitiveModel']);
+			assert.equal(part.filename, 'Model with Submodels');
+			assert.equal(part.name, 'Model with Submodels');
+			assert.equal(part.primitives.length, 0);
+			assert.equal(part.parts.length, 1);
+			assert.deepEqual(part.steps, [{parts: [0]}]);
+			assert.deepEqual(part.parts, [{
+				filename: 'base',
+				colorCode: -1,
+				matrix: [0, 0, -20, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+			}]);
 		});
 	});
 });

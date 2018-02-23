@@ -294,7 +294,7 @@ async function lineListToAbstractPart(fn, lineList, progressCallback) {
 	return abstractPart;
 }
 
-function loadSubModels(lineList) {
+async function loadSubModels(lineList) {
 	const models = [];
 	let lastFileLine, i, partName;
 	for (i = 0; i < lineList.length; i++) {
@@ -311,12 +311,12 @@ function loadSubModels(lineList) {
 	}
 	if (models.length) {
 		for (i = 1; i < models.length; i++) {
-			partName = lineList[models[i].start].slice(2).join(' ');
+			partName = lineList[models[i].start].slice(2).join(' ').toLowerCase();
 			unloadedSubModels[partName] = lineList.slice(models[i].start, models[i].end + 1);
 		}
 		partName = lineList[models[0].start].slice(2).join(' ');
 		const lines = lineList.slice(models[0].start, models[0].end + 1);
-		return lineListToAbstractPart(partName, lines, api.progressCallback);
+		return await lineListToAbstractPart(partName, lines, api.progressCallback);
 	}
 	return null;
 }
@@ -329,10 +329,11 @@ async function loadPart(fn, content, progressCallback) {
 	}
 	if (fn && fn in api.partDictionary) {
 		return api.partDictionary[fn];
-	} else if (fn && fn in unloadedSubModels) {
-		part = await lineListToAbstractPart(fn, unloadedSubModels[fn], api.progressCallback);
+	} else if (fn && fn.toLowerCase() in unloadedSubModels) {
+		const fnLower = fn.toLowerCase();
+		part = await lineListToAbstractPart(fn, unloadedSubModels[fnLower], api.progressCallback);
 		part.isSubModel = true;
-		delete unloadedSubModels[fn];
+		delete unloadedSubModels[fnLower];
 	} else {
 		if (!content) {
 			content = await req(fn);
@@ -358,7 +359,7 @@ async function loadPart(fn, content, progressCallback) {
 			progressCallback({stepCount: partCount});
 		}
 		if (!fn || fn.endsWith('mpd')) {
-			part = loadSubModels(lineList);
+			part = await loadSubModels(lineList);
 		}
 		if (part == null) {
 			part = await lineListToAbstractPart(fn, lineList, progressCallback);
