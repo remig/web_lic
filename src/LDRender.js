@@ -198,7 +198,7 @@ function cleanup(scene) {
 			}
 		}
 	});
-}j
+}
 
 // Render the specified scene in a size x size viewport, then crop it of all whitespace.
 // If containerID refers to an SVG image or HTML5 canvas, copy rendered image there.
