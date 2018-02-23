@@ -8,45 +8,54 @@ const api = {
 
 	generatePDF: function(app, store) {
 
-		function exportPage(page, pageSize, doc, r) {
-			if (!page) {
-				return;
-			}
-			if (page.needsLayout) {
-				store.mutations.layoutPage(page);
-			}
-			page.steps.forEach(step => exportStep(step, doc, r));
+		app.busyText = 'Generating PDF';
 
-			if (page.numberLabel != null) {
-				const lbl = store.get.pageNumber(page.numberLabel);
-				doc.setFontSize(20);
-				doc.text(
-					lbl.x * r,
-					(lbl.y + lbl.height) * r,
-					page.number + ''
-				);
-			}
-			if (page.labels != null) {
-				page.labels.forEach(lblID => {
-					const lbl = store.get.label(lblID);
-					doc.setFontSize(parseInt(util.fontToFontParts(lbl.font).fontSize, 10));
+		async function exportPage(page, idx, pageSize, doc, r) {
+			return new Promise(resolve => window.setTimeout(() => {
+				if (!page) {
+					return;
+				}
+				if (idx > 0) {
+					doc.addPage(pageSize.width, pageSize.height);
+				}
+				if (page.needsLayout) {
+					store.mutations.layoutPage(page);
+				}
+				page.steps.forEach(step => exportStep(step, doc, r));
+
+				if (page.numberLabel != null) {
+					const lbl = store.get.pageNumber(page.numberLabel);
+					doc.setFontSize(20);
 					doc.text(
 						lbl.x * r,
 						(lbl.y + lbl.height) * r,
-						lbl.text
+						page.number + ''
 					);
-				});
-			}
+				}
+				if (page.labels != null) {
+					page.labels.forEach(lblID => {
+						const lbl = store.get.label(lblID);
+						doc.setFontSize(parseInt(util.fontToFontParts(lbl.font).fontSize, 10));
+						doc.text(
+							lbl.x * r,
+							(lbl.y + lbl.height) * r,
+							lbl.text
+						);
+					});
+				}
+				app.updateProgress(`Page ${idx}`);
+				resolve();
+			}, 100));  // 100ms delay is needed to give the browser enough time to redraw itself and update the progress bar.  Sucks.
 		}
 
 		function exportStep(stepID, doc, r) {
 			const step = store.get.step(stepID);
+			const partList = store.get.partList(step);
 			const model = LDParse.model.get.submodelDescendant(store.model, step.submodel);
 
 			if (step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
-				const lastPart = (stepID === 0) ? null : step.parts[step.parts.length - 1];
-				const renderResult = LDRender.renderModelData(model, 1000, lastPart);
+				const renderResult = LDRender.renderModelData(model, 1000, {partList});
 				doc.addImage(
 					renderResult.image, 'PNG',
 					(step.x + csi.x) * r,
@@ -102,9 +111,20 @@ const api = {
 			}
 		}
 
-		app.busyText = 'Generating PDF';
+		async function exportPages(pages, pageSize, doc, r) {
+			for (var i = 0; i < pages.length; i++) {
+				await exportPage(pages[i], i, pageSize, doc, r);
+			}
+		}
 
-		window.setTimeout(function() {
+		function done(app, doc, start) {
+			doc.save(store.get.modelFilenameBase('.pdf'));
+			app.updateProgress({clear: true});
+			const end = Date.now();
+			app.statusText = `PDF Generated Successfully (${util.formatTime(start, end)})`;
+		}
+
+		window.setTimeout(() => {
 			const start = Date.now();
 			const r = 0.75;  // = 72 / 96
 			const pageSize = {
@@ -125,40 +145,51 @@ const api = {
 				.setDrawColor(0);
 
 			const pages = [store.state.titlePage].concat(store.state.pages);
-
-			pages.forEach((page, idx) => {
-				exportPage(page, pageSize, doc, r);
-				if (idx < pages.length - 1) {
-					doc.addPage(pageSize.width, pageSize.height);
-				}
+			app.updateProgress({stepCount: pages.length, text: 'Page 0'});
+			exportPages(pages, pageSize, doc, r).then(() => {
+				done(app, doc, start);
 			});
-
-			doc.save(store.get.modelFilenameBase('.pdf'));
-
-			app.busyText = '';
-			const end = Date.now();
-			app.statusText = `PDF Generated Successfully (${util.formatTime(start, end)})`;
 		}, 0);
 	},
 	generatePNGZip: function(app, store) {
 
-		function exportPage(page, canvas, imgFolder) {
-			if (!page) {
-				return;
-			}
-			if (page.needsLayout) {
-				store.mutations.layoutPage(page);
-			}
-			app.drawPage(page, canvas);
-			const pageName = (page.type === 'titlePage') ? 'Page 0 Title Page.png' : `Page ${page.number}.png`;
-			let data = canvas.toDataURL();
-			data = data.substr(data.indexOf(',') + 1);
-			imgFolder.file(pageName, data, {base64: true});
-		}
-
 		app.busyText = 'Generating PNG Zip';
 
-		window.setTimeout(function() {
+		async function exportPage(page, canvas, imgFolder) {
+			return new Promise(resolve => window.setTimeout(() => {
+				if (!page) {
+					return;
+				}
+				if (page.needsLayout) {
+					store.mutations.layoutPage(page);
+				}
+				app.drawPage(page, canvas);
+				const pageName = (page.type === 'titlePage') ? 'Page 0 Title Page.png' : `Page ${page.number}.png`;
+				let data = canvas.toDataURL();
+				data = data.substr(data.indexOf(',') + 1);
+				imgFolder.file(pageName, data, {base64: true});
+				app.updateProgress(`Page ${page.number || 0}`);
+				resolve();
+			}, 100));
+		}
+
+		async function exportPages(pages, canvas, imgFolder) {
+			for (let i = 0; i < pages.length; i++) {
+				await exportPage(pages[i], canvas, imgFolder);
+			}
+		}
+
+		function done(app, zip, fn, start) {
+			zip.generateAsync({type: 'blob'})
+				.then(content => saveAs(content, fn + '.zip'))
+				.then(() => {
+					app.updateProgress({clear: true});
+					const end = Date.now();
+					app.statusText = `PNG Zip Generated Successfully (${util.formatTime(start, end)})`;
+				});
+		}
+
+		window.setTimeout(() => {
 			const start = Date.now();
 			const fn = store.get.modelFilenameBase();
 			const zip = new JSZip();
@@ -169,15 +200,10 @@ const api = {
 			canvas.height = store.state.pageSize.height;
 
 			const pages = [store.state.titlePage].concat(store.state.pages);
-			pages.forEach(page => exportPage(page, canvas, imgFolder));
-
-			zip.generateAsync({type: 'blob'})
-				.then(content => saveAs(content, fn + '.zip'))
-				.then(() => {
-					app.busyText = '';
-					const end = Date.now();
-					app.statusText = `PNG Zip Generated Successfully (${util.formatTime(start, end)})`;
-				});
+			app.updateProgress({stepCount: pages.length, text: 'Page 0'});
+			exportPages(pages, canvas, imgFolder).then(() => {
+				done(app, zip, fn, start);
+			});
 		}, 0);
 	}
 };

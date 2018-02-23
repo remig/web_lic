@@ -73,6 +73,8 @@ const store = {
 			return container;
 		}
 
+		// TODO: need to cache rendering results, and add back a 'forceRedraw' flag, because most renders
+		// are identical to the previous renders.
 		return {
 			csi(localModel, step) {
 				const container = getCanvas(`CSI_${step.csiID}`);
@@ -86,8 +88,8 @@ const store = {
 			},
 			csiWithSelection(localModel, step) {
 				const container = getCanvas(`CSI_${step.csiID}`);
-				const partList = store.get.partList(step);
-				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000, {partList, resizeContainer: true});
+				const config = {partList: store.get.partList(step), resizeContainer: true};
+				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000, config);
 				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
 			},
 			pli(part) {
@@ -197,6 +199,9 @@ const store = {
 		},
 		partList(step) {  // Return a list of part IDs for every part in this (and previous) step.
 			step = store.get.lookupToItem(step);
+			if (step.parts == null) {
+				return null;
+			}
 			let partList = [];
 			while (step) {
 				if (step.parts) {
@@ -648,7 +653,9 @@ const store = {
 
 				const parts = util.clone(modelStep.parts || []);
 				const subModels = parts.filter(p => partDictionary[localModel.parts[p].filename].isSubModel);
-				subModels.forEach(submodel => store.mutations.addInitialPages(partDictionary, localModelIDList.concat(submodel)));
+				subModels.forEach(submodel => {
+					store.mutations.addInitialPages(partDictionary, localModelIDList.concat(submodel));
+				});
 
 				const page = addStateItem({
 					type: 'page',

@@ -1,4 +1,7 @@
 {
+	"parserOptions": {
+		"ecmaVersion": 8
+	},
     "env": {
         "browser": true,
         "es6": true
@@ -19,7 +22,7 @@
         "linebreak-style": ["error", "windows"],
         "key-spacing": "error",
         "keyword-spacing": "error",
-        "max-len": ["error", 200, {"ignoreComments": true}],
+        "max-len": ["error", 120, {"ignoreComments": true}],
         "no-alert": "error",
         "no-caller": "error",
 //        "no-console": "error",

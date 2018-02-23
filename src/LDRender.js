@@ -52,9 +52,10 @@ const api = {
 	renderAndDeltaSelectedPart(part, containerID, size, config) {
 
 		config = config || {};
-		config.startPart = (config.startPart == null) ? 0 : config.startPart;
-		config.endPart = (config.endPart == null) ? part.parts.length - 1 : config.endPart;
 		config.size = size;
+		if (!config.partList) {
+			config.partList = part.parts.map((part, idx) => idx);
+		}
 
 		initialize();
 		const scene = initScene(size);
@@ -75,18 +76,12 @@ const api = {
 		};
 	},
 
-	// Like renderModel / measurePart, except it doesn't copy the rendered image to a
-	// target node, it only returns a {width, height} object instead
-	measureModel(part, size, endPart, startPart) {
-		return api.renderModel(part, null, size, {endPart: endPart, startPart: startPart});
-	},
-	measurePart(part, size, config) {
-		return api.renderPart(part, null, size, config);
-	},
 	// Like renderModel / renderPart, except it doesn't copy the rendered image to a target
 	// node, it only returns the raw image data as a base64 encoded string
-	renderModelData(part, size, endPart, startPart) {
-		return api.renderModel(part, null, size, {endPart: endPart, startPart: startPart, getData: true});
+	renderModelData(part, size, config) {
+		config = config || {};
+		config.getData = true;
+		return api.renderModel(part, null, size, config);
 	},
 	renderPartData(part, size, config) {
 		config = config || {};

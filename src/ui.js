@@ -51,26 +51,27 @@ var app = new Vue({
 				this.closeModel();
 			}
 			this.busyText = 'Loading Model';
-			window.setTimeout(() => {  // Timeout needed to let Vue catch up and draw the busy spinner.  Or something.  Damned if I can't find a better way. Ugh.
-				store.setModel(modelGenerator());
-				this.filename = store.model.filename;
+			modelGenerator().then(model => {
+				store.setModel(model);
+				app.filename = store.model.filename;
 				LDRender.setPartDictionary(LDParse.partDictionary);
 
 				store.mutations.addTitlePage();
 				store.mutations.addInitialPages(LDParse.partDictionary);
-				store.get.label(1).text = `${LDParse.model.get.partCount(store.model)} Parts, ${store.get.pageCount()} Pages`;
+				const partCount = LDParse.model.get.partCount(store.model);
+				store.get.label(1).text = `${partCount} Parts, ${store.get.pageCount()} Pages`;
 				store.mutations.layoutTitlePage(store.get.titlePage());
 				store.save('localStorage');
 
-				this.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
+				app.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
 				undoStack.saveBaseState();
-				this.forceUIUpdate();
+				app.forceUIUpdate();
 
-				const end = Date.now();
-				this.busyText = '';
-				this.statusText = `"${store.get.modelFilename()}" loaded successfully (${util.formatTime(start, end)})`;
-				Vue.nextTick(this.drawCurrentPage);
-			}, 0);
+				const time = util.formatTime(start, Date.now());
+				app.updateProgress({clear: true});
+				app.statusText = `"${store.get.modelFilename()}" loaded successfully (${time})`;
+				Vue.nextTick(app.drawCurrentPage);
+			});
 		},
 		openLicFile(content) {
 			store.load(content);
@@ -150,6 +151,33 @@ var app = new Vue({
 			}
 			this.selectedItemLookup = null;
 		},
+		updateProgress: (() => {
+			let progress = 0, count = 0, text = '';
+			return (opts) => {
+				if (opts == null) {
+					progress++;
+				} else if (typeof opts === 'string') {
+					progress++;
+					text = opts;
+				} else {
+					if (opts.stepCount) {
+						count = opts.stepCount;
+					}
+					if (opts.clear) {
+						app.busyText = text = '';
+						progress = count = 0;
+					}
+					if (opts.text) {
+						text = opts.text;
+					}
+				}
+				// This gets called several times a second, as long-lived processes progress.  Vue's reactivity is too slow and resource intensive to use here.
+				const bar = document.getElementById('progressbar');
+				const pct = Math.floor(progress / count * 100) || 0;
+				bar.style.width = `${pct}%`;
+				bar.innerText = text || bar.style.width;
+			};
+		})(),
 		forceUIUpdate() {
 			// If I understood Vue better, I'd create components that damn well updated themselves properly.
 			this.treeUpdateState = !this.treeUpdateState;
@@ -172,7 +200,7 @@ var app = new Vue({
 			this.clearSelected();
 			this.currentPageLookup = null;
 			this.statusText = '';
-			this.busyText = '';
+			this.updateProgress({clear: true});
 			this.contextMenu = null;
 			this.filename = null;
 			this.dirtyState.undoIndex = 0;
@@ -472,6 +500,7 @@ var app = new Vue({
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.index;
 		});
+		LDParse.setProgressCallback(this.updateProgress);
 		var localState = localStorage.getItem('lic_state');
 		if (localState) {
 			this.openLicFile(JSON.parse(localState));

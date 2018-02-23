@@ -6,22 +6,23 @@ LDParse = (function() {
 
 const api = {
 	// Load the specified url via AJAX and return an abstractPart representing the content of url.
-	loadRemotePart(url) {
-		return loadPart(url);
+	async loadRemotePart(url) {
+		return await loadPart(url, null, api.progressCallback);
 	},
 	// Create an abstractPart from the specified 'content' of an LDraw part file
-	loadPartContent(content, fn) {
-		const part = loadPart(null, content);
+	async loadPartContent(content, fn) {
+		const part = await loadPart(null, content, api.progressCallback);
 		if (part && fn && part.filename == null) {
 			part.filename = fn;
 		}
 		return part;
 	},
-	loadLDConfig(url = '../ldraw/LDConfig.ldr') {
-		const content = ajax(url);
-		if (!content) {
+	async loadLDConfig(url = '../ldraw/LDConfig.ldr') {
+		let content = await fetch(url);
+		if (!content || !content.ok) {
 			return {};
 		}
+		content = await content.text() || '';
 		const colors = {};
 		const lineList = content.split('\n');
 		for (let i = 0; i < lineList.length; i++) {
@@ -42,6 +43,12 @@ const api = {
 		}
 		return colors;
 	},
+
+	// cb will be called incrementally during the part loading process
+	setProgressCallback(cb) {
+		api.progressCallback = cb;
+	},
+
 	// key: filename, value: abstractPart content.
 	// JSON representation of the LDraw file content for a given part.
 	partDictionary: {},
@@ -109,21 +116,7 @@ const partsInPFolder = {
 };
 /* eslint-enable max-len */
 
-function ajax(url) {
-	if (!url || typeof url !== 'string') {
-		return null;
-	}
-	const xhttp = new XMLHttpRequest();
-	xhttp.open('GET', url.toLowerCase(), false);
-	xhttp.setRequestHeader('Content-type', 'text/plain');
-	xhttp.send();
-	if (xhttp.status === 200 && xhttp.readyState === 4) {
-		return xhttp.responseText;
-	}
-	return null;
-}
-
-function req(fn) {
+async function req(fn) {
 	if (!fn || typeof fn !== 'string') {
 		return '';
 	}
@@ -134,21 +127,21 @@ function req(fn) {
 	} else {
 		path = partPathLookup[partsInPFolder[fn] || 0];
 	}
-	resp = ajax(path + fn);
-	if (resp == null) {
+	resp = await fetch(path + fn);
+	if (resp == null || !resp.ok) {
 		if (path.includes('/parts/')) {
-			resp = ajax(partPathLookup[1] + fn);
+			resp = await fetch(partPathLookup[1] + fn);
 		} else {
-			resp = ajax(partPathLookup[0] + fn);
+			resp = await fetch(partPathLookup[0] + fn);
 		}
 	}
-	if (resp == null) {
-		resp = ajax(`../ldraw/models/${fn}`);
+	if (resp == null || !resp.ok) {
+		resp = await fetch(`../ldraw/models/${fn}`);
 	}
-	if (resp == null) {
+	if (resp == null || !resp.ok) {
 		console.log(`   *** FAILED TO LOAD: ${fn}`);
 	}
-	return resp || '';
+	return await resp.text() || '';
 }
 
 // key: submodel filename, value: lineList to be loaded
@@ -211,11 +204,11 @@ function parseColorCode(code) {
 	return (code === 16 || code === 24) ? -1 : code;
 }
 
-function parsePart(abstractPartParent, line) {
+async function parsePart(abstractPartParent, line) {
 	const partName = line.slice(14).join(' ');
 	let colorCode = parseColorCode(line[1]);
 	colorCode = forceBlack(colorCode, abstractPartParent.filename, partName);
-	const part = loadPart(partName);
+	const part = await loadPart(partName);
 	if (part) {
 		abstractPartParent.parts.push({
 			colorCode: colorCode,
@@ -268,7 +261,7 @@ const lineParsers = {
 	'5': parseCondLine
 };
 
-function lineListToAbstractPart(fn, lineList) {
+async function lineListToAbstractPart(fn, lineList, progressCallback) {
 	const abstractPart = {
 		filename: fn,
 		name: '',
@@ -286,12 +279,16 @@ function lineListToAbstractPart(fn, lineList) {
 		}
 	}
 	if (!fn && lineList[1] && lineList[1][0] === '0' && lineList[1][1] === 'Name:') {
-		abstractPart.filename = lineList[1][2];  // If we don't have a filename but line 2 includes 'Name', use it
+		// If we don't have a filename but line 2 includes 'Name', use it
+		abstractPart.filename = lineList[1][2];
 	}
 	for (let i = 0; i < lineList.length; i++) {
 		const line = lineList[i];
 		if (line && line[0] in lineParsers) {
-			lineParsers[line[0]](abstractPart, line);
+			await lineParsers[line[0]](abstractPart, line);
+			if (progressCallback && line[0] === '1') {
+				progressCallback();
+			}
 		}
 	}
 	return abstractPart;
@@ -319,49 +316,58 @@ function loadSubModels(lineList) {
 		}
 		partName = lineList[models[0].start].slice(2).join(' ');
 		const lines = lineList.slice(models[0].start, models[0].end + 1);
-		return lineListToAbstractPart(partName, lines);
+		return lineListToAbstractPart(partName, lines, api.progressCallback);
 	}
 	return null;
 }
 
-function loadPart(fn, content) {
+async function loadPart(fn, content, progressCallback) {
 	let part;
 	if (needLDConfig) {
-		api.colorTable = api.loadLDConfig();
+		api.colorTable = await api.loadLDConfig();
 		needLDConfig = false;
 	}
 	if (fn && fn in api.partDictionary) {
 		return api.partDictionary[fn];
 	} else if (fn && fn in unloadedSubModels) {
-		part = lineListToAbstractPart(fn, unloadedSubModels[fn]);
+		part = await lineListToAbstractPart(fn, unloadedSubModels[fn], api.progressCallback);
 		part.isSubModel = true;
 		delete unloadedSubModels[fn];
 	} else {
-		content = content || req(fn);
+		if (!content) {
+			content = await req(fn);
+		}
 		if (!content) {
 			return null;  // No content, nothing to create
 		}
 		const lineList = [], tmpList = content.split('\n');
+		let partCount = 0;
 		for (let i = 0; i < tmpList.length; i++) {
 			const line = tmpList[i].trim().replace(/\s\s+/g, ' ').split(' ');
 			if (line && line.length > 1) {
 				lineList.push(line);
+				if (line[0] === '1') {
+					partCount++;
+				}
 			}
 		}
 		if (lineList.length < 1) {
 			return null;  // No content, nothing to create
 		}
+		if (progressCallback) {
+			progressCallback({stepCount: partCount});
+		}
 		if (!fn || fn.endsWith('mpd')) {
 			part = loadSubModels(lineList);
 		}
 		if (part == null) {
-			part = lineListToAbstractPart(fn, lineList);
+			part = await lineListToAbstractPart(fn, lineList, progressCallback);
 		}
 	}
 	api.partDictionary[fn || part.filename] = part;
 	if (part.steps) {
 		delete part.steps.lastPart;
-		// Check if any parts were left out of the last step; add them to new step if so.
+		// Check if any parts were left out of the last step; add them to a new step if so.
 		// This happens often when a model / submodel does not end with a 'STEP 0' command.
 		const lastStepParts = part.steps[part.steps.length - 1].parts;
 		if (lastStepParts[lastStepParts.length - 1] < part.parts.length - 1) {

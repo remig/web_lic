@@ -71,6 +71,15 @@ div#container {
 	border-left-color:#555;
 }
 
+.progress {
+	margin: 15px 0 0 0;
+}
+
+.progress-bar {
+	min-width: 3.5em;
+	transition: none;
+}
+
 /* Splitter stuff */
 .gutter.gutter-horizontal {
 	cursor: ew-resize;
@@ -103,15 +112,19 @@ div#container {
 	z-index: 1000;
 }
 
-#busyText {
+#busyContainer {
 	display: inline-block;
 	position: absolute;
 	top: 48%;
-	left: 50%;
+	left: 30%;
+	right: 30%;
 	background: white;
-	font: 18pt Helvetica;
 	padding: 20px;
 	border-radius: 5px;
+}
+
+.busyText {
+	font: 18pt Helvetica;
 }
 
 #spinner {
