@@ -14,10 +14,10 @@ const trivial_part_dict = require('../trivial_part_dict.json');
 describe('Test state store module', function() {
 
 	before(function() {
-		sinon.stub(util, 'renderCSI').callsFake(() => {
+		sinon.stub(store.render, 'csi').callsFake(() => {
 			return {width: 200, height: 100};
 		});
-		sinon.stub(util, 'renderPLI').callsFake(() => {
+		sinon.stub(store.render, 'pli').callsFake(() => {
 			return {width: 50, height: 25};
 		});
 		sinon.stub(util, 'measureLabel').callsFake(() => {

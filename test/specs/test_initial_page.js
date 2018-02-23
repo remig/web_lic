@@ -95,4 +95,13 @@ describe('Launch empty Page', function() {
 	it('Nothing should be saved to localStorage', () => {
 		assert.isNull(browser.localStorage('GET', 'lic_state').value);
 	});
+
+	describe('Left / right splitter should work', () => {
+
+		it('Hover over splitter should change cursor', () => {
+		});
+
+		it('Dragging splitter left should resize correctli', () => {
+		});
+	});
 });

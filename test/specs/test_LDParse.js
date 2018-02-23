@@ -1,10 +1,11 @@
-/* global global: false, require: false, describe: false, before: false, after: false, it: false */
+/* global require: false, describe: false, before: false, it: false */
 
 'use strict';
+require('isomorphic-fetch');
+const fetchMock = require('fetch-mock');
 const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
-const sinon = require('sinon');
 
 const LDParse = require('../../src/LDParse');
 
@@ -91,14 +92,9 @@ const fakeParts = {
 0`
 };
 
-let xhr, server;
-
 describe('Test LDParse module', function() {
 
 	before(function() {
-		server = sinon.fakeServer.create();
-		server.respondImmediately = true;
-		global.XMLHttpRequest = xhr = sinon.useFakeXMLHttpRequest();
 	});
 
 	it('LDParse exists with all public API and empty part & color tables', () => {
@@ -126,16 +122,17 @@ describe('Test LDParse module', function() {
 
 	describe('loadLDConfig() should work', () => {
 
-		it('Non-existent LDConfig should return empty color table', () => {
-			server.respondWith(/ldconfig\.ldr/ig, [404, {'Content-Type': 'text/plain'}, '']);
-			const colorTable = LDParse.loadLDConfig();
+		it('Non-existent LDConfig should return empty color table', async function() {
+			fetchMock.mock(/ldconfig\.ldr/ig, 404);
+			const colorTable = await LDParse.loadLDConfig();
 			assert.exists(colorTable);
 			assert.isEmpty(colorTable);
+			fetchMock.restore();
 		});
 
-		it('Load sample LDConfig file', () => {
-			server.respondWith(/ldconfig\.ldr/ig, [200, {'Content-Type': 'text/plain'}, fakeLDConfig]);
-			const colorTable = LDParse.loadLDConfig();
+		it('Load sample LDConfig file', async function() {
+			fetchMock.mock(/ldconfig\.ldr/ig, fakeLDConfig);
+			const colorTable = await LDParse.loadLDConfig();
 			assert.isNotEmpty(colorTable);
 			assert.exists(colorTable[0]);
 			assert.exists(colorTable[1]);
@@ -145,35 +142,40 @@ describe('Test LDParse module', function() {
 			assert.deepEqual(colorTable[2], {name: 'Green', color: 2456126, edge: 3355443});
 			assert.deepEqual(colorTable[16], {name: 'Main_Colour', color: -1, edge: -1});
 			assert.deepEqual(colorTable[24], {name: 'Edge_Colour', color: -1, edge: -1});
+			fetchMock.restore();
 		});
 
-		it('getColor() should work', () => {
+		it('getColor() should work', async function() {
 			assert.equal(LDParse.getColor(), 0);
 			assert.equal(LDParse.getColor(0), 0);
-			server.respondWith(/ldconfig\.ldr/ig, [200, {'Content-Type': 'text/plain'}, fakeLDConfig]);
-			LDParse.colorTable = LDParse.loadLDConfig();
+			fetchMock.mock(/ldconfig\.ldr/ig, fakeLDConfig);
+			LDParse.colorTable = await LDParse.loadLDConfig();
 			assert.equal(LDParse.getColor(0), 332573);
 			assert.equal(LDParse.getColor(0, 'color'), 332573);
 			assert.equal(LDParse.getColor(0, 'edge'), 5855577);
 			assert.equal(LDParse.getColor(16), -1);
 			assert.equal(LDParse.getColor(44), 0);
 			assert.equal(LDParse.getColor(null), 0);
+			fetchMock.restore();
 		});
 	});
 
 	describe('Load basic part content', () => {
 
-		it('Gracefully handle empty / bad part content', () => {
+		it('Gracefully handle empty / bad part content', async function() {
+			fetchMock.mock(/ldconfig\.ldr/ig, fakeLDConfig);
 			LDParse.setPartDictionary({});
 			assert.isEmpty(LDParse.partDictionary);
-			assert.isNull(LDParse.loadPartContent(''));
-			assert.isNull(LDParse.loadPartContent('\n'));
+			assert.isNull(await LDParse.loadPartContent(''));
+			assert.isNull(await LDParse.loadPartContent('\n'));
+			fetchMock.restore();
 		});
 
-		it('Load non-nested part', () => {
+		it('Load non-nested part', async function() {
+			fetchMock.mock(/ldconfig\.ldr/ig, fakeLDConfig);
 			LDParse.setPartDictionary({});
 			assert.isEmpty(LDParse.partDictionary);
-			const part = LDParse.loadPartContent(fakeParts['4-4edge.dat']);
+			const part = await LDParse.loadPartContent(fakeParts['4-4edge.dat']);
 			assert.isNotEmpty(part);
 			assert.equal(part.name, 'Circle 1.0');
 			assert.equal(part.filename, '4-4edge.dat');
@@ -181,6 +183,7 @@ describe('Test LDParse module', function() {
 			assert.equal(part.primitives.length, 16);
 			assert.deepEqual(part.primitives[0], {shape: 'line', colorCode: -1, points: [1, 0, 0, 0.9239, 0, 0.3827]});
 			assert.deepEqual(LDParse.partDictionary, {'4-4edge.dat': part});
+			fetchMock.restore();
 		});
 
 		it('Gracefully handle missing parts', () => {
@@ -188,10 +191,5 @@ describe('Test LDParse module', function() {
 
 		it('Load nested parts', () => {
 		});
-	});
-
-	after(function() {
-		xhr.restore();
-		server.restore();
 	});
 });

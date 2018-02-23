@@ -22,8 +22,6 @@ describe('Test LDRender module', function() {
 		assert.exists(LDRender);
 		assert.exists(LDRender.renderPart);
 		assert.exists(LDRender.renderModel);
-		assert.exists(LDRender.measureModel);
-		assert.exists(LDRender.measurePart);
 		assert.exists(LDRender.renderModelData);
 		assert.exists(LDRender.renderPartData);
 		assert.exists(LDRender.setPartDictionary);
