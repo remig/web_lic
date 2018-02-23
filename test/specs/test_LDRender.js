@@ -27,7 +27,5 @@ describe('Test LDRender module', function() {
 		assert.exists(LDRender.setPartDictionary);
 		assert.exists(LDRender.partDictionary);
 		assert.isEmpty(LDRender.partDictionary);
-		assert.exists(LDRender.geometryDictionary);
-		assert.isEmpty(LDRender.geometryDictionary);
 	});
 });

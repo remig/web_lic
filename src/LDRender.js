@@ -28,7 +28,9 @@ const api = {
 		const scene = initScene(size);
 
 		addPartToScene(scene, part, config);
-		return render(scene, size, containerID, config);
+		const res = render(scene, size, containerID, config);
+		cleanup(scene);
+		return res;
 	},
 	renderModel(part, containerID, size, config) {
 
@@ -42,7 +44,9 @@ const api = {
 		const scene = initScene(size);
 
 		addModelToScene(scene, part, config.partList, config);
-		return render(scene, size, containerID, config);
+		const res = render(scene, size, containerID, config);
+		cleanup(scene);
+		return res;
 	},
 
 	// Renders the model twice; once with all parts unselected and once with parts selected.
@@ -69,6 +73,7 @@ const api = {
 		config.includeSelection = true;
 		addModelToScene(scene, part, config.partList, config);
 		const selectedPartsBounds = render(scene, size, containerID, config);
+		cleanup(scene);
 
 		return {
 			dx: Math.max(0, noSelectedPartsBounds.x - selectedPartsBounds.x),
@@ -91,8 +96,7 @@ const api = {
 	setPartDictionary(dict) {
 		api.partDictionary = dict;    // Part dictionary {partName : abstractPart} as created by LDParse
 	},
-	partDictionary: {},
-	geometryDictionary: {}  // key: part filename, value: part's geometry
+	partDictionary: {}
 };
 
 function contextBoundingBox(data, w, h) {
@@ -182,6 +186,20 @@ function initScene(size) {
 	return scene;
 }
 
+function cleanup(scene) {
+	renderer.renderLists.dispose();
+	scene.traverse(node => {
+		if (node instanceof THREE.Mesh) {
+			if (node.geometry) {
+				node.geometry.dispose();
+			}
+			if (node.material) {
+				node.material.dispose();
+			}
+		}
+	});
+}j
+
 // Render the specified scene in a size x size viewport, then crop it of all whitespace.
 // If containerID refers to an SVG image or HTML5 canvas, copy rendered image there.
 // Return a {width, height} object specifying the final tightly cropped rendered image size.
@@ -250,21 +268,7 @@ function LDMatrixToMatrix(m) {
 
 function getPartGeometry(abstractPart, colorCode) {
 
-	if (0 && abstractPart.geometry != null) {
-		const faceGeometry = abstractPart.geometry.faces;
-		if (colorCode != null && !abstractPart.isSubModel) {
-			for (let i = 0; i < faceGeometry.faces.length; i++) {
-				faceGeometry.faces[i].color.setHex(LDParse.getColor(colorCode));
-			}
-		}
-
-		return {
-			faces: faceGeometry,
-			lines: abstractPart.geometry.lines.clone()
-		};
-	}
-
-	const geometry = api.geometryDictionary[abstractPart.filename] = {
+	const geometry = {
 		faces: new THREE.Geometry(),
 		lines: new THREE.Geometry(),
 		condlines: []
