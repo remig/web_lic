@@ -8,11 +8,13 @@ module.exports = browser => {
 
 	const page = {
 		ids: {
+			root_container: '#container',
 			status_bar: '#statusBar',
 			left_pane: '#leftPane',
 			tree: '#tree',
 			right_pane: '#rightPane',
 			page_canvas: '#pageCanvas',
+			splitter: '.gutter',
 			highlight: '#highlight',
 			file_uploader_button: '#uploadModelChooser',
 			menu: {
@@ -119,6 +121,11 @@ module.exports = browser => {
 				}
 				return true;
 			}
+		},
+		getStoreState(prop) {
+			return browser.execute(prop => {
+				return util.get(prop, store.state);
+			}, prop).value;
 		},
 		isPageCanvasBlank() {
 			return browser.execute(() => {

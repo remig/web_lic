@@ -84,7 +84,6 @@ const fakeParts = {
  2 24 0.7071 0 -0.7071 0.9239 0 -0.3827
  2 24 0.9239 0 -0.3827 1 0 0
 0`,
-
 	'caseInsensitiveModel': `
 0 FILE Model with Submodels
 0 Name:  model_submodel.ldr

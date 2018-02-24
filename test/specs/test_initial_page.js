@@ -98,10 +98,39 @@ describe('Launch empty Page', function() {
 
 	describe('Left / right splitter should work', () => {
 
-		it('Hover over splitter should change cursor', () => {
+		const size = browser.getElementSizeFloor2.bind(browser);
+
+		it('Splitter should be visible, tree 20% canvas 80%', () => {
+			assert.isTrue(browser.isVisible(page.ids.splitter));
+			assert.isTrue(browser.isVisible(page.ids.left_pane));
+			assert.isTrue(browser.isVisible(page.ids.right_pane));
+			const bodyWidth = size(page.ids.root_container).width;
+			const leftPanelWidth = size(page.ids.left_pane).width;
+			const rightPaneWidth = size(page.ids.right_pane).width;
+			assert.equal(Math.floor(bodyWidth * 0.2), Math.floor(leftPanelWidth + 2.5));
+			assert.equal(Math.floor(bodyWidth * 0.8), Math.floor(rightPaneWidth + 2.5));
 		});
 
-		it('Dragging splitter left should resize correctli', () => {
+		it('Drag splitter should resize left & right panels', () => {
+			const leftPanelWidth = browser.getElementSize(page.ids.left_pane).width;
+			const rightPaneWidth = browser.getElementSize(page.ids.right_pane).width;
+			browser.drag2(page.ids.splitter, -10, 0);
+			assert.equal(leftPanelWidth - 10, size(page.ids.left_pane).width);
+			assert.equal(rightPaneWidth + 10, size(page.ids.right_pane).width);
+			browser.drag2(page.ids.splitter, 61, 0);
+			assert.equal(leftPanelWidth + 50, size(page.ids.left_pane).width);
+			assert.equal(rightPaneWidth - 50, size(page.ids.right_pane).width);
+		});
+
+		it('Drag splitter too far left / right should only shrink so much', () => {
+			const bodyWidth = size(page.ids.root_container).width;
+			browser.drag2(page.ids.splitter, -200, 0);
+			assert.equal(100, size(page.ids.left_pane).width);
+			assert.equal(Math.floor(bodyWidth) - 105, size(page.ids.right_pane).width);
+			const pageWidth = page.getStoreState('pageSize').width;
+			browser.drag2(page.ids.splitter, 500, 0);
+			assert.equal(bodyWidth - pageWidth - 15, size(page.ids.left_pane).width);
+			assert.equal(pageWidth + 10, size(page.ids.right_pane).width);
 		});
 	});
 });

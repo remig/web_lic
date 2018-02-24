@@ -64,5 +64,25 @@ exports.config = {
 			}
 			return this.getCssProperty(selector, property).value;
 		});
+		browser.addCommand('getElementSizeFloor2', function(selector) {
+			const res = this.getElementSize(selector);
+			return {
+				width: Math.floor(res.width),
+				height: Math.floor(res.height)
+			};
+		});
+		browser.addCommand('getLocationFloor2', function(selector) {
+			const res = this.getLocation(selector);
+			return {
+				x: Math.floor(res.x),
+				y: Math.floor(res.y)
+			};
+		});
+		browser.addCommand('drag2', function(selector, dx, dy) {
+			this.moveToObject(selector);
+			this.buttonDown();
+			this.moveTo(null, dx, dy);
+			this.buttonUp();
+		});
 	}
 };

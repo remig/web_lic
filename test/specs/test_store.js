@@ -46,56 +46,31 @@ describe('Test state store module', function() {
 	}
 
 	it('store exists with all public API', () => {
-		assert.exists(store.state);
-		assert.exists(store.replaceState);
-		assert.exists(store.resetState);
-		assert.exists(store.get);
-		assert.exists(store.get.pageCount);
-		assert.exists(store.get.modelName);
-		assert.exists(store.get.modelFilename);
-		assert.exists(store.get.modelFilenameBase);
-		assert.exists(store.get.isTitlePage);
-		assert.exists(store.get.isFirstPage);
-		assert.exists(store.get.isLastPage);
-		assert.exists(store.get.nextPage);
-		assert.exists(store.get.prevPage);
-		assert.exists(store.get.titlePage);
-		assert.exists(store.get.firstPage);
-		assert.exists(store.get.lastPage);
-		assert.exists(store.get.parent);
-		assert.exists(store.get.pageForItem);
-		assert.exists(store.get.numberLabel);
-		assert.exists(store.get.lookupToItem);
-		assert.exists(store.get.itemToLookup);
-		assert.exists(store.get.page);
-		assert.exists(store.get.step);
-		assert.exists(store.get.csi);
-		assert.exists(store.get.pli);
-		assert.exists(store.get.pliItem);
-		assert.exists(store.get.pliQty);
-		assert.exists(store.get.label);
-		assert.exists(store.mutations);
-		assert.exists(store.mutations.addStateItem);
-		assert.exists(store.mutations.deleteItem);
-		assert.exists(store.mutations.repositionItem);
-		assert.exists(store.mutations.moveStepToPage);
-		assert.exists(store.mutations.moveStepToPreviousPage);
-		assert.exists(store.mutations.moveStepToNextPage);
-		assert.exists(store.mutations.mergeSteps);
-		assert.exists(store.mutations.deletePage);
-		assert.exists(store.mutations.deleteStep);
-		assert.exists(store.mutations.deletePLI);
-		assert.exists(store.mutations.renumber);
-		assert.exists(store.mutations.renumberSteps);
-		assert.exists(store.mutations.renumberPages);
-		assert.exists(store.mutations.setNumber);
-		assert.exists(store.mutations.layoutStep);
-		assert.exists(store.mutations.layoutPage);
-		assert.exists(store.mutations.layoutTitlePage);
-		assert.exists(store.mutations.addTitlePage);
-		assert.exists(store.mutations.addInitialPages);
+		assert.property(store, 'model');
+		assert.property(store, 'setModel');
+		assert.property(store, 'state');
+		assert.property(store, 'replaceState');
+		assert.property(store, 'resetState');
+		assert.property(store, 'load');
+		assert.property(store, 'save');
+		assert.property(store, 'render');
+		assert.hasAllKeys(store.render, ['csi', 'csiWithSelection', 'pli']);
+		assert.property(store, 'get');
+		assert.hasAllKeys(store.get, [
+			'pageCount', 'modelName', 'modelFilename', 'modelFilenameBase', 'isTitlePage',
+			'isFirstPage', 'isLastPage', 'nextPage', 'prevPage', 'titlePage', 'firstPage', 'lastPage',
+			'prevStep', 'nextStep', 'partList', 'matchingPLIItem', 'prev', 'next', 'parent', 'pageForItem',
+			'numberLabel', 'nextItemID', 'lookupToItem', 'itemToLookup', 'page', 'step', 'csi',
+			'pli', 'pliItem', 'pliQty', 'label', 'stepNumber', 'pageNumber'
+		]);
+		assert.property(store, 'mutations');
+		assert.hasAllKeys(store.mutations, [
+			'addStateItem', 'deleteItem', 'reparentItem', 'repositionItem', 'movePartToStep',
+			'moveStepToPage', 'moveStepToPreviousPage', 'moveStepToNextPage', 'mergeSteps', 'deletePage',
+			'deleteStep', 'deletePLI', 'renumber', 'renumberSteps', 'renumberPages', 'setNumber',
+			'layoutStep', 'layoutPage', 'layoutTitlePage', 'addTitlePage', 'addInitialPages'
+		]);
 	});
-
 
 	it('Initial state should be empty', () => {
 		verifyInitialState();

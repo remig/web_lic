@@ -48,6 +48,28 @@ const util = {
 	itemEq(a, b) {
 		return a && b && a.id === b.id && a.type === b.type;
 	},
+	get(prop, obj = {}, defaultValue) {
+		prop = (prop + '').split('.');
+		for (let i = 0; i < prop.length; i++) {
+			const p = prop[i];
+			const match = p.match(/(.*)\[(\d*)\]/);
+			if (match && match.length > 2) {
+				obj = obj[match[1]];
+				if (obj && Array.isArray(obj) && obj.length >= match[2]) {
+					obj = obj[match[2]];
+				} else {
+					return defaultValue;
+				}
+			} else {
+				if (obj.hasOwnProperty(p) && obj[p] != null) {
+					obj = obj[p];
+				} else {
+					return defaultValue;
+				}
+			}
+		}
+		return obj;
+	},
 	measureLabel: (() => {
 		const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
 		return function(font, text) {
@@ -67,12 +89,17 @@ const util = {
 	})(),
 	fontToFontParts: (() => {
 
+		/* eslint-disable max-len */
 		const boldList = ['bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
 		const sizeList = ['medium', 'xx-small', 'x-small', 'small', 'large', 'x-large', 'xx-large', 'smaller', 'larger'];
 		const stretchList = ['ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded'];
+		/* eslint-enable max-len */
 
 		return function(font = '') {
-			const fullFontParts = {fontStyle: '', fontVariant: '', fontWeight: '', fontStretch: '', fontSize: '', fontFamily: ''};
+			const fullFontParts = {
+				fontStyle: '', fontVariant: '', fontWeight: '',
+				fontStretch: '', fontSize: '', fontFamily: ''
+			};
 			var haveFontSize = false;
 			font = (font || '') + '';
 
@@ -108,7 +135,10 @@ const util = {
 				if (family.includes(' ') && family[0] !== '"' && family[0] !== "'") {
 					family = `"${family}"`;  // Font families that contain spaces must be quoted
 				}
-				return [this.fontStyle, this.fontVariant, this.fontWeight, this.fontStretch, this.fontSize, family].join(' ').trim();
+				return [
+					this.fontStyle, this.fontVariant, this.fontWeight,
+					this.fontStretch, this.fontSize, family
+				].join(' ').trim();
 			};
 			return fullFontParts;
 		};
