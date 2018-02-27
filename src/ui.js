@@ -307,6 +307,7 @@ var app = new Vue({
 			}
 		},
 		closeContextMenu() {
+			$('.dropdown-submenu.open').removeClass('open');
 			$('#contextMenu').css('display', 'none');
 		},
 		globalKeyPress(e) {

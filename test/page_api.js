@@ -16,7 +16,9 @@ module.exports = browser => {
 			page_canvas: '#pageCanvas',
 			splitter: '.gutter',
 			highlight: '#highlight',
+			contextMenu: '#contextMenu',
 			file_uploader_button: '#uploadModelChooser',
+			menu_container: '.navbar',
 			menu: {
 				file: '#file_menu',
 				edit: '#edit_menu',
@@ -74,6 +76,17 @@ module.exports = browser => {
 			}
 		},
 		selectors: {
+			contextMenu: {
+				content: '#contextMenu > ul',
+				entries: '#contextMenu > ul > li',
+				parentRow(row) {
+					const selector = `#contextMenu > ul > :nth-child(${row + 1})`;
+					return {
+						selector,
+						subMenu: selector + ' > ul'
+					};
+				}
+			},
 			tree: {
 				arrowIcons: '#tree .treeIcon',
 				topLevelRows: '#tree > ul > li',
@@ -100,23 +113,15 @@ module.exports = browser => {
 			isVisible() {
 				return browser.getCss2(page.ids.highlight, 'display') === 'block';
 			},
-			bbox() {
-				return {
-					x: parseFloat(browser.getCss2(page.ids.highlight, 'left')),
-					y: parseFloat(browser.getCss2(page.ids.highlight, 'top')),
-					width: parseFloat(browser.getCss2(page.ids.highlight, 'width')),
-					height: parseFloat(browser.getCss2(page.ids.highlight, 'height'))
-				};
-			},
 			isValid(x, y, width, height) {
 				if (!page.highlight.isVisible()) {
 					return false;
 				}
-				const highlightBox = page.highlight.bbox();
-				if (highlightBox.x < x || highlightBox.y < y) {
+				const box = browser.getBBox2(page.ids.highlight);
+				if (box.x < x || box.y < y) {
 					return false;
 				}
-				if (highlightBox.width !== width || highlightBox.height !== height) {
+				if (box.width !== width || box.height !== height) {
 					return false;
 				}
 				return true;

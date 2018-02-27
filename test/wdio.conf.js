@@ -78,6 +78,14 @@ exports.config = {
 				y: Math.floor(res.y)
 			};
 		});
+		browser.addCommand('getBBox2', function(selector) {
+			const pos = browser.getLocationFloor2(selector);
+			const size = browser.getElementSizeFloor2(selector);
+			return {
+				x: pos.x, y: pos.y,
+				width: size.width, height: size.height
+			};
+		});
 		browser.addCommand('drag2', function(selector, dx, dy) {
 			this.moveToObject(selector);
 			this.buttonDown();

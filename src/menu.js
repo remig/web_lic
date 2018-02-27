@@ -14,7 +14,8 @@ Vue.component('menu-list', {
 		toggleSubMenu(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			$(e.target.parentElement).toggleClass('open');
+			$('.dropdown-submenu.open').removeClass('open');
+			$(e.target.parentElement).addClass('open');
 		}
 	}
 });
@@ -37,7 +38,8 @@ function defaultCallback() {
 const menu = [
 	{name: 'File', children: [
 		{
-			text: 'Open...',
+			text: 'Open Lic File...',
+			id: 'open',
 			cb: () => {
 				document.getElementById('openFileChooser').click();  // Triggers app.triggerOpenFile
 			}

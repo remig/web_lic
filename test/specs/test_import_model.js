@@ -20,6 +20,7 @@ const clearDownloads = () => {
 
 describe('Import Trivial Model', function() {
 
+	let canvasSize;
 	before(() => {
 		if (!fs.existsSync(downloadPath)) {
 			fs.mkdirSync(downloadPath);
@@ -30,6 +31,7 @@ describe('Import Trivial Model', function() {
 			app.importLocalModel(model, fn);
 		}, trivial_model, 'trivial_model.ldr');
 		browser.waitForText('#statusBar', 9000);
+		canvasSize = browser.getElementSize(page.ids.page_canvas);
 	});
 
 	after(clearDownloads);
@@ -72,32 +74,80 @@ describe('Import Trivial Model', function() {
 
 	describe('Test highlight', () => {
 
+		const highlight = page.highlight;
 		it('Click center of Page should highlight CSI', () => {
-			const canvasSize = browser.getElementSize(page.ids.page_canvas);
 			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
-			assert.isTrue(page.highlight.isValid(385, 305, 122, 80));
+			assert.isTrue(highlight.isValid(385, 305, 122, 80));
 		});
 
 		it('Click just outside CSI should highlight Step', () => {
 			browser.leftClick(page.ids.page_canvas, 385, 305);
-			assert.isTrue(page.highlight.isValid(365, 285, 162, 120));
+			assert.isTrue(highlight.isValid(365, 285, 162, 120));
 		});
 
 		it('Click near edge of Page should highlight Page', () => {
 			browser.leftClick(page.ids.page_canvas, 5, 5);
-			assert.isTrue(page.highlight.isValid(-5, -5, 906, 706));
+			assert.isTrue(highlight.isValid(-5, -5, 906, 706));
 		});
 
 		it('Click off page should remove highlight', () => {
 			browser.leftClick(page.ids.page_canvas, -10, -10);
-			assert.isFalse(page.highlight.isVisible());
+			assert.isFalse(highlight.isVisible());
+		});
+	});
+
+	describe('Text context menu', () => {
+
+		const context = page.ids.contextMenu;
+
+		it('Context menu should exit invisibly', () => {
+			assert.isTrue(browser.isExisting(context));
+			assert.isFalse(browser.isVisible(context));
+		});
+
+		it('Right click should open context menu', () => {
+			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+			browser.rightClick();
+			assert.isTrue(browser.isVisible(context));
+			const box = browser.getBBox2(page.selectors.contextMenu.content);
+			assert.deepEqual(box, {x: 750, y: 613, width: 165, height: 109});
+			const text = browser.getText2(page.selectors.contextMenu.entries);
+			assert.deepEqual(text, ['Rotate CSI (NYI)', 'Scale CSI (NYI)', '', 'Add New Part (NYI)']);
+		});
+
+		it('Left click anywhere should hide context menu', () => {
+			browser.leftClick(page.ids.page_canvas, 5, 5);
+			assert.isFalse(browser.isVisible(context));
+		});
+
+		it('Left click outside page should hide context menu', () => {
+			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+			browser.rightClick();
+			assert.isTrue(browser.isVisible(context));
+			browser.leftClick(page.ids.menu_container);
+			assert.isFalse(browser.isVisible(context));
+		});
+
+		it('Click nested menu should open child', () => {
+			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, 140);
+			browser.rightClick();
+			assert.isFalse(browser.isVisible(page.selectors.contextMenu.parentRow(0).subMenu));
+			assert.isTrue(browser.isVisible(context));
+			const box = browser.getBBox2(page.selectors.contextMenu.content);
+			assert.deepEqual(box, {x: 750, y: 403, width: 160, height: 38});
+			const text = browser.getText2(page.selectors.contextMenu.entries);
+			assert.deepEqual([text], ['Set...']);
+			browser.leftClick(page.selectors.contextMenu.parentRow(0).selector);
+			assert.isTrue(browser.isVisible(page.selectors.contextMenu.parentRow(0).subMenu));
+		});
+
+		it('Multiple clicks in nested menu with multiple entries should close previous menus', () => {
 		});
 	});
 
 	it('Modify model should set dirty state and save state to localStorage', () => {
 		assert.isTrue(browser.isExisting(page.ids.filename_container));
 		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr');
-		const canvasSize = browser.getElementSize(page.ids.page_canvas);
 		browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
 		browser.keys(['ArrowRight']);
 		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr *');

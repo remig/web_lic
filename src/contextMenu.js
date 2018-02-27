@@ -42,79 +42,89 @@ const contextMenu = {
 	],
 	step: [
 		{
-			text: 'Move Step to Previous Page',
-			shown: function() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-					const page = store.get.pageForItem(app.selectedItemLookup);
-					if (store.get.isFirstPage(page) || store.get.isTitlePage(page)) {
-						return false;  // Previous page doesn't exist
-					} else if (page.steps.indexOf(app.selectedItemLookup.id) !== 0) {
-						return false;  // Can only move first step on a page to the previous page
+			text: 'Move Step to...',
+			children: [
+				{
+					text: 'Previous Page',
+					shown: function() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+							const page = store.get.pageForItem(app.selectedItemLookup);
+							if (store.get.isFirstPage(page) || store.get.isTitlePage(page)) {
+								return false;  // Previous page doesn't exist
+							} else if (page.steps.indexOf(app.selectedItemLookup.id) !== 0) {
+								return false;  // Can only move first step on a page to the previous page
+							}
+							return true;
+						}
+						return false;
+					},
+					cb: function() {
+						undoStack.commit('moveStepToPreviousPage', app.selectedItemLookup, this.text);
+						app.redrawUI(true);
 					}
-					return true;
-				}
-				return false;
-			},
-			cb: function() {
-				undoStack.commit('moveStepToPreviousPage', app.selectedItemLookup, this.text);
-				app.redrawUI(true);
-			}
-		},
-		{
-			text: 'Move Step to Next Page',
-			shown: function() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-					const page = store.get.pageForItem(app.selectedItemLookup);
-					if (store.get.isLastPage(page)) {
-						return false;  // Previous page doesn't exist
-					} else if (page.steps.indexOf(app.selectedItemLookup.id) !== page.steps.length - 1) {
-						return false;  // Can only move last step on a page to the next page
+				},
+				{
+					text: 'Next Page',
+					shown: function() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+							const page = store.get.pageForItem(app.selectedItemLookup);
+							if (store.get.isLastPage(page)) {
+								return false;  // Previous page doesn't exist
+							} else if (page.steps.indexOf(app.selectedItemLookup.id) !== page.steps.length - 1) {
+								return false;  // Can only move last step on a page to the next page
+							}
+							return true;
+						}
+						return false;
+					},
+					cb: function() {
+						undoStack.commit('moveStepToNextPage', app.selectedItemLookup, this.text);
+						app.redrawUI(true);
 					}
-					return true;
 				}
-				return false;
-			},
-			cb: function() {
-				undoStack.commit('moveStepToNextPage', app.selectedItemLookup, this.text);
-				app.redrawUI(true);
-			}
+			]
 		},
 		{text: 'separator'},
 		{
-			text: 'Merge Step with Previous Step',
-			shown: function() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-					const step = store.get.lookupToItem(app.selectedItemLookup);
-					return store.state.steps.indexOf(step) > 1;  // First 'step' is the title page content, which can't be merged
+			text: 'Merge Step with...',
+			children: [
+				{
+					text: 'Previous Step',
+					shown: function() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+							const step = store.get.lookupToItem(app.selectedItemLookup);
+							return store.state.steps.indexOf(step) > 1;  // First 'step' is the title page content, which can't be merged
+						}
+						return false;
+					},
+					cb: function() {
+						undoStack.commit(
+							'mergeSteps',
+							{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id - 1},
+							this.text
+						);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'Next Step',
+					shown: function() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+							const step = store.get.lookupToItem(app.selectedItemLookup);
+							return store.state.steps.indexOf(step) < store.state.steps.length - 1;
+						}
+						return false;
+					},
+					cb: function() {
+						undoStack.commit(
+							'mergeSteps',
+							{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id + 1},
+							this.text
+						);
+						app.redrawUI(true);
+					}
 				}
-				return false;
-			},
-			cb: function() {
-				undoStack.commit(
-					'mergeSteps',
-					{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id - 1},
-					this.text
-				);
-				app.redrawUI(true);
-			}
-		},
-		{
-			text: 'Merge Step with Next Step',
-			shown: function() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-					const step = store.get.lookupToItem(app.selectedItemLookup);
-					return store.state.steps.indexOf(step) < store.state.steps.length - 1;
-				}
-				return false;
-			},
-			cb: function() {
-				undoStack.commit(
-					'mergeSteps',
-					{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id + 1},
-					this.text
-				);
-				app.redrawUI(true);
-			}
+			]
 		}
 	],
 	stepNumber: [
