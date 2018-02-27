@@ -341,6 +341,35 @@ function getPartGeometry(abstractPart, colorCode) {
 	return geometry;
 }
 
+const arrowDimensions = {
+	head: {
+		length: 28,
+		width: 7,
+		insetDepth: 4
+	},
+	body: {
+		width: 1.25
+	}
+};
+
+function getArrowGeometry(length) {
+	const head = arrowDimensions.head, body = arrowDimensions.body;
+	const geom = new THREE.Geometry();
+	geom.vertices.push(new THREE.Vector3(0, 0, 0));
+	geom.vertices.push(new THREE.Vector3(-head.width, -head.length, 0));
+	geom.vertices.push(new THREE.Vector3(-body.width, -head.length + head.insetDepth, 0));
+	geom.vertices.push(new THREE.Vector3(body.width, -head.length + head.insetDepth, 0));
+	geom.vertices.push(new THREE.Vector3(head.width, -head.length, 0));
+	geom.vertices.push(new THREE.Vector3(body.width, -length - head.length, 0));
+	geom.vertices.push(new THREE.Vector3(-body.width, -length - head.length, 0));
+	geom.faces.push(new THREE.Face3(0, 1, 2));
+	geom.faces.push(new THREE.Face3(0, 2, 3));
+	geom.faces.push(new THREE.Face3(0, 3, 4));
+	geom.faces.push(new THREE.Face3(2, 3, 5));
+	geom.faces.push(new THREE.Face3(2, 5, 6));
+	return geom;
+}
+
 const selectedLineColor = 0xFF0000;
 const faceMaterial = new THREE.MeshBasicMaterial({
 	vertexColors: THREE.FaceColors,
@@ -353,6 +382,10 @@ const selectedFaceMaterial = new THREE.MeshBasicMaterial({
 	vertexColors: THREE.FaceColors,
 	opacity: 0.5,
 	transparent: true,
+	side: THREE.DoubleSide
+});
+const arrowMaterial = new THREE.MeshBasicMaterial({
+	color: 0xFF0000,
 	side: THREE.DoubleSide
 });
 
@@ -370,17 +403,46 @@ function lineSide(p, l1, l2) {
 	return (res > 0) ? 1 : -1;
 }
 
+function getPartDisplacement(direction, dt = 80) {
+	switch (direction) {
+		case 'left':
+			return {x: -dt, y: 0, z: 0};
+		case 'right':
+			return {x: dt, y: 0, z: 0};
+		case 'forward':
+			return {x: 0, y: 0, z: -dt};
+		case 'backward':
+			return {x: 0, y: 0, z: dt};
+		case 'down':
+			return {x: 0, y: dt, z: 0};
+		case 'up':
+		default:
+			return {x: 0, y: -dt, z: 0};
+	}
+}
+
 function addModelToScene(scene, model, partIDList, config) {
 
 	const size = config.size / 2;
+	const displacedParts = {};
+	(config.displacedParts || []).forEach(p => {
+		displacedParts[p.partID] = p.direction;
+	});
+
 	for (let i = 0; i < partIDList.length; i++) {
 		const part = model.parts[partIDList[i]];
 		const abstractPart = api.partDictionary[part.filename];
 		const drawSelected = config.includeSelection && part.selected;
+		const displacementDirection = displacedParts[partIDList[i]];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
 		const color = (part.colorCode >= 0) ? part.colorCode : null;
 		const partGeometry = getPartGeometry(abstractPart, color);
+
+		if (displacementDirection) {
+			const {x, y, z} = getPartDisplacement(displacementDirection);
+			matrix.multiply(new THREE.Matrix4().makeTranslation(x, y, z));
+		}
 
 		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMat);
@@ -390,6 +452,18 @@ function addModelToScene(scene, model, partIDList, config) {
 		const line = new THREE.LineSegments(partGeometry.lines, faceMaterial);
 		line.applyMatrix(matrix);
 		scene.add(line);
+
+		if (displacementDirection) {
+			// TODO: this only works for 'up' displacement
+			const partBox = new THREE.Box3().setFromObject(mesh);
+			const partHeight = partBox.max.y - partBox.min.y - 7;
+			const arrowMesh = new THREE.Mesh(getArrowGeometry(60), arrowMaterial);
+			const arrowMatrix = LDMatrixToMatrix(part.matrix);
+			arrowMatrix.multiply(new THREE.Matrix4().makeTranslation(0, partHeight, 0));
+			arrowMesh.applyMatrix(arrowMatrix);
+			arrowMesh.lookAt(camera.position);
+			scene.add(arrowMesh);
+		}
 
 		if (drawSelected) {
 			const box = new THREE.Box3().setFromObject(mesh);

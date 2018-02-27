@@ -1,4 +1,4 @@
-/* global Vue: false, LDParse: false */
+/* global Vue: false, util: false, LDParse: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 ContextMenu = (function() {
@@ -179,6 +179,17 @@ const contextMenu = {
 	],
 	part: [
 		{
+			text: 'Displace Part...',
+			children: [
+				{text: 'Up', cb: displacePart('up')},
+				{text: 'Down (NYI)', cb: () => {}},
+				{text: 'Left (NYI)', cb: () => {}},
+				{text: 'Right (NYI)', cb: () => {}},
+				{text: 'Forward (NYI)', cb: () => {}},
+				{text: 'Backward (NYI)', cb: () => {}}
+			]
+		},
+		{
 			text: 'Move Part to Previous Step',
 			shown: function() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
@@ -220,6 +231,18 @@ const contextMenu = {
 		}
 	]
 };
+
+function displacePart(direction) {
+	return () => {
+		const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+		undoStack.commit(
+			'displacePart',
+			{partID: app.selectedItemLookup.id, step, direction},
+			util.prettyPrint(direction)
+		);
+		app.redrawUI(true);
+	};
+}
 
 return function(menuEntry, localApp, localStore, localUndoStack) {
 	app = localApp;

@@ -143,6 +143,13 @@ const util = {
 			return fullFontParts;
 		};
 	})(),
+
+	degrees(radians) {
+		return radians * 180 / Math.PI;
+	},
+	radians(degrees) {
+		return degrees * Math.PI / 180;
+	},
 	emptyNode(node) {
 		if (node) {
 			while (node.firstChild) {

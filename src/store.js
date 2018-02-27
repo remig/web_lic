@@ -82,13 +82,18 @@ const store = {
 					LDRender.renderModel(localModel, container, 1000, {resizeContainer: true});
 				} else {
 					const partList = store.get.partList(step);
-					LDRender.renderModel(localModel, container, 1000, {partList, resizeContainer: true});
+					const config = {partList, resizeContainer: true, displacedParts: step.displacedParts};
+					LDRender.renderModel(localModel, container, 1000, config);
 				}
 				return {width: container.width, height: container.height, dx: 0, dy: 0, container};
 			},
 			csiWithSelection(localModel, step) {
+				const config = {
+					partList: store.get.partList(step),
+					resizeContainer: true,
+					displacedParts: step.displacedParts
+				};
 				const container = getCanvas(`CSI_${step.csiID}`);
-				const config = {partList: store.get.partList(step), resizeContainer: true};
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000, config);
 				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
 			},
@@ -321,6 +326,13 @@ const store = {
 				opts.item.x = opts.x;
 				opts.item.y = opts.y;
 			}
+		},
+		displacePart(opts) { // opts: {partID, step, direction}
+			// TODO: need to see if part is already displaced in this step
+			const step = store.get.lookupToItem(opts.step);
+			step.displacedParts = step.displacedParts || [];
+			step.displacedParts.push({partID: opts.partID, direction: opts.direction});
+			store.mutations.layoutPage(store.get.pageForItem(step));
 		},
 		// TODO: what if a step has zero parts?
 		movePartToStep(opts) { // opts: {partID, srcStep, destStep}
