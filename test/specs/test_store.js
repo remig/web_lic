@@ -65,7 +65,7 @@ describe('Test state store module', function() {
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
-			'addStateItem', 'deleteItem', 'reparentItem', 'repositionItem', 'movePartToStep',
+			'addStateItem', 'deleteItem', 'reparentItem', 'repositionItem', 'displacePart', 'movePartToStep',
 			'moveStepToPage', 'moveStepToPreviousPage', 'moveStepToNextPage', 'mergeSteps', 'deletePage',
 			'deleteStep', 'deletePLI', 'renumber', 'renumberSteps', 'renumberPages', 'setNumber',
 			'layoutStep', 'layoutPage', 'layoutTitlePage', 'addTitlePage', 'addInitialPages'

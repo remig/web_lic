@@ -72,31 +72,68 @@ describe('Import Trivial Model', function() {
 		assert.isFalse(page.isPageCanvasBlank());
 	});
 
-	describe('Test highlight', () => {
+	describe('Test highlight & selection', () => {
 
-		const highlight = page.highlight;
 		it('Click center of Page should highlight CSI', () => {
 			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
-			assert.isTrue(highlight.isValid(385, 305, 122, 80));
+			assert.isTrue(page.highlight.isValid(385, 305, 122, 80));
+			assert.deepEqual(page.getSelectedItem(), {id: 0, type: 'csi'});
 		});
 
 		it('Click just outside CSI should highlight Step', () => {
 			browser.leftClick(page.ids.page_canvas, 385, 305);
-			assert.isTrue(highlight.isValid(365, 285, 162, 120));
+			assert.isTrue(page.highlight.isValid(365, 285, 162, 120));
+			assert.deepEqual(page.getSelectedItem(), {id: 0, type: 'step'});
 		});
 
 		it('Click near edge of Page should highlight Page', () => {
 			browser.leftClick(page.ids.page_canvas, 5, 5);
-			assert.isTrue(highlight.isValid(-5, -5, 906, 706));
+			assert.isTrue(page.highlight.isValid(-5, -5, 906, 706));
+			assert.deepEqual(page.getSelectedItem(), {id: 0, type: 'titlePage'});
 		});
 
 		it('Click off page should remove highlight', () => {
 			browser.leftClick(page.ids.page_canvas, -10, -10);
-			assert.isFalse(highlight.isVisible());
+			assert.isFalse(page.highlight.isVisible());
+			assert.isNull(page.getSelectedItem());
 		});
 	});
 
-	describe('Text context menu', () => {
+	describe('Test page navigation', () => {
+
+		it('First drawn page should be title page', () => {
+			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'titlePage'});
+		});
+
+		it('Page up key on title page should do nothing', () => {
+			browser.keys(['PageUp']);
+			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'titlePage'});
+		});
+
+		it('Page down key should scroll to next page', () => {
+			browser.keys(['PageDown']);
+			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'page'});
+			browser.keys(['PageUp']);
+			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'titlePage'});
+			browser.keys(['PageDown', 'PageDown', 'PageDown', 'PageDown', 'PageDown']);
+			assert.deepEqual(page.getCurrentPage(), {pageID: 2, type: 'page'});
+			browser.keys(['PageUp', 'PageUp', 'PageUp', 'PageUp', 'PageUp', 'PageUp']);
+			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'titlePage'});
+		});
+
+		it('Page up / down should clear selection', () => {
+			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+			assert.isTrue(page.highlight.isValid(385, 305, 122, 80));
+			assert.deepEqual(page.getSelectedItem(), {id: 0, type: 'csi'});
+			browser.keys(['PageDown']);
+			assert.isFalse(page.highlight.isVisible());
+			assert.isNull(page.getSelectedItem());
+			browser.keys(['PageUp']);
+			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'titlePage'});
+		});
+	});
+
+	describe('Test context menu', () => {
 
 		const context = page.ids.contextMenu;
 
@@ -142,6 +179,23 @@ describe('Import Trivial Model', function() {
 		});
 
 		it('Multiple clicks in nested menu with multiple entries should close previous menus', () => {
+			browser.keys(['PageDown']);
+			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'page'});
+			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, 140);
+			browser.rightClick();
+			const text = browser.getText2(page.selectors.contextMenu.entries);
+			assert.deepEqual(text, ['Move Step to...', 'Merge Step with...']);
+
+			browser.leftClick(page.selectors.contextMenu.parentRow(0).selector);
+			assert.isTrue(browser.isVisible(page.selectors.contextMenu.parentRow(0).subMenu));
+			assert.isFalse(browser.isVisible(page.selectors.contextMenu.parentRow(1).subMenu));
+
+			browser.leftClick(page.selectors.contextMenu.parentRow(1).selector);
+			assert.isFalse(browser.isVisible(page.selectors.contextMenu.parentRow(0).subMenu));
+			assert.isTrue(browser.isVisible(page.selectors.contextMenu.parentRow(1).subMenu));
+
+			browser.keys(['PageUp']);
+			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'titlePage'});
 		});
 	});
 

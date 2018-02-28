@@ -127,6 +127,28 @@ module.exports = browser => {
 				return true;
 			}
 		},
+		getCurrentPage() {
+			return browser.execute(() => {
+				if (app.currentPageLookup == null) {
+					return null;
+				}
+				return {
+					pageID: app.currentPageLookup.id,
+					type: app.currentPageLookup.type
+				};
+			}).value;
+		},
+		getSelectedItem() {
+			return browser.execute(() => {
+				if (app.selectedItemLookup == null) {
+					return null;
+				}
+				return {
+					id: app.selectedItemLookup.id,
+					type: app.selectedItemLookup.type
+				};
+			}).value;
+		},
 		getStoreState(prop) {
 			return browser.execute(prop => {
 				return util.get(prop, store.state);
