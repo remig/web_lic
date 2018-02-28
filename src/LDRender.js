@@ -421,6 +421,75 @@ function getPartDisplacement(direction, dt = 80) {
 	}
 }
 
+function positionArrow(arrowMesh, partMesh, partMatrix, direction) {
+
+	const arrowMatrix = LDMatrixToMatrix(partMatrix);
+	const partBox = new THREE.Box3().setFromObject(partMesh);
+	let dx = 0, dy = 0, dz = 0;
+
+	switch (direction) {
+		case 'left':
+			dy = (partBox.max.y - partBox.min.y) / 2;
+			break;
+		case 'right':
+			dx = -(partBox.max.x - partBox.min.x) / 2;
+			dy = (partBox.max.y - partBox.min.y) / 2;
+			break;
+		case 'forward':
+			dy = (partBox.max.y - partBox.min.y) / 2;
+			break;
+		case 'backward':
+			dy = (partBox.max.y - partBox.min.y) / 2;
+			break;
+		case 'down':
+			dy = -7;
+			break;
+		case 'up':
+		default:
+			dy = partBox.max.y - partBox.min.y - 7;
+			break;
+	}
+
+	arrowMatrix.multiply(new THREE.Matrix4().makeTranslation(dx, dy, dz));
+	arrowMesh.applyMatrix(arrowMatrix);
+}
+
+function rotateArrow(arrowMesh, direction) {
+	switch (direction) {
+		case 'left':
+			arrowMesh.rotation.z = THREE.Math.degToRad(-90);
+			arrowMesh.rotation.x = THREE.Math.degToRad(-45);
+			break;
+		case 'right':
+			arrowMesh.rotation.z = THREE.Math.degToRad(90);
+			arrowMesh.rotation.x = THREE.Math.degToRad(-45);
+			break;
+		case 'forward':
+			arrowMesh.rotation.x = THREE.Math.degToRad(90);
+			arrowMesh.rotation.y = THREE.Math.degToRad(45);
+			break;
+		case 'backward':
+			arrowMesh.rotation.x = THREE.Math.degToRad(-90);
+			arrowMesh.rotation.y = THREE.Math.degToRad(-45);
+			break;
+		case 'down':
+			arrowMesh.rotation.x = THREE.Math.degToRad(180);
+			arrowMesh.rotation.y = THREE.Math.degToRad(45);
+			break;
+		case 'up':
+		default:
+			arrowMesh.rotation.y = THREE.Math.degToRad(-45);
+			break;
+	}
+}
+
+function getArrowMesh(partMesh, partMatrix, direction) {
+	const arrowMesh = new THREE.Mesh(getArrowGeometry(60), arrowMaterial);
+	positionArrow(arrowMesh, partMesh, partMatrix, direction);
+	rotateArrow(arrowMesh, direction);
+	return arrowMesh;
+}
+
 function addModelToScene(scene, model, partIDList, config) {
 
 	const size = config.size / 2;
@@ -454,15 +523,7 @@ function addModelToScene(scene, model, partIDList, config) {
 		scene.add(line);
 
 		if (displacementDirection) {
-			// TODO: this only works for 'up' displacement
-			const partBox = new THREE.Box3().setFromObject(mesh);
-			const partHeight = partBox.max.y - partBox.min.y - 7;
-			const arrowMesh = new THREE.Mesh(getArrowGeometry(60), arrowMaterial);
-			const arrowMatrix = LDMatrixToMatrix(part.matrix);
-			arrowMatrix.multiply(new THREE.Matrix4().makeTranslation(0, partHeight, 0));
-			arrowMesh.applyMatrix(arrowMatrix);
-			arrowMesh.lookAt(camera.position);
-			scene.add(arrowMesh);
+			scene.add(getArrowMesh(mesh, part.matrix, displacementDirection));
 		}
 
 		if (drawSelected) {

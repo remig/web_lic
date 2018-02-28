@@ -182,11 +182,11 @@ const contextMenu = {
 			text: 'Displace Part...',
 			children: [
 				{text: 'Up', cb: displacePart('up')},
-				{text: 'Down (NYI)', cb: () => {}},
-				{text: 'Left (NYI)', cb: () => {}},
-				{text: 'Right (NYI)', cb: () => {}},
-				{text: 'Forward (NYI)', cb: () => {}},
-				{text: 'Backward (NYI)', cb: () => {}}
+				{text: 'Down', cb: displacePart('down')},
+				{text: 'Left', cb: displacePart('left')},
+				{text: 'Right', cb: displacePart('right')},
+				{text: 'Forward', cb: displacePart('forward')},
+				{text: 'Backward', cb: displacePart('backward')}
 			]
 		},
 		{
