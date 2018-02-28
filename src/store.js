@@ -327,11 +327,19 @@ const store = {
 				opts.item.y = opts.y;
 			}
 		},
-		displacePart(opts) { // opts: {partID, step, direction}
-			// TODO: need to see if part is already displaced in this step
+		displacePart(opts) { // opts: {partID, step, direction}.  If direction == null, remove displacement
 			const step = store.get.lookupToItem(opts.step);
 			step.displacedParts = step.displacedParts || [];
-			step.displacedParts.push({partID: opts.partID, direction: opts.direction});
+			const idx = step.displacedParts.findIndex(p => p.partID === opts.partID);
+			if (opts.direction) {
+				if (idx >= 0) {
+					step.displacedParts[idx].direction = opts.direction;
+				} else {
+					step.displacedParts.push({partID: opts.partID, direction: opts.direction});
+				}
+			} else if (idx >= 0) {
+				step.displacedParts.splice(idx, 1);
+			}
 			store.mutations.layoutPage(store.get.pageForItem(step));
 		},
 		// TODO: what if a step has zero parts?

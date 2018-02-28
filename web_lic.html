@@ -89,14 +89,14 @@
 
 	<script type="text/x-template" id="menuTemplate">
 		<ul class="dropdown-menu">
-			<li v-for="child in menuEntries" :id="child.id || child.text | sanitizeMenuID" v-if="child.shown ? child.shown() : true"
-					:class="{divider: child.text == 'separator', 'dropdown-submenu': child.children, disabled: child.enabled ? !child.enabled() : false}">
-				<a v-if="child.text !== 'separator'" @click="child.children ? toggleSubMenu($event) : child.cb.call(child, $event)" class="clickable" data-toggle="dropdown">
-					<span class="menu-text">{{resolveProperty(child.text)}}</span>
-					<span class="menu-text shortcut" v-if="child.shortcut">{{child.shortcut | prettyPrint}}</span>
+			<li v-for="entry in menuEntries" :id="entry.id || entry.text | sanitizeMenuID" v-if="entry.shown ? entry.shown() : hasVisibleChildren(entry)"
+					:class="{divider: entry.text == 'separator', 'dropdown-submenu': entry.children, disabled: entry.enabled ? !entry.enabled() : false}">
+				<a v-if="entry.text !== 'separator'" @click="entry.children ? toggleSubMenu($event) : entry.cb.call(entry, $event)" class="clickable" data-toggle="dropdown">
+					<span class="menu-text">{{resolveProperty(entry.text)}}</span>
+					<span class="menu-text shortcut" v-if="entry.shortcut">{{entry.shortcut | prettyPrint}}</span>
 				</a>
-				<ul v-if="child.children" class="dropdown-menu">
-					<li v-for="c in resolveProperty(child.children)" ><a @click="c.cb.call(c, $event)" class="clickable">{{c.text}}</a></li>
+				<ul v-if="entry.children" class="dropdown-menu">
+					<li v-for="child in resolveProperty(entry.children)" v-if="child.shown ? child.shown() : true"><a @click="child.cb.call(child, $event)" class="clickable">{{child.text}}</a></li>
 				</ul>
 			</li>
 		</ul>

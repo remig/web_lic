@@ -20,14 +20,14 @@ const contextMenu = {
 		{text: 'Add Annotation (NYI)', cb: () => {}},
 		{
 			text: 'Delete This Blank Page',
-			shown: function() {
+			shown() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
 					const page = store.get.lookupToItem(app.selectedItemLookup);
 					return page.steps.length < 1;
 				}
 				return false;
 			},
-			cb: function() {
+			cb() {
 				const page = store.get.lookupToItem(app.selectedItemLookup);
 				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
 				undoStack.commit('deletePage', page, 'Delete Page');
@@ -46,7 +46,7 @@ const contextMenu = {
 			children: [
 				{
 					text: 'Previous Page',
-					shown: function() {
+					shown() {
 						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 							const page = store.get.pageForItem(app.selectedItemLookup);
 							if (store.get.isFirstPage(page) || store.get.isTitlePage(page)) {
@@ -58,14 +58,14 @@ const contextMenu = {
 						}
 						return false;
 					},
-					cb: function() {
+					cb() {
 						undoStack.commit('moveStepToPreviousPage', app.selectedItemLookup, this.text);
 						app.redrawUI(true);
 					}
 				},
 				{
 					text: 'Next Page',
-					shown: function() {
+					shown() {
 						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 							const page = store.get.pageForItem(app.selectedItemLookup);
 							if (store.get.isLastPage(page)) {
@@ -77,27 +77,26 @@ const contextMenu = {
 						}
 						return false;
 					},
-					cb: function() {
+					cb() {
 						undoStack.commit('moveStepToNextPage', app.selectedItemLookup, this.text);
 						app.redrawUI(true);
 					}
 				}
 			]
 		},
-		{text: 'separator'},
 		{
 			text: 'Merge Step with...',
 			children: [
 				{
 					text: 'Previous Step',
-					shown: function() {
+					shown() {
 						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 							const step = store.get.lookupToItem(app.selectedItemLookup);
 							return store.state.steps.indexOf(step) > 1;  // First 'step' is the title page content, which can't be merged
 						}
 						return false;
 					},
-					cb: function() {
+					cb() {
 						undoStack.commit(
 							'mergeSteps',
 							{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id - 1},
@@ -108,14 +107,14 @@ const contextMenu = {
 				},
 				{
 					text: 'Next Step',
-					shown: function() {
+					shown() {
 						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
 							const step = store.get.lookupToItem(app.selectedItemLookup);
 							return store.state.steps.indexOf(step) < store.state.steps.length - 1;
 						}
 						return false;
 					},
-					cb: function() {
+					cb() {
 						undoStack.commit(
 							'mergeSteps',
 							{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id + 1},
@@ -136,14 +135,14 @@ const contextMenu = {
 		{text: 'separator'},
 		{
 			text: 'Select Part (NYI)',
-			shown: function() {
+			shown() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
 					const step = store.get.parent(app.selectedItemLookup);
 					return step && step.parts && step.parts.length;
 				}
 				return false;
 			},
-			children: function() {
+			children() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
 					const step = store.get.parent(app.selectedItemLookup);
 					return step.parts.map(partID => {
@@ -151,7 +150,7 @@ const contextMenu = {
 						const abstractPart = LDParse.partDictionary[part.filename];
 						return {
 							text: abstractPart.name,
-							cb: function() {
+							cb() {
 								app.setSelected({type: 'part', id: partID, stepID: step.id});
 							}
 						};
@@ -186,19 +185,32 @@ const contextMenu = {
 				{text: 'Left', cb: displacePart('left')},
 				{text: 'Right', cb: displacePart('right')},
 				{text: 'Forward', cb: displacePart('forward')},
-				{text: 'Backward', cb: displacePart('backward')}
+				{text: 'Backward', cb: displacePart('backward')},
+				{
+					text: 'None',
+					shown() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
+							const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+							if (step.displacedParts) {
+								return step.displacedParts.some(p => p.partID === app.selectedItemLookup.id);
+							}
+						}
+						return false;
+					},
+					cb: displacePart(null)
+				}
 			]
 		},
 		{
 			text: 'Move Part to Previous Step',
-			shown: function() {
+			shown() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
 					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
 					return store.get.prevStep(step) != null;
 				}
 				return false;
 			},
-			cb: function() {
+			cb() {
 				const srcStep = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
 				const destStep = store.get.prevStep(srcStep);
 				undoStack.commit(
@@ -211,14 +223,14 @@ const contextMenu = {
 		},
 		{
 			text: 'Move Part to Next Step',
-			shown: function() {
+			shown() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
 					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
 					return store.get.nextStep(step) != null;
 				}
 				return false;
 			},
-			cb: function() {
+			cb() {
 				const srcStep = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
 				const destStep = store.get.nextStep(srcStep);
 				undoStack.commit(
@@ -238,7 +250,7 @@ function displacePart(direction) {
 		undoStack.commit(
 			'displacePart',
 			{partID: app.selectedItemLookup.id, step, direction},
-			util.prettyPrint(direction)
+			`Dispalce Part ${util.prettyPrint(direction || 'None')}`
 		);
 		app.redrawUI(true);
 	};

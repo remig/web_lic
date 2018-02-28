@@ -16,6 +16,12 @@ Vue.component('menu-list', {
 			e.stopPropagation();
 			$('.dropdown-submenu.open').removeClass('open');
 			$(e.target.parentElement).addClass('open');
+		},
+		hasVisibleChildren(child) {
+			if (!child.children) {
+				return true;
+			}
+			return child.children.some(el => el.shown ? el.shown() : true);
 		}
 	}
 });
