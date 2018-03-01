@@ -55,7 +55,8 @@ const api = {
 
 			if (step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
-				const renderResult = LDRender.renderModelData(model, 1000, {partList});
+				const config = {partList, displacedParts: step.displacedParts};
+				const renderResult = LDRender.renderModelData(model, 1000, config);
 				doc.addImage(
 					renderResult.image, 'PNG',
 					(step.x + csi.x) * r,

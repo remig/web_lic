@@ -424,6 +424,7 @@ function getPartDisplacement(direction, dt = 80) {
 function positionArrow(arrowMesh, partMesh, partMatrix, direction) {
 
 	const arrowMatrix = LDMatrixToMatrix(partMatrix);
+	arrowMatrix.extractRotation(new THREE.Matrix4());
 	const partBox = new THREE.Box3().setFromObject(partMesh);
 	let dx = 0, dy = 0, dz = 0;
 
