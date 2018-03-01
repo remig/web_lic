@@ -560,6 +560,11 @@ const store = {
 			}
 		},
 		layoutPage(page) {
+			page = store.get.lookupToItem(page);
+			if (page.type === 'titlePage') {
+				store.mutations.layoutTitlePage(page);
+				return;
+			}
 			const pageSize = store.state.pageSize;
 			const stepCount = page.steps.length;
 			const cols = Math.ceil(Math.sqrt(stepCount));
@@ -586,6 +591,7 @@ const store = {
 			delete page.needsLayout;
 		},
 		layoutTitlePage(page) {
+			page = store.get.lookupToItem(page);
 			const pageSize = store.state.pageSize;
 			const step = store.get.step(page.steps[0]);
 			const csi = store.get.csi(step.csiID);
@@ -619,6 +625,7 @@ const store = {
 				id: 0,
 				type: 'titlePage',
 				steps: [],
+				needsLayout: true,
 				labels: []
 			};
 
@@ -641,13 +648,29 @@ const store = {
 				x: null, y: null, width: null, height: null
 			}, page);
 
+			const partCount = LDParse.model.get.partCount(store.model);
+			const pageCount = store.get.pageCount();
 			addStateItem({
 				type: 'label',
-				text: '',
+				text: `${partCount} Parts, ${pageCount} Pages`,
 				font: '16pt Helvetica',
 				color: 'black',
 				x: null, y: null, width: null, height: null
 			}, page);
+		},
+		removeTitlePage() {
+			// TODO: handle this via store.mutations.deleteStep
+			const page = store.state.titlePage;
+			if (page == null) {
+				return;
+			}
+			if (page.labels) {
+				page.labels.forEach(id => store.mutations.deleteItem({type: 'label', id}));
+			}
+			if (page.steps) {
+				page.steps.forEach(id => store.mutations.deleteStep({type: 'step', id}));
+			}
+			store.state.titlePage = null;
 		},
 		addInitialPages(partDictionary, localModelIDList = []) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
 

@@ -68,7 +68,7 @@ describe('Test state store module', function() {
 			'addStateItem', 'deleteItem', 'reparentItem', 'repositionItem', 'displacePart', 'movePartToStep',
 			'moveStepToPage', 'moveStepToPreviousPage', 'moveStepToNextPage', 'mergeSteps', 'deletePage',
 			'deleteStep', 'deletePLI', 'renumber', 'renumberSteps', 'renumberPages', 'setNumber',
-			'layoutStep', 'layoutPage', 'layoutTitlePage', 'addTitlePage', 'addInitialPages'
+			'layoutStep', 'layoutPage', 'layoutTitlePage', 'addTitlePage', 'removeTitlePage', 'addInitialPages'
 		]);
 	});
 
@@ -104,7 +104,7 @@ describe('Test state store module', function() {
 		verifyInitialState();
 	});
 
-	const titlePageState = {type: 'titlePage', id: 0, steps: [0], labels: [0, 1]};
+	const titlePageState = {type: 'titlePage', id: 0, steps: [0], labels: [0, 1], needsLayout: true};
 	const pageState = {type: 'page', id: 0, needsLayout: true, number: 1, numberLabel: 0, steps: [1]};
 	const step0State = {
 		type: 'step', id: 0, parent: {type: 'titlePage', id: 0},
@@ -122,6 +122,11 @@ describe('Test state store module', function() {
 		type: 'label', id: 0, parent: {type: 'titlePage', id: 0}, text: '', color: 'black', font: '20pt Helvetica',
 		x: null, y: null, width: null, height: null
 	};
+	const summaryLabel = {
+		type: 'label', id: 1, parent: {type: 'titlePage', id: 0}, text: '0 Parts, 0 Pages', color: 'black', font: '16pt Helvetica',
+		x: null, y: null, width: null, height: null
+	};
+
 	it('Add a Title Page', () => {
 		store.mutations.addTitlePage();
 		assert.equal(store.state.pages.length, 0);
@@ -140,10 +145,12 @@ describe('Test state store module', function() {
 		assert.deepEqual(store.get.pageForItem(store.state.csis[0]), titlePageState);
 		assert.equal(store.state.labels.length, 2);
 		assert.deepEqual(store.state.labels[0], titleLabel);
+		assert.deepEqual(store.state.labels[1], summaryLabel);
 	});
 
 	it('Import trivial model', () => {
 		store.resetState();
+		LDParse.setPartDictionary(trivial_part_dict);
 		store.setModel(trivial_part_dict['trivial_model.ldr']);
 		store.mutations.addTitlePage();
 		store.mutations.addInitialPages(trivial_part_dict);

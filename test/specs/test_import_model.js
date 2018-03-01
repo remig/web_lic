@@ -77,13 +77,13 @@ describe('Import Trivial Model', function() {
 		it('Click center of Page should highlight CSI', () => {
 			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
 			assert.isTrue(page.highlight.isValid(385, 305, 122, 80));
-			assert.deepEqual(page.getSelectedItem(), {id: 0, type: 'csi'});
+			assert.deepEqual(page.getSelectedItem(), {id: 3, type: 'csi'});
 		});
 
 		it('Click just outside CSI should highlight Step', () => {
 			browser.leftClick(page.ids.page_canvas, 385, 305);
 			assert.isTrue(page.highlight.isValid(365, 285, 162, 120));
-			assert.deepEqual(page.getSelectedItem(), {id: 0, type: 'step'});
+			assert.deepEqual(page.getSelectedItem(), {id: 3, type: 'step'});
 		});
 
 		it('Click near edge of Page should highlight Page', () => {
@@ -124,7 +124,7 @@ describe('Import Trivial Model', function() {
 		it('Page up / down should clear selection', () => {
 			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
 			assert.isTrue(page.highlight.isValid(385, 305, 122, 80));
-			assert.deepEqual(page.getSelectedItem(), {id: 0, type: 'csi'});
+			assert.deepEqual(page.getSelectedItem(), {id: 3, type: 'csi'});
 			browser.keys(['PageDown']);
 			assert.isFalse(page.highlight.isVisible());
 			assert.isNull(page.getSelectedItem());

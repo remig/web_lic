@@ -13,10 +13,8 @@ const api = {
 		async function exportPage(page, idx, pageSize, doc, r) {
 			return new Promise(resolve => window.setTimeout(() => {
 				if (!page) {
+					resolve();
 					return;
-				}
-				if (idx > 0) {
-					doc.addPage(pageSize.width, pageSize.height);
 				}
 				if (page.needsLayout) {
 					store.mutations.layoutPage(page);
@@ -42,6 +40,9 @@ const api = {
 							lbl.text
 						);
 					});
+				}
+				if (!store.get.isLastPage(page)) {
+					doc.addPage(pageSize.width, pageSize.height);
 				}
 				app.updateProgress(`Page ${idx}`);
 				resolve();
@@ -145,7 +146,7 @@ const api = {
 				.setLineWidth(1.5)
 				.setDrawColor(0);
 
-			const pages = [store.state.titlePage].concat(store.state.pages);
+			const pages = [store.get.titlePage()].concat(store.state.pages);
 			app.updateProgress({stepCount: pages.length, text: 'Page 0'});
 			exportPages(pages, pageSize, doc, r).then(() => {
 				done(app, doc, start);
@@ -159,6 +160,7 @@ const api = {
 		async function exportPage(page, canvas, imgFolder) {
 			return new Promise(resolve => window.setTimeout(() => {
 				if (!page) {
+					resolve();
 					return;
 				}
 				if (page.needsLayout) {
@@ -200,7 +202,7 @@ const api = {
 			canvas.width = store.state.pageSize.width;
 			canvas.height = store.state.pageSize.height;
 
-			const pages = [store.state.titlePage].concat(store.state.pages);
+			const pages = [store.get.titlePage()].concat(store.state.pages);
 			app.updateProgress({stepCount: pages.length, text: 'Page 0'});
 			exportPages(pages, canvas, imgFolder).then(() => {
 				done(app, zip, fn, start);

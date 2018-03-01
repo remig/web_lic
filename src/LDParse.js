@@ -76,7 +76,13 @@ const api = {
 		get: {
 			// Return the total number of parts in this model, including parts in submodels
 			partCount(model) {
+				if (!model || !Array.isArray(model.parts) || model.parts.length <= 0) {
+					return 0;
+				}
 				return model.parts.reduce((acc, p) => {
+					if (!p || !p.filename || !api.partDictionary[p.filename]) {
+						return acc;
+					}
 					p = api.partDictionary[p.filename];
 					return (p.isSubModel ? p.parts.length : 1) + acc;
 				}, 0);

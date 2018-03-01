@@ -7,7 +7,7 @@ const assert = chai.assert;
 const page = require('../page_api')(browser, assert);
 const trivial_model = require('../trivial_model.json').model;
 
-describe('Import Trivial Model', function() {
+describe('Test Navigation Tree', function() {
 
 	before(() => {
 		browser.url('http://192.168.1.101:9977/web_lic/web_lic.html');
@@ -51,7 +51,7 @@ describe('Import Trivial Model', function() {
 		assert.equal(browser.getText2(page.selectors.tree.childRow('label', 0)), 'Trivial Model');
 		assert.equal(browser.getText2(page.selectors.tree.childRow('label', 1)), '3 Parts, 3 Pages');
 
-		const step0Selector = page.selectors.tree.parentRow('step', 0);
+		const step0Selector = page.selectors.tree.parentRow('step', 3);
 		assert.equal(browser.getText2(step0Selector.text), 'Step');
 		assert.equal(browser.getClass2(step0Selector.arrow), page.classes.tree.parentRow.closed);
 		assert.equal(browser.getClass2(step0Selector.subMenu), page.classes.tree.subMenu.hidden);
@@ -59,12 +59,12 @@ describe('Import Trivial Model', function() {
 		browser.click(step0Selector.arrow);
 		assert.equal(browser.getClass2(step0Selector.arrow), page.classes.tree.parentRow.open);
 		assert.equal(browser.getClass2(step0Selector.subMenu), page.classes.tree.subMenu.visible);
-		assert.equal(browser.getText2(page.selectors.tree.childRow('csi', 0)), 'CSI');
+		assert.equal(browser.getText2(page.selectors.tree.childRow('csi', 3)), 'CSI');
 
 		browser.click(step0Selector.arrow);
 		assert.equal(browser.getClass2(step0Selector.arrow), page.classes.tree.parentRow.closed);
 		assert.equal(browser.getClass2(step0Selector.subMenu), page.classes.tree.subMenu.hidden);
-		assert.equal(browser.getText2(page.selectors.tree.childRow('csi', 0)), '');
+		assert.equal(browser.getText2(page.selectors.tree.childRow('csi', 3)), '');
 
 		browser.click(titlePageSelector.arrow);
 		assert.equal(browser.getClass2(titlePageSelector.arrow), page.classes.tree.parentRow.closed);
@@ -95,8 +95,8 @@ describe('Import Trivial Model', function() {
 		assert.equal(browser.getClass2(page.selectors.tree.childRow('label', 1)), page.classes.tree.childRow.highlighted);
 		assert.isTrue(page.highlight.isValid(366, 542, 164, 30));
 
-		const csiSelector = page.selectors.tree.childRow('csi', 0);
-		const step0Selector = page.selectors.tree.parentRow('step', 0);
+		const csiSelector = page.selectors.tree.childRow('csi', 3);
+		const step0Selector = page.selectors.tree.parentRow('step', 3);
 		browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
 		assert.equal(browser.getClass2(page.selectors.tree.childRow('label', 1)), page.classes.tree.childRow.unhighlighted);
 		assert.equal(browser.getClass2(csiSelector), page.classes.tree.childRow.highlighted);

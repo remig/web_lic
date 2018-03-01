@@ -56,11 +56,8 @@ var app = new Vue({
 				app.filename = store.model.filename;
 				LDRender.setPartDictionary(LDParse.partDictionary);
 
+				store.mutations.addInitialPages(LDParse.partDictionary);  // Add pages before title page so title page summary label comes out correct
 				store.mutations.addTitlePage();
-				store.mutations.addInitialPages(LDParse.partDictionary);
-				const partCount = LDParse.model.get.partCount(store.model);
-				store.get.label(1).text = `${partCount} Parts, ${store.get.pageCount()} Pages`;
-				store.mutations.layoutTitlePage(store.get.titlePage());
 				store.save('localStorage');
 
 				app.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
@@ -76,7 +73,8 @@ var app = new Vue({
 		openLicFile(content) {
 			store.load(content);
 			this.filename = store.model.filename;
-			this.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
+			const firstPage = store.get.titlePage() || store.get.firstPage();
+			this.currentPageLookup = store.get.itemToLookup(firstPage);
 			store.save('localStorage');
 			undoStack.saveBaseState();
 			this.clearSelected();
@@ -368,7 +366,12 @@ var app = new Vue({
 			if (this.currentPageLookup != null) {
 				const canvas = document.getElementById('pageCanvas');
 				canvas.width = canvas.width;
-				this.drawPage(store.get.lookupToItem(this.currentPageLookup), canvas);
+				let page = store.get.lookupToItem(this.currentPageLookup);
+				if (page == null) {  // This can happen if, say, a page got deleted without updating the cucrrent page (like in undo / redo)
+					page = store.get.firstPage();
+					this.currentPageLookup = store.get.itemToLookup(page);
+				}
+				this.drawPage(page, canvas);
 			}
 		},
 		drawPage(page, canvas) {
