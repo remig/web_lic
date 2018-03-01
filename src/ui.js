@@ -251,7 +251,7 @@ var app = new Vue({
 						return lbl;
 					}
 				}
-				if (step.pliID != null) {
+				if (step.pliID != null && store.state.plisVisible) {
 					const pli = store.get.pli(step.pliID);
 					for (let j = 0; j < pli.pliItems.length; j++) {
 						const idx = pli.pliItems[j];
@@ -400,7 +400,7 @@ var app = new Vue({
 					ctx.drawImage(res.container, csi.x - res.dx, csi.y - res.dy);  // TODO: profile performance if every x, y, w, h argument is passed in
 				}
 
-				if (step.pliID != null) {
+				if (step.pliID != null && store.state.plisVisible) {
 					const pli = store.get.pli(step.pliID);
 					if (!util.isEmpty(pli.pliItems)) {
 						ctx.strokeStyle = 'black';

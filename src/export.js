@@ -67,7 +67,7 @@ const api = {
 				);
 			}
 
-			if (step.pliID != null) {
+			if (step.pliID != null && store.state.plisVisible) {
 
 				const pli = store.get.pli(step.pliID);
 				if (!util.isEmpty(pli.pliItems)) {

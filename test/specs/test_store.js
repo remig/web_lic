@@ -33,15 +33,18 @@ describe('Test state store module', function() {
 	}
 
 	function verifyInitialState() {
+		assert.deepEqual(store.state.pageSize, {width: 900, height: 700});
 		assert.isNull(store.state.titlePage);
+		assert.isTrue(store.state.plisVisible);
 		assert.isEmpty(store.state.pages);
+		assert.isEmpty(store.state.pageNumbers);
 		assert.isEmpty(store.state.steps);
+		assert.isEmpty(store.state.stepNumbers);
 		assert.isEmpty(store.state.csis);
 		assert.isEmpty(store.state.plis);
 		assert.isEmpty(store.state.pliItems);
 		assert.isEmpty(store.state.pliQtys);
 		assert.isEmpty(store.state.labels);
-		assert.deepEqual(store.state.pageSize, {width: 900, height: 700});
 		assert.equal(store.get.pageCount(), 0);
 	}
 
@@ -67,7 +70,7 @@ describe('Test state store module', function() {
 		assert.hasAllKeys(store.mutations, [
 			'addStateItem', 'deleteItem', 'reparentItem', 'repositionItem', 'displacePart', 'movePartToStep',
 			'moveStepToPage', 'moveStepToPreviousPage', 'moveStepToNextPage', 'mergeSteps', 'deletePage',
-			'deleteStep', 'deletePLI', 'renumber', 'renumberSteps', 'renumberPages', 'setNumber',
+			'deleteStep', 'togglePLIs', 'deletePLI', 'renumber', 'renumberSteps', 'renumberPages', 'setNumber',
 			'layoutStep', 'layoutPage', 'layoutTitlePage', 'addTitlePage', 'removeTitlePage', 'addInitialPages'
 		]);
 	});
@@ -128,6 +131,7 @@ describe('Test state store module', function() {
 	};
 
 	it('Add a Title Page', () => {
+		const titlePageState = {type: 'titlePage', id: 0, steps: [0], labels: [0, 1], needsLayout: true};
 		store.mutations.addTitlePage();
 		assert.equal(store.state.pages.length, 0);
 		assert.equal(store.state.steps.length, 1);

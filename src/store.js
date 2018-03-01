@@ -11,6 +11,7 @@ const pliMargin = pageMargin / 1.2;
 const emptyState = {
 	pageSize: {width: 900, height: 700},
 	titlePage: null,
+	plisVisible: true,
 	pages: [],
 	pageNumbers: [],
 	steps: [],
@@ -465,6 +466,12 @@ const store = {
 			store.mutations.deleteItem(step);
 			store.mutations.renumberSteps();
 		},
+		togglePLIs(opts) {  // opts: {visible}
+			store.state.plisVisible = opts.visible;
+			store.state.pages.forEach(p => {
+				p.needsLayout = true;
+			});
+		},
 		deletePLI(pli) {
 			pli = store.get.lookupToItem(pli);
 			if (!pli.pliItems.length) {
@@ -515,7 +522,7 @@ const store = {
 			let maxHeight = 0;
 			let left = pliMargin + qtyLabelOffset;
 
-			if (step.pliID != null) {
+			if (step.pliID != null && store.state.plisVisible) {
 
 				const pli = store.get.pli(step.pliID);
 				if (util.isEmpty(pli.pliItems)) {
@@ -728,7 +735,7 @@ const store = {
 					type: 'stepNumber',
 					x: null, y: null, width: null, height: null
 				}, step);
-				step.number = step.id;
+				step.number = step.id + (store.state.titlePage ? 0 : 1);
 
 				addStateItem({
 					type: 'csi',

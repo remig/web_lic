@@ -152,6 +152,22 @@ const menu = [
 				app.redrawUI(true);
 			}
 		},
+		{
+			text: 'Show PLIs',
+			shown: () => enableIfModel() && !store.state.plisVisible,
+			cb() {
+				undoStack.commit('togglePLIs', {visible: true}, this.text);
+				app.redrawUI(true);
+			}
+		},
+		{
+			text: 'Hide PLIs',
+			shown: () => enableIfModel() && store.state.plisVisible,
+			cb() {
+				undoStack.commit('togglePLIs', {visible: false}, this.text);
+				app.redrawUI(true);
+			}
+		},
 		{text: 'Snap To (NYI)', enabled: () => false, cb: () => {}},
 		{text: 'Brick Colors... (NYI)', enabled: () => false, cb: () => {}}
 	]},

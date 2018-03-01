@@ -127,7 +127,7 @@
 				<li v-if="target.csiID != null">
 					<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(target.csiID)" />
 				</li>
-				<li v-if="target.pliID != null" class="unindent">
+				<li v-if="target.pliID != null && treeData.store.state.plisVisible" class="unindent">
 					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.pli(target.pliID)" />
 				</li>
 				<template v-if="target.pliItems != null">
