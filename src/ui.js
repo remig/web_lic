@@ -323,7 +323,13 @@ var app = new Vue({
 				}
 			} else if (selItem && e.key.startsWith('Arrow') && this.isMoveable(selItem.type)) {
 				let dx = 0, dy = 0;
-				const dv = 30;
+				let dv = 5;
+				if (e.shiftKey) {
+					dv *= 2;
+				}
+				if (e.ctrlKey) {
+					dv *= 10;
+				}
 				if (e.key === 'ArrowUp') {
 					dy = -dv;
 				} else if (e.key === 'ArrowDown') {
@@ -377,7 +383,7 @@ var app = new Vue({
 		drawPage(page, canvas) {
 
 			if (page.needsLayout) {
-				store.mutations.layoutPage(page);
+				store.mutations.layoutPage({page});
 			}
 
 			const pageSize = store.state.pageSize;

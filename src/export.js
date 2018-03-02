@@ -17,7 +17,7 @@ const api = {
 					return;
 				}
 				if (page.needsLayout) {
-					store.mutations.layoutPage(page);
+					store.mutations.layoutPage({page});
 				}
 				page.steps.forEach(step => exportStep(step, doc, r));
 
@@ -164,7 +164,7 @@ const api = {
 					return;
 				}
 				if (page.needsLayout) {
-					store.mutations.layoutPage(page);
+					store.mutations.layoutPage({page});
 				}
 				app.drawPage(page, canvas);
 				const pageName = (page.type === 'titlePage') ? 'Page 0 Title Page.png' : `Page ${page.number}.png`;

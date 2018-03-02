@@ -9,11 +9,32 @@ let undoStack, app, store;
 const contextMenu = {
 	page: [
 		{text: 'Auto Layout (NYI)', cb: () => {}},
-		{text: 'Use Vertical Layout (NYI)', cb: () => {}},
-		{text: 'Layout By Row and Column (NYI)', cb: () => {}},
+		{
+			text: 'Use Vertical Layout',
+			cb() {
+				const page = app.selectedItemLookup;
+				undoStack.commit('layoutPage', {page, layout: 'vertical'}, this.text);
+				app.redrawUI(true);
+			}
+		},
+		{
+			text: 'Layout By Row and Column (NYI)',
+			cb() {
+				const page = app.selectedItemLookup;
+				undoStack.commit('layoutPage', {page, layout: {rows: 5, cols: 2, direction: 'vertical'}}, this.text);
+				app.redrawUI(true);
+			}
+		},
 		{text: 'separator'},
 		{text: 'Prepend Blank Page (NYI)', cb: () => {}},
-		{text: 'Append Blank Page (NYI)', cb: () => {}},
+		{
+			text: 'Append Blank Page',
+			cb() {
+				const prevPage = app.selectedItemLookup;
+				undoStack.commit('appendPage', {prevPage}, this.text);
+				app.redrawUI(true);
+			}
+		},
 		{text: 'separator'},
 		{text: 'Hide Step Separators (NYI)', cb: () => {}},
 		{text: 'Add Blank Step (NYI)', cb: () => {}},
@@ -41,6 +62,20 @@ const contextMenu = {
 		{text: 'Change Page Number (NYI)', cb: () => {}}
 	],
 	step: [
+		{
+			text: 'Convert to Callout (NYI)',
+			shown() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+					const step = store.get.lookupToItem(app.selectedItemLookup);
+					return !util.isEmpty(step.submodel);
+				}
+				return false;
+			},
+			cb() {
+				// const step = store.get.lookupToItem(app.selectedItemLookup);
+				// undoStack.commit('convertSubmodelToCallout', step, 'Convert to Callout');
+			}
+		},
 		{
 			text: 'Move Step to...',
 			children: [
@@ -91,17 +126,14 @@ const contextMenu = {
 					text: 'Previous Step',
 					shown() {
 						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-							const step = store.get.lookupToItem(app.selectedItemLookup);
-							return store.state.steps.indexOf(step) > 1;  // First 'step' is the title page content, which can't be merged
+							return store.get.prevStep(app.selectedItemLookup, true) != null;
 						}
 						return false;
 					},
 					cb() {
-						undoStack.commit(
-							'mergeSteps',
-							{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id - 1},
-							this.text
-						);
+						const sourceStepID = app.selectedItemLookup.id;
+						const destStepID = store.get.prevStep(app.selectedItemLookup).id;
+						undoStack.commit('mergeSteps', {sourceStepID, destStepID}, this.text);
 						app.redrawUI(true);
 					}
 				},
@@ -109,17 +141,14 @@ const contextMenu = {
 					text: 'Next Step',
 					shown() {
 						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-							const step = store.get.lookupToItem(app.selectedItemLookup);
-							return store.state.steps.indexOf(step) < store.state.steps.length - 1;
+							return store.get.nextStep(app.selectedItemLookup, true) != null;
 						}
 						return false;
 					},
 					cb() {
-						undoStack.commit(
-							'mergeSteps',
-							{sourceStepID: app.selectedItemLookup.id, destStepID: app.selectedItemLookup.id + 1},
-							this.text
-						);
+						const sourceStepID = app.selectedItemLookup.id;
+						const destStepID = store.get.nextStep(app.selectedItemLookup).id;
+						undoStack.commit('mergeSteps', {sourceStepID, destStepID}, this.text);
 						app.redrawUI(true);
 					}
 				}
