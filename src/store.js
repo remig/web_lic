@@ -446,6 +446,11 @@ const store = {
 				store.mutations.layoutPage({page: destPage});
 			}
 		},
+		addCalloutToStep(opts) {  // opts: {step}
+			const step = store.get.lookupToItem(opts.step);
+			step.callouts = step.callouts || [];
+			console.log('hi');
+		},
 		appendPage(opts) {  // opts: {prevPage}
 			const prevPage = store.get.lookupToItem(opts.prevPage);
 			const page = {
@@ -745,6 +750,7 @@ const store = {
 
 			localModel.steps.forEach(modelStep => {
 
+				const pageSize = store.state.pageSize;
 				const parts = util.clone(modelStep.parts || []);
 				const submodels = parts.filter(p => partDictionary[localModel.parts[p].filename].isSubModel);
 				const submodelsByQuantity = {};
@@ -763,7 +769,7 @@ const store = {
 					number: null,
 					steps: [],
 					needsLayout: true,
-					layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
+					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
 					numberLabel: null
 				});
 
@@ -778,6 +784,7 @@ const store = {
 					number: null,
 					numberLabel: null,
 					parts: parts,
+					callouts: [],
 					submodel: util.clone(localModelIDList),
 					csiID: null, pliID: null,
 					x: null, y: null, width: null, height: null

@@ -34,6 +34,10 @@ var app = new Vue({
 			undoIndex: 0,
 			lastSaveIndex: 0
 		},
+		pageSize: {
+			width: store.state.pageSize.width,
+			height: store.state.pageSize.height
+		},
 		treeUpdateState: false,  // Not used directly, only used to force the tree to redraw
 		menuUpdateState: false   // Not used directly, only used to force the tree to redraw
 	},
@@ -73,13 +77,17 @@ var app = new Vue({
 		openLicFile(content) {
 			store.load(content);
 			this.filename = store.model.filename;
+			this.pageSize.width = store.state.pageSize.width;
+			this.pageSize.height = store.state.pageSize.height;
 			const firstPage = store.get.titlePage() || store.get.firstPage();
 			this.currentPageLookup = store.get.itemToLookup(firstPage);
 			store.save('localStorage');
 			undoStack.saveBaseState();
 			this.clearSelected();
-			this.drawCurrentPage();
-			this.forceUIUpdate();
+			Vue.nextTick(() => {
+				this.drawCurrentPage();
+				this.forceUIUpdate();
+			});
 		},
 		save() {
 			store.save('file');
@@ -474,12 +482,6 @@ var app = new Vue({
 		},
 		navBarContent() {
 			return Menu(this, store, undoStack);
-		},
-		pageWidth() {
-			return store.state.pageSize.width;
-		},
-		pageHeight() {
-			return store.state.pageSize.height;
 		},
 		highlightStyle() {
 			const selItem = this.selectedItemLookup;

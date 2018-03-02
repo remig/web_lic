@@ -45,8 +45,8 @@
 				</div>
 			</div>
 			<div id="rightPane" class="split split-horizontal">
-				<div id="pageContainer" :style="{width: pageWidth + 'px', height: pageHeight + 'px'}">
-					<canvas id="pageCanvas" :width="pageWidth" :height="pageHeight"></canvas>
+				<div id="pageContainer" :style="{width: pageSize.width + 'px', height: pageSize.height + 'px'}">
+					<canvas id="pageCanvas" :width="pageSize.width" :height="pageSize.height"></canvas>
 					<div id="highlight" :style="highlightStyle"></div>
 				</div>
 			</div>

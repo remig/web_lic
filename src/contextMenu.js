@@ -11,9 +11,31 @@ const contextMenu = {
 		{text: 'Auto Layout (NYI)', cb: () => {}},
 		{
 			text: 'Use Vertical Layout',
+			shown() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
+					const page = store.get.lookupToItem(app.selectedItemLookup);
+					return page.layout !== 'vertical';
+				}
+				return false;
+			},
 			cb() {
 				const page = app.selectedItemLookup;
 				undoStack.commit('layoutPage', {page, layout: 'vertical'}, this.text);
+				app.redrawUI(true);
+			}
+		},
+		{
+			text: 'Use Horizontal Layout',
+			shown() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
+					const page = store.get.lookupToItem(app.selectedItemLookup);
+					return page.layout !== 'horizontal';
+				}
+				return false;
+			},
+			cb() {
+				const page = app.selectedItemLookup;
+				undoStack.commit('layoutPage', {page, layout: 'horizontal'}, this.text);
 				app.redrawUI(true);
 			}
 		},
