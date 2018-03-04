@@ -20,6 +20,8 @@ Vue.component('menu-list', {
 		hasVisibleChildren(child) {
 			if (!child.children) {
 				return true;
+			} else if (typeof child.children === 'function') {
+				return true;  // TODO: For now, all menu children defined by a function are forced visible
 			}
 			return child.children.some(el => el.shown ? el.shown() : true);
 		}

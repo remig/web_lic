@@ -262,8 +262,7 @@ var app = new Vue({
 				if (step.pliID != null && store.state.plisVisible) {
 					const pli = store.get.pli(step.pliID);
 					for (let j = 0; j < pli.pliItems.length; j++) {
-						const idx = pli.pliItems[j];
-						const pliItem = store.get.pliItem(idx);
+						const pliItem = store.get.pliItem(pli.pliItems[j]);
 						if (this.inBox(mx, my, pliItem)) {
 							return pliItem;
 						}
@@ -276,15 +275,36 @@ var app = new Vue({
 						return pli;
 					}
 				}
+				if (step.callouts) {
+					for (let j = 0; j < step.callouts.length; j++) {
+						const callout = store.get.callout(step.callouts[j]);
+						if (this.inBox(mx, my, callout)) {
+							return callout;
+						}
+						for (let k = 0; k < callout.calloutArrows.length; k++) {
+							const arrow = store.get.calloutArrow(callout.calloutArrows[k]);
+							const arrowPoints = store.get.calloutArrowToPoints(arrow);
+							let arrowBox = util.geom.bbox(arrowPoints);
+							arrowBox = util.geom.expandBox(arrowBox, 8, 8);
+							if (this.inBox(mx, my, {...arrow, ...arrowBox})) {
+								return arrow;
+							}
+						}
+					}
+				}
 				if (this.inBox(mx, my, step)) {
 					return step;
 				}
 			}
 			return page;
 		},
-		isMoveable(nodeType) {
-			return ['step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'label'].includes(nodeType);
-		},
+		isMoveable: (() => {
+			const moveableItems = [
+				'step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'label',
+				'callout', 'point'
+			];
+			return nodeType => moveableItems.includes(nodeType);
+		})(),
 		globalClick(e) {
 			this.closeContextMenu();
 			let target;
@@ -330,8 +350,7 @@ var app = new Vue({
 					this.setCurrentPage(prevPage);
 				}
 			} else if (selItem && e.key.startsWith('Arrow') && this.isMoveable(selItem.type)) {
-				let dx = 0, dy = 0;
-				let dv = 5;
+				let dx = 0, dy = 0, dv = 5;
 				if (e.shiftKey) {
 					dv *= 2;
 				}
@@ -348,6 +367,30 @@ var app = new Vue({
 					dx = dv;
 				}
 				const item = store.get.lookupToItem(selItem);
+				// Special case: the first point in a callout arrow can't move away from the callout itself
+				// TOOD: consider a similar case of moving a CSI with callout arrows pointing to it: move the arrow tips with the callout?
+				if (item.type === 'point') {
+					const arrow = store.get.calloutArrow(item.parent.id);
+					if (arrow.points.indexOf(item.id) === 0) {
+						const callout = store.get.callout(arrow.parent.id);
+						const newPos = {x: item.x + dx, y: item.y + dy};
+						const dt = util.geom.distance;
+						if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+							if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
+								dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
+							} else {
+								return;
+							}
+						} else {
+							if (dt(newPos.x, 0) > 2 || dt(newPos.x, callout.width) > 2) {
+								dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
+							} else {
+								return;
+							}
+						}
+					}
+				}
+
 				// TODO: If you move a CSI, the Step's bounding box needs to be updated
 				undoStack.commit('repositionItem', {
 					item: item,
@@ -414,12 +457,37 @@ var app = new Vue({
 					ctx.drawImage(res.container, csi.x - res.dx, csi.y - res.dy);  // TODO: profile performance if every x, y, w, h argument is passed in
 				}
 
+				(step.callouts || []).forEach(calloutID => {
+					const callout = store.get.callout(calloutID);
+					ctx.strokeStyle = 'black';
+					ctx.lineWidth = 2;
+					util.draw.roundedRect(ctx, callout.x, callout.y, callout.width, callout.height, 10);
+					ctx.stroke();
+					(callout.calloutArrows || []).forEach(arrowID => {
+						const arrow = store.get.calloutArrow(arrowID);
+						const arrowPoints = store.get.calloutArrowToPoints(arrow);
+						ctx.save();
+						ctx.translate(callout.x, callout.y);
+						ctx.beginPath();
+						ctx.moveTo(arrowPoints[0].x, arrowPoints[0].y);
+						arrowPoints.slice(1, -1).forEach(pt => {
+							ctx.lineTo(pt.x, pt.y);
+						});
+						ctx.stroke();
+						ctx.fillStyle = 'black';
+						const tip = arrowPoints[arrowPoints.length - 1];
+						util.draw.arrow(ctx, tip.x, tip.y, arrow.direction);
+						ctx.fill();
+						ctx.restore();
+					});
+				});
+
 				if (step.pliID != null && store.state.plisVisible) {
 					const pli = store.get.pli(step.pliID);
 					if (!util.isEmpty(pli.pliItems)) {
 						ctx.strokeStyle = 'black';
 						ctx.lineWidth = 2;
-						util.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
+						util.draw.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
 						ctx.stroke();
 
 						pli.pliItems.forEach(idx => {
@@ -491,8 +559,17 @@ var app = new Vue({
 			let box;
 			if (selItem.type === 'page' || selItem.type === 'titlePage') {
 				box = {x: 0, y: 0, width: store.state.pageSize.width, height: store.state.pageSize.height};
+			} else if (selItem.type === 'calloutArrow') {
+				const arrow = store.get.lookupToItem(selItem);
+				const points = store.get.calloutArrowToPoints(arrow);
+				let pointBox = util.geom.bbox(points);
+				pointBox = util.geom.expandBox(pointBox, 8, 8);
+				box = this.targetBox({...arrow, ...pointBox});
 			} else {
 				box = this.targetBox(store.get.lookupToItem(selItem));
+				if (selItem.type === 'point') {
+					box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
+				}
 			}
 			if (selItem.type === 'pageNumber' || selItem.type === 'stepNumber' || selItem.type === 'label') {
 				box.y += 5;  // Text is aligned to the bottom of the box; offset highlight to center nicely

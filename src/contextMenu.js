@@ -85,6 +85,13 @@ const contextMenu = {
 	],
 	step: [
 		{
+			text: 'Add Callout',
+			cb() {
+				undoStack.commit('addCalloutToStep', {step: app.selectedItemLookup}, this.text);
+				app.redrawUI(true);
+			}
+		},
+		{
 			text: 'Convert to Callout (NYI)',
 			shown() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
@@ -225,6 +232,26 @@ const contextMenu = {
 				{text: 'Font (NYI)', cb: () => {}},
 				{text: 'Color (NYI)', cb: () => {}}
 			]
+		}
+	],
+	calloutArrow: [
+		{
+			text: 'Select Point...',
+			children() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
+					const arrow = store.get.calloutArrow(app.selectedItemLookup);
+					return arrow.points.map((pointID, idx) => {
+						return {
+							text: (idx === 0) ? 'Base' :
+									(idx === arrow.points.length - 1) ? 'Tip' : `Point ${idx}`,
+							cb() {
+								app.setSelected({type: 'point', id: pointID});
+							}
+						};
+					});
+				}
+				return null;
+			}
 		}
 	],
 	part: [

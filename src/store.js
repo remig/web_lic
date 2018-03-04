@@ -20,7 +20,10 @@ const emptyState = {
 	plis: [],
 	pliItems: [],
 	pliQtys: [],
-	labels: []
+	labels: [],
+	callouts: [],
+	calloutArrows: [],
+	points: []
 };
 
 const store = {
@@ -224,6 +227,17 @@ const store = {
 			const targets = pli.pliItems.map(id => store.get.pliItem(id))
 				.filter(i => i.filename === part.filename && i.colorCode === part.colorCode);
 			return targets.length ? targets[0] : null;
+		},
+		calloutArrowToPoints(arrow) {
+			const points = arrow.points.map(store.get.point);
+			const tip = points[points.length - 1];
+
+			const base = {x: tip.x, y: tip.y};
+			const direction = arrow.direction;
+			base.x += (direction === 'right') ? -24 : (direction === 'left') ? 24 : 0;  // TODO: abstract callout arrow dimension... somewhere...
+			base.y += (direction === 'down') ? -24 : (direction === 'up') ? 24 : 0;
+
+			return [...points.slice(0, -1), base, tip];
 		},
 		prev(item) {  // Get the previous item in the specified item's list
 			item = store.get.lookupToItem(item);
@@ -449,7 +463,15 @@ const store = {
 		addCalloutToStep(opts) {  // opts: {step}
 			const step = store.get.lookupToItem(opts.step);
 			step.callouts = step.callouts || [];
-			console.log('hi');
+			store.mutations.addStateItem({
+				type: 'callout',
+				x: null, y: null, width: null, height: null,
+				steps: [],
+				calloutArrows: [],
+				layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
+				id: store.get.nextItemID('callout')
+			}, step);
+			store.mutations.layoutPage({page: store.get.pageForItem(step)});
 		},
 		appendPage(opts) {  // opts: {prevPage}
 			const prevPage = store.get.lookupToItem(opts.prevPage);
@@ -539,14 +561,43 @@ const store = {
 			step.width = box.width - pageMargin - pageMargin;
 			step.height = box.height - pageMargin - pageMargin;
 
+			let csi;
 			if (step.csiID != null) {
 				const csiSize = store.render.csi(localModel, step);
-				const csi = store.get.csi(step.csiID);
+				csi = store.get.csi(step.csiID);
 				csi.x = Math.floor((step.width - csiSize.width) / 2);
 				csi.y = Math.floor((step.height - csiSize.height) / 2);
 				csi.width = csiSize.width;
 				csi.height = csiSize.height;
 			}
+
+			(step.callouts || []).forEach(calloutID => {
+				const callout = store.get.callout(calloutID);
+				if (util.isEmpty(callout.steps)) {
+					callout.width = callout.height = 50;
+					callout.x = 10;
+					callout.y = Math.floor((step.height - callout.height) / 2);
+					(callout.calloutArrows || []).forEach(arrowID => {
+						store.mutations.deleteItem({type: 'calloutArrow', id: arrowID});
+					});
+					callout.calloutArrows = [];
+					const arrow = store.mutations.addStateItem({
+						type: 'calloutArrow',
+						points: [],
+						direction: 'right'
+					}, callout);
+
+					store.mutations.addStateItem({
+						type: 'point', x: callout.width, y: callout.height / 2
+					}, arrow);
+					store.mutations.addStateItem({
+						type: 'point',
+						x: csi ? ((step.width - csi.width) / 2) - callout.x : callout.width + 100,
+						y: callout.height / 2
+					}, arrow);
+				} else {
+				}
+			});
 
 			const qtyLabelOffset = 5;
 			let maxHeight = 0;

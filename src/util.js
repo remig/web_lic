@@ -157,13 +157,78 @@ const util = {
 			}
 		}
 	},
-	roundedRect(ctx, x, y, w, h, r) {
-		ctx.beginPath();
-		ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
-		ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);
-		ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
-		ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
-		ctx.closePath();
+	geom: {
+		bbox(points) {
+			let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+			for (let i = 0; i < (points || []).length; i++) {
+				const p = points[i];
+				minX = Math.min(minX, p.x);
+				minY = Math.min(minY, p.y);
+				maxX = Math.max(maxX, p.x);
+				maxY = Math.max(maxY, p.y);
+			}
+			return {
+				x: minX, y: minY,
+				width: maxX - minX, height: maxY - minY
+			};
+		},
+		expandBox(box, minWidth, minHeight) {
+			box = util.clone(box);
+			if (Math.floor(box.width) < 1) {
+				box.width = minWidth;
+				box.x -= minWidth / 2;
+			}
+			if (Math.floor(box.height) < 1) {
+				box.height = minHeight;
+				box.y -= minHeight / 2;
+			}
+			return box;
+		},
+		distance(p1, p2) {
+			if (typeof p1 === 'number' && typeof p2 === 'number') {
+				return Math.abs(p1 - p2);
+			}
+			return Math.sqrt(((p1.x - p2.x) ** 2) + ((p1.y - p2.y) ** 2));
+		}
+	},
+	draw: {
+		arrow: (() => {
+
+			const rotation = {up: 180, left: 90, right: -90};
+			const arrowDimensions = {
+				head: {
+					length: 28,
+					width: 7,
+					insetDepth: 4
+				},
+				body: {
+					width: 1.25
+				}
+			};
+
+			return function(ctx, tipX, tipY, direction) {
+				const head = arrowDimensions.head, bodyWidth = 1.25;
+				ctx.save();
+				ctx.translate(tipX, tipY);
+				ctx.rotate((rotation[direction] || 0) * Math.PI / 180);
+				ctx.beginPath();
+				ctx.moveTo(0, 0);
+				ctx.lineTo(-head.width, -head.length);
+				ctx.lineTo(-bodyWidth, -head.length + head.insetDepth);
+				ctx.lineTo(bodyWidth, -head.length + head.insetDepth);
+				ctx.lineTo(head.width, -head.length);
+				ctx.closePath();
+				ctx.restore();
+			};
+		})(),
+		roundedRect(ctx, x, y, w, h, r) {
+			ctx.beginPath();
+			ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
+			ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);
+			ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
+			ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
+			ctx.closePath();
+		}
 	},
 	clone(obj) {
 		return JSON.parse(JSON.stringify(obj));
