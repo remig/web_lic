@@ -368,6 +368,7 @@ var app = new Vue({
 				}
 				const item = store.get.lookupToItem(selItem);
 				// Special case: the first point in a callout arrow can't move away from the callout itself
+				// TODO: this doesn't prevent arrow base from coming off the rounded corner of a callout
 				// TOOD: consider a similar case of moving a CSI with callout arrows pointing to it: move the arrow tips with the callout?
 				if (item.type === 'point') {
 					const arrow = store.get.calloutArrow(item.parent.id);
