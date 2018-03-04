@@ -5,6 +5,7 @@ const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
 
+const util = require('../../src/util');
 const UndoStack = require('../../src/undoStack');
 const fakeStore = {
 	state: {
@@ -81,12 +82,6 @@ describe('Test undoStack module', function() {
 	});
 
 	it('Test commit', () => {
-		const eStack = new UndoStack();
-		eStack.commit();
-		assertStackEmpty(eStack);
-		eStack.commit('fakeMutation1');
-		assertStackEmpty(eStack);
-
 		const stack = new UndoStack(fakeStore);
 		stack.saveBaseState();
 		assert.equal(fakeStore.state.foo, 0);

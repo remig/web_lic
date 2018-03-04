@@ -9,6 +9,7 @@ const sinon = require('sinon');
 
 const LDParse = require('../../src/LDParse');
 const util = require('../../src/util');
+const Layout = require('../../src/layout');
 const store = require('../../src/store');
 const trivial_part_dict = require('../trivial_part_dict.json');
 
@@ -76,11 +77,14 @@ describe('Test state store module', function() {
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
-			'addStateItem', 'deleteItem', 'reparentItem', 'repositionItem', 'displacePart', 'movePartToStep',
+			'item', 'displacePart', 'movePartToStep',
 			'moveStepToPage', 'moveStepToPreviousPage', 'moveStepToNextPage', 'mergeSteps', 'addCalloutToStep',
 			'appendPage', 'deletePage', 'deleteStep', 'togglePLIs', 'deletePLI', 'renumber', 'renumberSteps',
 			'renumberPages', 'setNumber', 'layoutStep', 'layoutPage', 'layoutTitlePage', 'addTitlePage',
 			'removeTitlePage', 'addInitialPages'
+		]);
+		assert.hasAllKeys(store.mutations.item, [
+			'add', 'delete', 'reparent', 'reposition'
 		]);
 	});
 
@@ -90,23 +94,14 @@ describe('Test state store module', function() {
 
 	it('Insert simple state items', () => {
 		verifyInitialState();
-		assert.deepEqual(store.mutations.addStateItem({type: 'page'}), {type: 'page', id: 0});
+		assert.deepEqual(store.mutations.item.add({item: {type: 'page'}}), {type: 'page', id: 0});
 		assert.deepEqual(store.state.pages[0], {type: 'page', id: 0});
-		assert.deepEqual(store.mutations.addStateItem({type: 'page'}), {type: 'page', id: 1});
-		assert.deepEqual(store.mutations.addStateItem({type: 'page'}), {type: 'page', id: 2});
+		assert.deepEqual(store.mutations.item.add({item: {type: 'page'}}), {type: 'page', id: 1});
+		assert.deepEqual(store.mutations.item.add({item: {type: 'page'}}), {type: 'page', id: 2});
 		assert.equal(store.state.pages.length, 3);
 		assert.deepEqual(store.state.pages[1], {type: 'page', id: 1});
-		assert.deepEqual(store.mutations.addStateItem({type: 'step'}), {type: 'step', id: 0});
+		assert.deepEqual(store.mutations.item.add({item: {type: 'step'}}), {type: 'step', id: 0});
 		assert.deepEqual(store.state.steps[0], {type: 'step', id: 0});
-
-		store.resetState();
-		verifyInitialState();
-		assert.isNull(store.mutations.addStateItem());
-		verifyInitialState();
-		assert.isNull(store.mutations.addStateItem({foo: 'page'}));
-		verifyInitialState();
-		assert.isNull(store.mutations.addStateItem({type: 'foo'}));
-		verifyInitialState();
 	});
 
 	it('Replace and reset state', () => {

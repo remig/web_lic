@@ -29,13 +29,7 @@ UndoStack.prototype.onChange = function(onChangeCB) {
 
 UndoStack.prototype.commit = function(mutationName, opts, undoText) {
 
-	if (!this.store || !this.store.mutations || typeof this.store.mutations[mutationName] !== 'function') {
-		return;  // Ignore invalid / unrecognized commits
-	} else if (this.index < 0) {
-		return;  // Do not allow commit without initial base state
-	}
-
-	this.store.mutations[mutationName](opts);  // Perform the actual action
+	util.get(mutationName, this.store.mutations)(opts);  // Perform the actual action
 
 	if (this.index < this.stack.length - 1) {
 		// If there's undo actions after the 'current' action, delete them

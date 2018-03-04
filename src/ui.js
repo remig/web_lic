@@ -383,7 +383,7 @@ var app = new Vue({
 								return;
 							}
 						} else {
-							if (dt(newPos.x, 0) > 2 || dt(newPos.x, callout.width) > 2) {
+							if (dt(newPos.x, 0) < 2 || dt(newPos.x, callout.width) < 2) {
 								dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
 							} else {
 								return;
@@ -393,7 +393,7 @@ var app = new Vue({
 				}
 
 				// TODO: If you move a CSI, the Step's bounding box needs to be updated
-				undoStack.commit('repositionItem', {
+				undoStack.commit('item.reposition', {
 					item: item,
 					x: item.x + dx,
 					y: item.y + dy

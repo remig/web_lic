@@ -37,23 +37,23 @@ const Layout = {
 				callout.x = 10;
 				callout.y = Math.floor((step.height - callout.height) / 2);
 				(callout.calloutArrows || []).forEach(arrowID => {
-					store.mutations.deleteItem({type: 'calloutArrow', id: arrowID});
+					store.mutations.item.delete({item: {type: 'calloutArrow', id: arrowID}});
 				});
 				callout.calloutArrows = [];
-				const arrow = store.mutations.addStateItem({
+				const arrow = store.mutations.item.add({item: {
 					type: 'calloutArrow',
 					points: [],
 					direction: 'right'
-				}, callout);
+				}, parent: callout});
 
-				store.mutations.addStateItem({
+				store.mutations.item.add({item: {
 					type: 'point', x: callout.width, y: callout.height / 2
-				}, arrow);
-				store.mutations.addStateItem({
+				}, parent: arrow});
+				store.mutations.item.add({item: {
 					type: 'point',
 					x: csi ? ((step.width - csi.width) / 2) - callout.x : callout.width + 100,
 					y: callout.height / 2
-				}, arrow);
+				}, parent: arrow});
 			} else {
 			}
 		});
