@@ -28,7 +28,7 @@ describe('Launch empty Page', function() {
 		});
 
 		it('Menu bar filename should not be displayed', () => {
-			assert.isFalse(browser.isExisting(page.ids.filename_container));
+			assert.isFalse(browser.isExisting(page.ids.filenameContainer));
 		});
 
 		it('Click on File menu should open it', () => {
@@ -41,20 +41,20 @@ describe('Launch empty Page', function() {
 		});
 
 		it("'File -> Open' and 'File -> Import' should be enabled, everything else disabled", () => {
-			assert.equal(browser.getClass2(page.ids.sub_menu.file.open), page.classes.menu.enabled);
-			assert.equal(browser.getClass2(page.ids.sub_menu.file.open_recent), page.classes.menu.disabled);
-			assert.equal(browser.getClass2(page.ids.sub_menu.file.close), page.classes.menu.disabled);
-			assert.equal(browser.getClass2(page.ids.sub_menu.file.save), page.classes.menu.disabled);
-			assert.notEqual(browser.getClass2(page.ids.sub_menu.file.import_model), page.classes.menu.disabled);
-			assert.equal(browser.getClass2(page.ids.sub_menu.file.save_template), page.classes.menu.disabled);
+			assert.equal(browser.getClass2(page.ids.subMenu.file.open), page.classes.menu.enabled);
+			assert.equal(browser.getClass2(page.ids.subMenu.file.openRecent), page.classes.menu.disabled);
+			assert.equal(browser.getClass2(page.ids.subMenu.file.close), page.classes.menu.disabled);
+			assert.equal(browser.getClass2(page.ids.subMenu.file.save), page.classes.menu.disabled);
+			assert.notEqual(browser.getClass2(page.ids.subMenu.file.importModel), page.classes.menu.disabled);
+			assert.equal(browser.getClass2(page.ids.subMenu.file.saveTemplate), page.classes.menu.disabled);
 		});
 
 		it("'Edit', 'View' and 'Export' menus should all be disabled", () => {
-			const menu = page.ids.sub_menu;
+			const menu = page.ids.subMenu;
 			const menus = [
-				menu.edit.undo, menu.edit.redo, menu.edit.snap_to, menu.edit.brick_colors,
-				menu.view.add_horizontal_guide,
-				menu.export.generate_pdf, menu.export.generate_png_images
+				menu.edit.undo, menu.edit.redo, menu.edit.snapTo, menu.edit.brickColors,
+				menu.view.addHorizontalGuide,
+				menu.export.generatePdf, menu.export.generatePngImages
 			];
 			for (let i = 0; i < menus.length; i++) {
 				assert.equal(browser.getClass2(menus[i]), page.classes.menu.disabled);
@@ -62,7 +62,7 @@ describe('Launch empty Page', function() {
 		});
 
 		it('Click outside menu should close menu', () => {
-			browser.click(page.ids.page_canvas);
+			browser.click(page.ids.pageCanvas);
 			assert.equal(browser.getClass2(page.ids.menu.file), page.classes.menu.closed);
 		});
 	});
@@ -73,7 +73,7 @@ describe('Launch empty Page', function() {
 	});
 
 	it('Page Canvas should exist and be blank', () => {
-		assert.isTrue(browser.isVisible(page.ids.page_canvas));
+		assert.isTrue(browser.isVisible(page.ids.pageCanvas));
 		assert.isTrue(page.isPageCanvasBlank());
 	});
 
@@ -83,13 +83,13 @@ describe('Launch empty Page', function() {
 	});
 
 	it('Click initial empty page should not highlight', () => {
-		browser.click(page.ids.page_canvas);
+		browser.click(page.ids.pageCanvas);
 		assert.isFalse(page.highlight.isVisible());
 	});
 
 	it('Status bar should exist and be empty', () => {
-		assert.isTrue(browser.isVisible(page.ids.status_bar));
-		assert.isEmpty(browser.getText2(page.ids.status_bar));
+		assert.isTrue(browser.isVisible(page.ids.statusBar));
+		assert.isEmpty(browser.getText2(page.ids.statusBar));
 	});
 
 	it('Nothing should be saved to localStorage', () => {
@@ -102,35 +102,35 @@ describe('Launch empty Page', function() {
 
 		it('Splitter should be visible, tree 20% canvas 80%', () => {
 			assert.isTrue(browser.isVisible(page.ids.splitter));
-			assert.isTrue(browser.isVisible(page.ids.left_pane));
-			assert.isTrue(browser.isVisible(page.ids.right_pane));
-			const bodyWidth = size(page.ids.root_container).width;
-			const leftPanelWidth = size(page.ids.left_pane).width;
-			const rightPaneWidth = size(page.ids.right_pane).width;
+			assert.isTrue(browser.isVisible(page.ids.leftPane));
+			assert.isTrue(browser.isVisible(page.ids.rightPane));
+			const bodyWidth = size(page.ids.rootContainer).width;
+			const leftPanelWidth = size(page.ids.leftPane).width;
+			const rightPaneWidth = size(page.ids.rightPane).width;
 			assert.equal(Math.floor(bodyWidth * 0.2), Math.floor(leftPanelWidth + 2.5));
 			assert.equal(Math.floor(bodyWidth * 0.8), Math.floor(rightPaneWidth + 2.5));
 		});
 
 		it('Drag splitter should resize left & right panels', () => {
-			const leftPanelWidth = browser.getElementSize(page.ids.left_pane).width;
-			const rightPaneWidth = browser.getElementSize(page.ids.right_pane).width;
+			const leftPanelWidth = browser.getElementSize(page.ids.leftPane).width;
+			const rightPaneWidth = browser.getElementSize(page.ids.rightPane).width;
 			browser.drag2(page.ids.splitter, -10, 0);
-			assert.equal(leftPanelWidth - 10, size(page.ids.left_pane).width);
-			assert.equal(rightPaneWidth + 10, size(page.ids.right_pane).width);
+			assert.equal(leftPanelWidth - 10, size(page.ids.leftPane).width);
+			assert.equal(rightPaneWidth + 10, size(page.ids.rightPane).width);
 			browser.drag2(page.ids.splitter, 61, 0);
-			assert.equal(leftPanelWidth + 50, size(page.ids.left_pane).width);
-			assert.equal(rightPaneWidth - 50, size(page.ids.right_pane).width);
+			assert.equal(leftPanelWidth + 50, size(page.ids.leftPane).width);
+			assert.equal(rightPaneWidth - 50, size(page.ids.rightPane).width);
 		});
 
 		it('Drag splitter too far left / right should only shrink so much', () => {
-			const bodyWidth = size(page.ids.root_container).width;
+			const bodyWidth = size(page.ids.rootContainer).width;
 			browser.drag2(page.ids.splitter, -200, 0);
-			assert.equal(100, size(page.ids.left_pane).width);
-			assert.equal(Math.floor(bodyWidth) - 105, size(page.ids.right_pane).width);
+			assert.equal(100, size(page.ids.leftPane).width);
+			assert.equal(Math.floor(bodyWidth) - 105, size(page.ids.rightPane).width);
 			const pageWidth = page.getStoreState('pageSize').width;
 			browser.drag2(page.ids.splitter, 500, 0);
-			assert.equal(bodyWidth - pageWidth - 15, size(page.ids.left_pane).width);
-			assert.equal(pageWidth + 10, size(page.ids.right_pane).width);
+			assert.equal(bodyWidth - pageWidth - 15, size(page.ids.leftPane).width);
+			assert.equal(pageWidth + 10, size(page.ids.rightPane).width);
 		});
 	});
 });

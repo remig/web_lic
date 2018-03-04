@@ -2,6 +2,7 @@
 
 'use strict';
 const chai = require('chai');
+chai.config.truncateThreshold = 0;
 chai.use(require('chai-string'));
 const assert = chai.assert;
 const sinon = require('sinon');
@@ -33,6 +34,10 @@ describe('Test state store module', function() {
 	}
 
 	function verifyInitialState() {
+		assert.hasAllKeys(store.state, [
+			'pageSize', 'titlePage', 'plisVisible', 'pages', 'pageNumbers', 'steps', 'stepNumbers',
+			'csis', 'plis', 'pliItems', 'pliQtys', 'labels', 'callouts', 'calloutArrows', 'points'
+		]);
 		assert.deepEqual(store.state.pageSize, {width: 900, height: 700});
 		assert.isNull(store.state.titlePage);
 		assert.isTrue(store.state.plisVisible);
@@ -45,6 +50,8 @@ describe('Test state store module', function() {
 		assert.isEmpty(store.state.pliItems);
 		assert.isEmpty(store.state.pliQtys);
 		assert.isEmpty(store.state.labels);
+		assert.isEmpty(store.state.callouts);
+		assert.isEmpty(store.state.calloutArrows);
 		assert.equal(store.get.pageCount(), 0);
 	}
 
@@ -62,16 +69,18 @@ describe('Test state store module', function() {
 		assert.hasAllKeys(store.get, [
 			'pageCount', 'modelName', 'modelFilename', 'modelFilenameBase', 'isTitlePage',
 			'isFirstPage', 'isLastPage', 'nextPage', 'prevPage', 'titlePage', 'firstPage', 'lastPage',
-			'prevStep', 'nextStep', 'partList', 'matchingPLIItem', 'prev', 'next', 'parent', 'pageForItem',
-			'numberLabel', 'nextItemID', 'lookupToItem', 'itemToLookup', 'page', 'step', 'csi',
-			'pli', 'pliItem', 'pliQty', 'label', 'stepNumber', 'pageNumber'
+			'prevStep', 'nextStep', 'partList', 'matchingPLIItem', 'calloutArrowToPoints', 'prev', 'next',
+			'parent', 'pageForItem', 'numberLabel', 'nextItemID', 'lookupToItem', 'itemToLookup', 'page',
+			'pageNumber', 'step', 'stepNumber', 'csi', 'pli', 'pliItem', 'pliQty', 'label', 'callout',
+			'calloutArrow', 'point'
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
 			'addStateItem', 'deleteItem', 'reparentItem', 'repositionItem', 'displacePart', 'movePartToStep',
-			'moveStepToPage', 'moveStepToPreviousPage', 'moveStepToNextPage', 'mergeSteps', 'deletePage',
-			'deleteStep', 'togglePLIs', 'deletePLI', 'renumber', 'renumberSteps', 'renumberPages', 'setNumber',
-			'layoutStep', 'layoutPage', 'layoutTitlePage', 'addTitlePage', 'removeTitlePage', 'addInitialPages'
+			'moveStepToPage', 'moveStepToPreviousPage', 'moveStepToNextPage', 'mergeSteps', 'addCalloutToStep',
+			'appendPage', 'deletePage', 'deleteStep', 'togglePLIs', 'deletePLI', 'renumber', 'renumberSteps',
+			'renumberPages', 'setNumber', 'layoutStep', 'layoutPage', 'layoutTitlePage', 'addTitlePage',
+			'removeTitlePage', 'addInitialPages'
 		]);
 	});
 
@@ -108,26 +117,29 @@ describe('Test state store module', function() {
 	});
 
 	const titlePageState = {type: 'titlePage', id: 0, steps: [0], labels: [0, 1], needsLayout: true};
-	const pageState = {type: 'page', id: 0, needsLayout: true, number: 1, numberLabel: 0, steps: [1]};
+	const pageState = {
+		type: 'page', id: 0, needsLayout: true, layout: 'horizontal', number: 1, numberLabel: 0,
+		steps: [1]
+	};
 	const step0State = {
 		type: 'step', id: 0, parent: {type: 'titlePage', id: 0},
 		x: null, y: null, width: null, height: null, csiID: 0, pliID: null
 	};
 	const step1State = {
 		type: 'step', id: 1, parent: {type: 'page', id: 0}, number: 1, numberLabel: 0,
-		x: null, y: null, width: null, height: null, csiID: 1, parts: [0], pliID: 0, submodel: []
+		x: null, y: null, width: null, height: null, csiID: 1, parts: [0], pliID: 0, submodel: [], callouts: []
 	};
 	const csiState = {
 		type: 'csi', id: 0, parent: {type: 'step', id: 0},
 		x: null, y: null, width: null, height: null
 	};
 	const titleLabel = {
-		type: 'label', id: 0, parent: {type: 'titlePage', id: 0}, text: '', color: 'black', font: '20pt Helvetica',
-		x: null, y: null, width: null, height: null
+		type: 'label', id: 0, parent: {type: 'titlePage', id: 0}, text: '', color: 'black',
+		font: '20pt Helvetica', x: null, y: null, width: null, height: null
 	};
 	const summaryLabel = {
-		type: 'label', id: 1, parent: {type: 'titlePage', id: 0}, text: '0 Parts, 0 Pages', color: 'black', font: '16pt Helvetica',
-		x: null, y: null, width: null, height: null
+		type: 'label', id: 1, parent: {type: 'titlePage', id: 0}, text: '0 Parts, 0 Pages',
+		color: 'black', font: '16pt Helvetica', x: null, y: null, width: null, height: null
 	};
 
 	it('Add a Title Page', () => {

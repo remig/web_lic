@@ -89,15 +89,15 @@ describe('Test Navigation Tree', function() {
 	});
 
 	it('Click canvas should highlight related row', () => {
-		const canvasSize = browser.getElementSize(page.ids.page_canvas);
-		browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, 550);
+		const canvasSize = browser.getElementSize(page.ids.pageCanvas);
+		browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, 550);
 		assert.equal(browser.getClass2(page.selectors.tree.childRow('label', 0)), page.classes.tree.childRow.unhighlighted);
 		assert.equal(browser.getClass2(page.selectors.tree.childRow('label', 1)), page.classes.tree.childRow.highlighted);
 		assert.isTrue(page.highlight.isValid(366, 542, 164, 30));
 
 		const csiSelector = page.selectors.tree.childRow('csi', 3);
 		const step0Selector = page.selectors.tree.parentRow('step', 3);
-		browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+		browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, canvasSize.height / 2);
 		assert.equal(browser.getClass2(page.selectors.tree.childRow('label', 1)), page.classes.tree.childRow.unhighlighted);
 		assert.equal(browser.getClass2(csiSelector), page.classes.tree.childRow.highlighted);
 		assert.equal(browser.getText2(csiSelector), 'CSI');
@@ -113,8 +113,8 @@ describe('Test Navigation Tree', function() {
 		browser.click(page1.arrow);
 		assert.equal(browser.getClass2(page0.arrow), page.classes.tree.parentRow.open);
 		assert.equal(browser.getClass2(page1.arrow), page.classes.tree.parentRow.open);
-		const canvasSize = browser.getElementSize(page.ids.page_canvas);
-		browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+		const canvasSize = browser.getElementSize(page.ids.pageCanvas);
+		browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, canvasSize.height / 2);
 		browser.keys(['ArrowRight', 'ArrowRight']);
 		assert.equal(browser.getClass2(page0.arrow), page.classes.tree.parentRow.open);
 		assert.equal(browser.getClass2(page1.arrow), page.classes.tree.parentRow.open);

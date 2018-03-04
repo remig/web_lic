@@ -31,18 +31,18 @@ describe('Import Trivial Model', function() {
 			app.importLocalModel(model, fn);
 		}, trivial_model, 'trivial_model.ldr');
 		browser.waitForText('#statusBar', 9000);
-		canvasSize = browser.getElementSize(page.ids.page_canvas);
+		canvasSize = browser.getElementSize(page.ids.pageCanvas);
 	});
 
 	after(clearDownloads);
 
 	it('Status bar should report successful import', () => {
-		assert.startsWith(browser.getText(page.ids.status_bar), '"trivial_model.ldr" loaded successfully');
+		assert.startsWith(browser.getText(page.ids.statusBar), '"trivial_model.ldr" loaded successfully');
 	});
 
 	it('Filename should be visible in nav bar', () => {
-		assert.isTrue(browser.isExisting(page.ids.filename_container));
-		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr');
+		assert.isTrue(browser.isExisting(page.ids.filenameContainer));
+		assert.equal(browser.getText2(page.ids.filenameContainer), 'trivial_model.ldr');
 	});
 
 	it('LocalStorage should reflect imported model', () => {
@@ -57,15 +57,15 @@ describe('Import Trivial Model', function() {
 	});
 
 	it('Menus should reflect imported model', () => {
-		const m = page.ids.sub_menu, v = page.classes.menu;
+		const m = page.ids.subMenu, v = page.classes.menu;
 		assert.equal(browser.getClass2(m.file.close), v.enabled);
 		assert.equal(browser.getClass2(m.file.save), v.enabled);
 		assert.equal(browser.getClass2(m.edit.undo), v.disabled);
 		assert.equal(browser.getClass2(m.edit.redo), v.disabled);
-		assert.equal(browser.getClass2(m.edit.snap_to), v.disabled);
-		assert.equal(browser.getClass2(m.view.add_horizontal_guide), v.disabled);
-		assert.equal(browser.getClass2(m.export.generate_pdf), v.enabled);
-		assert.equal(browser.getClass2(m.export.generate_png_images), v.enabled);
+		assert.equal(browser.getClass2(m.edit.snapTo), v.disabled);
+		assert.equal(browser.getClass2(m.view.addHorizontalGuide), v.disabled);
+		assert.equal(browser.getClass2(m.export.generatePdf), v.enabled);
+		assert.equal(browser.getClass2(m.export.generatePngImages), v.enabled);
 	});
 
 	it('Canvas should not be blank', () => {
@@ -75,25 +75,25 @@ describe('Import Trivial Model', function() {
 	describe('Test highlight & selection', () => {
 
 		it('Click center of Page should highlight CSI', () => {
-			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+			browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, canvasSize.height / 2);
 			assert.isTrue(page.highlight.isValid(385, 305, 122, 80));
 			assert.deepEqual(page.getSelectedItem(), {id: 3, type: 'csi'});
 		});
 
 		it('Click just outside CSI should highlight Step', () => {
-			browser.leftClick(page.ids.page_canvas, 385, 305);
+			browser.leftClick(page.ids.pageCanvas, 385, 305);
 			assert.isTrue(page.highlight.isValid(365, 285, 162, 120));
 			assert.deepEqual(page.getSelectedItem(), {id: 3, type: 'step'});
 		});
 
 		it('Click near edge of Page should highlight Page', () => {
-			browser.leftClick(page.ids.page_canvas, 5, 5);
+			browser.leftClick(page.ids.pageCanvas, 5, 5);
 			assert.isTrue(page.highlight.isValid(-5, -5, 906, 706));
 			assert.deepEqual(page.getSelectedItem(), {id: 0, type: 'titlePage'});
 		});
 
 		it('Click off page should remove highlight', () => {
-			browser.leftClick(page.ids.page_canvas, -10, -10);
+			browser.leftClick(page.ids.pageCanvas, -10, -10);
 			assert.isFalse(page.highlight.isVisible());
 			assert.isNull(page.getSelectedItem());
 		});
@@ -122,7 +122,7 @@ describe('Import Trivial Model', function() {
 		});
 
 		it('Page up / down should clear selection', () => {
-			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+			browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, canvasSize.height / 2);
 			assert.isTrue(page.highlight.isValid(385, 305, 122, 80));
 			assert.deepEqual(page.getSelectedItem(), {id: 3, type: 'csi'});
 			browser.keys(['PageDown']);
@@ -135,7 +135,7 @@ describe('Import Trivial Model', function() {
 
 	describe('Test context menu', () => {
 
-		const context = page.ids.contextMenu;
+		const context = page.ids.contextMenuContainer;
 
 		it('Context menu should exit invisibly', () => {
 			assert.isTrue(browser.isExisting(context));
@@ -143,7 +143,7 @@ describe('Import Trivial Model', function() {
 		});
 
 		it('Right click should open context menu', () => {
-			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+			browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, canvasSize.height / 2);
 			browser.rightClick();
 			assert.isTrue(browser.isVisible(context));
 			const box = browser.getBBox2(page.selectors.contextMenu.content);
@@ -153,20 +153,20 @@ describe('Import Trivial Model', function() {
 		});
 
 		it('Left click anywhere should hide context menu', () => {
-			browser.leftClick(page.ids.page_canvas, 5, 5);
+			browser.leftClick(page.ids.pageCanvas, 5, 5);
 			assert.isFalse(browser.isVisible(context));
 		});
 
 		it('Left click outside page should hide context menu', () => {
-			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+			browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, canvasSize.height / 2);
 			browser.rightClick();
 			assert.isTrue(browser.isVisible(context));
-			browser.leftClick(page.ids.menu_container);
+			browser.leftClick(page.ids.menuContainer);
 			assert.isFalse(browser.isVisible(context));
 		});
 
 		it('Click nested menu should open child', () => {
-			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, 140);
+			browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, 140);
 			browser.rightClick();
 			assert.isFalse(browser.isVisible(page.selectors.contextMenu.parentRow(0).subMenu));
 			assert.isTrue(browser.isVisible(context));
@@ -181,18 +181,19 @@ describe('Import Trivial Model', function() {
 		it('Multiple clicks in nested menu with multiple entries should close previous menus', () => {
 			browser.keys(['PageDown']);
 			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'page'});
-			browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, 140);
+			browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, 140);
 			browser.rightClick();
 			const text = browser.getText2(page.selectors.contextMenu.entries);
-			assert.deepEqual(text, ['Move Step to...', 'Merge Step with...']);
+			assert.deepEqual(text, ['Add Callout', 'Move Step to...', 'Merge Step with...']);
 
-			browser.leftClick(page.selectors.contextMenu.parentRow(0).selector);
-			assert.isTrue(browser.isVisible(page.selectors.contextMenu.parentRow(0).subMenu));
-			assert.isFalse(browser.isVisible(page.selectors.contextMenu.parentRow(1).subMenu));
-
+			// TODO: fix context menu lookups to use IDs, so we don't have to rely on order here
 			browser.leftClick(page.selectors.contextMenu.parentRow(1).selector);
-			assert.isFalse(browser.isVisible(page.selectors.contextMenu.parentRow(0).subMenu));
 			assert.isTrue(browser.isVisible(page.selectors.contextMenu.parentRow(1).subMenu));
+			assert.isFalse(browser.isVisible(page.selectors.contextMenu.parentRow(2).subMenu));
+
+			browser.leftClick(page.selectors.contextMenu.parentRow(2).selector);
+			assert.isFalse(browser.isVisible(page.selectors.contextMenu.parentRow(1).subMenu));
+			assert.isTrue(browser.isVisible(page.selectors.contextMenu.parentRow(2).subMenu));
 
 			browser.keys(['PageUp']);
 			assert.deepEqual(page.getCurrentPage(), {pageID: 0, type: 'titlePage'});
@@ -200,11 +201,11 @@ describe('Import Trivial Model', function() {
 	});
 
 	it('Modify model should set dirty state and save state to localStorage', () => {
-		assert.isTrue(browser.isExisting(page.ids.filename_container));
-		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr');
-		browser.leftClick(page.ids.page_canvas, canvasSize.width / 2, canvasSize.height / 2);
+		assert.isTrue(browser.isExisting(page.ids.filenameContainer));
+		assert.equal(browser.getText2(page.ids.filenameContainer), 'trivial_model.ldr');
+		browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, canvasSize.height / 2);
 		browser.keys(['ArrowRight']);
-		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr *');
+		assert.equal(browser.getText2(page.ids.filenameContainer), 'trivial_model.ldr *');
 		let localStorage = browser.localStorage('GET', 'lic_state').value;
 		assert.isNotNull(localStorage);
 		localStorage = JSON.parse(localStorage);
@@ -212,10 +213,10 @@ describe('Import Trivial Model', function() {
 	});
 
 	it('Save file should download a file and reset dirty flag', () => {
-		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr *');
+		assert.equal(browser.getText2(page.ids.filenameContainer), 'trivial_model.ldr *');
 		browser.click(page.ids.menu.file);
-		browser.click(page.ids.sub_menu.file.save);
-		assert.equal(browser.getText2(page.ids.filename_container), 'trivial_model.ldr');
+		browser.click(page.ids.subMenu.file.save);
+		assert.equal(browser.getText2(page.ids.filenameContainer), 'trivial_model.ldr');
 		browser.pause(500);
 		assert.isTrue(fs.existsSync(downloadPath));
 		assert.isTrue(fs.existsSync(saveFile));

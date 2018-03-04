@@ -12,22 +12,15 @@ describe('Test util module', function() {
 	before(function() { });
 
 	it('util exists with all public API', () => {
-		assert.property(util, 'isEmpty');
-		assert.property(util, 'toArray');
-		assert.property(util, 'array');
+		assert.hasAllKeys(util, [
+			'isEmpty', 'toArray', 'array', 'itemEq', 'get', 'measureLabel', 'fontToFontParts', 'degrees',
+			'radians', 'emptyNode', 'geom', 'draw', 'clone', 'sort', 'formatTime', 'prettyPrint'
+		]);
 		assert.hasAllKeys(util.array, ['insert', 'remove', 'eq']);
-		assert.property(util, 'itemEq');
-		assert.property(util, 'get');
-		assert.property(util, 'measureLabel');
-		assert.property(util, 'fontToFontParts');
-		assert.property(util, 'emptyNode');
-		assert.property(util, 'roundedRect');
-		assert.property(util, 'clone');
-		assert.property(util, 'sort');
+		assert.hasAllKeys(util.geom, ['bbox', 'expandBox', 'distance']);
+		assert.hasAllKeys(util.draw, ['arrow', 'roundedRect']);
 		assert.hasAllKeys(util.sort, ['numeric']);
 		assert.hasAllKeys(util.sort.numeric, ['ascending', 'descending']);
-		assert.property(util, 'formatTime');
-		assert.property(util, 'prettyPrint');
 	});
 
 	after(function() { });

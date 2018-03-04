@@ -1,4 +1,4 @@
-/* global module: false */
+/* global module: false, app: false, store: false, util: false */
 // To run tests, cd to lic_w/test folder then 'npm test'
 // To debug tests, add 'browser.debug()' anywhere in the test code
 
@@ -8,48 +8,55 @@ module.exports = browser => {
 
 	const page = {
 		ids: {
-			root_container: '#container',
-			status_bar: '#statusBar',
-			left_pane: '#leftPane',
+			rootContainer: '#container',
+			statusBar: '#statusBar',
+			leftPane: '#leftPane',
 			tree: '#tree',
-			right_pane: '#rightPane',
-			page_canvas: '#pageCanvas',
+			rightPane: '#rightPane',
+			pageCanvas: '#pageCanvas',
 			splitter: '.gutter',
 			highlight: '#highlight',
-			contextMenu: '#contextMenu',
-			file_uploader_button: '#uploadModelChooser',
-			menu_container: '.navbar',
+			contextMenuContainer: '#contextMenu',
+			contextMenu: {
+				step: {
+					addCallout: '#add_callout_menu',
+					moveStep: '#move_step_to_menu',
+					mergeStep: '#merge_step_with_menu'
+				}
+			},
+			fileUploaderButton: '#uploadModelChooser',
+			menuContainer: '.navbar',
 			menu: {
 				file: '#file_menu',
 				edit: '#edit_menu',
 				view: '#view_menu',
 				export: '#export_menu'
 			},
-			filename_container: '#filename',
-			sub_menu: {
+			filenameContainer: '#filename',
+			subMenu: {
 				file: {
 					open: '#open_menu',
-					open_recent: '#open_recent_menu',
+					openRecent: '#open_recent_menu',
 					close: '#close_menu',
 					save: '#save_menu',
-					import_model: '#import_custom_model_menu',
-					save_template: '#save_template_menu',
-					save_template_as: '#save_template_as_menu',
-					load_template: '#load_template_menu',
-					reset_template: '#reset_template_menu'
+					importModel: '#import_custom_model_menu',
+					saveTemplate: '#save_template_menu',
+					saveTemplateAs: '#save_template_as_menu',
+					loadTemplate: '#load_template_menu',
+					resetTemplate: '#reset_template_menu'
 				},
 				edit: {
 					undo: '#undo_menu',
 					redo: '#redo_menu',
-					snap_to: '#snap_to_menu',
-					brick_colors: '#brick_colors_menu'
+					snapTo: '#snap_to_menu',
+					brickColors: '#brick_colors_menu'
 				},
 				view: {
-					add_horizontal_guide: '#add_horizontal_guide_menu'
+					addHorizontalGuide: '#add_horizontal_guide_menu'
 				},
 				export: {
-					generate_pdf: '#generate_pdf_menu',
-					generate_png_images: '#generate_png_images_menu'
+					generatePdf: '#generate_pdf_menu',
+					generatePngImages: '#generate_png_images_menu'
 				}
 			}
 		},
