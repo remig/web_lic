@@ -192,7 +192,7 @@ const contextMenu = {
 		{text: 'Scale CSI (NYI)', cb: () => {}},
 		{text: 'separator'},
 		{
-			text: 'Select Part (NYI)',
+			text: 'Select Part',
 			shown() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
 					const step = store.get.parent(app.selectedItemLookup);
@@ -234,6 +234,18 @@ const contextMenu = {
 			]
 		}
 	],
+	callout: [
+		{
+			text: 'Add Step',
+			cb() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'callout') {
+					const callout = app.selectedItemLookup;
+					undoStack.commit('addStepToCallout', {callout, doLayout: true}, this.text);
+					app.redrawUI(true);
+				}
+			}
+		}
+	],
 	calloutArrow: [
 		{
 			text: 'Select Point...',
@@ -252,6 +264,35 @@ const contextMenu = {
 				}
 				return null;
 			}
+		},
+		{
+			text: 'Add Point',
+			cb() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
+					const calloutArrow = store.get.calloutArrow(app.selectedItemLookup);
+					const newPointIdx = Math.ceil(calloutArrow.points.length / 2);
+					undoStack.commit('addPointToCalloutArrow', {calloutArrow}, this.text);
+					app.redrawUI(true);
+					Vue.nextTick(() => {
+						app.setSelected({type: 'point', id: calloutArrow.points[newPointIdx]});
+					});
+				}
+			}
+		},
+		{
+			text: 'Add Tip (NYI)',
+			cb() {
+			}
+		},
+		{
+			text: 'Rotate Tip...',
+			children: ['Up', 'Right', 'Down', 'Left'].map(direction => {
+				return {
+					text: direction,
+					shown: calloutTipRotationVisible(direction.toLowerCase()),
+					cb: rotateCalloutTip(direction.toLowerCase())
+				};
+			})
 		}
 	],
 	part: [
@@ -280,40 +321,65 @@ const contextMenu = {
 			]
 		},
 		{
-			text: 'Move Part to Previous Step',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-					return store.get.prevStep(step) != null;
+			text: 'Move Part to...',
+			children: [
+				{
+					text: 'Previous Step',
+					shown() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
+							const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+							return store.get.prevStep(step) != null;
+						}
+						return false;
+					},
+					cb() {
+						const srcStep = {type: 'step', id: app.selectedItemLookup.stepID};
+						const destStep = store.get.prevStep(srcStep);
+						undoStack.commit(
+							'part.moveToStep',
+							{partID: app.selectedItemLookup.id, srcStep, destStep},
+							this.text
+						);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'Next Step',
+					shown() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
+							const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+							return store.get.nextStep(step) != null;
+						}
+						return false;
+					},
+					cb() {
+						const srcStep = {type: 'step', id: app.selectedItemLookup.stepID};
+						const destStep = store.get.nextStep(srcStep);
+						undoStack.commit(
+							'part.moveToStep',
+							{partID: app.selectedItemLookup.id, srcStep, destStep},
+							this.text
+						);
+						app.redrawUI(true);
+					}
 				}
-				return false;
-			},
-			cb() {
-				const srcStep = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-				const destStep = store.get.prevStep(srcStep);
-				undoStack.commit(
-					'movePartToStep',
-					{partID: app.selectedItemLookup.id, srcStep, destStep},
-					this.text
-				);
-				app.redrawUI(true);
-			}
+			]
 		},
 		{
-			text: 'Move Part to Next Step',
+			text: 'Add Part to Callout',
 			shown() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
 					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-					return store.get.nextStep(step) != null;
+					return !util.isEmpty(step.callouts);
 				}
 				return false;
 			},
 			cb() {
-				const srcStep = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-				const destStep = store.get.nextStep(srcStep);
+				const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+				const callout = {id: step.callouts[0], type: 'callout'};
 				undoStack.commit(
-					'movePartToStep',
-					{partID: app.selectedItemLookup.id, srcStep, destStep},
+					'part.addToCallout',
+					{partID: app.selectedItemLookup.id, step, callout},
 					this.text
 				);
 				app.redrawUI(true);
@@ -322,11 +388,31 @@ const contextMenu = {
 	]
 };
 
+function calloutTipRotationVisible(direction) {
+	return () => {
+		if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
+			const calloutArrow = store.get.calloutArrow(app.selectedItemLookup);
+			return calloutArrow.direction !== direction;
+		}
+		return false;
+	};
+}
+
+function rotateCalloutTip(direction) {
+	return () => {
+		if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
+			const calloutArrow = store.get.calloutArrow(app.selectedItemLookup);
+			undoStack.commit('rotateCalloutArrowTip', {calloutArrow, direction}, 'Rotate Callout Arrow Tip');
+			app.redrawUI(true);
+		}
+	};
+}
+
 function displacePart(direction) {
 	return () => {
 		const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
 		undoStack.commit(
-			'displacePart',
+			'part.displace',
 			{partID: app.selectedItemLookup.id, step, direction},
 			`Dispalce Part ${util.prettyPrint(direction || 'None')}`
 		);

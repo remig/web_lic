@@ -138,7 +138,7 @@
 				</template>
 				<template v-if="target.callouts != null">
 					<li v-for="calloutID in target.callouts">
-						<treeRow :currentItem="currentItem" :target="treeData.store.get.callout(calloutID)" />
+						<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.callout(calloutID)" />
 					</li>
 				</template>
 			</ul>

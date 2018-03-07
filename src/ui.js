@@ -228,6 +228,62 @@ var app = new Vue({
 			const box = this.targetBox(t);
 			return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
 		},
+		findClickTargetInStep(mx, my, step) {
+			const csi = store.get.csi(step.csiID);
+			if (step.csiID != null && this.inBox(mx, my, csi)) {
+				return csi;
+			}
+			if (step.numberLabel != null) {
+				const lbl = store.get.stepNumber(step.numberLabel);
+				if (this.inBox(mx, my, lbl)) {
+					return lbl;
+				}
+			}
+			if (step.pliID != null && store.state.plisVisible) {
+				const pli = store.get.pli(step.pliID);
+				for (let i = 0; i < pli.pliItems.length; i++) {
+					const pliItem = store.get.pliItem(pli.pliItems[i]);
+					if (this.inBox(mx, my, pliItem)) {
+						return pliItem;
+					}
+					const pliQty = store.get.pliQty(pliItem.pliQtyID);
+					if (this.inBox(mx, my, pliQty)) {
+						return pliQty;
+					}
+				}
+				if (this.inBox(mx, my, pli)) {
+					return pli;
+				}
+			}
+			if (step.callouts) {
+				for (let i = 0; i < step.callouts.length; i++) {
+					const callout = store.get.callout(step.callouts[i]);
+					for (let j = 0; j < callout.steps.length; j++) {
+						const step = store.get.step(callout.steps[j]);
+						const innerTarget = app.findClickTargetInStep(mx, my, step);
+						if (innerTarget) {
+							return innerTarget;
+						}
+					}
+					if (this.inBox(mx, my, callout)) {
+						return callout;
+					}
+					for (let k = 0; k < callout.calloutArrows.length; k++) {
+						const arrow = store.get.calloutArrow(callout.calloutArrows[k]);
+						const arrowPoints = store.get.calloutArrowToPoints(arrow);
+						let arrowBox = util.geom.bbox(arrowPoints);
+						arrowBox = util.geom.expandBox(arrowBox, 8, 8);
+						if (this.inBox(mx, my, {...arrow, ...arrowBox})) {
+							return arrow;
+						}
+					}
+				}
+			}
+			if (this.inBox(mx, my, step)) {
+				return step;
+			}
+			return null;
+		},
 		findClickTarget(mx, my) {
 			const page = store.get.lookupToItem(this.currentPageLookup);
 			if (!page) {
@@ -249,51 +305,9 @@ var app = new Vue({
 			}
 			for (let i = 0; i < page.steps.length; i++) {
 				const step = store.get.step(page.steps[i]);
-				const csi = store.get.csi(step.csiID);
-				if (step.csiID != null && this.inBox(mx, my, csi)) {
-					return csi;
-				}
-				if (step.numberLabel != null) {
-					const lbl = store.get.stepNumber(step.numberLabel);
-					if (this.inBox(mx, my, lbl)) {
-						return lbl;
-					}
-				}
-				if (step.pliID != null && store.state.plisVisible) {
-					const pli = store.get.pli(step.pliID);
-					for (let j = 0; j < pli.pliItems.length; j++) {
-						const pliItem = store.get.pliItem(pli.pliItems[j]);
-						if (this.inBox(mx, my, pliItem)) {
-							return pliItem;
-						}
-						const pliQty = store.get.pliQty(pliItem.pliQtyID);
-						if (this.inBox(mx, my, pliQty)) {
-							return pliQty;
-						}
-					}
-					if (this.inBox(mx, my, pli)) {
-						return pli;
-					}
-				}
-				if (step.callouts) {
-					for (let j = 0; j < step.callouts.length; j++) {
-						const callout = store.get.callout(step.callouts[j]);
-						if (this.inBox(mx, my, callout)) {
-							return callout;
-						}
-						for (let k = 0; k < callout.calloutArrows.length; k++) {
-							const arrow = store.get.calloutArrow(callout.calloutArrows[k]);
-							const arrowPoints = store.get.calloutArrowToPoints(arrow);
-							let arrowBox = util.geom.bbox(arrowPoints);
-							arrowBox = util.geom.expandBox(arrowBox, 8, 8);
-							if (this.inBox(mx, my, {...arrow, ...arrowBox})) {
-								return arrow;
-							}
-						}
-					}
-				}
-				if (this.inBox(mx, my, step)) {
-					return step;
+				const innerTarget = app.findClickTargetInStep(mx, my, step);
+				if (innerTarget) {
+					return innerTarget;
 				}
 			}
 			return page;
@@ -366,7 +380,7 @@ var app = new Vue({
 				} else if (e.key === 'ArrowRight') {
 					dx = dv;
 				}
-				const item = store.get.lookupToItem(selItem);
+				let item = store.get.lookupToItem(selItem);
 				// Special case: the first point in a callout arrow can't move away from the callout itself
 				// TODO: this doesn't prevent arrow base from coming off the rounded corner of a callout
 				// TOOD: consider a similar case of moving a CSI with callout arrows pointing to it: move the arrow tips with the callout?
@@ -380,24 +394,42 @@ var app = new Vue({
 							if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
 								dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
 							} else {
-								return;
+								dx = 0;  // Prevent movement from pulling arrow base off callout
 							}
 						} else {
 							if (dt(newPos.x, 0) < 2 || dt(newPos.x, callout.width) < 2) {
 								dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
 							} else {
-								return;
+								dx = 0;  // Prevent movement from pulling arrow base off callout
 							}
 						}
 					}
+				} else if (item.type === 'csi') {
+					// TODO: If you move a CSI, the Step's bounding box needs to be updated
+					// If we're moving a CSI on a step with callouts, move each callout arrow tip too so it stays anchored to the CSI
+					const step = store.get.parent(item);
+					if (!util.isEmpty(step.callouts)) {
+						item = [item];
+						step.callouts.forEach(calloutID => {
+							const callout = store.get.callout(calloutID);
+							callout.calloutArrows.forEach(arrowID => {
+								const arrow = store.get.calloutArrow(arrowID);
+								item.push(store.get.point(arrow.points[arrow.points.length - 1]));
+							});
+						});
+					}
+				} else if (item.type === 'callout') {
+					// If we're moving a callout, move each callout arrow tip in the opposite direction so it stays in place anchored to the CSI
+					item.calloutArrows.forEach(arrowID => {
+						const arrow = store.get.calloutArrow(arrowID);
+						const tip = store.get.point(arrow.points[arrow.points.length - 1]);
+						tip.x -= dx;
+						tip.y -= dy;
+					});
 				}
 
-				// TODO: If you move a CSI, the Step's bounding box needs to be updated
-				undoStack.commit('item.reposition', {
-					item: item,
-					x: item.x + dx,
-					y: item.y + dy
-				}, `Move ${util.prettyPrint(selItem.type)}`);
+				const undoText = `Move ${util.prettyPrint(selItem.type)}`;
+				undoStack.commit('item.reposition', {item: item, dx, dy}, undoText);
 				this.redrawUI();
 			} else {
 				// Check if key is a menu shortcut
@@ -432,6 +464,84 @@ var app = new Vue({
 				this.drawPage(page, canvas);
 			}
 		},
+		drawStep(opts) {  // opts: {step, canvas}
+			const step = store.get.step(opts.step);
+			const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
+
+			const ctx = opts.canvas.getContext('2d');
+			ctx.save();
+			ctx.translate(step.x, step.y);
+
+			if (step.csiID != null) {
+				const csi = store.get.csi(step.csiID);
+				const partIsSelected = step.parts ? step.parts.some(i => localModel.parts[i].selected) : false;
+				const res = store.render[partIsSelected ? 'csiWithSelection' : 'csi'](localModel, step);
+				ctx.drawImage(res.container, csi.x - res.dx, csi.y - res.dy);  // TODO: profile performance if every x, y, w, h argument is passed in
+			}
+
+			(step.callouts || []).forEach(calloutID => {
+				const callout = store.get.callout(calloutID);
+				ctx.save();
+				ctx.translate(callout.x, callout.y);
+
+				callout.steps.forEach(id => app.drawStep({step: {type: 'step', id}, canvas: opts.canvas}));
+
+				ctx.strokeStyle = 'black';
+				ctx.lineWidth = 2;
+				util.draw.roundedRect(ctx, 0, 0, callout.width, callout.height, 10);
+				ctx.stroke();
+				(callout.calloutArrows || []).forEach(arrowID => {
+					const arrow = store.get.calloutArrow(arrowID);
+					const arrowPoints = store.get.calloutArrowToPoints(arrow);
+					ctx.beginPath();
+					ctx.moveTo(arrowPoints[0].x, arrowPoints[0].y);
+					arrowPoints.slice(1, -1).forEach(pt => {
+						ctx.lineTo(pt.x, pt.y);
+					});
+					ctx.stroke();
+					ctx.fillStyle = 'black';
+					const tip = arrowPoints[arrowPoints.length - 1];
+					util.draw.arrow(ctx, tip.x, tip.y, arrow.direction);
+					ctx.fill();
+				});
+				ctx.restore();
+			});
+
+			if (step.pliID != null && store.state.plisVisible) {
+				const pli = store.get.pli(step.pliID);
+				if (!util.isEmpty(pli.pliItems)) {
+					ctx.strokeStyle = 'black';
+					ctx.lineWidth = 2;
+					util.draw.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
+					ctx.stroke();
+
+					pli.pliItems.forEach(idx => {
+						const pliItem = store.get.pliItem(idx);
+						const part = localModel.parts[pliItem.partNumbers[0]];
+						const pliCanvas = store.render.pli(part).container;
+						ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
+
+						const pliQty = store.get.pliQty(pliItem.pliQtyID);
+						ctx.fillStyle = 'black';
+						ctx.font = 'bold 10pt Helvetica';
+						ctx.fillText(
+							'x' + pliItem.quantity,
+							pli.x + pliItem.x + pliQty.x,
+							pli.y + pliItem.y + pliQty.y + pliQty.height
+						);
+					});
+				}
+			}
+
+			if (step.numberLabel != null) {
+				const lbl = store.get.stepNumber(step.numberLabel);
+				ctx.fillStyle = 'black';
+				ctx.font = 'bold 20pt Helvetica';
+				ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
+			}
+
+			ctx.restore();
+		},
 		drawPage(page, canvas) {
 
 			if (page.needsLayout) {
@@ -443,81 +553,7 @@ var app = new Vue({
 			ctx.fillStyle = 'white';
 			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
 
-			page.steps.forEach(stepID => {
-
-				const step = store.get.step(stepID);
-				const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
-
-				ctx.save();
-				ctx.translate(step.x, step.y);
-
-				if (step.csiID != null) {
-					const csi = store.get.csi(step.csiID);
-					const partIsSelected = step.parts ? step.parts.some(i => localModel.parts[i].selected) : false;
-					const res = store.render[partIsSelected ? 'csiWithSelection' : 'csi'](localModel, step);
-					ctx.drawImage(res.container, csi.x - res.dx, csi.y - res.dy);  // TODO: profile performance if every x, y, w, h argument is passed in
-				}
-
-				(step.callouts || []).forEach(calloutID => {
-					const callout = store.get.callout(calloutID);
-					ctx.strokeStyle = 'black';
-					ctx.lineWidth = 2;
-					util.draw.roundedRect(ctx, callout.x, callout.y, callout.width, callout.height, 10);
-					ctx.stroke();
-					(callout.calloutArrows || []).forEach(arrowID => {
-						const arrow = store.get.calloutArrow(arrowID);
-						const arrowPoints = store.get.calloutArrowToPoints(arrow);
-						ctx.save();
-						ctx.translate(callout.x, callout.y);
-						ctx.beginPath();
-						ctx.moveTo(arrowPoints[0].x, arrowPoints[0].y);
-						arrowPoints.slice(1, -1).forEach(pt => {
-							ctx.lineTo(pt.x, pt.y);
-						});
-						ctx.stroke();
-						ctx.fillStyle = 'black';
-						const tip = arrowPoints[arrowPoints.length - 1];
-						util.draw.arrow(ctx, tip.x, tip.y, arrow.direction);
-						ctx.fill();
-						ctx.restore();
-					});
-				});
-
-				if (step.pliID != null && store.state.plisVisible) {
-					const pli = store.get.pli(step.pliID);
-					if (!util.isEmpty(pli.pliItems)) {
-						ctx.strokeStyle = 'black';
-						ctx.lineWidth = 2;
-						util.draw.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
-						ctx.stroke();
-
-						pli.pliItems.forEach(idx => {
-							const pliItem = store.get.pliItem(idx);
-							const part = localModel.parts[pliItem.partNumbers[0]];
-							const pliCanvas = store.render.pli(part).container;
-							ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
-
-							const pliQty = store.get.pliQty(pliItem.pliQtyID);
-							ctx.fillStyle = 'black';
-							ctx.font = 'bold 10pt Helvetica';
-							ctx.fillText(
-								'x' + pliItem.quantity,
-								pli.x + pliItem.x + pliQty.x,
-								pli.y + pliItem.y + pliQty.y + pliQty.height
-							);
-						});
-					}
-				}
-
-				if (step.numberLabel != null) {
-					const lbl = store.get.stepNumber(step.numberLabel);
-					ctx.fillStyle = 'black';
-					ctx.font = 'bold 20pt Helvetica';
-					ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
-				}
-
-				ctx.restore();
-			});
+			page.steps.forEach(id => app.drawStep({step: {type: 'step', id}, canvas}));
 
 			if (page.numberLabel != null) {
 				const lbl = store.get.pageNumber(page.numberLabel);

@@ -184,7 +184,11 @@ const store = {
 		},
 		prevStep(step, limitToSubmodel) {
 			step = store.get.lookupToItem(step);
-			let prevStep = store.get.prev(step);
+			let itemList;
+			if (step.parent.type === 'callout') {
+				itemList = store.get.callout(step.parent.id).steps.map(store.get.step);
+			}
+			let prevStep = store.get.prev(step, itemList);
 			if (limitToSubmodel) {
 				while (prevStep && !util.array.eq(step.submodel, prevStep.submodel)) {
 					prevStep = store.get.prev(prevStep);
@@ -235,16 +239,20 @@ const store = {
 
 			return [...points.slice(0, -1), base, tip];
 		},
-		prev(item) {  // Get the previous item in the specified item's list
+		prev(item, itemList) {  // Get the previous item in the specified item's list, based on item.number and matching parent types
 			item = store.get.lookupToItem(item);
-			const itemList = store.state[item.type + 's'];
-			const idx = itemList.findIndex(el => el.number === item.number - 1);
+			itemList = itemList || store.state[item.type + 's'];
+			const idx = itemList.findIndex(el => {
+				return el.number === item.number - 1 && el.parent.type === item.parent.type;
+			});
 			return (idx < 0) ? null : itemList[idx];
 		},
-		next(item) {  // Get the next item in the specified item's list
+		next(item, itemList) {  // Get the next item in the specified item's list, based on item.number and matching parent types
 			item = store.get.lookupToItem(item);
-			const itemList = store.state[item.type + 's'];
-			const idx = itemList.findIndex(el => el.number === item.number + 1);
+			itemList = itemList || store.state[item.type + 's'];
+			const idx = itemList.findIndex(el => {
+				return el.number === item.number + 1 && el.parent.type === item.parent.type;
+			});
 			return (idx < 0) ? null : itemList[idx];
 		},
 		parent(item) {
@@ -302,14 +310,14 @@ const store = {
 	},
 	mutations: {
 		item: {
-			add(opts) {  // opts: {item, parent}
+			add(opts) {  // opts: {item, parent, insertionIndex = -1}
 				const {item, parent} = opts;
 				item.id = store.get.nextItemID(item);
 				store.state[item.type + 's'].push(item);
 				if (parent) {
 					item.parent = {type: parent.type, id: parent.id};
 					if (parent.hasOwnProperty(item.type + 's')) {
-						parent[item.type + 's'].push(item.id);
+						util.array.insert(parent[item.type + 's'], item.id, opts.insertionIndex);
 					} else if (parent.hasOwnProperty(item.type + 'ID')) {
 						parent[item.type + 'ID'] = item.id;
 					} else if (parent.hasOwnProperty('numberLabel') && item.type.endsWith('Number')) {
@@ -322,88 +330,125 @@ const store = {
 				const item = store.get.lookupToItem(opts.item);
 				util.array.remove(store.state[item.type + 's'], item);
 			},
-			reparent(opts) {  // opts: {item, newParent, insertionIndex = last}
+			reparent(opts) {  // opts: {item, newParent, insertionIndex = -1}
 				const item = store.get.lookupToItem(opts.item);
 				const oldParent = store.get.parent(item);
 				const newParent = store.get.lookupToItem(opts.newParent);
 				item.parent.id = newParent.id;
 				util.array.remove(oldParent[item.type + 's'], item.id);
-				if (opts.insertionIndex == null) {
-					newParent[item.type + 's'].push(item.id);
-				} else {
-					util.array.insert(newParent[item.type + 's'], item.id, opts.insertionIndex);
+				util.array.insert(newParent[item.type + 's'], item.id, opts.insertionIndex);
+			},
+			reposition(opts) {  // opts: {item or [items], dx, dy}
+				const items = Array.isArray(opts.item) ? opts.item : [opts.item];
+				items.forEach(item => {
+					item.x += opts.dx;
+					item.y += opts.dy;
+				});
+			}
+		},
+		part: {
+			displace(opts) { // opts: {partID, step, direction}.  If direction == null, remove displacement
+				const step = store.get.lookupToItem(opts.step);
+				step.displacedParts = step.displacedParts || [];
+				const idx = step.displacedParts.findIndex(p => p.partID === opts.partID);
+				if (opts.direction) {
+					if (idx >= 0) {
+						step.displacedParts[idx].direction = opts.direction;
+					} else {
+						step.displacedParts.push({partID: opts.partID, direction: opts.direction});
+					}
+				} else if (idx >= 0) {
+					step.displacedParts.splice(idx, 1);
+				}
+				store.mutations.layoutPage({page: store.get.pageForItem(step)});
+			},
+			// TODO: what if a step has zero parts?
+			moveToStep(opts) { // opts: {partID, srcStep, destStep}
+				const partID = opts.partID;
+				const srcStep = store.get.lookupToItem(opts.srcStep);
+				util.array.remove(srcStep.parts, partID);
+
+				const destStep = store.get.lookupToItem(opts.destStep);
+				destStep.parts.push(partID);
+				destStep.parts.sort(util.sort.numeric.ascending);
+
+				if (srcStep.pliID != null) {
+					const destPLI = store.get.pli(destStep.pliID);
+					const pli = store.get.pli(srcStep.pliID);
+					const pliItems = pli.pliItems.map(i => store.get.pliItem(i));
+					const pliItem = pliItems.filter(i => i.partNumbers.includes(partID))[0];
+
+					if (pliItem.quantity === 1) {
+						const target = store.get.matchingPLIItem(destPLI, partID);
+						if (target) {
+							target.quantity++;
+							target.partNumbers.push(partID);
+							util.array.remove(pli.pliItems, pliItem.id);
+							store.mutations.item.delete({item: store.get.pliQty(pliItem.pliQtyID)});
+							store.mutations.item.delete({item: pliItem});
+						} else {
+							store.mutations.item.reparent({item: pliItem, newParent: destPLI});
+						}
+					} else {
+						pliItem.quantity -= 1;
+						util.array.remove(pliItem.partNumbers, partID);
+
+						const newPLIItem = util.clone(pliItem);
+						newPLIItem.parent.id = destPLI.id;
+						newPLIItem.partNumbers = [partID];
+						store.mutations.item.add({item: newPLIItem});
+						destPLI.pliItems.push(newPLIItem);
+
+						const newPLIQty = util.clone(store.get.pliQty(pliItem.pliQtyID));
+						newPLIQty.parent.id = newPLIItem.id;
+						store.mutations.item.add({item: newPLIQty});
+						newPLIItem.pliQtyID = newPLIQty.id;
+					}
+				}
+
+				store.mutations.layoutPage({page: store.get.pageForItem(srcStep)});
+				if (srcStep.parent.id !== destStep.parent.id) {
+					store.mutations.layoutPage({page: store.get.pageForItem(destStep)});
 				}
 			},
-			reposition(opts) {  // opts: {item, x, y}
-				if (opts && opts.item) {
-					opts.item.x = opts.x;
-					opts.item.y = opts.y;
+			addToCallout(opts) {  // opts: {partID, step, callout}
+				const partID = opts.partID;
+				const step = store.get.lookupToItem(opts.step);
+				const callout = store.get.lookupToItem(opts.callout);
+				let destCalloutStep;
+				if (util.isEmpty(callout.steps)) {
+					destCalloutStep = store.mutations.insertStep({dest: callout});
+				} else {
+					destCalloutStep = store.get.step(callout.steps[callout.steps.length - 1]);
 				}
+				destCalloutStep.parts.push(partID);
+				store.mutations.layoutPage({page: step.parent});
 			}
 		},
-		displacePart(opts) { // opts: {partID, step, direction}.  If direction == null, remove displacement
-			const step = store.get.lookupToItem(opts.step);
-			step.displacedParts = step.displacedParts || [];
-			const idx = step.displacedParts.findIndex(p => p.partID === opts.partID);
-			if (opts.direction) {
-				if (idx >= 0) {
-					step.displacedParts[idx].direction = opts.direction;
-				} else {
-					step.displacedParts.push({partID: opts.partID, direction: opts.direction});
-				}
-			} else if (idx >= 0) {
-				step.displacedParts.splice(idx, 1);
+		// TODO: add store.mutations.foo.create() to wrap all item.add({junk}) logic
+		insertStep(opts) {  // opts: {dest, doLayout = false, stepNumber = null, insertionIndex = -1}
+			const dest = store.get.lookupToItem(opts.dest);
+			const step = store.mutations.item.add({item: {
+				type: 'step',
+				number: opts.stepNumber, numberLabel: null,
+				parts: [], callouts: [], submodel: [],
+				csiID: null, pliID: null,
+				x: null, y: null, width: null, height: null
+			}, parent: dest, insertionIndex: opts.insertionIndex});
+			store.mutations.item.add({item: {
+				type: 'csi',
+				x: null, y: null, width: null, height: null
+			}, parent: step});
+			if (opts.stepNumber != null) {
+				store.mutations.item.add({item: {
+					type: 'stepNumber',
+					x: null, y: null, width: null, height: null
+				}, parent: step});
 			}
-			store.mutations.layoutPage({page: store.get.pageForItem(step)});
-		},
-		// TODO: what if a step has zero parts?
-		movePartToStep(opts) { // opts: {partID, srcStep, destStep}
-			const partID = opts.partID;
-			const srcStep = store.get.lookupToItem(opts.srcStep);
-			util.array.remove(srcStep.parts, partID);
-
-			const destStep = store.get.lookupToItem(opts.destStep);
-			destStep.parts.push(partID);
-			destStep.parts.sort(util.sort.numeric.ascending);
-
-			if (srcStep.pliID != null) {
-				const destPLI = store.get.pli(destStep.pliID);
-				const pli = store.get.pli(srcStep.pliID);
-				const pliItems = pli.pliItems.map(i => store.get.pliItem(i));
-				const pliItem = pliItems.filter(i => i.partNumbers.includes(partID))[0];
-
-				if (pliItem.quantity === 1) {
-					const target = store.get.matchingPLIItem(destPLI, partID);
-					if (target) {
-						target.quantity++;
-						target.partNumbers.push(partID);
-						util.array.remove(pli.pliItems, pliItem.id);
-						store.mutations.item.delete({item: store.get.pliQty(pliItem.pliQtyID)});
-						store.mutations.item.delete({item: pliItem});
-					} else {
-						store.mutations.items.reparent({item: pliItem, newParent: destPLI});
-					}
-				} else {
-					pliItem.quantity -= 1;
-					util.array.remove(pliItem.partNumbers, partID);
-
-					const newPLIItem = util.clone(pliItem);
-					newPLIItem.parent.id = destPLI.id;
-					newPLIItem.partNumbers = [partID];
-					store.mutations.item.add({item: newPLIItem});
-					destPLI.pliItems.push(newPLIItem);
-
-					const newPLIQty = util.clone(store.get.pliQty(pliItem.pliQtyID));
-					newPLIQty.parent.id = newPLIItem.id;
-					store.mutations.item.add({item: newPLIQty});
-					newPLIItem.pliQtyID = newPLIQty.id;
-				}
+			if (opts.doLayout) {
+				store.mutations.layoutPage({page: store.get.pageForItem(dest)});
 			}
-
-			store.mutations.layoutPage({page: store.get.pageForItem(srcStep)});
-			if (srcStep.parent.id !== destStep.parent.id) {
-				store.mutations.layoutPage({page: store.get.pageForItem(destStep)});
-			}
+			return step;
 		},
 		moveStepToPage(opts) {  // opts: {step, destPage, insertionIndex = 0}
 			const step = store.get.lookupToItem(opts.step);
@@ -462,12 +507,41 @@ const store = {
 			store.mutations.item.add({item: {
 				type: 'callout',
 				x: null, y: null, width: null, height: null,
-				steps: [],
-				calloutArrows: [],
+				steps: [], calloutArrows: [],
 				layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
 				id: store.get.nextItemID('callout')
 			}, parent: step});
 			store.mutations.layoutPage({page: store.get.pageForItem(step)});
+		},
+		addStepToCallout(opts) {  // opts: {callout, doLayout = false}
+			const callout = store.get.lookupToItem(opts.callout);
+			const stepNumber = callout.steps.length > 0 ? callout.steps.length + 1 : null;
+			store.mutations.insertStep({dest: callout, stepNumber});
+			if (stepNumber === 2) {  // Special case: callouts with one step have no step numbers; turn on step numbers when adding a 2nd step
+				const firstStep = store.get.step(callout.steps[0]);
+				firstStep.number = 1;
+				store.mutations.item.add({item: {
+					type: 'stepNumber', x: null, y: null, width: null, height: null
+				}, parent: firstStep});
+			}
+			if (opts.doLayout) {
+				store.mutations.layoutPage({page: store.get.pageForItem(callout)});
+			}
+		},
+		addPointToCalloutArrow(opts) { // opts: {calloutArrow, doLayout}
+			const arrow = store.get.calloutArrow(opts.calloutArrow);
+			const insertionIndex = Math.ceil(arrow.points.length / 2);
+			const p1 = store.get.point(arrow.points[insertionIndex - 1]);
+			const p2 = store.get.point(arrow.points[insertionIndex]);
+			const midpoint = util.geom.midpoint(p1, p2);
+			store.mutations.item.add({
+				item: {type: 'point', ...midpoint},
+				parent: arrow,
+				insertionIndex
+			});
+		},
+		rotateCalloutArrowTip(opts) {  // opts: {calloutArrow, direction}
+			store.get.calloutArrow(opts.calloutArrow).direction = opts.direction;
 		},
 		appendPage(opts) {  // opts: {prevPage}
 			const prevPage = store.get.lookupToItem(opts.prevPage);
@@ -505,7 +579,7 @@ const store = {
 			if (step.numberLabel != null) {
 				store.mutations.item.delete({item: store.get.stepNumber(step.numberLabel)});
 			}
-			if (step.csIID != null) {
+			if (step.csiID != null) {
 				store.mutations.item.delete({item: store.get.csi(step.csiID)});
 			}
 			if (step.pliID != null) {
@@ -545,13 +619,15 @@ const store = {
 		renumberPages() {
 			store.mutations.renumber('page');
 		},
-		setNumber(opts) {  // opts: {target, number}
+		setNumber() {  // opts: {target, number} NYI
 		},
 		layoutStep(opts) {  // opts: {step, box}
-			Layout.step(opts);
+			const step = store.get.lookupToItem(opts.step);
+			Layout.step.outsideIn(step, opts.box);
 		},
 		layoutPage(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
-			Layout.page(opts);
+			const page = store.get.lookupToItem(opts.page);
+			Layout.page(page, opts.layout);
 		},
 		layoutTitlePage(page) {
 			Layout.titlePage(page);
@@ -597,7 +673,7 @@ const store = {
 			}, parent: page});
 		},
 		removeTitlePage() {
-			// TODO: handle this via store.mutations.deleteStep
+			// TODO: handle this via store.mutations.deletePage
 			const page = store.get.titlePage();
 			if (page == null) {
 				return;
@@ -663,10 +739,8 @@ const store = {
 
 				const step = addItem({item: {
 					type: 'step',
-					number: null,
-					numberLabel: null,
-					parts: parts,
-					callouts: [],
+					number: null, numberLabel: null,
+					parts: parts, callouts: [],
 					submodel: util.clone(localModelIDList),
 					csiID: null, pliID: null,
 					x: null, y: null, width: null, height: null

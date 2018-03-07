@@ -25,7 +25,11 @@ const util = {
 	},
 	array: {
 		insert(array, item, idx) {
-			array.splice(idx, 0, item);
+			if (idx == null || idx === -1) {
+				array.push(item);
+			} else {
+				array.splice(idx, 0, item);
+			}
 		},
 		remove(array, item) {
 			const idx = array.indexOf(item);
@@ -189,6 +193,9 @@ const util = {
 				return Math.abs(p1 - p2);
 			}
 			return Math.sqrt(((p1.x - p2.x) ** 2) + ((p1.y - p2.y) ** 2));
+		},
+		midpoint(p1, p2) {
+			return {x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2};
 		}
 	},
 	draw: {
@@ -197,9 +204,9 @@ const util = {
 			const rotation = {up: 180, left: 90, right: -90};
 			const arrowDimensions = {
 				head: {
-					length: 28,
+					length: 30,
 					width: 7,
-					insetDepth: 4
+					insetDepth: 3
 				},
 				body: {
 					width: 1.25
