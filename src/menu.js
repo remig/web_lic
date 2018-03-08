@@ -29,7 +29,7 @@ Vue.component('menu-list', {
 });
 
 Vue.component('nav-menu', {
-	props: ['menuEntryList', 'filename'],
+	props: ['menuEntryList', 'filename', 'version'],
 	template: '#navMenuTemplate'
 });
 

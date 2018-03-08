@@ -4,6 +4,8 @@
 app = (function() {
 'use strict';
 
+const version = '0.15';
+
 const undoStack = new UndoStack(store);
 
 Vue.config.performance = false;
@@ -587,6 +589,9 @@ var app = new Vue({
 		},
 		navBarContent() {
 			return Menu(this, store, undoStack);
+		},
+		version() {
+			return version;
 		},
 		highlightStyle() {
 			const selItem = this.selectedItemLookup;

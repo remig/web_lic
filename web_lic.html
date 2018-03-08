@@ -38,7 +38,7 @@
 				</div>
 			</div>
 		</div>
-		<nav-menu :menu-entry-list="navBarContent" :filename="{name: filename, isDirty}" :key="menuUpdateState"></nav-menu>
+		<nav-menu :menu-entry-list="navBarContent" :filename="{name: filename, isDirty}" :version="version" :key="menuUpdateState"></nav-menu>
 		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
 			<div id="leftPane" class="split split-horizontal">
 				<div id="tree">
@@ -83,7 +83,7 @@
 					<li><span id="filename" class="navbar-text">{{filename.name + (filename.isDirty ? ' *' : '')}}</span></li>
 					<li><span class="navbar-text">|</span></li>
 				</template>
-				<li><a href="http://bugeyedmonkeys.com" target="_blank">Web Lic 0.1</a></li>
+				<li><a href="http://bugeyedmonkeys.com" target="_blank">Web Lic {{version}}</a></li>
 			</ul>
 		</nav>
 	</script>
