@@ -81,7 +81,7 @@ const contextMenu = {
 		}
 	],
 	pageNumber: [
-		{text: 'Change Page Number (NYI)', cb: () => {}}
+		{text: 'Change Page Number (NYI)', cb() {}}
 	],
 	step: [
 		{
@@ -286,11 +286,11 @@ const contextMenu = {
 		},
 		{
 			text: 'Rotate Tip...',
-			children: ['Up', 'Right', 'Down', 'Left'].map(direction => {
+			children: ['up', 'right', 'down', 'left'].map(direction => {
 				return {
-					text: direction,
-					shown: calloutTipRotationVisible(direction.toLowerCase()),
-					cb: rotateCalloutTip(direction.toLowerCase())
+					text: util.titleCase(direction),
+					shown: calloutTipRotationVisible(direction),
+					cb: rotateCalloutTip(direction)
 				};
 			})
 		}
@@ -298,27 +298,39 @@ const contextMenu = {
 	part: [
 		{
 			text: 'Displace Part...',
-			children: [
-				{text: 'Up', cb: displacePart('up')},
-				{text: 'Down', cb: displacePart('down')},
-				{text: 'Left', cb: displacePart('left')},
-				{text: 'Right', cb: displacePart('right')},
-				{text: 'Forward', cb: displacePart('forward')},
-				{text: 'Backward', cb: displacePart('backward')},
-				{
-					text: 'None',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-							const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-							if (step.displacedParts) {
-								return step.displacedParts.some(p => p.partID === app.selectedItemLookup.id);
-							}
-						}
-						return false;
-					},
-					cb: displacePart(null)
+			children: ['up', 'down', 'left', 'right', 'forward', 'backward', null].map(direction => {
+				return {
+					text: util.titleCase(direction || 'None'),
+					shown: showDisplacement(direction),
+					cb: displacePart(direction)
+				};
+			})
+		},
+		{
+			text: 'Adjust Displacement (NYI)',
+			shown() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
+					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+					if (step.displacedParts) {
+						return step.displacedParts.some(p => p.partID === app.selectedItemLookup.id);
+					}
 				}
-			]
+				return false;
+			},
+			cb() {}
+		},
+		{
+			text: 'Remove Displacement',
+			shown() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
+					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+					if (step.displacedParts) {
+						return step.displacedParts.some(p => p.partID === app.selectedItemLookup.id);
+					}
+				}
+				return false;
+			},
+			cb: displacePart(null)
 		},
 		{
 			text: 'Move Part to...',
@@ -338,7 +350,7 @@ const contextMenu = {
 						undoStack.commit(
 							'part.moveToStep',
 							{partID: app.selectedItemLookup.id, srcStep, destStep},
-							this.text
+							'Move Part to Previous Step'
 						);
 						app.redrawUI(true);
 					}
@@ -358,7 +370,7 @@ const contextMenu = {
 						undoStack.commit(
 							'part.moveToStep',
 							{partID: app.selectedItemLookup.id, srcStep, destStep},
-							this.text
+							'Move Part to Next Step'
 						);
 						app.redrawUI(true);
 					}
@@ -408,13 +420,32 @@ function rotateCalloutTip(direction) {
 	};
 }
 
+function showDisplacement(direction) {
+	return () => {
+		if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
+			const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+			if (step.displacedParts) {
+				if (direction == null) {
+					return step.displacedParts.some(p => p.partID === app.selectedItemLookup.id);
+				} else {
+					return step.displacedParts.every(p => {
+						return p.partID !== app.selectedItemLookup.id || p.direction !== direction;
+					});
+				}
+			}
+			return direction != null;
+		}
+		return false;
+	};
+}
+
 function displacePart(direction) {
 	return () => {
-		const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+		const step = {type: 'step', id: app.selectedItemLookup.stepID};
 		undoStack.commit(
 			'part.displace',
 			{partID: app.selectedItemLookup.id, step, direction},
-			`Dispalce Part ${util.prettyPrint(direction || 'None')}`
+			`Dispalce Part ${util.titleCase(direction || 'None')}`
 		);
 		app.redrawUI(true);
 	};

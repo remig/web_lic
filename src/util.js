@@ -37,6 +37,9 @@ const util = {
 				array.splice(idx, 1);
 			}
 		},
+		removeIndex(array, idx) {
+			array.splice(idx, 1);
+		},
 		eq(a, b) {
 			if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
 				return false;
@@ -257,6 +260,12 @@ const util = {
 		}
 		return t + 'ms';
 	},
+	titleCase(s) {
+		return s.replace(/([^\W_]+[^\s-]*) */g, function(el) {
+			// Use Title Case for generic strings
+			return el.charAt(0).toUpperCase() + el.substr(1).toLowerCase();
+		});
+	},
 	prettyPrint(s) {  // Human readable versions of common internal strings
 		s = s + '';
 		switch (s.toLowerCase()) {
@@ -276,10 +285,7 @@ const util = {
 		if (s.startsWith('ctrl+')) {
 			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();
 		}
-		return s.replace(/([^\W_]+[^\s-]*) */g, function(el) {
-			// Use Title Case for generic strings
-			return el.charAt(0).toUpperCase() + el.substr(1).toLowerCase();
-		});
+		return util.titleCase(s);
 	}
 };
 
