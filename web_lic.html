@@ -26,6 +26,7 @@
 	<script type="text/javascript" src="src/menu.js"></script>
 	<script type="text/javascript" src="src/contextMenu.js"></script>
 	<script type="text/javascript" src="src/tree.js"></script>
+	<script type="text/javascript" src="src/dialog.js"></script>
 </head>
 <body>
 	<div id="container">
@@ -38,24 +39,32 @@
 				</div>
 			</div>
 		</div>
+
 		<nav-menu :menu-entry-list="navBarContent" :filename="{name: filename, isDirty}" :version="version" :key="menuUpdateState"></nav-menu>
+
 		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
+
 			<div id="leftPane" class="split split-horizontal">
 				<div id="tree">
 					<tree :tree-data="treeData" :current-item="selectedItemLookup"></tree>
 				</div>
 			</div>
+
 			<div id="rightPane" class="split split-horizontal">
 				<div id="pageContainer" :style="{width: pageSize.width + 'px', height: pageSize.height + 'px'}">
 					<canvas id="pageCanvas" :width="pageSize.width" :height="pageSize.height"></canvas>
 					<div id="highlight" :style="highlightStyle"></div>
 				</div>
 			</div>
+
 		</div>
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
 		<div id="contextMenu" class="dropdown" tabindex="-1" @blur="closeContextMenu" @click="closeContextMenu">
-			<menu-list :menu-entries="contextMenu"></menu-list>
+			<menu-list :menu-entries="contextMenu" ref="contextMenuComponent"></menu-list>
 		</div>
+
+		<component :is="currentDialog" ref="currentDialog"></component>
+
 		<div id="statusBar">{{statusText}}</div>
 		<div id="offscreenCache" class="offscreen">
 			<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" @change="triggerOpenFile($event)" style="display: none;">
@@ -154,6 +163,50 @@
 				<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="page" />
 			</li>
 		</ul>
+	</script>
+
+	<script type="text/x-template" id="baseDialogTemplate">
+		<div id="dialogContainer" class="modal mini-modal" tabindex="-1" role="dialog" :style="{left: position.x + 'px', top: position.y + 'px'}">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<slot name="header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">{{title}}</h4>
+						</slot>
+					</div>
+					<div class="modal-body">
+						<slot name="body">Dialog Body</slot>
+					</div>
+					<div class="modal-footer">
+						<slot name="footer">
+							<slot name="buttons"></slot>
+							<button type="button" class="btn btn-default" data-dismiss="modal" v-on:click="cancel">{{cancelButtonText}}</button>
+							<button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="ok">{{okButtonText}}</button>
+						</slot>
+					</div>
+				</div>
+			</div>
+		</div>
+	</script>
+
+	<script type="text/x-template" id="partDisplacementDialogTemplate">
+		<baseDialog title="Displace Part" okButtonText="Apply">
+			<div slot="body">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<label  class="col-sm-3 control-label" for="inputPartDistance">Part Distance</label>
+						<div class="col-sm-2">
+							<input v-model.number="partDistance" v-on:input="updateValues" type="number" class="form-control" id="inputPartDistance"/>
+						</div>
+						<label  class="col-sm-3 control-label" for="inputArrowDistance">Arrow Distance</label>
+						<div class="col-sm-2">
+							<input v-model.number="arrowOffset" v-on:input="updateValues" type="number" class="form-control" id="inputArrowDistance"/>
+						</div>
+					</div>
+				</form>
+			</div>
+		</baseDialog>
 	</script>
 
 	<script type="text/javascript" src="src/ui.js"></script>

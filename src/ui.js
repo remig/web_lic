@@ -1,4 +1,4 @@
-/* global Vue: false, $: false, Split: false, UndoStack: false, LDParse: false, LDRender: false, util: false, store: false, Menu: false, ContextMenu: false */
+/* global Vue: false, Split: false, UndoStack: false, LDParse: false, LDRender: false, util: false, store: false, Menu: false, ContextMenu: false */
 
 // eslint-disable-next-line no-implicit-globals, no-undef
 app = (function() {
@@ -32,6 +32,7 @@ var app = new Vue({
 		busyText: '',
 		contextMenu: null,
 		filename: null,
+		currentDialog: null,
 		dirtyState: {
 			undoIndex: 0,
 			lastSaveIndex: 0
@@ -136,9 +137,6 @@ var app = new Vue({
 				return;
 			}
 			if (target.type === 'part') {
-				const step = store.get.step(target.stepID);
-				const part = LDParse.model.get.partFromID(target.id, store.model, step.submodel);
-				part.selected = true;
 				this.selectedItemLookup = target;
 				this.drawCurrentPage();
 			} else {
@@ -151,13 +149,11 @@ var app = new Vue({
 			}
 		},
 		clearSelected() {
-			if (this.selectedItemLookup && this.selectedItemLookup.type === 'part') {
-				const step = store.get.step(this.selectedItemLookup.stepID);
-				const part = LDParse.model.get.partFromID(this.selectedItemLookup.id, store.model, step.submodel);
-				delete part.selected;
+			const selItem = this.selectedItemLookup;
+			this.selectedItemLookup = null;
+			if (selItem && selItem.type === 'part') {
 				this.drawCurrentPage();
 			}
-			this.selectedItemLookup = null;
 		},
 		updateProgress: (() => {
 			let progress = 0, count = 0, text = '';
@@ -334,23 +330,21 @@ var app = new Vue({
 			}
 		},
 		rightClick(e) {
+			this.contextMenu = null;
 			if (this.selectedItemLookup != null) {
-				const menu = ContextMenu(this.selectedItemLookup.type, this, store, undoStack);
-				if (menu && menu.length) {
-					this.contextMenu = menu;
-					$('#contextMenu')  // TODO: Move this into a menu component method
-						.css({
-							'outline-style': 'none',
-							display: 'block',
-							left: e.pageX,
-							top: e.pageY
-						}).focus();
-				}
+				Vue.nextTick(() => {
+					// Delay menu creation so that earlier menu clear has time to take effect
+					// This is necessary as menu content may change without selected item changing
+					const menu = ContextMenu(this.selectedItemLookup.type, this, store, undoStack);
+					if (menu && menu.length) {
+						this.contextMenu = menu;
+						this.$refs.contextMenuComponent.show(e);
+					}
+				});
 			}
 		},
 		closeContextMenu() {
-			$('.dropdown-submenu.open').removeClass('open');
-			$('#contextMenu').css('display', 'none');
+			this.$refs.contextMenuComponent.hide();
 		},
 		globalKeyPress(e) {
 			this.closeContextMenu();
@@ -475,9 +469,11 @@ var app = new Vue({
 			ctx.translate(step.x, step.y);
 
 			if (step.csiID != null) {
+				const selItem = app.selectedItemLookup;
 				const csi = store.get.csi(step.csiID);
-				const partIsSelected = step.parts ? step.parts.some(i => localModel.parts[i].selected) : false;
-				const res = store.render[partIsSelected ? 'csiWithSelection' : 'csi'](localModel, step);
+				const selectedPartIDs = (selItem && selItem.type === 'part') ? [selItem.id] : null;
+				const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
+				const res = store.render[renderer](localModel, step, selectedPartIDs);
 				ctx.drawImage(res.container, csi.x - res.dx, csi.y - res.dy);  // TODO: profile performance if every x, y, w, h argument is passed in
 			}
 
@@ -647,7 +643,9 @@ Split(['#leftPane', '#rightPane'], {
 
 document.body.addEventListener('keyup', e => app.globalKeyPress(e));
 document.body.addEventListener('keydown', e => {
-	if (e.key === 'PageDown' || e.key === 'PageUp' || e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey)) {
+	if ((e.key === 'PageDown' || e.key === 'PageUp'
+		|| e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey))
+		&& e.target.nodeName !== 'INPUT') {
 		e.preventDefault();
 	}
 });

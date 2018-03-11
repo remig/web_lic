@@ -307,7 +307,7 @@ const contextMenu = {
 			})
 		},
 		{
-			text: 'Adjust Displacement (NYI)',
+			text: 'Adjust Displacement',
 			shown() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
 					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
@@ -317,19 +317,40 @@ const contextMenu = {
 				}
 				return false;
 			},
-			cb() {}
+			cb() {
+				const step = store.get.step(app.selectedItemLookup.stepID);
+				const displacement = step.displacedParts.find(p => p.partID === app.selectedItemLookup.id);
+				const originalDisplacement = util.clone(displacement);
+
+				app.currentDialog = 'partDisplacementDialog';
+				app.clearSelected();
+
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$on('ok', () => {
+						undoStack.commit( 'part.displace', {step, ...displacement}, 'Adjust Displaced Part');
+						app.redrawUI(true);
+					});
+					dialog.$on('cancel', () => {
+						displacement.distance = originalDisplacement.distance;
+						displacement.arrowOffset = originalDisplacement.arrowOffset;
+						app.redrawUI(true);
+					});
+					dialog.$on('update', (newValues) => {
+						displacement.distance = newValues.partDistance;
+						displacement.arrowOffset = newValues.arrowOffset;
+						app.redrawUI(true);
+					});
+					dialog.arrowOffset = displacement.arrowOffset;
+					dialog.partDistance = displacement.distance;
+					dialog.show({x: 400, y: 150});
+				});
+
+			}
 		},
 		{
 			text: 'Remove Displacement',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-					if (step.displacedParts) {
-						return step.displacedParts.some(p => p.partID === app.selectedItemLookup.id);
-					}
-				}
-				return false;
-			},
+			shown: showDisplacement(null),
 			cb: displacePart(null)
 		},
 		{
@@ -415,7 +436,7 @@ function rotateCalloutTip(direction) {
 		if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
 			const calloutArrow = store.get.calloutArrow(app.selectedItemLookup);
 			undoStack.commit('rotateCalloutArrowTip', {calloutArrow, direction}, 'Rotate Callout Arrow Tip');
-			app.redrawUI(true);
+			app.redrawUI();
 		}
 	};
 }
@@ -445,9 +466,9 @@ function displacePart(direction) {
 		undoStack.commit(
 			'part.displace',
 			{partID: app.selectedItemLookup.id, step, direction},
-			`Dispalce Part ${util.titleCase(direction || 'None')}`
+			`Displace Part ${util.titleCase(direction || 'None')}`
 		);
-		app.redrawUI(true);
+		app.redrawUI();
 	};
 }
 

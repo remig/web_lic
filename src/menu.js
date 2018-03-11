@@ -24,6 +24,19 @@ Vue.component('menu-list', {
 				return true;  // TODO: For now, all menu children defined by a function are forced visible
 			}
 			return child.children.some(el => el.shown ? el.shown() : true);
+		},
+		show(e) {
+			$('#contextMenu')
+				.css({
+					'outline-style': 'none',
+					display: 'block',
+					left: e.pageX,
+					top: e.pageY
+				}).focus();
+		},
+		hide() {
+			$('.dropdown-submenu.open').removeClass('open');
+			$('#contextMenu').css('display', 'none');
 		}
 	}
 });

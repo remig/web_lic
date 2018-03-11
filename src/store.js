@@ -45,7 +45,6 @@ const store = {
 		store.replaceState(content.state);
 	},
 	save(mode) {  // mode is either 'file' or 'localStorage'
-		store.model.parts.forEach(p => delete p.selected);
 		const content = JSON.stringify({
 			partDictionary: LDParse.partDictionary,
 			colorTable: LDParse.colorTable,
@@ -76,20 +75,26 @@ const store = {
 		// TODO: need to cache rendering results, and add back a 'forceRedraw' flag, because most renders
 		// are identical to the previous renders.
 		return {
-			csi(localModel, step) {
+			csi(localModel, step, selectedPartIDs) {
 				const container = getCanvas(`CSI_${step.csiID}`);
 				if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
 					LDRender.renderModel(localModel, container, 1000, {resizeContainer: true});
 				} else {
 					const partList = store.get.partList(step);
-					const config = {partList, resizeContainer: true, displacedParts: step.displacedParts};
+					const config = {
+						partList,
+						selectedPartIDs,
+						resizeContainer: true,
+						displacedParts: step.displacedParts
+					};
 					LDRender.renderModel(localModel, container, 1000, config);
 				}
 				return {width: container.width, height: container.height, dx: 0, dy: 0, container};
 			},
-			csiWithSelection(localModel, step) {
+			csiWithSelection(localModel, step, selectedPartIDs) {
 				const config = {
 					partList: store.get.partList(step),
+					selectedPartIDs,
 					resizeContainer: true,
 					displacedParts: step.displacedParts
 				};
@@ -347,18 +352,23 @@ const store = {
 			}
 		},
 		part: {
-			displace(opts) { // opts: {partID, step, direction}.  If direction == null, remove displacement
+			displace(opts) { // opts: {partID, step, direction, distance = 60, arrowOffset = 0}.  If direction == null, remove displacement
 				const step = store.get.lookupToItem(opts.step);
+				delete opts.step;
+				opts.distance = (opts.distance == null) ? 60 : opts.distance;
+				opts.arrowOffset = (opts.arrowOffset == null) ? 0 : opts.arrowOffset;
 				step.displacedParts = step.displacedParts || [];
 				const idx = step.displacedParts.findIndex(p => p.partID === opts.partID);
 				if (opts.direction) {
 					if (idx >= 0) {
 						step.displacedParts[idx].direction = opts.direction;
+						step.displacedParts[idx].distance = opts.distance;
+						step.displacedParts[idx].arrowOffset = opts.arrowOffset;
 					} else {
-						step.displacedParts.push({partID: opts.partID, direction: opts.direction});
+						step.displacedParts.push(opts);
 					}
 				} else if (idx >= 0) {
-					step.displacedParts.splice(idx, 1);
+					util.array.removeIndex(step.displacedParts, idx);
 				}
 				store.mutations.layoutPage({page: store.get.pageForItem(step)});
 			},
@@ -372,7 +382,7 @@ const store = {
 				destStep.parts.push(partID);
 				destStep.parts.sort(util.sort.numeric.ascending);
 
-				if (srcStep.pliID != null) {
+				if (srcStep.pliID != null && destStep.pliID != null) {
 					const destPLI = store.get.pli(destStep.pliID);
 					const pli = store.get.pli(srcStep.pliID);
 					const pliItems = pli.pliItems.map(i => store.get.pliItem(i));

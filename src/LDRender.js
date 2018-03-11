@@ -403,8 +403,9 @@ function lineSide(p, l1, l2) {
 	return (res > 0) ? 1 : -1;
 }
 
-function getPartDisplacement(direction, dt = 80) {
-	switch (direction) {
+function getPartDisplacement(displacement) {
+	const dt = displacement.distance || 60;
+	switch (displacement.direction) {
 		case 'left':
 			return {x: -dt, y: 0, z: 0};
 		case 'right':
@@ -421,7 +422,7 @@ function getPartDisplacement(direction, dt = 80) {
 	}
 }
 
-function positionArrow(arrowMesh, partMesh, partMatrix, direction) {
+function positionArrow(arrowMesh, partMesh, partMatrix, direction, offset) {
 
 	const arrowMatrix = LDMatrixToMatrix(partMatrix);
 	arrowMatrix.extractRotation(new THREE.Matrix4());
@@ -447,7 +448,7 @@ function positionArrow(arrowMesh, partMesh, partMatrix, direction) {
 			break;
 		case 'up':
 		default:
-			dy = partBox.max.y - partBox.min.y - 7;
+			dy = partBox.max.y - partBox.min.y - 7 - offset;
 			break;
 	}
 
@@ -484,9 +485,12 @@ function rotateArrow(arrowMesh, direction) {
 	}
 }
 
-function getArrowMesh(partMesh, partMatrix, direction) {
-	const arrowMesh = new THREE.Mesh(getArrowGeometry(60), arrowMaterial);
-	positionArrow(arrowMesh, partMesh, partMatrix, direction);
+function getArrowMesh(partMesh, partMatrix, displacement) {
+	const direction = displacement.direction;
+	const offset = displacement.arrowOffset || 0;
+	const length = (displacement.distance || 60) - offset - 25;
+	const arrowMesh = new THREE.Mesh(getArrowGeometry(length), arrowMaterial);
+	positionArrow(arrowMesh, partMesh, partMatrix, direction, offset);
 	rotateArrow(arrowMesh, direction);
 	return arrowMesh;
 }
@@ -494,23 +498,24 @@ function getArrowMesh(partMesh, partMatrix, direction) {
 function addModelToScene(scene, model, partIDList, config) {
 
 	const size = config.size / 2;
+	const selectedPartIDs = config.selectedPartIDs || [];
 	const displacedParts = {};
 	(config.displacedParts || []).forEach(p => {
-		displacedParts[p.partID] = p.direction;
+		displacedParts[p.partID] = p;
 	});
 
 	for (let i = 0; i < partIDList.length; i++) {
 		const part = model.parts[partIDList[i]];
 		const abstractPart = api.partDictionary[part.filename];
-		const drawSelected = config.includeSelection && part.selected;
-		const displacementDirection = displacedParts[partIDList[i]];
+		const drawSelected = config.includeSelection && selectedPartIDs.includes(partIDList[i]);
+		const displacement = displacedParts[partIDList[i]];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
 		const color = (part.colorCode >= 0) ? part.colorCode : null;
 		const partGeometry = getPartGeometry(abstractPart, color);
 
-		if (displacementDirection) {
-			const {x, y, z} = getPartDisplacement(displacementDirection);
+		if (displacement) {
+			const {x, y, z} = getPartDisplacement(displacement);
 			matrix.multiply(new THREE.Matrix4().makeTranslation(x, y, z));
 		}
 
@@ -523,8 +528,8 @@ function addModelToScene(scene, model, partIDList, config) {
 		line.applyMatrix(matrix);
 		scene.add(line);
 
-		if (displacementDirection) {
-			scene.add(getArrowMesh(mesh, part.matrix, displacementDirection));
+		if (displacement) {
+			scene.add(getArrowMesh(mesh, part.matrix, displacement));
 		}
 
 		if (drawSelected) {

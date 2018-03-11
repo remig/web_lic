@@ -80,6 +80,16 @@ div#container {
 	transition: none;
 }
 
+.mini-modal > .modal-dialog {
+	margin: 0;
+}
+
+/*
+.modal-backdrop.in {
+	opacity: 0;
+}
+*/
+
 /* Splitter stuff */
 .gutter.gutter-horizontal {
 	cursor: ew-resize;
