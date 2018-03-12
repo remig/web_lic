@@ -73,7 +73,7 @@ const contextMenu = {
 			cb() {
 				const page = store.get.lookupToItem(app.selectedItemLookup);
 				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
-				undoStack.commit('deletePage', page, 'Delete Page');
+				undoStack.commit('deletePage', {page}, 'Delete Page');
 				Vue.nextTick(() => {
 					app.setCurrentPage(nextPage);
 				});

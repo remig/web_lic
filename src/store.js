@@ -315,11 +315,12 @@ const store = {
 	},
 	mutations: {
 		item: {
-			add(opts) {  // opts: {item, parent, insertionIndex = -1}
-				const {item, parent} = opts;
+			add(opts) {  // opts: {itemJSON, parent, insertionIndex = -1}
+				const item = opts.item;
 				item.id = store.get.nextItemID(item);
 				store.state[item.type + 's'].push(item);
-				if (parent) {
+				if (opts.parent) {
+					const parent = store.get.lookupToItem(opts.parent);
 					item.parent = {type: parent.type, id: parent.id};
 					if (parent.hasOwnProperty(item.type + 's')) {
 						util.array.insert(parent[item.type + 's'], item.id, opts.insertionIndex);
@@ -334,6 +335,16 @@ const store = {
 			delete(opts) {  // opts: {item}
 				const item = store.get.lookupToItem(opts.item);
 				util.array.remove(store.state[item.type + 's'], item);
+				if (item.parent) {
+					const parent = store.get.lookupToItem(item.parent);
+					if (parent.hasOwnProperty(item.type + 's')) {
+						util.array.remove(parent[item.type + 's'], item.id);
+					} else if (parent.hasOwnProperty(item.type + 'ID')) {
+						parent[item.type + 'ID'] = null;
+					} else if (parent.hasOwnProperty('numberLabel') && item.type.endsWith('Number')) {
+						parent.numberLabel = null;
+					}
+				}
 			},
 			reparent(opts) {  // opts: {item, newParent, insertionIndex = -1}
 				const item = store.get.lookupToItem(opts.item);
@@ -393,9 +404,7 @@ const store = {
 						if (target) {
 							target.quantity++;
 							target.partNumbers.push(partID);
-							util.array.remove(pli.pliItems, pliItem.id);
-							store.mutations.item.delete({item: store.get.pliQty(pliItem.pliQtyID)});
-							store.mutations.item.delete({item: pliItem});
+							store.mutations.deletePLIItem({pliItem});
 						} else {
 							store.mutations.item.reparent({item: pliItem, newParent: destPLI});
 						}
@@ -494,10 +503,12 @@ const store = {
 				return;
 			}
 			destStep.parts = destStep.parts.concat(sourceStep.parts);
+			sourceStep.parts = [];
 			destStep.parts.sort(util.sort.numeric.ascending);
 			const sourcePLI = store.get.pli(sourceStep.pliID);
 			const destPLI = store.get.pli(destStep.pliID);
 			if (sourcePLI && destPLI) {
+				// TODO: this doesn't correctly merge two steps with PLIs that have matching parts
 				sourcePLI.pliItems.forEach(id => {
 					store.get.pliItem(id).parent.id = destPLI.id;
 				});
@@ -505,7 +516,7 @@ const store = {
 			}
 			const sourcePage = store.get.pageForItem(sourceStep);
 			const destPage = store.get.pageForItem(destStep);
-			store.mutations.deleteStep(sourceStep);
+			store.mutations.deleteStep({step: sourceStep});
 			store.mutations.layoutPage({page: sourcePage});
 			if (sourcePage.id !== destPage.id) {
 				store.mutations.layoutPage({page: destPage});
@@ -572,20 +583,22 @@ const store = {
 
 			util.array.insert(store.state.pages, page, store.state.pages.indexOf(prevPage) + 1);
 		},
-		deletePage(page) {
-			page = store.get.lookupToItem(page);
-			if (!page.steps.length) {  // Don't delete pages that still have steps
-				if (page.numberLabel != null) {
-					store.mutations.item.delete({item: store.get.pageNumber(page.numberLabel)});
-				}
-				store.mutations.item.delete({item: page});
-				store.mutations.renumberPages();
+		deletePage(opts) {  // opts: {page}
+			const page = store.get.lookupToItem(opts.page);
+			if (page.steps && page.steps.length) {
+				throw 'Cannot delete a page with steps';
 			}
+			if (page.numberLabel != null) {
+				store.mutations.item.delete({item: store.get.pageNumber(page.numberLabel)});
+			}
+			store.mutations.item.delete({item: page});
+			store.mutations.renumberPages();
 		},
-		deleteStep(step) {
-			step = store.get.lookupToItem(step);
-			const page = store.get.pageForItem(step);
-			util.array.remove(page.steps, step.id);
+		deleteStep(opts) { // opts: {step}
+			const step = store.get.lookupToItem(opts.step);
+			if (step.parts && step.parts.length) {
+				throw 'Cannot delete a step with parts';
+			}
 			if (step.numberLabel != null) {
 				store.mutations.item.delete({item: store.get.stepNumber(step.numberLabel)});
 			}
@@ -593,7 +606,7 @@ const store = {
 				store.mutations.item.delete({item: store.get.csi(step.csiID)});
 			}
 			if (step.pliID != null) {
-				store.mutations.deletePLI(store.get.pli(step.pliID));
+				store.mutations.deletePLI({pli: store.get.pli(step.pliID), deleteItems: true});
 			}
 			store.mutations.item.delete({item: step});
 			store.mutations.renumberSteps();
@@ -604,11 +617,20 @@ const store = {
 				p.needsLayout = true;
 			});
 		},
-		deletePLI(pli) {
-			pli = store.get.lookupToItem(pli);
-			if (!pli.pliItems.length) {
-				store.mutations.item.delete({item: pli});  // Don't delete plis that still have parts
+		deletePLI(opts) {  // opts: {pli, deleteItem: false}
+			const pli = store.get.lookupToItem(opts.pli);
+			if (!opts.deleteItems && pli.pliItems && pli.pliItems.length) {
+				throw 'Cannot delete a PLI with items';
 			}
+			pli.pliItems.forEach(pliItemID => {
+				store.mutations.deletePLIItem({item: {type: 'pliItem', id: pliItemID}});
+			});
+			store.mutations.item.delete({item: pli});
+		},
+		deletePLIItem(opts) {  // opts: {pliItem}
+			const pliItem = store.get.lookupToItem(opts.pliItem);
+			store.mutations.item.delete({item: {type: 'pliQty', id: pliItem.pliQtyID}});
+			store.mutations.item.delete({item: pliItem});
 		},
 		renumber(type) {
 			let prevNumber;
@@ -683,17 +705,14 @@ const store = {
 			}, parent: page});
 		},
 		removeTitlePage() {
-			// TODO: handle this via store.mutations.deletePage
 			const page = store.get.titlePage();
 			if (page == null) {
 				return;
 			}
-			if (page.labels) {
-				page.labels.forEach(id => store.mutations.item.delete({item: {type: 'label', id}}));
-			}
-			if (page.steps) {
-				page.steps.forEach(id => store.mutations.deleteStep({type: 'step', id}));
-			}
+			const labels = util.clone(page.labels || []);  // clone because item.delete will modify this list
+			labels.forEach(id => store.mutations.item.delete({item: {type: 'label', id}}));
+			const steps = util.clone(page.steps || []);
+			steps.forEach(id => store.mutations.deleteStep({step: {type: 'step', id}}));
 			store.state.titlePage = null;
 		},
 		addInitialPages(partDictionary, localModelIDList = []) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
