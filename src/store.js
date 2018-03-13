@@ -436,7 +436,7 @@ const store = {
 				const callout = store.get.lookupToItem(opts.callout);
 				let destCalloutStep;
 				if (util.isEmpty(callout.steps)) {
-					destCalloutStep = store.mutations.insertStep({dest: callout});
+					destCalloutStep = store.mutations.step.add({dest: callout});
 				} else {
 					destCalloutStep = store.get.step(callout.steps[callout.steps.length - 1]);
 				}
@@ -445,99 +445,125 @@ const store = {
 			}
 		},
 		// TODO: add store.mutations.foo.create() to wrap all item.add({junk}) logic
-		insertStep(opts) {  // opts: {dest, doLayout = false, stepNumber = null, insertionIndex = -1}
-			const dest = store.get.lookupToItem(opts.dest);
-			const step = store.mutations.item.add({item: {
-				type: 'step',
-				number: opts.stepNumber, numberLabel: null,
-				parts: [], callouts: [], submodel: [],
-				csiID: null, pliID: null,
-				x: null, y: null, width: null, height: null
-			}, parent: dest, insertionIndex: opts.insertionIndex});
-			store.mutations.item.add({item: {
-				type: 'csi',
-				x: null, y: null, width: null, height: null
-			}, parent: step});
-			if (opts.stepNumber != null) {
+		step: {
+			add(opts) {  // opts: {dest, doLayout = false, stepNumber = null, insertionIndex = -1}
+				const dest = store.get.lookupToItem(opts.dest);
+				const step = store.mutations.item.add({item: {
+					type: 'step',
+					number: opts.stepNumber, numberLabel: null,
+					parts: [], callouts: [], submodel: [],
+					csiID: null, pliID: null,
+					x: null, y: null, width: null, height: null
+				}, parent: dest, insertionIndex: opts.insertionIndex});
 				store.mutations.item.add({item: {
-					type: 'stepNumber',
+					type: 'csi',
 					x: null, y: null, width: null, height: null
 				}, parent: step});
-			}
-			if (opts.doLayout) {
-				store.mutations.layoutPage({page: store.get.pageForItem(dest)});
-			}
-			return step;
-		},
-		moveStepToPage(opts) {  // opts: {step, destPage, insertionIndex = 0}
-			const step = store.get.lookupToItem(opts.step);
-			const currentPage = store.get.parent(step);
-			const destPage = store.get.lookupToItem(opts.destPage);
-			store.mutations.item.reparent({
-				item: step,
-				newParent: destPage,
-				insertionIndex: opts.insertionIndex || 0
-			});
-			store.mutations.layoutPage({page: currentPage});
-			store.mutations.layoutPage({page: destPage});
-		},
-		moveStepToPreviousPage(step) {
-			step = store.get.lookupToItem(step);
-			const destPage = store.get.prevPage(step.parent, false);
-			if (destPage) {
-				const insertionIndex = destPage.steps.length;
-				store.mutations.moveStepToPage({step, destPage, insertionIndex});
-			}
-		},
-		moveStepToNextPage(step) {
-			step = store.get.lookupToItem(step);
-			const destPage = store.get.nextPage(step.parent);
-			if (destPage) {
-				store.mutations.moveStepToPage({step, destPage, insertionIndex: 0});
-			}
-		},
-		mergeSteps(opts) {  // opts: {sourceStepID, destStepID}
-			const sourceStep = store.get.step(opts.sourceStepID);
-			const destStep = store.get.step(opts.destStepID);
-			if (!sourceStep || !destStep) {
-				return;
-			}
-			destStep.parts = destStep.parts.concat(sourceStep.parts);
-			sourceStep.parts = [];
-			destStep.parts.sort(util.sort.numeric.ascending);
-			const sourcePLI = store.get.pli(sourceStep.pliID);
-			const destPLI = store.get.pli(destStep.pliID);
-			if (sourcePLI && destPLI) {
-				// TODO: this doesn't correctly merge two steps with PLIs that have matching parts
-				sourcePLI.pliItems.forEach(id => {
-					store.get.pliItem(id).parent.id = destPLI.id;
+				if (opts.stepNumber != null) {
+					store.mutations.item.add({item: {
+						type: 'stepNumber',
+						x: null, y: null, width: null, height: null
+					}, parent: step});
+				}
+				if (opts.doLayout) {
+					store.mutations.layoutPage({page: store.get.pageForItem(dest)});
+				}
+				return step;
+			},
+			delete(opts) { // opts: {step}
+				const step = store.get.lookupToItem(opts.step);
+				if (step.parts && step.parts.length) {
+					throw 'Cannot delete a step with parts';
+				}
+				if (step.numberLabel != null) {
+					store.mutations.item.delete({item: store.get.stepNumber(step.numberLabel)});
+				}
+				if (step.csiID != null) {
+					store.mutations.item.delete({item: store.get.csi(step.csiID)});
+				}
+				if (step.pliID != null) {
+					store.mutations.deletePLI({pli: store.get.pli(step.pliID), deleteItems: true});
+				}
+				store.mutations.item.delete({item: step});
+				store.mutations.step.renumber();
+			},
+			renumber() {
+				store.mutations.renumber('step');
+			},
+			layout(opts) {  // opts: {step, box}
+				const step = store.get.lookupToItem(opts.step);
+				Layout.step.outsideIn(step, opts.box);
+			},
+			moveToPage(opts) {  // opts: {step, destPage, insertionIndex = 0}
+				const step = store.get.lookupToItem(opts.step);
+				const currentPage = store.get.parent(step);
+				const destPage = store.get.lookupToItem(opts.destPage);
+				store.mutations.item.reparent({
+					item: step,
+					newParent: destPage,
+					insertionIndex: opts.insertionIndex || 0
 				});
-				destPLI.pliItems = destPLI.pliItems.concat(sourcePLI.pliItems);
-			}
-			const sourcePage = store.get.pageForItem(sourceStep);
-			const destPage = store.get.pageForItem(destStep);
-			store.mutations.deleteStep({step: sourceStep});
-			store.mutations.layoutPage({page: sourcePage});
-			if (sourcePage.id !== destPage.id) {
+				store.mutations.layoutPage({page: currentPage});
 				store.mutations.layoutPage({page: destPage});
+			},
+			moveToPreviousPage(opts) {  // opts: {step}
+				const step = store.get.lookupToItem(opts.step);
+				const destPage = store.get.prevPage(step.parent, false);
+				if (destPage) {
+					const insertionIndex = destPage.steps.length;
+					store.mutations.step.moveToPage({step, destPage, insertionIndex});
+				}
+			},
+			moveToNextPage(opts) {  // opts: {step}
+				const step = store.get.lookupToItem(opts.step);
+				const destPage = store.get.nextPage(step.parent);
+				if (destPage) {
+					store.mutations.step.moveToPage({step, destPage, insertionIndex: 0});
+				}
+			},
+			mergeWithStep(opts) {  // opts: {sourceStep, destStep}
+				const sourceStep = store.get.lookupToItem(opts.sourceStep);
+				const destStep = store.get.lookupToItem(opts.destStep);
+				if (!sourceStep || !destStep) {
+					return;
+				}
+				destStep.parts = destStep.parts.concat(sourceStep.parts);
+				sourceStep.parts = [];
+				destStep.parts.sort(util.sort.numeric.ascending);
+				const sourcePLI = store.get.pli(sourceStep.pliID);
+				const destPLI = store.get.pli(destStep.pliID);
+				if (sourcePLI && destPLI) {
+					// TODO: this doesn't correctly merge two steps with PLIs that have matching parts
+					sourcePLI.pliItems.forEach(id => {
+						store.get.pliItem(id).parent.id = destPLI.id;
+					});
+					destPLI.pliItems = destPLI.pliItems.concat(sourcePLI.pliItems);
+				}
+				const sourcePage = store.get.pageForItem(sourceStep);
+				const destPage = store.get.pageForItem(destStep);
+				store.mutations.step.delete({step: sourceStep});
+				store.mutations.layoutPage({page: sourcePage});
+				if (sourcePage.id !== destPage.id) {
+					store.mutations.layoutPage({page: destPage});
+				}
+			},
+			addCallout(opts) {  // opts: {step}
+				const step = store.get.lookupToItem(opts.step);
+				step.callouts = step.callouts || [];
+				store.mutations.item.add({item: {
+					type: 'callout',
+					x: null, y: null, width: null, height: null,
+					steps: [], calloutArrows: [],
+					layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
+					id: store.get.nextItemID('callout')
+				}, parent: step});
+				store.mutations.layoutPage({page: store.get.pageForItem(step)});
 			}
-		},
-		addCalloutToStep(opts) {  // opts: {step}
-			const step = store.get.lookupToItem(opts.step);
-			step.callouts = step.callouts || [];
-			store.mutations.item.add({item: {
-				type: 'callout',
-				x: null, y: null, width: null, height: null,
-				steps: [], calloutArrows: [],
-				layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
-				id: store.get.nextItemID('callout')
-			}, parent: step});
-			store.mutations.layoutPage({page: store.get.pageForItem(step)});
 		},
 		addStepToCallout(opts) {  // opts: {callout, doLayout = false}
 			const callout = store.get.lookupToItem(opts.callout);
 			const stepNumber = callout.steps.length > 0 ? callout.steps.length + 1 : null;
-			store.mutations.insertStep({dest: callout, stepNumber});
+			store.mutations.step.add({dest: callout, stepNumber});
 			if (stepNumber === 2) {  // Special case: callouts with one step have no step numbers; turn on step numbers when adding a 2nd step
 				const firstStep = store.get.step(callout.steps[0]);
 				firstStep.number = 1;
@@ -594,23 +620,6 @@ const store = {
 			store.mutations.item.delete({item: page});
 			store.mutations.renumberPages();
 		},
-		deleteStep(opts) { // opts: {step}
-			const step = store.get.lookupToItem(opts.step);
-			if (step.parts && step.parts.length) {
-				throw 'Cannot delete a step with parts';
-			}
-			if (step.numberLabel != null) {
-				store.mutations.item.delete({item: store.get.stepNumber(step.numberLabel)});
-			}
-			if (step.csiID != null) {
-				store.mutations.item.delete({item: store.get.csi(step.csiID)});
-			}
-			if (step.pliID != null) {
-				store.mutations.deletePLI({pli: store.get.pli(step.pliID), deleteItems: true});
-			}
-			store.mutations.item.delete({item: step});
-			store.mutations.renumberSteps();
-		},
 		togglePLIs(opts) {  // opts: {visible}
 			store.state.plisVisible = opts.visible;
 			store.state.pages.forEach(p => {
@@ -623,7 +632,7 @@ const store = {
 				throw 'Cannot delete a PLI with items';
 			}
 			pli.pliItems.forEach(pliItemID => {
-				store.mutations.deletePLIItem({item: {type: 'pliItem', id: pliItemID}});
+				store.mutations.deletePLIItem({pliItem: {type: 'pliItem', id: pliItemID}});
 			});
 			store.mutations.item.delete({item: pli});
 		},
@@ -645,17 +654,10 @@ const store = {
 				}
 			});
 		},
-		renumberSteps() {
-			store.mutations.renumber('step');
-		},
 		renumberPages() {
 			store.mutations.renumber('page');
 		},
 		setNumber() {  // opts: {target, number} NYI
-		},
-		layoutStep(opts) {  // opts: {step, box}
-			const step = store.get.lookupToItem(opts.step);
-			Layout.step.outsideIn(step, opts.box);
 		},
 		layoutPage(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
 			const page = store.get.lookupToItem(opts.page);
@@ -712,7 +714,7 @@ const store = {
 			const labels = util.clone(page.labels || []);  // clone because item.delete will modify this list
 			labels.forEach(id => store.mutations.item.delete({item: {type: 'label', id}}));
 			const steps = util.clone(page.steps || []);
-			steps.forEach(id => store.mutations.deleteStep({step: {type: 'step', id}}));
+			steps.forEach(id => store.mutations.step.delete({step: {type: 'step', id}}));
 			store.state.titlePage = null;
 		},
 		addInitialPages(partDictionary, localModelIDList = []) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree

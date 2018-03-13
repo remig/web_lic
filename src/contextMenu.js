@@ -87,7 +87,7 @@ const contextMenu = {
 		{
 			text: 'Add Callout',
 			cb() {
-				undoStack.commit('addCalloutToStep', {step: app.selectedItemLookup}, this.text);
+				undoStack.commit('step.addCallout', {step: app.selectedItemLookup}, this.text);
 				app.redrawUI(true);
 			}
 		},
@@ -123,7 +123,7 @@ const contextMenu = {
 						return false;
 					},
 					cb() {
-						undoStack.commit('moveStepToPreviousPage', app.selectedItemLookup, this.text);
+						undoStack.commit('step.moveToPreviousPage', {step: app.selectedItemLookup}, this.text);
 						app.redrawUI(true);
 					}
 				},
@@ -142,7 +142,7 @@ const contextMenu = {
 						return false;
 					},
 					cb() {
-						undoStack.commit('moveStepToNextPage', app.selectedItemLookup, this.text);
+						undoStack.commit('step.moveToNextPage', {step: app.selectedItemLookup}, this.text);
 						app.redrawUI(true);
 					}
 				}
@@ -160,9 +160,9 @@ const contextMenu = {
 						return false;
 					},
 					cb() {
-						const sourceStepID = app.selectedItemLookup.id;
-						const destStepID = store.get.prevStep(app.selectedItemLookup).id;
-						undoStack.commit('mergeSteps', {sourceStepID, destStepID}, this.text);
+						const sourceStep = app.selectedItemLookup;
+						const destStep = store.get.prevStep(app.selectedItemLookup);
+						undoStack.commit('step.mergeWithStep', {sourceStep, destStep}, this.text);
 						app.redrawUI(true);
 					}
 				},
@@ -175,13 +175,26 @@ const contextMenu = {
 						return false;
 					},
 					cb() {
-						const sourceStepID = app.selectedItemLookup.id;
-						const destStepID = store.get.nextStep(app.selectedItemLookup).id;
-						undoStack.commit('mergeSteps', {sourceStepID, destStepID}, this.text);
+						const sourceStep = app.selectedItemLookup;
+						const destStep = store.get.nextStep(app.selectedItemLookup);
+						undoStack.commit('step.mergeWithStep', {sourceStep, destStep}, this.text);
 						app.redrawUI(true);
 					}
 				}
 			]
+		},
+		{
+			text: 'Delete Empty Step',
+			shown() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
+					return util.isEmpty(store.get.step(app.selectedItemLookup).parts);
+				}
+				return false;
+			},
+			cb() {
+				undoStack.commit('step.delete', {step: app.selectedItemLookup}, this.text);
+				app.redrawUI(true);
+			}
 		}
 	],
 	stepNumber: [

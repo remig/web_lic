@@ -77,11 +77,10 @@ describe('Test state store module', function() {
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
-			'item', 'part', 'insertStep',
-			'moveStepToPage', 'moveStepToPreviousPage', 'moveStepToNextPage', 'mergeSteps', 'addCalloutToStep',
+			'item', 'part', 'step',
 			'addStepToCallout', 'addPointToCalloutArrow', 'rotateCalloutArrowTip',
-			'appendPage', 'deletePage', 'deleteStep', 'togglePLIs', 'deletePLI', 'deletePLIItem', 'renumber',
-			'renumberSteps', 'renumberPages', 'setNumber', 'layoutStep', 'layoutPage', 'layoutTitlePage',
+			'appendPage', 'deletePage', 'togglePLIs', 'deletePLI', 'deletePLIItem', 'renumber',
+			'renumberPages', 'setNumber', 'layoutPage', 'layoutTitlePage',
 			'addTitlePage', 'removeTitlePage', 'addInitialPages'
 		]);
 		assert.hasAllKeys(store.mutations.item, [
@@ -89,6 +88,10 @@ describe('Test state store module', function() {
 		]);
 		assert.hasAllKeys(store.mutations.part, [
 			'displace', 'moveToStep', 'addToCallout'
+		]);
+		assert.hasAllKeys(store.mutations.step, [
+			'add', 'delete', 'renumber', 'layout', 'moveToPage', 'moveToPreviousPage', 'moveToNextPage',
+			'mergeWithStep', 'addCallout'
 		]);
 	});
 
@@ -360,7 +363,7 @@ describe('Test state store module', function() {
 			const step = {type: 'step', id: 2};
 			assert.equal(store.get.parent(step).id, 1);
 			assert.equal(store.get.lookupToItem(step).id, 2);
-			store.mutations.moveStepToPreviousPage(step);
+			store.mutations.step.moveToPreviousPage({step});
 			assert.equal(store.state.steps[2].parent.id, 0);
 			assert.deepEqual(store.get.step(step).parent, {type: 'page', id: 0});
 			assert.deepEqual(store.state.pages[0].steps, [1, 2]);
@@ -369,20 +372,20 @@ describe('Test state store module', function() {
 
 		it('Move Step back to next page', () => {
 			const step = {type: 'step', id: 2};
-			store.mutations.moveStepToNextPage(step);
+			store.mutations.step.moveToNextPage({step});
 			assert.deepEqual(store.state.pages[0].steps, [1]);
 			assert.deepEqual(store.state.pages[1].steps, [2]);
 			assert.equal(store.state.steps[2].parent.id, 1);
 		});
 
 		it('Should not move first step to previous page', () => {
-			store.mutations.moveStepToPreviousPage({type: 'step', id: 1});
+			store.mutations.step.moveToPreviousPage({step: {type: 'step', id: 1}});
 			assert.equal(store.state.steps[1].parent.id, 0);
 			assert.equal(store.state.pages[0].steps[0], 1);
 		});
 
 		it('Should not move last step anywhere', () => {
-			store.mutations.moveStepToNextPage({type: 'step', id: 3});
+			store.mutations.step.moveToNextPage({step: {type: 'step', id: 3}});
 			assert.equal(store.state.steps[3].parent.id, 2);
 			assert.equal(store.state.pages[2].steps[0], 3);
 		});
@@ -402,7 +405,7 @@ describe('Test state store module', function() {
 		});
 
 		it('Delete empty page', () => {
-			store.mutations.moveStepToPreviousPage({type: 'step', id: 2});
+			store.mutations.step.moveToPreviousPage({step: {type: 'step', id: 2}});
 			assert.equal(store.state.pages[0].steps.length, 2);
 			assert.isEmpty(store.state.pages[1].steps);
 			assert.equal(store.state.steps[2].parent.id, 0);
@@ -415,12 +418,10 @@ describe('Test state store module', function() {
 			assert.equal(store.get.numberLabel(store.state.pages[1]), store.state.pageNumbers[1]);
 		});
 
-		it.skip('Delete another page', () => {
-			store.mutations.deletePage({page: {type: 'page', id: 2}});  // TODO: can't delete a page with steps yet
-			assert.equal(store.state.pages[1].steps.length, 1);
-			store.mutations.moveStepToPreviousPage({type: 'step', id: 3});
-			assert.equal(store.state.pages[1].steps.length, 0);
+		it('Delete another page', () => {
+			store.mutations.step.moveToPreviousPage({step: {type: 'step', id: 3}});
 			store.mutations.deletePage({page: {type: 'page', id: 2}});
+			assert.equal(store.state.pages[0].steps.length, 3);
 			assert.equal(store.state.pages.length, 1);
 			assert.isFalse(store.get.isLastPage({type: 'titlePage', id: 0}));
 			assert.equal(store.get.numberLabel(store.state.pages[0]), store.state.pageNumbers[0]);
@@ -428,6 +429,6 @@ describe('Test state store module', function() {
 	});
 
 	it('Move all steps to 1 page', () => {
-//		store.mutations.moveStepToPreviousPage({type: 'step', id: 3});
+//		store.mutations.step.moveToPreviousPage({step: {type: 'step', id: 3}});
 	});
 });

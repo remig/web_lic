@@ -199,7 +199,7 @@ const Layout = {
 				box.x = colSize * (i % cols);
 				box.y = rowSize * Math.floor(i / cols);
 			}
-			store.mutations.layoutStep({step: store.get.step(page.steps[i]), box});
+			store.mutations.step.layout({step: store.get.step(page.steps[i]), box});
 		}
 
 		if (page.numberLabel != null) {
@@ -218,7 +218,7 @@ const Layout = {
 		const step = store.get.step(page.steps[0]);
 		const csi = store.get.csi(step.csiID);
 		const box = {x: 0, y: 0, width: pageSize.width, height: pageSize.height};
-		store.mutations.layoutStep({step, box});
+		store.mutations.step.layout({step, box});
 		step.width = csi.width + 40;
 		step.height = csi.height + 40;
 		step.x = Math.floor((pageSize.width - step.width) / 2);
