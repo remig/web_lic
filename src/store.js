@@ -81,6 +81,9 @@ const store = {
 					LDRender.renderModel(localModel, container, 1000, {resizeContainer: true});
 				} else {
 					const partList = store.get.partList(step);
+					if (util.isEmpty(partList)) {
+						return null;
+					}
 					const config = {
 						partList,
 						selectedPartIDs,
@@ -92,7 +95,6 @@ const store = {
 				return {width: container.width, height: container.height, dx: 0, dy: 0, container};
 			},
 			csiWithSelection(localModel, step, selectedPartIDs) {
-				// TODO: when selecting a part inside a callout, the matching part in the main model also draws as selected
 				const config = {
 					partList: store.get.partList(step),
 					selectedPartIDs,
@@ -455,7 +457,6 @@ const store = {
 				store.mutations.layoutPage({page: step.parent});
 			},
 			removeFromCallout(opts) {  // opts: {partID, step}
-				// TODO: when removing the last part in a callout step, step doesn't redraw as empty
 				const step = store.get.lookupToItem(opts.step);
 				util.array.remove(step.parts, opts.partID);
 				store.mutations.layoutPage({page: store.get.pageForItem(step)});

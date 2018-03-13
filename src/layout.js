@@ -8,6 +8,7 @@ Layout = (function() {
 const pageMargin = 20;
 const pliMargin = Math.floor(pageMargin / 1.2);
 const calloutMargin = Math.floor(pliMargin / 2);
+const emptyCalloutSize = 50;
 
 const Layout = {
 
@@ -16,7 +17,7 @@ const Layout = {
 		const csi = store.get.csi(step.csiID);
 
 		if (util.isEmpty(callout.steps)) {
-			callout.width = callout.height = 50;
+			callout.width = callout.height = emptyCalloutSize;
 		} else {
 			let totalHeight = 0, maxWidth = 0;
 			callout.height = 0;
@@ -111,7 +112,7 @@ const Layout = {
 			step.height = box.height - pageMargin - pageMargin;
 
 			if (step.csiID != null) {
-				const csiSize = store.render.csi(localModel, step);
+				const csiSize = store.render.csi(localModel, step) || {width: 0, height: 0};
 				const csi = store.get.csi(step.csiID);
 				csi.x = Math.floor((step.width - csiSize.width) / 2);
 				csi.y = Math.floor((step.height - csiSize.height) / 2);
@@ -154,7 +155,8 @@ const Layout = {
 
 			// TODO: move all Math.floor rounding to the last possible moment: when drawing the CSI / PLI on the page
 			if (step.csiID != null) {
-				const csiSize = store.render.csi(localModel, step);
+				const emptyCSISize = emptyCalloutSize - (margin * 4);
+				const csiSize = store.render.csi(localModel, step) || {width: emptyCSISize, height: emptyCSISize};
 				const csi = store.get.csi(step.csiID);
 				csi.x = Math.floor(lblSize.width + margin);
 				csi.y = Math.floor(lblSize.height + margin);

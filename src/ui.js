@@ -471,10 +471,13 @@ var app = new Vue({
 			if (step.csiID != null) {
 				const selItem = app.selectedItemLookup;
 				const csi = store.get.csi(step.csiID);
-				const selectedPartIDs = (selItem && selItem.type === 'part') ? [selItem.id] : null;
+				const haveSelectedParts = selItem && selItem.type === 'part' && selItem.stepID === step.id;
+				const selectedPartIDs = haveSelectedParts ? [selItem.id] : null;
 				const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
 				const res = store.render[renderer](localModel, step, selectedPartIDs);
-				ctx.drawImage(res.container, csi.x - res.dx, csi.y - res.dy);  // TODO: profile performance if every x, y, w, h argument is passed in
+				if (res) {
+					ctx.drawImage(res.container, csi.x - res.dx, csi.y - res.dy);  // TODO: profile performance if every x, y, w, h argument is passed in
+				}
 			}
 
 			(step.callouts || []).forEach(calloutID => {
