@@ -77,21 +77,26 @@ describe('Test state store module', function() {
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
-			'item', 'part', 'step',
-			'addStepToCallout', 'addPointToCalloutArrow', 'rotateCalloutArrowTip',
+			'item', 'part', 'step', 'callout', 'calloutArrow',
 			'appendPage', 'deletePage', 'togglePLIs', 'deletePLI', 'deletePLIItem', 'renumber',
 			'renumberPages', 'setNumber', 'layoutPage', 'layoutTitlePage',
 			'addTitlePage', 'removeTitlePage', 'addInitialPages'
 		]);
 		assert.hasAllKeys(store.mutations.item, [
-			'add', 'delete', 'reparent', 'reposition'
+			'add', 'delete', 'deleteChildList', 'reparent', 'reposition'
 		]);
 		assert.hasAllKeys(store.mutations.part, [
-			'displace', 'moveToStep', 'addToCallout'
+			'displace', 'moveToStep', 'addToCallout', 'removeFromCallout'
 		]);
 		assert.hasAllKeys(store.mutations.step, [
 			'add', 'delete', 'renumber', 'layout', 'moveToPage', 'moveToPreviousPage', 'moveToNextPage',
 			'mergeWithStep', 'addCallout'
+		]);
+		assert.hasAllKeys(store.mutations.callout, [
+			'delete', 'addStep'
+		]);
+		assert.hasAllKeys(store.mutations.calloutArrow, [
+			'delete', 'addPoint', 'rotateTip'
 		]);
 	});
 

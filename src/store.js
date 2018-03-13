@@ -92,6 +92,7 @@ const store = {
 				return {width: container.width, height: container.height, dx: 0, dy: 0, container};
 			},
 			csiWithSelection(localModel, step, selectedPartIDs) {
+				// TODO: when selecting a part inside a callout, the matching part in the main model also draws as selected
 				const config = {
 					partList: store.get.partList(step),
 					selectedPartIDs,
@@ -346,6 +347,16 @@ const store = {
 					}
 				}
 			},
+			deleteChildList(opts) {  // opts: {item, listType}
+				const item = store.get.lookupToItem(opts.item);
+				const list = util.clone(item[opts.listType + 's'] || []);
+				const itemType = store.mutations[opts.listType] ? opts.listType : 'item';
+				list.forEach(id => {
+					const arg = {};
+					arg[itemType] = {type: opts.listType, id};
+					store.mutations[itemType].delete(arg);
+				});
+			},
 			reparent(opts) {  // opts: {item, newParent, insertionIndex = -1}
 				const item = store.get.lookupToItem(opts.item);
 				const oldParent = store.get.parent(item);
@@ -442,6 +453,12 @@ const store = {
 				}
 				destCalloutStep.parts.push(partID);
 				store.mutations.layoutPage({page: step.parent});
+			},
+			removeFromCallout(opts) {  // opts: {partID, step}
+				// TODO: when removing the last part in a callout step, step doesn't redraw as empty
+				const step = store.get.lookupToItem(opts.step);
+				util.array.remove(step.parts, opts.partID);
+				store.mutations.layoutPage({page: store.get.pageForItem(step)});
 			}
 		},
 		// TODO: add store.mutations.foo.create() to wrap all item.add({junk}) logic
@@ -484,6 +501,7 @@ const store = {
 				if (step.pliID != null) {
 					store.mutations.deletePLI({pli: store.get.pli(step.pliID), deleteItems: true});
 				}
+				store.mutations.item.deleteChildList({item: step, listType: 'callout'});
 				store.mutations.item.delete({item: step});
 				store.mutations.step.renumber();
 			},
@@ -560,35 +578,50 @@ const store = {
 				store.mutations.layoutPage({page: store.get.pageForItem(step)});
 			}
 		},
-		addStepToCallout(opts) {  // opts: {callout, doLayout = false}
-			const callout = store.get.lookupToItem(opts.callout);
-			const stepNumber = callout.steps.length > 0 ? callout.steps.length + 1 : null;
-			store.mutations.step.add({dest: callout, stepNumber});
-			if (stepNumber === 2) {  // Special case: callouts with one step have no step numbers; turn on step numbers when adding a 2nd step
-				const firstStep = store.get.step(callout.steps[0]);
-				firstStep.number = 1;
-				store.mutations.item.add({item: {
-					type: 'stepNumber', x: null, y: null, width: null, height: null
-				}, parent: firstStep});
-			}
-			if (opts.doLayout) {
-				store.mutations.layoutPage({page: store.get.pageForItem(callout)});
+		callout: {
+			delete(opts) {  // opts: {callout}
+				const item = store.get.lookupToItem(opts.callout);
+				store.mutations.item.deleteChildList({item, listType: 'calloutArrow'});
+				store.mutations.item.deleteChildList({item, listType: 'step'});
+				store.mutations.item.delete({item});
+			},
+			addStep(opts) {  // opts: {callout, doLayout = false}
+				const callout = store.get.lookupToItem(opts.callout);
+				const stepNumber = callout.steps.length > 0 ? callout.steps.length + 1 : null;
+				store.mutations.step.add({dest: callout, stepNumber});
+				if (stepNumber === 2) {  // Special case: callouts with one step have no step numbers; turn on step numbers when adding a 2nd step
+					const firstStep = store.get.step(callout.steps[0]);
+					firstStep.number = 1;
+					store.mutations.item.add({item: {
+						type: 'stepNumber', x: null, y: null, width: null, height: null
+					}, parent: firstStep});
+				}
+				if (opts.doLayout) {
+					store.mutations.layoutPage({page: store.get.pageForItem(callout)});
+				}
 			}
 		},
-		addPointToCalloutArrow(opts) { // opts: {calloutArrow, doLayout}
-			const arrow = store.get.calloutArrow(opts.calloutArrow);
-			const insertionIndex = Math.ceil(arrow.points.length / 2);
-			const p1 = store.get.point(arrow.points[insertionIndex - 1]);
-			const p2 = store.get.point(arrow.points[insertionIndex]);
-			const midpoint = util.geom.midpoint(p1, p2);
-			store.mutations.item.add({
-				item: {type: 'point', ...midpoint},
-				parent: arrow,
-				insertionIndex
-			});
-		},
-		rotateCalloutArrowTip(opts) {  // opts: {calloutArrow, direction}
-			store.get.calloutArrow(opts.calloutArrow).direction = opts.direction;
+		calloutArrow: {
+			delete(opts) {  // opts: {calloutArrow}
+				const item = opts.calloutArrow;
+				store.mutations.item.deleteChildList({item, listType: 'point'});
+				store.mutations.item.delete({item});
+			},
+			addPoint(opts) { // opts: {calloutArrow, doLayout}
+				const arrow = store.get.calloutArrow(opts.calloutArrow);
+				const insertionIndex = Math.ceil(arrow.points.length / 2);
+				const p1 = store.get.point(arrow.points[insertionIndex - 1]);
+				const p2 = store.get.point(arrow.points[insertionIndex]);
+				const midpoint = util.geom.midpoint(p1, p2);
+				store.mutations.item.add({
+					item: {type: 'point', ...midpoint},
+					parent: arrow,
+					insertionIndex
+				});
+			},
+			rotateTip(opts) {  // opts: {calloutArrow, direction}
+				store.get.calloutArrow(opts.calloutArrow).direction = opts.direction;
+			}
 		},
 		appendPage(opts) {  // opts: {prevPage}
 			const prevPage = store.get.lookupToItem(opts.prevPage);
@@ -631,9 +664,7 @@ const store = {
 			if (!opts.deleteItems && pli.pliItems && pli.pliItems.length) {
 				throw 'Cannot delete a PLI with items';
 			}
-			pli.pliItems.forEach(pliItemID => {
-				store.mutations.deletePLIItem({pliItem: {type: 'pliItem', id: pliItemID}});
-			});
+			store.mutations.item.deleteChildList({item: pli, listType: 'pliItem'});
 			store.mutations.item.delete({item: pli});
 		},
 		deletePLIItem(opts) {  // opts: {pliItem}
@@ -707,14 +738,12 @@ const store = {
 			}, parent: page});
 		},
 		removeTitlePage() {
-			const page = store.get.titlePage();
-			if (page == null) {
+			const item = store.get.titlePage();
+			if (item == null) {
 				return;
 			}
-			const labels = util.clone(page.labels || []);  // clone because item.delete will modify this list
-			labels.forEach(id => store.mutations.item.delete({item: {type: 'label', id}}));
-			const steps = util.clone(page.steps || []);
-			steps.forEach(id => store.mutations.step.delete({step: {type: 'step', id}}));
+			store.mutations.item.deleteChildList({item, listType: 'label'});
+			store.mutations.item.deleteChildList({item, listType: 'step'});
 			store.state.titlePage = null;
 		},
 		addInitialPages(partDictionary, localModelIDList = []) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree

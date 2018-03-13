@@ -17,7 +17,7 @@ describe('Test util module', function() {
 			'radians', 'emptyNode', 'geom', 'draw', 'clone', 'sort', 'formatTime', 'titleCase', 'prettyPrint'
 		]);
 		assert.hasAllKeys(util.array, ['insert', 'remove', 'removeIndex', 'eq']);
-		assert.hasAllKeys(util.geom, ['bbox', 'expandBox', 'distance']);
+		assert.hasAllKeys(util.geom, ['bbox', 'expandBox', 'distance', 'midpoint']);
 		assert.hasAllKeys(util.draw, ['arrow', 'roundedRect']);
 		assert.hasAllKeys(util.sort, ['numeric']);
 		assert.hasAllKeys(util.sort.numeric, ['ascending', 'descending']);

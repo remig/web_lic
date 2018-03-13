@@ -253,9 +253,23 @@ const contextMenu = {
 			cb() {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'callout') {
 					const callout = app.selectedItemLookup;
-					undoStack.commit('addStepToCallout', {callout, doLayout: true}, this.text);
+					undoStack.commit('callout.addStep', {callout, doLayout: true}, this.text);
 					app.redrawUI(true);
 				}
+			}
+		},
+		{
+			text: 'Delete Empty Callout',
+			shown() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'callout') {
+					const callout = store.get.callout(app.selectedItemLookup);
+					return util.isEmpty(callout.steps);
+				}
+				return false;
+			},
+			cb() {
+				undoStack.commit('callout.delete', {callout: app.selectedItemLookup}, this.text);
+				app.redrawUI(true);
 			}
 		}
 	],
@@ -284,7 +298,7 @@ const contextMenu = {
 				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
 					const calloutArrow = store.get.calloutArrow(app.selectedItemLookup);
 					const newPointIdx = Math.ceil(calloutArrow.points.length / 2);
-					undoStack.commit('addPointToCalloutArrow', {calloutArrow}, this.text);
+					undoStack.commit('calloutArrow.addPoint', {calloutArrow}, this.text);
 					app.redrawUI(true);
 					Vue.nextTick(() => {
 						app.setSelected({type: 'point', id: calloutArrow.points[newPointIdx]});
@@ -430,6 +444,25 @@ const contextMenu = {
 				);
 				app.redrawUI(true);
 			}
+		},
+		{
+			text: 'Remove Part from Callout',
+			shown() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
+					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+					return step.parent.type === 'callout';
+				}
+				return false;
+			},
+			cb() {
+				const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+				undoStack.commit(
+					'part.removeFromCallout',
+					{partID: app.selectedItemLookup.id, step},
+					this.text
+				);
+				app.redrawUI(true);
+			}
 		}
 	]
 };
@@ -448,7 +481,7 @@ function rotateCalloutTip(direction) {
 	return () => {
 		if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
 			const calloutArrow = store.get.calloutArrow(app.selectedItemLookup);
-			undoStack.commit('rotateCalloutArrowTip', {calloutArrow, direction}, 'Rotate Callout Arrow Tip');
+			undoStack.commit('calloutArrow.rotateTip', {calloutArrow, direction}, 'Rotate Callout Arrow Tip');
 			app.redrawUI();
 		}
 	};
