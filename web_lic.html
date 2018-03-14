@@ -66,15 +66,15 @@
 		<component :is="currentDialog" ref="currentDialog"></component>
 
 		<div id="statusBar">{{statusText}}</div>
-		<div id="offscreenCache" class="offscreen">
-			<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" @change="triggerOpenFile($event)" style="display: none;">
-			<input type="file" name="uploadModelChooser" id="uploadModelChooser" accept=".ldr, .mpd" @change="triggerModelImport($event)" style="display: none;">
-			<svg xmlns="http://www.w3.org/2000/svg">
-				<text id="fontMeasureContainer">gW</text>
-			</svg>
-			<canvas id="generateImagesCanvas"></canvas>
-			<div id="canvasHolder"></div>
-		</div>
+	</div>
+	<div id="offscreenCache" class="offscreen">
+		<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" @change="triggerOpenFile($event)" style="display: none;">
+		<input type="file" name="uploadModelChooser" id="uploadModelChooser" accept=".ldr, .mpd" @change="triggerModelImport($event)" style="display: none;">
+		<svg xmlns="http://www.w3.org/2000/svg">
+			<text id="fontMeasureContainer">gW</text>
+		</svg>
+		<canvas id="generateImagesCanvas"></canvas>
+		<div id="canvasHolder"></div>
 	</div>
 
 	<!-- Component Templates -->

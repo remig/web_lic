@@ -6,6 +6,9 @@ InstructionExporter = (function() {
 
 function exportInstructions(app, store, exportType, drawPageCallback, doneCallback) {
 
+	const scale = 1;  // TODO: create UI to set this to support hi-res export
+	app.busyText = `Generating ${exportType}`;
+
 	async function exportPage(page, canvas) {
 		return new Promise(resolve => window.setTimeout(() => {
 			if (!page) {
@@ -15,7 +18,7 @@ function exportInstructions(app, store, exportType, drawPageCallback, doneCallba
 			if (page.needsLayout) {
 				store.mutations.layoutPage({page});
 			}
-			app.drawPage(page, canvas);
+			app.drawPage(page, canvas, scale);
 
 			drawPageCallback(page, canvas);
 
@@ -30,13 +33,11 @@ function exportInstructions(app, store, exportType, drawPageCallback, doneCallba
 		}
 	}
 
-	app.busyText = `Generating ${exportType}`;
-
 	window.setTimeout(() => {
 		const start = Date.now();
 		const canvas = document.getElementById('generateImagesCanvas');
-		canvas.width = store.state.pageSize.width;
-		canvas.height = store.state.pageSize.height;
+		canvas.width = store.state.pageSize.width * scale;
+		canvas.height = store.state.pageSize.height * scale;
 
 		const pages = [store.get.titlePage(), ...store.state.pages];
 		app.updateProgress({stepCount: pages.length, text: 'Page 0'});

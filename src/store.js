@@ -75,10 +75,10 @@ const store = {
 		// TODO: need to cache rendering results, and add back a 'forceRedraw' flag, because most renders
 		// are identical to the previous renders.
 		return {
-			csi(localModel, step, selectedPartIDs) {
+			csi(localModel, step, selectedPartIDs, scale = 1) {
 				const container = getCanvas(`CSI_${step.csiID}`);
 				if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
-					LDRender.renderModel(localModel, container, 1000, {resizeContainer: true});
+					LDRender.renderModel(localModel, container, 1000 * scale, {resizeContainer: true});
 				} else {
 					const partList = store.get.partList(step);
 					if (util.isEmpty(partList)) {
@@ -90,11 +90,11 @@ const store = {
 						resizeContainer: true,
 						displacedParts: step.displacedParts
 					};
-					LDRender.renderModel(localModel, container, 1000, config);
+					LDRender.renderModel(localModel, container, 1000 * scale, config);
 				}
 				return {width: container.width, height: container.height, dx: 0, dy: 0, container};
 			},
-			csiWithSelection(localModel, step, selectedPartIDs) {
+			csiWithSelection(localModel, step, selectedPartIDs, scale = 1) {
 				const config = {
 					partList: store.get.partList(step),
 					selectedPartIDs,
@@ -102,12 +102,12 @@ const store = {
 					displacedParts: step.displacedParts
 				};
 				const container = getCanvas(`CSI_${step.csiID}`);
-				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000, config);
+				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
 				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
 			},
-			pli(part) {
+			pli(part, scale = 1) {
 				const container = getCanvas(`PLI_${part.filename}_${part.colorCode}`);
-				LDRender.renderPart(part, container, 1000, {resizeContainer: true});
+				LDRender.renderPart(part, container, 1000 * scale, {resizeContainer: true});
 				return {width: container.width, height: container.height, container};
 			}
 		};

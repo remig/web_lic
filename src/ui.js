@@ -460,24 +460,27 @@ var app = new Vue({
 				this.drawPage(page, canvas);
 			}
 		},
-		drawStep(opts) {  // opts: {step, canvas}
-			const step = store.get.step(opts.step);
+		drawStep(step, canvas, scale = 1) {
+			step = store.get.step(step);
 			const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
 
-			const ctx = opts.canvas.getContext('2d');
+			const ctx = canvas.getContext('2d');
 			ctx.save();
 			ctx.translate(step.x, step.y);
 
 			if (step.csiID != null) {
+				ctx.save();
+				ctx.scale(1 / scale, 1 / scale);
 				const selItem = app.selectedItemLookup;
 				const csi = store.get.csi(step.csiID);
 				const haveSelectedParts = selItem && selItem.type === 'part' && selItem.stepID === step.id;
 				const selectedPartIDs = haveSelectedParts ? [selItem.id] : null;
 				const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
-				const res = store.render[renderer](localModel, step, selectedPartIDs);
+				const res = store.render[renderer](localModel, step, selectedPartIDs, scale);
 				if (res) {
-					ctx.drawImage(res.container, csi.x - res.dx, csi.y - res.dy);  // TODO: profile performance if every x, y, w, h argument is passed in
+					ctx.drawImage(res.container, (csi.x - res.dx) * scale, (csi.y - res.dy) * scale);  // TODO: profile performance if every x, y, w, h argument is passed in
 				}
+				ctx.restore();
 			}
 
 			(step.callouts || []).forEach(calloutID => {
@@ -485,7 +488,7 @@ var app = new Vue({
 				ctx.save();
 				ctx.translate(callout.x, callout.y);
 
-				callout.steps.forEach(id => app.drawStep({step: {type: 'step', id}, canvas: opts.canvas}));
+				callout.steps.forEach(id => app.drawStep({type: 'step', id}, canvas, scale));
 
 				ctx.strokeStyle = 'black';
 				ctx.lineWidth = 2;
@@ -516,12 +519,18 @@ var app = new Vue({
 					util.draw.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
 					ctx.stroke();
 
+					ctx.save();
+					ctx.scale(1 / scale, 1 / scale);
 					pli.pliItems.forEach(idx => {
 						const pliItem = store.get.pliItem(idx);
 						const part = localModel.parts[pliItem.partNumbers[0]];
-						const pliCanvas = store.render.pli(part).container;
-						ctx.drawImage(pliCanvas, pli.x + pliItem.x, pli.y + pliItem.y);
+						const pliCanvas = store.render.pli(part, scale).container;
+						ctx.drawImage(pliCanvas, (pli.x + pliItem.x) * scale, (pli.y + pliItem.y) * scale);
+					});
+					ctx.restore();
 
+					pli.pliItems.forEach(idx => {
+						const pliItem = store.get.pliItem(idx);
 						const pliQty = store.get.pliQty(pliItem.pliQtyID);
 						ctx.fillStyle = 'black';
 						ctx.font = 'bold 10pt Helvetica';
@@ -543,7 +552,7 @@ var app = new Vue({
 
 			ctx.restore();
 		},
-		drawPage(page, canvas) {
+		drawPage(page, canvas, scale = 1) {
 
 			if (page.needsLayout) {
 				store.mutations.layoutPage({page});
@@ -551,10 +560,14 @@ var app = new Vue({
 
 			const pageSize = store.state.pageSize;
 			const ctx = canvas.getContext('2d');
+			ctx.save();
+			if (scale > 1) {
+				ctx.scale(scale, scale);
+			}
 			ctx.fillStyle = 'white';
 			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
 
-			page.steps.forEach(id => app.drawStep({step: {type: 'step', id}, canvas}));
+			page.steps.forEach(id => app.drawStep({type: 'step', id}, canvas, scale));
 
 			if (page.numberLabel != null) {
 				const lbl = store.get.pageNumber(page.numberLabel);
@@ -571,6 +584,7 @@ var app = new Vue({
 					ctx.fillText(lbl.text, lbl.x, lbl.y + lbl.height);
 				});
 			}
+			ctx.restore();
 		},
 		pages() {
 			return store.state.pages.filter(p => p != null);
