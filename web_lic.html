@@ -68,8 +68,8 @@
 		<div id="statusBar">{{statusText}}</div>
 	</div>
 	<div id="offscreenCache" class="offscreen">
-		<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" @change="triggerOpenFile($event)" style="display: none;">
-		<input type="file" name="uploadModelChooser" id="uploadModelChooser" accept=".ldr, .mpd" @change="triggerModelImport($event)" style="display: none;">
+		<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" onchange="app.triggerOpenFile(event)" style="display: none;">
+		<input type="file" name="uploadModelChooser" id="uploadModelChooser" accept=".ldr, .mpd" onchange="app.triggerModelImport(event)" style="display: none;">
 		<svg xmlns="http://www.w3.org/2000/svg">
 			<text id="fontMeasureContainer">gW</text>
 		</svg>
