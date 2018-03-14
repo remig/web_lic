@@ -397,7 +397,7 @@ const store = {
 				store.mutations.layoutPage({page: store.get.pageForItem(step)});
 			},
 			// TODO: what if a step has zero parts?
-			moveToStep(opts) { // opts: {partID, srcStep, destStep}
+			moveToStep(opts) { // opts: {partID, srcStep, destStep, doLayout = false}
 				const partID = opts.partID;
 				const srcStep = store.get.lookupToItem(opts.srcStep);
 				util.array.remove(srcStep.parts, partID);
@@ -412,35 +412,39 @@ const store = {
 					const pliItems = pli.pliItems.map(i => store.get.pliItem(i));
 					const pliItem = pliItems.filter(i => i.partNumbers.includes(partID))[0];
 
+					const target = store.get.matchingPLIItem(destPLI, partID);
+					if (target) {
+						target.quantity++;
+						target.partNumbers.push(partID);
+					} else {
+						const newItem = store.mutations.item.add({item: {
+							type: 'pliItem',
+							filename: pliItem.filename,
+							partNumbers: [partID],
+							colorCode: pliItem.colorCode,
+							quantity: 1, pliQtyID: null,
+							x: null, y: null, width: null, height: null
+						}, parent: destPLI});
+
+						store.mutations.item.add({item: {
+							type: 'pliQty',
+							x: null, y: null, width: null, height: null
+						}, parent: newItem});
+					}
+
 					if (pliItem.quantity === 1) {
-						const target = store.get.matchingPLIItem(destPLI, partID);
-						if (target) {
-							target.quantity++;
-							target.partNumbers.push(partID);
-							store.mutations.deletePLIItem({pliItem});
-						} else {
-							store.mutations.item.reparent({item: pliItem, newParent: destPLI});
-						}
+						store.mutations.deletePLIItem({pliItem});
 					} else {
 						pliItem.quantity -= 1;
 						util.array.remove(pliItem.partNumbers, partID);
-
-						const newPLIItem = util.clone(pliItem);
-						newPLIItem.parent.id = destPLI.id;
-						newPLIItem.partNumbers = [partID];
-						store.mutations.item.add({item: newPLIItem});
-						destPLI.pliItems.push(newPLIItem);
-
-						const newPLIQty = util.clone(store.get.pliQty(pliItem.pliQtyID));
-						newPLIQty.parent.id = newPLIItem.id;
-						store.mutations.item.add({item: newPLIQty});
-						newPLIItem.pliQtyID = newPLIQty.id;
 					}
 				}
 
-				store.mutations.layoutPage({page: store.get.pageForItem(srcStep)});
-				if (srcStep.parent.id !== destStep.parent.id) {
-					store.mutations.layoutPage({page: store.get.pageForItem(destStep)});
+				if (opts.doLayout) {
+					store.mutations.layoutPage({page: store.get.pageForItem(srcStep)});
+					if (srcStep.parent.id !== destStep.parent.id) {
+						store.mutations.layoutPage({page: store.get.pageForItem(destStep)});
+					}
 				}
 			},
 			addToCallout(opts) {  // opts: {partID, step, callout}
@@ -540,27 +544,19 @@ const store = {
 					store.mutations.step.moveToPage({step, destPage, insertionIndex: 0});
 				}
 			},
-			mergeWithStep(opts) {  // opts: {sourceStep, destStep}
-				const sourceStep = store.get.lookupToItem(opts.sourceStep);
+			mergeWithStep(opts) {  // opts: {srcStep, destStep}
+				const srcStep = store.get.lookupToItem(opts.srcStep);
 				const destStep = store.get.lookupToItem(opts.destStep);
-				if (!sourceStep || !destStep) {
+				if (!srcStep || !destStep) {
 					return;
 				}
-				destStep.parts = destStep.parts.concat(sourceStep.parts);
-				sourceStep.parts = [];
-				destStep.parts.sort(util.sort.numeric.ascending);
-				const sourcePLI = store.get.pli(sourceStep.pliID);
-				const destPLI = store.get.pli(destStep.pliID);
-				if (sourcePLI && destPLI) {
-					// TODO: this doesn't correctly merge two steps with PLIs that have matching parts
-					sourcePLI.pliItems.forEach(id => {
-						store.get.pliItem(id).parent.id = destPLI.id;
-					});
-					destPLI.pliItems = destPLI.pliItems.concat(sourcePLI.pliItems);
-				}
-				const sourcePage = store.get.pageForItem(sourceStep);
+				util.clone(srcStep.parts).forEach(partID => {
+					store.mutations.part.moveToStep({partID, srcStep, destStep, doLayout: false});
+				});
+				store.mutations.step.delete({step: srcStep});
+
+				const sourcePage = store.get.pageForItem(srcStep);
 				const destPage = store.get.pageForItem(destStep);
-				store.mutations.step.delete({step: sourceStep});
 				store.mutations.layoutPage({page: sourcePage});
 				if (sourcePage.id !== destPage.id) {
 					store.mutations.layoutPage({page: destPage});

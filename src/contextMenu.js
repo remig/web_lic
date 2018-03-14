@@ -160,9 +160,9 @@ const contextMenu = {
 						return false;
 					},
 					cb() {
-						const sourceStep = app.selectedItemLookup;
+						const srcStep = app.selectedItemLookup;
 						const destStep = store.get.prevStep(app.selectedItemLookup);
-						undoStack.commit('step.mergeWithStep', {sourceStep, destStep}, this.text);
+						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
 						app.redrawUI(true);
 					}
 				},
@@ -175,9 +175,9 @@ const contextMenu = {
 						return false;
 					},
 					cb() {
-						const sourceStep = app.selectedItemLookup;
+						const srcStep = app.selectedItemLookup;
 						const destStep = store.get.nextStep(app.selectedItemLookup);
-						undoStack.commit('step.mergeWithStep', {sourceStep, destStep}, this.text);
+						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
 						app.redrawUI(true);
 					}
 				}
@@ -397,7 +397,7 @@ const contextMenu = {
 						const destStep = store.get.prevStep(srcStep);
 						undoStack.commit(
 							'part.moveToStep',
-							{partID: app.selectedItemLookup.id, srcStep, destStep},
+							{partID: app.selectedItemLookup.id, srcStep, destStep, doLayout: true},
 							'Move Part to Previous Step'
 						);
 						app.redrawUI(true);
@@ -417,7 +417,7 @@ const contextMenu = {
 						const destStep = store.get.nextStep(srcStep);
 						undoStack.commit(
 							'part.moveToStep',
-							{partID: app.selectedItemLookup.id, srcStep, destStep},
+							{partID: app.selectedItemLookup.id, srcStep, destStep, doLayout: true},
 							'Move Part to Next Step'
 						);
 						app.redrawUI(true);
