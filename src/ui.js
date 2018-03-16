@@ -555,7 +555,7 @@ var app = new Vue({
 		drawPage(page, canvas, scale = 1) {
 
 			if (page.needsLayout) {
-				store.mutations.layoutPage({page});
+				store.mutations.page.layout({page});
 			}
 
 			const pageSize = store.state.pageSize;

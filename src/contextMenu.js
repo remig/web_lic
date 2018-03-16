@@ -20,7 +20,7 @@ const contextMenu = {
 			},
 			cb() {
 				const page = app.selectedItemLookup;
-				undoStack.commit('layoutPage', {page, layout: 'vertical'}, this.text);
+				undoStack.commit('page.layout', {page, layout: 'vertical'}, this.text);
 				app.redrawUI(true);
 			}
 		},
@@ -35,7 +35,7 @@ const contextMenu = {
 			},
 			cb() {
 				const page = app.selectedItemLookup;
-				undoStack.commit('layoutPage', {page, layout: 'horizontal'}, this.text);
+				undoStack.commit('page.layout', {page, layout: 'horizontal'}, this.text);
 				app.redrawUI(true);
 			}
 		},
@@ -43,7 +43,7 @@ const contextMenu = {
 			text: 'Layout By Row and Column (NYI)',
 			cb() {
 				const page = app.selectedItemLookup;
-				undoStack.commit('layoutPage', {page, layout: {rows: 5, cols: 2, direction: 'vertical'}}, this.text);
+				undoStack.commit('page.layout', {page, layout: {rows: 5, cols: 2, direction: 'vertical'}}, this.text);
 				app.redrawUI(true);
 			}
 		},
@@ -53,7 +53,7 @@ const contextMenu = {
 			text: 'Append Blank Page',
 			cb() {
 				const prevPage = app.selectedItemLookup;
-				undoStack.commit('appendPage', {prevPage}, this.text);
+				undoStack.commit('page.appendPage', {prevPage}, this.text);
 				app.redrawUI(true);
 			}
 		},
@@ -73,7 +73,7 @@ const contextMenu = {
 			cb() {
 				const page = store.get.lookupToItem(app.selectedItemLookup);
 				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
-				undoStack.commit('deletePage', {page}, 'Delete Page');
+				undoStack.commit('page.delete', {page}, 'Delete Page');
 				Vue.nextTick(() => {
 					app.setCurrentPage(nextPage);
 				});
@@ -282,7 +282,7 @@ const contextMenu = {
 					return arrow.points.map((pointID, idx) => {
 						return {
 							text: (idx === 0) ? 'Base' :
-									(idx === arrow.points.length - 1) ? 'Tip' : `Point ${idx}`,
+								(idx === arrow.points.length - 1) ? 'Tip' : `Point ${idx}`,
 							cb() {
 								app.setSelected({type: 'point', id: pointID});
 							}

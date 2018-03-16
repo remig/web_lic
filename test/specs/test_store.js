@@ -77,9 +77,8 @@ describe('Test state store module', function() {
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
-			'item', 'part', 'step', 'callout', 'calloutArrow',
-			'appendPage', 'deletePage', 'togglePLIs', 'deletePLI', 'deletePLIItem', 'renumber',
-			'renumberPages', 'setNumber', 'layoutPage', 'layoutTitlePage',
+			'item', 'part', 'step', 'callout', 'calloutArrow', 'page', 'pli', 'pliItem',
+			'renumber', 'setNumber', 'layoutTitlePage',
 			'addTitlePage', 'removeTitlePage', 'addInitialPages'
 		]);
 		assert.hasAllKeys(store.mutations.item, [
@@ -97,6 +96,15 @@ describe('Test state store module', function() {
 		]);
 		assert.hasAllKeys(store.mutations.calloutArrow, [
 			'delete', 'addPoint', 'rotateTip'
+		]);
+		assert.hasAllKeys(store.mutations.page, [
+			'delete', 'appendPage', 'renumber', 'layout'
+		]);
+		assert.hasAllKeys(store.mutations.pli, [
+			'delete', 'toggleVisibility'
+		]);
+		assert.hasAllKeys(store.mutations.pliItem, [
+			'delete'
 		]);
 	});
 
@@ -401,7 +409,7 @@ describe('Test state store module', function() {
 		it('Should not delete page with steps', () => {
 			resetState();
 			assert.throws(
-				() => store.mutations.deletePage({page: {type: 'page', id: 2}}),
+				() => store.mutations.page.delete({page: {type: 'page', id: 2}}),
 				'Cannot delete a page with steps'
 			);
 			assert.equal(store.state.pages.length, 3);
@@ -415,7 +423,7 @@ describe('Test state store module', function() {
 			assert.isEmpty(store.state.pages[1].steps);
 			assert.equal(store.state.steps[2].parent.id, 0);
 
-			store.mutations.deletePage({page: {type: 'page', id: 1}});
+			store.mutations.page.delete({page: {type: 'page', id: 1}});
 			assert.equal(store.state.pages.length, 2);
 			assert.equal(store.state.pageNumbers.length, 2);
 			assert.deepEqual(store.state.pageNumbers.map(el => el.id), [0, 2]);
@@ -425,7 +433,7 @@ describe('Test state store module', function() {
 
 		it('Delete another page', () => {
 			store.mutations.step.moveToPreviousPage({step: {type: 'step', id: 3}});
-			store.mutations.deletePage({page: {type: 'page', id: 2}});
+			store.mutations.page.delete({page: {type: 'page', id: 2}});
 			assert.equal(store.state.pages[0].steps.length, 3);
 			assert.equal(store.state.pages.length, 1);
 			assert.isFalse(store.get.isLastPage({type: 'titlePage', id: 0}));

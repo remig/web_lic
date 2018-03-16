@@ -16,7 +16,7 @@ function exportInstructions(app, store, exportType, drawPageCallback, doneCallba
 				return;
 			}
 			if (page.needsLayout) {
-				store.mutations.layoutPage({page});
+				store.mutations.page.layout({page});
 			}
 			app.drawPage(page, canvas, scale);
 

@@ -171,7 +171,7 @@ const menu = [
 			text: 'Show PLIs',
 			shown: () => enableIfModel() && !store.state.plisVisible,
 			cb() {
-				undoStack.commit('togglePLIs', {visible: true}, this.text);
+				undoStack.commit('pli.toggleVisibility', {visible: true}, this.text);
 				app.redrawUI(true);
 			}
 		},
@@ -179,7 +179,7 @@ const menu = [
 			text: 'Hide PLIs',
 			shown: () => enableIfModel() && store.state.plisVisible,
 			cb() {
-				undoStack.commit('togglePLIs', {visible: false}, this.text);
+				undoStack.commit('pli.toggleVisibility', {visible: false}, this.text);
 				app.redrawUI(true);
 			}
 		},

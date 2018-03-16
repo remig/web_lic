@@ -394,7 +394,7 @@ const store = {
 				} else if (idx >= 0) {
 					util.array.removeIndex(step.displacedParts, idx);
 				}
-				store.mutations.layoutPage({page: store.get.pageForItem(step)});
+				store.mutations.page.layout({page: store.get.pageForItem(step)});
 			},
 			// TODO: what if a step has zero parts?
 			moveToStep(opts) { // opts: {partID, srcStep, destStep, doLayout = false}
@@ -433,7 +433,7 @@ const store = {
 					}
 
 					if (pliItem.quantity === 1) {
-						store.mutations.deletePLIItem({pliItem});
+						store.mutations.pliItem.delete({pliItem});
 					} else {
 						pliItem.quantity -= 1;
 						util.array.remove(pliItem.partNumbers, partID);
@@ -441,9 +441,9 @@ const store = {
 				}
 
 				if (opts.doLayout) {
-					store.mutations.layoutPage({page: store.get.pageForItem(srcStep)});
+					store.mutations.page.layout({page: store.get.pageForItem(srcStep)});
 					if (srcStep.parent.id !== destStep.parent.id) {
-						store.mutations.layoutPage({page: store.get.pageForItem(destStep)});
+						store.mutations.page.layout({page: store.get.pageForItem(destStep)});
 					}
 				}
 			},
@@ -458,12 +458,12 @@ const store = {
 					destCalloutStep = store.get.step(callout.steps[callout.steps.length - 1]);
 				}
 				destCalloutStep.parts.push(partID);
-				store.mutations.layoutPage({page: step.parent});
+				store.mutations.page.layout({page: step.parent});
 			},
 			removeFromCallout(opts) {  // opts: {partID, step}
 				const step = store.get.lookupToItem(opts.step);
 				util.array.remove(step.parts, opts.partID);
-				store.mutations.layoutPage({page: store.get.pageForItem(step)});
+				store.mutations.page.layout({page: store.get.pageForItem(step)});
 			}
 		},
 		// TODO: add store.mutations.foo.create() to wrap all item.add({junk}) logic
@@ -488,7 +488,7 @@ const store = {
 					}, parent: step});
 				}
 				if (opts.doLayout) {
-					store.mutations.layoutPage({page: store.get.pageForItem(dest)});
+					store.mutations.page.layout({page: store.get.pageForItem(dest)});
 				}
 				return step;
 			},
@@ -504,7 +504,7 @@ const store = {
 					store.mutations.item.delete({item: store.get.csi(step.csiID)});
 				}
 				if (step.pliID != null) {
-					store.mutations.deletePLI({pli: store.get.pli(step.pliID), deleteItems: true});
+					store.mutations.pli.delete({pli: store.get.pli(step.pliID), deleteItems: true});
 				}
 				store.mutations.item.deleteChildList({item: step, listType: 'callout'});
 				store.mutations.item.delete({item: step});
@@ -526,8 +526,8 @@ const store = {
 					newParent: destPage,
 					insertionIndex: opts.insertionIndex || 0
 				});
-				store.mutations.layoutPage({page: currentPage});
-				store.mutations.layoutPage({page: destPage});
+				store.mutations.page.layout({page: currentPage});
+				store.mutations.page.layout({page: destPage});
 			},
 			moveToPreviousPage(opts) {  // opts: {step}
 				const step = store.get.lookupToItem(opts.step);
@@ -557,9 +557,9 @@ const store = {
 
 				const sourcePage = store.get.pageForItem(srcStep);
 				const destPage = store.get.pageForItem(destStep);
-				store.mutations.layoutPage({page: sourcePage});
+				store.mutations.page.layout({page: sourcePage});
 				if (sourcePage.id !== destPage.id) {
-					store.mutations.layoutPage({page: destPage});
+					store.mutations.page.layout({page: destPage});
 				}
 			},
 			addCallout(opts) {  // opts: {step}
@@ -572,7 +572,7 @@ const store = {
 					layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
 					id: store.get.nextItemID('callout')
 				}, parent: step});
-				store.mutations.layoutPage({page: store.get.pageForItem(step)});
+				store.mutations.page.layout({page: store.get.pageForItem(step)});
 			}
 		},
 		callout: {
@@ -594,7 +594,7 @@ const store = {
 					}, parent: firstStep});
 				}
 				if (opts.doLayout) {
-					store.mutations.layoutPage({page: store.get.pageForItem(callout)});
+					store.mutations.page.layout({page: store.get.pageForItem(callout)});
 				}
 			}
 		},
@@ -620,54 +620,67 @@ const store = {
 				store.get.calloutArrow(opts.calloutArrow).direction = opts.direction;
 			}
 		},
-		appendPage(opts) {  // opts: {prevPage}
-			const prevPage = store.get.lookupToItem(opts.prevPage);
-			const page = {
-				type: 'page',
-				number: prevPage.number + 1,
-				steps: [],
-				needsLayout: true,
-				numberLabel: null,
-				layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
-				id: store.get.nextItemID('page')
-			};
+		page: {
+			delete(opts) {  // opts: {page}
+				const page = store.get.lookupToItem(opts.page);
+				if (page.steps && page.steps.length) {
+					throw 'Cannot delete a page with steps';
+				}
+				if (page.numberLabel != null) {
+					store.mutations.item.delete({item: store.get.pageNumber(page.numberLabel)});
+				}
+				store.mutations.item.delete({item: page});
+				store.mutations.page.renumber();
+			},
+			appendPage(opts) {  // opts: {prevPage}
+				const prevPage = store.get.lookupToItem(opts.prevPage);
+				const page = {
+					type: 'page',
+					number: prevPage.number + 1,
+					steps: [],
+					needsLayout: true,
+					numberLabel: null,
+					layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
+					id: store.get.nextItemID('page')
+				};
 
-			store.mutations.item.add({item: {
-				type: 'pageNumber',
-				x: null, y: null, width: null, height: null
-			}, parent: page});
+				store.mutations.item.add({item: {
+					type: 'pageNumber',
+					x: null, y: null, width: null, height: null
+				}, parent: page});
 
-			util.array.insert(store.state.pages, page, store.state.pages.indexOf(prevPage) + 1);
-		},
-		deletePage(opts) {  // opts: {page}
-			const page = store.get.lookupToItem(opts.page);
-			if (page.steps && page.steps.length) {
-				throw 'Cannot delete a page with steps';
+				util.array.insert(store.state.pages, page, store.state.pages.indexOf(prevPage) + 1);
+			},
+			renumber() {
+				store.mutations.renumber('page');
+			},
+			layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
+				const page = store.get.lookupToItem(opts.page);
+				Layout.page(page, opts.layout);
 			}
-			if (page.numberLabel != null) {
-				store.mutations.item.delete({item: store.get.pageNumber(page.numberLabel)});
+		},
+		pli: {
+			delete(opts) {  // opts: {pli, deleteItem: false}
+				const pli = store.get.lookupToItem(opts.pli);
+				if (!opts.deleteItems && pli.pliItems && pli.pliItems.length) {
+					throw 'Cannot delete a PLI with items';
+				}
+				store.mutations.item.deleteChildList({item: pli, listType: 'pliItem'});
+				store.mutations.item.delete({item: pli});
+			},
+			toggleVisibility(opts) {  // opts: {visible}
+				store.state.plisVisible = opts.visible;
+				store.state.pages.forEach(p => {
+					p.needsLayout = true;
+				});
 			}
-			store.mutations.item.delete({item: page});
-			store.mutations.renumberPages();
 		},
-		togglePLIs(opts) {  // opts: {visible}
-			store.state.plisVisible = opts.visible;
-			store.state.pages.forEach(p => {
-				p.needsLayout = true;
-			});
-		},
-		deletePLI(opts) {  // opts: {pli, deleteItem: false}
-			const pli = store.get.lookupToItem(opts.pli);
-			if (!opts.deleteItems && pli.pliItems && pli.pliItems.length) {
-				throw 'Cannot delete a PLI with items';
+		pliItem: {
+			delete(opts) {  // opts: {pliItem}
+				const pliItem = store.get.lookupToItem(opts.pliItem);
+				store.mutations.item.delete({item: {type: 'pliQty', id: pliItem.pliQtyID}});
+				store.mutations.item.delete({item: pliItem});
 			}
-			store.mutations.item.deleteChildList({item: pli, listType: 'pliItem'});
-			store.mutations.item.delete({item: pli});
-		},
-		deletePLIItem(opts) {  // opts: {pliItem}
-			const pliItem = store.get.lookupToItem(opts.pliItem);
-			store.mutations.item.delete({item: {type: 'pliQty', id: pliItem.pliQtyID}});
-			store.mutations.item.delete({item: pliItem});
 		},
 		renumber(type) {
 			let prevNumber;
@@ -682,14 +695,7 @@ const store = {
 				}
 			});
 		},
-		renumberPages() {
-			store.mutations.renumber('page');
-		},
 		setNumber() {  // opts: {target, number} NYI
-		},
-		layoutPage(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
-			const page = store.get.lookupToItem(opts.page);
-			Layout.page(page, opts.layout);
 		},
 		layoutTitlePage(page) {
 			Layout.titlePage(page);
