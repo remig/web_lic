@@ -4,7 +4,7 @@
 util = (function() {
 'use strict';
 
-const util = {
+const api = {
 	isEmpty(p) {
 		if (typeof p === 'number') {
 			return false;
@@ -180,7 +180,7 @@ const util = {
 			};
 		},
 		expandBox(box, minWidth, minHeight) {
-			box = util.clone(box);
+			box = api.clone(box);
 			if (Math.floor(box.width) < 1) {
 				box.width = minWidth;
 				box.x -= minWidth / 2;
@@ -285,14 +285,14 @@ const util = {
 		if (s.startsWith('ctrl+')) {
 			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();
 		}
-		return util.titleCase(s);
+		return api.titleCase(s);
 	}
 };
 
 if (typeof module !== 'undefined' && module.exports != null) {
-	module.exports = util;
+	module.exports = api;
 }
 
-return util;
+return api;
 
 })();

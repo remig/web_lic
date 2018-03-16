@@ -9,12 +9,19 @@ Vue.component('treeRow', {
 	template: '#treeRowTemplate',
 	methods: {
 		itemClick() {
-			app.setSelected(this.target);
+			app.setSelected(this.target);  // TODO: fire an event here, don't rely on global 'app' anymore
 		}
 	},
 	watch: {
 		currentItem(newItem) {
-			expandParents(this, newItem);
+			// When an arbitrary item gets selected, make sure all of its ancestors in the tree are expanded
+			if (util.itemEq(newItem, this.target)) {
+				let parent = this.$parent;
+				while (parent && parent.hasOwnProperty('expanded')) {
+					parent.expanded = true;
+					parent = parent.$parent;
+				}
+			}
 		}
 	},
 	computed: {
@@ -68,15 +75,5 @@ Vue.component('tree', {
 	props: ['treeData', 'currentItem'],
 	template: '#treeTemplate'
 });
-
-function expandParents(node, newItem) {
-	if (util.itemEq(newItem, node.target)) {
-		let parent = node.$parent;
-		while (parent && parent.hasOwnProperty('expanded')) {
-			parent.expanded = true;
-			parent = parent.$parent;
-		}
-	}
-}
 
 })();

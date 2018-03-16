@@ -4,10 +4,6 @@
 UndoStack = (function() {
 'use strict';
 
-function clone(state) {
-	return JSON.parse(JSON.stringify(state));
-}
-
 // stack is an array of state; undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone.
 // index points to the currently visible state in the UI.
 // TODO: don't let this grow unbound - support max undo stack size.  Need performance metrics here, for decent max stack size.
@@ -21,6 +17,10 @@ function UndoStack(store) {
 		return this;
 	}
 	return new UndoStack(store);
+}
+
+function clone(state) {
+	return JSON.parse(JSON.stringify(state));
 }
 
 UndoStack.prototype.onChange = function(onChangeCB) {
