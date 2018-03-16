@@ -30,7 +30,7 @@
 </head>
 <body>
 	<div id="container">
-		<div id="busyOverlay" :class="{hidden: busyText === ''}">
+		<div id="busyOverlay" :class="{hidden: busyText === ''}" v-cloak>
 			<!--<div id="busyText">{{busyText}}<div id="spinner"></div></div>-->
 			<div id="busyContainer">
 				<div class="busyText">{{busyText}}</div>
@@ -65,7 +65,7 @@
 
 		<component :is="currentDialog" ref="currentDialog"></component>
 
-		<div id="statusBar">{{statusText}}</div>
+		<div id="statusBar" v-cloak >{{statusText}}</div>
 	</div>
 	<div id="offscreenCache" class="offscreen">
 		<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" onchange="app.triggerOpenFile(event)" style="display: none;">

@@ -78,6 +78,7 @@ var app = new Vue({
 			});
 		},
 		openLicFile(content) {
+			const start = Date.now();
 			store.load(content);
 			this.filename = store.model.filename;
 			this.pageSize.width = store.state.pageSize.width;
@@ -87,6 +88,8 @@ var app = new Vue({
 			store.save('localStorage');
 			undoStack.saveBaseState();
 			this.clearSelected();
+			const time = util.formatTime(start, Date.now());
+			this.statusText = `"${this.filename}" openend successfully (${time})`;
 			Vue.nextTick(() => {
 				this.drawCurrentPage();
 				this.forceUIUpdate();

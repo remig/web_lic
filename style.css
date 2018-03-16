@@ -260,6 +260,10 @@ ul {
 	border: 3px dashed #2eb9ce;
 }
 
+[v-cloak] {
+	display: none;
+}
+
 .hidden {
 	display: none;
 }
