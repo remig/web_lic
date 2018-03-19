@@ -4,9 +4,10 @@
 const util = require('./util');
 const LDParse = require('./LDParse');
 const store = require('./store');
+const undoStack = require('./undoStack');
 const unused = require('./dialog');
 
-let undoStack, app;
+let app;
 
 const contextMenu = {
 	page: [
@@ -520,8 +521,7 @@ function displacePart(direction) {
 	};
 }
 
-module.exports = function ContextMenu(menuEntry, localApp, localUndoStack) {
+module.exports = function ContextMenu(menuEntry, localApp) {
 	app = localApp;
-	undoStack = localUndoStack;
 	return contextMenu[menuEntry];
 };

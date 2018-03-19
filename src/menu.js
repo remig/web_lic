@@ -3,6 +3,8 @@
 
 const InstructionExporter = require('./export');
 const store = require('./store');
+const undoStack = require('./undoStack');
+let app;
 
 Vue.component('menu-list', {
 	props: ['menuEntries'],
@@ -45,8 +47,6 @@ Vue.component('nav-menu', {
 	props: ['menuEntryList', 'filename', 'version'],
 	template: '#navMenuTemplate'
 });
-
-let undoStack, app;
 
 function enableIfModel() {
 	return store != null && store.model != null;
@@ -217,8 +217,7 @@ const menu = [
 	]}
 ];
 
-module.exports = function Menu(localApp, localUndoStack) {
+module.exports = function Menu(localApp) {
 	app = localApp;
-	undoStack = localUndoStack;
 	return menu;
 };

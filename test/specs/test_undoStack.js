@@ -3,125 +3,118 @@ const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
 
-const util = require('../../src/util');
-const UndoStack = require('../../src/undoStack');
-const fakeStore = {
-	state: {
-		foo: 0,
-		bar: 5
+const store = require('../../src/store');
+
+store.state = {foo: 0, bar: 5};
+store.save = () => {};
+store.mutations = {
+	fakeMutation1() {
+		store.state.foo++;
 	},
-	replaceState(newState) {
-		fakeStore.state = newState;
-	},
-	save() {
-	},
-	mutations: {
-		fakeMutation1() {
-			fakeStore.state.foo++;
-		},
-		fakeMutation2(v) {
-			fakeStore.state.bar = v;
-		}
+	fakeMutation2(v) {
+		store.state.bar = v;
 	}
 };
 
+const undoStack = require('../../src/undoStack');
+
+function assertStackEmpty(stack) {
+	assert.isFalse(stack.isUndoAvailable());
+	assert.isFalse(stack.isRedoAvailable());
+	assert.isEmpty(stack.getState().stack);
+	assert.equal(stack.getIndex(), -1);
+	assert.isEmpty(stack.undoText());
+	assert.isEmpty(stack.redoText());
+}
+
 describe('Test undoStack module', function() {
 
-	it('Instantiate new empty undoStack', () => {
-		const stack = new UndoStack();
-		assert.isEmpty(stack.stack);
-		assert.equal(stack.index, -1);
-		assert.notExists(stack.store);
-		const stack2 = UndoStack(fakeStore);
-		assert.equal(stack2.store, fakeStore);
+	it('ensure new undoStack is empty', () => {
+		assertStackEmpty(undoStack);
 	});
 
-	function assertStackEmpty(stack) {
-		assert.isFalse(stack.isUndoAvailable());
-		assert.isFalse(stack.isRedoAvailable());
-		assert.isEmpty(stack.stack);
-		assert.equal(stack.index, -1);
-		assert.isEmpty(stack.undoText());
-	}
+	it('undo, redo & clear should not alter empty stack', () => {
+		undoStack.undo();
+		assertStackEmpty(undoStack);
 
-	it('Test methods on empty stack', () => {
-		const stack = new UndoStack(fakeStore);
-		assert.isFalse(stack.isUndoAvailable());
-		assert.isFalse(stack.isRedoAvailable());
-		assert.isEmpty(stack.undoText());
-		assert.isEmpty(stack.redoText());
+		undoStack.redo();
+		assertStackEmpty(undoStack);
 
-		stack.undo();
-		assertStackEmpty(stack);
-
-		stack.redo();
-		assertStackEmpty(stack);
-
-		stack.clear();
-		assertStackEmpty(stack);
+		undoStack.clear();
+		assertStackEmpty(undoStack);
 	});
 
 	it('Test setting base state', () => {
-		const stack = new UndoStack(fakeStore);
-		stack.saveBaseState();
-		assert.equal(stack.index, 0);
-		assert.equal(stack.stack.length, 1);
-		const baseState = stack.stack[0];
+		undoStack.saveBaseState();
+		const state = undoStack.getState();
+		assert.equal(state.index, 0);
+		assert.equal(state.stack.length, 1);
+		const baseState = state.stack[0];
 		assert.isNull(baseState.text);
 		assert.equal(baseState.state.bar, 5);
-		fakeStore.state.bar = 30;
+		store.state.bar = 30;
 		assert.equal(baseState.state.bar, 5);  // ensure state was cloned
-		assert.isFalse(stack.isUndoAvailable());
-		assert.isFalse(stack.isRedoAvailable());
-		stack.undo();
-		assert.equal(stack.index, 0);
-		stack.redo();
-		assert.equal(stack.index, 0);
+		assert.isFalse(undoStack.isUndoAvailable());
+		assert.isFalse(undoStack.isRedoAvailable());
+		undoStack.undo();
+		assert.equal(undoStack.getIndex(), 0);
+		undoStack.redo();
+		assert.equal(undoStack.getIndex(), 0);
+	});
+
+	it('clear should empty stack', () => {
+		undoStack.clear();
+		assertStackEmpty(undoStack);
 	});
 
 	it('Test commit', () => {
-		const stack = new UndoStack(fakeStore);
-		stack.saveBaseState();
-		assert.equal(fakeStore.state.foo, 0);
-		stack.commit('fakeMutation1', null, 'Fake Mutation');
-		assert.equal(fakeStore.state.foo, 1);
-		assert.equal(stack.index, 1);
-		assert.equal(stack.stack.length, 2);
-		assert.isTrue(stack.isUndoAvailable());
-		assert.equal(stack.undoText(), 'Fake Mutation');
+		undoStack.saveBaseState();
+		const state = undoStack.getState();
+		assert.equal(store.state.foo, 0);
+		undoStack.commit('fakeMutation1', null, 'Fake Mutation');
+		assert.equal(store.state.foo, 1);
+		assert.equal(undoStack.getIndex(), 1);
+		assert.equal(state.stack.length, 2);
+		assert.isTrue(undoStack.isUndoAvailable());
+		assert.equal(undoStack.undoText(), 'Fake Mutation');
 
-		stack.undo();
-		assert.equal(fakeStore.state.foo, 0);
-		assert.isFalse(stack.isUndoAvailable());
-		assert.isTrue(stack.isRedoAvailable());
-		assert.equal(stack.redoText(), 'Fake Mutation');
-		assert.equal(stack.index, 0);
-		stack.undo();
-		assert.equal(fakeStore.state.foo, 0);
-		assert.equal(stack.index, 0);
+		undoStack.undo();
+		assert.equal(store.state.foo, 0);
+		assert.isFalse(undoStack.isUndoAvailable());
+		assert.isTrue(undoStack.isRedoAvailable());
+		assert.equal(undoStack.redoText(), 'Fake Mutation');
+		assert.equal(undoStack.getIndex(), 0);
+		undoStack.undo();
+		assert.equal(store.state.foo, 0);
+		assert.equal(undoStack.getIndex(), 0);
 
-		stack.redo();
-		assert.equal(stack.index, 1);
-		assert.equal(fakeStore.state.foo, 1);
-		assert.isTrue(stack.isUndoAvailable());
-		assert.isFalse(stack.isRedoAvailable());
-		stack.redo();
-		assert.equal(stack.index, 1);
+		undoStack.redo();
+		assert.equal(undoStack.getIndex(), 1);
+		assert.equal(store.state.foo, 1);
+		assert.isTrue(undoStack.isUndoAvailable());
+		assert.isFalse(undoStack.isRedoAvailable());
+		undoStack.redo();
+		assert.equal(undoStack.getIndex(), 1);
 
-		stack.commit('fakeMutation1', null, 'Fake Mutation');
-		stack.commit('fakeMutation1', null, 'Fake Mutation');
-		stack.commit('fakeMutation1', null, 'Fake Mutation');
-		stack.commit('fakeMutation1', null, 'Fake Mutation');
-		assert.equal(stack.index, 5);
-		assert.equal(fakeStore.state.foo, 5);
+		undoStack.commit('fakeMutation1', null, 'Fake Mutation');
+		undoStack.commit('fakeMutation1', null, 'Fake Mutation');
+		undoStack.commit('fakeMutation1', null, 'Fake Mutation');
+		undoStack.commit('fakeMutation1', null, 'Fake Mutation');
+		assert.equal(undoStack.getIndex(), 5);
+		assert.equal(store.state.foo, 5);
 
-		stack.undo();
-		stack.undo();
-		stack.undo();
-		assert.equal(stack.index, 2);
-		stack.commit('fakeMutation2', 550, 'Another Fake Mutation');
-		assert.equal(stack.index, 3);
-		assert.equal(fakeStore.state.bar, 550);
-		assert.equal(stack.undoText(), 'Another Fake Mutation');
+		undoStack.undo();
+		undoStack.undo();
+		undoStack.undo();
+		assert.equal(undoStack.getIndex(), 2);
+		undoStack.commit('fakeMutation2', 550, 'Another Fake Mutation');
+		assert.equal(undoStack.getIndex(), 3);
+		assert.equal(store.state.bar, 550);
+		assert.equal(undoStack.undoText(), 'Another Fake Mutation');
+	});
+
+	it('clear should empty stack', () => {
+		undoStack.clear();
+		assertStackEmpty(undoStack);
 	});
 });

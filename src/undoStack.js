@@ -1,51 +1,98 @@
 'use strict';
 
 const util = require('./util');
+const store = require('./store');
 
 // stack is an array of state; undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone.
 // index points to the currently visible state in the UI.
 // TODO: don't let this grow unbound - support max undo stack size.  Need performance metrics here, for decent max stack size.
-function UndoStack(store) {
-	if (this instanceof UndoStack) {
-		this.stack = [];
-		this.index = -1;
-		this.store = store;
-		this.localStorageTimer = null;
-		this.onChangeCB = null;
-		return this;
-	}
-	return new UndoStack(store);
-}
 
-function clone(state) {
-	return JSON.parse(JSON.stringify(state));
-}
-
-UndoStack.prototype.onChange = function(onChangeCB) {
-	this.onChangeCB = onChangeCB;
+const state = {
+	stack: [],
+	index: -1,
+	localStorageTimer: null,
+	onChangeCB: null
 };
 
-UndoStack.prototype.commit = function(mutationName, opts, undoText) {
+const api = {
 
-	util.get(mutationName, this.store.mutations)(opts);  // Perform the actual action
+	onChange(onChangeCB) {
+		state.onChangeCB = onChangeCB;
+	},
 
-	if (this.index < this.stack.length - 1) {
-		// If there's undo actions after the 'current' action, delete them
-		this.stack.splice(this.index + 1);
-	}
-	this.stack.push({
-		state: clone(this.store.state),
-		text: undoText || ''
-	});
-	setIndex(this, this.index + 1);
+	commit(mutationName, opts, undoText) {
 
-	// Save the current state to localStorage if we haven't saved it in the last 30 seconds
-	// Need 'typeof setTimeout' check to not crash in unit tests
-	if (typeof setTimeout === 'function' && this.localStorageTimer == null) {
-		this.store.save('localStorage');
-		this.localStorageTimer = setTimeout(() => {
-			this.localStorageTimer = null;
-		}, 30 * 1000);
+		util.get(mutationName, store.mutations)(opts);  // Perform the actual action
+
+		if (state.index < state.stack.length - 1) {
+			// If there's undo actions after the 'current' action, delete them
+			state.stack.splice(state.index + 1);
+		}
+		state.stack.push({
+			state: util.clone(store.state),
+			text: undoText || ''
+		});
+		setIndex(state, state.index + 1);
+
+		// Save the current state to localStorage if we haven't saved it in the last 30 seconds
+		// Need 'typeof setTimeout' check to not crash in unit tests
+		if (typeof setTimeout === 'function' && state.localStorageTimer == null) {
+			store.save('localStorage');
+			state.localStorageTimer = setTimeout(() => {
+				state.localStorageTimer = null;
+			}, 30 * 1000);
+		}
+	},
+
+	// Copy the store's current state into the undoStack's initial base state
+	saveBaseState() {
+		state.stack = [{state: util.clone(store.state), text: null}];
+		setIndex(state, 0);
+	},
+
+	undo() {
+		if (api.isUndoAvailable()) {
+			setIndex(state, state.index - 1);
+			const newState = util.clone(state.stack[state.index].state);
+			store.replaceState(newState);
+		}
+	},
+
+	redo() {
+		if (api.isRedoAvailable()) {
+			setIndex(state, state.index + 1);
+			const newState = util.clone(state.stack[state.index].state);
+			store.replaceState(newState);
+		}
+	},
+
+	clear() {
+		state.stack = [];
+		setIndex(state, -1);
+	},
+
+	getIndex() {
+		return state.index;
+	},
+
+	getState() {
+		return state;
+	},
+
+	isUndoAvailable() {
+		return state.index > 0;
+	},
+
+	isRedoAvailable() {
+		return state.index < state.stack.length - 1;
+	},
+
+	undoText() {
+		return api.isUndoAvailable() ? state.stack[state.index].text : '';
+	},
+
+	redoText() {
+		return api.isRedoAvailable() ? state.stack[state.index + 1].text : '';
 	}
 };
 
@@ -56,47 +103,4 @@ function setIndex(stack, newIndex) {
 	}
 }
 
-// Copy the store's current state into the undoStack's initial base state
-UndoStack.prototype.saveBaseState = function() {
-	this.stack = [{state: clone(this.store.state), text: null}];
-	setIndex(this, 0);
-};
-
-UndoStack.prototype.undo = function() {
-	if (this.isUndoAvailable()) {
-		setIndex(this, this.index - 1);
-		const newState = clone(this.stack[this.index].state);
-		this.store.replaceState(newState);
-	}
-};
-
-UndoStack.prototype.redo = function() {
-	if (this.isRedoAvailable()) {
-		setIndex(this, this.index + 1);
-		const newState = clone(this.stack[this.index].state);
-		this.store.replaceState(newState);
-	}
-};
-
-UndoStack.prototype.clear = function() {
-	this.stack = [];
-	setIndex(this, -1);
-};
-
-UndoStack.prototype.isUndoAvailable = function() {
-	return this.index > 0;
-};
-
-UndoStack.prototype.isRedoAvailable = function() {
-	return this.index < this.stack.length - 1;
-};
-
-UndoStack.prototype.undoText = function() {
-	return this.isUndoAvailable() ? this.stack[this.index].text : '';
-};
-
-UndoStack.prototype.redoText = function() {
-	return this.isRedoAvailable() ? this.stack[this.index + 1].text : '';
-};
-
-module.exports = UndoStack;
+module.exports = api;

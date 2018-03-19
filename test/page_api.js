@@ -167,7 +167,7 @@ module.exports = browser => {
 		importTrivialModel() {
 			browser.url('http://192.168.1.101:9977/web_lic/index.html');
 			browser.execute(function(model, fn) {
-				__Web_lic_testScope.app.importLocalModelXX(model, fn);
+				__Web_lic_testScope.app.importLocalModel(model, fn);
 			}, trivial_model, 'trivial_model.ldr');
 			browser.waitForText(page.ids.statusBar, 9000);
 		},

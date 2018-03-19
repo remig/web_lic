@@ -2,8 +2,8 @@
 'use strict';
 
 const util = require('./util');
-const UndoStack = require('./undoStack');
 const store = require('./store');
+const undoStack = require('./undoStack');
 const LDParse = require('./LDParse');
 const LDRender = require('./LDRender');
 const Menu = require('./menu');
@@ -12,7 +12,6 @@ const unused = require('./tree');
 const unused2 = require('./Layout');
 
 const version = '0.15';
-const undoStack = new UndoStack(store);
 
 Vue.config.performance = false;
 
@@ -103,7 +102,7 @@ const app = new Vue({
 		},
 		save() {
 			store.save('file');
-			this.dirtyState.lastSaveIndex = undoStack.index;
+			this.dirtyState.lastSaveIndex = undoStack.getIndex();
 		},
 		triggerModelImport(e) {
 			const reader = new FileReader();
@@ -344,7 +343,7 @@ const app = new Vue({
 				Vue.nextTick(() => {
 					// Delay menu creation so that earlier menu clear has time to take effect
 					// This is necessary as menu content may change without selected item changing
-					const menu = ContextMenu(this.selectedItemLookup.type, this, undoStack);
+					const menu = ContextMenu(this.selectedItemLookup.type, this);
 					if (menu && menu.length) {
 						this.contextMenu = menu;
 						this.$refs.contextMenuComponent.show(e);
@@ -611,7 +610,7 @@ const app = new Vue({
 			return this.dirtyState.undoIndex !== this.dirtyState.lastSaveIndex;
 		},
 		navBarContent() {
-			return Menu(this, undoStack);
+			return Menu(this);
 		},
 		version() {
 			return version;
@@ -681,7 +680,7 @@ const app = new Vue({
 		});
 
 		undoStack.onChange(() => {
-			this.dirtyState.undoIndex = undoStack.index;
+			this.dirtyState.undoIndex = undoStack.getIndex();
 		});
 
 		LDParse.setProgressCallback(this.updateProgress);
