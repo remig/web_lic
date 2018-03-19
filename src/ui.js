@@ -616,10 +616,13 @@ const app = new Vue({
 			return version;
 		},
 		highlightStyle() {
-			// TODO: If you select someting from the tree on a page that has not yet been laid out, the highlight is drawn wrong
 			const selItem = this.selectedItemLookup;
 			if (!selItem || selItem.type === 'part') {
 				return {display: 'none'};
+			}
+			const page = store.get.pageForItem(selItem);
+			if (page.needsLayout) {
+				store.mutations.page.layout({page});
 			}
 			let box;
 			if (selItem.type === 'page' || selItem.type === 'titlePage') {
