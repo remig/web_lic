@@ -11,7 +11,7 @@ const ContextMenu = require('./contextMenu');
 require('./tree');
 require('./dialog');
 
-const version = '0.15';
+const version = require('../package.json').version;
 
 Vue.config.performance = false;
 
