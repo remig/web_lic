@@ -613,7 +613,7 @@ const app = new Vue({
 			return Menu(this);
 		},
 		version() {
-			return version;
+			return version.slice(0, version.lastIndexOf('.'));  // major.minor is enough for public consumption
 		},
 		highlightStyle() {
 			const selItem = this.selectedItemLookup;
