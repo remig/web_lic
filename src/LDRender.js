@@ -1,8 +1,6 @@
-/*global module: false, require: false, LDParse: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-LDRender = (function() {
 'use strict';
+
+const LDParse = require('./LDParse');
 
 let THREE;
 if (typeof window !== 'undefined' && window.THREE) {
@@ -101,7 +99,7 @@ const api = {
 
 function contextBoundingBox(data, w, h) {
 	let x, y, minX, minY, maxX, maxY;
-	o1:
+	o1: {
 		for (y = h; y--;) {
 			for (x = w; x--;) {
 				if (data[(w * y + x) * 4 + 3] > 0) {
@@ -110,10 +108,11 @@ function contextBoundingBox(data, w, h) {
 				}
 			}
 		}
+	}
 	if (!maxY) {
 		return null;
 	}
-	o2:
+	o2: {
 		for (x = w; x--;) {
 			for (y = maxY + 1; y--;) {
 				if (data[(w * y + x) * 4 + 3] > 0) {
@@ -122,7 +121,8 @@ function contextBoundingBox(data, w, h) {
 				}
 			}
 		}
-	o3:
+	}
+	o3: {
 		for (x = 0; x <= maxX; ++x) {
 			for (y = maxY + 1; y--;) {
 				if (data[(w * y + x) * 4 + 3] > 0) {
@@ -131,7 +131,8 @@ function contextBoundingBox(data, w, h) {
 				}
 			}
 		}
-	o4:
+	}
+	o4: {
 		for (y = 0;y <= maxY; ++y) {
 			for (x = minX; x <= maxX; ++x) {
 				if (data[(w * y + x) * 4 + 3] > 0) {
@@ -140,6 +141,7 @@ function contextBoundingBox(data, w, h) {
 				}
 			}
 		}
+	}
 	return {
 		x: minX, y: minY,
 		maxX: maxX, maxY: maxY,
@@ -582,10 +584,4 @@ function addPartToScene(scene, part, config) {
 	return addModelToScene(scene, model, [0], config);
 }
 
-if (typeof module !== 'undefined' && module.exports != null) {
-	module.exports = api;
-}
-
-return api;
-
-})();
+module.exports = api;

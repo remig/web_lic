@@ -1,5 +1,3 @@
-/* global require: false, describe: false, it: false */
-
 'use strict';
 const chai = require('chai');
 chai.use(require('chai-string'));

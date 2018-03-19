@@ -1,10 +1,12 @@
-/* global Vue: false, util: false, LDParse: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-ContextMenu = (function() {
+/* global Vue: false */
 'use strict';
 
-let undoStack, app, store;
+const util = require('./util');
+const LDParse = require('./LDParse');
+const store = require('./store');
+const unused = require('./dialog');
+
+let undoStack, app;
 
 const contextMenu = {
 	page: [
@@ -518,11 +520,8 @@ function displacePart(direction) {
 	};
 }
 
-return function(menuEntry, localApp, localStore, localUndoStack) {
+module.exports = function ContextMenu(menuEntry, localApp, localUndoStack) {
 	app = localApp;
-	store = localStore;
 	undoStack = localUndoStack;
 	return contextMenu[menuEntry];
 };
-
-})();

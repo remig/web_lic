@@ -1,6 +1,4 @@
 /* global Vue: false, $: false */
-
-(function() {
 'use strict';
 
 Vue.component('baseDialog', {
@@ -60,4 +58,4 @@ Vue.component('partDisplacementDialog', {
 	}
 });
 
-})();
+module.exports = function Dialog() {};

@@ -1,15 +1,19 @@
 {
 	"parserOptions": {
 		"ecmaVersion": 8,
+		"sourceType": "module",
 		"ecmaFeatures": {
 			"experimentalObjectRestSpread": true
 		}
 	},
     "env": {
-        "browser": true,
-        "es6": true
+        "commonjs": true,
+        "mocha": true
     },
-    "extends": "eslint:recommended",
+    "extends": [
+        "eslint:recommended",
+        "plugin:vue/essential"
+    ],
     "rules": {
         "block-scoped-var": "error",
         "brace-style": ["error", "1tbs", {"allowSingleLine": true} ],

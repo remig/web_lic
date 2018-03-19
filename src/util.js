@@ -1,7 +1,3 @@
-/* global module: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-util = (function() {
 'use strict';
 
 const api = {
@@ -289,10 +285,4 @@ const api = {
 	}
 };
 
-if (typeof module !== 'undefined' && module.exports != null) {
-	module.exports = api;
-}
-
-return api;
-
-})();
+module.exports = api;

@@ -1,5 +1,3 @@
-/* global require: false, describe: false, it: false, beforeEach: false */
-
 'use strict';
 require('isomorphic-fetch');
 const fetchMock = require('fetch-mock');

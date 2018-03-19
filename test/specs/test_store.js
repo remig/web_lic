@@ -1,5 +1,3 @@
-/* global require: false, describe: false, it: false, before: false, beforeEach: false */
-
 'use strict';
 const chai = require('chai');
 chai.config.truncateThreshold = 0;
@@ -9,8 +7,8 @@ const sinon = require('sinon');
 
 const LDParse = require('../../src/LDParse');
 const util = require('../../src/util');
-const Layout = require('../../src/layout');
 const store = require('../../src/store');
+
 const trivial_part_dict = require('../trivial_part_dict.json');
 
 describe('Test state store module', function() {
@@ -442,6 +440,6 @@ describe('Test state store module', function() {
 	});
 
 	it('Move all steps to 1 page', () => {
-//		store.mutations.step.moveToPreviousPage({step: {type: 'step', id: 3}});
+		//store.mutations.step.moveToPreviousPage({step: {type: 'step', id: 3}});
 	});
 });

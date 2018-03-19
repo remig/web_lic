@@ -1,8 +1,11 @@
-/* global module: false, app: false, store: false, util: false */
+/* global module: false, __Web_lic_testScope: false */
 // To run tests, cd to lic_w/test folder then 'npm test'
 // To debug tests, add 'browser.debug()' anywhere in the test code
-
 'use strict';
+
+// TODO: run unit tests directly in mocha, not in webdriver for faster test runs.
+
+const trivial_model = require('./trivial_model.json').model;
 
 module.exports = browser => {
 
@@ -136,30 +139,37 @@ module.exports = browser => {
 		},
 		getCurrentPage() {
 			return browser.execute(() => {
-				if (app.currentPageLookup == null) {
+				if (__Web_lic_testScope.app.currentPageLookup == null) {
 					return null;
 				}
 				return {
-					pageID: app.currentPageLookup.id,
-					type: app.currentPageLookup.type
+					pageID: __Web_lic_testScope.app.currentPageLookup.id,
+					type: __Web_lic_testScope.app.currentPageLookup.type
 				};
 			}).value;
 		},
 		getSelectedItem() {
 			return browser.execute(() => {
-				if (app.selectedItemLookup == null) {
+				if (__Web_lic_testScope.app.selectedItemLookup == null) {
 					return null;
 				}
 				return {
-					id: app.selectedItemLookup.id,
-					type: app.selectedItemLookup.type
+					id: __Web_lic_testScope.app.selectedItemLookup.id,
+					type: __Web_lic_testScope.app.selectedItemLookup.type
 				};
 			}).value;
 		},
 		getStoreState(prop) {
 			return browser.execute(prop => {
-				return util.get(prop, store.state);
+				return __Web_lic_testScope.util.get(prop, __Web_lic_testScope.store.state);
 			}, prop).value;
+		},
+		importTrivialModel() {
+			browser.url('http://192.168.1.101:9977/web_lic/index.html');
+			browser.execute(function(model, fn) {
+				__Web_lic_testScope.app.importLocalModelXX(model, fn);
+			}, trivial_model, 'trivial_model.ldr');
+			browser.waitForText(page.ids.statusBar, 9000);
 		},
 		isPageCanvasBlank() {
 			return browser.execute(() => {

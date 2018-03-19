@@ -1,8 +1,8 @@
-/* global Vue: false, $: false, InstructionExporter: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-Menu = (function() {
+/* global Vue: false, $: false */
 'use strict';
+
+const InstructionExporter = require('./export');
+const store = require('./store');
 
 Vue.component('menu-list', {
 	props: ['menuEntries'],
@@ -46,15 +46,15 @@ Vue.component('nav-menu', {
 	template: '#navMenuTemplate'
 });
 
-let undoStack, app, store;
+let undoStack, app;
 
 function enableIfModel() {
 	return store != null && store.model != null;
 }
 
-function defaultCallback() {
-	// TOOD: most menu commands should just call the associated method in app.
-}
+// TOOD: most menu commands should just call the associated method in app.
+// function defaultCallback() {
+// }
 
 const menu = [
 	{name: 'File', children: [
@@ -217,11 +217,8 @@ const menu = [
 	]}
 ];
 
-return function(localApp, localStore, localUndoStack) {
+module.exports = function Menu(localApp, localUndoStack) {
 	app = localApp;
-	store = localStore;
 	undoStack = localUndoStack;
 	return menu;
 };
-
-})();

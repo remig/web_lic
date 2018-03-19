@@ -16,17 +16,6 @@
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.3.5/split.min.js"></script>
-	<script type="text/javascript" src="src/LDParse.js"></script>
-	<script type="text/javascript" src="src/LDRender.js"></script>
-	<script type="text/javascript" src="src/util.js"></script>
-	<script type="text/javascript" src="src/store.js"></script>
-	<script type="text/javascript" src="src/layout.js"></script>
-	<script type="text/javascript" src="src/undoStack.js"></script>
-	<script type="text/javascript" src="src/export.js"></script>
-	<script type="text/javascript" src="src/menu.js"></script>
-	<script type="text/javascript" src="src/contextMenu.js"></script>
-	<script type="text/javascript" src="src/tree.js"></script>
-	<script type="text/javascript" src="src/dialog.js"></script>
 </head>
 <body>
 	<div id="container">
@@ -66,15 +55,15 @@
 		<component :is="currentDialog" ref="currentDialog"></component>
 
 		<div id="statusBar" v-cloak >{{statusText}}</div>
-	</div>
-	<div id="offscreenCache" class="offscreen">
-		<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" onchange="app.triggerOpenFile(event)" style="display: none;">
-		<input type="file" name="uploadModelChooser" id="uploadModelChooser" accept=".ldr, .mpd" onchange="app.triggerModelImport(event)" style="display: none;">
-		<svg xmlns="http://www.w3.org/2000/svg">
-			<text id="fontMeasureContainer">gW</text>
-		</svg>
-		<canvas id="generateImagesCanvas"></canvas>
-		<div id="canvasHolder"></div>
+		<div id="offscreenCache" class="offscreen">
+			<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" @change="triggerOpenFile($event)" style="display: none;">
+			<input type="file" name="uploadModelChooser" id="uploadModelChooser" accept=".ldr, .mpd" @change="triggerModelImport($event)" style="display: none;">
+			<svg xmlns="http://www.w3.org/2000/svg">
+				<text id="fontMeasureContainer">gW</text>
+			</svg>
+			<canvas id="generateImagesCanvas"></canvas>
+			<div id="canvasHolder"></div>
+		</div>
 	</div>
 
 	<!-- Component Templates -->
@@ -119,14 +108,14 @@
 	<script type="text/x-template" id="treeParentRowTemplate">
 		<div :id="`treeParent_${target.type}_${target.id}`">
 			<i :class="['treeIcon', {treeIconClosed: !expanded}]" @click.stop.prevent="arrowClick" />
-			<treeRow :currentItem="currentItem" :target="target" />
+			<treeRow :currentItem="currentItem" :target="target" :selectionCallback="treeData.selectionCallback" />
 			<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">
 				<li v-if="target.numberLabel != null">
-					<treeRow :currentItem="currentItem" :target="treeData.store.get.numberLabel(target)" />
+					<treeRow :currentItem="currentItem" :target="treeData.store.get.numberLabel(target)" :selectionCallback="treeData.selectionCallback" />
 				</li>
 				<template v-if="target.labels != null">
 					<li v-for="labelID in target.labels">
-						<treeRow :currentItem="currentItem" :target="treeData.store.get.label(labelID)" />
+						<treeRow :currentItem="currentItem" :target="treeData.store.get.label(labelID)" :selectionCallback="treeData.selectionCallback" />
 					</li>
 				</template>
 				<template v-if="target.steps != null">
@@ -135,14 +124,14 @@
 					</li>
 				</template>
 				<li v-if="target.csiID != null">
-					<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(target.csiID)" />
+					<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(target.csiID)" :selectionCallback="treeData.selectionCallback" />
 				</li>
 				<li v-if="target.pliID != null && treeData.store.state.plisVisible" class="unindent">
 					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.pli(target.pliID)" />
 				</li>
 				<template v-if="target.pliItems != null">
 					<li v-for="pliItem in target.pliItems.map(id => treeData.store.get.pliItem(id))">
-						<treeRow :currentItem="currentItem" :target="pliItem" />
+						<treeRow :currentItem="currentItem" :target="pliItem" :selectionCallback="treeData.selectionCallback" />
 					</li>
 				</template>
 				<template v-if="target.callouts != null">
@@ -209,7 +198,7 @@
 		</baseDialog>
 	</script>
 
-	<script type="text/javascript" src="src/ui.js"></script>
+	<script type="text/javascript" src="dist/bundle.js"></script>
 
 </body>
 </html>

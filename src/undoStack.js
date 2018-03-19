@@ -1,8 +1,6 @@
-/* global module: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-UndoStack = (function() {
 'use strict';
+
+const util = require('./util');
 
 // stack is an array of state; undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone.
 // index points to the currently visible state in the UI.
@@ -101,10 +99,4 @@ UndoStack.prototype.redoText = function() {
 	return this.isRedoAvailable() ? this.stack[this.index + 1].text : '';
 };
 
-if (typeof module !== 'undefined' && module.exports != null) {
-	module.exports = UndoStack;
-}
-
-return UndoStack;
-
-})();
+module.exports = UndoStack;

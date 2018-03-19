@@ -1,8 +1,8 @@
-/* global module: false, util: false, store: false, LDParse: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-Layout = (function() {
 'use strict';
+
+const util = require('./util');
+const store = require('./store');
+const LDParse = require('./LDParse');
 
 // These will end up in the template page, when we have one
 const pageMargin = 20;
@@ -10,7 +10,7 @@ const pliMargin = Math.floor(pageMargin / 1.2);
 const calloutMargin = Math.floor(pliMargin / 2);
 const emptyCalloutSize = 50;
 
-const Layout = {
+const api = {
 
 	callout(callout) {
 		const step = store.get.step(callout.parent.id);
@@ -23,7 +23,7 @@ const Layout = {
 			callout.height = 0;
 			callout.steps.forEach(stepID => {
 				const step = store.get.step(stepID);
-				Layout.step.insideOut(step, calloutMargin);
+				api.step.insideOut(step, calloutMargin);
 				step.x = calloutMargin;
 				step.y = Math.floor(calloutMargin + totalHeight);
 				totalHeight = step.y + step.height;
@@ -38,9 +38,10 @@ const Layout = {
 		}
 		callout.x = 10;
 		callout.y = Math.floor(csi.y - ((callout.height - csi.height) / 2));
-		Layout.calloutArrow(callout);
+		api.calloutArrow(callout);
 	},
 	calloutArrow(callout) {
+		// TODO: do not recreate callout arrow on layout; just alter the existing one
 		const step = store.get.step(callout.parent.id);
 		const csi = store.get.csi(step.csiID);
 		callout.calloutArrows.forEach(id => {
@@ -121,11 +122,11 @@ const Layout = {
 			}
 
 			(step.callouts || []).forEach(calloutID => {
-				Layout.callout(store.get.callout(calloutID));
+				api.callout(store.get.callout(calloutID));
 			});
 
 			if (step.pliID != null && store.state.plisVisible) {
-				Layout.pli(store.get.pli(step.pliID));
+				api.pli(store.get.pli(step.pliID));
 			}
 
 			if (step.numberLabel != null) {
@@ -244,10 +245,4 @@ const Layout = {
 	}
 };
 
-if (typeof module !== 'undefined' && module.exports != null) {
-	module.exports = Layout;
-}
-
-return Layout;
-
-})();
+module.exports = api;

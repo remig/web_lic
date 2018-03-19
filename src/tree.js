@@ -1,15 +1,15 @@
-/* global Vue: false, app: false, util: false, LDParse: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-(function() {
+/* global Vue: false */
 'use strict';
 
+const util = require('./util');
+const LDParse = require('./LDParse');
+
 Vue.component('treeRow', {
-	props: ['currentItem', 'target'],
+	props: ['currentItem', 'target', 'selectionCallback'],
 	template: '#treeRowTemplate',
 	methods: {
 		itemClick() {
-			app.setSelected(this.target);  // TODO: fire an event here, don't rely on global 'app' anymore
+			this.selectionCallback(this.target);  // Easier and faster than emitting an event across 3 levels of components
 		}
 	},
 	watch: {
@@ -76,4 +76,4 @@ Vue.component('tree', {
 	template: '#treeTemplate'
 });
 
-})();
+module.exports = function Tree() {};

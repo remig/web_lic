@@ -1,9 +1,3 @@
-/* global module: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-LDParse = (function() {
-'use strict';
-
 const api = {
 	// Load the specified url via AJAX and return an abstractPart representing the content of url.
 	async loadRemotePart(url) {
@@ -387,10 +381,4 @@ async function loadPart(fn, content, progressCallback) {
 	return part;
 }
 
-if (typeof module !== 'undefined' && module.exports != null) {
-	module.exports = api;
-}
-
-return api;
-
-})();
+module.exports = api;

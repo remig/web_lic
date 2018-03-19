@@ -1,11 +1,17 @@
-/* global Vue: false, Split: false, UndoStack: false, LDParse: false, LDRender: false, util: false, store: false, Menu: false, ContextMenu: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-app = (function() {
+/* global Vue: false, Split: false, */
 'use strict';
 
-const version = '0.15';
+const util = require('./util');
+const UndoStack = require('./undoStack');
+const store = require('./store');
+const LDParse = require('./LDParse');
+const LDRender = require('./LDRender');
+const Menu = require('./menu');
+const ContextMenu = require('./contextMenu');
+const unused = require('./tree');
+const unused2 = require('./Layout');
 
+const version = '0.15';
 const undoStack = new UndoStack(store);
 
 Vue.config.performance = false;
@@ -23,7 +29,7 @@ Vue.filter('sanitizeMenuID', id => {
 
 Vue.filter('prettyPrint', util.prettyPrint);
 
-var app = new Vue({
+const app = new Vue({
 	el: '#container',
 	data: {  // Store any transient UI state data here.  Do *not* store state items here; Vue turns these into observers
 		currentPageLookup: null,
@@ -60,21 +66,21 @@ var app = new Vue({
 			this.busyText = 'Loading Model';
 			modelGenerator().then(model => {
 				store.setModel(model);
-				app.filename = store.model.filename;
+				this.filename = store.model.filename;
 				LDRender.setPartDictionary(LDParse.partDictionary);
 
 				store.mutations.addInitialPages(LDParse.partDictionary);  // Add pages before title page so title page summary label comes out correct
 				store.mutations.addTitlePage();
 				store.save('localStorage');
 
-				app.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
+				this.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
 				undoStack.saveBaseState();
-				app.forceUIUpdate();
+				this.forceUIUpdate();
 
 				const time = util.formatTime(start, Date.now());
-				app.updateProgress({clear: true});
-				app.statusText = `"${store.get.modelFilename()}" loaded successfully (${time})`;
-				Vue.nextTick(app.drawCurrentPage);
+				this.updateProgress({clear: true});
+				this.statusText = `"${store.get.modelFilename()}" loaded successfully (${time})`;
+				Vue.nextTick(this.drawCurrentPage);
 			});
 		},
 		openLicFile(content) {
@@ -97,13 +103,13 @@ var app = new Vue({
 		},
 		save() {
 			store.save('file');
-			app.dirtyState.lastSaveIndex = undoStack.index;
+			this.dirtyState.lastSaveIndex = undoStack.index;
 		},
 		triggerModelImport(e) {
 			const reader = new FileReader();
-			reader.onload = (function(filename) {
-				return function(e) {
-					app.importLocalModel(e.target.result, filename);
+			reader.onload = (filename => {
+				return e => {
+					this.importLocalModel(e.target.result, filename);
 				};
 			})(e.target.files[0].name);
 			reader.readAsText(e.target.files[0]);
@@ -111,8 +117,8 @@ var app = new Vue({
 		},
 		triggerOpenFile(e) {
 			const reader = new FileReader();
-			reader.onload = function(e) {
-				app.openLicFile(JSON.parse(e.target.result));
+			reader.onload = e => {
+				this.openLicFile(JSON.parse(e.target.result));
 			};
 			reader.readAsText(e.target.files[0]);
 			e.target.value = '';
@@ -160,7 +166,7 @@ var app = new Vue({
 		},
 		updateProgress: (() => {
 			let progress = 0, count = 0, text = '';
-			return (opts) => {
+			return function(opts) {
 				if (opts == null) {
 					progress++;
 				} else if (typeof opts === 'string') {
@@ -171,7 +177,7 @@ var app = new Vue({
 						count = opts.stepCount;
 					}
 					if (opts.clear) {
-						app.busyText = text = '';
+						this.busyText = text = '';
 						progress = count = 0;
 					}
 					if (opts.text) {
@@ -261,7 +267,7 @@ var app = new Vue({
 					const callout = store.get.callout(step.callouts[i]);
 					for (let j = 0; j < callout.steps.length; j++) {
 						const step = store.get.step(callout.steps[j]);
-						const innerTarget = app.findClickTargetInStep(mx, my, step);
+						const innerTarget = this.findClickTargetInStep(mx, my, step);
 						if (innerTarget) {
 							return innerTarget;
 						}
@@ -306,7 +312,7 @@ var app = new Vue({
 			}
 			for (let i = 0; i < page.steps.length; i++) {
 				const step = store.get.step(page.steps[i]);
-				const innerTarget = app.findClickTargetInStep(mx, my, step);
+				const innerTarget = this.findClickTargetInStep(mx, my, step);
 				if (innerTarget) {
 					return innerTarget;
 				}
@@ -338,7 +344,7 @@ var app = new Vue({
 				Vue.nextTick(() => {
 					// Delay menu creation so that earlier menu clear has time to take effect
 					// This is necessary as menu content may change without selected item changing
-					const menu = ContextMenu(this.selectedItemLookup.type, this, store, undoStack);
+					const menu = ContextMenu(this.selectedItemLookup.type, this, undoStack);
 					if (menu && menu.length) {
 						this.contextMenu = menu;
 						this.$refs.contextMenuComponent.show(e);
@@ -474,7 +480,7 @@ var app = new Vue({
 			if (step.csiID != null) {
 				ctx.save();
 				ctx.scale(1 / scale, 1 / scale);
-				const selItem = app.selectedItemLookup;
+				const selItem = this.selectedItemLookup;
 				const csi = store.get.csi(step.csiID);
 				const haveSelectedParts = selItem && selItem.type === 'part' && selItem.stepID === step.id;
 				const selectedPartIDs = haveSelectedParts ? [selItem.id] : null;
@@ -491,7 +497,7 @@ var app = new Vue({
 				ctx.save();
 				ctx.translate(callout.x, callout.y);
 
-				callout.steps.forEach(id => app.drawStep({type: 'step', id}, canvas, scale));
+				callout.steps.forEach(id => this.drawStep({type: 'step', id}, canvas, scale));
 
 				ctx.strokeStyle = 'black';
 				ctx.lineWidth = 2;
@@ -570,7 +576,7 @@ var app = new Vue({
 			ctx.fillStyle = 'white';
 			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
 
-			page.steps.forEach(id => app.drawStep({type: 'step', id}, canvas, scale));
+			page.steps.forEach(id => this.drawStep({type: 'step', id}, canvas, scale));
 
 			if (page.numberLabel != null) {
 				const lbl = store.get.pageNumber(page.numberLabel);
@@ -597,6 +603,7 @@ var app = new Vue({
 		treeData() {
 			return {
 				store,
+				selectionCallback: this.setSelected.bind(this),
 				treeUpdateState: this.treeUpdateState  // Reactive property used to trigger tree update
 			};
 		},
@@ -604,12 +611,13 @@ var app = new Vue({
 			return this.dirtyState.undoIndex !== this.dirtyState.lastSaveIndex;
 		},
 		navBarContent() {
-			return Menu(this, store, undoStack);
+			return Menu(this, undoStack);
 		},
 		version() {
 			return version;
 		},
 		highlightStyle() {
+			// TODO: If you select someting from the tree on a page that has not yet been laid out, the highlight is drawn wrong
 			const selItem = this.selectedItemLookup;
 			if (!selItem || selItem.type === 'part') {
 				return {display: 'none'};
@@ -643,10 +651,39 @@ var app = new Vue({
 			};
 		}
 	},
-	mounted: function() {
+	mounted() {
+
+		document.body.addEventListener('keyup', e => {
+			this.globalKeyPress(e);
+		});
+
+		document.body.addEventListener('keydown', e => {
+			if ((e.key === 'PageDown' || e.key === 'PageUp'
+				|| e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey))
+				&& e.target.nodeName !== 'INPUT') {
+				e.preventDefault();
+			}
+		});
+
+		window.addEventListener('beforeunload', e => {
+			if (this && this.isDirty) {
+				const msg = 'You have unsaved changes. Leave anyway?';
+				e.returnValue = msg;
+				return msg;
+			}
+			return null;
+		});
+
+		// Enable splitter between tree and page view
+		Split(['#leftPane', '#rightPane'], {
+			sizes: [20, 80], minSize: [100, store.state.pageSize.width + 10], direction: 'horizontal',
+			gutterSize: 5, snapOffset: 0
+		});
+
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.index;
 		});
+
 		LDParse.setProgressCallback(this.updateProgress);
 		var localState = localStorage.getItem('lic_state');
 		if (localState) {
@@ -655,29 +692,10 @@ var app = new Vue({
 	}
 });
 
-// Enable splitter between tree and page view
-Split(['#leftPane', '#rightPane'], {
-	sizes: [20, 80], minSize: [100, store.state.pageSize.width + 10], direction: 'horizontal',
-	gutterSize: 5, snapOffset: 0
-});
-
-document.body.addEventListener('keyup', e => app.globalKeyPress(e));
-document.body.addEventListener('keydown', e => {
-	if ((e.key === 'PageDown' || e.key === 'PageUp'
-		|| e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey))
-		&& e.target.nodeName !== 'INPUT') {
-		e.preventDefault();
-	}
-});
-
-window.addEventListener('beforeunload', e => {
-	if (app && app.isDirty) {
-		const msg = 'You have unsaved changes. Leave anyway?';
-		e.returnValue = msg;
-		return msg;
-	}
-	return null;
-});
+window.__Web_lic_testScope = {  // store a global reference to these for easier testing
+	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
+	util, app, store
+};
 
 //app.importRemoteModel('Creator/20015 - Alligator.mpd');
 //app.importRemoteModel('Star Wars/7140 - X-Wing Fighter.mpd');
@@ -688,7 +706,3 @@ window.addEventListener('beforeunload', e => {
 //app.importRemoteModel('Space/894 - Mobile Ground Tracking Station.mpd');
 //app.importRemoteModel('Star Wars/4487 - Jedi Starfighter & Slave I.mpd');
 //app.importRemoteModel('trivial_model.ldr');
-
-return app;
-
-})();

@@ -1,8 +1,12 @@
-/* global module: false, util: false, Layout: false, saveAs: false, LDParse: false, LDRender: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-store = (function() {
+/* global saveAs: false */
 'use strict';
+
+const util = require('./util');
+const LDParse = require('./LDParse');
+const LDRender = require('./LDRender');
+
+// Load this later, to avoid circular import issues
+let Layout;  // eslint-disable-line prefer-const
 
 const emptyState = {
 	pageSize: {width: 900, height: 700},
@@ -870,10 +874,6 @@ for (let el in store.state) {
 	}
 }
 
-if (typeof module !== 'undefined' && module.exports != null) {
-	module.exports = store;
-}
+module.exports = store;
 
-return store;
-
-})();
+Layout = require('./Layout');

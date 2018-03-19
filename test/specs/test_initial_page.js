@@ -1,4 +1,4 @@
-/* global require: false, browser: false, before: false, describe: false, it: false */
+/* global browser: false */
 
 'use strict';
 const chai = require('chai');
@@ -9,7 +9,7 @@ const page = require('../page_api')(browser);
 describe('Launch empty Page', function() {
 
 	before(() => {
-		browser.url('http://192.168.1.101:9977/web_lic/web_lic.html');
+		browser.url('http://192.168.1.101:9977/web_lic/index.html');  // TODO: abstract local server URL into proper config file
 	});
 
 	it("Page title should be 'Web Lic!'", () => {

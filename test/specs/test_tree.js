@@ -1,20 +1,15 @@
-/* global require: false, describe: false, before: false, it: false, browser: false, app: false */
+/* global browser: false */
 
 'use strict';
 const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
 const page = require('../page_api')(browser, assert);
-const trivial_model = require('../trivial_model.json').model;
 
 describe('Test Navigation Tree', function() {
 
 	before(() => {
-		browser.url('http://192.168.1.101:9977/web_lic/web_lic.html');
-		browser.execute(function(model, fn) {
-			app.importLocalModel(model, fn);
-		}, trivial_model, 'trivial_model.ldr');
-		browser.waitForText('#statusBar', 9000);
+		page.importTrivialModel();
 	});
 
 	it('Verify initial tree content', () => {
@@ -91,14 +86,23 @@ describe('Test Navigation Tree', function() {
 	it('Click canvas should highlight related row', () => {
 		const canvasSize = browser.getElementSize(page.ids.pageCanvas);
 		browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, 550);
-		assert.equal(browser.getClass2(page.selectors.tree.childRow('label', 0)), page.classes.tree.childRow.unhighlighted);
-		assert.equal(browser.getClass2(page.selectors.tree.childRow('label', 1)), page.classes.tree.childRow.highlighted);
+		assert.equal(
+			browser.getClass2(page.selectors.tree.childRow('label', 0)),
+			page.classes.tree.childRow.unhighlighted
+		);
+		assert.equal(
+			browser.getClass2(page.selectors.tree.childRow('label', 1)),
+			page.classes.tree.childRow.highlighted
+		);
 		assert.isTrue(page.highlight.isValid(366, 542, 164, 30));
 
 		const csiSelector = page.selectors.tree.childRow('csi', 3);
 		const step0Selector = page.selectors.tree.parentRow('step', 3);
 		browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, canvasSize.height / 2);
-		assert.equal(browser.getClass2(page.selectors.tree.childRow('label', 1)), page.classes.tree.childRow.unhighlighted);
+		assert.equal(
+			browser.getClass2(page.selectors.tree.childRow('label', 1)),
+			page.classes.tree.childRow.unhighlighted
+		);
 		assert.equal(browser.getClass2(csiSelector), page.classes.tree.childRow.highlighted);
 		assert.equal(browser.getText2(csiSelector), 'CSI');
 		assert.equal(browser.getClass2(step0Selector.arrow), page.classes.tree.parentRow.open);

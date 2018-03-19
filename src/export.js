@@ -1,8 +1,7 @@
-/* global module: false, jsPDF: false, JSZip: false, saveAs: false, util: false */
-
-// eslint-disable-next-line no-implicit-globals, no-undef
-InstructionExporter = (function() {
+/* global jsPDF: false, JSZip: false, saveAs: false */
 'use strict';
+
+const util = require('./util');
 
 function exportInstructions(app, store, exportType, drawPageCallback, doneCallback) {
 
@@ -104,10 +103,4 @@ const api = {
 	}
 };
 
-if (typeof module !== 'undefined' && module.exports != null) {
-	module.exports = api;
-}
-
-return api;
-
-})();
+module.exports = api;

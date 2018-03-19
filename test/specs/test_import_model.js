@@ -1,4 +1,4 @@
-/* global browser: false, require: false, before: false, after: false, describe: false, it: false, app: false */
+/* global browser: false */
 
 'use strict';
 const fs = require('fs');
@@ -6,7 +6,6 @@ const chai = require('chai');
 chai.use(require('chai-string'));
 const assert = chai.assert;
 const page = require('../page_api')(browser);
-const trivial_model = require('../trivial_model.json').model;
 const downloadPath = browser.options.downloadPath;
 const saveFile = `${downloadPath}/trivial_model.lic`;
 
@@ -26,11 +25,7 @@ describe('Import Trivial Model', function() {
 			fs.mkdirSync(downloadPath);
 		}
 		clearDownloads();
-		browser.url('http://192.168.1.101:9977/web_lic/web_lic.html');
-		browser.execute(function(model, fn) {
-			app.importLocalModel(model, fn);
-		}, trivial_model, 'trivial_model.ldr');
-		browser.waitForText('#statusBar', 9000);
+		page.importTrivialModel();
 		canvasSize = browser.getElementSize(page.ids.pageCanvas);
 	});
 

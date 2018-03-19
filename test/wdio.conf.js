@@ -1,18 +1,18 @@
 /* global exports: false, require: false, browser: false, process: false */
 
 const path = require('path');
-const downloadPath = path.resolve('chromeDownloads');
+const downloadPath = path.resolve('test/chromeDownloads');
 
 exports.config = {
 	specs: [
-		'./specs/test_LDParse.js',
-		'./specs/test_LDRender.js',
-		'./specs/test_util.js',
-		'./specs/test_store.js',
-		'./specs/test_undoStack.js',
-		'./specs/test_initial_page.js',
-		'./specs/test_import_model.js',
-		'./specs/test_tree.js'
+		'./test/specs/test_LDParse.js',
+		'./test/specs/test_LDRender.js',
+		'./test/specs/test_util.js',
+		'./test/specs/test_store.js',
+		'./test/specs/test_undoStack.js',
+		'./test/specs/test_initial_page.js',
+		'./test/specs/test_import_model.js',
+		'./test/specs/test_tree.js'
 	],
 	exclude: [],
 	maxInstances: 1,
@@ -32,7 +32,7 @@ exports.config = {
 	coloredLogs: true,
 	deprecationWarnings: false,
 	bail: 0,
-	screenshotPath: './errorShots/',
+	screenshotPath: 'test/errorShots/',
 	downloadPath: downloadPath,
 	baseUrl: 'http://localhost',
 	waitforTimeout: 1000000,
