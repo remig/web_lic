@@ -57,5 +57,3 @@ Vue.component('partDisplacementDialog', {
 		}
 	}
 });
-
-module.exports = function Dialog() {};

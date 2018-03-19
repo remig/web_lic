@@ -5,7 +5,7 @@ const util = require('./util');
 const LDParse = require('./LDParse');
 const LDRender = require('./LDRender');
 
-// Load this later, to avoid circular import issues
+// Load this later, to avoid circular import issues (layout.js is just code that belongs in store moved to a dedicated file)
 let Layout;  // eslint-disable-line prefer-const
 
 const emptyState = {

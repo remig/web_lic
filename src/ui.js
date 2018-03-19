@@ -8,8 +8,8 @@ const LDParse = require('./LDParse');
 const LDRender = require('./LDRender');
 const Menu = require('./menu');
 const ContextMenu = require('./contextMenu');
-const unused = require('./tree');
-const unused2 = require('./Layout');
+require('./tree');
+require('./dialog');
 
 const version = '0.15';
 

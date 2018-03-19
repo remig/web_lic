@@ -1,8 +1,8 @@
 'use strict';
 
 const util = require('./util');
-const store = require('./store');
 const LDParse = require('./LDParse');
+const store = require('./store');
 
 // These will end up in the template page, when we have one
 const pageMargin = 20;

@@ -5,7 +5,6 @@ const util = require('./util');
 const LDParse = require('./LDParse');
 const store = require('./store');
 const undoStack = require('./undoStack');
-const unused = require('./dialog');
 
 let app;
 

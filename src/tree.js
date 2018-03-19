@@ -75,5 +75,3 @@ Vue.component('tree', {
 	props: ['treeData', 'currentItem'],
 	template: '#treeTemplate'
 });
-
-module.exports = function Tree() {};
