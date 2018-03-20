@@ -57,3 +57,20 @@ Vue.component('partDisplacementDialog', {
 		}
 	}
 });
+
+Vue.component('pageRowColLayoutDialog', {
+	template: '#rowColLayoutTemplate',
+	mixins: [baseDialogPropagator],
+	data: function() {
+		return {
+			rows: 2,
+			cols: 2,
+			direction: 'vertical'
+		};
+	},
+	methods: {
+		updateValues() {
+			this.$emit('update', {...this.$data});
+		}
+	}
+});

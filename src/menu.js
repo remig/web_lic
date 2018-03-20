@@ -52,10 +52,6 @@ function enableIfModel() {
 	return store != null && store.model != null;
 }
 
-// TOOD: most menu commands should just call the associated method in app.
-// function defaultCallback() {
-// }
-
 const menu = [
 	{name: 'File', children: [
 		{

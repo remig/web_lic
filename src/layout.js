@@ -46,7 +46,7 @@ const api = {
 		const csi = store.get.csi(step.csiID);
 		callout.calloutArrows.forEach(id => {
 			const arrow = store.get.calloutArrow(id);
-			arrow.points.forEach(id => store.mutations.item.delete({item: {type: 'point', id}}));
+			store.mutations.item.deleteChildList({item: arrow, listType: 'point'});
 			store.mutations.item.delete({item: {type: 'calloutArrow', id}});
 		});
 		callout.calloutArrows = [];
@@ -112,11 +112,18 @@ const api = {
 			step.width = box.width - pageMargin - pageMargin;
 			step.height = box.height - pageMargin - pageMargin;
 
+			if (step.pliID != null && store.state.plisVisible) {
+				api.pli(store.get.pli(step.pliID));
+			}
+
+			const havePLI = step.pliID != null && store.state.plisVisible;
+			const pliHeight = havePLI ? store.get.pli(step.pliID).height : 0;
+
 			if (step.csiID != null) {
 				const csiSize = store.render.csi(localModel, step) || {width: 0, height: 0};
 				const csi = store.get.csi(step.csiID);
 				csi.x = Math.floor((step.width - csiSize.width) / 2);
-				csi.y = Math.floor((step.height - csiSize.height) / 2);
+				csi.y = Math.floor((step.height + pliHeight - csiSize.height) / 2);
 				csi.width = csiSize.width;
 				csi.height = csiSize.height;
 			}
@@ -125,13 +132,7 @@ const api = {
 				api.callout(store.get.callout(calloutID));
 			});
 
-			if (step.pliID != null && store.state.plisVisible) {
-				api.pli(store.get.pli(step.pliID));
-			}
-
 			if (step.numberLabel != null) {
-				const havePLI = step.pliID != null && store.state.plisVisible;
-				const pliHeight = havePLI ? store.get.pli(step.pliID).height : 0;
 				const lblSize = util.measureLabel('bold 20pt Helvetica', step.number);
 				const lbl = store.get.stepNumber(step.numberLabel);
 				lbl.x = 0;
@@ -170,6 +171,34 @@ const api = {
 			step.height = margin + lblSize.height + contentSize.height + margin;
 		}
 	},
+	dividers(page, layout, rows, cols) {
+
+		// Delete any dividers already on the page, then re-add new ones in the right plaoces.
+		page.dividers = page.dividers || [];
+		store.mutations.item.deleteChildList({item: page, listType: 'divider'});
+
+		const pageSize = store.state.pageSize;
+		const colSize = Math.floor(pageSize.width / cols);
+		const rowSize = Math.floor(pageSize.height / rows);
+
+		if (layout === 'horizontal') {
+			for (let i = 1; i < rows; i++) {
+				store.mutations.item.add({item: {
+					type: 'divider',
+					p1: {x: pageMargin, y: rowSize * i},
+					p2: {x: pageSize.width - pageMargin, y: rowSize * i}
+				}, parent: page});
+			}
+		} else {
+			for (let i = 1; i < cols; i++) {
+				store.mutations.item.add({item: {
+					type: 'divider',
+					p1: {x: colSize * i, y: pageMargin},
+					p2: {x: colSize * i, y: pageSize.height - pageMargin}
+				}, parent: page});
+			}
+		}
+	},
 	page(page, layout) {
 
 		if (page.type === 'titlePage') {
@@ -204,6 +233,8 @@ const api = {
 			}
 			store.mutations.step.layout({step: store.get.step(page.steps[i]), box});
 		}
+
+		api.dividers(page, layout, rows, cols);
 
 		if (page.numberLabel != null) {
 			const lblSize = util.measureLabel('bold 20pt Helvetica', page.number);

@@ -577,6 +577,16 @@ const app = new Vue({
 
 			page.steps.forEach(id => this.drawStep({type: 'step', id}, canvas, scale));
 
+			(page.dividers || []).forEach(id => {
+				const divider = store.get.divider(id);
+				ctx.strokeStyle = 'black';
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(divider.p1.x, divider.p1.y);
+				ctx.lineTo(divider.p2.x, divider.p2.y);
+				ctx.stroke();
+			});
+
 			if (page.numberLabel != null) {
 				const lbl = store.get.pageNumber(page.numberLabel);
 				ctx.fillStyle = 'black';

@@ -10,7 +10,13 @@ let app;
 
 const contextMenu = {
 	page: [
-		{text: 'Auto Layout (NYI)', cb: () => {}},
+		{
+			text: 'Auto Layout',
+			cb() {
+				undoStack.commit('page.layout', {page: app.selectedItemLookup}, this.text);
+				app.redrawUI(true);
+			}
+		},
 		{
 			text: 'Use Vertical Layout',
 			shown() {
@@ -42,10 +48,39 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Layout By Row and Column (NYI)',
+			text: 'Layout By Row and Column',
 			cb() {
-				const page = app.selectedItemLookup;
-				undoStack.commit('page.layout', {page, layout: {rows: 5, cols: 2, direction: 'vertical'}}, this.text);
+				const page = store.get.page(app.selectedItemLookup);
+				const originalLayout = util.clone(page.layout);
+
+				app.currentDialog = 'pageRowColLayoutDialog';
+				app.clearSelected();
+
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$on('ok', () => {
+						undoStack.commit('page.layout', {page}, 'Layout Page by Row and Column');
+						app.redrawUI(true);
+					});
+					dialog.$on('cancel', () => {
+						page.layout = originalLayout;
+						app.redrawUI(true);
+					});
+					dialog.$on('update', newValues => {
+						page.layout = {
+							rows: newValues.rows,
+							cols: newValues.cols,
+							direction: newValues.direction
+						};
+						store.mutations.page.layout({page});
+						app.redrawUI(true);
+					});
+					dialog.rows = originalLayout.rows || 2;
+					dialog.cols = originalLayout.cols || 2;
+					dialog.direction = originalLayout.direction || 'vertical';
+					dialog.show({x: 400, y: 150});
+				});
+
 				app.redrawUI(true);
 			}
 		},
@@ -365,7 +400,7 @@ const contextMenu = {
 						displacement.arrowOffset = originalDisplacement.arrowOffset;
 						app.redrawUI(true);
 					});
-					dialog.$on('update', (newValues) => {
+					dialog.$on('update', newValues => {
 						displacement.distance = newValues.partDistance;
 						displacement.arrowOffset = newValues.arrowOffset;
 						app.redrawUI(true);
@@ -374,7 +409,6 @@ const contextMenu = {
 					dialog.partDistance = displacement.distance;
 					dialog.show({x: 400, y: 150});
 				});
-
 			}
 		},
 		{

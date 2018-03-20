@@ -14,6 +14,7 @@ const emptyState = {
 	plisVisible: true,
 	pages: [],
 	pageNumbers: [],
+	dividers: [],
 	steps: [],
 	stepNumbers: [],
 	csis: [],
@@ -642,6 +643,7 @@ const store = {
 					type: 'page',
 					number: prevPage.number + 1,
 					steps: [],
+					dividers: [],
 					needsLayout: true,
 					numberLabel: null,
 					layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
@@ -660,7 +662,7 @@ const store = {
 			},
 			layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
 				const page = store.get.lookupToItem(opts.page);
-				Layout.page(page, opts.layout);
+				Layout.page(page, opts.layout || page.layout);
 			}
 		},
 		pli: {
