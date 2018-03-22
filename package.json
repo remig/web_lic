@@ -4,7 +4,8 @@
 	"description": "Create an instruction book from a 3D model",
 	"main": "src/ui.js",
 	"scripts": {
-		"build": "webpack",
+		"build": "webpack --config webpack.dev.js",
+		"build_prod": "webpack --config webpack.prod.js",
 		"test": "./node_modules/.bin/wdio ./test/wdio.conf.js"
 	},
 	"keywords": [],
@@ -19,6 +20,7 @@
 		"isomorphic-fetch": "^2.2.1",
 		"mocha": "^5.0.4",
 		"sinon": "^4.4.6",
+		"uglifyjs-webpack-plugin": "^1.2.4",
 		"wdio-chromedriver-service": "^0.1.2",
 		"wdio-mocha-framework": "^0.5.13",
 		"wdio-spec-reporter": "^0.1.4",

@@ -58,12 +58,14 @@ const contextMenu = {
 
 				Vue.nextTick(() => {
 					const dialog = app.$refs.currentDialog;
+					dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
 					dialog.$on('ok', () => {
 						undoStack.commit('page.layout', {page}, 'Layout Page by Row and Column');
 						app.redrawUI(true);
 					});
 					dialog.$on('cancel', () => {
 						page.layout = originalLayout;
+						store.mutations.page.layout({page});
 						app.redrawUI(true);
 					});
 					dialog.$on('update', newValues => {
@@ -391,6 +393,7 @@ const contextMenu = {
 
 				Vue.nextTick(() => {
 					const dialog = app.$refs.currentDialog;
+					dialog.$off();
 					dialog.$on('ok', () => {
 						undoStack.commit( 'part.displace', {step, ...displacement}, 'Adjust Displaced Part');
 						app.redrawUI(true);

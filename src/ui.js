@@ -706,7 +706,7 @@ const app = new Vue({
 
 window.__Web_lic_testScope = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
-	util, app, store
+	util, app, store, undoStack
 };
 
 //app.importRemoteModel('Creator/20015 - Alligator.mpd');

@@ -42,35 +42,29 @@ const baseDialogPropagator = {
 	}
 };
 
-Vue.component('partDisplacementDialog', {
-	template: '#partDisplacementDialogTemplate',
-	mixins: [baseDialogPropagator],
-	data: function() {
-		return {
-			arrowOffset: 0,
-			partDistance: 60
-		};
+const dialogs = {
+	partDisplacement: {
+		arrowOffset: 0,
+		partDistance: 60
 	},
-	methods: {
-		updateValues() {
-			this.$emit('update', {...this.$data});
-		}
+	pageRowColLayout: {
+		rows: 2,
+		cols: 2,
+		direction: 'vertical'
 	}
-});
+};
 
-Vue.component('pageRowColLayoutDialog', {
-	template: '#rowColLayoutTemplate',
-	mixins: [baseDialogPropagator],
-	data: function() {
-		return {
-			rows: 2,
-			cols: 2,
-			direction: 'vertical'
-		};
-	},
-	methods: {
-		updateValues() {
-			this.$emit('update', {...this.$data});
+Object.entries(dialogs).forEach(([name, props]) => {
+	Vue.component(name + 'Dialog', {
+		template: `#${name}Template`,
+		mixins: [baseDialogPropagator],
+		data: function() {
+			return props;
+		},
+		methods: {
+			updateValues() {
+				this.$emit('update', {...this.$data});
+			}
 		}
-	}
+	});
 });
