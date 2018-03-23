@@ -121,12 +121,7 @@ const api = {
 
 			if (step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
-				let csiSize;
-				if (csi.width != null && csi.height != null) {
-					csiSize = {width: csi.width, height: csi.height};
-				} else {
-					csiSize = store.render.csi(localModel, step) || {width: 0, height: 0};
-				}
+				const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
 				csi.x = Math.floor((step.width - csiSize.width) / 2);
 				csi.y = Math.floor((step.height + pliHeight - csiSize.height) / 2);
 				csi.width = csiSize.width;
@@ -164,12 +159,7 @@ const api = {
 			if (step.csiID != null) {
 				const emptyCSISize = emptyCalloutSize - (margin * 4);
 				const csi = store.get.csi(step.csiID);
-				let csiSize;
-				if (csi.width != null && csi.height != null) {
-					csiSize = {width: csi.width, height: csi.height};
-				} else {
-					csiSize = store.render.csi(localModel, step) || {width: emptyCSISize, height: emptyCSISize};
-				}
+				const csiSize = store.render.csi(localModel, step, csi) || {width: emptyCSISize, height: emptyCSISize};
 				csi.x = Math.floor(lblSize.width + margin);
 				csi.y = Math.floor(lblSize.height + margin);
 				csi.width = contentSize.width = csiSize.width;

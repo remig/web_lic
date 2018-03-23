@@ -67,52 +67,56 @@ const store = {
 	render: (function() {
 
 		function getCanvas(domID) {
-			let container = document.getElementById(domID);
-			if (!container) {
-				container = document.createElement('canvas');
-				container.setAttribute('id', domID);
-				container.setAttribute('class', 'offscreen');
-				document.getElementById('canvasHolder').appendChild(container);
-			}
+			const container = document.createElement('canvas');
+			container.setAttribute('id', domID);
+			container.setAttribute('class', 'offscreen');
+			document.getElementById('canvasHolder').appendChild(container);
 			return container;
 		}
 
-		// TODO: need to cache rendering results, and add back a 'forceRedraw' flag, because most renders
-		// are identical to the previous renders.
 		return {
-			csi(localModel, step, selectedPartIDs, scale = 1) {
-				const container = getCanvas(`CSI_${step.csiID}`);
-				if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
-					LDRender.renderModel(localModel, container, 1000 * scale, {resizeContainer: true});
-				} else {
-					const partList = store.get.partList(step);
-					if (util.isEmpty(partList)) {
-						return null;
+			csi(localModel, step, csi, selectedPartIDs, scale = 1) {
+				const domID = `CSI_${step.csiID}`;
+				let container = document.getElementById(domID);
+				if (csi.isDirty || container == null) {
+					container = container || getCanvas(domID);
+					if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
+						LDRender.renderModel(localModel, container, 1000 * scale, {resizeContainer: true});
+					} else {
+						const partList = store.get.partList(step);
+						if (util.isEmpty(partList)) {
+							return null;
+						}
+						const config = {
+							partList,
+							selectedPartIDs,
+							resizeContainer: true,
+							displacedParts: step.displacedParts
+						};
+						LDRender.renderModel(localModel, container, 1000 * scale, config);
 					}
-					const config = {
-						partList,
-						selectedPartIDs,
-						resizeContainer: true,
-						displacedParts: step.displacedParts
-					};
-					LDRender.renderModel(localModel, container, 1000 * scale, config);
+					delete csi.isDirty;
 				}
 				return {width: container.width, height: container.height, dx: 0, dy: 0, container};
 			},
-			csiWithSelection(localModel, step, selectedPartIDs, scale = 1) {
+			csiWithSelection(localModel, step, csi, selectedPartIDs, scale = 1) {
 				const config = {
 					partList: store.get.partList(step),
 					selectedPartIDs,
 					resizeContainer: true,
 					displacedParts: step.displacedParts
 				};
-				const container = getCanvas(`CSI_${step.csiID}`);
+				const container = document.getElementById('generateImagesCanvas');
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
 				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
 			},
 			pli(part, scale = 1) {
-				const container = getCanvas(`PLI_${part.filename}_${part.colorCode}`);
-				LDRender.renderPart(part, container, 1000 * scale, {resizeContainer: true});
+				const domID = `PLI_${part.filename}_${part.colorCode}`;
+				let container = document.getElementById(domID);
+				if (!container) {
+					container = getCanvas(domID);
+					LDRender.renderPart(part, container, 1000 * scale, {resizeContainer: true});
+				}
 				return {width: container.width, height: container.height, container};
 			}
 		};
@@ -404,7 +408,7 @@ const store = {
 				} else if (idx >= 0) {
 					util.array.removeIndex(step.displacedParts, idx);
 				}
-				store.mutations.page.layout({page: store.get.pageForItem(step)});
+				store.mutations.page.layout({page: store.get.pageForItem(step)});  // TODO: no need to layout entire page; can layout just the step containing the newly displaced part
 			},
 			// TODO: what if a step has zero parts?
 			moveToStep(opts) { // opts: {partID, srcStep, destStep, doLayout = false}
@@ -469,6 +473,7 @@ const store = {
 				} else {
 					destCalloutStep = store.get.step(callout.steps[callout.steps.length - 1]);
 				}
+				destCalloutStep.submodel = util.clone(step.submodel);
 				destCalloutStep.parts.push(partID);
 				store.mutations.page.layout({page: step.parent});
 			},
@@ -482,6 +487,7 @@ const store = {
 			resetSize(opts) {  // opts: {csi: csi or csiItem or csiID}
 				const csi = store.get.lookupToItem(opts.csi, 'csi');
 				csi.width = csi.height = null;
+				csi.isDirty = true;
 			}
 		},
 		// TODO: add store.mutations.foo.create() to wrap all item.add({junk}) logic
@@ -770,6 +776,7 @@ const store = {
 		},
 		addInitialPages(opts) {  // opts: {layoutChoices, localModelIDList = []}
 
+			opts = opts || {};
 			const localModelIDList = opts.localModelIDList || [];  // Array of submodel IDs used to traverse the submodel tree
 			const localModel = LDParse.model.get.submodelDescendant(store.model, localModelIDList);
 
@@ -877,7 +884,7 @@ const store = {
 				});
 			});
 
-			if (opts.layoutChoices.useMaxSteps) {
+			if (opts.layoutChoices && opts.layoutChoices.useMaxSteps) {
 				Layout.mergePages(pagesAdded);
 			}
 		}

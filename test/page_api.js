@@ -61,6 +61,17 @@ module.exports = browser => {
 					generatePdf: '#generate_pdf_menu',
 					generatePngImages: '#generate_png_images_menu'
 				}
+			},
+			dialog: {
+				container: '#dialogContainer',
+				okButton: '#okDialogButton',
+				cancelButton: '#cancelDialogButton',
+				importModel: {
+					includeTitlePage: '#includeTitlePageCheckbox',
+					includePartListPage: '#includePartListPageCheckbox',
+					includePLIs: '#includePLIsCheckbox',
+					useMaxSteps: '#useMaxStepsCheckbox'
+				}
 			}
 		},
 		classes: {
@@ -169,6 +180,10 @@ module.exports = browser => {
 			browser.execute(function(model, fn) {
 				__Web_lic_testScope.app.importLocalModel(model, fn);
 			}, trivial_model, 'trivial_model.ldr');
+			browser.waitForVisible(page.ids.dialog.container, 9000);
+			browser.click(page.ids.dialog.importModel.includeTitlePage);
+			browser.click(page.ids.dialog.importModel.useMaxSteps);
+			browser.click(page.ids.dialog.okButton);
 			browser.waitForText(page.ids.statusBar, 9000);
 		},
 		isPageCanvasBlank() {

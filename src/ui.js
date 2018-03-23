@@ -505,7 +505,7 @@ const app = new Vue({
 				const haveSelectedParts = selItem && selItem.type === 'part' && selItem.stepID === step.id;
 				const selectedPartIDs = haveSelectedParts ? [selItem.id] : null;
 				const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
-				const res = store.render[renderer](localModel, step, selectedPartIDs, scale);
+				const res = store.render[renderer](localModel, step, csi, selectedPartIDs, scale);
 				if (res) {
 					ctx.drawImage(res.container, (csi.x - res.dx) * scale, (csi.y - res.dy) * scale);  // TODO: profile performance if every x, y, w, h argument is passed in
 				}

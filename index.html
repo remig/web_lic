@@ -55,15 +55,17 @@
 		<component :is="currentDialog" ref="currentDialog"></component>
 
 		<div id="statusBar" v-cloak >{{statusText}}</div>
-		<div id="offscreenCache" class="offscreen">
-			<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" @change="triggerOpenFile($event)" style="display: none;">
-			<input type="file" name="uploadModelChooser" id="uploadModelChooser" accept=".ldr, .mpd" @change="triggerModelImport($event)" style="display: none;">
-			<svg xmlns="http://www.w3.org/2000/svg">
-				<text id="fontMeasureContainer">gW</text>
-			</svg>
-			<canvas id="generateImagesCanvas"></canvas>
-			<div id="canvasHolder"></div>
-		</div>
+
+		<input type="file" name="openFileChooser" id="openFileChooser" accept=".lic" @change="triggerOpenFile($event)" style="display: none;">
+		<input type="file" name="uploadModelChooser" id="uploadModelChooser" accept=".ldr, .mpd" @change="triggerModelImport($event)" style="display: none;">
+
+	</div>
+	<div id="offscreenCache" class="offscreen">
+		<svg xmlns="http://www.w3.org/2000/svg">
+			<text id="fontMeasureContainer">gW</text>
+		</svg>
+		<canvas id="generateImagesCanvas"></canvas>
+		<div id="canvasHolder"></div>
 	</div>
 
 	<!-- Component Templates -->
@@ -170,8 +172,8 @@
 					<div class="modal-footer">
 						<slot name="footer">
 							<slot name="buttons"></slot>
-							<button v-if="cancelButtonText" type="button" class="btn btn-default" data-dismiss="modal" v-on:click="cancel">{{cancelButtonText}}</button>
-							<button v-if="okButtonText" type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="ok">{{okButtonText}}</button>
+							<button v-if="cancelButtonText" id="cancelDialogButton" type="button" class="btn btn-default" data-dismiss="modal" v-on:click="cancel">{{cancelButtonText}}</button>
+							<button v-if="okButtonText" id="okDialogButton" type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="ok">{{okButtonText}}</button>
 						</slot>
 					</div>
 				</div>
@@ -191,20 +193,20 @@
 							</div>
 							<div class="col-sm-5">
 								<label class="checkbox">
-									<input v-model="useMaxSteps" type="checkbox" value="" />
+									<input v-model="useMaxSteps" id="useMaxStepsCheckbox" type="checkbox" value="" />
 									As many as can fit nicely (slow)
 								</label>
 							</div>
 						</div>
 						<div class="row">
 							<label class="checkbox-inline">
-								<input v-model="includeTitlePage" type="checkbox" value="" />Include Title Page
+								<input v-model="includeTitlePage" id="includeTitlePageCheckbox" type="checkbox" value="" />Include Title Page
 							</label>
 							<label class="checkbox-inline">
-								<input v-model="includePartListPage" type="checkbox" value="" />Include Part List Page (NYI)
+								<input v-model="includePartListPage" id="includePartListPageCheckbox" type="checkbox" value="" />Include Part List Page (NYI)
 							</label>
 							<label class="checkbox-inline">
-								<input v-model="includePLIs" type="checkbox" value="" />Include PLIs in each Step
+								<input v-model="includePLIs" id="includePLIsCheckbox" type="checkbox" value="" />Include PLIs in each Step
 							</label>
 						</div>
 					</div>

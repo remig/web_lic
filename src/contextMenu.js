@@ -385,6 +385,7 @@ const contextMenu = {
 			},
 			cb() {
 				const step = store.get.step(app.selectedItemLookup.stepID);
+				const csi = store.get.csi(step.csiID);
 				const displacement = step.displacedParts.find(p => p.partID === app.selectedItemLookup.id);
 				const originalDisplacement = util.clone(displacement);
 
@@ -399,11 +400,13 @@ const contextMenu = {
 						app.redrawUI(true);
 					});
 					dialog.$on('cancel', () => {
+						csi.isDirty = true;
 						displacement.distance = originalDisplacement.distance;
 						displacement.arrowOffset = originalDisplacement.arrowOffset;
 						app.redrawUI(true);
 					});
 					dialog.$on('update', newValues => {
+						csi.isDirty = true;
 						displacement.distance = newValues.partDistance;
 						displacement.arrowOffset = newValues.arrowOffset;
 						app.redrawUI(true);

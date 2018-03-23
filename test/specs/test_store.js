@@ -29,13 +29,14 @@ describe('Test state store module', function() {
 		store.resetState();
 		store.setModel(trivial_part_dict['trivial_model.ldr']);
 		store.mutations.addTitlePage();
-		store.mutations.addInitialPages(trivial_part_dict);
+		store.mutations.addInitialPages();
 	}
 
 	function verifyInitialState() {
 		assert.hasAllKeys(store.state, [
-			'pageSize', 'titlePage', 'plisVisible', 'pages', 'pageNumbers', 'steps', 'stepNumbers',
-			'csis', 'plis', 'pliItems', 'pliQtys', 'labels', 'callouts', 'calloutArrows', 'points'
+			'pageSize', 'titlePage', 'plisVisible', 'pages', 'pageNumbers', 'dividers', 'steps',
+			'stepNumbers', 'csis', 'plis', 'pliItems', 'pliQtys', 'labels',
+			'callouts', 'calloutArrows', 'points'
 		]);
 		assert.deepEqual(store.state.pageSize, {width: 900, height: 700});
 		assert.isNull(store.state.titlePage);
@@ -71,11 +72,11 @@ describe('Test state store module', function() {
 			'prevStep', 'nextStep', 'partList', 'matchingPLIItem', 'calloutArrowToPoints', 'prev', 'next',
 			'parent', 'pageForItem', 'numberLabel', 'nextItemID', 'lookupToItem', 'itemToLookup', 'page',
 			'pageNumber', 'step', 'stepNumber', 'csi', 'pli', 'pliItem', 'pliQty', 'label', 'callout',
-			'calloutArrow', 'point'
+			'calloutArrow', 'point', 'divider'
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
-			'item', 'part', 'step', 'callout', 'calloutArrow', 'page', 'pli', 'pliItem',
+			'item', 'part', 'csi', 'step', 'callout', 'calloutArrow', 'page', 'pli', 'pliItem',
 			'renumber', 'setNumber', 'layoutTitlePage',
 			'addTitlePage', 'removeTitlePage', 'addInitialPages'
 		]);
@@ -84,6 +85,9 @@ describe('Test state store module', function() {
 		]);
 		assert.hasAllKeys(store.mutations.part, [
 			'displace', 'moveToStep', 'addToCallout', 'removeFromCallout'
+		]);
+		assert.hasAllKeys(store.mutations.csi, [
+			'resetSize'
 		]);
 		assert.hasAllKeys(store.mutations.step, [
 			'add', 'delete', 'renumber', 'layout', 'moveToPage', 'moveToPreviousPage', 'moveToNextPage',
@@ -182,7 +186,7 @@ describe('Test state store module', function() {
 		LDParse.setPartDictionary(trivial_part_dict);
 		store.setModel(trivial_part_dict['trivial_model.ldr']);
 		store.mutations.addTitlePage();
-		store.mutations.addInitialPages(trivial_part_dict);
+		store.mutations.addInitialPages();
 		assert.equal(store.state.pages.length, 3);
 		assert.deepEqual(store.state.titlePage, titlePageState);
 		assert.deepEqual(store.state.pages[0], pageState);
