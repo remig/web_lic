@@ -31,8 +31,8 @@ Vue.component('baseDialog', {
 // and pass along position and show() from this dialog to child.
 const baseDialogPropagator = {
 	mounted() {
-		this.$children[0].$on('ok', () => this.$emit('ok'));
-		this.$children[0].$on('cancel', () => this.$emit('cancel'));
+		this.$children[0].$on('ok', () => this.$emit('ok', {...this.$data}));
+		this.$children[0].$on('cancel', () => this.$emit('cancel', {...this.$data}));
 	},
 	methods: {
 		show(position) {
@@ -43,6 +43,14 @@ const baseDialogPropagator = {
 };
 
 const dialogs = {
+	importModel: {
+		hasSteps: false,
+		stepsPerPage: 1,
+		useMaxSteps: false,
+		includeTitlePage: false,
+		includePartListPage: false,
+		includePLIs: false
+	},
 	partDisplacement: {
 		arrowOffset: 0,
 		partDistance: 60

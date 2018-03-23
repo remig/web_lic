@@ -296,10 +296,14 @@ const store = {
 			const itemList = store.state[item + 's'];
 			return itemList.length ? Math.max.apply(null, itemList.map(el => el.id)) + 1 : 0;
 		},
-		lookupToItem(lookup) {  // Convert a {type, id} lookup object into the actual item it refers to
-			if (!lookup || !lookup.type) {
+		lookupToItem(lookup, type) {  // Convert a {type, id} lookup object into the actual item it refers to
+			if (lookup == null || (!lookup.type && type == null)) {
 				return null;
-			} else if (lookup.parent || lookup.number != null) {
+			}
+			if (typeof lookup === 'number' && type != null) {
+				lookup = {type, id: lookup};
+			}
+			if (lookup.parent || lookup.number != null) {
 				return lookup;  // lookup is already an item
 			} else if (store.state.hasOwnProperty(lookup.type)) {
 				return store.state[lookup.type];
@@ -384,6 +388,7 @@ const store = {
 			displace(opts) { // opts: {partID, step, direction, distance = 60, arrowOffset = 0}.  If direction == null, remove displacement
 				const step = store.get.lookupToItem(opts.step);
 				delete opts.step;
+				store.mutations.csi.resetSize({csi: step.csiID});
 				opts.distance = (opts.distance == null) ? 60 : opts.distance;
 				opts.arrowOffset = (opts.arrowOffset == null) ? 0 : opts.arrowOffset;
 				step.displacedParts = step.displacedParts || [];
@@ -405,9 +410,11 @@ const store = {
 			moveToStep(opts) { // opts: {partID, srcStep, destStep, doLayout = false}
 				const partID = opts.partID;
 				const srcStep = store.get.lookupToItem(opts.srcStep);
+				store.mutations.csi.resetSize({csi: srcStep.csiID});
 				util.array.remove(srcStep.parts, partID);
 
 				const destStep = store.get.lookupToItem(opts.destStep);
+				store.mutations.csi.resetSize({csi: destStep.csiID});
 				destStep.parts.push(partID);
 				destStep.parts.sort(util.sort.numeric.ascending);
 
@@ -469,6 +476,12 @@ const store = {
 				const step = store.get.lookupToItem(opts.step);
 				util.array.remove(step.parts, opts.partID);
 				store.mutations.page.layout({page: store.get.pageForItem(step)});
+			}
+		},
+		csi: {
+			resetSize(opts) {  // opts: {csi: csi or csiItem or csiID}
+				const csi = store.get.lookupToItem(opts.csi, 'csi');
+				csi.width = csi.height = null;
 			}
 		},
 		// TODO: add store.mutations.foo.create() to wrap all item.add({junk}) logic
@@ -755,8 +768,9 @@ const store = {
 			store.mutations.item.deleteChildList({item, listType: 'step'});
 			store.state.titlePage = null;
 		},
-		addInitialPages(partDictionary, localModelIDList = []) {  // localModelIDList is an array of submodel IDs used to traverse the submodel tree
+		addInitialPages(opts) {  // opts: {layoutChoices, localModelIDList = []}
 
+			const localModelIDList = opts.localModelIDList || [];  // Array of submodel IDs used to traverse the submodel tree
 			const localModel = LDParse.model.get.submodelDescendant(store.model, localModelIDList);
 
 			if (!localModel) {
@@ -774,12 +788,13 @@ const store = {
 			}
 
 			const addItem = store.mutations.item.add;
+			const pagesAdded = [];
 
 			localModel.steps.forEach(modelStep => {
 
 				const pageSize = store.state.pageSize;
 				const parts = util.clone(modelStep.parts || []);
-				const submodels = parts.filter(p => partDictionary[localModel.parts[p].filename].isSubModel);
+				const submodels = parts.filter(p => LDParse.partDictionary[localModel.parts[p].filename].isSubModel);
 				const submodelsByQuantity = {};
 				submodels.forEach(submodel => {
 					const filename = localModel.parts[submodel].filename;
@@ -788,7 +803,10 @@ const store = {
 				});
 
 				Object.values(submodelsByQuantity).forEach(entry => {
-					store.mutations.addInitialPages(partDictionary, localModelIDList.concat(entry.id));
+					store.mutations.addInitialPages({
+						layoutChoices: opts.layoutChoices,
+						localModelIDList: localModelIDList.concat(entry.id)
+					});
 				});
 
 				const page = addItem({item: {
@@ -799,6 +817,7 @@ const store = {
 					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
 					numberLabel: null
 				}});
+				pagesAdded.push(page.id);
 
 				addItem({item: {
 					type: 'pageNumber',
@@ -857,6 +876,10 @@ const store = {
 					}
 				});
 			});
+
+			if (opts.layoutChoices.useMaxSteps) {
+				Layout.mergePages(pagesAdded);
+			}
 		}
 	}
 };

@@ -120,8 +120,13 @@ const api = {
 			const pliHeight = havePLI ? store.get.pli(step.pliID).height : 0;
 
 			if (step.csiID != null) {
-				const csiSize = store.render.csi(localModel, step) || {width: 0, height: 0};
 				const csi = store.get.csi(step.csiID);
+				let csiSize;
+				if (csi.width != null && csi.height != null) {
+					csiSize = {width: csi.width, height: csi.height};
+				} else {
+					csiSize = store.render.csi(localModel, step) || {width: 0, height: 0};
+				}
 				csi.x = Math.floor((step.width - csiSize.width) / 2);
 				csi.y = Math.floor((step.height + pliHeight - csiSize.height) / 2);
 				csi.width = csiSize.width;
@@ -158,8 +163,13 @@ const api = {
 			// TODO: move all Math.floor rounding to the last possible moment: when drawing the CSI / PLI on the page
 			if (step.csiID != null) {
 				const emptyCSISize = emptyCalloutSize - (margin * 4);
-				const csiSize = store.render.csi(localModel, step) || {width: emptyCSISize, height: emptyCSISize};
 				const csi = store.get.csi(step.csiID);
+				let csiSize;
+				if (csi.width != null && csi.height != null) {
+					csiSize = {width: csi.width, height: csi.height};
+				} else {
+					csiSize = store.render.csi(localModel, step) || {width: emptyCSISize, height: emptyCSISize};
+				}
 				csi.x = Math.floor(lblSize.width + margin);
 				csi.y = Math.floor(lblSize.height + margin);
 				csi.width = contentSize.width = csiSize.width;
@@ -231,7 +241,8 @@ const api = {
 				box.x = colSize * (i % cols);
 				box.y = rowSize * Math.floor(i / cols);
 			}
-			store.mutations.step.layout({step: store.get.step(page.steps[i]), box});
+			// TODO: multiple steps on a page should have all their PLIs the same(ish) height, so that step numbers align horizontally
+			api.step.outsideIn(store.get.step(page.steps[i]), box);
 		}
 
 		api.dividers(page, layout, rows, cols);
@@ -273,7 +284,48 @@ const api = {
 		modelInfo.width = modelInfoSize.width;
 		modelInfo.height = modelInfoSize.height;
 		delete page.needsLayout;
+	},
+	mergePages(pagesAdded) {
+		// Starting with one step per page, move adjacent steps to the previous page until the page is full-ish
+
+		const pages = pagesAdded.map(pageID => store.get.page(pageID));
+		pages.forEach(page => api.page(page));
+
+		const stepsToMerge = [].concat(...pages.map(page => page.steps)).slice(1);
+		while (stepsToMerge.length) {
+
+			const step = {type: 'step', id: stepsToMerge[0]};
+			const originalPage = store.get.pageForItem(step);
+
+			store.mutations.step.moveToPreviousPage({step});  // Move next step to previous page
+			const destPage = store.get.pageForItem(step);
+			const stepsOverlap = destPage.steps.some(stepID => isStepTooSmall(store.get.step(stepID)));
+
+			if (stepsOverlap) {
+				// Not enough room; move step back then start filling the next page;
+				store.mutations.step.moveToNextPage({step});
+			} else {
+				// Step fits; delete the now-empty page the step moved from
+				store.mutations.page.delete({page: originalPage});
+			}
+			util.array.removeIndex(stepsToMerge, 0);
+		}
 	}
 };
+
+function isStepTooSmall(step) {
+	const csi = store.get.csi(step.csiID);
+	const pli = store.state.plisVisible ? store.get.pli(step.pliID) : null;
+	const pliHeight = pli ? pli.height : 0;
+
+	if (step.width < csi.width * 1.1) {
+		return true;
+	} else if (pli && step.width < pli.width * 1.05) {
+		return true;
+	} else if (step.height < (pliHeight + csi.height) * 1.2) {
+		return true;
+	}
+	return false;
+}
 
 module.exports = api;

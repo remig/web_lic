@@ -68,18 +68,39 @@ const app = new Vue({
 				this.filename = store.model.filename;
 				LDRender.setPartDictionary(LDParse.partDictionary);
 
-				store.mutations.addInitialPages(LDParse.partDictionary);  // Add pages before title page so title page summary label comes out correct
-				store.mutations.addTitlePage();
-				store.save('localStorage');
+				this.currentDialog = 'importModelDialog';
 
-				this.currentPageLookup = store.get.itemToLookup(store.get.titlePage());
-				undoStack.saveBaseState();
-				this.forceUIUpdate();
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.hasSteps = true;
+					dialog.stepsPerPage = 1;
+					dialog.useMaxSteps = true;
+					dialog.includeTitlePage = false;
+					dialog.includePartListPage = false;
+					dialog.includePLIs = true;
+					dialog.show({x: 400, y: 150});
+					dialog.$off();
+					dialog.$on('ok', layoutChoices => {
 
-				const time = util.formatTime(start, Date.now());
-				this.updateProgress({clear: true});
-				this.statusText = `"${store.get.modelFilename()}" loaded successfully (${time})`;
-				Vue.nextTick(this.drawCurrentPage);
+						// TODO: laying out multiple steps per page can be slow.  Show a progress bar for this.
+						store.mutations.pli.toggleVisibility({visible: layoutChoices.includePLIs});
+						store.mutations.addInitialPages({layoutChoices});  // Add pages before title page so title page summary label comes out correct
+						if (layoutChoices.includeTitlePage) {
+							store.mutations.addTitlePage();
+						}
+						store.save('localStorage');
+
+						this.currentPageLookup = store.get.itemToLookup(store.get.titlePage() || store.get.firstPage());
+						undoStack.saveBaseState();
+						this.forceUIUpdate();
+
+						const time = util.formatTime(start, Date.now());
+						this.updateProgress({clear: true});
+						this.statusText = `"${store.get.modelFilename()}" loaded successfully (${time})`;
+						Vue.nextTick(this.drawCurrentPage);
+					});
+				});
+
 			});
 		},
 		openLicFile(content) {
