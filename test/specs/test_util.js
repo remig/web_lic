@@ -14,7 +14,7 @@ describe('Test util module', function() {
 			'isEmpty', 'toArray', 'array', 'itemEq', 'get', 'measureLabel', 'fontToFontParts', 'degrees',
 			'radians', 'emptyNode', 'geom', 'draw', 'clone', 'sort', 'formatTime', 'titleCase', 'prettyPrint'
 		]);
-		assert.hasAllKeys(util.array, ['insert', 'remove', 'removeIndex', 'eq']);
+		assert.hasAllKeys(util.array, ['insert', 'remove', 'removeIndex', 'chunk', 'eq']);
 		assert.hasAllKeys(util.geom, ['bbox', 'expandBox', 'distance', 'midpoint']);
 		assert.hasAllKeys(util.draw, ['arrow', 'roundedRect']);
 		assert.hasAllKeys(util.sort, ['numeric']);

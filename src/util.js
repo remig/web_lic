@@ -36,6 +36,13 @@ const api = {
 		removeIndex(array, idx) {
 			array.splice(idx, 1);
 		},
+		chunk(array, size = 1) {
+			const res = [];
+			for (let i = 0; i < array.length; i += size) {
+				res.push(array.slice(i, i + size));
+			}
+			return res;
+		},
 		eq(a, b) {
 			if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
 				return false;

@@ -231,11 +231,13 @@ const api = {
 				box.x = colSize * (i % cols);
 				box.y = rowSize * Math.floor(i / cols);
 			}
-			// TODO: multiple steps on a page should have all their PLIs the same(ish) height, so that step numbers align horizontally
 			api.step.outsideIn(store.get.step(page.steps[i]), box);
 		}
 
+		page.layout = (rows > 0 || cols > 0) ? {rows, cols, direction: layout} : 'horizontal';
 		api.dividers(page, layout, rows, cols);
+
+		alignStepNumbers(page);
 
 		if (page.numberLabel != null) {
 			const lblSize = util.measureLabel('bold 20pt Helvetica', page.number);
@@ -302,6 +304,21 @@ const api = {
 		}
 	}
 };
+
+function alignStepNumbers(page) {
+	const steps = page.steps.map(stepID => store.get.step(stepID));
+	if (steps.length < 2 || typeof page.layout !== 'object' || page.layout.direction !== 'horizontal') {
+		return;  // only align step numbers across horizontally laid out pages with multiple steps
+	}
+	const stepsByRow = util.array.chunk(steps, page.layout.cols);
+	stepsByRow.forEach(stepList => {
+		const stepNumbers = stepList.map(step => store.get.stepNumber(step.numberLabel));
+		const lowestStepNumber = Math.max(...stepNumbers.map(n => n.y));
+		stepNumbers.forEach(n => {
+			n.y = lowestStepNumber;
+		});
+	});
+}
 
 function isStepTooSmall(step) {
 	const csi = store.get.csi(step.csiID);
