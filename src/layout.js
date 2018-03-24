@@ -112,12 +112,11 @@ const api = {
 			step.width = box.width - pageMargin - pageMargin;
 			step.height = box.height - pageMargin - pageMargin;
 
-			if (step.pliID != null && store.state.plisVisible) {
-				api.pli(store.get.pli(step.pliID));
+			const pli = (step.pliID != null && store.state.plisVisible) ? store.get.pli(step.pliID) : null;
+			if (pli) {
+				api.pli(pli);
 			}
-
-			const havePLI = step.pliID != null && store.state.plisVisible;
-			const pliHeight = havePLI ? store.get.pli(step.pliID).height : 0;
+			const pliHeight = pli ? pli.height : 0;
 
 			if (step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
@@ -199,14 +198,13 @@ const api = {
 			}
 		}
 	},
-	page(page, layout) {
+	page(page, layout = 'horizontal') {
 
 		if (page.type === 'titlePage') {
 			store.mutations.layoutTitlePage(page);
 			return;
 		}
 
-		layout = page.layout = layout || 'horizontal';
 		const pageSize = store.state.pageSize;
 		const stepCount = page.steps.length;
 		let cols = Math.ceil(Math.sqrt(stepCount));
@@ -234,10 +232,12 @@ const api = {
 			api.step.outsideIn(store.get.step(page.steps[i]), box);
 		}
 
-		page.layout = (rows > 0 || cols > 0) ? {rows, cols, direction: layout} : 'horizontal';
+		page.actualLayout = (rows > 1 || cols > 1) ? {rows, cols, direction: layout} : 'horizontal';
 		api.dividers(page, layout, rows, cols);
 
-		alignStepNumbers(page);
+		if (store.state.plisVisible) {
+			alignStepContent(page);
+		}
 
 		if (page.numberLabel != null) {
 			const lblSize = util.measureLabel('bold 20pt Helvetica', page.number);
@@ -289,33 +289,41 @@ const api = {
 			const step = {type: 'step', id: stepsToMerge[0]};
 			const originalPage = store.get.pageForItem(step);
 
-			store.mutations.step.moveToPreviousPage({step});  // Move next step to previous page
-			const destPage = store.get.pageForItem(step);
-			const stepsOverlap = destPage.steps.some(stepID => isStepTooSmall(store.get.step(stepID)));
+			const prevPage = store.get.prevPage(originalPage, false);
+			if (pagesAdded.includes(prevPage.id)) {  // previous page must be in the list of pages that can be altered, in order to move steps to it
 
-			if (stepsOverlap) {
-				// Not enough room; move step back then start filling the next page;
-				store.mutations.step.moveToNextPage({step});
-			} else {
-				// Step fits; delete the now-empty page the step moved from
-				store.mutations.page.delete({page: originalPage});
+				store.mutations.step.moveToPreviousPage({step});  // Move this step to previous page
+				const destPage = store.get.pageForItem(step);
+				const stepsOverlap = destPage.steps.some(stepID => isStepTooSmall(store.get.step(stepID)));
+
+				if (stepsOverlap) {
+					// Not enough room; move step back then start filling the next page
+					store.mutations.step.moveToNextPage({step});
+				} else {
+					// Step fits; delete the now-empty page the step moved from
+					store.mutations.page.delete({page: originalPage});
+				}
 			}
 			util.array.removeIndex(stepsToMerge, 0);
 		}
 	}
 };
 
-function alignStepNumbers(page) {
+function alignStepContent(page) {
 	const steps = page.steps.map(stepID => store.get.step(stepID));
-	if (steps.length < 2 || typeof page.layout !== 'object' || page.layout.direction !== 'horizontal') {
-		return;  // only align step numbers across horizontally laid out pages with multiple steps
+	if (steps.length < 2 || typeof page.actualLayout !== 'object' || page.actualLayout.direction !== 'horizontal') {
+		return;  // only align step content across horizontally laid out pages with multiple steps
 	}
-	const stepsByRow = util.array.chunk(steps, page.layout.cols);
+	const stepsByRow = util.array.chunk(steps, page.actualLayout.cols);
 	stepsByRow.forEach(stepList => {
-		const stepNumbers = stepList.map(step => store.get.stepNumber(step.numberLabel));
-		const lowestStepNumber = Math.max(...stepNumbers.map(n => n.y));
-		stepNumbers.forEach(n => {
-			n.y = lowestStepNumber;
+		const tallestPLIHeight = Math.max(...stepList.map(step => store.get.pli(step.pliID).height));
+		stepList.forEach(step => {
+			const pliHeight = store.get.pli(step.pliID).height || -pageMargin;
+			const dt = tallestPLIHeight - pliHeight;
+			if (dt > 0) {
+				store.get.csi(step.csiID).y += Math.floor(dt / 2);
+				store.get.stepNumber(step.numberLabel).y += dt;
+			}
 		});
 	});
 }
