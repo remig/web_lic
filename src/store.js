@@ -860,13 +860,16 @@ const store = {
 
 				parts.forEach(partID => {
 
+					const part = localModel.parts[partID];
+					if (LDParse.partDictionary[localModel.parts[partID].filename].isSubModel) {  // TODO: checking if a part is a submodel is horrendously ugly
+						return;  // Don't create PLI items for submodels
+					}
+
 					const target = store.get.matchingPLIItem(pli, partID);
 					if (target) {
 						target.quantity++;
 						target.partNumbers.push(partID);
 					} else {
-
-						const part = localModel.parts[partID];
 						const pliItem = addItem({item: {
 							type: 'pliItem',
 							filename: part.filename,
