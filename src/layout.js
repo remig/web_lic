@@ -242,8 +242,8 @@ const api = {
 		if (page.numberLabel != null) {
 			const lblSize = util.measureLabel('bold 20pt Helvetica', page.number);
 			const lbl = store.get.pageNumber(page.numberLabel);
-			lbl.x = pageSize.width - pageMargin - lblSize.width;
-			lbl.y = pageSize.height - pageMargin - lblSize.height;
+			lbl.x = pageSize.width - pageMargin;
+			lbl.y = pageSize.height - pageMargin;
 			lbl.width = lblSize.width;
 			lbl.height = lblSize.height;
 		}

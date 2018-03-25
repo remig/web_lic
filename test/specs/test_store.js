@@ -100,7 +100,7 @@ describe('Test state store module', function() {
 			'delete', 'addPoint', 'rotateTip'
 		]);
 		assert.hasAllKeys(store.mutations.page, [
-			'delete', 'appendPage', 'renumber', 'layout'
+			'add', 'delete', 'renumber', 'layout'
 		]);
 		assert.hasAllKeys(store.mutations.pli, [
 			'delete', 'toggleVisibility'

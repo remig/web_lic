@@ -329,8 +329,10 @@ const store = {
 			return {id: item.id, type: item.type};
 		}
 	},
+	// TODO: convert all 'opts' arguments into {opts} for automatic destructuring.  duh.
 	mutations: {
 		item: {
+			// TODO: support both insertionIndex and parentInsertionIndex
 			add(opts) {  // opts: {itemJSON, parent, insertionIndex = -1}
 				const item = opts.item;
 				item.id = store.get.nextItemID(item);
@@ -490,9 +492,9 @@ const store = {
 				csi.isDirty = true;
 			}
 		},
-		// TODO: add store.mutations.foo.create() to wrap all item.add({junk}) logic
 		step: {
 			add(opts) {  // opts: {dest, doLayout = false, stepNumber = null, insertionIndex = -1}
+
 				const dest = store.get.lookupToItem(opts.dest);
 				const step = store.mutations.item.add({item: {
 					type: 'step',
@@ -501,16 +503,19 @@ const store = {
 					csiID: null, pliID: null,
 					x: null, y: null, width: null, height: null
 				}, parent: dest, insertionIndex: opts.insertionIndex});
+
 				store.mutations.item.add({item: {
 					type: 'csi',
 					x: null, y: null, width: null, height: null
 				}, parent: step});
+
 				if (opts.stepNumber != null) {
 					store.mutations.item.add({item: {
 						type: 'stepNumber',
 						x: null, y: null, width: null, height: null
 					}, parent: step});
 				}
+
 				if (opts.doLayout) {
 					store.mutations.page.layout({page: store.get.pageForItem(dest)});
 				}
@@ -645,22 +650,10 @@ const store = {
 			}
 		},
 		page: {
-			delete(opts) {  // opts: {page}
-				const page = store.get.lookupToItem(opts.page);
-				if (page.steps && page.steps.length) {
-					throw 'Cannot delete a page with steps';
-				}
-				if (page.numberLabel != null) {
-					store.mutations.item.delete({item: store.get.pageNumber(page.numberLabel)});
-				}
-				store.mutations.item.delete({item: page});
-				store.mutations.page.renumber();
-			},
-			appendPage(opts) {  // opts: {prevPage}
-				const prevPage = store.get.lookupToItem(opts.prevPage);
+			add(opts) {  // opts: {pageNumber, insertionIndex = -1}
 				const page = {
 					type: 'page',
-					number: prevPage.number + 1,
+					number: opts.pageNumber,
 					steps: [],
 					dividers: [],
 					needsLayout: true,
@@ -671,10 +664,23 @@ const store = {
 
 				store.mutations.item.add({item: {
 					type: 'pageNumber',
+					align: 'right', valign: 'bottom',
 					x: null, y: null, width: null, height: null
 				}, parent: page});
 
-				util.array.insert(store.state.pages, page, store.state.pages.indexOf(prevPage) + 1);
+				util.array.insert(store.state.pages, page, opts.insertionIndex);
+				store.mutations.page.renumber();
+			},
+			delete(opts) {  // opts: {page}
+				const page = store.get.lookupToItem(opts.page);
+				if (page.steps && page.steps.length) {
+					throw 'Cannot delete a page with steps';
+				}
+				if (page.numberLabel != null) {
+					store.mutations.item.delete({item: store.get.pageNumber(page.numberLabel)});
+				}
+				store.mutations.item.delete({item: page});
+				store.mutations.page.renumber();
 			},
 			renumber() {
 				store.mutations.renumber('page');
@@ -713,7 +719,7 @@ const store = {
 				if (el && el.number != null) {
 					if (prevNumber == null && el.number > 1) {
 						el.number = 1;
-					} else if (prevNumber != null && prevNumber < el.number - 1) {
+					} else if (prevNumber != null && prevNumber !== el.number - 1) {
 						el.number = prevNumber + 1;
 					}
 					prevNumber = el.number;
@@ -816,6 +822,7 @@ const store = {
 					});
 				});
 
+				// TODO: rewrite this using store.mutation.foo.add instead of creating item objects directly
 				const page = addItem({item: {
 					type: 'page',
 					number: null,
@@ -828,6 +835,7 @@ const store = {
 
 				addItem({item: {
 					type: 'pageNumber',
+					align: 'right', valign: 'bottom',
 					x: null, y: null, width: null, height: null
 				}, parent: page});
 				page.number = page.id + 1;

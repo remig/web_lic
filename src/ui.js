@@ -609,10 +609,14 @@ const app = new Vue({
 			});
 
 			if (page.numberLabel != null) {
+				ctx.save();
 				const lbl = store.get.pageNumber(page.numberLabel);
 				ctx.fillStyle = 'black';
 				ctx.font = 'bold 20pt Helvetica';
-				ctx.fillText(page.number, lbl.x, lbl.y + lbl.height);
+				ctx.textAlign = lbl.align || 'start';
+				ctx.textBaseline = lbl.valign || 'alphabetic';
+				ctx.fillText(page.number, lbl.x, lbl.y);
+				ctx.restore();
 			}
 
 			if (page.labels != null) {
@@ -727,7 +731,7 @@ const app = new Vue({
 
 window.__Web_lic_testScope = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
-	util, app, store, undoStack
+	util, app, store, undoStack, LDParse
 };
 
 //app.importRemoteModel('Creator/20015 - Alligator.mpd');

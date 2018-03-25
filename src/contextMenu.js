@@ -87,12 +87,25 @@ const contextMenu = {
 			}
 		},
 		{text: 'separator'},
-		{text: 'Prepend Blank Page (NYI)', cb: () => {}},
+		{
+			text: 'Prepend Blank Page',
+			cb() {
+				const nextPage = store.get.lookupToItem(app.selectedItemLookup);
+				undoStack.commit('page.add', {
+					pageNumber: nextPage.number,
+					insertionIndex: store.state.pages.indexOf(nextPage)
+				}, this.text);
+				app.redrawUI(true);
+			}
+		},
 		{
 			text: 'Append Blank Page',
 			cb() {
-				const prevPage = app.selectedItemLookup;
-				undoStack.commit('page.appendPage', {prevPage}, this.text);
+				const prevPage = store.get.lookupToItem(app.selectedItemLookup);
+				undoStack.commit('page.add', {
+					pageNumber: prevPage.number + 1,
+					insertionIndex: store.state.pages.indexOf(prevPage) + 1
+				}, this.text);
 				app.redrawUI(true);
 			}
 		},
