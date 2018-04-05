@@ -207,7 +207,7 @@ const api = {
 	draw: {
 		arrow: (() => {
 
-			const rotation = {up: 180, left: 90, right: -90};
+			const presetAngles = {up: 180, left: 90, right: -90};
 			const arrowDimensions = {
 				head: {
 					length: 30,
@@ -219,11 +219,22 @@ const api = {
 				}
 			};
 
-			return function(ctx, tipX, tipY, direction) {
+			return function(ctx, tipX, tipY, rotation, scale) {
 				const head = arrowDimensions.head, bodyWidth = 1.25;
 				ctx.save();
 				ctx.translate(tipX, tipY);
-				ctx.rotate((rotation[direction] || 0) * Math.PI / 180);
+				if (rotation in presetAngles) {
+					ctx.rotate(api.radians(rotation[rotation]));
+				} else if (typeof rotation === 'number') {
+					ctx.rotate(api.radians(rotation));
+				}
+				if (scale) {
+					if (Array.isArray(scale)) {
+						ctx.scale(scale[0], scale[1]);
+					} else {
+						ctx.scale(scale, scale);
+					}
+				}
 				ctx.beginPath();
 				ctx.moveTo(0, 0);
 				ctx.lineTo(-head.width, -head.length);
@@ -244,6 +255,9 @@ const api = {
 		}
 	},
 	clone(obj) {
+		if (obj == null) {
+			return null;  // JSON.parse crashes if obj is undefined
+		}
 		return JSON.parse(JSON.stringify(obj));
 	},
 	sort: {

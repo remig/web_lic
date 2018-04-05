@@ -489,6 +489,7 @@ const app = new Vue({
 				this.drawPage(page, canvas);
 			}
 		},
+		// TODO: move page drawing to dedicated module
 		drawStep(step, canvas, scale = 1) {
 			step = store.get.step(step);
 			const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
@@ -577,6 +578,38 @@ const app = new Vue({
 				ctx.fillStyle = 'black';
 				ctx.font = 'bold 20pt Helvetica';
 				ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
+			}
+
+			if (step.rotateIcon) {
+				const lbl = store.get.stepNumber(step.numberLabel);
+				const x = lbl.x + lbl.width + 20, y = lbl.y + 5, scale = 0.4;
+				ctx.fillStyle = ctx.strokeStyle = 'black';
+
+				ctx.lineWidth = 2;
+				ctx.save();
+				ctx.translate(x, y);
+				ctx.scale(scale, scale);
+				util.draw.roundedRect(ctx, 0, 0, 100, 94, 15);
+				ctx.restore();
+				ctx.stroke();
+
+				ctx.lineWidth = 3;
+				ctx.save();
+				ctx.translate(x, y);
+				ctx.scale(scale, scale);
+				ctx.beginPath();
+				ctx.arc(50, 38, 39, util.radians(29), util.radians(130));
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.arc(50, 56, 39, util.radians(180 + 29), util.radians(180 + 130));
+				ctx.stroke();
+
+				util.draw.arrow(ctx, 15, 57, 135, [1, 0.7]);
+				ctx.fill();
+				util.draw.arrow(ctx, 86, 38, -45, [1, 0.7]);
+				ctx.fill();
+				ctx.restore();
 			}
 
 			ctx.restore();

@@ -59,6 +59,12 @@ const dialogs = {
 		rows: 2,
 		cols: 2,
 		direction: 'vertical'
+	},
+	rotateCSI: {
+		rotation: {
+			x: 0, y: 0, z: 0
+		},
+		addRotateIcon: false
 	}
 };
 

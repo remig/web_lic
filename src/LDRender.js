@@ -518,7 +518,18 @@ function addModelToScene(scene, model, partIDList, config) {
 
 		if (displacement) {
 			const {x, y, z} = getPartDisplacement(displacement);
-			matrix.multiply(new THREE.Matrix4().makeTranslation(x, y, z));
+			matrix.premultiply(new THREE.Matrix4().makeTranslation(x, y, z));
+		}
+
+		if (config.rotation) {
+			const {x, y, z} = config.rotation;
+			const euler = new THREE.Euler(
+				THREE.Math.degToRad(x),
+				THREE.Math.degToRad(y),
+				THREE.Math.degToRad(z),
+				'XYZ'
+			);
+			matrix.premultiply(new THREE.Matrix4().makeRotationFromEuler(euler));
 		}
 
 		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;

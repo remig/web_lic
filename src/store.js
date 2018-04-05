@@ -91,7 +91,8 @@ const store = {
 							partList,
 							selectedPartIDs,
 							resizeContainer: true,
-							displacedParts: step.displacedParts
+							displacedParts: step.displacedParts,
+							rotation: csi.rotation
 						};
 						LDRender.renderModel(localModel, container, 1000 * scale, config);
 					}
@@ -104,7 +105,8 @@ const store = {
 					partList: store.get.partList(step),
 					selectedPartIDs,
 					resizeContainer: true,
-					displacedParts: step.displacedParts
+					displacedParts: step.displacedParts,
+					rotation: csi.rotation
 				};
 				const container = document.getElementById('generateImagesCanvas');
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
@@ -486,6 +488,21 @@ const store = {
 			}
 		},
 		csi: {
+			add(opts) { // opts: {parent}
+				store.mutations.item.add({item: {
+					type: 'csi',
+					rotation: null,
+					x: null, y: null, width: null, height: null
+				}, parent: opts.parent});
+			},
+			rotate(opts) {  // opts: {csi, rotation: {x, y, z}, addRotateIcon}
+				const csi = store.get.lookupToItem(opts.csi);
+				csi.rotation = opts.rotation;
+				store.mutations.step.toggleRotateIcon(
+					{step: {type: 'step', id: csi.parent.id}, display: opts.addRotateIcon}
+				);
+				store.mutations.page.layout({page: store.get.pageForItem(csi)});
+			},
 			resetSize(opts) {  // opts: {csi: csi or csiItem or csiID}
 				const csi = store.get.lookupToItem(opts.csi, 'csi');
 				csi.width = csi.height = null;
@@ -504,10 +521,7 @@ const store = {
 					x: null, y: null, width: null, height: null
 				}, parent: dest, insertionIndex: opts.insertionIndex});
 
-				store.mutations.item.add({item: {
-					type: 'csi',
-					x: null, y: null, width: null, height: null
-				}, parent: step});
+				store.mutations.csi.add({parent: step});
 
 				if (opts.stepNumber != null) {
 					store.mutations.item.add({item: {
@@ -602,6 +616,10 @@ const store = {
 					id: store.get.nextItemID('callout')
 				}, parent: step});
 				store.mutations.page.layout({page: store.get.pageForItem(step)});
+			},
+			toggleRotateIcon(opts) { // opts: {step, display}
+				const step = store.get.lookupToItem(opts.step);
+				step.rotateIcon = opts.display;
 			}
 		},
 		callout: {
@@ -748,10 +766,7 @@ const store = {
 				x: null, y: null, width: null, height: null
 			}, parent: page});
 
-			addItem({item: {
-				type: 'csi',
-				x: null, y: null, width: null, height: null
-			}, parent: step});
+			store.mutations.csi.add({parent: step});
 
 			addItem({item: {
 				type: 'label',
@@ -855,10 +870,7 @@ const store = {
 				}, parent: step});
 				step.number = step.id + (store.state.titlePage ? 0 : 1);
 
-				addItem({item: {
-					type: 'csi',
-					x: null, y: null, width: null, height: null
-				}, parent: step});
+				store.mutations.csi.add({parent: step});
 
 				const pli = addItem({item: {
 					type: 'pli',

@@ -263,6 +263,36 @@
 		</baseDialog>
 	</script>
 
+	<script type="text/x-template" id="rotateCSITemplate">
+		<baseDialog title="Rotate CSI">
+			<div slot="body">
+				<form class="form-horizontal" role="form">
+					<div class="form-group container-fluid">
+						<div class="row">
+							<label class="col-sm-2 control-label" for="x">X</label>
+							<div class="col-sm-2">
+								<input v-model.number="rotation.x" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" id="x"/>
+							</div>
+							<label class="col-sm-2 control-label" for="y">Y</label>
+							<div class="col-sm-2">
+								<input v-model.number="rotation.y" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" id="y"/>
+							</div>
+							<label class="col-sm-2 control-label" for="z">Z</label>
+							<div class="col-sm-2">
+								<input v-model.number="rotation.z" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" id="z"/>
+							</div>
+						</div>
+						<div class="row">
+							<label class="checkbox-inline">
+								<input v-model="addRotateIcon" id="includeRotationIconCheckbox" type="checkbox" value="" />Add Rotation Icon
+							</label>
+						</div>
+					</div>
+				</form>
+			</div>
+		</baseDialog>
+	</script>
+
 	<script type="text/javascript" src="dist/bundle.js"></script>
 
 </body>

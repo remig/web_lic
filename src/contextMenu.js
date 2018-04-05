@@ -253,7 +253,47 @@ const contextMenu = {
 		{text: 'Change Step Number (NYI)', cb: () => {}}
 	],
 	csi: [
-		{text: 'Rotate CSI (NYI)', cb: () => {}},
+		{
+			// TODO: include a 'Rotate next X CSIs in the dialog too
+			text: 'Rotate CSI...',
+			cb() {
+				const csi = store.get.csi(app.selectedItemLookup.id);
+				const originalRotation = util.clone(csi.rotation);
+				csi.rotation = csi.rotation || {x: 0, y: 0, z: 0};
+
+				app.currentDialog = 'rotateCSIDialog';
+				app.clearSelected();
+
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$off();
+					dialog.$on('ok', newValues => {
+						undoStack.commit(
+							'csi.rotate',
+							{csi, ...util.clone(newValues)},
+							'Rotate CSI',
+							[csi]
+						);
+						app.redrawUI(true);
+					});
+					dialog.$on('cancel', () => {
+						csi.isDirty = true;
+						csi.rotation = originalRotation;
+						app.redrawUI(true);
+					});
+					dialog.$on('update', newValues => {
+						csi.isDirty = true;
+						csi.rotation = newValues.rotation;
+						app.redrawUI(true);
+					});
+					dialog.rotation.x = csi.rotation.x;
+					dialog.rotation.y = csi.rotation.y;
+					dialog.rotation.z = csi.rotation.z;
+					dialog.addRotateIcon = true;
+					dialog.show({x: 400, y: 150});
+				});
+			}
+		},
 		{text: 'Scale CSI (NYI)', cb: () => {}},
 		{text: 'separator'},
 		{

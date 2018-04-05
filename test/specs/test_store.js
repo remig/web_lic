@@ -87,11 +87,11 @@ describe('Test state store module', function() {
 			'displace', 'moveToStep', 'addToCallout', 'removeFromCallout'
 		]);
 		assert.hasAllKeys(store.mutations.csi, [
-			'resetSize'
+			'add', 'rotate', 'resetSize'
 		]);
 		assert.hasAllKeys(store.mutations.step, [
 			'add', 'delete', 'renumber', 'layout', 'moveToPage', 'moveToPreviousPage', 'moveToNextPage',
-			'mergeWithStep', 'addCallout'
+			'mergeWithStep', 'addCallout', 'addRotateIcon'
 		]);
 		assert.hasAllKeys(store.mutations.callout, [
 			'delete', 'addStep'
