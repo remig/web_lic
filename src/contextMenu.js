@@ -453,7 +453,8 @@ const contextMenu = {
 						undoStack.commit(
 							'part.moveToStep',
 							{partID: app.selectedItemLookup.id, srcStep, destStep, doLayout: true},
-							'Move Part to Previous Step'
+							'Move Part to Previous Step',
+							[{type: 'csi', id: destStep.csiID}]
 						);
 						app.redrawUI(true);
 					}
@@ -473,7 +474,8 @@ const contextMenu = {
 						undoStack.commit(
 							'part.moveToStep',
 							{partID: app.selectedItemLookup.id, srcStep, destStep, doLayout: true},
-							'Move Part to Next Step'
+							'Move Part to Next Step',
+							[{type: 'csi', id: destStep.csiID}]
 						);
 						app.redrawUI(true);
 					}
@@ -563,11 +565,12 @@ function showDisplacement(direction) {
 
 function displacePart(direction) {
 	return () => {
-		const step = {type: 'step', id: app.selectedItemLookup.stepID};
+		const step = store.get.step(app.selectedItemLookup.stepID);
 		undoStack.commit(
 			'part.displace',
 			{partID: app.selectedItemLookup.id, step, direction},
-			`Displace Part ${util.titleCase(direction || 'None')}`
+			`Displace Part ${util.titleCase(direction || 'None')}`,
+			[{type: 'csi', id: step.csiID}]
 		);
 		app.redrawUI();
 	};

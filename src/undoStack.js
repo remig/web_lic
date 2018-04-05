@@ -20,7 +20,7 @@ const api = {
 		state.onChangeCB = onChangeCB;
 	},
 
-	commit(mutationName, opts, undoText) {
+	commit(mutationName, opts, undoText, clearCacheTargets) {
 
 		util.get(mutationName, store.mutations)(opts);  // Perform the actual action
 
@@ -28,9 +28,12 @@ const api = {
 			// If there's undo actions after the 'current' action, delete them
 			state.stack.splice(state.index + 1);
 		}
+		// TODO: state can be really big; consider detecting just some guaranteed minimal
+		// delta between the current state and new state, and push only that.
 		state.stack.push({
 			state: util.clone(store.state),
-			text: undoText || ''
+			undoText,
+			clearCacheTargets
 		});
 		setIndex(state, state.index + 1);
 
@@ -46,23 +49,19 @@ const api = {
 
 	// Copy the store's current state into the undoStack's initial base state
 	saveBaseState() {
-		state.stack = [{state: util.clone(store.state), text: null}];
+		state.stack = [{state: util.clone(store.state), undoText: null}];
 		setIndex(state, 0);
 	},
 
 	undo() {
 		if (api.isUndoAvailable()) {
-			setIndex(state, state.index - 1);
-			const newState = util.clone(state.stack[state.index].state);
-			store.replaceState(newState);
+			performUndoRedoAction(state.index - 1);
 		}
 	},
 
 	redo() {
 		if (api.isRedoAvailable()) {
-			setIndex(state, state.index + 1);
-			const newState = util.clone(state.stack[state.index].state);
-			store.replaceState(newState);
+			performUndoRedoAction(state.index + 1);
 		}
 	},
 
@@ -88,13 +87,36 @@ const api = {
 	},
 
 	undoText() {
-		return api.isUndoAvailable() ? state.stack[state.index].text : '';
+		return api.isUndoAvailable() ? state.stack[state.index].undoText : '';
 	},
 
 	redoText() {
-		return api.isRedoAvailable() ? state.stack[state.index + 1].text : '';
+		return api.isRedoAvailable() ? state.stack[state.index + 1].undoText : '';
 	}
 };
+
+function performUndoRedoAction(newIndex) {
+	const prevIndex = state.index;
+	setIndex(state, newIndex);
+	const stackContent = state.stack[state.index];
+	const newState = util.clone(stackContent.state);
+	store.replaceState(newState);
+
+	const clearCacheTargets = [];
+	if (state.stack[prevIndex] && state.stack[prevIndex].clearCacheTargets) {
+		clearCacheTargets.push(...state.stack[prevIndex].clearCacheTargets);
+	}
+	if (state.stack[state.index] && state.stack[state.index].clearCacheTargets) {
+		clearCacheTargets.push(...state.stack[state.index].clearCacheTargets);
+	}
+	clearCacheTargets.forEach(item => {
+		item = {type: item.type, id: item.id};  // Some cache items were cloned from previous states; ensure we pull only the actual item from the current state
+		item = store.get.lookupToItem(item);
+		if (item) {
+			item.isDirty = true;
+		}
+	});
+}
 
 function setIndex(stack, newIndex) {
 	stack.index = newIndex;
