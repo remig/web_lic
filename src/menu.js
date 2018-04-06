@@ -117,7 +117,14 @@ const menu = [
 		{text: 'Save Template (NYI)', enabled: () => false, cb: () => {}},
 		{text: 'Save Template As... (NYI)', enabled: () => false, cb: () => {}},
 		{text: 'Load Template (NYI)', enabled: () => false, cb: () => {}},
-		{text: 'Reset Template (NYI)', enabled: () => false, cb: () => {}}
+		{text: 'Reset Template (NYI)', enabled: () => false, cb: () => {}},
+		{text: 'separator'},
+		{
+			text: 'Clear Local Cache',
+			cb() {
+				window.localStorage.removeItem('lic_state');
+			}
+		}
 	]},
 	{name: 'Edit', children: [
 		{
