@@ -204,56 +204,6 @@ const api = {
 			return {x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2};
 		}
 	},
-	draw: {
-		arrow: (() => {
-
-			const presetAngles = {up: 180, left: 90, right: -90};
-			const arrowDimensions = {
-				head: {
-					length: 30,
-					width: 7,
-					insetDepth: 3
-				},
-				body: {
-					width: 1.25
-				}
-			};
-
-			return function(ctx, tipX, tipY, rotation, scale) {
-				const head = arrowDimensions.head, bodyWidth = 1.25;
-				ctx.save();
-				ctx.translate(tipX, tipY);
-				if (rotation in presetAngles) {
-					ctx.rotate(api.radians(rotation[rotation]));
-				} else if (typeof rotation === 'number') {
-					ctx.rotate(api.radians(rotation));
-				}
-				if (scale) {
-					if (Array.isArray(scale)) {
-						ctx.scale(scale[0], scale[1]);
-					} else {
-						ctx.scale(scale, scale);
-					}
-				}
-				ctx.beginPath();
-				ctx.moveTo(0, 0);
-				ctx.lineTo(-head.width, -head.length);
-				ctx.lineTo(-bodyWidth, -head.length + head.insetDepth);
-				ctx.lineTo(bodyWidth, -head.length + head.insetDepth);
-				ctx.lineTo(head.width, -head.length);
-				ctx.closePath();
-				ctx.restore();
-			};
-		})(),
-		roundedRect(ctx, x, y, w, h, r) {
-			ctx.beginPath();
-			ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
-			ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);
-			ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
-			ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
-			ctx.closePath();
-		}
-	},
 	clone(obj) {
 		if (obj == null) {
 			return null;  // JSON.parse crashes if obj is undefined

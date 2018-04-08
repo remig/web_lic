@@ -8,6 +8,7 @@ const LDParse = require('./LDParse');
 const LDRender = require('./LDRender');
 const Menu = require('./menu');
 const ContextMenu = require('./contextMenu');
+const Draw = require('./draw');
 require('./tree');
 require('./dialog');
 
@@ -489,178 +490,10 @@ const app = new Vue({
 				this.drawPage(page, canvas);
 			}
 		},
-		// TODO: move page drawing to dedicated module
-		drawStep(step, canvas, scale = 1) {
-			step = store.get.step(step);
-			const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
-
-			const ctx = canvas.getContext('2d');
-			ctx.save();
-			ctx.translate(step.x, step.y);
-
-			if (step.csiID != null) {
-				ctx.save();
-				ctx.scale(1 / scale, 1 / scale);
-				const selItem = this.selectedItemLookup;
-				const csi = store.get.csi(step.csiID);
-				const haveSelectedParts = selItem && selItem.type === 'part' && selItem.stepID === step.id;
-				const selectedPartIDs = haveSelectedParts ? [selItem.id] : null;
-				const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
-				const res = store.render[renderer](localModel, step, csi, selectedPartIDs, scale);
-				if (res) {
-					ctx.drawImage(res.container, (csi.x - res.dx) * scale, (csi.y - res.dy) * scale);  // TODO: profile performance if every x, y, w, h argument is passed in
-				}
-				ctx.restore();
-			}
-
-			(step.callouts || []).forEach(calloutID => {
-				const callout = store.get.callout(calloutID);
-				ctx.save();
-				ctx.translate(callout.x, callout.y);
-
-				callout.steps.forEach(id => this.drawStep({type: 'step', id}, canvas, scale));
-
-				ctx.strokeStyle = 'black';
-				ctx.lineWidth = 2;
-				util.draw.roundedRect(ctx, 0, 0, callout.width, callout.height, 10);
-				ctx.stroke();
-				(callout.calloutArrows || []).forEach(arrowID => {
-					const arrow = store.get.calloutArrow(arrowID);
-					const arrowPoints = store.get.calloutArrowToPoints(arrow);
-					ctx.beginPath();
-					ctx.moveTo(arrowPoints[0].x, arrowPoints[0].y);
-					arrowPoints.slice(1, -1).forEach(pt => {
-						ctx.lineTo(pt.x, pt.y);
-					});
-					ctx.stroke();
-					ctx.fillStyle = 'black';
-					const tip = arrowPoints[arrowPoints.length - 1];
-					util.draw.arrow(ctx, tip.x, tip.y, arrow.direction);
-					ctx.fill();
-				});
-				ctx.restore();
-			});
-
-			if (step.pliID != null && store.state.plisVisible) {
-				const pli = store.get.pli(step.pliID);
-				if (!util.isEmpty(pli.pliItems)) {
-					ctx.strokeStyle = 'black';
-					ctx.lineWidth = 2;
-					util.draw.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
-					ctx.stroke();
-
-					ctx.save();
-					ctx.scale(1 / scale, 1 / scale);
-					pli.pliItems.forEach(idx => {
-						const pliItem = store.get.pliItem(idx);
-						const part = localModel.parts[pliItem.partNumbers[0]];
-						const pliCanvas = store.render.pli(part, scale).container;
-						ctx.drawImage(pliCanvas, (pli.x + pliItem.x) * scale, (pli.y + pliItem.y) * scale);
-					});
-					ctx.restore();
-
-					pli.pliItems.forEach(idx => {
-						const pliItem = store.get.pliItem(idx);
-						const pliQty = store.get.pliQty(pliItem.pliQtyID);
-						ctx.fillStyle = 'black';
-						ctx.font = 'bold 10pt Helvetica';
-						ctx.fillText(
-							'x' + pliItem.quantity,
-							pli.x + pliItem.x + pliQty.x,
-							pli.y + pliItem.y + pliQty.y + pliQty.height
-						);
-					});
-				}
-			}
-
-			if (step.numberLabel != null) {
-				const lbl = store.get.stepNumber(step.numberLabel);
-				ctx.fillStyle = 'black';
-				ctx.font = 'bold 20pt Helvetica';
-				ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
-			}
-
-			if (step.rotateIcon) {
-				const lbl = store.get.stepNumber(step.numberLabel);
-				const x = lbl.x + lbl.width + 20, y = lbl.y + 5, scale = 0.4;
-				ctx.fillStyle = ctx.strokeStyle = 'black';
-
-				ctx.lineWidth = 2;
-				ctx.save();
-				ctx.translate(x, y);
-				ctx.scale(scale, scale);
-				util.draw.roundedRect(ctx, 0, 0, 100, 94, 15);
-				ctx.restore();
-				ctx.stroke();
-
-				ctx.lineWidth = 3;
-				ctx.save();
-				ctx.translate(x, y);
-				ctx.scale(scale, scale);
-				ctx.beginPath();
-				ctx.arc(50, 38, 39, util.radians(29), util.radians(130));
-				ctx.stroke();
-
-				ctx.beginPath();
-				ctx.arc(50, 56, 39, util.radians(180 + 29), util.radians(180 + 130));
-				ctx.stroke();
-
-				util.draw.arrow(ctx, 15, 57, 135, [1, 0.7]);
-				ctx.fill();
-				util.draw.arrow(ctx, 86, 38, -45, [1, 0.7]);
-				ctx.fill();
-				ctx.restore();
-			}
-
-			ctx.restore();
-		},
 		drawPage(page, canvas, scale = 1) {
-
-			if (page.needsLayout) {
-				store.mutations.page.layout({page});
-			}
-
-			const pageSize = store.state.pageSize;
-			const ctx = canvas.getContext('2d');
-			ctx.save();
-			if (scale > 1) {
-				ctx.scale(scale, scale);
-			}
-			ctx.fillStyle = 'white';
-			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
-
-			page.steps.forEach(id => this.drawStep({type: 'step', id}, canvas, scale));
-
-			(page.dividers || []).forEach(id => {
-				const divider = store.get.divider(id);
-				ctx.strokeStyle = 'black';
-				ctx.lineWidth = 2;
-				ctx.beginPath();
-				ctx.moveTo(divider.p1.x, divider.p1.y);
-				ctx.lineTo(divider.p2.x, divider.p2.y);
-				ctx.stroke();
-			});
-
-			if (page.numberLabel != null) {
-				ctx.save();
-				const lbl = store.get.pageNumber(page.numberLabel);
-				ctx.fillStyle = 'black';
-				ctx.font = 'bold 20pt Helvetica';
-				ctx.textAlign = lbl.align || 'start';
-				ctx.textBaseline = lbl.valign || 'alphabetic';
-				ctx.fillText(page.number, lbl.x, lbl.y);
-				ctx.restore();
-			}
-
-			if (page.labels != null) {
-				page.labels.forEach(labelID => {
-					const lbl = store.get.label(labelID);
-					ctx.fillStyle = lbl.color || 'black';
-					ctx.font = lbl.font || 'bold 20pt Helvetica';
-					ctx.fillText(lbl.text, lbl.x, lbl.y + lbl.height);
-				});
-			}
-			ctx.restore();
+			const selItem = this.selectedItemLookup;
+			const selectedPart = (selItem && selItem.type === 'part') ? selItem : null;
+			Draw.page(page, canvas, scale, selectedPart);
 		},
 		pages() {
 			return store.state.pages.filter(p => p != null);
