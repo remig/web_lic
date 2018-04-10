@@ -310,12 +310,79 @@ const contextMenu = {
 								app.redrawUI(true);
 							});
 							dialog.rotation = csi.rotation;
-							dialog.addRotateIcon = true;
 							dialog.show({x: 400, y: 150});
 						});
 					}
 				}
 			]
+		},
+		{
+			text: 'Copy Rotation to next Steps...',
+			shown() {
+				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
+					const csi = store.get.csi(app.selectedItemLookup);
+					const rotation = csi.rotation;
+					return rotation && (rotation.x || rotation.y || rotation.z);
+				}
+				return false;
+			},
+			cb() {
+				const csi = store.get.csi(app.selectedItemLookup.id);
+				const rotation = util.clone(csi.rotation);
+				const step = store.get.step(csi.parent.id);
+				const originalRotations = [];
+
+				app.currentDialog = 'copyRotationDialog';
+				app.clearSelected();
+
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$off();
+					dialog.$on('ok', newValues => {
+						const csiList = originalRotations
+							.map((rotation, id) => ({type: 'csi', id})).filter(el => el);
+						undoStack.commit(
+							'step.copyRotation',
+							{step, rotation, ...newValues},
+							'Copy CSI Rotations',
+							csiList
+						);
+						app.redrawUI(true);
+					});
+					dialog.$on('cancel', () => {
+						originalRotations.forEach((rotation, csiID) => {
+							const csi = store.get.csi(csiID);
+							if (csi) {
+								csi.rotation = (rotation === 'none') ? null : rotation;
+								csi.isDirty = true;
+							}
+						});
+						app.redrawUI(true);
+					});
+					dialog.$on('update', newValues => {
+						let csi, nextStep = step;
+						for (let i = 0; i < newValues.nextXSteps; i++) {
+							nextStep = store.get.nextStep(nextStep);
+							if (nextStep) {
+								csi = store.get.csi(nextStep.csiID);
+								if (csi) {
+									if (originalRotations[csi.id] == null) {
+										originalRotations[csi.id] =
+											(csi.rotation == null) ? 'none' : csi.rotation;
+									}
+									csi.isDirty = true;
+									csi.rotation = rotation;
+								}
+							}
+						}
+						app.redrawUI(true);
+					});
+					dialog.nextXSteps = 0;
+					dialog.show({x: 400, y: 150});
+				});
+
+				app.redrawUI(true);
+			}
 		},
 		{text: 'Scale CSI (NYI)', cb: () => {}},
 		{text: 'separator'},

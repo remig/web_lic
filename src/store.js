@@ -149,7 +149,7 @@ const store = {
 			if (!store.model || !store.model.filename) {
 				return '';
 			}
-			return store.model.filename.replace(/\..+$/, '') + (ext || '');
+			return util.store.model.filename.split('.')[0] + (ext || '');
 		},
 		isTitlePage(page) {
 			return (page || {}).type === 'titlePage';
@@ -495,9 +495,10 @@ const store = {
 					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
 			},
-			rotate(opts) {  // opts: {csi, rotation: {x, y, z}, addRotateIcon}
+			rotate(opts) {  // opts: {csi, rotation: {x, y, z}, addRotateIcon, copyToNextXSteps}
 				const csi = store.get.lookupToItem(opts.csi);
 				csi.rotation = opts.rotation;
+				csi.isDirty = true;
 				store.mutations.step.toggleRotateIcon(
 					{step: {type: 'step', id: csi.parent.id}, display: opts.addRotateIcon}
 				);
@@ -620,6 +621,20 @@ const store = {
 			toggleRotateIcon(opts) { // opts: {step, display}
 				const step = store.get.lookupToItem(opts.step);
 				step.rotateIcon = opts.display;
+			},
+			copyRotation(opts) {  // {step, nextXSteps, rotation}  Copy step's CSI rotation to next X steps
+				const step = store.get.lookupToItem(opts.step);
+				let csi, nextStep = step;
+				for (let i = 0; i < opts.nextXSteps; i++) {
+					nextStep = store.get.nextStep(nextStep);
+					if (nextStep) {
+						csi = store.get.csi(nextStep.csiID);
+						if (csi) {
+							csi.isDirty = true;
+							csi.rotation = opts.rotation;
+						}
+					}
+				}
 			}
 		},
 		callout: {

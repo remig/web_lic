@@ -64,7 +64,10 @@ const dialogs = {
 		rotation: {
 			x: 0, y: 0, z: 0
 		},
-		addRotateIcon: false
+		addRotateIcon: true
+	},
+	copyRotation: {
+		nextXSteps: 0
 	}
 };
 
