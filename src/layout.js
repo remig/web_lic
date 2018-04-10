@@ -42,6 +42,7 @@ const api = {
 	},
 	calloutArrow(callout) {
 		// TODO: do not recreate callout arrow on layout; just alter the existing one
+		// TODO: arrow should come out of the center of the last step in the callout
 		const step = store.get.step(callout.parent.id);
 		const csi = store.get.csi(step.csiID);
 		callout.calloutArrows.forEach(id => {
@@ -170,7 +171,7 @@ const api = {
 			step.height = margin + lblSize.height + contentSize.height + margin;
 		}
 	},
-	dividers(page, layout, rows, cols) {
+	dividers(page, layoutDirection, rows, cols) {
 
 		// Delete any dividers already on the page, then re-add new ones in the right plaoces.
 		page.dividers = page.dividers || [];
@@ -180,7 +181,7 @@ const api = {
 		const colSize = Math.floor(pageSize.width / cols);
 		const rowSize = Math.floor(pageSize.height / rows);
 
-		if (layout === 'horizontal') {
+		if (layoutDirection === 'horizontal') {
 			for (let i = 1; i < rows; i++) {
 				store.mutations.item.add({item: {
 					type: 'divider',
@@ -209,12 +210,16 @@ const api = {
 		const stepCount = page.steps.length;
 		let cols = Math.ceil(Math.sqrt(stepCount));
 		let rows = Math.ceil(stepCount / cols);
-		if (layout === 'vertical') {
-			[cols, rows] = [rows, cols];
-		} else if (layout.rows != null && layout.cols != null) {
+		let layoutDirection;
+		if (layout.rows != null && layout.cols != null) {
 			cols = layout.cols;
 			rows = layout.rows;
-			layout = layout.direction || (pageSize.width > pageSize ? 'horizontal' : 'vertical');
+			layoutDirection = layout.direction || (pageSize.width > pageSize ? 'horizontal' : 'vertical');
+		} else {
+			layoutDirection = layout;
+			if (layout === 'vertical') {
+				[cols, rows] = [rows, cols];
+			}
 		}
 		const colSize = Math.floor(pageSize.width / cols);
 		const rowSize = Math.floor(pageSize.height / rows);
@@ -222,7 +227,7 @@ const api = {
 		const box = {x: 0, y: 0, width: colSize, height: rowSize};
 
 		for (let i = 0; i < stepCount; i++) {
-			if (layout === 'vertical') {
+			if (layoutDirection === 'vertical') {
 				box.x = colSize * Math.floor(i / rows);
 				box.y = rowSize * (i % rows);
 			} else {
@@ -232,8 +237,9 @@ const api = {
 			api.step.outsideIn(store.get.step(page.steps[i]), box);
 		}
 
-		page.actualLayout = (rows > 1 || cols > 1) ? {rows, cols, direction: layout} : 'horizontal';
-		api.dividers(page, layout, rows, cols);
+		page.layout = layout;
+		page.actualLayout = (rows > 1 || cols > 1) ? {rows, cols, direction: layoutDirection} : 'horizontal';
+		api.dividers(page, layoutDirection, rows, cols);
 
 		if (store.state.plisVisible) {
 			alignStepContent(page);

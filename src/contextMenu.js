@@ -11,80 +11,83 @@ let app;
 const contextMenu = {
 	page: [
 		{
-			text: 'Auto Layout',
-			cb() {
-				undoStack.commit('page.layout', {page: app.selectedItemLookup}, this.text);
-				app.redrawUI(true);
-			}
-		},
-		{
-			text: 'Use Vertical Layout',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
-					const page = store.get.lookupToItem(app.selectedItemLookup);
-					return page.layout !== 'vertical';
+			text: 'Layout',
+			children: [
+				{
+					text: 'Redo Layout',
+					cb() {
+						undoStack.commit('page.layout', {page: app.selectedItemLookup}, this.text);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'Vertical',
+					shown() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
+							const page = store.get.lookupToItem(app.selectedItemLookup);
+							return page.layout !== 'vertical';
+						}
+						return false;
+					},
+					cb() {
+						const page = app.selectedItemLookup;
+						undoStack.commit('page.layout', {page, layout: 'vertical'}, this.text);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'Horizontal',
+					shown() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
+							const page = store.get.lookupToItem(app.selectedItemLookup);
+							return page.layout !== 'horizontal';
+						}
+						return false;
+					},
+					cb() {
+						const page = app.selectedItemLookup;
+						undoStack.commit('page.layout', {page, layout: 'horizontal'}, this.text);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'By Row and Column',
+					cb() {
+						const page = store.get.page(app.selectedItemLookup);
+						const originalLayout = util.clone(page.layout);
+
+						app.currentDialog = 'pageRowColLayoutDialog';
+						app.clearSelected();
+
+						Vue.nextTick(() => {
+							const dialog = app.$refs.currentDialog;
+							dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
+							dialog.$on('ok', newValues => {
+								undoStack.commit(
+									'page.layout',
+									{page, layout: newValues},
+									'Layout Page by Row and Column'
+								);
+								app.redrawUI(true);
+							});
+							dialog.$on('cancel', () => {
+								store.mutations.page.layout({page, layout: originalLayout});
+								app.redrawUI(true);
+							});
+							dialog.$on('update', newValues => {
+								store.mutations.page.layout({page, layout: newValues});
+								app.redrawUI(true);
+							});
+							dialog.rows = originalLayout.rows || 2;
+							dialog.cols = originalLayout.cols || 2;
+							dialog.direction = originalLayout.direction || 'vertical';
+							dialog.show({x: 400, y: 150});
+						});
+
+						app.redrawUI(true);
+					}
 				}
-				return false;
-			},
-			cb() {
-				const page = app.selectedItemLookup;
-				undoStack.commit('page.layout', {page, layout: 'vertical'}, this.text);
-				app.redrawUI(true);
-			}
-		},
-		{
-			text: 'Use Horizontal Layout',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
-					const page = store.get.lookupToItem(app.selectedItemLookup);
-					return page.layout !== 'horizontal';
-				}
-				return false;
-			},
-			cb() {
-				const page = app.selectedItemLookup;
-				undoStack.commit('page.layout', {page, layout: 'horizontal'}, this.text);
-				app.redrawUI(true);
-			}
-		},
-		{
-			text: 'Layout By Row and Column',
-			cb() {
-				const page = store.get.page(app.selectedItemLookup);
-				const originalLayout = util.clone(page.layout);
-
-				app.currentDialog = 'pageRowColLayoutDialog';
-				app.clearSelected();
-
-				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
-					dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
-					dialog.$on('ok', () => {
-						undoStack.commit('page.layout', {page}, 'Layout Page by Row and Column');
-						app.redrawUI(true);
-					});
-					dialog.$on('cancel', () => {
-						page.layout = originalLayout;
-						store.mutations.page.layout({page});
-						app.redrawUI(true);
-					});
-					dialog.$on('update', newValues => {
-						page.layout = {
-							rows: newValues.rows,
-							cols: newValues.cols,
-							direction: newValues.direction
-						};
-						store.mutations.page.layout({page});
-						app.redrawUI(true);
-					});
-					dialog.rows = originalLayout.rows || 2;
-					dialog.cols = originalLayout.cols || 2;
-					dialog.direction = originalLayout.direction || 'vertical';
-					dialog.show({x: 400, y: 150});
-				});
-
-				app.redrawUI(true);
-			}
+			]
 		},
 		{text: 'separator'},
 		{
@@ -254,45 +257,65 @@ const contextMenu = {
 	],
 	csi: [
 		{
-			// TODO: include a 'Rotate next X CSIs in the dialog too
-			text: 'Rotate CSI...',
-			cb() {
-				const csi = store.get.csi(app.selectedItemLookup.id);
-				const originalRotation = util.clone(csi.rotation);
-				csi.rotation = csi.rotation || {x: 0, y: 0, z: 0};
+			text: 'Rotate Step Image',
+			children: [
+				{
+					text: 'Flip Upside Down',
+					cb() {
+						const csi = app.selectedItemLookup;
+						const opts = {csi, rotation: {x: 0, y: 0, z: 180}, addRotateIcon: true};
+						undoStack.commit('csi.rotate', opts, 'Flip Step Image', [csi]);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'Rotate Front to Back',
+					cb() {
+						const csi = app.selectedItemLookup;
+						const opts = {csi, rotation: {x: 0, y: 180, z: 0}, addRotateIcon: true};
+						undoStack.commit('csi.rotate', opts, 'Rotate Step Image', [csi]);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'Custom Rotation...',
+					cb() {
+						const csi = store.get.csi(app.selectedItemLookup.id);
+						const originalRotation = util.clone(csi.rotation);
+						csi.rotation = csi.rotation || {x: 0, y: 0, z: 0};
 
-				app.currentDialog = 'rotateCSIDialog';
-				app.clearSelected();
+						app.currentDialog = 'rotateCSIDialog';
+						app.clearSelected();
 
-				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
-					dialog.$off();
-					dialog.$on('ok', newValues => {
-						undoStack.commit(
-							'csi.rotate',
-							{csi, ...util.clone(newValues)},
-							'Rotate CSI',
-							[csi]
-						);
-						app.redrawUI(true);
-					});
-					dialog.$on('cancel', () => {
-						csi.isDirty = true;
-						csi.rotation = originalRotation;
-						app.redrawUI(true);
-					});
-					dialog.$on('update', newValues => {
-						csi.isDirty = true;
-						csi.rotation = newValues.rotation;
-						app.redrawUI(true);
-					});
-					dialog.rotation.x = csi.rotation.x;
-					dialog.rotation.y = csi.rotation.y;
-					dialog.rotation.z = csi.rotation.z;
-					dialog.addRotateIcon = true;
-					dialog.show({x: 400, y: 150});
-				});
-			}
+						Vue.nextTick(() => {
+							const dialog = app.$refs.currentDialog;
+							dialog.$off();
+							dialog.$on('ok', newValues => {
+								undoStack.commit(
+									'csi.rotate',
+									{csi, ...util.clone(newValues)},
+									'Rotate Step Image',
+									[csi]
+								);
+								app.redrawUI(true);
+							});
+							dialog.$on('cancel', () => {
+								csi.rotation = originalRotation;
+								csi.isDirty = true;
+								app.redrawUI(true);
+							});
+							dialog.$on('update', newValues => {
+								csi.rotation = newValues.rotation;
+								csi.isDirty = true;
+								app.redrawUI(true);
+							});
+							dialog.rotation = csi.rotation;
+							dialog.addRotateIcon = true;
+							dialog.show({x: 400, y: 150});
+						});
+					}
+				}
+			]
 		},
 		{text: 'Scale CSI (NYI)', cb: () => {}},
 		{text: 'separator'},
