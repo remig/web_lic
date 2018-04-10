@@ -82,10 +82,8 @@ const api = {
 			ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
 		}
 
-		if (step.rotateIcon) {
-			const lbl = store.get.stepNumber(step.numberLabel);
-			const x = lbl.x + lbl.width + 20, y = lbl.y + 5;
-			api.stepRotateIcon(ctx, x, y, 0.4);
+		if (step.rotateIconID != null) {
+			api.rotateIcon(step.rotateIconID, ctx);
 		}
 
 		ctx.restore();
@@ -168,21 +166,26 @@ const api = {
 		ctx.restore();
 	},
 
-	stepRotateIcon(ctx, x, y, scale = 1) {
-		ctx.fillStyle = ctx.strokeStyle = 'black';
+	rotateIcon(icon, ctx) {
+		icon = store.get.rotateIcon(icon);
+		const scale = {  // Icon is drawn in 100 x 94 space; scale to that
+			width: icon.width / 100,  // TODO: put Layout.rotateIconAspectRatio somewhere easier to read
+			height: icon.height / 94
+		};
 
+		ctx.fillStyle = ctx.strokeStyle = 'black';
 		ctx.lineWidth = 2;
 		ctx.save();
-		ctx.translate(x, y);
-		ctx.scale(scale, scale);
+		ctx.translate(icon.x, icon.y);
+		ctx.scale(scale.width, scale.height);
 		api.roundedRect(ctx, 0, 0, 100, 94, 15);
 		ctx.restore();
-		ctx.stroke();
+		ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
 
 		ctx.lineWidth = 3;
 		ctx.save();
-		ctx.translate(x, y);
-		ctx.scale(scale, scale);
+		ctx.translate(icon.x, icon.y);
+		ctx.scale(scale.width, scale.height);
 		ctx.beginPath();
 		ctx.arc(50, 38, 39, util.radians(29), util.radians(130));
 		ctx.stroke();

@@ -362,7 +362,9 @@ const contextMenu = {
 					dialog.$on('update', newValues => {
 						let csi, nextStep = step;
 						for (let i = 0; i < newValues.nextXSteps; i++) {
-							nextStep = store.get.nextStep(nextStep);
+							if (nextStep) {
+								nextStep = store.get.nextStep(nextStep);
+							}
 							if (nextStep) {
 								csi = store.get.csi(nextStep.csiID);
 								if (csi) {

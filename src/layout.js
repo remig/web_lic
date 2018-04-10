@@ -9,6 +9,7 @@ const pageMargin = 20;
 const pliMargin = Math.floor(pageMargin / 1.2);
 const calloutMargin = Math.floor(pliMargin / 2);
 const emptyCalloutSize = 50;
+const rotateIconAspectRatio = 0.94; // height / width
 
 const api = {
 
@@ -139,6 +140,15 @@ const api = {
 				lbl.y = pliHeight ? pliHeight + pageMargin : 0;
 				lbl.width = lblSize.width;
 				lbl.height = lblSize.height;
+			}
+
+			if (step.rotateIconID != null && step.csiID != null) {
+				const csi = store.get.csi(step.csiID);
+				const icon = store.get.rotateIcon(step.rotateIconID);
+				icon.width = 40;
+				icon.height = icon.width * rotateIconAspectRatio;
+				icon.x = csi.x - icon.width - 20;
+				icon.y = csi.y - icon.height;
 			}
 		},
 		insideOut(step, margin) {

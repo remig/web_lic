@@ -24,7 +24,8 @@ const emptyState = {
 	labels: [],
 	callouts: [],
 	calloutArrows: [],
-	points: []
+	points: [],
+	rotateIcons: []
 };
 
 const store = {
@@ -510,6 +511,14 @@ const store = {
 				csi.isDirty = true;
 			}
 		},
+		rotateIcon: {
+			add(opts) {  // opts: {parent}
+				store.mutations.item.add({item: {
+					type: 'rotateIcon',
+					x: null, y: null, scale: 1
+				}, parent: opts.parent});
+			}
+		},
 		step: {
 			add(opts) {  // opts: {dest, doLayout = false, stepNumber = null, insertionIndex = -1}
 
@@ -518,7 +527,7 @@ const store = {
 					type: 'step',
 					number: opts.stepNumber, numberLabel: null,
 					parts: [], callouts: [], submodel: [],
-					csiID: null, pliID: null,
+					csiID: null, pliID: null, rotateIconID: null,
 					x: null, y: null, width: null, height: null
 				}, parent: dest, insertionIndex: opts.insertionIndex});
 
@@ -620,13 +629,19 @@ const store = {
 			},
 			toggleRotateIcon(opts) { // opts: {step, display}
 				const step = store.get.lookupToItem(opts.step);
-				step.rotateIcon = opts.display;
+				if (opts.display) {
+					store.mutations.rotateIcon.add({parent: step});
+				} else if (!opts.display && step.rotateIconID != null) {
+					store.mutations.item.delete({item: {type: 'rotateIcon', id: step.rotateIconID}});
+				}
 			},
 			copyRotation(opts) {  // {step, nextXSteps, rotation}  Copy step's CSI rotation to next X steps
 				const step = store.get.lookupToItem(opts.step);
 				let csi, nextStep = step;
 				for (let i = 0; i < opts.nextXSteps; i++) {
-					nextStep = store.get.nextStep(nextStep);
+					if (nextStep) {
+						nextStep = store.get.nextStep(nextStep);
+					}
 					if (nextStep) {
 						csi = store.get.csi(nextStep.csiID);
 						if (csi) {
@@ -870,22 +885,12 @@ const store = {
 				}, parent: page});
 				page.number = page.id + 1;
 
-				const step = addItem({item: {
-					type: 'step',
-					number: null, numberLabel: null,
-					parts: parts, callouts: [],
-					submodel: util.clone(localModelIDList),
-					csiID: null, pliID: null,
-					x: null, y: null, width: null, height: null
-				}, parent: page});
-
-				addItem({item: {
-					type: 'stepNumber',
-					x: null, y: null, width: null, height: null
-				}, parent: step});
+				const step = store.mutations.step.add({
+					dest: page, doLayout: false, stepNumber: 0
+				});
+				step.parts = parts;
+				step.submodel = util.clone(localModelIDList);
 				step.number = step.id + (store.state.titlePage ? 0 : 1);
-
-				store.mutations.csi.add({parent: step});
 
 				const pli = addItem({item: {
 					type: 'pli',

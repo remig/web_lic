@@ -307,6 +307,12 @@ const app = new Vue({
 					}
 				}
 			}
+			if (step.rotateIconID != null) {
+				const icon = store.get.rotateIcon(step.rotateIconID);
+				if (this.inBox(mx, my, icon)) {
+					return icon;
+				}
+			}
 			if (this.inBox(mx, my, step)) {
 				return step;
 			}
@@ -343,7 +349,7 @@ const app = new Vue({
 		isMoveable: (() => {
 			const moveableItems = [
 				'step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'label',
-				'callout', 'point'
+				'callout', 'point', 'rotateIcon'
 			];
 			return nodeType => moveableItems.includes(nodeType);
 		})(),
