@@ -335,16 +335,15 @@ const store = {
 	// TODO: convert all 'opts' arguments into {opts} for automatic destructuring.  duh.
 	mutations: {
 		item: {
-			// TODO: support both insertionIndex and parentInsertionIndex
-			add(opts) {  // opts: {itemJSON, parent, insertionIndex = -1}
+			add(opts) {  // opts: {itemJSON, parent, insertionIndex = -1, parentInsertionIndex = =1}
 				const item = opts.item;
 				item.id = store.get.nextItemID(item);
-				store.state[item.type + 's'].push(item);
+				util.array.insert(store.state[item.type + 's'], item, opts.insertionIndex);
 				if (opts.parent) {
 					const parent = store.get.lookupToItem(opts.parent);
 					item.parent = {type: parent.type, id: parent.id};
 					if (parent.hasOwnProperty(item.type + 's')) {
-						util.array.insert(parent[item.type + 's'], item.id, opts.insertionIndex);
+						util.array.insert(parent[item.type + 's'], item.id, opts.parentInsertionIndex);
 					} else if (parent.hasOwnProperty(item.type + 'ID')) {
 						parent[item.type + 'ID'] = item.id;
 					} else if (parent.hasOwnProperty('numberLabel') && item.type.endsWith('Number')) {
@@ -377,13 +376,13 @@ const store = {
 					store.mutations[itemType].delete(arg);
 				});
 			},
-			reparent(opts) {  // opts: {item, newParent, insertionIndex = -1}
+			reparent(opts) {  // opts: {item, newParent, parentInsertionIndex = -1}
 				const item = store.get.lookupToItem(opts.item);
 				const oldParent = store.get.parent(item);
 				const newParent = store.get.lookupToItem(opts.newParent);
 				item.parent.id = newParent.id;
 				util.array.remove(oldParent[item.type + 's'], item.id);
-				util.array.insert(newParent[item.type + 's'], item.id, opts.insertionIndex);
+				util.array.insert(newParent[item.type + 's'], item.id, opts.parentInsertionIndex);
 			},
 			reposition(opts) {  // opts: {item or [items], dx, dy}
 				const items = Array.isArray(opts.item) ? opts.item : [opts.item];
@@ -490,7 +489,7 @@ const store = {
 		},
 		csi: {
 			add(opts) { // opts: {parent}
-				store.mutations.item.add({item: {
+				return store.mutations.item.add({item: {
 					type: 'csi',
 					rotation: null,
 					x: null, y: null, width: null, height: null
@@ -520,18 +519,25 @@ const store = {
 			}
 		},
 		step: {
-			add(opts) {  // opts: {dest, doLayout = false, stepNumber = null, insertionIndex = -1}
+			add(opts) {  // opts: {dest, doLayout = false, stepNumber = null, renumber = false, insertionIndex = -1, parentInsertionIndex = -1}
 
 				const dest = store.get.lookupToItem(opts.dest);
-				const step = store.mutations.item.add({item: {
-					type: 'step',
-					number: opts.stepNumber, numberLabel: null,
-					parts: [], callouts: [], submodel: [],
-					csiID: null, pliID: null, rotateIconID: null,
-					x: null, y: null, width: null, height: null
-				}, parent: dest, insertionIndex: opts.insertionIndex});
+				const step = store.mutations.item.add({
+					item: {
+						type: 'step',
+						number: opts.stepNumber, numberLabel: null,
+						parts: [], callouts: [], submodel: [],
+						csiID: null, pliID: null, rotateIconID: null,
+						x: null, y: null, width: null, height: null
+					},
+					parent: dest,
+					insertionIndex: opts.insertionIndex,
+					parentInsertionIndex: opts.parentInsertionIndex
+				});
 
 				store.mutations.csi.add({parent: step});
+
+				store.mutations.pli.add({parent: step});
 
 				if (opts.stepNumber != null) {
 					store.mutations.item.add({item: {
@@ -539,7 +545,9 @@ const store = {
 						x: null, y: null, width: null, height: null
 					}, parent: step});
 				}
-
+				if (opts.renumber) {
+					store.mutations.step.renumber();
+				}
 				if (opts.doLayout) {
 					store.mutations.page.layout({page: store.get.pageForItem(dest)});
 				}
@@ -570,14 +578,14 @@ const store = {
 				const step = store.get.lookupToItem(opts.step);
 				Layout.step.outsideIn(step, opts.box);
 			},
-			moveToPage(opts) {  // opts: {step, destPage, insertionIndex = 0}
+			moveToPage(opts) {  // opts: {step, destPage, parentInsertionIndex = 0}
 				const step = store.get.lookupToItem(opts.step);
 				const currentPage = store.get.parent(step);
 				const destPage = store.get.lookupToItem(opts.destPage);
 				store.mutations.item.reparent({
 					item: step,
 					newParent: destPage,
-					insertionIndex: opts.insertionIndex || 0
+					parentInsertionIndex: opts.parentInsertionIndex || 0
 				});
 				store.mutations.page.layout({page: currentPage});
 				store.mutations.page.layout({page: destPage});
@@ -586,15 +594,15 @@ const store = {
 				const step = store.get.lookupToItem(opts.step);
 				const destPage = store.get.prevPage(step.parent, false);
 				if (destPage) {
-					const insertionIndex = destPage.steps.length;
-					store.mutations.step.moveToPage({step, destPage, insertionIndex});
+					const parentInsertionIndex = destPage.steps.length;
+					store.mutations.step.moveToPage({step, destPage, parentInsertionIndex});
 				}
 			},
 			moveToNextPage(opts) {  // opts: {step}
 				const step = store.get.lookupToItem(opts.step);
 				const destPage = store.get.nextPage(step.parent);
 				if (destPage) {
-					store.mutations.step.moveToPage({step, destPage, insertionIndex: 0});
+					store.mutations.step.moveToPage({step, destPage, parentInsertionIndex: 0});
 				}
 			},
 			mergeWithStep(opts) {  // opts: {srcStep, destStep}
@@ -683,14 +691,14 @@ const store = {
 			},
 			addPoint(opts) { // opts: {calloutArrow, doLayout}
 				const arrow = store.get.calloutArrow(opts.calloutArrow);
-				const insertionIndex = Math.ceil(arrow.points.length / 2);
-				const p1 = store.get.point(arrow.points[insertionIndex - 1]);
-				const p2 = store.get.point(arrow.points[insertionIndex]);
+				const parentInsertionIndex = Math.ceil(arrow.points.length / 2);
+				const p1 = store.get.point(arrow.points[parentInsertionIndex - 1]);
+				const p2 = store.get.point(arrow.points[parentInsertionIndex]);
 				const midpoint = util.geom.midpoint(p1, p2);
 				store.mutations.item.add({
 					item: {type: 'point', ...midpoint},
 					parent: arrow,
-					insertionIndex
+					parentInsertionIndex
 				});
 			},
 			rotateTip(opts) {  // opts: {calloutArrow, direction}
@@ -718,6 +726,7 @@ const store = {
 
 				util.array.insert(store.state.pages, page, opts.insertionIndex);
 				store.mutations.page.renumber();
+				return page;
 			},
 			delete(opts) {  // opts: {page}
 				const page = store.get.lookupToItem(opts.page);
@@ -739,6 +748,13 @@ const store = {
 			}
 		},
 		pli: {
+			add(opts) {  // opts: {parent}
+				return store.mutations.item.add({item: {
+					type: 'pli',
+					pliItems: [],
+					x: null, y: null, width: null, height: null
+				}, parent: opts.parent});
+			},
 			delete(opts) {  // opts: {pli, deleteItem: false}
 				const pli = store.get.lookupToItem(opts.pli);
 				if (!opts.deleteItems && pli.pliItems && pli.pliItems.length) {
@@ -892,11 +908,7 @@ const store = {
 				step.submodel = util.clone(localModelIDList);
 				step.number = step.id + (store.state.titlePage ? 0 : 1);
 
-				const pli = addItem({item: {
-					type: 'pli',
-					pliItems: [],
-					x: null, y: null, width: null, height: null
-				}, parent: step});
+				const pli = store.get.pli(step.pliID);
 
 				parts.forEach(partID => {
 

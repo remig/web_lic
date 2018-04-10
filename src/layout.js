@@ -332,13 +332,15 @@ function alignStepContent(page) {
 	}
 	const stepsByRow = util.array.chunk(steps, page.actualLayout.cols);
 	stepsByRow.forEach(stepList => {
-		const tallestPLIHeight = Math.max(...stepList.map(step => store.get.pli(step.pliID).height));
+		const tallestPLIHeight = Math.max(...stepList.map(step => (store.get.pli(step.pliID) || {}).height || 0));
 		stepList.forEach(step => {
-			const pliHeight = store.get.pli(step.pliID).height || -pageMargin;
-			const dt = tallestPLIHeight - pliHeight;
-			if (dt > 0) {
-				store.get.csi(step.csiID).y += Math.floor(dt / 2);
-				store.get.stepNumber(step.numberLabel).y += dt;
+			const csi = store.get.csi(step.csiID);
+			if (csi) {
+				csi.y = Math.floor((step.height + tallestPLIHeight - csi.height) / 2);
+			}
+			const lbl = store.get.stepNumber(step.numberLabel);
+			if (lbl) {
+				lbl.y = tallestPLIHeight ? tallestPLIHeight + pageMargin : 0;
 			}
 		});
 	});

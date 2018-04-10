@@ -114,7 +114,23 @@ const contextMenu = {
 		},
 		{text: 'separator'},
 		{text: 'Hide Step Separators (NYI)', cb: () => {}},
-		{text: 'Add Blank Step (NYI)', cb: () => {}},
+		{
+			text: 'Add Blank Step',
+			cb() {
+				const dest = store.get.page(app.selectedItemLookup.id);
+				const lastStep = store.get.step(dest.steps[dest.steps.length - 1]);
+				const stepNumber = lastStep.number + 1;
+				undoStack.commit(
+					'step.add',
+					{
+						dest, stepNumber, doLayout: true, renumber: true,
+						insertionIndex: store.state.steps.indexOf(lastStep) + 1
+					},
+					this.text
+				);
+				app.redrawUI(true);
+			}
+		},
 		{text: 'Add Annotation (NYI)', cb: () => {}},
 		{
 			text: 'Delete This Blank Page',

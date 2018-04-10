@@ -36,7 +36,7 @@ describe('Test state store module', function() {
 		assert.hasAllKeys(store.state, [
 			'pageSize', 'titlePage', 'plisVisible', 'pages', 'pageNumbers', 'dividers', 'steps',
 			'stepNumbers', 'csis', 'plis', 'pliItems', 'pliQtys', 'labels',
-			'callouts', 'calloutArrows', 'points'
+			'callouts', 'calloutArrows', 'points', 'rotateIcons'
 		]);
 		assert.deepEqual(store.state.pageSize, {width: 900, height: 700});
 		assert.isNull(store.state.titlePage);
@@ -70,13 +70,13 @@ describe('Test state store module', function() {
 			'pageCount', 'modelName', 'modelFilename', 'modelFilenameBase', 'isTitlePage',
 			'isFirstPage', 'isLastPage', 'nextPage', 'prevPage', 'titlePage', 'firstPage', 'lastPage',
 			'prevStep', 'nextStep', 'partList', 'matchingPLIItem', 'calloutArrowToPoints', 'prev', 'next',
-			'parent', 'pageForItem', 'numberLabel', 'nextItemID', 'lookupToItem', 'itemToLookup', 'page',
-			'pageNumber', 'step', 'stepNumber', 'csi', 'pli', 'pliItem', 'pliQty', 'label', 'callout',
-			'calloutArrow', 'point', 'divider'
+			'parent', 'pageForItem', 'numberLabel', 'nextItemID', 'lookupToItem', 'itemToLookup',
+			'page', 'pageNumber', 'divider', 'step', 'stepNumber', 'csi', 'pli', 'pliItem', 'pliQty',
+			'label', 'callout', 'calloutArrow', 'point', 'rotateIcon'
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
-			'item', 'part', 'csi', 'step', 'callout', 'calloutArrow', 'page', 'pli', 'pliItem',
+			'item', 'part', 'csi', 'rotateIcon', 'step', 'callout', 'calloutArrow', 'page', 'pli', 'pliItem',
 			'renumber', 'setNumber', 'layoutTitlePage',
 			'addTitlePage', 'removeTitlePage', 'addInitialPages'
 		]);
@@ -103,7 +103,7 @@ describe('Test state store module', function() {
 			'add', 'delete', 'renumber', 'layout'
 		]);
 		assert.hasAllKeys(store.mutations.pli, [
-			'delete', 'toggleVisibility'
+			'add', 'delete', 'toggleVisibility'
 		]);
 		assert.hasAllKeys(store.mutations.pliItem, [
 			'delete'
@@ -144,11 +144,12 @@ describe('Test state store module', function() {
 	};
 	const step1State = {
 		type: 'step', id: 1, parent: {type: 'page', id: 0}, number: 1, numberLabel: 0,
-		x: null, y: null, width: null, height: null, csiID: 1, parts: [0], pliID: 0, submodel: [], callouts: []
+		x: null, y: null, width: null, height: null, rotateIconID: null,
+		csiID: 1, parts: [0], pliID: 0, submodel: [], callouts: []
 	};
 	const csiState = {
 		type: 'csi', id: 0, parent: {type: 'step', id: 0},
-		x: null, y: null, width: null, height: null
+		x: null, y: null, width: null, height: null, rotation: null
 	};
 	const titleLabel = {
 		type: 'label', id: 0, parent: {type: 'titlePage', id: 0}, text: '', color: 'black',
@@ -339,7 +340,7 @@ describe('Test state store module', function() {
 			assert.deepEqual(res, {type: 'callout', id: 0, parent: {type: 'step', id: 1}});
 			store.mutations.item.add({item: {type: 'callout'}, parent: {type: 'step', id: 1}});
 			store.mutations.item.add({item: {type: 'callout'}, parent: {type: 'step', id: 1}});
-			store.mutations.item.add({item: {type: 'callout'}, parent: {type: 'step', id: 1}, insertionIndex: 1});
+			store.mutations.item.add({item: {type: 'callout'}, parent: {type: 'step', id: 1}, parentInsertionIndex: 1});
 			assert.deepEqual(store.get.step(1).callouts, [0, 3, 1, 2]);
 			store.state.csis = [];
 			store.mutations.item.add({item: {type: 'csi'}, parent: {type: 'step', id: 0}});
