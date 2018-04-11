@@ -266,6 +266,35 @@ const contextMenu = {
 				undoStack.commit('step.delete', {step: app.selectedItemLookup}, this.text);
 				app.redrawUI(true);
 			}
+		},
+		{text: 'separator'},
+		{
+			text: 'Prepend Blank Step',
+			cb() {
+				const step = store.get.step(app.selectedItemLookup.id);
+				const dest = store.get.pageForItem(step);
+				const opts = {
+					dest, stepNumber: step.number, doLayout: true, renumber: true,
+					insertionIndex: store.state.steps.indexOf(step),
+					parentInsertionIndex: dest.steps.indexOf(step.id)
+				};
+				undoStack.commit('step.add', opts, this.text);
+				app.redrawUI(true);
+			}
+		},
+		{
+			text: 'Append Blank Step',
+			cb() {
+				const step = store.get.step(app.selectedItemLookup.id);
+				const dest = store.get.pageForItem(step);
+				const opts = {
+					dest, stepNumber: step.number + 1, doLayout: true, renumber: true,
+					insertionIndex: store.state.steps.indexOf(step) + 1,
+					parentInsertionIndex: dest.steps.indexOf(step.id) + 1
+				};
+				undoStack.commit('step.add', opts, this.text);
+				app.redrawUI(true);
+			}
 		}
 	],
 	stepNumber: [
