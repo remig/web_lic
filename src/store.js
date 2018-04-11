@@ -510,6 +510,22 @@ const store = {
 				csi.isDirty = true;
 			}
 		},
+		annotation: {
+			set(opts) {  // opts: {annotation, newProperties, doLayout}
+				const annotation = store.get.lookupToItem(opts.annotation);
+				const props = opts.newProperties || {};
+				if (props.text && annotation.annotationType === 'label') {
+					annotation.text = props.text;
+					Layout.label(annotation);
+				}
+				if (opts.doLayout) {
+					store.mutations.page.layout({page: store.get.pageForItem(annotation)});
+				}
+			},
+			delete(opts) {  // opts: {annotation}
+				store.mutations.item.delete({item: opts.annotation});
+			}
+		},
 		rotateIcon: {
 			add(opts) {  // opts: {parent}
 				store.mutations.item.add({item: {

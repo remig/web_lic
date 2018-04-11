@@ -466,14 +466,65 @@ const contextMenu = {
 		{text: 'Rotate PLI Part (NYI)', cb: () => {}},
 		{text: 'Scale PLI Part (NYI)', cb: () => {}}
 	],
-	label: [
+	annotation: [
 		{
-			text: 'Set...',
+			text: 'Set',
 			children: [
-				{text: 'Text (NYI)', cb: () => {}},
+				{
+					text: 'Text...',
+					shown() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'annotation') {
+							const annotation = store.get.annotation(app.selectedItemLookup);
+							return annotation && annotation.annotationType === 'label';
+						}
+						return false;
+					},
+					cb() {
+						const annotation = store.get.annotation(app.selectedItemLookup);
+						const originalText = annotation.text;
+
+						app.currentDialog = 'stringDialog';
+						app.clearSelected();
+
+						Vue.nextTick(() => {
+							const dialog = app.$refs.currentDialog;
+							dialog.$off();
+							dialog.$on('ok', newValues => {
+								const page = store.get.pageForItem(annotation);
+								const opts = {
+									annotation,
+									newProperties: {text: newValues.string},
+									doLayout: store.get.isTitlePage(page)
+								};
+								undoStack.commit('annotation.set', opts, 'Set Label Text');
+								app.redrawUI(true);
+							});
+							dialog.$on('cancel', () => {
+								annotation.text = originalText;
+								app.redrawUI(true);
+							});
+							dialog.$on('update', newValues => {
+								annotation.text = newValues.string;
+								app.redrawUI(true);
+							});
+							dialog.title = 'Set Label Text';
+							dialog.labelText = 'New Text';
+							dialog.string = annotation.text;
+							dialog.show({x: 400, y: 150});
+						});
+					}
+				},
 				{text: 'Font (NYI)', cb: () => {}},
 				{text: 'Color (NYI)', cb: () => {}}
 			]
+		},
+		{
+			text: 'Delete',
+			cb() {
+				const annotation = app.selectedItemLookup;
+				undoStack.commit('annotation.delete', {annotation}, this.text);
+				app.redrawUI(true);
+			}
 		}
 	],
 	callout: [

@@ -68,6 +68,11 @@ const dialogs = {
 	},
 	copyRotation: {
 		nextXSteps: 0
+	},
+	string: {
+		title: '',
+		labelText: '',
+		string: ''
 	}
 };
 

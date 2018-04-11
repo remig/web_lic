@@ -212,7 +212,7 @@ const api = {
 	page(page, layout = 'horizontal') {
 
 		if (page.type === 'titlePage') {
-			store.mutations.layoutTitlePage(page);
+			api.titlePage(page);
 			return;
 		}
 
@@ -279,19 +279,20 @@ const api = {
 		csi.x = csi.y = 20;
 
 		const title = store.get.annotation(page.annotations[0]);
-		const titleSize = util.measureLabel(title.font, title.text);
-		title.x = (pageSize.width - titleSize.width) / 2;
-		title.y = (step.y - titleSize.height) / 2;
-		title.width = titleSize.width;
-		title.height = titleSize.height;
+		api.label(title);
+		title.x = (pageSize.width - title.width) / 2;
+		title.y = (step.y - title.height) / 2;
 
 		const modelInfo = store.get.annotation(page.annotations[1]);
-		const modelInfoSize = util.measureLabel(modelInfo.font, modelInfo.text);
-		modelInfo.x = (pageSize.width - modelInfoSize.width) / 2;
-		modelInfo.y = ((step.y - modelInfoSize.height) / 2) + step.y + step.height;
-		modelInfo.width = modelInfoSize.width;
-		modelInfo.height = modelInfoSize.height;
+		api.label(modelInfo);
+		modelInfo.x = (pageSize.width - modelInfo.width) / 2;
+		modelInfo.y = ((step.y - modelInfo.height) / 2) + step.y + step.height;
 		delete page.needsLayout;
+	},
+	label(label) {
+		const labelSize = util.measureLabel(label.font, label.text);
+		label.width = labelSize.width;
+		label.height = labelSize.height;
 	},
 	mergePages(pagesAdded) {
 		// Starting with one step per page, move adjacent steps to the previous page until the page is full-ish
