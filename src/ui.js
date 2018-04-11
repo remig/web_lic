@@ -47,6 +47,10 @@ const app = new Vue({
 			width: store.state.pageSize.width,
 			height: store.state.pageSize.height
 		},
+		lastRightClickPos: {
+			x: null,
+			y: null
+		},
 		treeUpdateState: false,  // Not used directly, only used to force the tree to redraw
 		menuUpdateState: false   // Not used directly, only used to force the tree to redraw
 	},
@@ -366,6 +370,8 @@ const app = new Vue({
 			}
 		},
 		rightClick(e) {
+			this.lastRightClickPos.x = e.clientX;
+			this.lastRightClickPos.y = e.clientY;
 			this.contextMenu = null;
 			if (this.selectedItemLookup != null) {
 				Vue.nextTick(() => {
@@ -378,6 +384,14 @@ const app = new Vue({
 					}
 				});
 			}
+		},
+		pageCoordsToCanvasCoords(point) {
+			const canvas = document.getElementById('pageCanvas');
+			const box = canvas.getBoundingClientRect();
+			return {
+				x: point.x - box.x,
+				y: point.y - box.y
+			};
 		},
 		closeContextMenu() {
 			this.$refs.contextMenuComponent.hide();

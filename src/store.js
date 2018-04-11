@@ -511,6 +511,28 @@ const store = {
 			}
 		},
 		annotation: {
+			add(opts) {  // opts: {annotationType, properties, parent}
+
+				const annotation = store.mutations.item.add({item: {
+					type: 'annotation',
+					annotationType: opts.annotationType,
+					x: null, y: null, width: null, height: null
+				}, parent: opts.parent});
+
+				opts.properties = opts.properties || {};
+				Object.entries(opts.properties).forEach(([k, v]) => (annotation[k] = v));  // Copy passed in props to annotation
+
+				// Guarantee some nice defaults
+				if (annotation.annotationType === 'label') {
+					annotation.text = annotation.text || 'Label';
+					annotation.font = annotation.font || '20pt Helvetica';
+					annotation.color = annotation.color || 'black';
+					if (opts.properties.text) {
+						Layout.label(annotation);
+					}
+				}
+				return annotation;
+			},
 			set(opts) {  // opts: {annotation, newProperties, doLayout}
 				const annotation = store.get.lookupToItem(opts.annotation);
 				const props = opts.newProperties || {};
@@ -528,7 +550,7 @@ const store = {
 		},
 		rotateIcon: {
 			add(opts) {  // opts: {parent}
-				store.mutations.item.add({item: {
+				return store.mutations.item.add({item: {
 					type: 'rotateIcon',
 					x: null, y: null, scale: 1
 				}, parent: opts.parent});
@@ -722,17 +744,19 @@ const store = {
 			}
 		},
 		page: {
-			add(opts) {  // opts: {pageNumber, insertionIndex = -1}
+			add(opts = {}) {  // opts: {pageNumber, insertionIndex = -1}
 				const page = {
 					type: 'page',
 					number: opts.pageNumber,
 					steps: [],
 					dividers: [],
+					annotations: [],
 					needsLayout: true,
 					numberLabel: null,
 					layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
 					id: store.get.nextItemID('page')
 				};
+				util.array.insert(store.state.pages, page, opts.insertionIndex);
 
 				store.mutations.item.add({item: {
 					type: 'pageNumber',
@@ -740,7 +764,6 @@ const store = {
 					x: null, y: null, width: null, height: null
 				}, parent: page});
 
-				util.array.insert(store.state.pages, page, opts.insertionIndex);
 				store.mutations.page.renumber();
 				return page;
 			},
@@ -830,25 +853,27 @@ const store = {
 
 			store.mutations.csi.add({parent: step});
 
-			addItem({item: {
-				type: 'annotation',
+			store.mutations.annotation.add({
 				annotationType: 'label',
-				text: store.get.modelName(true),
-				font: '20pt Helvetica',
-				color: 'black',
-				x: null, y: null, width: null, height: null
-			}, parent: page});
+				properties: {
+					text: store.get.modelName(true),
+					font: '20pt Helvetica',
+					color: 'black'
+				},
+				parent: page
+			});
 
 			const partCount = LDParse.model.get.partCount(store.model);
 			const pageCount = store.get.pageCount();
-			addItem({item: {
-				type: 'annotation',
+			store.mutations.annotation.add({
 				annotationType: 'label',
-				text: `${partCount} Parts, ${pageCount} Pages`,
-				font: '16pt Helvetica',
-				color: 'black',
-				x: null, y: null, width: null, height: null
-			}, parent: page});
+				properties: {
+					text: `${partCount} Parts, ${pageCount} Pages`,
+					font: '16pt Helvetica',
+					color: 'black'
+				},
+				parent: page
+			});
 		},
 		removeTitlePage() {
 			const item = store.get.titlePage();
@@ -884,7 +909,6 @@ const store = {
 
 			localModel.steps.forEach(modelStep => {
 
-				const pageSize = store.state.pageSize;
 				const parts = util.clone(modelStep.parts || []);
 				const submodels = parts.filter(p => LDParse.partDictionary[localModel.parts[p].filename].isSubModel);
 				const submodelsByQuantity = {};
@@ -901,22 +925,8 @@ const store = {
 					});
 				});
 
-				// TODO: rewrite this using store.mutation.foo.add instead of creating item objects directly
-				const page = addItem({item: {
-					type: 'page',
-					number: null,
-					steps: [],
-					needsLayout: true,
-					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
-					numberLabel: null
-				}});
+				const page = store.mutations.page.add();
 				pagesAdded.push(page.id);
-
-				addItem({item: {
-					type: 'pageNumber',
-					align: 'right', valign: 'bottom',
-					x: null, y: null, width: null, height: null
-				}, parent: page});
 				page.number = page.id + 1;
 
 				const step = store.mutations.step.add({
@@ -940,6 +950,7 @@ const store = {
 						target.quantity++;
 						target.partNumbers.push(partID);
 					} else {
+						// TODO: rewrite this using store.mutation.foo.add instead of creating item objects directly
 						const pliItem = addItem({item: {
 							type: 'pliItem',
 							filename: part.filename,

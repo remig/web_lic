@@ -131,7 +131,34 @@ const contextMenu = {
 				app.redrawUI(true);
 			}
 		},
-		{text: 'Add Annotation (NYI)', cb: () => {}},
+		{
+			text: 'Add Annotation',
+			children: [
+				{
+					text: 'Label',
+					cb() {
+						const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
+						const opts = {
+							annotationType: 'label',
+							properties: {text: 'New Label', ...clickPos},
+							parent: app.selectedItemLookup
+						};
+						undoStack.commit('annotation.add', opts, this.text);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'Line (NYI)',
+					cb() {
+					}
+				},
+				{
+					text: 'Image (NYI)',
+					cb() {
+					}
+				}
+			]
+		},
 		{
 			text: 'Delete This Blank Page',
 			shown() {
