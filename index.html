@@ -115,9 +115,9 @@
 				<li v-if="target.numberLabel != null">
 					<treeRow :currentItem="currentItem" :target="treeData.store.get.numberLabel(target)" :selectionCallback="treeData.selectionCallback" />
 				</li>
-				<template v-if="target.labels != null">
-					<li v-for="labelID in target.labels">
-						<treeRow :currentItem="currentItem" :target="treeData.store.get.label(labelID)" :selectionCallback="treeData.selectionCallback" />
+				<template v-if="target.annotations != null">
+					<li v-for="annotationID in target.annotations">
+						<treeRow :currentItem="currentItem" :target="treeData.store.get.annotation(annotationID)" :selectionCallback="treeData.selectionCallback" />
 					</li>
 				</template>
 				<template v-if="target.steps != null">

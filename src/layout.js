@@ -278,14 +278,14 @@ const api = {
 		step.y = Math.floor((pageSize.height - step.height) / 2);
 		csi.x = csi.y = 20;
 
-		const title = store.get.label(page.labels[0]);
+		const title = store.get.annotation(page.annotations[0]);
 		const titleSize = util.measureLabel(title.font, title.text);
 		title.x = (pageSize.width - titleSize.width) / 2;
 		title.y = (step.y - titleSize.height) / 2;
 		title.width = titleSize.width;
 		title.height = titleSize.height;
 
-		const modelInfo = store.get.label(page.labels[1]);
+		const modelInfo = store.get.annotation(page.annotations[1]);
 		const modelInfoSize = util.measureLabel(modelInfo.font, modelInfo.text);
 		modelInfo.x = (pageSize.width - modelInfoSize.width) / 2;
 		modelInfo.y = ((step.y - modelInfoSize.height) / 2) + step.y + step.height;

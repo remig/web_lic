@@ -21,7 +21,7 @@ const emptyState = {
 	plis: [],
 	pliItems: [],
 	pliQtys: [],
-	labels: [],
+	annotations: [],
 	callouts: [],
 	calloutArrows: [],
 	points: [],
@@ -803,7 +803,7 @@ const store = {
 				type: 'titlePage',
 				steps: [],
 				needsLayout: true,
-				labels: []
+				annotations: []
 			};
 
 			const step = addItem({item: {
@@ -815,7 +815,8 @@ const store = {
 			store.mutations.csi.add({parent: step});
 
 			addItem({item: {
-				type: 'label',
+				type: 'annotation',
+				annotationType: 'label',
 				text: store.get.modelName(true),
 				font: '20pt Helvetica',
 				color: 'black',
@@ -825,7 +826,8 @@ const store = {
 			const partCount = LDParse.model.get.partCount(store.model);
 			const pageCount = store.get.pageCount();
 			addItem({item: {
-				type: 'label',
+				type: 'annotation',
+				annotationType: 'label',
 				text: `${partCount} Parts, ${pageCount} Pages`,
 				font: '16pt Helvetica',
 				color: 'black',
@@ -837,7 +839,7 @@ const store = {
 			if (item == null) {
 				return;
 			}
-			store.mutations.item.deleteChildList({item, listType: 'label'});
+			store.mutations.item.deleteChildList({item, listType: 'annotation'});
 			store.mutations.item.deleteChildList({item, listType: 'step'});
 			store.state.titlePage = null;
 		},

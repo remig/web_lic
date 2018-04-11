@@ -38,8 +38,11 @@ Vue.component('treeRow', {
 				return 'Page ' + (t.number || '');
 			} else if (t.type === 'step') {
 				return 'Step ' + (t.number || '');
-			} else if (t.type === 'label') {
-				return t.text;
+			} else if (t.type === 'annotation') {
+				switch (t.annotationType) {
+					case 'label':
+						return t.text;
+				}
 			} else if (t.type === 'pliItem') {
 				const part = LDParse.partDictionary[t.filename];
 				if (!part || !part.name) {

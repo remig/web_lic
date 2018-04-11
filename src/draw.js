@@ -44,12 +44,16 @@ const api = {
 			ctx.restore();
 		}
 
-		if (page.labels != null) {
-			page.labels.forEach(labelID => {
-				const lbl = store.get.label(labelID);
-				ctx.fillStyle = lbl.color || 'black';
-				ctx.font = lbl.font || 'bold 20pt Helvetica';
-				ctx.fillText(lbl.text, lbl.x, lbl.y + lbl.height);
+		if (page.annotations != null) {
+			page.annotations.forEach(id => {
+				const annotation = store.get.annotation(id);
+				switch (annotation.annotationType) {
+					case 'label':
+						ctx.fillStyle = annotation.color || 'black';
+						ctx.font = annotation.font || 'bold 20pt Helvetica';
+						ctx.fillText(annotation.text, annotation.x, annotation.y + annotation.height);
+						break;
+				}
 			});
 		}
 		ctx.restore();

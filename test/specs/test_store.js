@@ -35,7 +35,7 @@ describe('Test state store module', function() {
 	function verifyInitialState() {
 		assert.hasAllKeys(store.state, [
 			'pageSize', 'titlePage', 'plisVisible', 'pages', 'pageNumbers', 'dividers', 'steps',
-			'stepNumbers', 'csis', 'plis', 'pliItems', 'pliQtys', 'labels',
+			'stepNumbers', 'csis', 'plis', 'pliItems', 'pliQtys', 'annotations',
 			'callouts', 'calloutArrows', 'points', 'rotateIcons'
 		]);
 		assert.deepEqual(store.state.pageSize, {width: 900, height: 700});
@@ -49,7 +49,7 @@ describe('Test state store module', function() {
 		assert.isEmpty(store.state.plis);
 		assert.isEmpty(store.state.pliItems);
 		assert.isEmpty(store.state.pliQtys);
-		assert.isEmpty(store.state.labels);
+		assert.isEmpty(store.state.annotations);
 		assert.isEmpty(store.state.callouts);
 		assert.isEmpty(store.state.calloutArrows);
 		assert.equal(store.get.pageCount(), 0);
@@ -72,7 +72,7 @@ describe('Test state store module', function() {
 			'prevStep', 'nextStep', 'partList', 'matchingPLIItem', 'calloutArrowToPoints', 'prev', 'next',
 			'parent', 'pageForItem', 'numberLabel', 'nextItemID', 'lookupToItem', 'itemToLookup',
 			'page', 'pageNumber', 'divider', 'step', 'stepNumber', 'csi', 'pli', 'pliItem', 'pliQty',
-			'label', 'callout', 'calloutArrow', 'point', 'rotateIcon'
+			'annotation', 'callout', 'calloutArrow', 'point', 'rotateIcon'
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
@@ -133,7 +133,7 @@ describe('Test state store module', function() {
 		verifyInitialState();
 	});
 
-	const titlePageState = {type: 'titlePage', id: 0, steps: [0], labels: [0, 1], needsLayout: true};
+	const titlePageState = {type: 'titlePage', id: 0, steps: [0], annotations: [0, 1], needsLayout: true};
 	const pageState = {
 		type: 'page', id: 0, needsLayout: true, layout: 'horizontal', number: 1, numberLabel: 0,
 		steps: [1]
@@ -152,16 +152,16 @@ describe('Test state store module', function() {
 		x: null, y: null, width: null, height: null, rotation: null
 	};
 	const titleLabel = {
-		type: 'label', id: 0, parent: {type: 'titlePage', id: 0}, text: '', color: 'black',
-		font: '20pt Helvetica', x: null, y: null, width: null, height: null
+		type: 'annotation', annotationType: 'label', id: 0, parent: {type: 'titlePage', id: 0}, text: '',
+		color: 'black', font: '20pt Helvetica', x: null, y: null, width: null, height: null
 	};
 	const summaryLabel = {
-		type: 'label', id: 1, parent: {type: 'titlePage', id: 0}, text: '0 Parts, 0 Pages',
-		color: 'black', font: '16pt Helvetica', x: null, y: null, width: null, height: null
+		type: 'annotation', annotationType: 'label', id: 1, parent: {type: 'titlePage', id: 0},
+		text: '0 Parts, 0 Pages', color: 'black', font: '16pt Helvetica', x: null, y: null, width: null, height: null
 	};
 
 	it('Add a Title Page', () => {
-		const titlePageState = {type: 'titlePage', id: 0, steps: [0], labels: [0, 1], needsLayout: true};
+		const titlePageState = {type: 'titlePage', id: 0, steps: [0], annotations: [0, 1], needsLayout: true};
 		store.mutations.addTitlePage();
 		assert.equal(store.state.pages.length, 0);
 		assert.equal(store.state.steps.length, 1);
@@ -177,9 +177,9 @@ describe('Test state store module', function() {
 		assert.deepEqual(store.get.parent(store.state.csis[0]), step0State);
 		assert.deepEqual(store.get.pageForItem(store.state.steps[0]), titlePageState);
 		assert.deepEqual(store.get.pageForItem(store.state.csis[0]), titlePageState);
-		assert.equal(store.state.labels.length, 2);
-		assert.deepEqual(store.state.labels[0], titleLabel);
-		assert.deepEqual(store.state.labels[1], summaryLabel);
+		assert.equal(store.state.annotations.length, 2);
+		assert.deepEqual(store.state.annotations[0], titleLabel);
+		assert.deepEqual(store.state.annotations[1], summaryLabel);
 	});
 
 	it('Import trivial model', () => {
@@ -198,7 +198,7 @@ describe('Test state store module', function() {
 		assert.deepEqual(store.state.csis[0], csiState);
 		const newTitleLabel = util.clone(titleLabel);
 		newTitleLabel.text = 'Trivial Model';
-		assert.deepEqual(store.state.labels[0], newTitleLabel);
+		assert.deepEqual(store.state.annotations[0], newTitleLabel);
 	});
 
 	it('Verify page navigation', () => {
@@ -282,7 +282,7 @@ describe('Test state store module', function() {
 
 		assert.deepEqual(store.get.itemToLookup(store.state.pages[0]), {type: 'page', id: 0});
 		assert.deepEqual(store.get.itemToLookup(store.state.steps[1]), {type: 'step', id: 1});
-		assert.deepEqual(store.get.itemToLookup(store.state.labels[0]), {type: 'label', id: 0});
+		assert.deepEqual(store.get.itemToLookup(store.state.annotations[0]), {type: 'annotation', id: 0});
 		assert.isNull(store.get.itemToLookup());
 		assert.isNull(store.get.itemToLookup({}));
 		assert.isNull(store.get.itemToLookup({type: 'foo', id: 0}));
@@ -305,7 +305,7 @@ describe('Test state store module', function() {
 
 		assert.deepEqual(store.get.pli(1), store.state.plis[1]);
 		assert.deepEqual(store.get.pliQty(0), store.state.pliQtys[0]);
-		assert.deepEqual(store.get.label(0), store.state.labels[0]);
+		assert.deepEqual(store.get.annotation(0), store.state.annotations[0]);
 		assert.deepEqual(store.get.pageNumber(0), store.state.pageNumbers[0]);
 		assert.deepEqual(store.get.stepNumber(0), store.state.stepNumbers[0]);
 	});
@@ -368,7 +368,7 @@ describe('Test state store module', function() {
 		store.mutations.removeTitlePage();
 		assert.isNull(store.state.titlePage);
 		assert.equal(store.state.csis.length, 3);
-		assert.isEmpty(store.state.labels);
+		assert.isEmpty(store.state.annotations);
 
 	});
 

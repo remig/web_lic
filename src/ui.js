@@ -329,11 +329,11 @@ const app = new Vue({
 					return lbl;
 				}
 			}
-			if (page.labels != null) {
-				for (let i = 0; i < page.labels.length; i++) {
-					const lbl = store.get.label(page.labels[i]);
-					if (this.inBox(mx, my, lbl)) {
-						return lbl;
+			if (page.annotations != null) {
+				for (let i = 0; i < page.annotations.length; i++) {
+					const a = store.get.annotation(page.annotations[i]);
+					if (this.inBox(mx, my, a)) {
+						return a;
 					}
 				}
 			}
@@ -348,7 +348,7 @@ const app = new Vue({
 		},
 		isMoveable: (() => {
 			const moveableItems = [
-				'step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'label',
+				'step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'annotation',
 				'callout', 'point', 'rotateIcon'
 			];
 			return nodeType => moveableItems.includes(nodeType);
@@ -546,7 +546,7 @@ const app = new Vue({
 					box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
 				}
 			}
-			if (selItem.type === 'pageNumber' || selItem.type === 'stepNumber' || selItem.type === 'label') {
+			if (selItem.type === 'pageNumber' || selItem.type === 'stepNumber' || selItem.type === 'annotation') {
 				box.y += 5;  // Text is aligned to the bottom of the box; offset highlight to center nicely
 			} else if (selItem.type === 'pliQty') {
 				box.y += 3;
