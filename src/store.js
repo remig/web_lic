@@ -479,11 +479,13 @@ const store = {
 				}
 				destCalloutStep.submodel = util.clone(step.submodel);
 				destCalloutStep.parts.push(partID);
+				store.mutations.csi.resetSize({csi: destCalloutStep.csiID});
 				store.mutations.page.layout({page: step.parent});
 			},
 			removeFromCallout(opts) {  // opts: {partID, step}
 				const step = store.get.lookupToItem(opts.step);
 				util.array.remove(step.parts, opts.partID);
+				store.mutations.csi.resetSize({csi: step.csiID});
 				store.mutations.page.layout({page: store.get.pageForItem(step)});
 			}
 		},
@@ -504,10 +506,12 @@ const store = {
 				);
 				store.mutations.page.layout({page: store.get.pageForItem(csi)});
 			},
-			resetSize(opts) {  // opts: {csi: csi or csiItem or csiID}
+			resetSize(opts) {  // opts: {csi}
 				const csi = store.get.lookupToItem(opts.csi, 'csi');
-				csi.width = csi.height = null;
-				csi.isDirty = true;
+				if (csi) {
+					csi.width = csi.height = null;
+					csi.isDirty = true;
+				}
 			}
 		},
 		annotation: {
