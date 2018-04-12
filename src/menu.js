@@ -58,7 +58,7 @@ const menu = [
 			text: 'Open Lic File...',
 			id: 'open',
 			cb() {
-				document.getElementById('openFileChooser').click();  // Triggers app.triggerOpenFile
+				app.openFileChooser('.lic', app.triggerOpenFile);
 			}
 		},
 		{text: 'Open Recent (NYI)', enabled: () => false, cb: () => {}},
@@ -81,7 +81,7 @@ const menu = [
 		{
 			text: 'Import Custom Model...',
 			cb() {
-				document.getElementById('uploadModelChooser').click();
+				app.openFileChooser('.ldr, .mpd', app.triggerModelImport);
 			}
 		},
 		{

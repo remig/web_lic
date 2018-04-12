@@ -148,6 +148,12 @@ const app = new Vue({
 			reader.readAsText(e.target.files[0]);
 			e.target.value = '';
 		},
+		openFileChooser(accept, callback) {
+			var input = document.getElementById('openFileChooser');
+			input.onchange = callback;
+			input.setAttribute('accept', accept);
+			input.click();  // Triggers app.triggerOpenFile
+		},
 		closeModel() {
 			store.model = null;
 			store.resetState();
