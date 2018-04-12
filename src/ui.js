@@ -395,8 +395,8 @@ const app = new Vue({
 			const canvas = document.getElementById('pageCanvas');
 			const box = canvas.getBoundingClientRect();
 			return {
-				x: point.x - box.x,
-				y: point.y - box.y
+				x: Math.floor(point.x - box.x),
+				y: Math.floor(point.y - box.y)
 			};
 		},
 		closeContextMenu() {
@@ -543,32 +543,35 @@ const app = new Vue({
 			return version.slice(0, version.lastIndexOf('.'));  // major.minor is enough for public consumption
 		},
 		highlightStyle() {
-			const selItem = this.selectedItemLookup;
+			const selItem = store.get.lookupToItem(this.selectedItemLookup);
 			if (!selItem || selItem.type === 'part') {
 				return {display: 'none'};
 			}
+			const type = selItem.type;
 			const page = store.get.pageForItem(selItem);
 			if (page.needsLayout) {
 				store.mutations.page.layout({page});
 			}
 			let box;
-			if (selItem.type === 'page' || selItem.type === 'titlePage') {
+			if (type === 'page' || type === 'titlePage') {
 				box = {x: 0, y: 0, width: store.state.pageSize.width, height: store.state.pageSize.height};
-			} else if (selItem.type === 'calloutArrow') {
-				const arrow = store.get.lookupToItem(selItem);
-				const points = store.get.calloutArrowToPoints(arrow);
+			} else if (type === 'calloutArrow') {
+				const points = store.get.calloutArrowToPoints(selItem);
 				let pointBox = util.geom.bbox(points);
 				pointBox = util.geom.expandBox(pointBox, 8, 8);
-				box = this.targetBox({...arrow, ...pointBox});
+				box = this.targetBox({...selItem, ...pointBox});
 			} else {
 				box = this.targetBox(store.get.lookupToItem(selItem));
-				if (selItem.type === 'point') {
+				if (type === 'point') {
 					box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
 				}
 			}
-			if (selItem.type === 'pageNumber' || selItem.type === 'stepNumber' || selItem.type === 'annotation') {
-				box.y += 5;  // Text is aligned to the bottom of the box; offset highlight to center nicely
-			} else if (selItem.type === 'pliQty') {
+
+			// Text is aligned to the bottom of the box; offset highlight to center nicely
+			if (type === 'pageNumber' || type === 'stepNumber'
+					|| (type === 'annotation' && selItem.annotationType === 'text')) {
+				box.y += 5;
+			} else if (type === 'pliQty') {
 				box.y += 3;
 			}
 			return {

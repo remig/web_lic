@@ -143,7 +143,7 @@ const contextMenu = {
 							properties: {text: 'New Label', ...clickPos},
 							parent: app.selectedItemLookup
 						};
-						undoStack.commit('annotation.add', opts, this.text);
+						undoStack.commit('annotation.add', opts, 'Add Label');
 						app.redrawUI(true);
 					}
 				},
@@ -153,8 +153,23 @@ const contextMenu = {
 					}
 				},
 				{
-					text: 'Image (NYI)',
+					text: 'Image',
 					cb() {
+						const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
+						app.openFileChooser('.png', e => {
+							const reader = new FileReader();
+							reader.onload = e => {
+								const opts = {
+									annotationType: 'image',
+									properties: {src: e.target.result, ...clickPos},
+									parent: app.selectedItemLookup
+								};
+								undoStack.commit('annotation.add', opts, 'Add Image');
+								app.redrawUI(true);
+							};
+							reader.readAsDataURL(e.target.files[0]);
+							e.target.value = '';
+						});
 					}
 				}
 			]
@@ -541,8 +556,28 @@ const contextMenu = {
 						});
 					}
 				},
-				{text: 'Font (NYI)', cb: () => {}},
-				{text: 'Color (NYI)', cb: () => {}}
+				{
+					text: 'Font (NYI)',
+					shown() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'annotation') {
+							const annotation = store.get.annotation(app.selectedItemLookup);
+							return annotation && annotation.annotationType !== 'image';
+						}
+						return false;
+					},
+					cb() {}
+				},
+				{
+					text: 'Color (NYI)',
+					shown() {
+						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'annotation') {
+							const annotation = store.get.annotation(app.selectedItemLookup);
+							return annotation && annotation.annotationType !== 'image';
+						}
+						return false;
+					},
+					cb() {}
+				}
 			]
 		},
 		{

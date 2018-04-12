@@ -46,17 +46,31 @@ const api = {
 
 		if (page.annotations != null) {
 			page.annotations.forEach(id => {
-				const annotation = store.get.annotation(id);
-				switch (annotation.annotationType) {
-					case 'label':
-						ctx.fillStyle = annotation.color || 'black';
-						ctx.font = annotation.font || 'bold 20pt Helvetica';
-						ctx.fillText(annotation.text, annotation.x, annotation.y + annotation.height);
-						break;
-				}
+				api.annotation(store.get.annotation(id), ctx);
 			});
 		}
 		ctx.restore();
+	},
+
+	annotation(annotation, ctx) {
+		switch (annotation.annotationType) {
+			case 'label': {
+				ctx.fillStyle = annotation.color || 'black';
+				ctx.font = annotation.font || 'bold 20pt Helvetica';
+				ctx.fillText(annotation.text, annotation.x, annotation.y + annotation.height);
+				break;
+			}
+			case 'image': {
+				const image = new Image();
+				image.onload = function() {
+					annotation.width = this.width;
+					annotation.height = this.height;
+					ctx.drawImage(image, Math.floor(annotation.x), Math.floor(annotation.y));
+				};
+				image.src = annotation.src;
+				break;
+			}
+		}
 	},
 
 	step(step, ctx, scale = 1, selectedPart) {
