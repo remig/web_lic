@@ -152,7 +152,7 @@ const app = new Vue({
 			var input = document.getElementById('openFileChooser');
 			input.onchange = callback;
 			input.setAttribute('accept', accept);
-			input.click();  // Triggers app.triggerOpenFile
+			input.click();
 		},
 		closeModel() {
 			store.model = null;
@@ -266,6 +266,7 @@ const app = new Vue({
 			const box = this.targetBox(t);
 			return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
 		},
+		// TODO: abstract the details in here better.  Shouldn't have to add more code here for each simple box container
 		findClickTargetInStep(mx, my, step) {
 			const csi = store.get.csi(step.csiID);
 			if (step.csiID != null && this.inBox(mx, my, csi)) {
@@ -275,6 +276,12 @@ const app = new Vue({
 				const lbl = store.get.stepNumber(step.numberLabel);
 				if (this.inBox(mx, my, lbl)) {
 					return lbl;
+				}
+			}
+			if (step.submodelImageID != null) {
+				const submodelImage = store.get.submodelImage(step.submodelImageID);
+				if (this.inBox(mx, my, submodelImage)) {
+					return submodelImage;
 				}
 			}
 			if (step.pliID != null && store.state.plisVisible) {
@@ -359,7 +366,7 @@ const app = new Vue({
 		isMoveable: (() => {
 			const moveableItems = [
 				'step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'annotation',
-				'callout', 'point', 'rotateIcon'
+				'submodelImage', 'callout', 'point', 'rotateIcon'
 			];
 			return nodeType => moveableItems.includes(nodeType);
 		})(),

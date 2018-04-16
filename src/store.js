@@ -20,7 +20,8 @@ const emptyState = {
 	csis: [],
 	plis: [],
 	pliItems: [],
-	pliQtys: [],
+	pliQtys: [],  // TODO: rename this to more generic 'quantityLabel', useful in multiple spots (pliItem, submodelImage, steps, etc)
+	submodelImages: [],
 	annotations: [],
 	callouts: [],
 	calloutArrows: [],
@@ -514,6 +515,24 @@ const store = {
 				}
 			}
 		},
+		submodelImage: {
+			add(opts) {  // opts: {parent, submodel, quantity}
+				const item = store.mutations.item.add({item: {
+					type: 'submodelImage', pliQtyID: null,
+					submodel: opts.submodel, quantity: opts.quantity || 1,
+					x: null, y: null, width: null, height: null, contentX: null, contentY: null
+				}, parent: opts.parent});
+
+				if (opts.quantity > 1) {
+					store.mutations.item.add({item: {
+						type: 'pliQty',
+						align: 'right', valign: 'bottom',
+						x: null, y: null, width: null, height: null
+					}, parent: item});
+				}
+				return item;
+			}
+		},
 		annotation: {
 			add(opts) {  // opts: {annotationType, properties, parent}
 
@@ -569,7 +588,7 @@ const store = {
 						type: 'step',
 						number: opts.stepNumber, numberLabel: null,
 						parts: [], callouts: [], submodel: [],
-						csiID: null, pliID: null, rotateIconID: null,
+						csiID: null, pliID: null, rotateIconID: null, submodelImageID: null,
 						x: null, y: null, width: null, height: null
 					},
 					parent: dest,
@@ -888,7 +907,7 @@ const store = {
 			store.mutations.item.deleteChildList({item, listType: 'step'});
 			store.state.titlePage = null;
 		},
-		addInitialPages(opts) {  // opts: {layoutChoices, localModelIDList = []}
+		addInitialPages(opts) {  // opts: {layoutChoices, localModelIDList = [], submodelQuantity}
 
 			opts = opts || {};
 			const localModelIDList = opts.localModelIDList || [];  // Array of submodel IDs used to traverse the submodel tree
@@ -925,7 +944,8 @@ const store = {
 				Object.values(submodelsByQuantity).forEach(entry => {
 					store.mutations.addInitialPages({
 						layoutChoices: opts.layoutChoices,
-						localModelIDList: localModelIDList.concat(entry.id)
+						localModelIDList: localModelIDList.concat(entry.id),
+						submodelQuantity: entry.quantity
 					});
 				});
 
@@ -939,6 +959,15 @@ const store = {
 				step.parts = parts;
 				step.submodel = util.clone(localModelIDList);
 				step.number = step.id + (store.state.titlePage ? 0 : 1);
+
+				if (opts.submodelQuantity != null) {
+					store.mutations.submodelImage.add({
+						parent: step,
+						submodel: util.clone(localModelIDList),
+						quantity: opts.submodelQuantity
+					});
+					opts.submodelQuantity = null;
+				}
 
 				const pli = store.get.pli(step.pliID);
 

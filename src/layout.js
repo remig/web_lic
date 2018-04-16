@@ -71,37 +71,55 @@ const api = {
 
 		if (util.isEmpty(pli.pliItems)) {
 			pli.x = pli.y = pli.width = pli.height = 0;
-		} else {
+			return;
+		}
 
-			const step = store.get.step(pli.parent.id);
-			const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
-			const qtyLabelOffset = 5;
-			let maxHeight = 0, left = pliMargin + qtyLabelOffset;
+		const step = store.get.step(pli.parent.id);
+		const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
+		const qtyLabelOffset = 5;
+		let maxHeight = 0, left = pliMargin + qtyLabelOffset;
 
-			//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
-			for (let i = 0; i < pli.pliItems.length; i++) {
+		//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
+		for (let i = 0; i < pli.pliItems.length; i++) {
 
-				const pliItem = store.get.pliItem(pli.pliItems[i]);
-				const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]]);
-				pliItem.x = Math.floor(left);
-				pliItem.y = Math.floor(pliMargin);
-				pliItem.width = pliSize.width;
-				pliItem.height = pliSize.height;
+			const pliItem = store.get.pliItem(pli.pliItems[i]);
+			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]]);
+			pliItem.x = Math.floor(left);
+			pliItem.y = Math.floor(pliMargin);
+			pliItem.width = pliSize.width;
+			pliItem.height = pliSize.height;
 
-				const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
-				const pliQty = store.get.pliQty(pliItem.pliQtyID);
-				pliQty.x = -qtyLabelOffset;
-				pliQty.y = pliSize.height - qtyLabelOffset;
-				pliQty.width = lblSize.width;
-				pliQty.height = lblSize.height;
+			const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
+			const pliQty = store.get.pliQty(pliItem.pliQtyID);
+			pliQty.x = -qtyLabelOffset;
+			pliQty.y = pliSize.height - qtyLabelOffset;
+			pliQty.width = lblSize.width;
+			pliQty.height = lblSize.height;
 
-				left += Math.floor(pliSize.width + pliMargin);
-				maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + pliQty.height);
-			}
+			left += Math.floor(pliSize.width + pliMargin);
+			maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + pliQty.height);
+		}
 
-			pli.x = pli.y = 0;
-			pli.width = left;
-			pli.height = pliMargin + maxHeight + pliMargin;
+		pli.x = pli.y = 0;
+		pli.width = left;
+		pli.height = pliMargin + maxHeight + pliMargin;
+	},
+	submodelImage(submodelImage) {
+		const part = LDParse.model.get.submodelDescendant(store.model, submodelImage.submodel);
+		const pliSize = store.render.pli(part);
+		submodelImage.x = submodelImage.y = 0;
+		submodelImage.contentX = submodelImage.contentY = pliMargin;
+		submodelImage.width = pliMargin + pliSize.width + pliMargin;
+		submodelImage.height = pliMargin + pliSize.height + pliMargin;
+
+		if (submodelImage.pliQtyID != null) {
+			const lbl = store.get.pliQty(submodelImage.pliQtyID);
+			const lblSize = util.measureLabel('bold 16pt Helvetica', 'x' + submodelImage.quantity);
+			submodelImage.width += lblSize.width + pliMargin;
+			lbl.x = submodelImage.width - pliMargin;
+			lbl.y = submodelImage.height - pliMargin;
+			lbl.width = lblSize.width;
+			lbl.height = lblSize.height;
 		}
 	},
 	step: {
@@ -114,11 +132,18 @@ const api = {
 			step.width = box.width - pageMargin - pageMargin;
 			step.height = box.height - pageMargin - pageMargin;
 
+			const submodelImage = (step.submodelImageID != null) ? store.get.submodelImage(step.submodelImageID) : null;
+			if (submodelImage) {
+				api.submodelImage(submodelImage);
+			}
+			const submodelHeight = submodelImage ? submodelImage.height + pliMargin : 0;
+
 			const pli = (step.pliID != null && store.state.plisVisible) ? store.get.pli(step.pliID) : null;
 			if (pli) {
 				api.pli(pli);
+				pli.y += submodelHeight;
 			}
-			const pliHeight = pli ? pli.height : 0;
+			const pliHeight = pli ? pli.height + submodelHeight : submodelHeight;
 
 			if (step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
@@ -333,6 +358,7 @@ function alignStepContent(page) {
 	}
 	const stepsByRow = util.array.chunk(steps, page.actualLayout.cols);
 	stepsByRow.forEach(stepList => {
+		stepList = stepList.filter(el => el.submodelImageID == null);  // Don't adjust steps with submodel images here
 		const tallestPLIHeight = Math.max(...stepList.map(step => (store.get.pli(step.pliID) || {}).height || 0));
 		stepList.forEach(step => {
 			const csi = store.get.csi(step.csiID);
@@ -351,12 +377,16 @@ function isStepTooSmall(step) {
 	const csi = store.get.csi(step.csiID);
 	const pli = store.state.plisVisible ? store.get.pli(step.pliID) : null;
 	const pliHeight = pli ? pli.height : 0;
+	const submodelImage = store.get.submodelImage(step.submodelImageID);
+	const submodelHeight = submodelImage ? submodelImage.height : 0;
 
 	if (step.width < csi.width * 1.1) {
 		return true;
 	} else if (pli && step.width < pli.width * 1.05) {
 		return true;
-	} else if (step.height < (pliHeight + csi.height) * 1.2) {
+	} else if (submodelImage && step.width < submodelImage.width * 1.05) {
+		return true;
+	} else if (step.height < (submodelHeight + pliHeight + csi.height) * 1.2) {
 		return true;
 	}
 	return false;

@@ -122,6 +122,9 @@
 						<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="step" />
 					</li>
 				</template>
+				<li v-if="target.submodelImageID != null">
+					<treeRow :currentItem="currentItem" :target="treeData.store.get.submodelImage(target.submodelImageID)" :selectionCallback="treeData.selectionCallback" />
+				</li>
 				<li v-if="target.csiID != null">
 					<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(target.csiID)" :selectionCallback="treeData.selectionCallback" />
 				</li>

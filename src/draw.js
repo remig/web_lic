@@ -73,6 +73,7 @@ const api = {
 		}
 	},
 
+	// TODO: Add support for a quantity label to a step. Useful on the last step of a submodel build many times.
 	step(step, ctx, scale = 1, selectedPart) {
 
 		step = store.get.step(step);
@@ -83,6 +84,10 @@ const api = {
 
 		if (step.csiID != null) {
 			api.csi(step.csiID, localModel, ctx, scale, selectedPart);
+		}
+
+		if (step.submodelImageID != null) {
+			api.submodelImage(step.submodelImageID, ctx, scale);
 		}
 
 		(step.callouts || []).forEach(calloutID => {
@@ -105,6 +110,32 @@ const api = {
 		}
 
 		ctx.restore();
+	},
+
+	submodelImage(submodelImage, ctx, scale = 1) {
+		const si = store.get.submodelImage(submodelImage);
+		ctx.strokeStyle = 'black';
+		ctx.lineWidth = 2;
+		api.roundedRect(ctx, si.x, si.y, si.width, si.height, 10);
+		ctx.stroke();
+
+		ctx.save();
+		ctx.scale(1 / scale, 1 / scale);
+		const part = LDParse.model.get.submodelDescendant(store.model, si.submodel);
+		const siCanvas = store.render.pli(part, scale).container;
+		ctx.drawImage(siCanvas, (si.x + si.contentX) * scale, (si.y + si.contentY) * scale);
+		ctx.restore();
+
+		if (si.pliQtyID != null) {
+			ctx.save();
+			const lbl = store.get.pliQty(si.pliQtyID);
+			ctx.fillStyle = 'black';
+			ctx.font = 'bold 16pt Helvetica';
+			ctx.textAlign = lbl.align || 'start';
+			ctx.textBaseline = lbl.valign || 'alphabetic';
+			ctx.fillText('x' + si.quantity, lbl.x, lbl.y);
+			ctx.restore();
+		}
 	},
 
 	csi(csi, localModel, ctx, scale = 1, selectedPart) {
