@@ -50,7 +50,7 @@ describe('Test undoStack module', function() {
 		assert.equal(state.index, 0);
 		assert.equal(state.stack.length, 1);
 		const baseState = state.stack[0];
-		assert.isNull(baseState.text);
+		assert.isNull(baseState.undoText);
 		assert.equal(baseState.state.bar, 5);
 		store.state.bar = 30;
 		assert.equal(baseState.state.bar, 5);  // ensure state was cloned

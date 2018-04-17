@@ -43,8 +43,8 @@ describe('Test Navigation Tree', function() {
 		browser.click(titlePageSelector.arrow);
 		assert.equal(browser.getClass2(titlePageSelector.arrow), page.classes.tree.parentRow.open);
 		assert.equal(browser.getClass2(titlePageSelector.subMenu), page.classes.tree.subMenu.visible);
-		assert.equal(browser.getText2(page.selectors.tree.childRow('label', 0)), 'Trivial Model');
-		assert.equal(browser.getText2(page.selectors.tree.childRow('label', 1)), '3 Parts, 3 Pages');
+		assert.equal(browser.getText2(page.selectors.tree.childRow('annotation', 0)), 'Trivial Model');
+		assert.equal(browser.getText2(page.selectors.tree.childRow('annotation', 1)), '3 Parts, 3 Pages');
 
 		const step0Selector = page.selectors.tree.parentRow('step', 3);
 		assert.equal(browser.getText2(step0Selector.text), 'Step');
@@ -64,7 +64,7 @@ describe('Test Navigation Tree', function() {
 		browser.click(titlePageSelector.arrow);
 		assert.equal(browser.getClass2(titlePageSelector.arrow), page.classes.tree.parentRow.closed);
 		assert.equal(browser.getClass2(titlePageSelector.subMenu), page.classes.tree.subMenu.hidden);
-		assert.equal(browser.getText2(page.selectors.tree.childRow('label', 0)), '');
+		assert.equal(browser.getText2(page.selectors.tree.childRow('annotation', 0)), '');
 	});
 
 	it('Click rows should highlight target on canvas', () => {
@@ -76,7 +76,7 @@ describe('Test Navigation Tree', function() {
 		assert.isTrue(page.highlight.isValid(-5, -5, 906, 706));
 		assert.equal(browser.getClass2(titlePageSelector.text), page.classes.tree.childRow.highlighted);
 
-		const labelSelector = page.selectors.tree.childRow('label', 0);
+		const labelSelector = page.selectors.tree.childRow('annotation', 0);
 		browser.click(labelSelector);
 		assert.equal(browser.getClass2(titlePageSelector.text), page.classes.tree.childRow.unhighlighted);
 		assert.equal(browser.getClass2(labelSelector), page.classes.tree.childRow.highlighted);
@@ -87,11 +87,11 @@ describe('Test Navigation Tree', function() {
 		const canvasSize = browser.getElementSize(page.ids.pageCanvas);
 		browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, 550);
 		assert.equal(
-			browser.getClass2(page.selectors.tree.childRow('label', 0)),
+			browser.getClass2(page.selectors.tree.childRow('annotation', 0)),
 			page.classes.tree.childRow.unhighlighted
 		);
 		assert.equal(
-			browser.getClass2(page.selectors.tree.childRow('label', 1)),
+			browser.getClass2(page.selectors.tree.childRow('annotation', 1)),
 			page.classes.tree.childRow.highlighted
 		);
 		assert.isTrue(page.highlight.isValid(366, 542, 164, 30));
@@ -100,7 +100,7 @@ describe('Test Navigation Tree', function() {
 		const step0Selector = page.selectors.tree.parentRow('step', 3);
 		browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, canvasSize.height / 2);
 		assert.equal(
-			browser.getClass2(page.selectors.tree.childRow('label', 1)),
+			browser.getClass2(page.selectors.tree.childRow('annotation', 1)),
 			page.classes.tree.childRow.unhighlighted
 		);
 		assert.equal(browser.getClass2(csiSelector), page.classes.tree.childRow.highlighted);
@@ -122,5 +122,9 @@ describe('Test Navigation Tree', function() {
 		browser.keys(['ArrowRight', 'ArrowRight']);
 		assert.equal(browser.getClass2(page0.arrow), page.classes.tree.parentRow.open);
 		assert.equal(browser.getClass2(page1.arrow), page.classes.tree.parentRow.open);
+	});
+
+	it('Selecting something on a page that needs layout should layout page to generate correct highlight box', () => {
+
 	});
 });

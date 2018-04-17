@@ -144,7 +144,7 @@ describe('Import Trivial Model', function() {
 			const box = browser.getBBox2(page.selectors.contextMenu.content);
 			assert.deepEqual(box, {x: 750, y: 613, width: 165, height: 109});
 			const text = browser.getText2(page.selectors.contextMenu.entries);
-			assert.deepEqual(text, ['Rotate CSI (NYI)', 'Scale CSI (NYI)', '', 'Add New Part (NYI)']);
+			assert.deepEqual(text, ['Rotate Step Image', 'Scale CSI (NYI)', '', 'Add New Part (NYI)']);
 		});
 
 		it('Left click anywhere should hide context menu', () => {
@@ -166,9 +166,9 @@ describe('Import Trivial Model', function() {
 			assert.isFalse(browser.isVisible(page.selectors.contextMenu.parentRow(0).subMenu));
 			assert.isTrue(browser.isVisible(context));
 			const box = browser.getBBox2(page.selectors.contextMenu.content);
-			assert.deepEqual(box, {x: 750, y: 403, width: 160, height: 38});
+			assert.deepEqual(box, {x: 750, y: 403, width: 160, height: 64});
 			const text = browser.getText2(page.selectors.contextMenu.entries);
-			assert.deepEqual([text], ['Set...']);
+			assert.deepEqual(text, ['Set', 'Delete']);
 			browser.leftClick(page.selectors.contextMenu.parentRow(0).selector);
 			assert.isTrue(browser.isVisible(page.selectors.contextMenu.parentRow(0).subMenu));
 		});
@@ -179,7 +179,7 @@ describe('Import Trivial Model', function() {
 			browser.leftClick(page.ids.pageCanvas, canvasSize.width / 2, 140);
 			browser.rightClick();
 			const text = browser.getText2(page.selectors.contextMenu.entries);
-			assert.deepEqual(text, ['Add Callout', 'Move Step to...', 'Merge Step with...']);
+			assert.deepEqual(text, ['Add Callout', 'Move Step to', 'Merge Step with...', '', 'Prepend Blank Step', 'Append Blank Step']);  // Move context menu content to page API
 
 			// TODO: fix context menu lookups to use IDs, so we don't have to rely on order here
 			browser.leftClick(page.selectors.contextMenu.parentRow(1).selector);

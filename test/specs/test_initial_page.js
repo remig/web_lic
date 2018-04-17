@@ -127,7 +127,7 @@ describe('Launch empty Page', function() {
 			browser.drag2(page.ids.splitter, -200, 0);
 			assert.equal(100, size(page.ids.leftPane).width);
 			assert.equal(Math.floor(bodyWidth) - 105, size(page.ids.rightPane).width);
-			const pageWidth = page.getStoreState('pageSize').width;
+			const pageWidth = page.getStoreState('template.page.width');
 			browser.drag2(page.ids.splitter, 500, 0);
 			assert.equal(bodyWidth - pageWidth - 15, size(page.ids.leftPane).width);
 			assert.equal(pageWidth + 10, size(page.ids.rightPane).width);

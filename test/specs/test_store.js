@@ -21,7 +21,7 @@ describe('Test state store module', function() {
 			return {width: 50, height: 25};
 		});
 		sinon.stub(util, 'measureLabel').callsFake(() => {
-			return {width: 10, height: 14};
+			return {width: null, height: null};
 		});
 	});
 
@@ -34,11 +34,12 @@ describe('Test state store module', function() {
 
 	function verifyInitialState() {
 		assert.hasAllKeys(store.state, [
-			'pageSize', 'titlePage', 'plisVisible', 'pages', 'pageNumbers', 'dividers', 'steps',
-			'stepNumbers', 'csis', 'plis', 'pliItems', 'pliQtys', 'annotations',
+			'template', 'titlePage', 'plisVisible', 'pages', 'pageNumbers', 'dividers', 'steps',
+			'stepNumbers', 'csis', 'plis', 'pliItems', 'pliQtys', 'submodelImages', 'annotations',
 			'callouts', 'calloutArrows', 'points', 'rotateIcons'
 		]);
-		assert.deepEqual(store.state.pageSize, {width: 900, height: 700});
+		assert.equal(store.state.template.page.width, 900);
+		assert.equal(store.state.template.page.height, 700);
 		assert.isNull(store.state.titlePage);
 		assert.isTrue(store.state.plisVisible);
 		assert.isEmpty(store.state.pages);
@@ -71,12 +72,13 @@ describe('Test state store module', function() {
 			'isFirstPage', 'isLastPage', 'nextPage', 'prevPage', 'titlePage', 'firstPage', 'lastPage',
 			'prevStep', 'nextStep', 'partList', 'matchingPLIItem', 'calloutArrowToPoints', 'prev', 'next',
 			'parent', 'pageForItem', 'numberLabel', 'nextItemID', 'lookupToItem', 'itemToLookup',
-			'page', 'pageNumber', 'divider', 'step', 'stepNumber', 'csi', 'pli', 'pliItem', 'pliQty',
+			'page', 'pageNumber', 'divider', 'step', 'stepNumber', 'csi', 'pli', 'pliItem', 'pliQty', 'submodelImage',
 			'annotation', 'callout', 'calloutArrow', 'point', 'rotateIcon'
 		]);
 		assert.property(store, 'mutations');
 		assert.hasAllKeys(store.mutations, [
-			'item', 'part', 'csi', 'rotateIcon', 'step', 'callout', 'calloutArrow', 'page', 'pli', 'pliItem',
+			'item', 'part', 'csi', 'annotation', 'rotateIcon', 'step', 'callout',
+			'calloutArrow', 'page', 'pli', 'pliItem', 'submodelImage',
 			'renumber', 'setNumber', 'layoutTitlePage',
 			'addTitlePage', 'removeTitlePage', 'addInitialPages'
 		]);
@@ -88,6 +90,12 @@ describe('Test state store module', function() {
 		]);
 		assert.hasAllKeys(store.mutations.csi, [
 			'add', 'rotate', 'resetSize'
+		]);
+		assert.hasAllKeys(store.mutations.annotation, [
+			'add', 'set', 'delete'
+		]);
+		assert.hasAllKeys(store.mutations.rotateIcon, [
+			'add'
 		]);
 		assert.hasAllKeys(store.mutations.step, [
 			'add', 'delete', 'renumber', 'layout', 'moveToPage', 'moveToPreviousPage', 'moveToNextPage',
@@ -136,7 +144,7 @@ describe('Test state store module', function() {
 	const titlePageState = {type: 'titlePage', id: 0, steps: [0], annotations: [0, 1], needsLayout: true};
 	const pageState = {
 		type: 'page', id: 0, needsLayout: true, layout: 'horizontal', number: 1, numberLabel: 0,
-		steps: [1]
+		steps: [1], dividers: [], annotations: []
 	};
 	const step0State = {
 		type: 'step', id: 0, parent: {type: 'titlePage', id: 0},
@@ -145,14 +153,14 @@ describe('Test state store module', function() {
 	const step1State = {
 		type: 'step', id: 1, parent: {type: 'page', id: 0}, number: 1, numberLabel: 0,
 		x: null, y: null, width: null, height: null, rotateIconID: null,
-		csiID: 1, parts: [0], pliID: 0, submodel: [], callouts: []
+		csiID: 1, parts: [0], pliID: 0, submodel: [], callouts: [], submodelImageID: null
 	};
 	const csiState = {
 		type: 'csi', id: 0, parent: {type: 'step', id: 0},
 		x: null, y: null, width: null, height: null, rotation: null
 	};
 	const titleLabel = {
-		type: 'annotation', annotationType: 'label', id: 0, parent: {type: 'titlePage', id: 0}, text: '',
+		type: 'annotation', annotationType: 'label', id: 0, parent: {type: 'titlePage', id: 0}, text: 'Label',
 		color: 'black', font: '20pt Helvetica', x: null, y: null, width: null, height: null
 	};
 	const summaryLabel = {
