@@ -22,7 +22,10 @@ const api = {
 
 	commit(mutationName, opts, undoText, clearCacheTargets) {
 
-		util.get(mutationName, store.mutations)(opts);  // Perform the actual action
+		const mutation = util.get(mutationName, store.mutations);
+		if (mutation) {
+			mutation(opts);  // Perform the actual action
+		}
 
 		if (state.index < state.stack.length - 1) {
 			// If there's undo actions after the 'current' action, delete them
@@ -53,6 +56,7 @@ const api = {
 		setIndex(state, 0);
 	},
 
+	// TODO: Need automatic way of navigating to and redrawing whatever was most affected by undo / redo action
 	undo() {
 		if (api.isUndoAvailable()) {
 			performUndoRedoAction(state.index - 1);

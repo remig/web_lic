@@ -35,8 +35,8 @@ function exportInstructions(app, store, exportType, drawPageCallback, doneCallba
 	window.setTimeout(() => {
 		const start = Date.now();
 		const canvas = document.getElementById('generateImagesCanvas');
-		canvas.width = store.state.pageSize.width * scale;
-		canvas.height = store.state.pageSize.height * scale;
+		canvas.width = store.state.template.page.width * scale;
+		canvas.height = store.state.template.page.height * scale;
 
 		const pages = [store.get.titlePage(), ...store.state.pages];
 		app.updateProgress({stepCount: pages.length, text: 'Page 0'});
@@ -56,8 +56,8 @@ const api = {
 
 		const r = 0.75;  // = 72 / 96
 		const pageSize = {
-			width: store.state.pageSize.width * r,
-			height: store.state.pageSize.height * r
+			width: store.state.template.page.width * r,
+			height: store.state.template.page.height * r
 		};
 		const doc = new jsPDF(
 			pageSize.width > pageSize.height ? 'landscape' : 'portrait',

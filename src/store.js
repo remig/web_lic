@@ -4,12 +4,13 @@
 const util = require('./util');
 const LDParse = require('./LDParse');
 const LDRender = require('./LDRender');
+const template = require('./template.js');
 
 // Load this later, to avoid circular import issues (layout.js is just code that belongs in store moved to a dedicated file)
 let Layout;  // eslint-disable-line prefer-const
 
 const emptyState = {
-	pageSize: {width: 900, height: 700},
+	template: template,
 	titlePage: null,
 	plisVisible: true,
 	pages: [],
@@ -151,7 +152,7 @@ const store = {
 			if (!store.model || !store.model.filename) {
 				return '';
 			}
-			return util.store.model.filename.split('.')[0] + (ext || '');
+			return store.model.filename.split('.')[0] + (ext || '');
 		},
 		isTitlePage(page) {
 			return (page || {}).type === 'titlePage';
@@ -691,7 +692,7 @@ const store = {
 					type: 'callout',
 					x: null, y: null, width: null, height: null,
 					steps: [], calloutArrows: [],
-					layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
+					layout: store.state.template.page.width > store.state.template.page.height ? 'horizontal' : 'vertical',
 					id: store.get.nextItemID('callout')
 				}, parent: step});
 				store.mutations.page.layout({page: store.get.pageForItem(step)});
@@ -776,7 +777,7 @@ const store = {
 					annotations: [],
 					needsLayout: true,
 					numberLabel: null,
-					layout: store.state.pageSize.width > store.state.pageSize ? 'horizontal' : 'vertical',
+					layout: store.state.template.page.width > store.state.template.page.height ? 'horizontal' : 'vertical',
 					id: store.get.nextItemID('page')
 				};
 				util.array.insert(store.state.pages, page, opts.insertionIndex);

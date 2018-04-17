@@ -212,7 +212,7 @@ const api = {
 		page.dividers = page.dividers || [];
 		store.mutations.item.deleteChildList({item: page, listType: 'divider'});
 
-		const pageSize = store.state.pageSize;
+		const pageSize = store.state.template.page;
 		const colSize = Math.floor(pageSize.width / cols);
 		const rowSize = Math.floor(pageSize.height / rows);
 
@@ -241,7 +241,7 @@ const api = {
 			return;
 		}
 
-		const pageSize = store.state.pageSize;
+		const pageSize = store.state.template.page;
 		const stepCount = page.steps.length;
 		let cols = Math.ceil(Math.sqrt(stepCount));
 		let rows = Math.ceil(stepCount / cols);
@@ -249,7 +249,7 @@ const api = {
 		if (layout.rows != null && layout.cols != null) {
 			cols = layout.cols;
 			rows = layout.rows;
-			layoutDirection = layout.direction || (pageSize.width > pageSize ? 'horizontal' : 'vertical');
+			layoutDirection = layout.direction || (pageSize.width > pageSize.height ? 'horizontal' : 'vertical');
 		} else {
 			layoutDirection = layout;
 			if (layout === 'vertical') {
@@ -292,7 +292,7 @@ const api = {
 	},
 	titlePage(page) {
 		page = store.get.lookupToItem(page);
-		const pageSize = store.state.pageSize;
+		const pageSize = store.state.template.page;
 		const step = store.get.step(page.steps[0]);
 		const csi = store.get.csi(step.csiID);
 		const box = {x: 0, y: 0, width: pageSize.width, height: pageSize.height};

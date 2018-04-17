@@ -12,7 +12,7 @@ const api = {
 			store.mutations.page.layout({page});
 		}
 
-		const pageSize = store.state.pageSize;
+		const pageSize = store.state.template.page;
 		const ctx = canvas.getContext('2d');
 		ctx.save();
 		if (scale > 1) {

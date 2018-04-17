@@ -44,8 +44,8 @@ const app = new Vue({
 			lastSaveIndex: 0
 		},
 		pageSize: {
-			width: store.state.pageSize.width,
-			height: store.state.pageSize.height
+			width: store.state.template.page.width,
+			height: store.state.template.page.height
 		},
 		lastRightClickPos: {
 			x: null,
@@ -112,8 +112,8 @@ const app = new Vue({
 			const start = Date.now();
 			store.load(content);
 			this.filename = store.model.filename;
-			this.pageSize.width = store.state.pageSize.width;
-			this.pageSize.height = store.state.pageSize.height;
+			this.pageSize.width = store.state.template.page.width;
+			this.pageSize.height = store.state.template.page.height;
 			const firstPage = store.get.titlePage() || store.get.firstPage();
 			this.currentPageLookup = store.get.itemToLookup(firstPage);
 			store.save('localStorage');
@@ -505,7 +505,7 @@ const app = new Vue({
 			}
 		},
 		clearPageCanvas() {
-			const pageSize = store.state.pageSize;
+			const pageSize = store.state.template.page;
 			const canvas = document.getElementById('pageCanvas');
 			const ctx = canvas.getContext('2d');
 			ctx.fillStyle = 'white';
@@ -561,7 +561,7 @@ const app = new Vue({
 			}
 			let box;
 			if (type === 'page' || type === 'titlePage') {
-				box = {x: 0, y: 0, width: store.state.pageSize.width, height: store.state.pageSize.height};
+				box = {x: 0, y: 0, width: store.state.template.page.width, height: store.state.template.page.height};
 			} else if (type === 'calloutArrow') {
 				const points = store.get.calloutArrowToPoints(selItem);
 				let pointBox = util.geom.bbox(points);
@@ -615,7 +615,7 @@ const app = new Vue({
 
 		// Enable splitter between tree and page view
 		Split(['#leftPane', '#rightPane'], {
-			sizes: [20, 80], minSize: [100, store.state.pageSize.width + 10], direction: 'horizontal',
+			sizes: [20, 80], minSize: [100, store.state.template.page.width + 10], direction: 'horizontal',
 			gutterSize: 5, snapOffset: 0
 		});
 

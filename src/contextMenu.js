@@ -219,7 +219,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Move Step to...',
+			text: 'Move Step to',
 			children: [
 				{
 					text: 'Previous Page',
