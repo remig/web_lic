@@ -551,6 +551,8 @@ const store = {
 					annotation.text = annotation.text || 'Label';
 					annotation.font = annotation.font || '20pt Helvetica';
 					annotation.color = annotation.color || 'black';
+					annotation.align = 'left';
+					annotation.valign = 'top';
 					if (opts.properties.text) {
 						Layout.label(annotation);
 					}
@@ -604,6 +606,7 @@ const store = {
 				if (opts.stepNumber != null) {
 					store.mutations.item.add({item: {
 						type: 'stepNumber',
+						align: 'left', valign: 'top',
 						x: null, y: null, width: null, height: null
 					}, parent: step});
 				}
@@ -687,12 +690,13 @@ const store = {
 			},
 			addCallout(opts) {  // opts: {step}
 				const step = store.get.lookupToItem(opts.step);
+				const pageSize = store.state.template.page;
 				step.callouts = step.callouts || [];
 				store.mutations.item.add({item: {
 					type: 'callout',
 					x: null, y: null, width: null, height: null,
 					steps: [], calloutArrows: [],
-					layout: store.state.template.page.width > store.state.template.page.height ? 'horizontal' : 'vertical',
+					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
 					id: store.get.nextItemID('callout')
 				}, parent: step});
 				store.mutations.page.layout({page: store.get.pageForItem(step)});
@@ -737,7 +741,9 @@ const store = {
 					const firstStep = store.get.step(callout.steps[0]);
 					firstStep.number = 1;
 					store.mutations.item.add({item: {
-						type: 'stepNumber', x: null, y: null, width: null, height: null
+						type: 'stepNumber',
+						align: 'left', valign: 'top',
+						x: null, y: null, width: null, height: null
 					}, parent: firstStep});
 				}
 				if (opts.doLayout) {
@@ -769,6 +775,7 @@ const store = {
 		},
 		page: {
 			add(opts = {}) {  // opts: {pageNumber, insertionIndex = -1}
+				const pageSize = store.state.template.page;
 				const page = {
 					type: 'page',
 					number: opts.pageNumber,
@@ -777,7 +784,7 @@ const store = {
 					annotations: [],
 					needsLayout: true,
 					numberLabel: null,
-					layout: store.state.template.page.width > store.state.template.page.height ? 'horizontal' : 'vertical',
+					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
 					id: store.get.nextItemID('page')
 				};
 				util.array.insert(store.state.pages, page, opts.insertionIndex);
@@ -996,6 +1003,7 @@ const store = {
 
 						addItem({item: {
 							type: 'pliQty',
+							align: 'left', valign: 'top',
 							x: null, y: null, width: null, height: null
 						}, parent: pliItem});
 					}

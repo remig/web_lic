@@ -253,6 +253,14 @@ const app = new Vue({
 		},
 		targetBox(t) {
 			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
+			if (t.align === 'right') {
+				box.x -= box.width;
+			}
+			if (t.valign === 'bottom') {
+				box.y -= box.height;
+			} else if (t.valign === 'top') {
+				box.y += 5;
+			}
 			while (t) {
 				t = store.get.parent(t);
 				if (t) {
@@ -572,14 +580,6 @@ const app = new Vue({
 				if (type === 'point') {
 					box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
 				}
-			}
-
-			// Text is aligned to the bottom of the box; offset highlight to center nicely
-			if (type === 'pageNumber' || type === 'stepNumber'
-					|| (type === 'annotation' && selItem.annotationType === 'text')) {
-				box.y += 5;
-			} else if (type === 'pliQty') {
-				box.y += 3;
 			}
 			return {
 				display: 'block',
