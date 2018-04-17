@@ -114,7 +114,8 @@ const api = {
 
 		if (submodelImage.pliQtyID != null) {
 			const lbl = store.get.pliQty(submodelImage.pliQtyID);
-			const lblSize = util.measureLabel('bold 16pt Helvetica', 'x' + submodelImage.quantity);
+			const font = store.state.template.submodelImage.quantityLabel.font;
+			const lblSize = util.measureLabel(font, 'x' + submodelImage.quantity);
 			submodelImage.width += lblSize.width + pliMargin;
 			lbl.x = submodelImage.width - pliMargin;
 			lbl.y = submodelImage.height - pliMargin;
@@ -159,7 +160,7 @@ const api = {
 			});
 
 			if (step.numberLabel != null) {
-				const lblSize = util.measureLabel('bold 20pt Helvetica', step.number);
+				const lblSize = util.measureLabel(store.state.template.step.numberLabel.font, step.number);
 				const lbl = store.get.stepNumber(step.numberLabel);
 				lbl.x = 0;
 				lbl.y = pliHeight ? pliHeight + pageMargin : 0;
@@ -183,7 +184,7 @@ const api = {
 
 			let lblSize = {width: 0, height: 0};
 			if (step.numberLabel != null) {
-				lblSize = util.measureLabel('bold 20pt Helvetica', step.number);
+				lblSize = util.measureLabel(store.state.template.step.numberLabel.font, step.number);
 				const lbl = store.get.stepNumber(step.numberLabel);
 				lbl.x = lbl.y = 0;
 				lbl.width = lblSize.width;
@@ -281,7 +282,7 @@ const api = {
 		}
 
 		if (page.numberLabel != null) {
-			const lblSize = util.measureLabel('bold 20pt Helvetica', page.number);
+			const lblSize = util.measureLabel(store.state.template.page.numberLabel.font, page.number);
 			const lbl = store.get.pageNumber(page.numberLabel);
 			lbl.x = pageSize.width - pageMargin;
 			lbl.y = pageSize.height - pageMargin;

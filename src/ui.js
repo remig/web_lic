@@ -513,22 +513,18 @@ const app = new Vue({
 			}
 		},
 		clearPageCanvas() {
-			const pageSize = store.state.template.page;
 			const canvas = document.getElementById('pageCanvas');
-			const ctx = canvas.getContext('2d');
-			ctx.fillStyle = 'white';
-			ctx.fillRect(0, 0, pageSize.width, pageSize.height);
+			canvas.width = canvas.width;
 		},
 		drawCurrentPage() {
 			if (this.currentPageLookup != null) {
-				const canvas = document.getElementById('pageCanvas');
-				canvas.width = canvas.width;
+				this.clearPageCanvas();
 				let page = store.get.lookupToItem(this.currentPageLookup);
 				if (page == null) {  // This can happen if, say, a page got deleted without updating the cucrrent page (like in undo / redo)
 					page = store.get.firstPage();
 					this.currentPageLookup = store.get.itemToLookup(page);
 				}
-				this.drawPage(page, canvas);
+				this.drawPage(page, document.getElementById('pageCanvas'));
 			}
 		},
 		drawPage(page, canvas, scale = 1) {

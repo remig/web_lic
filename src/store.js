@@ -888,8 +888,7 @@ const store = {
 				annotationType: 'label',
 				properties: {
 					text: store.get.modelName(true),
-					font: '20pt Helvetica',
-					color: 'black'
+					font: '20pt Helvetica'
 				},
 				parent: page
 			});
@@ -900,8 +899,7 @@ const store = {
 				annotationType: 'label',
 				properties: {
 					text: `${partCount} Parts, ${pageCount} Pages`,
-					font: '16pt Helvetica',
-					color: 'black'
+					font: '16pt Helvetica'
 				},
 				parent: page
 			});

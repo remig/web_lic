@@ -8,6 +8,7 @@ const api = {
 
 	page(page, canvas, scale = 1, selectedPart) {
 
+		const template = store.state.template.page;
 		if (page.needsLayout) {
 			store.mutations.page.layout({page});
 		}
@@ -25,8 +26,8 @@ const api = {
 
 		(page.dividers || []).forEach(id => {
 			const divider = store.get.divider(id);
-			ctx.strokeStyle = 'black';
-			ctx.lineWidth = 2;
+			ctx.strokeStyle = template.dividers.color;
+			ctx.lineWidth = template.dividers.width;
 			ctx.beginPath();
 			ctx.moveTo(divider.p1.x, divider.p1.y);
 			ctx.lineTo(divider.p2.x, divider.p2.y);
@@ -36,8 +37,8 @@ const api = {
 		if (page.numberLabel != null) {
 			ctx.save();
 			const lbl = store.get.pageNumber(page.numberLabel);
-			ctx.fillStyle = 'black';
-			ctx.font = 'bold 20pt Helvetica';
+			ctx.fillStyle = template.numberLabel.color;
+			ctx.font = template.numberLabel.font;
 			ctx.textAlign = lbl.align || 'start';
 			ctx.textBaseline = lbl.valign || 'alphabetic';
 			ctx.fillText(page.number, lbl.x, lbl.y);
@@ -100,8 +101,8 @@ const api = {
 
 		if (step.numberLabel != null) {
 			const lbl = store.get.stepNumber(step.numberLabel);
-			ctx.fillStyle = 'black';
-			ctx.font = 'bold 20pt Helvetica';
+			ctx.fillStyle = store.state.template.step.numberLabel.color;
+			ctx.font = store.state.template.step.numberLabel.font;
 			ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
 		}
 
@@ -113,10 +114,11 @@ const api = {
 	},
 
 	submodelImage(submodelImage, ctx, scale = 1) {
+		const template = store.state.template.submodelImage;
 		const si = store.get.submodelImage(submodelImage);
-		ctx.strokeStyle = 'black';
-		ctx.lineWidth = 2;
-		api.roundedRect(ctx, si.x, si.y, si.width, si.height, 10);
+		ctx.strokeStyle = template.border.color;
+		ctx.lineWidth = template.border.width;
+		api.roundedRect(ctx, si.x, si.y, si.width, si.height, template.border.cornerRadius);
 		ctx.stroke();
 
 		ctx.save();
@@ -129,8 +131,8 @@ const api = {
 		if (si.pliQtyID != null) {
 			ctx.save();
 			const lbl = store.get.pliQty(si.pliQtyID);
-			ctx.fillStyle = 'black';
-			ctx.font = 'bold 16pt Helvetica';
+			ctx.fillStyle = template.quantityLabel.color;
+			ctx.font = template.quantityLabel.font;
 			ctx.textAlign = lbl.align || 'start';
 			ctx.textBaseline = lbl.valign || 'alphabetic';
 			ctx.fillText('x' + si.quantity, lbl.x, lbl.y);
@@ -155,13 +157,14 @@ const api = {
 	},
 
 	pli(pli, localModel, ctx, scale = 1) {
+		const template = store.state.template;
 		pli = store.get.pli(pli);
 		if (util.isEmpty(pli.pliItems)) {
 			return;
 		}
-		ctx.strokeStyle = 'black';
-		ctx.lineWidth = 2;
-		api.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, 10);
+		ctx.strokeStyle = template.pli.border.color;
+		ctx.lineWidth = template.pli.border.width;
+		api.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, template.pli.border.cornerRadius);
 		ctx.stroke();
 
 		ctx.save();
@@ -177,8 +180,8 @@ const api = {
 		pli.pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const pliQty = store.get.pliQty(pliItem.pliQtyID);
-			ctx.fillStyle = 'black';
-			ctx.font = 'bold 10pt Helvetica';
+			ctx.fillStyle = template.pliItem.quantityLabel.color;
+			ctx.font = template.pliItem.quantityLabel.font;
 			ctx.fillText(
 				'x' + pliItem.quantity,
 				pli.x + pliItem.x + pliQty.x,
@@ -188,16 +191,21 @@ const api = {
 	},
 
 	callout(callout, ctx, scale = 1, selectedPart) {
+		const template = store.state.template.callout;
 		callout = store.get.callout(callout);
 		ctx.save();
 		ctx.translate(callout.x, callout.y);
 
 		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 
-		ctx.strokeStyle = 'black';
-		ctx.lineWidth = 2;
+		ctx.strokeStyle = template.border.color;
+		ctx.lineWidth = template.border.width;
 		api.roundedRect(ctx, 0, 0, callout.width, callout.height, 10);
 		ctx.stroke();
+
+		ctx.strokeStyle = template.arrow.color;
+		ctx.fillStyle = template.arrow.color;
+		ctx.lineWidth = template.arrow.width;
 		(callout.calloutArrows || []).forEach(arrowID => {
 			const arrow = store.get.calloutArrow(arrowID);
 			const arrowPoints = store.get.calloutArrowToPoints(arrow);
@@ -207,7 +215,7 @@ const api = {
 				ctx.lineTo(pt.x, pt.y);
 			});
 			ctx.stroke();
-			ctx.fillStyle = 'black';
+			ctx.fillStyle = template.arrow.color;
 			const tip = arrowPoints[arrowPoints.length - 1];
 			api.arrowHead(ctx, tip.x, tip.y, arrow.direction);
 			ctx.fill();
@@ -216,14 +224,15 @@ const api = {
 	},
 
 	rotateIcon(icon, ctx) {
+		const template = store.state.template.rotateIcon;
 		icon = store.get.rotateIcon(icon);
 		const scale = {  // Icon is drawn in 100 x 94 space; scale to that
 			width: icon.width / 100,  // TODO: put Layout.rotateIconAspectRatio somewhere easier to read
 			height: icon.height / 94
 		};
 
-		ctx.fillStyle = ctx.strokeStyle = 'black';
-		ctx.lineWidth = 2;
+		ctx.fillStyle = ctx.strokeStyle = template.border.color;
+		ctx.lineWidth = template.border.width;
 		ctx.save();
 		ctx.translate(icon.x, icon.y);
 		ctx.scale(scale.width, scale.height);
@@ -231,7 +240,8 @@ const api = {
 		ctx.restore();
 		ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
 
-		ctx.lineWidth = 3;
+		ctx.fillStyle = ctx.strokeStyle = template.arrow.color;
+		ctx.lineWidth = template.arrow.width;
 		ctx.save();
 		ctx.translate(icon.x, icon.y);
 		ctx.scale(scale.width, scale.height);
