@@ -109,8 +109,8 @@
 			<i :class="['treeIcon', {treeIconClosed: !expanded}]" @click.stop.prevent="arrowClick" />
 			<treeRow :currentItem="currentItem" :target="target" :selectionCallback="treeData.selectionCallback" />
 			<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">
-				<li v-if="target.numberLabel != null">
-					<treeRow :currentItem="currentItem" :target="treeData.store.get.numberLabel(target)" :selectionCallback="treeData.selectionCallback" />
+				<li v-if="target.numberLabelID != null">
+					<treeRow :currentItem="currentItem" :target="treeData.store.get.numberLabel(target.numberLabelID)" :selectionCallback="treeData.selectionCallback" />
 				</li>
 				<template v-if="target.annotations != null">
 					<li v-for="annotationID in target.annotations">

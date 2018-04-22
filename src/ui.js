@@ -280,8 +280,8 @@ const app = new Vue({
 			if (step.csiID != null && this.inBox(mx, my, csi)) {
 				return csi;
 			}
-			if (step.numberLabel != null) {
-				const lbl = store.get.stepNumber(step.numberLabel);
+			if (step.numberLabelID != null) {
+				const lbl = store.get.numberLabel(step.numberLabelID);
 				if (this.inBox(mx, my, lbl)) {
 					return lbl;
 				}
@@ -348,8 +348,8 @@ const app = new Vue({
 			if (!page) {
 				return null;
 			}
-			if (page.numberLabel != null) {
-				const lbl = store.get.pageNumber(page.numberLabel);
+			if (page.numberLabelID != null) {
+				const lbl = store.get.numberLabel(page.numberLabelID);
 				if (this.inBox(mx, my, lbl)) {
 					return lbl;
 				}
@@ -373,7 +373,7 @@ const app = new Vue({
 		},
 		isMoveable: (() => {
 			const moveableItems = [
-				'step', 'csi', 'pli', 'pliItem', 'pliQty', 'pageNumber', 'stepNumber', 'annotation',
+				'step', 'csi', 'pli', 'pliItem', 'pliQty', 'numberLabel', 'annotation',
 				'submodelImage', 'callout', 'point', 'rotateIcon'
 			];
 			return nodeType => moveableItems.includes(nodeType);

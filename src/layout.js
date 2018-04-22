@@ -159,9 +159,9 @@ const api = {
 				api.callout(store.get.callout(calloutID));
 			});
 
-			if (step.numberLabel != null) {
+			if (step.numberLabelID != null) {
 				const lblSize = util.measureLabel(store.state.template.step.numberLabel.font, step.number);
-				const lbl = store.get.stepNumber(step.numberLabel);
+				const lbl = store.get.numberLabel(step.numberLabelID);
 				lbl.x = 0;
 				lbl.y = pliHeight ? pliHeight + pageMargin : 0;
 				lbl.width = lblSize.width;
@@ -183,9 +183,9 @@ const api = {
 			margin = margin || pageMargin;
 
 			let lblSize = {width: 0, height: 0};
-			if (step.numberLabel != null) {
+			if (step.numberLabelID != null) {
 				lblSize = util.measureLabel(store.state.template.step.numberLabel.font, step.number);
-				const lbl = store.get.stepNumber(step.numberLabel);
+				const lbl = store.get.numberLabel(step.numberLabelID);
 				lbl.x = lbl.y = 0;
 				lbl.width = lblSize.width;
 				lbl.height = lblSize.height;
@@ -281,9 +281,9 @@ const api = {
 			alignStepContent(page);
 		}
 
-		if (page.numberLabel != null) {
+		if (page.numberLabelID != null) {
 			const lblSize = util.measureLabel(store.state.template.page.numberLabel.font, page.number);
-			const lbl = store.get.pageNumber(page.numberLabel);
+			const lbl = store.get.numberLabel(page.numberLabelID);
 			lbl.x = pageSize.width - pageMargin;
 			lbl.y = pageSize.height - pageMargin;
 			lbl.width = lblSize.width;
@@ -366,7 +366,7 @@ function alignStepContent(page) {
 			if (csi) {
 				csi.y = Math.floor((step.height + tallestPLIHeight - csi.height) / 2);
 			}
-			const lbl = store.get.stepNumber(step.numberLabel);
+			const lbl = store.get.numberLabel(step.numberLabelID);
 			if (lbl) {
 				lbl.y = tallestPLIHeight ? tallestPLIHeight + pageMargin : 0;
 			}

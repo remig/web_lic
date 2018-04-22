@@ -14,14 +14,13 @@ const emptyState = {
 	titlePage: null,
 	plisVisible: true,
 	pages: [],
-	pageNumbers: [],
 	dividers: [],
 	steps: [],
-	stepNumbers: [],
 	csis: [],
 	plis: [],
 	pliItems: [],
 	pliQtys: [],  // TODO: rename this to more generic 'quantityLabel', useful in multiple spots (pliItem, submodelImage, steps, etc)
+	numberLabels: [],
 	submodelImages: [],
 	annotations: [],
 	callouts: [],
@@ -291,13 +290,6 @@ const store = {
 			}
 			return item;
 		},
-		numberLabel(item) {
-			item = store.get.lookupToItem(item);
-			if (item && item.numberLabel != null) {
-				return store.get[item.type + 'Number'](item.numberLabel);
-			}
-			return null;
-		},
 		nextItemID(item) {  // Get the next unused ID in this item's list
 			if (item && item.type) {
 				item = item.type;
@@ -331,7 +323,7 @@ const store = {
 			} else if (!store.state.hasOwnProperty(item.type + 's')) {
 				return null;
 			}
-			return {id: item.id, type: item.type};
+			return {type: item.type, id: item.id};
 		}
 	},
 	// TODO: convert all 'opts' arguments into {opts} for automatic destructuring.  duh.
@@ -348,8 +340,6 @@ const store = {
 						util.array.insert(parent[item.type + 's'], item.id, opts.parentInsertionIndex);
 					} else if (parent.hasOwnProperty(item.type + 'ID')) {
 						parent[item.type + 'ID'] = item.id;
-					} else if (parent.hasOwnProperty('numberLabel') && item.type.endsWith('Number')) {
-						parent.numberLabel = item.id;
 					}
 				}
 				return item;
@@ -363,8 +353,6 @@ const store = {
 						util.array.remove(parent[item.type + 's'], item.id);
 					} else if (parent.hasOwnProperty(item.type + 'ID')) {
 						parent[item.type + 'ID'] = null;
-					} else if (parent.hasOwnProperty('numberLabel') && item.type.endsWith('Number')) {
-						parent.numberLabel = null;
 					}
 				}
 			},
@@ -589,7 +577,7 @@ const store = {
 				const step = store.mutations.item.add({
 					item: {
 						type: 'step',
-						number: opts.stepNumber, numberLabel: null,
+						number: opts.stepNumber, numberLabelID: null,
 						parts: [], callouts: [], submodel: [],
 						csiID: null, pliID: null, rotateIconID: null, submodelImageID: null,
 						x: null, y: null, width: null, height: null
@@ -605,7 +593,7 @@ const store = {
 
 				if (opts.stepNumber != null) {
 					store.mutations.item.add({item: {
-						type: 'stepNumber',
+						type: 'numberLabel',
 						align: 'left', valign: 'top',
 						x: null, y: null, width: null, height: null
 					}, parent: step});
@@ -623,8 +611,8 @@ const store = {
 				if (step.parts && step.parts.length) {
 					throw 'Cannot delete a step with parts';
 				}
-				if (step.numberLabel != null) {
-					store.mutations.item.delete({item: store.get.stepNumber(step.numberLabel)});
+				if (step.numberLabelID != null) {
+					store.mutations.item.delete({item: store.get.numberLabel(step.numberLabelID)});
 				}
 				if (step.csiID != null) {
 					store.mutations.item.delete({item: store.get.csi(step.csiID)});
@@ -741,7 +729,7 @@ const store = {
 					const firstStep = store.get.step(callout.steps[0]);
 					firstStep.number = 1;
 					store.mutations.item.add({item: {
-						type: 'stepNumber',
+						type: 'numberLabel',
 						align: 'left', valign: 'top',
 						x: null, y: null, width: null, height: null
 					}, parent: firstStep});
@@ -777,20 +765,20 @@ const store = {
 			add(opts = {}) {  // opts: {pageNumber, insertionIndex = -1}
 				const pageSize = store.state.template.page;
 				const page = {
+					id: store.get.nextItemID('page'),
 					type: 'page',
 					number: opts.pageNumber,
 					steps: [],
 					dividers: [],
 					annotations: [],
 					needsLayout: true,
-					numberLabel: null,
-					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
-					id: store.get.nextItemID('page')
+					numberLabelID: null,
+					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
 				};
 				util.array.insert(store.state.pages, page, opts.insertionIndex);
 
 				store.mutations.item.add({item: {
-					type: 'pageNumber',
+					type: 'numberLabel',
 					align: 'right', valign: 'bottom',
 					x: null, y: null, width: null, height: null
 				}, parent: page});
@@ -803,8 +791,8 @@ const store = {
 				if (page.steps && page.steps.length) {
 					throw 'Cannot delete a page with steps';
 				}
-				if (page.numberLabel != null) {
-					store.mutations.item.delete({item: store.get.pageNumber(page.numberLabel)});
+				if (page.numberLabelID != null) {
+					store.mutations.item.delete({item: store.get.numberLabel(page.numberLabelID)});
 				}
 				store.mutations.item.delete({item: page});
 				store.mutations.page.renumber();

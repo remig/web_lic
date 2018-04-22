@@ -193,9 +193,6 @@ const contextMenu = {
 			}
 		}
 	],
-	pageNumber: [
-		{text: 'Change Page Number (NYI)', cb() {}}
-	],
 	step: [
 		{
 			text: 'Add Callout',
@@ -339,8 +336,10 @@ const contextMenu = {
 			}
 		}
 	],
-	stepNumber: [
-		{text: 'Change Step Number (NYI)', cb: () => {}}
+	numberLabel: [
+		// TODO: differentiate these two based on parent
+		{text: 'Change Step Number (NYI)', cb() {}},
+		{text: 'Change Page Number (NYI)', cb() {}}
 	],
 	csi: [
 		{

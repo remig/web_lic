@@ -34,9 +34,9 @@ const api = {
 			ctx.stroke();
 		});
 
-		if (page.numberLabel != null) {
+		if (page.numberLabelID != null) {
 			ctx.save();
-			const lbl = store.get.pageNumber(page.numberLabel);
+			const lbl = store.get.numberLabel(page.numberLabelID);
 			ctx.fillStyle = template.numberLabel.color;
 			ctx.font = template.numberLabel.font;
 			ctx.textAlign = lbl.align || 'start';
@@ -99,8 +99,8 @@ const api = {
 			api.pli(step.pliID, localModel, ctx, scale);
 		}
 
-		if (step.numberLabel != null) {
-			const lbl = store.get.stepNumber(step.numberLabel);
+		if (step.numberLabelID != null) {
+			const lbl = store.get.numberLabel(step.numberLabelID);
 			ctx.fillStyle = store.state.template.step.numberLabel.color;
 			ctx.font = store.state.template.step.numberLabel.font;
 			ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);

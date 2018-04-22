@@ -244,10 +244,8 @@ const api = {
 				return 'PLI Item';
 			case 'pliqty':
 				return 'PLI Quantity Label';
-			case 'stepnumber':
-				return 'Step Number';
-			case 'pagenumber':
-				return 'Page Number';
+			case 'numberlabel':
+				return 'Number Label';
 		}
 		if (s.startsWith('ctrl+')) {
 			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();
