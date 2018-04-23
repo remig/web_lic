@@ -78,7 +78,7 @@ const api = {
 	step(step, ctx, scale = 1, selectedPart) {
 
 		step = store.get.step(step);
-		const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
+		const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
 
 		ctx.save();
 		ctx.translate(step.x, step.y);
@@ -116,6 +116,7 @@ const api = {
 	submodelImage(submodelImage, ctx, scale = 1) {
 		const template = store.state.template.submodelImage;
 		const si = store.get.submodelImage(submodelImage);
+		const step = store.get.parent(si);
 		ctx.strokeStyle = template.border.color;
 		ctx.lineWidth = template.border.width;
 		api.roundedRect(ctx, si.x, si.y, si.width, si.height, template.border.cornerRadius);
@@ -123,7 +124,7 @@ const api = {
 
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
-		const part = LDParse.model.get.submodelDescendant(store.model, si.submodel);
+		const part = LDParse.model.get.submodelDescendant(step.model || store.model, si.submodel);
 		const siCanvas = store.render.pli(part, scale).container;
 		ctx.drawImage(siCanvas, (si.x + si.contentX) * scale, (si.y + si.contentY) * scale);
 		ctx.restore();

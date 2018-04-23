@@ -147,6 +147,9 @@
 
 	<script type="text/x-template" id="treeTemplate">
 		<ul>
+			<li v-if="treeData.store.get.templatePage() != null">
+				<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.templatePage()" />
+			</li>
 			<li v-if="treeData.store.get.titlePage() != null">
 				<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.titlePage()" />
 			</li>

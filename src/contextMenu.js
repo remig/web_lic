@@ -349,7 +349,7 @@ const contextMenu = {
 					text: 'Flip Upside Down',
 					cb() {
 						const csi = app.selectedItemLookup;
-						const opts = {csi, rotation: {x: 0, y: 0, z: 180}, addRotateIcon: true};
+						const opts = {csi, rotation: {x: 0, y: 0, z: 180}, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts, 'Flip Step Image', [csi]);
 						app.redrawUI(true);
 					}
@@ -785,7 +785,7 @@ const contextMenu = {
 				const callout = {id: step.callouts[0], type: 'callout'};
 				undoStack.commit(
 					'part.addToCallout',
-					{partID: app.selectedItemLookup.id, step, callout},
+					{partID: app.selectedItemLookup.id, step, callout, doLayout: true},
 					this.text
 				);
 				app.redrawUI(true);

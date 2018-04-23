@@ -69,6 +69,7 @@ const app = new Vue({
 			}
 			this.busyText = 'Loading Model';
 			modelGenerator().then(model => {
+				store.mutations.templatePage.add();
 				store.setModel(model);
 				this.filename = store.model.filename;
 				LDRender.setPartDictionary(LDParse.partDictionary);
@@ -564,7 +565,7 @@ const app = new Vue({
 				store.mutations.page.layout({page});
 			}
 			let box;
-			if (type === 'page' || type === 'titlePage') {
+			if (type === 'page' || type === 'titlePage' || type === 'templatePage') {
 				box = {x: 0, y: 0, width: store.state.template.page.width, height: store.state.template.page.height};
 			} else if (type === 'calloutArrow') {
 				const points = store.get.calloutArrowToPoints(selItem);
@@ -631,13 +632,3 @@ window.__Web_lic_testScope = {  // store a global reference to these for easier 
 	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
 	util, app, store, undoStack, LDParse
 };
-
-//app.importRemoteModel('Creator/20015 - Alligator.mpd');
-//app.importRemoteModel('Star Wars/7140 - X-Wing Fighter.mpd');
-//app.importRemoteModel('Star Wars/4491 - MTT.mpd');
-//app.importRemoteModel('Star Wars/4489 - AT-AT.mpd');
-//app.importRemoteModel('Architecture/21010 - Robie House.mpd');
-//app.importRemoteModel('Adventurers/5935 - Island Hopper.mpd');
-//app.importRemoteModel('Space/894 - Mobile Ground Tracking Station.mpd');
-//app.importRemoteModel('Star Wars/4487 - Jedi Starfighter & Slave I.mpd');
-//app.importRemoteModel('trivial_model.ldr');

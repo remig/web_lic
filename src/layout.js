@@ -75,7 +75,7 @@ const api = {
 		}
 
 		const step = store.get.step(pli.parent.id);
-		const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
+		const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
 		const qtyLabelOffset = 5;
 		let maxHeight = 0, left = pliMargin + qtyLabelOffset;
 
@@ -105,7 +105,8 @@ const api = {
 		pli.height = pliMargin + maxHeight + pliMargin;
 	},
 	submodelImage(submodelImage) {
-		const part = LDParse.model.get.submodelDescendant(store.model, submodelImage.submodel);
+		const step = store.get.parent(submodelImage);
+		const part = LDParse.model.get.submodelDescendant(step.model || store.model, submodelImage.submodel);
 		const pliSize = store.render.pli(part);
 		submodelImage.x = submodelImage.y = 0;
 		submodelImage.contentX = submodelImage.contentY = pliMargin;
@@ -126,7 +127,7 @@ const api = {
 	step: {
 		outsideIn(step, box) {  // Starting with a pre-defined box, layout everything in this step inside it
 
-			const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
+			const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
 
 			step.x = Math.floor(box.x + pageMargin);
 			step.y = Math.floor(box.y + pageMargin);
@@ -178,7 +179,7 @@ const api = {
 			}
 		},
 		insideOut(step, margin) {
-			const localModel = LDParse.model.get.submodelDescendant(store.model, step.submodel);
+			const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
 			const contentSize = {width: 0, height: 0};
 			margin = margin || pageMargin;
 
