@@ -26,19 +26,19 @@ const api = {
 				const step = store.get.step(stepID);
 				api.step.insideOut(step, calloutMargin);
 				step.x = calloutMargin;
-				step.y = Math.floor(calloutMargin + totalHeight);
+				step.y = calloutMargin + totalHeight;
 				totalHeight = step.y + step.height;
 				maxWidth = Math.max(maxWidth, step.width);
 			});
 			callout.steps.forEach(stepID => {
 				const step = store.get.step(stepID);
-				step.x = Math.floor(calloutMargin + ((maxWidth - step.width) / 2));
+				step.x = calloutMargin + ((maxWidth - step.width) / 2);
 			});
 			callout.width = calloutMargin + maxWidth + calloutMargin;
 			callout.height = calloutMargin + totalHeight;
 		}
 		callout.x = 10;
-		callout.y = Math.floor(csi.y - ((callout.height - csi.height) / 2));
+		callout.y = csi.y - ((callout.height - csi.height) / 2);
 		api.calloutArrow(callout);
 	},
 	calloutArrow(callout) {
@@ -84,8 +84,8 @@ const api = {
 
 			const pliItem = store.get.pliItem(pli.pliItems[i]);
 			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]]);
-			pliItem.x = Math.floor(left);
-			pliItem.y = Math.floor(pliMargin);
+			pliItem.x = left;
+			pliItem.y = pliMargin;
 			pliItem.width = pliSize.width;
 			pliItem.height = pliSize.height;
 
@@ -96,7 +96,7 @@ const api = {
 			pliQty.width = lblSize.width;
 			pliQty.height = lblSize.height;
 
-			left += Math.floor(pliSize.width + pliMargin);
+			left += pliSize.width + pliMargin;
 			maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + pliQty.height);
 		}
 
@@ -129,8 +129,8 @@ const api = {
 
 			const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
 
-			step.x = Math.floor(box.x + pageMargin);
-			step.y = Math.floor(box.y + pageMargin);
+			step.x = box.x + pageMargin;
+			step.y = box.y + pageMargin;
 			step.width = box.width - pageMargin - pageMargin;
 			step.height = box.height - pageMargin - pageMargin;
 
@@ -150,8 +150,8 @@ const api = {
 			if (step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
 				const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
-				csi.x = Math.floor((step.width - csiSize.width) / 2);
-				csi.y = Math.floor((step.height + pliHeight - csiSize.height) / 2);
+				csi.x = (step.width - csiSize.width) / 2;
+				csi.y = (step.height + pliHeight - csiSize.height) / 2;
 				csi.width = csiSize.width;
 				csi.height = csiSize.height;
 			}
@@ -192,13 +192,12 @@ const api = {
 				lbl.height = lblSize.height;
 			}
 
-			// TODO: move all Math.floor rounding to the last possible moment: when drawing the CSI / PLI on the page
 			if (step.csiID != null) {
 				const emptyCSISize = emptyCalloutSize - (margin * 4);
 				const csi = store.get.csi(step.csiID);
 				const csiSize = store.render.csi(localModel, step, csi) || {width: emptyCSISize, height: emptyCSISize};
-				csi.x = Math.floor(lblSize.width + margin);
-				csi.y = Math.floor(lblSize.height + margin);
+				csi.x = lblSize.width + margin;
+				csi.y = lblSize.height + margin;
 				csi.width = contentSize.width = csiSize.width;
 				csi.height = contentSize.height = csiSize.height;
 			}
@@ -301,8 +300,8 @@ const api = {
 		store.mutations.step.layout({step, box});
 		step.width = csi.width + 40;
 		step.height = csi.height + 40;
-		step.x = Math.floor((pageSize.width - step.width) / 2);
-		step.y = Math.floor((pageSize.height - step.height) / 2);
+		step.x = (pageSize.width - step.width) / 2;
+		step.y = (pageSize.height - step.height) / 2;
 		csi.x = csi.y = 20;
 
 		const title = store.get.annotation(page.annotations[0]);
@@ -365,7 +364,7 @@ function alignStepContent(page) {
 		stepList.forEach(step => {
 			const csi = store.get.csi(step.csiID);
 			if (csi) {
-				csi.y = Math.floor((step.height + tallestPLIHeight - csi.height) / 2);
+				csi.y = (step.height + tallestPLIHeight - csi.height) / 2;
 			}
 			const lbl = store.get.numberLabel(step.numberLabelID);
 			if (lbl) {

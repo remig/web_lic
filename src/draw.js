@@ -126,7 +126,9 @@ const api = {
 		ctx.scale(1 / scale, 1 / scale);
 		const part = LDParse.model.get.submodelDescendant(step.model || store.model, si.submodel);
 		const siCanvas = store.render.pli(part, scale).container;
-		ctx.drawImage(siCanvas, (si.x + si.contentX) * scale, (si.y + si.contentY) * scale);
+		const x = Math.floor((si.x + si.contentX) * scale);
+		const y = Math.floor((si.y + si.contentY) * scale);
+		ctx.drawImage(siCanvas, x, y);
 		ctx.restore();
 
 		if (si.pliQtyID != null) {
@@ -152,7 +154,9 @@ const api = {
 		const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
 		const res = store.render[renderer](localModel, step, csi, selectedPartIDs, scale);
 		if (res) {
-			ctx.drawImage(res.container, (csi.x - res.dx) * scale, (csi.y - res.dy) * scale);  // TODO: profile performance if every x, y, w, h argument is passed in
+			const x = Math.floor((csi.x - res.dx) * scale);
+			const y = Math.floor((csi.y - res.dy) * scale);
+			ctx.drawImage(res.container, x, y);  // TODO: profile performance if every x, y, w, h argument is passed in
 		}
 		ctx.restore();
 	},
@@ -174,7 +178,9 @@ const api = {
 			const pliItem = store.get.pliItem(idx);
 			const part = localModel.parts[pliItem.partNumbers[0]];
 			const pliCanvas = store.render.pli(part, scale).container;
-			ctx.drawImage(pliCanvas, (pli.x + pliItem.x) * scale, (pli.y + pliItem.y) * scale);
+			const x = Math.floor((pli.x + pliItem.x) * scale);
+			const y = Math.floor((pli.y + pliItem.y) * scale);
+			ctx.drawImage(pliCanvas, x, y);
 		});
 		ctx.restore();
 
