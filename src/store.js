@@ -795,7 +795,7 @@ const store = {
 					number: opts.pageNumber,
 					numberLabelID: null,
 					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
-				}});
+				}, insertionIndex: opts.insertionIndex});
 
 				if (opts.pageNumber === 'id') {  // Special flag to say 'use page ID as page number'
 					page.number = page.id + 1;
