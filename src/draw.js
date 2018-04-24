@@ -81,7 +81,7 @@ const api = {
 		const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
 
 		ctx.save();
-		ctx.translate(step.x, step.y);
+		ctx.translate(Math.floor(step.x), Math.floor(step.y));
 
 		if (step.csiID != null) {
 			api.csi(step.csiID, localModel, ctx, scale, selectedPart);
@@ -201,7 +201,7 @@ const api = {
 		const template = store.state.template.callout;
 		callout = store.get.callout(callout);
 		ctx.save();
-		ctx.translate(callout.x, callout.y);
+		ctx.translate(Math.floor(callout.x), Math.floor(callout.y));
 
 		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 
@@ -241,7 +241,7 @@ const api = {
 		ctx.fillStyle = ctx.strokeStyle = template.border.color;
 		ctx.lineWidth = template.border.width;
 		ctx.save();
-		ctx.translate(icon.x, icon.y);
+		ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
 		ctx.scale(scale.width, scale.height);
 		api.roundedRect(ctx, 0, 0, 100, 94, 15);
 		ctx.restore();
@@ -250,7 +250,7 @@ const api = {
 		ctx.fillStyle = ctx.strokeStyle = template.arrow.color;
 		ctx.lineWidth = template.arrow.width;
 		ctx.save();
-		ctx.translate(icon.x, icon.y);
+		ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
 		ctx.scale(scale.width, scale.height);
 		ctx.beginPath();
 		ctx.arc(50, 38, 39, util.radians(29), util.radians(130));
@@ -284,7 +284,7 @@ const api = {
 		return function(ctx, tipX, tipY, rotation, scale) {
 			const head = arrowDimensions.head, bodyWidth = 1.25;
 			ctx.save();
-			ctx.translate(tipX, tipY);
+			ctx.translate(Math.floor(tipX), Math.floor(tipY));
 			if (rotation in presetAngles) {
 				ctx.rotate(util.radians(presetAngles[rotation]));
 			} else if (typeof rotation === 'number') {
