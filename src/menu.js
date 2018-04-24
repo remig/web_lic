@@ -1,17 +1,25 @@
 /* global Vue: false, $: false */
 'use strict';
 
+const util = require('./util');
 const InstructionExporter = require('./export');
 const store = require('./store');
 const undoStack = require('./undoStack');
 let app;
 
 Vue.component('menu-list', {
-	props: ['menuEntries'],
+	props: ['menuEntries', 'selectedItem'],
 	template: '#menuTemplate',
 	methods: {
 		resolveProperty(p) {
-			return (typeof p === 'function') ? p() : p;
+			return (typeof p === 'function') ? p(this.selectedItem) : p;
+		},
+		triggerMenu(entry, e) {
+			if (entry.children) {
+				this.toggleSubMenu(e);
+			} else {
+				entry.cb(this.selectedItem);
+			}
 		},
 		toggleSubMenu(e) {
 			e.preventDefault();
@@ -19,13 +27,20 @@ Vue.component('menu-list', {
 			$('.dropdown-submenu.open').removeClass('open');
 			$(e.target.parentElement).addClass('open');
 		},
-		hasVisibleChildren(child) {
-			if (!child.children) {
-				return true;
-			} else if (typeof child.children === 'function') {
-				return true;  // TODO: For now, all menu children defined by a function are forced visible
+		isVisible(entry) {
+			if (this.selectedItem == null) {
+				return false;
+			} else if (entry.type && entry.type !== this.selectedItem.type) {
+				return false;
+			} else if (entry.shown) {
+				return entry.shown(this.selectedItem);
+			} else if (entry.children) {
+				if (typeof entry.children === 'function') {
+					return !util.isEmpty(entry.children(this.selectedItem));
+				}
+				return entry.children.some(el => el.shown ? el.shown(this.selectedItem) : true);
 			}
-			return child.children.some(el => el.shown ? el.shown() : true);
+			return true;
 		},
 		show(e) {
 			$('#contextMenu')
@@ -114,10 +129,10 @@ const menu = [
 			]
 		},
 		{text: 'separator'},
-		{text: 'Save Template (NYI)', enabled: () => false, cb: () => {}},
-		{text: 'Save Template As... (NYI)', enabled: () => false, cb: () => {}},
-		{text: 'Load Template (NYI)', enabled: () => false, cb: () => {}},
-		{text: 'Reset Template (NYI)', enabled: () => false, cb: () => {}},
+		{text: 'Save Template (NYI)', enabled: () => false, cb() {}},
+		{text: 'Save Template As... (NYI)', enabled: () => false, cb() {}},
+		{text: 'Load Template (NYI)', enabled: () => false, cb() {}},
+		{text: 'Reset Template (NYI)', enabled: () => false, cb() {}},
 		{text: 'separator'},
 		{
 			text: 'Clear Local Cache',
@@ -186,21 +201,21 @@ const menu = [
 				app.redrawUI(true);
 			}
 		},
-		{text: 'Snap To (NYI)', enabled: () => false, cb: () => {}},
-		{text: 'Brick Colors... (NYI)', enabled: () => false, cb: () => {}}
+		{text: 'Snap To (NYI)', enabled: () => false, cb() {}},
+		{text: 'Brick Colors... (NYI)', enabled: () => false, cb() {}}
 	]},
 	{name: 'View (NYI)', children: [
-		{text: 'Add Horizontal Guide', enabled: () => false, cb: () => {}},
-		{text: 'Add Vertical Guide', enabled: () => false, cb: () => {}},
-		{text: 'Remove Guides', enabled: () => false, cb: () => {}},
+		{text: 'Add Horizontal Guide', enabled: () => false, cb() {}},
+		{text: 'Add Vertical Guide', enabled: () => false, cb() {}},
+		{text: 'Remove Guides', enabled: () => false, cb() {}},
 		{text: 'separator'},
-		{text: 'Zoom 100%', enabled: () => false, cb: () => {}},
-		{text: 'Zoom To Fit', enabled: () => false, cb: () => {}},
-		{text: 'Zoom In', enabled: () => false, cb: () => {}},
-		{text: 'Zoom Out', enabled: () => false, cb: () => {}},
+		{text: 'Zoom 100%', enabled: () => false, cb() {}},
+		{text: 'Zoom To Fit', enabled: () => false, cb() {}},
+		{text: 'Zoom In', enabled: () => false, cb() {}},
+		{text: 'Zoom Out', enabled: () => false, cb() {}},
 		{text: 'separator'},
-		{text: 'Show One Page', enabled: () => false, cb: () => {}},
-		{text: 'Show Two Pages', enabled: () => false, cb: () => {}}
+		{text: 'Show One Page', enabled: () => false, cb() {}},
+		{text: 'Show Two Pages', enabled: () => false, cb() {}}
 	]},
 	{name: 'Export', children: [
 		{

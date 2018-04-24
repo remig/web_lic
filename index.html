@@ -49,7 +49,7 @@
 		</div>
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
 		<div id="contextMenu" class="dropdown" tabindex="-1" @blur="closeContextMenu" @click="closeContextMenu">
-			<menu-list :menu-entries="contextMenu" ref="contextMenuComponent"></menu-list>
+			<menu-list :menu-entries="contextMenu" :selected-item="selectedItemLookup" ref="contextMenuComponent"></menu-list>
 		</div>
 
 		<component :is="currentDialog" ref="currentDialog"></component>
@@ -72,7 +72,7 @@
 			<ul class="nav navbar-nav">
 				<li v-for="menu in menuEntryList" :id="menu.id || menu.name | sanitizeMenuID" class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
-					<menu-list :menu-entries="menu.children"></menu-list>
+					<menu-list :menu-entries="menu.children" selected-item=""></menu-list>
 				</li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
@@ -87,14 +87,16 @@
 
 	<script type="text/x-template" id="menuTemplate">
 		<ul class="dropdown-menu">
-			<li v-for="entry in menuEntries" :id="entry.id || entry.text | sanitizeMenuID" v-if="entry.shown ? entry.shown() : hasVisibleChildren(entry)"
+			<li v-for="entry in menuEntries" :id="entry.id || entry.text | sanitizeMenuID" v-if="isVisible(entry)"
 					:class="{divider: entry.text == 'separator', 'dropdown-submenu': entry.children, disabled: entry.enabled ? !entry.enabled() : false}">
-				<a v-if="entry.text !== 'separator'" @click="entry.children ? toggleSubMenu($event) : entry.cb.call(entry, $event)" class="clickable" data-toggle="dropdown">
+				<a v-if="entry.text !== 'separator'" @click="triggerMenu(entry, $event)" class="clickable" data-toggle="dropdown">
 					<span class="menu-text">{{resolveProperty(entry.text)}}</span>
 					<span class="menu-text shortcut" v-if="entry.shortcut">{{entry.shortcut | prettyPrint}}</span>
 				</a>
 				<ul v-if="entry.children" class="dropdown-menu">
-					<li v-for="child in resolveProperty(entry.children)" v-if="child.shown ? child.shown() : true"><a @click="child.cb.call(child, $event)" class="clickable">{{child.text}}</a></li>
+					<li v-for="child in resolveProperty(entry.children)" v-if="isVisible(child)">
+						<a @click="triggerMenu(child, $event)" class="clickable">{{child.text}}</a>
+					</li>
 				</ul>
 			</li>
 		</ul>

@@ -15,45 +15,39 @@ const contextMenu = {
 			children: [
 				{
 					text: 'Redo Layout',
-					cb() {
-						undoStack.commit('page.layout', {page: app.selectedItemLookup}, this.text);
+					cb(selectedItem) {
+						undoStack.commit('page.layout', {page: selectedItem}, this.text);
 						app.redrawUI(true);
 					}
 				},
 				{
 					text: 'Vertical',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
-							const page = store.get.lookupToItem(app.selectedItemLookup);
-							return page.layout !== 'vertical';
-						}
-						return false;
+					shown(selectedItem) {
+						const page = store.get.lookupToItem(selectedItem);
+						return page.layout !== 'vertical';
 					},
-					cb() {
-						const page = app.selectedItemLookup;
+					cb(selectedItem) {
+						const page = selectedItem;
 						undoStack.commit('page.layout', {page, layout: 'vertical'}, this.text);
 						app.redrawUI(true);
 					}
 				},
 				{
 					text: 'Horizontal',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
-							const page = store.get.lookupToItem(app.selectedItemLookup);
-							return page.layout !== 'horizontal';
-						}
-						return false;
+					shown(selectedItem) {
+						const page = store.get.lookupToItem(selectedItem);
+						return page.layout !== 'horizontal';
 					},
-					cb() {
-						const page = app.selectedItemLookup;
+					cb(selectedItem) {
+						const page = selectedItem;
 						undoStack.commit('page.layout', {page, layout: 'horizontal'}, this.text);
 						app.redrawUI(true);
 					}
 				},
 				{
 					text: 'By Row and Column',
-					cb() {
-						const page = store.get.page(app.selectedItemLookup);
+					cb(selectedItem) {
+						const page = store.get.page(selectedItem);
 						const originalLayout = util.clone(page.layout);
 
 						app.currentDialog = 'pageRowColLayoutDialog';
@@ -92,8 +86,8 @@ const contextMenu = {
 		{text: 'separator'},
 		{
 			text: 'Prepend Blank Page',
-			cb() {
-				const nextPage = store.get.lookupToItem(app.selectedItemLookup);
+			cb(selectedItem) {
+				const nextPage = store.get.lookupToItem(selectedItem);
 				undoStack.commit('page.add', {
 					pageNumber: nextPage.number,
 					insertionIndex: store.state.pages.indexOf(nextPage)
@@ -103,8 +97,8 @@ const contextMenu = {
 		},
 		{
 			text: 'Append Blank Page',
-			cb() {
-				const prevPage = store.get.lookupToItem(app.selectedItemLookup);
+			cb(selectedItem) {
+				const prevPage = store.get.lookupToItem(selectedItem);
 				undoStack.commit('page.add', {
 					pageNumber: prevPage.number + 1,
 					insertionIndex: store.state.pages.indexOf(prevPage) + 1
@@ -116,8 +110,8 @@ const contextMenu = {
 		{text: 'Hide Step Separators (NYI)', cb: () => {}},
 		{
 			text: 'Add Blank Step',
-			cb() {
-				const dest = store.get.page(app.selectedItemLookup.id);
+			cb(selectedItem) {
+				const dest = store.get.page(selectedItem.id);
 				const lastStep = store.get.step(dest.steps[dest.steps.length - 1]);
 				const stepNumber = lastStep.number + 1;
 				undoStack.commit(
@@ -136,12 +130,12 @@ const contextMenu = {
 			children: [
 				{
 					text: 'Label',
-					cb() {
+					cb(selectedItem) {
 						const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 						const opts = {
 							annotationType: 'label',
 							properties: {text: 'New Label', ...clickPos},
-							parent: app.selectedItemLookup
+							parent: selectedItem
 						};
 						undoStack.commit('annotation.add', opts, 'Add Label');
 						app.redrawUI(true);
@@ -149,12 +143,11 @@ const contextMenu = {
 				},
 				{
 					text: 'Line (NYI)',
-					cb() {
-					}
+					cb() {}
 				},
 				{
 					text: 'Image',
-					cb() {
+					cb(selectedItem) {
 						const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 						app.openFileChooser('.png', e => {
 							const reader = new FileReader();
@@ -162,7 +155,7 @@ const contextMenu = {
 								const opts = {
 									annotationType: 'image',
 									properties: {src: e.target.result, ...clickPos},
-									parent: app.selectedItemLookup
+									parent: selectedItem
 								};
 								undoStack.commit('annotation.add', opts, 'Add Image');
 								app.redrawUI(true);
@@ -176,15 +169,12 @@ const contextMenu = {
 		},
 		{
 			text: 'Delete This Blank Page',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'page') {
-					const page = store.get.lookupToItem(app.selectedItemLookup);
-					return page.steps.length < 1;
-				}
-				return false;
+			shown(selectedItem) {
+				const page = store.get.lookupToItem(selectedItem);
+				return page.steps.length < 1;
 			},
-			cb() {
-				const page = store.get.lookupToItem(app.selectedItemLookup);
+			cb(selectedItem) {
+				const page = store.get.lookupToItem(selectedItem);
 				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
 				undoStack.commit('page.delete', {page}, 'Delete Page');
 				Vue.nextTick(() => {
@@ -196,22 +186,19 @@ const contextMenu = {
 	step: [
 		{
 			text: 'Add Callout',
-			cb() {
-				undoStack.commit('step.addCallout', {step: app.selectedItemLookup}, this.text);
+			cb(selectedItem) {
+				undoStack.commit('step.addCallout', {step: selectedItem}, this.text);
 				app.redrawUI(true);
 			}
 		},
 		{
 			text: 'Convert to Callout (NYI)',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-					const step = store.get.lookupToItem(app.selectedItemLookup);
-					return !util.isEmpty(step.submodel);
-				}
-				return false;
+			shown(selectedItem) {
+				const step = store.get.lookupToItem(selectedItem);
+				return !util.isEmpty(step.submodel);
 			},
 			cb() {
-				// const step = store.get.lookupToItem(app.selectedItemLookup);
+				// const step = store.get.lookupToItem(selectedItem);
 				// undoStack.commit('convertSubmodelToCallout', step, 'Convert to Callout');
 			}
 		},
@@ -220,39 +207,33 @@ const contextMenu = {
 			children: [
 				{
 					text: 'Previous Page',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-							const page = store.get.pageForItem(app.selectedItemLookup);
-							if (store.get.isFirstPage(page) || store.get.isTitlePage(page)) {
-								return false;  // Previous page doesn't exist
-							} else if (page.steps.indexOf(app.selectedItemLookup.id) !== 0) {
-								return false;  // Can only move first step on a page to the previous page
-							}
-							return true;
+					shown(selectedItem) {
+						const page = store.get.pageForItem(selectedItem);
+						if (store.get.isFirstPage(page) || store.get.isTitlePage(page)) {
+							return false;  // Previous page doesn't exist
+						} else if (page.steps.indexOf(selectedItem.id) !== 0) {
+							return false;  // Can only move first step on a page to the previous page
 						}
-						return false;
+						return true;
 					},
-					cb() {
-						undoStack.commit('step.moveToPreviousPage', {step: app.selectedItemLookup}, this.text);
+					cb(selectedItem) {
+						undoStack.commit('step.moveToPreviousPage', {step: selectedItem}, this.text);
 						app.redrawUI(true);
 					}
 				},
 				{
 					text: 'Next Page',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-							const page = store.get.pageForItem(app.selectedItemLookup);
-							if (store.get.isLastPage(page)) {
-								return false;  // Previous page doesn't exist
-							} else if (page.steps.indexOf(app.selectedItemLookup.id) !== page.steps.length - 1) {
-								return false;  // Can only move last step on a page to the next page
-							}
-							return true;
+					shown(selectedItem) {
+						const page = store.get.pageForItem(selectedItem);
+						if (store.get.isLastPage(page)) {
+							return false;  // Previous page doesn't exist
+						} else if (page.steps.indexOf(selectedItem.id) !== page.steps.length - 1) {
+							return false;  // Can only move last step on a page to the next page
 						}
-						return false;
+						return true;
 					},
-					cb() {
-						undoStack.commit('step.moveToNextPage', {step: app.selectedItemLookup}, this.text);
+					cb(selectedItem) {
+						undoStack.commit('step.moveToNextPage', {step: selectedItem}, this.text);
 						app.redrawUI(true);
 					}
 				}
@@ -263,30 +244,24 @@ const contextMenu = {
 			children: [
 				{
 					text: 'Previous Step',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-							return store.get.prevStep(app.selectedItemLookup, true) != null;
-						}
-						return false;
+					shown(selectedItem) {
+						return store.get.prevStep(selectedItem, true) != null;
 					},
-					cb() {
-						const srcStep = app.selectedItemLookup;
-						const destStep = store.get.prevStep(app.selectedItemLookup);
+					cb(selectedItem) {
+						const srcStep = selectedItem;
+						const destStep = store.get.prevStep(selectedItem);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
 						app.redrawUI(true);
 					}
 				},
 				{
 					text: 'Next Step',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-							return store.get.nextStep(app.selectedItemLookup, true) != null;
-						}
-						return false;
+					shown(selectedItem) {
+						return store.get.nextStep(selectedItem, true) != null;
 					},
-					cb() {
-						const srcStep = app.selectedItemLookup;
-						const destStep = store.get.nextStep(app.selectedItemLookup);
+					cb(selectedItem) {
+						const srcStep = selectedItem;
+						const destStep = store.get.nextStep(selectedItem);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
 						app.redrawUI(true);
 					}
@@ -295,22 +270,19 @@ const contextMenu = {
 		},
 		{
 			text: 'Delete Empty Step',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'step') {
-					return util.isEmpty(store.get.step(app.selectedItemLookup).parts);
-				}
-				return false;
+			shown(selectedItem) {
+				return util.isEmpty(store.get.step(selectedItem).parts);
 			},
-			cb() {
-				undoStack.commit('step.delete', {step: app.selectedItemLookup}, this.text);
+			cb(selectedItem) {
+				undoStack.commit('step.delete', {step: selectedItem}, this.text);
 				app.redrawUI(true);
 			}
 		},
 		{text: 'separator'},
 		{
 			text: 'Prepend Blank Step',
-			cb() {
-				const step = store.get.step(app.selectedItemLookup.id);
+			cb(selectedItem) {
+				const step = store.get.step(selectedItem.id);
 				const dest = store.get.pageForItem(step);
 				const opts = {
 					dest, stepNumber: step.number, doLayout: true, renumber: true,
@@ -323,8 +295,8 @@ const contextMenu = {
 		},
 		{
 			text: 'Append Blank Step',
-			cb() {
-				const step = store.get.step(app.selectedItemLookup.id);
+			cb(selectedItem) {
+				const step = store.get.step(selectedItem.id);
 				const dest = store.get.pageForItem(step);
 				const opts = {
 					dest, stepNumber: step.number + 1, doLayout: true, renumber: true,
@@ -347,8 +319,8 @@ const contextMenu = {
 			children: [
 				{
 					text: 'Flip Upside Down',
-					cb() {
-						const csi = app.selectedItemLookup;
+					cb(selectedItem) {
+						const csi = selectedItem;
 						const opts = {csi, rotation: {x: 0, y: 0, z: 180}, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts, 'Flip Step Image', [csi]);
 						app.redrawUI(true);
@@ -356,8 +328,8 @@ const contextMenu = {
 				},
 				{
 					text: 'Rotate Front to Back',
-					cb() {
-						const csi = app.selectedItemLookup;
+					cb(selectedItem) {
+						const csi = selectedItem;
 						const opts = {csi, rotation: {x: 0, y: 180, z: 0}, addRotateIcon: true};
 						undoStack.commit('csi.rotate', opts, 'Rotate Step Image', [csi]);
 						app.redrawUI(true);
@@ -365,8 +337,8 @@ const contextMenu = {
 				},
 				{
 					text: 'Custom Rotation...',
-					cb() {
-						const csi = store.get.csi(app.selectedItemLookup.id);
+					cb(selectedItem) {
+						const csi = store.get.csi(selectedItem.id);
 						const originalRotation = util.clone(csi.rotation);
 						csi.rotation = csi.rotation || {x: 0, y: 0, z: 0};
 
@@ -404,16 +376,13 @@ const contextMenu = {
 		},
 		{
 			text: 'Copy Rotation to next Steps...',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
-					const csi = store.get.csi(app.selectedItemLookup);
-					const rotation = csi.rotation;
-					return rotation && (rotation.x || rotation.y || rotation.z);
-				}
-				return false;
+			shown(selectedItem) {
+				const csi = store.get.csi(selectedItem);
+				const rotation = csi.rotation;
+				return rotation && (rotation.x || rotation.y || rotation.z);
 			},
-			cb() {
-				const csi = store.get.csi(app.selectedItemLookup.id);
+			cb(selectedItem) {
+				const csi = store.get.csi(selectedItem.id);
 				const rotation = util.clone(csi.rotation);
 				const step = store.get.step(csi.parent.id);
 				const originalRotations = [];
@@ -476,28 +445,22 @@ const contextMenu = {
 		{text: 'separator'},
 		{
 			text: 'Select Part',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
-					const step = store.get.parent(app.selectedItemLookup);
-					return step && step.parts && step.parts.length;
-				}
-				return false;
+			shown(selectedItem) {
+				const step = store.get.parent(selectedItem);
+				return step && step.parts && step.parts.length;
 			},
-			children() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'csi') {
-					const step = store.get.parent(app.selectedItemLookup);
-					return step.parts.map(partID => {
-						const part = LDParse.model.get.partFromID(partID, store.model, step.submodel);
-						const abstractPart = LDParse.partDictionary[part.filename];
-						return {
-							text: abstractPart.name,
-							cb() {
-								app.setSelected({type: 'part', id: partID, stepID: step.id});
-							}
-						};
-					});
-				}
-				return null;
+			children(selectedItem) {
+				const step = store.get.parent(selectedItem);
+				return (step.parts || []).map(partID => {
+					const part = LDParse.model.get.partFromID(partID, store.model, step.submodel);
+					const abstractPart = LDParse.partDictionary[part.filename];
+					return {
+						text: abstractPart.name,
+						cb() {
+							app.setSelected({type: 'part', id: partID, stepID: step.id});
+						}
+					};
+				});
 			}
 		},
 		{text: 'Add New Part (NYI)', cb: () => {}}
@@ -513,15 +476,12 @@ const contextMenu = {
 			children: [
 				{
 					text: 'Text...',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'annotation') {
-							const annotation = store.get.annotation(app.selectedItemLookup);
-							return annotation && annotation.annotationType === 'label';
-						}
-						return false;
+					shown(selectedItem) {
+						const annotation = store.get.annotation(selectedItem);
+						return annotation && annotation.annotationType === 'label';
 					},
-					cb() {
-						const annotation = store.get.annotation(app.selectedItemLookup);
+					cb(selectedItem) {
+						const annotation = store.get.annotation(selectedItem);
 						const originalText = annotation.text;
 
 						app.currentDialog = 'stringDialog';
@@ -557,23 +517,17 @@ const contextMenu = {
 				},
 				{
 					text: 'Font (NYI)',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'annotation') {
-							const annotation = store.get.annotation(app.selectedItemLookup);
-							return annotation && annotation.annotationType !== 'image';
-						}
-						return false;
+					shown(selectedItem) {
+						const annotation = store.get.annotation(selectedItem);
+						return annotation && annotation.annotationType !== 'image';
 					},
 					cb() {}
 				},
 				{
 					text: 'Color (NYI)',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'annotation') {
-							const annotation = store.get.annotation(app.selectedItemLookup);
-							return annotation && annotation.annotationType !== 'image';
-						}
-						return false;
+					shown(selectedItem) {
+						const annotation = store.get.annotation(selectedItem);
+						return annotation && annotation.annotationType !== 'image';
 					},
 					cb() {}
 				}
@@ -581,8 +535,8 @@ const contextMenu = {
 		},
 		{
 			text: 'Delete',
-			cb() {
-				const annotation = app.selectedItemLookup;
+			cb(selectedItem) {
+				const annotation = selectedItem;
 				undoStack.commit('annotation.delete', {annotation}, this.text);
 				app.redrawUI(true);
 			}
@@ -591,25 +545,19 @@ const contextMenu = {
 	callout: [
 		{
 			text: 'Add Step',
-			cb() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'callout') {
-					const callout = app.selectedItemLookup;
-					undoStack.commit('callout.addStep', {callout, doLayout: true}, this.text);
-					app.redrawUI(true);
-				}
+			cb(selectedItem) {
+				undoStack.commit('callout.addStep', {callout: selectedItem, doLayout: true}, this.text);
+				app.redrawUI(true);
 			}
 		},
 		{
 			text: 'Delete Empty Callout',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'callout') {
-					const callout = store.get.callout(app.selectedItemLookup);
-					return util.isEmpty(callout.steps);
-				}
-				return false;
+			shown(selectedItem) {
+				const callout = store.get.callout(selectedItem);
+				return util.isEmpty(callout.steps);
 			},
-			cb() {
-				undoStack.commit('callout.delete', {callout: app.selectedItemLookup}, this.text);
+			cb(selectedItem) {
+				undoStack.commit('callout.delete', {callout: selectedItem}, this.text);
 				app.redrawUI(true);
 			}
 		}
@@ -617,40 +565,34 @@ const contextMenu = {
 	calloutArrow: [
 		{
 			text: 'Select Point...',
-			children() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
-					const arrow = store.get.calloutArrow(app.selectedItemLookup);
-					return arrow.points.map((pointID, idx) => {
-						return {
-							text: (idx === 0) ? 'Base' :
-								(idx === arrow.points.length - 1) ? 'Tip' : `Point ${idx}`,
-							cb() {
-								app.setSelected({type: 'point', id: pointID});
-							}
-						};
-					});
-				}
-				return null;
+			children(selectedItem) {
+				const arrow = store.get.calloutArrow(selectedItem);
+				return arrow.points.map((pointID, idx) => {
+					return {
+						text: (idx === 0) ? 'Base' :
+							(idx === arrow.points.length - 1) ? 'Tip' : `Point ${idx}`,
+						cb() {
+							app.setSelected({type: 'point', id: pointID});
+						}
+					};
+				});
 			}
 		},
 		{
 			text: 'Add Point',
-			cb() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
-					const calloutArrow = store.get.calloutArrow(app.selectedItemLookup);
-					const newPointIdx = Math.ceil(calloutArrow.points.length / 2);
-					undoStack.commit('calloutArrow.addPoint', {calloutArrow}, this.text);
-					app.redrawUI(true);
-					Vue.nextTick(() => {
-						app.setSelected({type: 'point', id: calloutArrow.points[newPointIdx]});
-					});
-				}
+			cb(selectedItem) {
+				const calloutArrow = store.get.calloutArrow(selectedItem);
+				const newPointIdx = Math.ceil(calloutArrow.points.length / 2);
+				undoStack.commit('calloutArrow.addPoint', {calloutArrow}, this.text);
+				app.redrawUI(true);
+				Vue.nextTick(() => {
+					app.setSelected({type: 'point', id: calloutArrow.points[newPointIdx]});
+				});
 			}
 		},
 		{
 			text: 'Add Tip (NYI)',
-			cb() {
-			}
+			cb() {}
 		},
 		{
 			text: 'Rotate Tip...',
@@ -676,19 +618,17 @@ const contextMenu = {
 		},
 		{
 			text: 'Adjust Displacement',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-					if (step.displacedParts) {
-						return step.displacedParts.some(p => p.partID === app.selectedItemLookup.id);
-					}
+			shown(selectedItem) {
+				const step = store.get.step({type: 'step', id: selectedItem.stepID});
+				if (step.displacedParts) {
+					return step.displacedParts.some(p => p.partID === selectedItem.id);
 				}
 				return false;
 			},
-			cb() {
-				const step = store.get.step(app.selectedItemLookup.stepID);
+			cb(selectedItem) {
+				const step = store.get.step(selectedItem.stepID);
 				const csi = store.get.csi(step.csiID);
-				const displacement = step.displacedParts.find(p => p.partID === app.selectedItemLookup.id);
+				const displacement = step.displacedParts.find(p => p.partID === selectedItem.id);
 				const originalDisplacement = util.clone(displacement);
 
 				app.currentDialog = 'partDisplacementDialog';
@@ -729,19 +669,16 @@ const contextMenu = {
 			children: [
 				{
 					text: 'Previous Step',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-							const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-							return store.get.prevStep(step) != null;
-						}
-						return false;
+					shown(selectedItem) {
+						const step = store.get.step({type: 'step', id: selectedItem.stepID});
+						return store.get.prevStep(step) != null;
 					},
-					cb() {
-						const srcStep = {type: 'step', id: app.selectedItemLookup.stepID};
+					cb(selectedItem) {
+						const srcStep = {type: 'step', id: selectedItem.stepID};
 						const destStep = store.get.prevStep(srcStep);
 						undoStack.commit(
 							'part.moveToStep',
-							{partID: app.selectedItemLookup.id, srcStep, destStep, doLayout: true},
+							{partID: selectedItem.id, srcStep, destStep, doLayout: true},
 							'Move Part to Previous Step',
 							[{type: 'csi', id: destStep.csiID}]
 						);
@@ -750,19 +687,16 @@ const contextMenu = {
 				},
 				{
 					text: 'Next Step',
-					shown() {
-						if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-							const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-							return store.get.nextStep(step) != null;
-						}
-						return false;
+					shown(selectedItem) {
+						const step = store.get.step({type: 'step', id: selectedItem.stepID});
+						return store.get.nextStep(step) != null;
 					},
-					cb() {
-						const srcStep = {type: 'step', id: app.selectedItemLookup.stepID};
+					cb(selectedItem) {
+						const srcStep = {type: 'step', id: selectedItem.stepID};
 						const destStep = store.get.nextStep(srcStep);
 						undoStack.commit(
 							'part.moveToStep',
-							{partID: app.selectedItemLookup.id, srcStep, destStep, doLayout: true},
+							{partID: selectedItem.id, srcStep, destStep, doLayout: true},
 							'Move Part to Next Step',
 							[{type: 'csi', id: destStep.csiID}]
 						);
@@ -773,19 +707,16 @@ const contextMenu = {
 		},
 		{
 			text: 'Add Part to Callout',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-					return !util.isEmpty(step.callouts);
-				}
-				return false;
+			shown(selectedItem) {
+				const step = store.get.step({type: 'step', id: selectedItem.stepID});
+				return !util.isEmpty(step.callouts);
 			},
-			cb() {
-				const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+			cb(selectedItem) {
+				const step = store.get.step({type: 'step', id: selectedItem.stepID});
 				const callout = {id: step.callouts[0], type: 'callout'};
 				undoStack.commit(
 					'part.addToCallout',
-					{partID: app.selectedItemLookup.id, step, callout, doLayout: true},
+					{partID: selectedItem.id, step, callout, doLayout: true},
 					this.text
 				);
 				app.redrawUI(true);
@@ -793,18 +724,15 @@ const contextMenu = {
 		},
 		{
 			text: 'Remove Part from Callout',
-			shown() {
-				if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-					const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-					return step.parent.type === 'callout';
-				}
-				return false;
+			shown(selectedItem) {
+				const step = store.get.step({type: 'step', id: selectedItem.stepID});
+				return step.parent.type === 'callout';
 			},
-			cb() {
-				const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
+			cb(selectedItem) {
+				const step = store.get.step({type: 'step', id: selectedItem.stepID});
 				undoStack.commit(
 					'part.removeFromCallout',
-					{partID: app.selectedItemLookup.id, step},
+					{partID: selectedItem.id, step},
 					this.text
 				);
 				app.redrawUI(true);
@@ -814,50 +742,42 @@ const contextMenu = {
 };
 
 function calloutTipRotationVisible(direction) {
-	return () => {
-		if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
-			const calloutArrow = store.get.calloutArrow(app.selectedItemLookup);
-			return calloutArrow.direction !== direction;
-		}
-		return false;
+	return (selectedItem) => {
+		const calloutArrow = store.get.calloutArrow(selectedItem);
+		return calloutArrow.direction !== direction;
 	};
 }
 
 function rotateCalloutTip(direction) {
-	return () => {
-		if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'calloutArrow') {
-			const calloutArrow = store.get.calloutArrow(app.selectedItemLookup);
-			undoStack.commit('calloutArrow.rotateTip', {calloutArrow, direction}, 'Rotate Callout Arrow Tip');
-			app.redrawUI();
-		}
+	return (selectedItem) => {
+		const calloutArrow = store.get.calloutArrow(selectedItem);
+		undoStack.commit('calloutArrow.rotateTip', {calloutArrow, direction}, 'Rotate Callout Arrow Tip');
+		app.redrawUI();
 	};
 }
 
 function showDisplacement(direction) {
-	return () => {
-		if (app && app.selectedItemLookup && app.selectedItemLookup.type === 'part') {
-			const step = store.get.step({type: 'step', id: app.selectedItemLookup.stepID});
-			if (step.displacedParts) {
-				if (direction == null) {
-					return step.displacedParts.some(p => p.partID === app.selectedItemLookup.id);
-				} else {
-					return step.displacedParts.every(p => {
-						return p.partID !== app.selectedItemLookup.id || p.direction !== direction;
-					});
-				}
+	return (selectedItem) => {
+		const step = store.get.step({type: 'step', id: selectedItem.stepID});
+		if (step.displacedParts) {
+			if (direction == null) {
+				return step.displacedParts.some(p => p.partID === selectedItem.id);
+			} else {
+				return step.displacedParts.every(p => {
+					return p.partID !== selectedItem.id || p.direction !== direction;
+				});
 			}
-			return direction != null;
 		}
-		return false;
+		return direction != null;
 	};
 }
 
 function displacePart(direction) {
-	return () => {
-		const step = store.get.step(app.selectedItemLookup.stepID);
+	return (selectedItem) => {
+		const step = store.get.step(selectedItem.stepID);
 		undoStack.commit(
 			'part.displace',
-			{partID: app.selectedItemLookup.id, step, direction},
+			{partID: selectedItem.id, step, direction},
 			`Displace Part ${util.titleCase(direction || 'None')}`,
 			[{type: 'csi', id: step.csiID}]
 		);
@@ -865,7 +785,11 @@ function displacePart(direction) {
 	};
 }
 
-module.exports = function ContextMenu(menuEntry, localApp) {
+module.exports = function ContextMenu(entryType, localApp) {
 	app = localApp;
-	return contextMenu[menuEntry];
+	const menu = contextMenu[entryType];
+	menu.forEach(m => {
+		m.type = entryType;  // Copy entry type to each meny entry; saves typing them all out everywhere above
+	});
+	return menu;
 };
