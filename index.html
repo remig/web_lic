@@ -322,6 +322,18 @@
 		</baseDialog>
 	</script>
 
+	<script type="text/x-template" id="borderTemplate">
+		<baseDialog title="Set Border">
+			<div slot="body" class="container-fluid">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<color-picker v-model="color" v-on:input="updateValues"></color-picker>
+					</div>
+				</form>
+			</div>
+		</baseDialog>
+	</script>
+
 	<script type="text/javascript" src="dist/bundle.js"></script>
 
 </body>

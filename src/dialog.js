@@ -73,6 +73,9 @@ const dialogs = {
 		title: '',
 		labelText: '',
 		string: ''
+	},
+	border: {
+		color: ''
 	}
 };
 

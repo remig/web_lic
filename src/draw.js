@@ -117,10 +117,13 @@ const api = {
 		const template = store.state.template.submodelImage;
 		const si = store.get.submodelImage(submodelImage);
 		const step = store.get.parent(si);
-		ctx.strokeStyle = template.border.color;
-		ctx.lineWidth = template.border.width;
-		api.roundedRect(ctx, si.x, si.y, si.width, si.height, template.border.cornerRadius);
-		ctx.stroke();
+
+		const rectStyle = {
+			fillStyle: template.fill.color,
+			strokeStyle: template.border.color,
+			lineWidth: template.border.width
+		};
+		api.roundedRectStyled(ctx, si.x, si.y, si.width, si.height, template.border.cornerRadius, rectStyle);
 
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
@@ -167,10 +170,15 @@ const api = {
 		if (util.isEmpty(pli.pliItems)) {
 			return;
 		}
-		ctx.strokeStyle = template.pli.border.color;
-		ctx.lineWidth = template.pli.border.width;
-		api.roundedRect(ctx, pli.x, pli.y, pli.width, pli.height, template.pli.border.cornerRadius);
-		ctx.stroke();
+		const rectStyle = {
+			fillStyle: template.pli.fill.color,
+			strokeStyle: template.pli.border.color,
+			lineWidth: template.pli.border.width
+		};
+		api.roundedRectStyled(
+			ctx, pli.x, pli.y, pli.width, pli.height,
+			template.pli.border.cornerRadius, rectStyle
+		);
 
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
@@ -203,12 +211,14 @@ const api = {
 		ctx.save();
 		ctx.translate(Math.floor(callout.x), Math.floor(callout.y));
 
-		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
+		const rectStyle = {
+			fillStyle: template.fill.color,
+			strokeStyle: template.border.color,
+			lineWidth: template.border.width
+		};
+		api.roundedRectStyled(ctx, 0, 0, callout.width, callout.height, 10, rectStyle);
 
-		ctx.strokeStyle = template.border.color;
-		ctx.lineWidth = template.border.width;
-		api.roundedRect(ctx, 0, 0, callout.width, callout.height, 10);
-		ctx.stroke();
+		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 
 		ctx.strokeStyle = template.arrow.color;
 		ctx.fillStyle = template.arrow.color;
@@ -307,6 +317,20 @@ const api = {
 			ctx.restore();
 		};
 	})(),
+
+	roundedRectStyled(ctx, x, y, w, h, r, style) {
+		ctx.save();
+		if (style.fillStyle) {
+			ctx.fillStyle = style.fillStyle;
+			api.roundedRect(ctx, x, y, w, h, r);
+			ctx.fill();
+		}
+		ctx.strokeStyle = style.strokeStyle;
+		ctx.lineWidth = style.lineWidth;
+		api.roundedRect(ctx, x, y, w, h, r);
+		ctx.stroke();
+		ctx.restore();
+	},
 
 	roundedRect(ctx, x, y, w, h, r) {
 		ctx.beginPath();

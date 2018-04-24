@@ -6,9 +6,53 @@ const LDParse = require('./LDParse');
 const store = require('./store');
 const undoStack = require('./undoStack');
 
+const colorPicker = require('vue-color/dist/vue-color');
+Vue.component('color-picker', colorPicker.Chrome);
+
 let app;
 
 const contextMenu = {
+	templatePage: {
+		templatePage: [
+			{
+				text: 'Set Border... (NYI)',
+				cb() {}
+			}
+		],
+		step: [
+		],
+		submodelImage: [
+			{text: 'Set Border...', cb: setBorder('submodelImage')},
+			{text: 'Set Fill...', cb: setFill('submodelImage')}
+		],
+		csi: [
+			{
+				text: 'Change Default Rotation... (NYI)',
+				cb() {}
+			},
+			{
+				text: 'Change Default Scale... (NYI)',
+				cb() {}
+			}
+		],
+		pli: [
+			{text: 'Set Border...', cb: setBorder('pli')},
+			{text: 'Set Fill...', cb: setFill('pli')}
+		],
+		pliItem: [],
+		pliQtys: [
+			{
+				text: 'Set Font... (NYI)',
+				cb() {}
+			}
+		],
+		callout: [
+			{text: 'Set Border...', cb: setBorder('callout')},
+			{text: 'Set Fill...', cb: setFill('callout')}
+		],
+		calloutArrow: [
+		]
+	},
 	page: [
 		{
 			text: 'Layout',
@@ -785,9 +829,75 @@ function displacePart(direction) {
 	};
 }
 
+function rgbaToString(c) {
+	c = c.rgba;
+	return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
+}
+
+function setFill(templateEntry) {
+	return function() {
+		const fill = util.get(templateEntry, store.state.template).fill;
+		const originalColor = util.clone(fill.color);
+
+		app.currentDialog = 'borderDialog';
+		app.clearSelected();
+
+		Vue.nextTick(() => {
+			const dialog = app.$refs.currentDialog;
+			dialog.$off();
+			dialog.$on('ok', () => {
+				// TODO: undo / redo support for changing template entries
+			});
+			dialog.$on('cancel', () => {
+				fill.color = originalColor;
+				app.redrawUI(true);
+			});
+			dialog.$on('update', newValues => {
+				fill.color = rgbaToString(newValues.color);
+				app.redrawUI(true);
+			});
+			dialog.color = originalColor || 'black';
+			dialog.show({x: 400, y: 150});
+		});
+	};
+}
+
+function setBorder(templateEntry) {
+	// TODO: add border width, corner radius and dash patterns to this dialog (so it's not just a dupe of setFill)
+	return function() {
+		const border = util.get(templateEntry, store.state.template).border;
+		const originalColor = util.clone(border.color);
+
+		app.currentDialog = 'borderDialog';
+		app.clearSelected();
+
+		Vue.nextTick(() => {
+			const dialog = app.$refs.currentDialog;
+			dialog.$off();
+			dialog.$on('ok', () => {
+				// TODO: undo / redo support for changing template entries
+			});
+			dialog.$on('cancel', () => {
+				border.color = originalColor;
+				app.redrawUI(true);
+			});
+			dialog.$on('update', newValues => {
+				border.color = newValues.color.hex;
+				app.redrawUI(true);
+			});
+			dialog.color = originalColor;
+			dialog.show({x: 400, y: 150});
+		});
+	};
+}
+
 module.exports = function ContextMenu(entryType, localApp) {
 	app = localApp;
-	const menu = contextMenu[entryType];
+	let menu = contextMenu[entryType];
+	const page = store.get.pageForItem(app.selectedItemLookup);
+	if (store.get.isTemplatePage(page)) {  // Special case: template page items should use template page item menus
+		menu = contextMenu.templatePage[entryType];
+	}
 	menu.forEach(m => {
 		m.type = entryType;  // Copy entry type to each meny entry; saves typing them all out everywhere above
 	});

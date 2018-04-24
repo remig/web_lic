@@ -12,6 +12,11 @@ const template = {
 		dividers: {
 			width: 2,
 			color: 'black'
+		},
+		border: {
+			width: 0,
+			color: null,
+			cornerRadius: 0
 		}
 	},
 	step: {
@@ -24,6 +29,9 @@ const template = {
 		csi: {
 			scale: 1,
 			rotation: null
+		},
+		fill: {
+			color: null
 		},
 		border: {
 			width: 2,
@@ -40,6 +48,9 @@ const template = {
 		rotation: null
 	},
 	pli: {
+		fill: {
+			color: null
+		},
 		border: {
 			width: 2,
 			color: 'black',
@@ -57,6 +68,9 @@ const template = {
 		}
 	},
 	callout: {
+		fill: {
+			color: null
+		},
 		border: {
 			width: 2,
 			color: 'black',
