@@ -236,6 +236,8 @@ const api = {
 	prettyPrint(s) {  // Human readable versions of common internal strings
 		s = s + '';
 		switch (s.toLowerCase()) {
+			case 'submodelimage':
+				return 'Submodel Image';
 			case 'csi':
 				return 'CSI';
 			case 'pli':
