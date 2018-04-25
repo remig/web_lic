@@ -399,7 +399,7 @@ const app = new Vue({
 				Vue.nextTick(() => {
 					// Delay menu creation so that earlier menu clear has time to take effect
 					// This is necessary as menu content may change without selected item changing
-					const menu = ContextMenu(this.selectedItemLookup.type, this);
+					const menu = ContextMenu(this.selectedItemLookup, this);
 					if (menu && menu.length) {
 						this.contextMenu = menu;
 						this.$refs.contextMenuComponent.show(e);

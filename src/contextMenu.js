@@ -15,13 +15,27 @@ const contextMenu = {
 	templatePage: {
 		templatePage: [
 			{text: 'Set Border...', cb: setBorder('page')},
-			{text: 'Set Fill...', cb: setFill('page')}
+			{text: 'Set Fill...', cb: setColor('page')}
 		],
 		step: [
 		],
+		numberLabel(selectedItem) {
+			const parent = store.get.parent(selectedItem);
+			switch (parent.type) {
+				case 'templatePage':
+					return [
+						{text: 'Set Color...', cb: setColor('page', 'numberLabel')}
+					];
+				case 'step':
+					return [
+						{text: 'Set Color...', cb: setColor('step', 'numberLabel')}
+					];
+			}
+			return [];
+		},
 		submodelImage: [
 			{text: 'Set Border...', cb: setBorder('submodelImage')},
-			{text: 'Set Fill...', cb: setFill('submodelImage')}
+			{text: 'Set Fill...', cb: setColor('submodelImage')}
 		],
 		csi: [
 			{
@@ -35,7 +49,7 @@ const contextMenu = {
 		],
 		pli: [
 			{text: 'Set Border...', cb: setBorder('pli')},
-			{text: 'Set Fill...', cb: setFill('pli')}
+			{text: 'Set Fill...', cb: setColor('pli')}
 		],
 		pliItem: [],
 		pliQtys: [
@@ -46,13 +60,13 @@ const contextMenu = {
 		],
 		callout: [
 			{text: 'Set Border...', cb: setBorder('callout')},
-			{text: 'Set Fill...', cb: setFill('callout')}
+			{text: 'Set Fill...', cb: setColor('callout')}
 		],
 		calloutArrow: [
 		],
 		rotateIcon: [
 			{text: 'Set Border...', cb: setBorder('rotateIcon')},
-			{text: 'Set Fill...', cb: setFill('rotateIcon')},
+			{text: 'Set Fill...', cb: setColor('rotateIcon')},
 			{text: 'Set Arrow Style...', cb: setBorder('rotateIcon.arrow', true)}
 		]
 	},
@@ -355,11 +369,20 @@ const contextMenu = {
 			}
 		}
 	],
-	numberLabel: [
-		// TODO: differentiate these two based on parent
-		{text: 'Change Step Number (NYI)', cb() {}},
-		{text: 'Change Page Number (NYI)', cb() {}}
-	],
+	numberLabel(selectedItem) {
+		const parent = store.get.parent(selectedItem);
+		switch (parent.type) {
+			case 'page':
+				return [
+					{text: 'Change Page Number (NYI)', cb() {}}
+				];
+			case 'step':
+				return [
+					{text: 'Change Step Number (NYI)', cb() {}}
+				];
+		}
+		return [];
+	},
 	csi: [
 		{
 			text: 'Rotate Step Image',
@@ -517,6 +540,7 @@ const contextMenu = {
 		{text: 'Rotate PLI Part (NYI)', cb: () => {}},
 		{text: 'Scale PLI Part (NYI)', cb: () => {}}
 	],
+	pliQty: [],
 	annotation: [
 		{
 			text: 'Set',
@@ -840,9 +864,9 @@ function rgbaToString(c) {
 	return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
 }
 
-function setFill(templateEntry) {
+function setColor(templateEntry, colorType = 'fill') {
 	return function() {
-		const fill = util.get(templateEntry, store.state.template).fill;
+		const fill = util.get(templateEntry, store.state.template)[colorType];
 		const originalColor = util.clone(fill.color);
 
 		app.currentDialog = 'colorDialog';
@@ -852,7 +876,7 @@ function setFill(templateEntry) {
 			const dialog = app.$refs.currentDialog;
 			dialog.$off();
 			dialog.$on('ok', newValues => {
-				const entry = templateEntry + '.fill';
+				const entry = `${templateEntry}.${colorType}`;
 				undoStack.commit(
 					'templatePage.set',
 					{entry, value: {color: rgbaToString(newValues.color)}},
@@ -913,15 +937,14 @@ function setBorder(templateEntry, ignoreCornerRadius) {
 	};
 }
 
-module.exports = function ContextMenu(entryType, localApp) {
+module.exports = function ContextMenu(entry, localApp) {
 	app = localApp;
-	let menu = contextMenu[entryType];
+	let menu = contextMenu[entry.type];
 	const page = store.get.pageForItem(app.selectedItemLookup);
 	if (store.get.isTemplatePage(page)) {  // Special case: template page items should use template page item menus
-		menu = contextMenu.templatePage[entryType];
+		menu = contextMenu.templatePage[entry.type];
 	}
-	menu.forEach(m => {
-		m.type = entryType;  // Copy entry type to each meny entry; saves typing them all out everywhere above
-	});
+	menu = (typeof menu === 'function') ? menu(entry) : menu;
+	menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above
 	return menu;
 };
