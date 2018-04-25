@@ -85,14 +85,19 @@ const template = {
 		}
 	},
 	rotateIcon: {
+		fill: {
+			color: null
+		},
 		border: {
 			width: 2,
 			color: 'black',
 			cornerRadius: 10
 		},
 		arrow: {
-			width: 3,
-			color: 'black'
+			border: {
+				width: 3,
+				color: 'black'
+			}
 		}
 	}
 };

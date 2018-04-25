@@ -343,9 +343,11 @@
 						<div class="col-sm-2">
 							<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
 						</div>
-						<label class="col-sm-3 control-label" for="cornerRadius">Corner Radius</label>
-						<div class="col-sm-2">
-							<input v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
+						<div v-if="cornerRadius != null">
+							<label class="col-sm-3 control-label" for="cornerRadius">Corner Radius</label>
+							<div class="col-sm-2">
+								<input v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
+							</div>
 						</div>
 						<div class="col-sm-3">
 							<color-picker v-model="color" v-on:input="updateValues"></color-picker>

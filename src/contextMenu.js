@@ -49,6 +49,11 @@ const contextMenu = {
 			{text: 'Set Fill...', cb: setFill('callout')}
 		],
 		calloutArrow: [
+		],
+		rotateIcon: [
+			{text: 'Set Border...', cb: setBorder('rotateIcon')},
+			{text: 'Set Fill...', cb: setFill('rotateIcon')},
+			{text: 'Set Arrow Style...', cb: setBorder('rotateIcon.arrow', true)}
 		]
 	},
 	page: [
@@ -869,7 +874,7 @@ function setFill(templateEntry) {
 	};
 }
 
-function setBorder(templateEntry) {
+function setBorder(templateEntry, ignoreCornerRadius) {
 	return function() {
 		const border = util.get(templateEntry, store.state.template).border;
 		const originalBorder = util.clone(border);
@@ -900,6 +905,9 @@ function setBorder(templateEntry) {
 				app.redrawUI(true);
 			});
 			util.copy(dialog, originalBorder);
+			if (ignoreCornerRadius) {
+				dialog.cornerRadius = null;
+			}
 			dialog.show({x: 400, y: 150});
 		});
 	};

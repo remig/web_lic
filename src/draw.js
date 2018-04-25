@@ -257,17 +257,24 @@ const api = {
 			height: icon.height / 94
 		};
 
-		ctx.fillStyle = ctx.strokeStyle = template.border.color;
+		ctx.strokeStyle = template.border.color;
 		ctx.lineWidth = template.border.width;
 		ctx.save();
 		ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
 		ctx.scale(scale.width, scale.height);
+
+		if (template.fill.color) {
+			ctx.fillStyle = template.fill.color;
+			api.roundedRect(ctx, 0, 0, 100, 94, 15);
+			ctx.fill();
+		}
+
 		api.roundedRect(ctx, 0, 0, 100, 94, 15);
 		ctx.restore();
 		ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
 
-		ctx.fillStyle = ctx.strokeStyle = template.arrow.color;
-		ctx.lineWidth = template.arrow.width;
+		ctx.fillStyle = ctx.strokeStyle = template.arrow.border.color;
+		ctx.lineWidth = template.arrow.border.width;
 		ctx.save();
 		ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
 		ctx.scale(scale.width, scale.height);
