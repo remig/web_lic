@@ -322,12 +322,34 @@
 		</baseDialog>
 	</script>
 
+	<script type="text/x-template" id="colorTemplate">
+		<baseDialog title="Set Fill Color">
+			<div slot="body" class="container-fluid">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<color-picker v-model="color" v-on:input="updateValues"></color-picker>
+					</div>
+				</form>
+			</div>
+		</baseDialog>
+	</script>
+
 	<script type="text/x-template" id="borderTemplate">
 		<baseDialog title="Set Border">
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
-						<color-picker v-model="color" v-on:input="updateValues"></color-picker>
+						<label class="col-sm-3 control-label" for="lineWidth">Line Width</label>
+						<div class="col-sm-2">
+							<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
+						</div>
+						<label class="col-sm-3 control-label" for="cornerRadius">Corner Radius</label>
+						<div class="col-sm-2">
+							<input v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
+						</div>
+						<div class="col-sm-3">
+							<color-picker v-model="color" v-on:input="updateValues"></color-picker>
+						</div>
 					</div>
 				</form>
 			</div>
