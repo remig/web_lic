@@ -830,6 +830,9 @@ function displacePart(direction) {
 }
 
 function rgbaToString(c) {
+	if (typeof c === 'string') {
+		return c;
+	}
 	c = c.rgba;
 	return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
 }
@@ -839,14 +842,20 @@ function setFill(templateEntry) {
 		const fill = util.get(templateEntry, store.state.template).fill;
 		const originalColor = util.clone(fill.color);
 
-		app.currentDialog = 'borderDialog';
+		app.currentDialog = 'colorDialog';
 		app.clearSelected();
 
 		Vue.nextTick(() => {
 			const dialog = app.$refs.currentDialog;
 			dialog.$off();
-			dialog.$on('ok', () => {
-				// TODO: undo / redo support for changing template entries
+			dialog.$on('ok', newValues => {
+				const entry = templateEntry + '.fill';
+				undoStack.commit(
+					'templatePage.set',
+					{entry, value: {color: rgbaToString(newValues.color)}},
+					'Set Template Fill'
+				);
+				app.redrawUI(true);
 			});
 			dialog.$on('cancel', () => {
 				fill.color = originalColor;
@@ -863,10 +872,9 @@ function setFill(templateEntry) {
 }
 
 function setBorder(templateEntry) {
-	// TODO: add border width, corner radius and dash patterns to this dialog (so it's not just a dupe of setFill)
 	return function() {
 		const border = util.get(templateEntry, store.state.template).border;
-		const originalColor = util.clone(border.color);
+		const originalBorder = util.clone(border);
 
 		app.currentDialog = 'borderDialog';
 		app.clearSelected();
@@ -874,18 +882,26 @@ function setBorder(templateEntry) {
 		Vue.nextTick(() => {
 			const dialog = app.$refs.currentDialog;
 			dialog.$off();
-			dialog.$on('ok', () => {
-				// TODO: undo / redo support for changing template entries
+			dialog.$on('ok', newValues => {
+				const entry = templateEntry + '.border';
+				newValues.color = rgbaToString(newValues.color);
+				undoStack.commit(
+					'templatePage.set',
+					{entry, value: newValues},
+					'Set Template Border'
+				);
+				app.redrawUI(true);
 			});
 			dialog.$on('cancel', () => {
-				border.color = originalColor;
+				util.copy(border, originalBorder);
 				app.redrawUI(true);
 			});
 			dialog.$on('update', newValues => {
-				border.color = newValues.color.hex;
+				newValues.color = rgbaToString(newValues.color);
+				util.copy(border, newValues);
 				app.redrawUI(true);
 			});
-			dialog.color = originalColor;
+			util.copy(dialog, originalBorder);
 			dialog.show({x: 400, y: 150});
 		});
 	};

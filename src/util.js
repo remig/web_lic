@@ -153,7 +153,6 @@ const api = {
 			return fullFontParts;
 		};
 	})(),
-
 	degrees(radians) {
 		return radians * 180 / Math.PI;
 	},
@@ -210,6 +209,14 @@ const api = {
 		}
 		return JSON.parse(JSON.stringify(obj));
 	},
+	copy(to, from) {
+		api.forEach(from, (k, v) => {
+			to[k] = v;
+		});
+	},
+	forEach(obj, cb) {
+		Object.entries(obj).forEach(([k, v]) => cb(k, v));
+	},
 	sort: {
 		numeric: {
 			ascending(a, b) {
@@ -253,6 +260,19 @@ const api = {
 			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();
 		}
 		return api.titleCase(s);
+	},
+	isBorderVisible(border) {
+		if (!border || !border.width || border.width < 1 || !border.color || typeof border.color !== 'string') {
+			return false;
+		}
+		// TODO: this color visibility check is totally naive
+		const color = border.color.toLowerCase();
+		if (color === 'transparent') {
+			return false;
+		} else if (color.startsWith('rgba') && (color.endsWith(',0)') || color.endsWith(', 0)'))) {
+			return false;
+		}
+		return true;
 	}
 };
 

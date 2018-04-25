@@ -1,6 +1,8 @@
 /* global Vue: false, $: false */
 'use strict';
 
+const util = require('./util');
+
 Vue.component('baseDialog', {
 	template: '#baseDialogTemplate',
 	data: function() {
@@ -74,12 +76,16 @@ const dialogs = {
 		labelText: '',
 		string: ''
 	},
-	border: {
+	color: {
 		color: ''
+	},
+	border: {
+		width: 0,
+		color: '',
+		cornerRadius: 0
 	}
 };
-
-Object.entries(dialogs).forEach(([name, props]) => {
+util.forEach(dialogs, (name, props) => {
 	Vue.component(name + 'Dialog', {
 		template: `#${name}Template`,
 		mixins: [baseDialogPropagator],

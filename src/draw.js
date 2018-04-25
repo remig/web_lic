@@ -216,7 +216,7 @@ const api = {
 			strokeStyle: template.border.color,
 			lineWidth: template.border.width
 		};
-		api.roundedRectStyled(ctx, 0, 0, callout.width, callout.height, 10, rectStyle);
+		api.roundedRectStyled(ctx, 0, 0, callout.width, callout.height, template.border.cornerRadius, rectStyle);
 
 		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 
@@ -320,19 +320,26 @@ const api = {
 
 	roundedRectStyled(ctx, x, y, w, h, r, style) {
 		ctx.save();
+		if (style.lineWidth % 2) {  // Avoid half-pixel offset blurry lines
+			x += 0.5;
+			y += 0.5;
+		}
 		if (style.fillStyle) {
 			ctx.fillStyle = style.fillStyle;
 			api.roundedRect(ctx, x, y, w, h, r);
 			ctx.fill();
 		}
-		ctx.strokeStyle = style.strokeStyle;
-		ctx.lineWidth = style.lineWidth;
-		api.roundedRect(ctx, x, y, w, h, r);
-		ctx.stroke();
+		if (util.isBorderVisible({width: style.lineWidth, color: style.strokeStyle})) {
+			ctx.strokeStyle = style.strokeStyle;
+			ctx.lineWidth = style.lineWidth;
+			api.roundedRect(ctx, x, y, w, h, r);
+			ctx.stroke();
+		}
 		ctx.restore();
 	},
 
 	roundedRect(ctx, x, y, w, h, r) {
+		// TODO: this looks bad if border line width is thick; make 'r' define inner curve, not the middle of the curve
 		ctx.beginPath();
 		ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
 		ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);

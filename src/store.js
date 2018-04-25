@@ -548,7 +548,7 @@ const store = {
 				}, parent: opts.parent});
 
 				opts.properties = opts.properties || {};
-				Object.entries(opts.properties).forEach(([k, v]) => (annotation[k] = v));  // Copy passed in props to annotation
+				util.copy(annotation, opts.properties);
 
 				// Guarantee some nice defaults
 				if (annotation.annotationType === 'label') {
@@ -940,6 +940,10 @@ const store = {
 				callout.steps.forEach(s => {
 					store.get.step(s).model = templateModel;
 				});
+			},
+			set(opts) {  // opts: {entry, value}
+				const entry = util.get(opts.entry, store.state.template);
+				util.copy(entry, opts.value);
 			}
 		},
 		renumber(itemList) {
