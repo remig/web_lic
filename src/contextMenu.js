@@ -14,10 +14,8 @@ let app;
 const contextMenu = {
 	templatePage: {
 		templatePage: [
-			{
-				text: 'Set Border... (NYI)',
-				cb() {}
-			}
+			{text: 'Set Border...', cb: setBorder('page')},
+			{text: 'Set Fill...', cb: setFill('page')}
 		],
 		step: [
 		],

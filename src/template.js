@@ -13,9 +13,12 @@ const template = {
 			width: 2,
 			color: 'black'
 		},
+		fill: {
+			color: 'white'
+		},
 		border: {
 			width: 0,
-			color: null,
+			color: 'black',
 			cornerRadius: 0
 		}
 	},

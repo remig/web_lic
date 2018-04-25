@@ -8,19 +8,28 @@ const api = {
 
 	page(page, canvas, scale = 1, selectedPart) {
 
-		const template = store.state.template.page;
 		if (page.needsLayout) {
 			store.mutations.page.layout({page});
 		}
 
-		const pageSize = store.state.template.page;
 		const ctx = canvas.getContext('2d');
 		ctx.save();
 		if (scale > 1) {
 			ctx.scale(scale, scale);
 		}
-		ctx.fillStyle = 'white';
-		ctx.fillRect(0, 0, pageSize.width, pageSize.height);
+
+		const template = store.state.template.page;
+		const rectStyle = {
+			strokeStyle: template.border.color,
+			lineWidth: template.border.width * 2
+		};
+		ctx.fillStyle = template.fill.color;
+		ctx.fillRect(0, 0, template.width, template.height);
+
+		api.roundedRectStyled(
+			ctx, 0, 0, template.width, template.height,
+			template.border.cornerRadius * 2, rectStyle
+		);
 
 		page.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 
