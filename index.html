@@ -124,8 +124,8 @@
 						<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="step" />
 					</li>
 				</template>
-				<li v-if="target.submodelImageID != null">
-					<treeRow :currentItem="currentItem" :target="treeData.store.get.submodelImage(target.submodelImageID)" :selectionCallback="treeData.selectionCallback" />
+				<li v-if="target.submodelImageID != null" class="unindent">
+					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.submodelImage(target.submodelImageID)" />
 				</li>
 				<li v-if="target.csiID != null">
 					<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(target.csiID)" :selectionCallback="treeData.selectionCallback" />
@@ -138,8 +138,11 @@
 						<treeRow :currentItem="currentItem" :target="pliItem" :selectionCallback="treeData.selectionCallback" />
 					</li>
 				</template>
+				<li v-if="target.quantityLabelID != null">
+					<treeRow :currentItem="currentItem" :target="treeData.store.get.quantityLabel(target.quantityLabelID)" :selectionCallback="treeData.selectionCallback" />
+				</li>
 				<template v-if="target.callouts != null">
-					<li v-for="calloutID in target.callouts">
+					<li v-for="calloutID in target.callouts" class="unindent">
 						<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.callout(calloutID)" />
 					</li>
 				</template>

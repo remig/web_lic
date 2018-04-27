@@ -17,6 +17,8 @@ Vue.component('menu-list', {
 		triggerMenu(entry, e) {
 			if (entry.children) {
 				this.toggleSubMenu(e);
+			} else if (typeof entry.cb === 'string') {
+				app[entry.cb]();
 			} else {
 				entry.cb(this.selectedItem);
 			}
@@ -73,26 +75,22 @@ const menu = [
 			text: 'Open Lic File...',
 			id: 'open',
 			cb() {
-				app.openFileChooser('.lic', app.triggerOpenFile);
+				app.openFileChooser('.lic', app.triggerOpenLicFile);
 			}
 		},
 		{text: 'Open Recent (NYI)', enabled: () => false, cb: () => {}},
-		{text: 'separator'},
 		{
 			text: 'Close',
 			enabled: enableIfModel,
-			cb() {
-				app.closeModel();
-			}
+			cb: 'closeModel'
 		},
 		{
 			text: 'Save',
 			shortcut: 'ctrl+s',
 			enabled: enableIfModel,
-			cb() {
-				app.save();
-			}
+			cb: 'save'
 		},
+		{text: 'separator'},
 		{
 			text: 'Import Custom Model...',
 			cb() {
@@ -129,10 +127,32 @@ const menu = [
 			]
 		},
 		{text: 'separator'},
-		{text: 'Save Template (NYI)', enabled: () => false, cb() {}},
-		{text: 'Save Template As... (NYI)', enabled: () => false, cb() {}},
-		{text: 'Load Template (NYI)', enabled: () => false, cb() {}},
-		{text: 'Reset Template (NYI)', enabled: () => false, cb() {}},
+		{
+			text: 'Template',
+			enabled: enableIfModel,
+			children: [
+				{
+					text: 'Save',
+					cb() {
+						store.save('file', 'template', '\t');
+					}
+				},
+				{
+					text: 'Load',
+					cb() {
+						app.openFileChooser('.lit', app.triggerTemplateImport);
+					}
+				},
+				{text: 'Load Built-in (NYI)', enabled: false, cb() {}},
+				{
+					text: 'Reset',
+					cb() {
+						undoStack.commit('templatePage.reset', null, 'Reset Template');
+						app.redrawUI(true);
+					}
+				}
+			]
+		},
 		{text: 'separator'},
 		{
 			text: 'Clear Local Cache',
@@ -146,7 +166,7 @@ const menu = [
 			id: 'undo',
 			text: () => 'Undo ' + undoStack.undoText(),
 			shortcut: 'ctrl+z',
-			enabled: () => undoStack.isUndoAvailable(),
+			enabled: undoStack.isUndoAvailable,
 			cb() {
 				if (undoStack.isUndoAvailable()) {
 					undoStack.undo();
@@ -158,7 +178,7 @@ const menu = [
 			id: 'redo',
 			text: () => 'Redo ' + undoStack.redoText(),
 			shortcut: 'ctrl+y',
-			enabled: () => undoStack.isRedoAvailable(),
+			enabled: undoStack.isRedoAvailable,
 			cb() {
 				if (undoStack.isRedoAvailable()) {
 					undoStack.redo();

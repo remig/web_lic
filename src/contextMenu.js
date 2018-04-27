@@ -27,9 +27,16 @@ const contextMenu = {
 						{text: 'Set Color...', cb: setColor('page', 'numberLabel')}
 					];
 				case 'step':
-					return [
-						{text: 'Set Color...', cb: setColor('step', 'numberLabel')}
-					];
+					switch (store.get.parent(parent).type) {
+						case 'templatePage':
+							return [
+								{text: 'Set Color...', cb: setColor('step', 'numberLabel')}
+							];
+						case 'callout':
+							return [
+								{text: 'Set Color...', cb: setColor('callout.step', 'numberLabel')}
+							];
+					}
 			}
 			return [];
 		},
@@ -52,26 +59,41 @@ const contextMenu = {
 			{text: 'Set Fill...', cb: setColor('pli')}
 		],
 		pliItem: [],
-		pliQtys: [
-			{
-				text: 'Set Font... (NYI)',
-				cb() {}
+		quantityLabel(selectedItem) {
+			const parent = store.get.parent(selectedItem);
+			switch (parent.type) {
+				case 'submodelImage':
+					return [
+						{text: 'Set Font... (NYI)', cb() {}},
+						{text: 'Set Color...', cb: setColor('submodelImage', 'quantityLabel')}
+					];
+				case 'pliItem':
+					return [
+						{text: 'Set Font... (NYI)', cb() {}},
+						{text: 'Set Color...', cb: setColor('pliItem', 'quantityLabel')}
+					];
 			}
-		],
+			return [];
+		},
 		callout: [
 			{text: 'Set Border...', cb: setBorder('callout')},
 			{text: 'Set Fill...', cb: setColor('callout')}
 		],
 		calloutArrow: [
+			{text: 'Set Line Style...', cb: setBorder('callout.arrow')}
 		],
 		rotateIcon: [
 			{text: 'Set Border...', cb: setBorder('rotateIcon')},
 			{text: 'Set Fill...', cb: setColor('rotateIcon')},
-			{text: 'Set Arrow Style...', cb: setBorder('rotateIcon.arrow', true)}
+			{text: 'Set Arrow Style...', cb: setBorder('rotateIcon.arrow')}
+		],
+		divider: [
+			{text: 'Set Line Style...', cb: setBorder('page.divider')}
 		]
 	},
 	page: [
 		{
+			// TODO: concatenate parent -> child text so it comes out 'Layout Vertical' and not 'Vertical'
 			text: 'Layout',
 			children: [
 				{
@@ -540,7 +562,7 @@ const contextMenu = {
 		{text: 'Rotate PLI Part (NYI)', cb: () => {}},
 		{text: 'Scale PLI Part (NYI)', cb: () => {}}
 	],
-	pliQty: [],
+	quantityLabel: [],
 	annotation: [
 		{
 			text: 'Set',
@@ -676,6 +698,7 @@ const contextMenu = {
 			})
 		}
 	],
+	divider: [],
 	part: [
 		{
 			text: 'Displace Part...',
@@ -898,10 +921,11 @@ function setColor(templateEntry, colorType = 'fill') {
 	};
 }
 
-function setBorder(templateEntry, ignoreCornerRadius) {
+function setBorder(templateEntry) {
 	return function() {
 		const border = util.get(templateEntry, store.state.template).border;
 		const originalBorder = util.clone(border);
+		const ignoreCornerRadius = !border.hasOwnProperty('cornerRadius');
 
 		app.currentDialog = 'borderDialog';
 		app.clearSelected();

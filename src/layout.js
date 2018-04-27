@@ -90,14 +90,14 @@ const api = {
 			pliItem.height = pliSize.height;
 
 			const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
-			const pliQty = store.get.pliQty(pliItem.pliQtyID);
-			pliQty.x = -qtyLabelOffset;
-			pliQty.y = pliSize.height - qtyLabelOffset;
-			pliQty.width = lblSize.width;
-			pliQty.height = lblSize.height;
+			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+			quantityLabel.x = -qtyLabelOffset;
+			quantityLabel.y = pliSize.height - qtyLabelOffset;
+			quantityLabel.width = lblSize.width;
+			quantityLabel.height = lblSize.height;
 
 			left += pliSize.width + pliMargin;
-			maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + pliQty.height);
+			maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + quantityLabel.height);
 		}
 
 		pli.x = pli.y = 0;
@@ -113,8 +113,8 @@ const api = {
 		submodelImage.width = pliMargin + pliSize.width + pliMargin;
 		submodelImage.height = pliMargin + pliSize.height + pliMargin;
 
-		if (submodelImage.pliQtyID != null) {
-			const lbl = store.get.pliQty(submodelImage.pliQtyID);
+		if (submodelImage.quantityLabelID != null) {
+			const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
 			const font = store.state.template.submodelImage.quantityLabel.font;
 			const lblSize = util.measureLabel(font, 'x' + submodelImage.quantity);
 			submodelImage.width += lblSize.width + pliMargin;
@@ -219,19 +219,19 @@ const api = {
 
 		if (layoutDirection === 'horizontal') {
 			for (let i = 1; i < rows; i++) {
-				store.mutations.item.add({item: {
-					type: 'divider',
+				store.mutations.divider.add({
+					parent: page,
 					p1: {x: pageMargin, y: rowSize * i},
 					p2: {x: pageSize.width - pageMargin, y: rowSize * i}
-				}, parent: page});
+				});
 			}
 		} else {
 			for (let i = 1; i < cols; i++) {
-				store.mutations.item.add({item: {
-					type: 'divider',
+				store.mutations.divider.add({
+					parent: page,
 					p1: {x: colSize * i, y: pageMargin},
 					p2: {x: colSize * i, y: pageSize.height - pageMargin}
-				}, parent: page});
+				});
 			}
 		}
 	},

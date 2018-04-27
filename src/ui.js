@@ -111,6 +111,9 @@ const app = new Vue({
 		},
 		openLicFile(content) {
 			const start = Date.now();
+			if (store.model) {
+				this.closeModel();
+			}
 			store.load(content);
 			this.filename = store.model.filename;
 			this.pageSize.width = store.state.template.page.width;
@@ -132,28 +135,40 @@ const app = new Vue({
 			this.dirtyState.lastSaveIndex = undoStack.getIndex();
 		},
 		triggerModelImport(e) {
-			const reader = new FileReader();
-			reader.onload = (filename => {
-				return e => {
-					this.importLocalModel(e.target.result, filename);
-				};
-			})(e.target.files[0].name);
-			reader.readAsText(e.target.files[0]);
-			e.target.value = '';
+			this.openFile(e, (result, filename) => {
+				this.importLocalModel(result, filename);
+			});
 		},
-		triggerOpenFile(e) {
-			const reader = new FileReader();
-			reader.onload = e => {
-				this.openLicFile(JSON.parse(e.target.result));
-			};
-			reader.readAsText(e.target.files[0]);
-			e.target.value = '';
+		triggerTemplateImport(e) {
+			this.openFile(e, (result, filename) => {
+				undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template');
+				this.statusText = `"${filename}" template openend successfully`;
+				Vue.nextTick(() => {
+					this.drawCurrentPage();
+					this.forceUIUpdate();
+				});
+			});
+		},
+		triggerOpenLicFile(e) {
+			this.openFile(e, result => {
+				this.openLicFile(JSON.parse(result));
+			});
 		},
 		openFileChooser(accept, callback) {
 			var input = document.getElementById('openFileChooser');
 			input.onchange = callback;
 			input.setAttribute('accept', accept);
 			input.click();
+		},
+		openFile(e, cb) {
+			const reader = new FileReader();
+			reader.onload = (filename => {
+				return e => {
+					cb(e.target.result, filename);
+				};
+			})(e.target.files[0].name);
+			reader.readAsText(e.target.files[0]);
+			e.target.value = '';
 		},
 		closeModel() {
 			store.model = null;
@@ -290,6 +305,12 @@ const app = new Vue({
 			if (step.submodelImageID != null) {
 				const submodelImage = store.get.submodelImage(step.submodelImageID);
 				if (this.inBox(mx, my, submodelImage)) {
+					if (submodelImage.quantityLabelID != null) {
+						const quantityLabel = store.get.quantityLabel(submodelImage.quantityLabelID);
+						if (this.inBox(mx, my, quantityLabel)) {
+							return quantityLabel;
+						}
+					}
 					return submodelImage;
 				}
 			}
@@ -300,9 +321,9 @@ const app = new Vue({
 					if (this.inBox(mx, my, pliItem)) {
 						return pliItem;
 					}
-					const pliQty = store.get.pliQty(pliItem.pliQtyID);
-					if (this.inBox(mx, my, pliQty)) {
-						return pliQty;
+					const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+					if (this.inBox(mx, my, quantityLabel)) {
+						return quantityLabel;
 					}
 				}
 				if (this.inBox(mx, my, pli)) {
@@ -363,6 +384,15 @@ const app = new Vue({
 					}
 				}
 			}
+			for (let i = 0; i < page.dividers.length; i++) {
+				const divider = store.get.divider(page.dividers[i]);
+
+				let box = util.geom.bbox([divider.p1, divider.p2]);
+				box = util.geom.expandBox(box, 8, 8);
+				if (this.inBox(mx, my, {...divider, ...box})) {
+					return divider;
+				}
+			}
 			for (let i = 0; i < page.steps.length; i++) {
 				const step = store.get.step(page.steps[i]);
 				const innerTarget = this.findClickTargetInStep(mx, my, step);
@@ -374,10 +404,15 @@ const app = new Vue({
 		},
 		isMoveable: (() => {
 			const moveableItems = [
-				'step', 'csi', 'pli', 'pliItem', 'pliQty', 'numberLabel', 'annotation',
+				'step', 'csi', 'pli', 'pliItem', 'quantityLabel', 'numberLabel', 'annotation',
 				'submodelImage', 'callout', 'point', 'rotateIcon'
 			];
-			return nodeType => moveableItems.includes(nodeType);
+			return item => {
+				if (store.get.isTemplatePage(store.get.pageForItem(item))) {
+					return false;
+				}
+				return moveableItems.includes(item.type);
+			};
 		})(),
 		globalClick(e) {
 			this.closeContextMenu();
@@ -431,7 +466,7 @@ const app = new Vue({
 				if (prevPage) {
 					this.setCurrentPage(prevPage);
 				}
-			} else if (selItem && e.key.startsWith('Arrow') && this.isMoveable(selItem.type)) {
+			} else if (selItem && e.key.startsWith('Arrow') && this.isMoveable(selItem)) {
 				let dx = 0, dy = 0, dv = 5;
 				if (e.shiftKey) {
 					dv *= 2;
@@ -568,8 +603,13 @@ const app = new Vue({
 			if (type === 'page' || type === 'titlePage' || type === 'templatePage') {
 				box = {x: 0, y: 0, width: store.state.template.page.width, height: store.state.template.page.height};
 			} else if (type === 'calloutArrow') {
+				// TODO: store arrow / divider / stuff with points bounding box in item itself at layout time, then use it like any other target
 				const points = store.get.calloutArrowToPoints(selItem);
 				let pointBox = util.geom.bbox(points);
+				pointBox = util.geom.expandBox(pointBox, 8, 8);
+				box = this.targetBox({...selItem, ...pointBox});
+			} else if (type === 'divider') {
+				let pointBox = util.geom.bbox([selItem.p1, selItem.p2]);
 				pointBox = util.geom.expandBox(pointBox, 8, 8);
 				box = this.targetBox({...selItem, ...pointBox});
 			} else {

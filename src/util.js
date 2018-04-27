@@ -251,8 +251,8 @@ const api = {
 				return 'PLI';
 			case 'pliitem':
 				return 'PLI Item';
-			case 'pliqty':
-				return 'PLI Quantity Label';
+			case 'quantitylabel':
+				return 'Quantity Label';
 			case 'numberlabel':
 				return 'Number Label';
 		}

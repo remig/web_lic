@@ -4,13 +4,13 @@
 const util = require('./util');
 const LDParse = require('./LDParse');
 const LDRender = require('./LDRender');
-const template = require('./template.js');
+const defaultTemplate = require('./template.js');
 
 // Load this later, to avoid circular import issues (layout.js is just code that belongs in store moved to a dedicated file)
 let Layout;  // eslint-disable-line prefer-const
 
 const emptyState = {
-	template: template,
+	template: util.clone(defaultTemplate),
 	templatePage: null,
 	titlePage: null,
 	plisVisible: true,
@@ -20,7 +20,7 @@ const emptyState = {
 	csis: [],
 	plis: [],
 	pliItems: [],
-	pliQtys: [],  // TODO: rename this to more generic 'quantityLabel', useful in multiple spots (pliItem, submodelImage, steps, etc)
+	quantityLabels: [],
 	numberLabels: [],
 	submodelImages: [],
 	annotations: [],
@@ -52,17 +52,23 @@ const store = {
 		LDRender.setPartDictionary(content.partDictionary);
 		store.replaceState(content.state);
 	},
-	save(mode) {  // mode is either 'file' or 'localStorage'
-		const content = JSON.stringify({
-			partDictionary: LDParse.partDictionary,
-			colorTable: LDParse.colorTable,
-			model: store.model,
-			state: store.state
-		});
+	save(mode, target = 'state', jsonIndent) {  // mode is either 'file' or 'localStorage', target is either 'state' or 'template'
+		let content;
+		if (target === 'template') {
+			content = {template: store.state.template};
+		} else {
+			content = {
+				partDictionary: LDParse.partDictionary,
+				colorTable: LDParse.colorTable,
+				model: store.model,
+				state: store.state
+			};
+		}
+		content = JSON.stringify(content, null, jsonIndent);
 		if (mode === 'file') {
 			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
-			saveAs(blob, store.get.modelFilenameBase('.lic'));
-		} else if (mode === 'localStorage') {
+			saveAs(blob, store.get.modelFilenameBase((target === 'template') ? '.lit' : '.lic'));
+		} else if (mode === 'localStorage' && target !== 'template') {
 			console.log('Updating localStorage');
 			window.localStorage.setItem('lic_state', content);
 		}
@@ -523,14 +529,14 @@ const store = {
 		submodelImage: {
 			add(opts) {  // opts: {parent, submodel, quantity}
 				const item = store.mutations.item.add({item: {
-					type: 'submodelImage', pliQtyID: null,
+					type: 'submodelImage', quantityLabelID: null,
 					submodel: opts.submodel, quantity: opts.quantity || 1,
 					x: null, y: null, width: null, height: null, contentX: null, contentY: null
 				}, parent: opts.parent});
 
 				if (opts.quantity > 1) {
 					store.mutations.item.add({item: {
-						type: 'pliQty',
+						type: 'quantityLabel',
 						align: 'right', valign: 'bottom',
 						x: null, y: null, width: null, height: null
 					}, parent: item});
@@ -833,6 +839,16 @@ const store = {
 				Layout.page(page, opts.layout || page.layout);
 			}
 		},
+		divider: {
+			add(opts) {  // opts: {parent, p1, p2}
+				return store.mutations.item.add({item: {
+					type: 'divider', p1: opts.p1, p2: opts.p2
+				}, parent: opts.parent});
+			},
+			delete(opts) {  // opts: {divider}
+				store.mutations.item.delete({item: opts.divider});
+			}
+		},
 		pli: {
 			add(opts) {  // opts: {parent}
 				return store.mutations.item.add({item: {
@@ -863,12 +879,12 @@ const store = {
 					filename: opts.filename,
 					partNumbers: opts.partNumbers,
 					colorCode: opts.colorCode,
-					quantity: 1, pliQtyID: null,
+					quantity: 1, quantityLabelID: null,
 					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
 
 				store.mutations.item.add({item: {
-					type: 'pliQty',
+					type: 'quantityLabel',
 					align: 'left', valign: 'top',
 					x: null, y: null, width: null, height: null
 				}, parent: pliItem});
@@ -877,12 +893,12 @@ const store = {
 			},
 			delete(opts) {  // opts: {pliItem}
 				const pliItem = store.get.lookupToItem(opts.pliItem);
-				store.mutations.item.delete({item: {type: 'pliQty', id: pliItem.pliQtyID}});
+				store.mutations.item.delete({item: {type: 'quantityLabel', id: pliItem.quantityLabelID}});
 				store.mutations.item.delete({item: pliItem});
 			}
 		},
 		templatePage: {
-			add() {
+			async add() {
 				const part1 = {
 					colorCode: 1, filename: '3001.dat',
 					matrix: [0, 0, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0]
@@ -901,10 +917,10 @@ const store = {
 					LDParse.partDictionary['templateModel.ldr'] = templateModel;
 				}
 				if (!(part1.filename in LDParse.partDictionary)) {
-					LDParse.loadRemotePart(part1.filename);
+					await LDParse.loadRemotePart(part1.filename);
 				}
 				if (!(part2.filename in LDParse.partDictionary)) {
-					LDParse.loadRemotePart(part2.filename);
+					await LDParse.loadRemotePart(part2.filename);
 				}
 				const page = store.state.templatePage = store.mutations.page.add(
 					{pageType: 'templatePage', pageNumber: 0}
@@ -940,10 +956,28 @@ const store = {
 				callout.steps.forEach(s => {
 					store.get.step(s).model = templateModel;
 				});
+
+				store.mutations.page.layout({page});
+
+				const pageHeight = store.state.template.page.height;
+				const pageMargin = 20;
+				const csi = store.get.csi(step.csiID);
+				const x = csi.x + csi.width + (pageMargin * 5);
+				store.mutations.divider.add({
+					parent: page,
+					p1: {x, y: pageMargin},
+					p2: {x, y: pageHeight - pageMargin}
+				});
 			},
 			set(opts) {  // opts: {entry, value}
 				const entry = util.get(opts.entry, store.state.template);
 				util.copy(entry, opts.value);
+			},
+			load(opts) {  // opts: {template}
+				store.state.template = opts.template;
+			},
+			reset() {
+				store.state.template = util.clone(defaultTemplate);
 			}
 		},
 		renumber(itemList) {

@@ -9,9 +9,11 @@ const template = {
 			color: 'black',
 			position: 'right'  // One of "right', "left", "even-right", "even-left"
 		},
-		dividers: {
-			width: 2,
-			color: 'black'
+		divider: {
+			border: {
+				width: 2,
+				color: 'black'
+			}
 		},
 		fill: {
 			color: 'white'
@@ -80,8 +82,16 @@ const template = {
 			cornerRadius: 10
 		},
 		arrow: {
-			width: 2,
-			color: 'black'
+			border: {
+				width: 2,
+				color: 'black'
+			}
+		},
+		step: {
+			numberLabel: {
+				font: 'bold 20pt Helvetica',
+				color: 'black'
+			}
 		}
 	},
 	rotateIcon: {

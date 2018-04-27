@@ -35,8 +35,8 @@ const api = {
 
 		(page.dividers || []).forEach(id => {
 			const divider = store.get.divider(id);
-			ctx.strokeStyle = template.dividers.color;
-			ctx.lineWidth = template.dividers.width;
+			ctx.strokeStyle = template.divider.border.color;
+			ctx.lineWidth = template.divider.border.width;
 			ctx.beginPath();
 			ctx.moveTo(divider.p1.x, divider.p1.y);
 			ctx.lineTo(divider.p2.x, divider.p2.y);
@@ -109,9 +109,11 @@ const api = {
 		}
 
 		if (step.numberLabelID != null) {
+			let template = store.state.template;
+			template = (step.parent.type === 'callout') ? template.callout.step : template.step;
 			const lbl = store.get.numberLabel(step.numberLabelID);
-			ctx.fillStyle = store.state.template.step.numberLabel.color;
-			ctx.font = store.state.template.step.numberLabel.font;
+			ctx.fillStyle = template.numberLabel.color;
+			ctx.font = template.numberLabel.font;
 			ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
 		}
 
@@ -143,9 +145,9 @@ const api = {
 		ctx.drawImage(siCanvas, x, y);
 		ctx.restore();
 
-		if (si.pliQtyID != null) {
+		if (si.quantityLabelID != null) {
 			ctx.save();
-			const lbl = store.get.pliQty(si.pliQtyID);
+			const lbl = store.get.quantityLabel(si.quantityLabelID);
 			ctx.fillStyle = template.quantityLabel.color;
 			ctx.font = template.quantityLabel.font;
 			ctx.textAlign = lbl.align || 'start';
@@ -203,18 +205,27 @@ const api = {
 
 		pli.pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
-			const pliQty = store.get.pliQty(pliItem.pliQtyID);
+			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 			ctx.fillStyle = template.pliItem.quantityLabel.color;
 			ctx.font = template.pliItem.quantityLabel.font;
 			ctx.fillText(
 				'x' + pliItem.quantity,
-				pli.x + pliItem.x + pliQty.x,
-				pli.y + pliItem.y + pliQty.y + pliQty.height
+				pli.x + pliItem.x + quantityLabel.x,
+				pli.y + pliItem.y + quantityLabel.y + quantityLabel.height
 			);
 		});
 	},
 
 	callout(callout, ctx, scale = 1, selectedPart) {
+		function offset({x, y}, lineWidth) {
+			x = Math.floor(x);
+			y = Math.floor(y);
+			if (lineWidth % 2) {  // Avoid half-pixel offset blurry lines
+				x += 0.5;
+				y += 0.5;
+			}
+			return {x, y};
+		}
 		const template = store.state.template.callout;
 		callout = store.get.callout(callout);
 		ctx.save();
@@ -229,20 +240,22 @@ const api = {
 
 		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 
-		ctx.strokeStyle = template.arrow.color;
-		ctx.fillStyle = template.arrow.color;
-		ctx.lineWidth = template.arrow.width;
+		ctx.strokeStyle = template.arrow.border.color;
+		ctx.fillStyle = template.arrow.border.color;
+		ctx.lineWidth = template.arrow.border.width;
 		(callout.calloutArrows || []).forEach(arrowID => {
 			const arrow = store.get.calloutArrow(arrowID);
 			const arrowPoints = store.get.calloutArrowToPoints(arrow);
+			const pt = offset(arrowPoints[0], template.arrow.border.width);
 			ctx.beginPath();
-			ctx.moveTo(arrowPoints[0].x, arrowPoints[0].y);
+			ctx.moveTo(pt.x, pt.y);
 			arrowPoints.slice(1, -1).forEach(pt => {
+				pt = offset(pt, template.arrow.border.width);
 				ctx.lineTo(pt.x, pt.y);
 			});
 			ctx.stroke();
 			ctx.fillStyle = template.arrow.color;
-			const tip = arrowPoints[arrowPoints.length - 1];
+			const tip = offset(arrowPoints[arrowPoints.length - 1], template.arrow.border.width);
 			api.arrowHead(ctx, tip.x, tip.y, arrow.direction);
 			ctx.fill();
 		});
@@ -269,9 +282,14 @@ const api = {
 			ctx.fill();
 		}
 
-		api.roundedRect(ctx, 0, 0, 100, 94, 15);
-		ctx.restore();
-		ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
+		const haveBorder = util.isBorderVisible(template.border);
+		if (haveBorder) {
+			api.roundedRect(ctx, 0, 0, 100, 94, 15);
+		}
+		ctx.restore();  // TODO: figure out how to preserve stroke width across transforms
+		if (haveBorder) {
+			ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
+		}
 
 		ctx.fillStyle = ctx.strokeStyle = template.arrow.border.color;
 		ctx.lineWidth = template.arrow.border.width;
@@ -310,7 +328,7 @@ const api = {
 		return function(ctx, tipX, tipY, rotation, scale) {
 			const head = arrowDimensions.head, bodyWidth = 1.25;
 			ctx.save();
-			ctx.translate(Math.floor(tipX), Math.floor(tipY));
+			ctx.translate(tipX, tipY);
 			if (rotation in presetAngles) {
 				ctx.rotate(util.radians(presetAngles[rotation]));
 			} else if (typeof rotation === 'number') {
