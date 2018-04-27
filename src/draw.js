@@ -114,7 +114,9 @@ const api = {
 			const lbl = store.get.numberLabel(step.numberLabelID);
 			ctx.fillStyle = template.numberLabel.color;
 			ctx.font = template.numberLabel.font;
-			ctx.fillText(step.number + '', lbl.x, lbl.y + lbl.height);
+			ctx.textAlign = lbl.align || 'start';
+			ctx.textBaseline = lbl.valign || 'alphabetic';
+			ctx.fillText(step.number + '', lbl.x, lbl.y);
 		}
 
 		if (step.rotateIconID != null) {
@@ -286,7 +288,7 @@ const api = {
 		if (haveBorder) {
 			api.roundedRect(ctx, 0, 0, 100, 94, 15);
 		}
-		ctx.restore();  // TODO: figure out how to preserve stroke width across transforms
+		ctx.restore();
 		if (haveBorder) {
 			ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
 		}
@@ -354,26 +356,30 @@ const api = {
 
 	roundedRectStyled(ctx, x, y, w, h, r, style) {
 		ctx.save();
-		if (style.lineWidth % 2) {  // Avoid half-pixel offset blurry lines
-			x += 0.5;
-			y += 0.5;
-		}
 		if (style.fillStyle) {
 			ctx.fillStyle = style.fillStyle;
-			api.roundedRect(ctx, x, y, w, h, r);
+			api.roundedRect(ctx, x, y, w, h, r, style.lineWidth);
 			ctx.fill();
 		}
 		if (util.isBorderVisible({width: style.lineWidth, color: style.strokeStyle})) {
 			ctx.strokeStyle = style.strokeStyle;
 			ctx.lineWidth = style.lineWidth;
-			api.roundedRect(ctx, x, y, w, h, r);
+			api.roundedRect(ctx, x, y, w, h, r, style.lineWidth);
 			ctx.stroke();
 		}
 		ctx.restore();
 	},
 
-	roundedRect(ctx, x, y, w, h, r) {
+	roundedRect(ctx, x, y, w, h, r, lineWidth) {
 		// TODO: this looks bad if border line width is thick; make 'r' define inner curve, not the middle of the curve
+		x = Math.floor(x);
+		y = Math.floor(y);
+		w = Math.floor(w);
+		h = Math.floor(h);
+		if (lineWidth % 2) {  // Avoid half-pixel offset blurry lines
+			x += 0.5;
+			y += 0.5;
+		}
 		ctx.beginPath();
 		ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
 		ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);

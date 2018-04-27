@@ -4,10 +4,6 @@ const util = require('./util');
 const LDParse = require('./LDParse');
 const store = require('./store');
 
-// These will end up in the template page, when we have one
-const pageMargin = 20;
-const pliMargin = Math.floor(pageMargin / 1.2);
-const calloutMargin = Math.floor(pliMargin / 2);
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
 
@@ -16,6 +12,7 @@ const api = {
 	callout(callout) {
 		const step = store.get.step(callout.parent.id);
 		const csi = store.get.csi(step.csiID);
+		const margin = getMargin(store.state.template.callout.innerMargin);
 
 		if (util.isEmpty(callout.steps)) {
 			callout.width = callout.height = emptyCalloutSize;
@@ -24,18 +21,18 @@ const api = {
 			callout.height = 0;
 			callout.steps.forEach(stepID => {
 				const step = store.get.step(stepID);
-				api.step.insideOut(step, calloutMargin);
-				step.x = calloutMargin;
-				step.y = calloutMargin + totalHeight;
+				api.step.insideOut(step, margin);
+				step.x = margin;
+				step.y = margin + totalHeight;
 				totalHeight = step.y + step.height;
 				maxWidth = Math.max(maxWidth, step.width);
 			});
 			callout.steps.forEach(stepID => {
 				const step = store.get.step(stepID);
-				step.x = calloutMargin + ((maxWidth - step.width) / 2);
+				step.x = margin + ((maxWidth - step.width) / 2);
 			});
-			callout.width = calloutMargin + maxWidth + calloutMargin;
-			callout.height = calloutMargin + totalHeight;
+			callout.width = margin + maxWidth + margin;
+			callout.height = margin + totalHeight;
 		}
 		callout.x = 10;
 		callout.y = csi.y - ((callout.height - csi.height) / 2);
@@ -77,7 +74,8 @@ const api = {
 		const step = store.get.step(pli.parent.id);
 		const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
 		const qtyLabelOffset = 5;
-		let maxHeight = 0, left = pliMargin + qtyLabelOffset;
+		const margin = getMargin(store.state.template.pli.innerMargin);
+		let maxHeight = 0, left = margin + qtyLabelOffset;
 
 		//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
 		for (let i = 0; i < pli.pliItems.length; i++) {
@@ -85,7 +83,7 @@ const api = {
 			const pliItem = store.get.pliItem(pli.pliItems[i]);
 			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]]);
 			pliItem.x = left;
-			pliItem.y = pliMargin;
+			pliItem.y = margin;
 			pliItem.width = pliSize.width;
 			pliItem.height = pliSize.height;
 
@@ -96,30 +94,31 @@ const api = {
 			quantityLabel.width = lblSize.width;
 			quantityLabel.height = lblSize.height;
 
-			left += pliSize.width + pliMargin;
+			left += pliSize.width + margin;
 			maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + quantityLabel.height);
 		}
 
 		pli.x = pli.y = 0;
 		pli.width = left;
-		pli.height = pliMargin + maxHeight + pliMargin;
+		pli.height = margin + maxHeight + margin;
 	},
 	submodelImage(submodelImage) {
 		const step = store.get.parent(submodelImage);
 		const part = LDParse.model.get.submodelDescendant(step.model || store.model, submodelImage.submodel);
 		const pliSize = store.render.pli(part);
+		const margin = getMargin(store.state.template.submodelImage.innerMargin);
 		submodelImage.x = submodelImage.y = 0;
-		submodelImage.contentX = submodelImage.contentY = pliMargin;
-		submodelImage.width = pliMargin + pliSize.width + pliMargin;
-		submodelImage.height = pliMargin + pliSize.height + pliMargin;
+		submodelImage.contentX = submodelImage.contentY = margin;
+		submodelImage.width = margin + pliSize.width + margin;
+		submodelImage.height = margin + pliSize.height + margin;
 
 		if (submodelImage.quantityLabelID != null) {
 			const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
 			const font = store.state.template.submodelImage.quantityLabel.font;
 			const lblSize = util.measureLabel(font, 'x' + submodelImage.quantity);
-			submodelImage.width += lblSize.width + pliMargin;
-			lbl.x = submodelImage.width - pliMargin;
-			lbl.y = submodelImage.height - pliMargin;
+			submodelImage.width += lblSize.width + margin;
+			lbl.x = submodelImage.width - margin;
+			lbl.y = submodelImage.height - margin;
 			lbl.width = lblSize.width;
 			lbl.height = lblSize.height;
 		}
@@ -129,6 +128,8 @@ const api = {
 
 			const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
 
+			const pageMargin = getMargin(store.state.template.page.innerMargin);
+			const innerMargin = getMargin(store.state.template.step.innerMargin);
 			step.x = box.x + pageMargin;
 			step.y = box.y + pageMargin;
 			step.width = box.width - pageMargin - pageMargin;
@@ -138,7 +139,7 @@ const api = {
 			if (submodelImage) {
 				api.submodelImage(submodelImage);
 			}
-			const submodelHeight = submodelImage ? submodelImage.height + pliMargin : 0;
+			const submodelHeight = submodelImage ? submodelImage.height + innerMargin : 0;
 
 			const pli = (step.pliID != null && store.state.plisVisible) ? store.get.pli(step.pliID) : null;
 			if (pli) {
@@ -164,7 +165,7 @@ const api = {
 				const lblSize = util.measureLabel(store.state.template.step.numberLabel.font, step.number);
 				const lbl = store.get.numberLabel(step.numberLabelID);
 				lbl.x = 0;
-				lbl.y = pliHeight ? pliHeight + pageMargin : 0;
+				lbl.y = pliHeight ? pliHeight + innerMargin : 0;
 				lbl.width = lblSize.width;
 				lbl.height = lblSize.height;
 			}
@@ -172,16 +173,16 @@ const api = {
 			if (step.rotateIconID != null && step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
 				const icon = store.get.rotateIcon(step.rotateIconID);
-				icon.width = 40;
+				icon.width = store.state.template.rotateIcon.size;
 				icon.height = icon.width * rotateIconAspectRatio;
-				icon.x = csi.x - icon.width - 20;
+				icon.x = csi.x - icon.width - innerMargin;
 				icon.y = csi.y - icon.height;
 			}
 		},
 		insideOut(step, margin) {
 			const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
 			const contentSize = {width: 0, height: 0};
-			margin = margin || pageMargin;
+			margin = margin || getMargin(store.state.template.page.innerMargin);
 
 			let lblSize = {width: 0, height: 0};
 			if (step.numberLabelID != null) {
@@ -216,21 +217,22 @@ const api = {
 		const pageSize = store.state.template.page;
 		const colSize = Math.floor(pageSize.width / cols);
 		const rowSize = Math.floor(pageSize.height / rows);
+		const margin = getMargin(store.state.template.page.innerMargin);
 
 		if (layoutDirection === 'horizontal') {
 			for (let i = 1; i < rows; i++) {
 				store.mutations.divider.add({
 					parent: page,
-					p1: {x: pageMargin, y: rowSize * i},
-					p2: {x: pageSize.width - pageMargin, y: rowSize * i}
+					p1: {x: margin, y: rowSize * i},
+					p2: {x: pageSize.width - margin, y: rowSize * i}
 				});
 			}
 		} else {
 			for (let i = 1; i < cols; i++) {
 				store.mutations.divider.add({
 					parent: page,
-					p1: {x: colSize * i, y: pageMargin},
-					p2: {x: colSize * i, y: pageSize.height - pageMargin}
+					p1: {x: colSize * i, y: margin},
+					p2: {x: colSize * i, y: pageSize.height - margin}
 				});
 			}
 		}
@@ -243,6 +245,7 @@ const api = {
 		}
 
 		const pageSize = store.state.template.page;
+		const margin = getMargin(store.state.template.page.innerMargin);
 		const stepCount = page.steps.length;
 		let cols = Math.ceil(Math.sqrt(stepCount));
 		let rows = Math.ceil(stepCount / cols);
@@ -284,8 +287,8 @@ const api = {
 		if (page.numberLabelID != null) {
 			const lblSize = util.measureLabel(store.state.template.page.numberLabel.font, page.number);
 			const lbl = store.get.numberLabel(page.numberLabelID);
-			lbl.x = pageSize.width - pageMargin;
-			lbl.y = pageSize.height - pageMargin;
+			lbl.x = pageSize.width - margin;
+			lbl.y = pageSize.height - margin;
 			lbl.width = lblSize.width;
 			lbl.height = lblSize.height;
 		}
@@ -352,7 +355,13 @@ const api = {
 	}
 };
 
+function getMargin(margin) {
+	const pageSize = store.state.template.page;
+	return margin * Math.max(pageSize.width, pageSize.height);
+}
+
 function alignStepContent(page) {
+	const margin = getMargin(store.state.template.step.innerMargin);
 	const steps = page.steps.map(stepID => store.get.step(stepID));
 	if (steps.length < 2 || typeof page.actualLayout !== 'object' || page.actualLayout.direction !== 'horizontal') {
 		return;  // only align step content across horizontally laid out pages with multiple steps
@@ -368,7 +377,7 @@ function alignStepContent(page) {
 			}
 			const lbl = store.get.numberLabel(step.numberLabelID);
 			if (lbl) {
-				lbl.y = tallestPLIHeight ? tallestPLIHeight + pageMargin : 0;
+				lbl.y = tallestPLIHeight ? tallestPLIHeight + margin : 0;
 			}
 		});
 	});

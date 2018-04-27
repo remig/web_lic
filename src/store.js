@@ -616,7 +616,7 @@ const store = {
 				if (opts.stepNumber != null) {
 					store.mutations.item.add({item: {
 						type: 'numberLabel',
-						align: 'left', valign: 'top',
+						align: 'left', valign: 'hanging',
 						x: null, y: null, width: null, height: null
 					}, parent: step});
 				}
@@ -916,6 +916,7 @@ const store = {
 				if (!('templateModel.ldr' in LDParse.partDictionary)) {
 					LDParse.partDictionary['templateModel.ldr'] = templateModel;
 				}
+				// TODO: inline these two parts so we don't need a remote call to load them
 				if (!(part1.filename in LDParse.partDictionary)) {
 					await LDParse.loadRemotePart(part1.filename);
 				}
@@ -959,14 +960,15 @@ const store = {
 
 				store.mutations.page.layout({page});
 
-				const pageHeight = store.state.template.page.height;
-				const pageMargin = 20;
+				const template = store.state.template.page;
+				const pageHeight = template.height;
+				const margin = template.innerMargin * Math.max(template.width, template.height);
 				const csi = store.get.csi(step.csiID);
-				const x = csi.x + csi.width + (pageMargin * 5);
+				const x = csi.x + csi.width + (margin * 5);
 				store.mutations.divider.add({
 					parent: page,
-					p1: {x, y: pageMargin},
-					p2: {x, y: pageHeight - pageMargin}
+					p1: {x, y: margin},
+					p2: {x, y: pageHeight - margin}
 				});
 			},
 			set(opts) {  // opts: {entry, value}

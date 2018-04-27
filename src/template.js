@@ -1,11 +1,13 @@
 'use strict';
 
+// All margins are decimal percentages of max(pageWidth, pageHeight)
 const template = {
 	page: {
 		width: 900,
 		height: 700,
+		innerMargin: 0.025,
 		numberLabel: {
-			font: 'bold 20pt Helvetica',
+			font: 'bold 18pt Helvetica',
 			color: 'black',
 			position: 'right'  // One of "right', "left", "even-right", "even-left"
 		},
@@ -25,12 +27,14 @@ const template = {
 		}
 	},
 	step: {
+		innerMargin: 0.02,
 		numberLabel: {
-			font: 'bold 20pt Helvetica',
+			font: 'bold 22pt Helvetica',
 			color: 'black'
 		}
 	},
 	submodelImage: {
+		innerMargin: 0.017,
 		csi: {
 			scale: 1,
 			rotation: null
@@ -44,7 +48,7 @@ const template = {
 			cornerRadius: 10
 		},
 		quantityLabel: {
-			font: 'bold 16pt Helvetica',
+			font: 'bold 18pt Helvetica',
 			color: 'black'
 		}
 	},
@@ -53,6 +57,7 @@ const template = {
 		rotation: null
 	},
 	pli: {
+		innerMargin: 0.017,
 		fill: {
 			color: null
 		},
@@ -73,6 +78,7 @@ const template = {
 		}
 	},
 	callout: {
+		innerMargin: 0.012,
 		fill: {
 			color: null
 		},
@@ -89,12 +95,13 @@ const template = {
 		},
 		step: {
 			numberLabel: {
-				font: 'bold 20pt Helvetica',
+				font: 'bold 18pt Helvetica',
 				color: 'black'
 			}
 		}
 	},
 	rotateIcon: {
+		size: 40,
 		fill: {
 			color: null
 		},
