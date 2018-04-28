@@ -957,19 +957,6 @@ const store = {
 				callout.steps.forEach(s => {
 					store.get.step(s).model = templateModel;
 				});
-
-				store.mutations.page.layout({page});
-
-				const template = store.state.template.page;
-				const pageHeight = template.height;
-				const margin = template.innerMargin * Math.max(template.width, template.height);
-				const csi = store.get.csi(step.csiID);
-				const x = csi.x + csi.width + (margin * 5);
-				store.mutations.divider.add({
-					parent: page,
-					p1: {x, y: margin},
-					p2: {x, y: pageHeight - margin}
-				});
 			},
 			set(opts) {  // opts: {entry, value}
 				const entry = util.get(opts.entry, store.state.template);

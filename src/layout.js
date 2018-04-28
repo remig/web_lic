@@ -208,11 +208,28 @@ const api = {
 			step.height = margin + lblSize.height + contentSize.height + margin;
 		}
 	},
+	templatePageDividers(page) {
+		const template = store.state.template.page;
+		const margin = getMargin(store.state.template.page.innerMargin);
+		const step = store.get.step(page.steps[0]);
+		const csi = store.get.csi(step.csiID);
+		const x = csi.x + csi.width + (margin * 5);
+		store.mutations.divider.add({
+			parent: page,
+			p1: {x, y: margin},
+			p2: {x, y: template.height - margin}
+		});
+	},
 	dividers(page, layoutDirection, rows, cols) {
 
-		// Delete any dividers already on the page, then re-add new ones in the right plaoces.
+		// Delete any dividers already on the page, then re-add new ones in the right places
 		page.dividers = page.dividers || [];
 		store.mutations.item.deleteChildList({item: page, listType: 'divider'});
+
+		if (page.type === 'templatePage') {
+			api.templatePageDividers(page);
+			return;
+		}
 
 		const pageSize = store.state.template.page;
 		const colSize = Math.floor(pageSize.width / cols);
