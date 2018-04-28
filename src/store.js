@@ -967,6 +967,18 @@ const store = {
 			},
 			reset() {
 				store.state.template = util.clone(defaultTemplate);
+			},
+			setPageSize(opts) {  // opts: {width, height}
+				store.state.template.page.width = opts.width;
+				store.state.template.page.height = opts.height;
+				store.state.templatePage.needsLayout = true;
+				if (store.state.titlePage) {
+					store.state.titlePage.needsLayout = true;
+				}
+				store.state.pages.forEach(p => {
+					p = store.get.lookupToItem(p);
+					p.needsLayout = true;
+				});
 			}
 		},
 		renumber(itemList) {

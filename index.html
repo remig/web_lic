@@ -190,7 +190,7 @@
 	</script>
 
 	<script type="text/x-template" id="importModelTemplate">
-		<baseDialog title="Import Model" okButtonText="Ok" cancelButtonText="">
+		<baseDialog title="Import Model" cancelButtonText="">
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
@@ -215,6 +215,25 @@
 						<label class="checkbox-inline">
 							<input v-model="includePLIs" id="includePLIsCheckbox" type="checkbox" value="" />Include PLIs in each Step
 						</label>
+					</div>
+				</form>
+			</div>
+		</baseDialog>
+	</script>
+
+	<script type="text/x-template" id="pageSizeTemplate">
+		<baseDialog title="Page Size">
+			<div slot="body" class="container-fluid">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="pageWidth">Width</label>
+						<div class="col-sm-3">
+							<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageWidth"/>
+						</div>
+						<label class="col-sm-2 control-label" for="pageHeight">Height</label>
+						<div class="col-sm-3">
+							<input v-model.number="height" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageHeight"/>
+						</div>
 					</div>
 				</form>
 			</div>

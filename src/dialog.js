@@ -53,6 +53,10 @@ const dialogs = {
 		includePartListPage: false,
 		includePLIs: false
 	},
+	pageSize: {
+		width: 900,
+		height: 700
+	},
 	partDisplacement: {
 		arrowOffset: 0,
 		partDistance: 60

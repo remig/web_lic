@@ -15,7 +15,36 @@ const contextMenu = {
 	templatePage: {
 		templatePage: [
 			{text: 'Set Border...', cb: setBorder('page')},
-			{text: 'Set Fill...', cb: setColor('page')}
+			{text: 'Set Fill...', cb: setColor('page')},
+			{
+				text: 'Set Page Size...',
+				cb() {
+					const originalPageSize = {
+						width: store.state.template.page.width,
+						height: store.state.template.page.height
+					};
+
+					app.currentDialog = 'pageSizeDialog';
+					app.clearSelected();
+
+					Vue.nextTick(() => {
+						const dialog = app.$refs.currentDialog;
+						dialog.$off();
+						dialog.$on('ok', newValues => {
+							undoStack.commit(
+								'templatePage.setPageSize',
+								{...newValues},
+								'Set Page Size'
+							);
+							app.redrawUI(true);
+						});
+						dialog.width = originalPageSize.width;
+						dialog.height = originalPageSize.height;
+						dialog.show({x: 400, y: 150});
+					});
+					app.redrawUI(true);
+				}
+			}
 		],
 		step: [
 		],
@@ -41,6 +70,7 @@ const contextMenu = {
 			return [];
 		},
 		submodelImage: [
+			// TODO: need to be able to select the CSI inside submodel image
 			{text: 'Set Border...', cb: setBorder('submodelImage')},
 			{text: 'Set Fill...', cb: setColor('submodelImage')}
 		],
@@ -128,7 +158,7 @@ const contextMenu = {
 					}
 				},
 				{
-					text: 'By Row and Column',
+					text: 'By Row and Column...',
 					cb(selectedItem) {
 						const page = store.get.page(selectedItem);
 						const originalLayout = util.clone(page.layout);
@@ -407,7 +437,7 @@ const contextMenu = {
 	},
 	csi: [
 		{
-			text: 'Rotate Step Image',
+			text: 'Rotate CSI',
 			children: [
 				{
 					text: 'Flip Upside Down',

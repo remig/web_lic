@@ -239,6 +239,14 @@ const app = new Vue({
 			};
 		})(),
 		forceUIUpdate() {
+			const pageSize = store.state.template.page;
+			if ((this.pageSize.width !== pageSize.width) || (this.pageSize.height !== pageSize.height)) {
+				this.pageSize.width = store.state.template.page.width;
+				this.pageSize.height = store.state.template.page.height;
+				Vue.nextTick(() => {
+					this.drawCurrentPage();
+				});
+			}
 			// If I understood Vue better, I'd create components that damn well updated themselves properly.
 			this.treeUpdateState = !this.treeUpdateState;
 			this.menuUpdateState = !this.menuUpdateState;
