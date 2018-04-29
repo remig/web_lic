@@ -91,7 +91,7 @@
 					:class="{divider: entry.text == 'separator', 'dropdown-submenu': entry.children, disabled: entry.enabled ? !entry.enabled() : false}">
 				<a v-if="entry.text !== 'separator'" @click="triggerMenu(entry, $event)" class="clickable" data-toggle="dropdown">
 					<span class="menu-text">{{resolveProperty(entry.text)}}</span>
-					<span class="menu-text shortcut" v-if="entry.shortcut">{{entry.shortcut | prettyPrint}}</span>
+					<span class="menu-text shortcut small" v-if="entry.shortcut">{{entry.shortcut | prettyPrint}}</span>
 				</a>
 				<ul v-if="entry.children" class="dropdown-menu">
 					<li v-for="child in resolveProperty(entry.children)" v-if="isVisible(child)">
