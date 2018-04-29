@@ -23,7 +23,11 @@ const contextMenu = {
 						width: store.state.template.page.width,
 						height: store.state.template.page.height
 					};
-
+					const aspectRatio = originalPageSize.width / originalPageSize.height;
+					let prevValues = {
+						maintainAspectRatio: true,
+						...originalPageSize
+					};
 					app.currentDialog = 'pageSizeDialog';
 					app.clearSelected();
 
@@ -38,8 +42,21 @@ const contextMenu = {
 							);
 							app.redrawUI(true);
 						});
+						dialog.$on('update', newValues => {
+							if (newValues.maintainAspectRatio !== prevValues.maintainAspectRatio) {
+								dialog.height = Math.floor(newValues.width / aspectRatio);
+							} else if (newValues.maintainAspectRatio) {
+								if (newValues.width !== prevValues.width) {
+									dialog.height = Math.floor(newValues.width / aspectRatio);
+								} else if (newValues.height !== prevValues.height) {
+									dialog.width = Math.floor(newValues.height * aspectRatio);
+								}
+							}
+							prevValues = util.clone(newValues);
+						});
 						dialog.width = originalPageSize.width;
 						dialog.height = originalPageSize.height;
+						dialog.maintainAspectRatio = true;
 						dialog.show({x: 400, y: 150});
 					});
 					app.redrawUI(true);

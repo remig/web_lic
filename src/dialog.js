@@ -54,6 +54,7 @@ const dialogs = {
 		includePLIs: false
 	},
 	pageSize: {
+		maintainAspectRatio: true,
 		width: 900,
 		height: 700
 	},
