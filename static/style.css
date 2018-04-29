@@ -24,6 +24,16 @@ div#container {
 	padding-bottom: 8px;
 }
 
+.dropdown-menu > li > a {
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
+
+.dropdown-menu > li > a.shortcut-parent {
+	position: relative;
+	padding-right: 70px;
+}
+
 .navbar-text {
 	margin: 0px;
 	padding: 8px 0px 8px 15px;
@@ -34,7 +44,17 @@ div#container {
 }
 
 .shortcut {
-	float: right;
+  line-height: 22px;
+  position: absolute;
+  text-align: right;
+  max-width: 60px;
+  right: 8px;
+  color: #888;
+  overflow: hidden;
+  white-space: nowrap;
+  word-wrap: normal;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
 }
 
 .dropdown-menu > .disabled > a {

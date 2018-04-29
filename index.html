@@ -89,7 +89,7 @@
 		<ul class="dropdown-menu">
 			<li v-for="entry in menuEntries" :id="entry.id || entry.text | sanitizeMenuID" v-if="isVisible(entry)"
 					:class="{divider: entry.text == 'separator', 'dropdown-submenu': entry.children, disabled: entry.enabled ? !entry.enabled() : false}">
-				<a v-if="entry.text !== 'separator'" @click="triggerMenu(entry, $event)" class="clickable" data-toggle="dropdown">
+				<a v-if="entry.text !== 'separator'" @click="triggerMenu(entry, $event)" :class="['clickable', {'shortcut-parent': entry.shortcut}]" data-toggle="dropdown">
 					<span class="menu-text">{{resolveProperty(entry.text)}}</span>
 					<span class="menu-text shortcut small" v-if="entry.shortcut">{{entry.shortcut | prettyPrint}}</span>
 				</a>
@@ -229,7 +229,7 @@
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
-						<label class="checkbox">
+						<label class="checkbox col-sm-8 col-sm-offset-1">
 							<input v-model="maintainAspectRatio" v-on:input="updateValues" id="maintainAspectRatioCheckbox" type="checkbox" value="" />
 							Maintain Aspect Ratio
 						</label>
