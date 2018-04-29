@@ -284,6 +284,8 @@ const app = new Vue({
 				box.y -= box.height;
 			} else if (t.valign === 'top') {
 				box.y += 5;
+			} else if (t.valign === 'hanging') {
+				box.y -= 5;
 			}
 			while (t) {
 				t = store.get.parent(t);
@@ -621,7 +623,7 @@ const app = new Vue({
 				pointBox = util.geom.expandBox(pointBox, 8, 8);
 				box = this.targetBox({...selItem, ...pointBox});
 			} else {
-				box = this.targetBox(store.get.lookupToItem(selItem));
+				box = this.targetBox(selItem);
 				if (type === 'point') {
 					box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
 				}

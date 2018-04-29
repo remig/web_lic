@@ -207,13 +207,16 @@
 					</div>
 					<div class="form-group">
 						<label class="checkbox-inline">
-							<input v-model="includeTitlePage" id="includeTitlePageCheckbox" type="checkbox" value="" />Include Title Page
+							<input v-model="includeTitlePage" id="includeTitlePageCheckbox" type="checkbox" value="" />
+							Include Title Page
 						</label>
 						<label class="checkbox-inline">
-							<input v-model="includePartListPage" id="includePartListPageCheckbox" type="checkbox" value="" />Include Part List Page (NYI)
+							<input v-model="includePartListPage" id="includePartListPageCheckbox" type="checkbox" value="" />
+							Include Part List Page (NYI)
 						</label>
 						<label class="checkbox-inline">
-							<input v-model="includePLIs" id="includePLIsCheckbox" type="checkbox" value="" />Include PLIs in each Step
+							<input v-model="includePLIs" id="includePLIsCheckbox" type="checkbox" value="" />
+							Include PLIs in each Step
 						</label>
 					</div>
 				</form>
@@ -225,6 +228,12 @@
 		<baseDialog title="Page Size">
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<label class="checkbox">
+							<input v-model="maintainAspectRatio" v-on:input="updateValues" id="maintainAspectRatioCheckbox" type="checkbox" value="" />
+							Maintain Aspect Ratio
+						</label>
+					</div>
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="pageWidth">Width</label>
 						<div class="col-sm-3">
@@ -275,10 +284,12 @@
 					</div>
 					<div class="form-group">
 						<label class="col-sm-4 radio-inline">
-							<input v-model="direction" v-on:change="updateValues" type="radio" name="inlineRadioOptions" id="directionHorizontal" value="horizontal">Horizontal
+							<input v-model="direction" v-on:change="updateValues" type="radio" name="inlineRadioOptions" id="directionHorizontal" value="horizontal">
+							Horizontal
 						</label>
 						<label class="col-sm-4 radio-inline">
-							<input v-model="direction" v-on:change="updateValues" type="radio" name="inlineRadioOptions" id="directionVertical" value="vertical">Vertical
+							<input v-model="direction" v-on:change="updateValues" type="radio" name="inlineRadioOptions" id="directionVertical" value="vertical">
+							Vertical
 						</label>
 					</div>
 				</form>
@@ -306,7 +317,8 @@
 					</div>
 					<div class="form-group">
 						<label class="checkbox-inline">
-							<input v-model="addRotateIcon" id="includeRotationIconCheckbox" type="checkbox" value="" />Add Rotation Icon
+							<input v-model="addRotateIcon" id="includeRotationIconCheckbox" type="checkbox" value="" />
+							Add Rotation Icon
 						</label>
 					</div>
 				</form>
