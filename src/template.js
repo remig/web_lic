@@ -119,4 +119,23 @@ const template = {
 	}
 };
 
+const part1 = {
+	colorCode: 1, filename: '3001.dat',
+	matrix: [0, 0, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0]
+};
+const part2 = {
+	colorCode: 4, filename: '3003.dat',
+	matrix: [0, -24, 20, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+};
+const model = {
+	filename: 'templateModel.ldr',
+	name: 'templateModel.ldr',
+	parts: [part1, part2],
+	primitives: [], steps: []
+};
+
+template.modelData = {
+	model, part1, part2
+};
+
 module.exports = template;

@@ -3,8 +3,8 @@ const api = {
 	LDrawPath: '../ldraw/',  // path to load LDraw parts via HTTP.  Either absolute or relative to the current page
 
 	// Load the specified url via AJAX and return an abstractPart representing the content of url.
-	async loadRemotePart(url) {
-		return await loadPart(url, null, api.progressCallback);
+	async loadRemotePart(url, skipProgress) {
+		return await loadPart(url, null, skipProgress ? null : api.progressCallback);
 	},
 	// Create an abstractPart from the specified 'content' of an LDraw part file
 	async loadPartContent(content, fn) {

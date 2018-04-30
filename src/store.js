@@ -899,36 +899,22 @@ const store = {
 		},
 		templatePage: {
 			async add() {
-				const part1 = {
-					colorCode: 1, filename: '3001.dat',
-					matrix: [0, 0, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0]
-				};
-				const part2 = {
-					colorCode: 4, filename: '3003.dat',
-					matrix: [0, -24, 20, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-				};
-				const templateModel = {
-					filename: 'templateModel.ldr',
-					name: 'templateModel.ldr',
-					parts: [part1, part2],
-					primitives: [], steps: []
-				};
-				if (!('templateModel.ldr' in LDParse.partDictionary)) {
-					LDParse.partDictionary['templateModel.ldr'] = templateModel;
+				const modelData = store.state.template.modelData;
+				if (!(modelData.model.filename in LDParse.partDictionary)) {
+					LDParse.partDictionary[modelData.model.filename] = modelData.model;
 				}
-				// TODO: inline these two parts so we don't need a remote call to load them
-				if (!(part1.filename in LDParse.partDictionary)) {
-					await LDParse.loadRemotePart(part1.filename);
+				if (!(modelData.part1.filename in LDParse.partDictionary)) {
+					await LDParse.loadRemotePart(modelData.part1.filename, true);
 				}
-				if (!(part2.filename in LDParse.partDictionary)) {
-					await LDParse.loadRemotePart(part2.filename);
+				if (!(modelData.part2.filename in LDParse.partDictionary)) {
+					await LDParse.loadRemotePart(modelData.part2.filename, true);
 				}
 				const page = store.state.templatePage = store.mutations.page.add(
 					{pageType: 'templatePage', pageNumber: 0}
 				);
 
 				const step = store.mutations.step.add({stepNumber: 1, dest: page});
-				step.model = templateModel;
+				step.model = modelData.model;
 				step.parts = [0, 1];
 
 				store.mutations.csi.rotate({
@@ -942,7 +928,7 @@ const store = {
 				});
 
 				const pli = store.get.pli(step.pliID);
-				[part1, part2].forEach((p, idx) => {
+				[modelData.part1, modelData.part2].forEach((p, idx) => {
 					store.mutations.pliItem.add({
 						parent: pli, partNumbers: [idx],
 						filename: p.filename, colorCode: p.colorCode
@@ -955,7 +941,7 @@ const store = {
 				store.mutations.callout.addStep({callout});
 				store.mutations.part.addToCallout({partID: 1, step, callout});
 				callout.steps.forEach(s => {
-					store.get.step(s).model = templateModel;
+					store.get.step(s).model = modelData.model;
 				});
 			},
 			set(opts) {  // opts: {entry, value}
