@@ -255,6 +255,10 @@ const api = {
 				return 'Quantity Label';
 			case 'numberlabel':
 				return 'Number Label';
+			case 'rotateicon':
+				return 'Rotate Icon';
+			case 'templatepage':
+				return 'Page';
 		}
 		if (s.startsWith('ctrl+')) {
 			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();

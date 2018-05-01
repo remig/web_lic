@@ -11,6 +11,9 @@ const ContextMenu = require('./contextMenu');
 const Draw = require('./draw');
 require('./tree');
 require('./dialog');
+require('./templatePanel');
+
+Vue.component('color-picker', require('vue-color/dist/vue-color').Chrome);
 
 const version = require('../package.json').version;
 
@@ -628,12 +631,18 @@ const app = new Vue({
 					box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
 				}
 			}
+			// TODO: Handle wide borders better: x & y should be outside the border, then layout inside minus entire border width
+			let borderWidth = 0;
+			var template = store.state.template[selItem.type];
+			if (template && template.border) {
+				borderWidth = Math.ceil(template.border.width / 2);
+			}
 			return {
 				display: 'block',
-				left: `${box.x - 3}px`,
-				top: `${box.y - 3}px`,
-				width: `${box.width + 6}px`,
-				height: `${box.height + 6}px`
+				left: `${box.x - 4 - borderWidth}px`,
+				top: `${box.y - 4 - borderWidth}px`,
+				width: `${box.width + ((4 + borderWidth) * 2)}px`,
+				height: `${box.height + ((4 + borderWidth) * 2)}px`
 			};
 		}
 	},

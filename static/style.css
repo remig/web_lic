@@ -236,20 +236,35 @@ ul {
 
 #rightPane {
 	background-color: #bbb;
-	width: 100%;
+	display: flex;
+}
+
+#rightSubPane {
+	height: 100%;
+	flex: 1 1 auto;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 #pageContainer {
     background-color: #fff;
-    display: block;
-    position: absolute;
-    padding: 0;
-    margin: auto;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
     box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
+}
+
+#pageCanvas {
+	position: absolute;
+}
+
+#templatePanel {
+	width: 250px;
+	height: 100%;
+	border: 1px solid grey;
+	background-color: white;
+}
+
+#templatePanel h4 {
+	text-align: center;
 }
 
 #statusBar {
@@ -277,8 +292,8 @@ ul {
 
 #highlight {  /* Style the border around selected items */
 	display: none;
-	position: absolute;
-	pointer-events:none;
+	position: relative;
+	pointer-events: none;
 	border: 3px dashed #2eb9ce;
 }
 

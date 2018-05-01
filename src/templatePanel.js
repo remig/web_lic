@@ -5,8 +5,74 @@ const util = require('./util');
 const store = require('./store');
 const undoStack = require('./undoStack');
 
-const colorPicker = require('vue-color/dist/vue-color');
-Vue.component('color-picker', colorPicker.Chrome);
+const calloutTemplatePanel = {
+	template: '#calloutTemplatePanel',
+	data: function() {
+		return {
+			fill: '',
+			border: {
+				width: 0,
+				color: '',
+				cornerRadius: 0
+			}
+		};
+	},
+	methods: {
+		init() {
+			const template = store.state.template.callout;
+			this.fill = template.fill.color || 'transparent';
+			this.border.width = template.border.width;
+			this.border.color = template.border.color;
+			this.border.cornerRadius = template.border.cornerRadius;
+		},
+		updateValues() {
+			const template = store.state.template.callout;
+			template.fill.color = rgbaToString(this.fill);
+			template.border.width = this.border.width;
+			template.border.color = rgbaToString(this.border.color);
+			template.border.cornerRadius = this.border.cornerRadius;
+			this.$emit('new-values', 'Callout');
+		}
+	}
+};
+
+Vue.component('templatePanel', {
+	template: '#templatePanel',
+	props: ['entry', 'app'],
+	components: {
+		calloutTemplatePanel
+	},
+	data: function() {
+		return {lastEdit: ''};
+	},
+	watch: {
+		entry() {
+			if (this.lastEdit) {
+				undoStack.commit('', null, 'Set Template Border', this.lastEdit);
+				this.lastEdit = '';
+				this.app.redrawUI(false);
+			}
+		}
+	},
+	methods: {
+		newValues(type) {
+			this.lastEdit = type;
+			this.app.redrawUI(false);
+		}
+	},
+	computed: {
+		currentTemplatePanel: function() {
+			const templateName = this.entry ? `${this.entry.type}TemplatePanel` : null;
+			if (templateName && templateName in this.$options.components) {
+				Vue.nextTick(() => {
+					this.$refs.currentTemplatePanel.init();
+				});
+				return this.entry.type + 'TemplatePanel';
+			}
+			return null;
+		}
+	}
+});
 
 let app;
 

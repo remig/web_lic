@@ -7,9 +7,6 @@ const store = require('./store');
 const undoStack = require('./undoStack');
 const TemplateMenu = require('./templatePanel');
 
-const colorPicker = require('vue-color/dist/vue-color');
-Vue.component('color-picker', colorPicker.Chrome);
-
 let app;
 
 const contextMenu = {
