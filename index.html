@@ -395,21 +395,29 @@
 		</baseDialog>
 	</script>
 
+	<script type="text/x-template" id="colorTemplatePanel">
+		<div>
+			<div>Fill</div>
+			<color-picker v-model="fill" v-on:input="updateValues"></color-picker>
+		</div>
+	</script>
+
+	<script type="text/x-template" id="borderTemplatePanel">
+		<div>
+			<div>Border</div>
+			<label for="lineWidth">Line Width</label>
+			<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
+			<label v-if="cornerRadius != null" for="cornerRadius">Corner Radius</label>
+			<input v-if="cornerRadius != null" v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
+			<div>Border Color</div>
+			<color-picker v-model="color" v-on:input="updateValues"></color-picker>
+		</div>
+	</script>
+
 	<script type="text/x-template" id="calloutTemplatePanel">
 		<div>
-			<div>
-				<div>Fill</div>
-				<color-picker v-model="fill" v-on:input="updateValues"></color-picker>
-			</div>
-			<div>
-				<div>Border</div>
-				<label for="lineWidth">Line Width</label>
-				<input v-model.number="border.width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
-				<label v-if="border.cornerRadius != null" for="cornerRadius">Corner Radius</label>
-				<input v-if="border.cornerRadius != null" v-model.number="border.cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
-				<div>Border Color</div>
-				<color-picker v-model="border.color" v-on:input="updateValues"></color-picker>
-			</div>
+			<color-template-panel template-entry="callout" v-on:new-values="newValues"></color-template-panel>
+			<border-template-panel template-entry="callout" v-on:new-values="newValues"></border-template-panel>
 		</div>
 	</script>
 

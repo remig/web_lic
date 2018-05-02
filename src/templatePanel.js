@@ -5,32 +5,54 @@ const util = require('./util');
 const store = require('./store');
 const undoStack = require('./undoStack');
 
-const calloutTemplatePanel = {
-	template: '#calloutTemplatePanel',
-	data: function() {
+const colorTemplatePanel = {
+	template: '#colorTemplatePanel',
+	props: ['templateEntry'],
+	data() {
+		const template = util.get(this.templateEntry, store.state.template).fill;
 		return {
-			fill: '',
-			border: {
-				width: 0,
-				color: '',
-				cornerRadius: 0
-			}
+			fill: template.color || 'transparent'
 		};
 	},
 	methods: {
-		init() {
-			const template = store.state.template.callout;
-			this.fill = template.fill.color || 'transparent';
-			this.border.width = template.border.width;
-			this.border.color = template.border.color;
-			this.border.cornerRadius = template.border.cornerRadius;
-		},
 		updateValues() {
-			const template = store.state.template.callout;
-			template.fill.color = rgbaToString(this.fill);
-			template.border.width = this.border.width;
-			template.border.color = rgbaToString(this.border.color);
-			template.border.cornerRadius = this.border.cornerRadius;
+			const template = util.get(this.templateEntry, store.state.template).fill;
+			template.color = rgbaToString(this.fill);
+			this.$emit('new-values');
+		}
+	}
+};
+
+const borderTemplatePanel = {
+	template: '#borderTemplatePanel',
+	props: ['templateEntry'],
+	data() {
+		const template = util.get(this.templateEntry, store.state.template).border;
+		return {
+			width: template.width || 0,
+			color: template.color || 'transparent',
+			cornerRadius: template.cornerRadius
+		};
+	},
+	methods: {
+		updateValues() {
+			const template = util.get(this.templateEntry, store.state.template).border;
+			template.width = this.width;
+			template.color = rgbaToString(this.color);
+			template.cornerRadius = this.cornerRadius;
+			this.$emit('new-values');
+		}
+	}
+};
+
+const calloutTemplatePanel = {
+	template: '#calloutTemplatePanel',
+	components: {
+		colorTemplatePanel,
+		borderTemplatePanel
+	},
+	methods: {
+		newValues() {
 			this.$emit('new-values', 'Callout');
 		}
 	}
@@ -42,13 +64,13 @@ Vue.component('templatePanel', {
 	components: {
 		calloutTemplatePanel
 	},
-	data: function() {
+	data() {
 		return {lastEdit: ''};
 	},
 	watch: {
 		entry() {
 			if (this.lastEdit) {
-				undoStack.commit('', null, 'Set Template Border', this.lastEdit);
+				undoStack.commit('', null, 'Change Template ' + this.lastEdit);
 				this.lastEdit = '';
 				this.app.redrawUI(false);
 			}
@@ -65,7 +87,9 @@ Vue.component('templatePanel', {
 			const templateName = this.entry ? `${this.entry.type}TemplatePanel` : null;
 			if (templateName && templateName in this.$options.components) {
 				Vue.nextTick(() => {
-					this.$refs.currentTemplatePanel.init();
+					if (typeof this.$refs.currentTemplatePanel.init === 'function') {
+						this.$refs.currentTemplatePanel.init();
+					}
 				});
 				return this.entry.type + 'TemplatePanel';
 			}
