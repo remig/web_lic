@@ -5,64 +5,134 @@ const util = require('./util');
 const store = require('./store');
 const undoStack = require('./undoStack');
 
-const colorTemplatePanel = {
-	template: '#colorTemplatePanel',
-	props: ['templateEntry'],
-	data() {
-		const template = util.get(this.templateEntry, store.state.template).fill;
-		return {
-			fill: template.color || 'transparent'
-		};
-	},
-	methods: {
-		updateValues() {
-			const template = util.get(this.templateEntry, store.state.template).fill;
-			template.color = rgbaToString(this.fill);
-			this.$emit('new-values');
+function colorTemplatePanel(templateEntry) {
+	return {
+		template: '#colorTemplatePanel',
+		data() {
+			const template = util.get(templateEntry, store.state.template).fill;
+			return {
+				fill: template.color || 'transparent'
+			};
+		},
+		methods: {
+			updateValues() {
+				const template = util.get(templateEntry, store.state.template).fill;
+				template.color = rgbaToString(this.fill);
+				this.$emit('new-values');
+			}
 		}
-	}
-};
+	};
+}
 
-const borderTemplatePanel = {
-	template: '#borderTemplatePanel',
-	props: ['templateEntry'],
-	data() {
-		const template = util.get(this.templateEntry, store.state.template).border;
-		return {
-			width: template.width || 0,
-			color: template.color || 'transparent',
-			cornerRadius: template.cornerRadius
-		};
-	},
-	methods: {
-		updateValues() {
+function borderTemplatePanel(templateEntry) {
+	return {
+		template: '#borderTemplatePanel',
+		props: {
+			title: {type: String, default: 'Border'},
+			templateEntry: {type: String, default: templateEntry}
+		},
+		data() {
 			const template = util.get(this.templateEntry, store.state.template).border;
-			template.width = this.width;
-			template.color = rgbaToString(this.color);
-			template.cornerRadius = this.cornerRadius;
-			this.$emit('new-values');
+			return {
+				width: template.width || 0,
+				color: template.color || 'transparent',
+				cornerRadius: template.cornerRadius
+			};
+		},
+		methods: {
+			updateValues() {
+				const template = util.get(this.templateEntry, store.state.template).border;
+				template.width = this.width;
+				template.color = rgbaToString(this.color);
+				template.cornerRadius = this.cornerRadius;
+				this.$emit('new-values');
+			}
+		}
+	};
+}
+
+function fillAndBorderTemplatePanel(templateEntry) {
+	return {
+		template: '#fillAndBorderTemplatePanel',
+		components: {
+			colorTemplatePanel: colorTemplatePanel(templateEntry),
+			borderTemplatePanel: borderTemplatePanel(templateEntry)
+		},
+		methods: {
+			newValues() {
+				this.$emit('new-values', util.prettyPrint(templateEntry));
+			}
+		}
+	};
+}
+
+const pageTemplatePanel = {
+	template: '#pageTemplatePanel',
+	data() {
+		const template = store.state.template.page;
+		return {
+			width: template.width,
+			height: template.height,
+			aspectRatio: template.width / template.height,
+			maintainAspectRatio: true
+		};
+	},
+	components: {
+		colorTemplatePanel: colorTemplatePanel('page'),
+		borderTemplatePanel: borderTemplatePanel('page')
+	},
+	methods: {
+		changeAspectRatio() {
+			this.height = Math.floor(this.width / this.aspectRatio);
+			this.updateValues();
+		},
+		newValues() {
+			this.$emit('new-values', 'Page');
+		},
+		updateValues() {
+			const template = store.state.template.page;
+			if (this.width !== template.width || this.height !== template.height) {
+				if (this.maintainAspectRatio) {
+					if (this.width !== template.width) {
+						this.height = Math.floor(this.width / this.aspectRatio);
+					} else if (this.height !== template.height) {
+						this.width = Math.floor(this.height * this.aspectRatio);
+					}
+				}
+				store.state.template.page.width = this.width;
+				store.state.template.page.height = this.height;
+				store.state.templatePage.needsLayout = true;
+				this.$emit('new-values', 'Page');
+			}
 		}
 	}
 };
 
-const calloutTemplatePanel = {
-	template: '#calloutTemplatePanel',
+const rotateIconTemplatePanel = {
+	template: '#rotateIconTemplatePanel',
 	components: {
-		colorTemplatePanel,
-		borderTemplatePanel
+		colorTemplatePanel: colorTemplatePanel('rotateIcon'),
+		borderTemplatePanel: borderTemplatePanel('rotateIcon')
 	},
 	methods: {
 		newValues() {
-			this.$emit('new-values', 'Callout');
+			this.$emit('new-values', 'Rotate Icon');
 		}
 	}
 };
 
+// TODO: need to be able to select the CSI inside submodel image
 Vue.component('templatePanel', {
 	template: '#templatePanel',
 	props: ['entry', 'app'],
 	components: {
-		calloutTemplatePanel
+		templatePage: pageTemplatePanel,
+		pli: fillAndBorderTemplatePanel('pli'),
+		callout: fillAndBorderTemplatePanel('callout'),
+		calloutArrow: borderTemplatePanel('callout.arrow'),
+		submodelImage: fillAndBorderTemplatePanel('submodelImage'),
+		divider: borderTemplatePanel('page.divider'),
+		rotateIcon: rotateIconTemplatePanel
 	},
 	data() {
 		return {lastEdit: ''};
@@ -70,7 +140,7 @@ Vue.component('templatePanel', {
 	watch: {
 		entry() {
 			if (this.lastEdit) {
-				undoStack.commit('', null, 'Change Template ' + this.lastEdit);
+				undoStack.commit('', null, `Change ${this.lastEdit} Template`);
 				this.lastEdit = '';
 				this.app.redrawUI(false);
 			}
@@ -84,14 +154,14 @@ Vue.component('templatePanel', {
 	},
 	computed: {
 		currentTemplatePanel: function() {
-			const templateName = this.entry ? `${this.entry.type}TemplatePanel` : null;
+			const templateName = this.entry ? this.entry.type : null;
 			if (templateName && templateName in this.$options.components) {
 				Vue.nextTick(() => {
 					if (typeof this.$refs.currentTemplatePanel.init === 'function') {
 						this.$refs.currentTemplatePanel.init();
 					}
 				});
-				return this.entry.type + 'TemplatePanel';
+				return this.entry.type;
 			}
 			return null;
 		}
@@ -101,58 +171,6 @@ Vue.component('templatePanel', {
 let app;
 
 const templateMenu = {
-	templatePage: [
-		{text: 'Set Border...', cb: setBorder('page')},
-		{text: 'Set Fill...', cb: setColor('page')},
-		{
-			text: 'Set Page Size...',
-			cb() {
-				const originalPageSize = {
-					width: store.state.template.page.width,
-					height: store.state.template.page.height
-				};
-				const aspectRatio = originalPageSize.width / originalPageSize.height;
-				let prevValues = {
-					maintainAspectRatio: true,
-					...originalPageSize
-				};
-				app.currentDialog = 'pageSizeDialog';
-				app.clearSelected();
-
-				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
-					dialog.$off();
-					dialog.$on('ok', newValues => {
-						undoStack.commit(
-							'templatePage.setPageSize',
-							{...newValues},
-							'Set Page Size'
-						);
-						app.redrawUI(true);
-					});
-					dialog.$on('update', newValues => {
-						if (newValues.maintainAspectRatio !== prevValues.maintainAspectRatio) {
-							dialog.height = Math.floor(newValues.width / aspectRatio);
-						} else if (newValues.maintainAspectRatio) {
-							if (newValues.width !== prevValues.width) {
-								dialog.height = Math.floor(newValues.width / aspectRatio);
-							} else if (newValues.height !== prevValues.height) {
-								dialog.width = Math.floor(newValues.height * aspectRatio);
-							}
-						}
-						prevValues = util.clone(newValues);
-					});
-					dialog.width = originalPageSize.width;
-					dialog.height = originalPageSize.height;
-					dialog.maintainAspectRatio = true;
-					dialog.show({x: 400, y: 150});
-				});
-				app.redrawUI(true);
-			}
-		}
-	],
-	step: [
-	],
 	numberLabel(selectedItem) {
 		const parent = store.get.parent(selectedItem);
 		switch (parent.type) {
@@ -174,11 +192,6 @@ const templateMenu = {
 		}
 		return [];
 	},
-	submodelImage: [
-		// TODO: need to be able to select the CSI inside submodel image
-		{text: 'Set Border...', cb: setBorder('submodelImage')},
-		{text: 'Set Fill...', cb: setColor('submodelImage')}
-	],
 	csi: [
 		{
 			text: 'Change Default Rotation... (NYI)',
@@ -189,11 +202,6 @@ const templateMenu = {
 			cb() {}
 		}
 	],
-	pli: [
-		{text: 'Set Border...', cb: setBorder('pli')},
-		{text: 'Set Fill...', cb: setColor('pli')}
-	],
-	pliItem: [],
 	quantityLabel(selectedItem) {
 		const parent = store.get.parent(selectedItem);
 		switch (parent.type) {
@@ -209,22 +217,7 @@ const templateMenu = {
 				];
 		}
 		return [];
-	},
-	callout: [
-		{text: 'Set Border...', cb: setBorder('callout')},
-		{text: 'Set Fill...', cb: setColor('callout')}
-	],
-	calloutArrow: [
-		{text: 'Set Line Style...', cb: setBorder('callout.arrow')}
-	],
-	rotateIcon: [
-		{text: 'Set Border...', cb: setBorder('rotateIcon')},
-		{text: 'Set Fill...', cb: setColor('rotateIcon')},
-		{text: 'Set Arrow Style...', cb: setBorder('rotateIcon.arrow')}
-	],
-	divider: [
-		{text: 'Set Line Style...', cb: setBorder('page.divider')}
-	]
+	}
 };
 
 function rgbaToString(c) {
@@ -269,50 +262,13 @@ function setColor(templateEntry, colorType = 'fill') {
 	};
 }
 
-function setBorder(templateEntry) {
-	return function() {
-		const border = util.get(templateEntry, store.state.template).border;
-		const originalBorder = util.clone(border);
-		const ignoreCornerRadius = !border.hasOwnProperty('cornerRadius');
-
-		app.currentDialog = 'borderDialog';
-		app.clearSelected();
-
-		Vue.nextTick(() => {
-			const dialog = app.$refs.currentDialog;
-			dialog.$off();
-			dialog.$on('ok', newValues => {
-				const entry = templateEntry + '.border';
-				newValues.color = rgbaToString(newValues.color);
-				undoStack.commit(
-					'templatePage.set',
-					{entry, value: newValues},
-					'Set Template Border'
-				);
-				app.redrawUI(true);
-			});
-			dialog.$on('cancel', () => {
-				util.copy(border, originalBorder);
-				app.redrawUI(true);
-			});
-			dialog.$on('update', newValues => {
-				newValues.color = rgbaToString(newValues.color);
-				util.copy(border, newValues);
-				app.redrawUI(true);
-			});
-			util.copy(dialog, originalBorder);
-			if (ignoreCornerRadius) {
-				dialog.cornerRadius = null;
-			}
-			dialog.show({x: 400, y: 150});
-		});
-	};
-}
-
 module.exports = function TemplateMenu(entry, localApp) {
 	app = localApp;
 	let menu = templateMenu[entry.type];
 	menu = (typeof menu === 'function') ? menu(entry) : menu;
-	menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above
-	return menu;
+	if (menu) {
+		menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above
+		return menu;
+	}
+	return null;
 };

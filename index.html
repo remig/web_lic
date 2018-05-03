@@ -227,31 +227,6 @@
 		</baseDialog>
 	</script>
 
-	<script type="text/x-template" id="pageSizeTemplate">
-		<baseDialog title="Page Size">
-			<div slot="body" class="container-fluid">
-				<form class="form-horizontal" role="form">
-					<div class="form-group">
-						<label class="checkbox col-sm-8 col-sm-offset-1">
-							<input v-model="maintainAspectRatio" v-on:input="updateValues" id="maintainAspectRatioCheckbox" type="checkbox" value="" />
-							Maintain Aspect Ratio
-						</label>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label" for="pageWidth">Width</label>
-						<div class="col-sm-3">
-							<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageWidth"/>
-						</div>
-						<label class="col-sm-2 control-label" for="pageHeight">Height</label>
-						<div class="col-sm-3">
-							<input v-model.number="height" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageHeight"/>
-						</div>
-					</div>
-				</form>
-			</div>
-		</baseDialog>
-	</script>
-
 	<script type="text/x-template" id="partDisplacementTemplate">
 		<baseDialog title="Displace Part" okButtonText="Apply">
 			<div slot="body" class="container-fluid">
@@ -371,30 +346,6 @@
 		</baseDialog>
 	</script>
 
-	<script type="text/x-template" id="borderTemplate">
-		<baseDialog title="Set Border">
-			<div slot="body" class="container-fluid">
-				<form class="form-horizontal" role="form">
-					<div class="form-group">
-						<label class="col-sm-3 control-label" for="lineWidth">Line Width</label>
-						<div class="col-sm-2">
-							<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
-						</div>
-						<div v-if="cornerRadius != null">
-							<label class="col-sm-3 control-label" for="cornerRadius">Corner Radius</label>
-							<div class="col-sm-2">
-								<input v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
-							</div>
-						</div>
-						<div class="col-sm-3">
-							<color-picker v-model="color" v-on:input="updateValues"></color-picker>
-						</div>
-					</div>
-				</form>
-			</div>
-		</baseDialog>
-	</script>
-
 	<script type="text/x-template" id="colorTemplatePanel">
 		<div>
 			<div>Fill</div>
@@ -404,25 +355,48 @@
 
 	<script type="text/x-template" id="borderTemplatePanel">
 		<div>
-			<div>Border</div>
+			<div>{{title}}</div>
 			<label for="lineWidth">Line Width</label>
 			<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
 			<label v-if="cornerRadius != null" for="cornerRadius">Corner Radius</label>
 			<input v-if="cornerRadius != null" v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
-			<div>Border Color</div>
+			<div>{{title}} Color</div>
 			<color-picker v-model="color" v-on:input="updateValues"></color-picker>
 		</div>
 	</script>
 
-	<script type="text/x-template" id="calloutTemplatePanel">
+	<script type="text/x-template" id="fillAndBorderTemplatePanel">
 		<div>
-			<color-template-panel template-entry="callout" v-on:new-values="newValues"></color-template-panel>
-			<border-template-panel template-entry="callout" v-on:new-values="newValues"></border-template-panel>
+			<color-template-panel v-on:new-values="newValues"></color-template-panel>
+			<border-template-panel v-on:new-values="newValues"></border-template-panel>
+		</div>
+	</script>
+
+	<script type="text/x-template" id="pageTemplatePanel">
+		<div>
+			<label>
+				<input v-model="maintainAspectRatio" v-on:click="changeAspectRatio" type="checkbox" />
+				Maintain Aspect Ratio ({{aspectRatio.toFixed(2)}})
+			</label><br />
+			<label for="pageWidth">Width (px)</label>
+			<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageWidth" />
+			<label for="pageHeight">Height (px)</label>
+			<input v-model.number="height" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageHeight" />
+			<color-template-panel v-on:new-values="newValues"></color-template-panel>
+			<border-template-panel v-on:new-values="newValues"></border-template-panel>
+		</div>
+	</script>
+
+	<script type="text/x-template" id="rotateIconTemplatePanel">
+		<div>
+			<color-template-panel v-on:new-values="newValues"></color-template-panel>
+			<border-template-panel v-on:new-values="newValues"></border-template-panel>
+			<border-template-panel v-on:new-values="newValues" title="Arrow" templateEntry="rotateIcon.arrow"></border-template-panel>
 		</div>
 	</script>
 
 	<script type="text/x-template" id="templatePanel">
-		<div @click.stop.prevent="">
+		<div @click.stop="">
 			<h4>{{entry ? entry.type : 'Select a Page Item' | prettyPrint}}</h4>
 			<hr>
 			<component :is="currentTemplatePanel" ref="currentTemplatePanel" v-on:new-values="newValues"></component>
