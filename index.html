@@ -346,21 +346,34 @@
 		</baseDialog>
 	</script>
 
+	<!-- Template Page Components -->
 	<script type="text/x-template" id="colorTemplatePanel">
-		<div>
-			<div>{{title}}</div>
+		<div class="panel panel-template">
+			<h5>{{title}}</h5>
 			<color-picker v-model="fill" v-on:input="updateValues"></color-picker>
 		</div>
 	</script>
 
 	<script type="text/x-template" id="borderTemplatePanel">
-		<div>
-			<div>{{title}}</div>
-			<label for="lineWidth">Line Width</label>
-			<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
-			<label v-if="cornerRadius != null" for="cornerRadius">Corner Radius</label>
-			<input v-if="cornerRadius != null" v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
-			<div>{{title}} Color</div>
+		<div class="panel panel-template">
+			<h5>{{title}}</h5>
+			<div class="panel-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label for="lineWidth" class="control-label col-sm-7">Line Width</label>
+						<div class="col-sm-5">
+						<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label v-if="cornerRadius != null" for="cornerRadius" class="control-label col-sm-7">Corner Radius</label>
+						<div class="col-sm-5">
+							<input v-if="cornerRadius != null" v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
+						</div>
+					</div>
+				</form>
+			</div>
+			<h5 class="paddingT10">{{title}} Color</h5>
 			<color-picker v-model="color" v-on:input="updateValues"></color-picker>
 		</div>
 	</script>
@@ -373,38 +386,68 @@
 	</script>
 
 	<script type="text/x-template" id="fontTemplatePanel">
-		<div>
-			<select v-model="face">
-				<option>Helvetica</option>
-				<option>Times New Roman</option>
-			</select>
-			<button v-on:click="toggleProp('bold')">B</button>
-			<button v-on:click="toggleProp('italic')">I</button>
-			<button v-on:click="toggleProp('underline')">U</button>
-			<label for="fontSize">Size</label>
-			<input v-model.number="size" v-on:input="updateValues" type="number" min="0" class="form-control" id="fontSize" />
-			<div>Color</div>
+		<div class="panel panel-template">
+			<h5>Font</h5>
+			<div class="panel-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<select v-model="face">
+							<option>Helvetica</option>
+							<option>Times New Roman</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<button v-on:click="toggleProp('bold')">B</button>
+						<button v-on:click="toggleProp('italic')">I</button>
+						<button v-on:click="toggleProp('underline')">U</button>
+					</div>
+					<div class="form-group">
+						<label for="fontSize" class="control-label col-sm-5">Size</label>
+						<div class="col-sm-5">
+							<input v-model.number="size" v-on:input="updateValues" type="number" min="0" class="form-control" id="fontSize" />
+						</div>
+					</div>
+				</form>
+			</div>
+			<h5 class="paddingT10">Color</h5>
 			<color-picker v-model="color" v-on:input="updateValues"></color-picker>
 		</div>
 	</script>
 
 	<script type="text/x-template" id="pageTemplatePanel">
 		<div>
-			<label>
-				<input v-model="maintainAspectRatio" v-on:click="changeAspectRatio" type="checkbox" />
-				Maintain Aspect Ratio ({{aspectRatio.toFixed(2)}})
-			</label><br />
-			<label for="pageWidth">Width (px)</label>
-			<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageWidth" />
-			<label for="pageHeight">Height (px)</label>
-			<input v-model.number="height" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageHeight" />
+			<div class="panel panel-template">
+				<h5>Page Size</h5>
+				<div class="panel-body">
+					<form class="form-horizontal">
+						<div class="checkbox">
+							<label for="maintainAspectRatio">
+								<input v-model="maintainAspectRatio" v-on:click="changeAspectRatio" type="checkbox" id="maintainAspectRatio" />
+								Maintain Aspect Ratio ({{aspectRatio.toFixed(2)}})
+							</label>
+						</div>
+						<div class="form-group paddingT10">
+							<label for="pageWidth" class="control-label col-sm-5">Width (px)</label>
+							<div class="col-sm-5">
+								<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageWidth" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="pageHeight" class="control-label col-sm-5">Height (px)</label>
+							<div class="col-sm-5">
+								<input v-model.number="height" v-on:input="updateValues" type="number" min="0" class="form-control col-sm-10" id="pageHeight" />
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
 			<color-template-panel v-on:new-values="newValues"></color-template-panel>
 			<border-template-panel v-on:new-values="newValues"></border-template-panel>
 		</div>
 	</script>
 
 	<script type="text/x-template" id="rotateIconTemplatePanel">
-		<div>
+		<div class="panel panel-template">
 			<color-template-panel v-on:new-values="newValues"></color-template-panel>
 			<border-template-panel v-on:new-values="newValues"></border-template-panel>
 			<border-template-panel v-on:new-values="newValues" title="Arrow" templateEntry="rotateIcon.arrow"></border-template-panel>
@@ -412,10 +455,11 @@
 	</script>
 
 	<script type="text/x-template" id="templatePanel">
-		<div @click.stop="">
+		<div @click.stop="" class="container">
 			<h4>{{entry ? entry.type : 'Select a Page Item' | prettyPrint}}</h4>
-			<hr>
-			<component :is="currentTemplatePanel" ref="currentTemplatePanel" v-on:new-values="newValues"></component>
+			<div class="panel-group">
+				<component :is="currentTemplatePanel" ref="currentTemplatePanel" v-on:new-values="newValues"></component>
+			</div>
 		</div>
 	</script>
 

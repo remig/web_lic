@@ -257,7 +257,7 @@ ul {
 }
 
 #templatePanel {
-	width: 250px;
+	width: 265px;
 	height: 100%;
 	border: 1px solid grey;
 	background-color: white;
@@ -309,4 +309,39 @@ ul {
 	position: absolute;
 	left: -10000px;
 	top: -10000px;
+}
+
+/* Template Page Panel */
+.panel-group .panel {
+	border-radius: 0;
+}
+
+.panel-template {
+    margin-bottom: 10px;
+    background-color: #fff;
+    border-bottom: 1px solid #888;
+    border-radius: 0;
+}
+
+.panel-template .panel-body {
+	padding: 0 0 0 10px;
+}
+
+.panel-template h5 {
+	font-weight: 600;
+}
+
+/* Padding */
+
+.paddingT05 {
+	padding-top: 5px;
+}
+.paddingT10 {
+	padding-top: 10px;
+}
+.paddingT15 {
+	padding-top: 15px;
+}
+.paddingT20 {
+	padding-top: 20px;
 }
