@@ -614,7 +614,7 @@ const app = new Vue({
 			}
 			let box;
 			if (type === 'page' || type === 'titlePage' || type === 'templatePage') {
-				box = {x: 0, y: 0, width: store.state.template.page.width, height: store.state.template.page.height};
+				box = {x: 0, y: 0, width: this.pageSize.width, height: this.pageSize.height};
 			} else if (type === 'calloutArrow') {
 				// TODO: store arrow / divider / stuff with points bounding box in item itself at layout time, then use it like any other target
 				const points = store.get.calloutArrowToPoints(selItem);

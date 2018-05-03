@@ -953,6 +953,7 @@ const store = {
 			},
 			reset() {
 				store.state.template = util.clone(defaultTemplate);
+				store.state.templatePage.needsLayout = true;
 			},
 			setPageSize(opts) {  // opts: {width, height}
 				store.state.template.page.width = opts.width;

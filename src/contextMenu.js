@@ -806,6 +806,8 @@ module.exports = function ContextMenu(entry, localApp) {
 		menu = TemplateMenu(entry, localApp);
 	}
 	menu = (typeof menu === 'function') ? menu(entry) : menu;
-	menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above
-	return menu;
+	if (menu) {
+		menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above
+		return menu;
+	}
 };
