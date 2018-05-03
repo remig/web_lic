@@ -209,6 +209,30 @@ const store = {
 		templatePage() {
 			return store.state.templatePage;
 		},
+		templateForItem(item) {
+			const template = store.state.template;
+			if (template[item.type]) {
+				return template[item.type];
+			}
+			item = store.get.lookupToItem(item);
+			const parent = store.get.parent(item);
+			switch (item.type) {
+				case 'templatePage':
+					return template.page;
+				case 'divider':
+					return template.page.divider;
+				case 'quantityLabel':
+					return template[parent.type].quantityLabel;
+				case 'numberLabel':
+					if (parent.parent && parent.parent.type === 'callout') {
+						return template.callout.step.numberLabel;
+					} else if (parent.type === 'templatePage') {
+						return template.page.numberLabel;
+					}
+					return template[parent.type].numberLabel;
+			}
+			return null;
+		},
 		isTemplatePage(page) {
 			return (page || {}).type === 'templatePage';
 		},

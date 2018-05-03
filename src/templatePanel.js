@@ -60,7 +60,7 @@ const fontTemplatePanel = {
 	template: '#fontTemplatePanel',
 	data() {
 		return {
-			templateEntry: null,
+			templateItem: null,
 			family: '',
 			size: 0,
 			bold: false,
@@ -71,42 +71,22 @@ const fontTemplatePanel = {
 	},
 	methods: {
 		init(entry) {
-			let templateEntry;
-			const parent = store.get.parent(entry);
-			switch (parent.type) {
-				case 'templatePage':
-					templateEntry = 'page.numberLabel';
-					break;
-				case 'step':
-					if (parent.parent.type === 'callout') {
-						templateEntry = 'callout.step.numberLabel';
-					} else {
-						templateEntry = 'step.numberLabel';
-					}
-					break;
-				case 'submodelImage':
-					templateEntry = 'submodelImage.quantityLabel';
-					break;
-				case 'pliItem':
-					templateEntry = 'pliItem.quantityLabel';
-					break;
-			}
-			const template = util.get(templateEntry, store.state.template);
+			const template = store.get.templateForItem(entry);
 			const fontParts = util.fontToFontParts(template.font);
+			this.templateItem = util.clone(entry);
 			this.family = fontParts.fontFamily;
+			this.size = parseInt(fontParts.fontSize, 10);
 			this.bold = fontParts.fontWeight === 'bold';
 			this.italic = fontParts.fontStyle === 'italic';
 			this.underline = false;
-			this.size = parseInt(fontParts.fontSize, 10);
 			this.color = template.color;
-			this.templateEntry = templateEntry;
 		},
 		toggleProp(prop) {
 			this[prop] = !this[prop];
 			this.updateValues();
 		},
 		updateValues() {
-			const template = util.get(this.templateEntry, store.state.template);
+			const template = store.get.templateForItem(this.templateItem);
 			const fontParts = {
 				fontSize: this.size + 'pt',
 				fontFamily: this.family,
@@ -169,8 +149,8 @@ const pageTemplatePanel = {
 						this.width = Math.floor(this.height * this.aspectRatio);
 					}
 				}
-				store.state.template.page.width = this.width;
-				store.state.template.page.height = this.height;
+				template.width = this.width;
+				template.height = this.height;
 				store.state.templatePage.needsLayout = true;
 				this.$emit('new-values', 'Page');
 			}

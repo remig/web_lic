@@ -87,7 +87,8 @@ const api = {
 			pliItem.width = pliSize.width;
 			pliItem.height = pliSize.height;
 
-			const lblSize = util.measureLabel('bold 10pt Helvetica', 'x' + pliItem.quantity);
+			const font = store.state.template.pliItem.quantityLabel.font;
+			const lblSize = util.measureLabel(font, 'x' + pliItem.quantity);
 			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 			quantityLabel.x = -qtyLabelOffset;
 			quantityLabel.y = pliSize.height - qtyLabelOffset;
@@ -186,7 +187,7 @@ const api = {
 
 			let lblSize = {width: 0, height: 0};
 			if (step.numberLabelID != null) {
-				lblSize = util.measureLabel(store.state.template.step.numberLabel.font, step.number);
+				lblSize = util.measureLabel(store.state.template.callout.step.numberLabel.font, step.number);
 				const lbl = store.get.numberLabel(step.numberLabelID);
 				lbl.x = lbl.y = 0;
 				lbl.width = lblSize.width;

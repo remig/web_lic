@@ -633,8 +633,8 @@ const app = new Vue({
 			}
 			// TODO: Handle wide borders better: x & y should be outside the border, then layout inside minus entire border width
 			let borderWidth = 0;
-			var template = store.state.template[selItem.type];
-			if (template && template.border) {
+			var template = store.get.templateForItem(selItem);
+			if (template && template.border && template.border.width) {
 				borderWidth = Math.ceil(template.border.width / 2);
 			}
 			return {
