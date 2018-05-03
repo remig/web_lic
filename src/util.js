@@ -139,20 +139,21 @@ const api = {
 					}
 				}
 			});
-
-			fullFontParts.toString = function() {
-				let family = this.fontFamily.trim();
-				if (family.includes(' ') && family[0] !== '"' && family[0] !== "'") {
-					family = `"${family}"`;  // Font families that contain spaces must be quoted
-				}
-				return [
-					this.fontStyle, this.fontVariant, this.fontWeight,
-					this.fontStretch, this.fontSize, family
-				].join(' ').trim();
-			};
 			return fullFontParts;
 		};
 	})(),
+	fontPartsToFont({
+		fontStyle = '', fontVariant = '', fontWeight = '',
+		fontStretch = '', fontSize = '', fontFamily = ''
+	} = {}) {
+		let family = fontFamily.trim();
+		if (family.includes(' ') && family[0] !== '"' && family[0] !== "'") {
+			family = `"${family}"`;  // Font families that contain spaces must be quoted
+		}
+		return [
+			fontStyle, fontVariant, fontWeight, fontStretch, fontSize, family
+		].filter(el => el !== '').join(' ').trim();
+	},
 	degrees(radians) {
 		return radians * 180 / Math.PI;
 	},

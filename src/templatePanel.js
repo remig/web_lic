@@ -56,38 +56,70 @@ function borderTemplatePanel(templateEntry) {
 }
 
 // TODO: support underlining fonts in general
-function fontTemplatePanel(templateEntry) {
-	return {
-		template: '#fontTemplatePanel',
-		props: {
-			title: {type: String, default: 'Font'},
-			templateEntry: {type: String, default: templateEntry}
-		},
-		data() {
-			const template = util.get(this.templateEntry, store.state.template);
-			const fontParts = util.fontToFontParts(template.font);
-			return {
-				face: fontParts.fontFamily,
-				bold: fontParts.fontWeight === 'bold',
-				italic: fontParts.fontStyle === 'italic',
-				underline: false,
-				size: parseInt(fontParts.fontSize, 10),
-				color: template.color
-			};
-		},
-		methods: {
-			toggleProp(prop) {
-				this[prop] = !this[prop];
-				this.$emit('new-values', util.prettyPrint(this.templateEntry));
-			},
-			updateValues() {
-				const template = util.get(this.templateEntry, store.state.template);
-				template.color = rgbaToString(this.color);
-				this.$emit('new-values', util.prettyPrint(this.templateEntry));
+const fontTemplatePanel = {
+	template: '#fontTemplatePanel',
+	data() {
+		return {
+			templateEntry: null,
+			family: '',
+			size: 0,
+			bold: false,
+			italic: false,
+			underline: false,
+			color: 'transparent'
+		};
+	},
+	methods: {
+		init(entry) {
+			let templateEntry;
+			const parent = store.get.parent(entry);
+			switch (parent.type) {
+				case 'templatePage':
+					templateEntry = 'page.numberLabel';
+					break;
+				case 'step':
+					if (parent.parent.type === 'callout') {
+						templateEntry = 'callout.step.numberLabel';
+					} else {
+						templateEntry = 'step.numberLabel';
+					}
+					break;
+				case 'submodelImage':
+					templateEntry = 'submodelImage.quantityLabel';
+					break;
+				case 'pliItem':
+					templateEntry = 'pliItem.quantityLabel';
+					break;
 			}
+			const template = util.get(templateEntry, store.state.template);
+			const fontParts = util.fontToFontParts(template.font);
+			this.family = fontParts.fontFamily;
+			this.bold = fontParts.fontWeight === 'bold';
+			this.italic = fontParts.fontStyle === 'italic';
+			this.underline = false;
+			this.size = parseInt(fontParts.fontSize, 10);
+			this.color = template.color;
+			this.templateEntry = templateEntry;
+		},
+		toggleProp(prop) {
+			this[prop] = !this[prop];
+			this.updateValues();
+		},
+		updateValues() {
+			const template = util.get(this.templateEntry, store.state.template);
+			const fontParts = {
+				fontSize: this.size + 'pt',
+				fontFamily: this.family,
+				fontWeight: this.bold ? 'bold' : null,
+				fontStyle: this.italic ? 'italic' : null
+			};
+			template.font = util.fontPartsToFont(fontParts);
+			template.color = rgbaToString(this.color);
+			store.state.templatePage.needsLayout = true;
+			this.$emit('new-values', util.prettyPrint(this.templateEntry));
 		}
-	};
-}
+	}
+};
 
 function fillAndBorderTemplatePanel(templateEntry) {
 	return {
@@ -171,8 +203,8 @@ Vue.component('templatePanel', {
 		submodelImage: fillAndBorderTemplatePanel('submodelImage'),
 		divider: borderTemplatePanel('page.divider'),
 		rotateIcon: rotateIconTemplatePanel,
-		numberLabel: fontTemplatePanel('step.numberLabel'),
-		quantityLabel: fontTemplatePanel('pliItem.quantityLabel')
+		numberLabel: fontTemplatePanel,
+		quantityLabel: fontTemplatePanel
 	},
 	data() {
 		return {lastEdit: ''};
@@ -198,7 +230,7 @@ Vue.component('templatePanel', {
 			if (templateName && templateName in this.$options.components) {
 				Vue.nextTick(() => {
 					if (typeof this.$refs.currentTemplatePanel.init === 'function') {
-						this.$refs.currentTemplatePanel.init();
+						this.$refs.currentTemplatePanel.init(this.entry);
 					}
 				});
 				return this.entry.type;

@@ -391,15 +391,15 @@
 			<div class="panel-body">
 				<form class="form-horizontal">
 					<div class="form-group">
-						<select v-model="face">
+						<select v-model="family">
 							<option>Helvetica</option>
 							<option>Times New Roman</option>
 						</select>
 					</div>
 					<div class="form-group">
-						<button v-on:click="toggleProp('bold')">B</button>
-						<button v-on:click="toggleProp('italic')">I</button>
-						<button v-on:click="toggleProp('underline')">U</button>
+						<button v-on:click.stop.prevent="toggleProp('bold')">B</button>
+						<button v-on:click.stop.prevent="toggleProp('italic')">I</button>
+						<button v-on:click.stop.prevent="toggleProp('underline')">U</button>
 					</div>
 					<div class="form-group">
 						<label for="fontSize" class="control-label col-sm-5">Size</label>
