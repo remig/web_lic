@@ -348,7 +348,7 @@
 
 	<script type="text/x-template" id="colorTemplatePanel">
 		<div>
-			<div>Fill</div>
+			<div>{{title}}</div>
 			<color-picker v-model="fill" v-on:input="updateValues"></color-picker>
 		</div>
 	</script>
@@ -369,6 +369,22 @@
 		<div>
 			<color-template-panel v-on:new-values="newValues"></color-template-panel>
 			<border-template-panel v-on:new-values="newValues"></border-template-panel>
+		</div>
+	</script>
+
+	<script type="text/x-template" id="fontTemplatePanel">
+		<div>
+			<select v-model="face">
+				<option>Helvetica</option>
+				<option>Times New Roman</option>
+			</select>
+			<button v-on:click="toggleProp('bold')">B</button>
+			<button v-on:click="toggleProp('italic')">I</button>
+			<button v-on:click="toggleProp('underline')">U</button>
+			<label for="fontSize">Size</label>
+			<input v-model.number="size" v-on:input="updateValues" type="number" min="0" class="form-control" id="fontSize" />
+			<div>Color</div>
+			<color-picker v-model="color" v-on:input="updateValues"></color-picker>
 		</div>
 	</script>
 

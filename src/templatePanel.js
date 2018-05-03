@@ -8,17 +8,21 @@ const undoStack = require('./undoStack');
 function colorTemplatePanel(templateEntry) {
 	return {
 		template: '#colorTemplatePanel',
+		props: {
+			title: {type: String, default: 'Fill'},
+			templateEntry: {type: String, default: templateEntry}
+		},
 		data() {
-			const template = util.get(templateEntry, store.state.template).fill;
+			const template = util.get(this.templateEntry, store.state.template).fill;
 			return {
 				fill: template.color || 'transparent'
 			};
 		},
 		methods: {
 			updateValues() {
-				const template = util.get(templateEntry, store.state.template).fill;
+				const template = util.get(this.templateEntry, store.state.template).fill;
 				template.color = rgbaToString(this.fill);
-				this.$emit('new-values');
+				this.$emit('new-values', util.prettyPrint(this.templateEntry));
 			}
 		}
 	};
@@ -45,7 +49,41 @@ function borderTemplatePanel(templateEntry) {
 				template.width = this.width;
 				template.color = rgbaToString(this.color);
 				template.cornerRadius = this.cornerRadius;
-				this.$emit('new-values');
+				this.$emit('new-values', util.prettyPrint(this.templateEntry));
+			}
+		}
+	};
+}
+
+// TODO: support underlining fonts in general
+function fontTemplatePanel(templateEntry) {
+	return {
+		template: '#fontTemplatePanel',
+		props: {
+			title: {type: String, default: 'Font'},
+			templateEntry: {type: String, default: templateEntry}
+		},
+		data() {
+			const template = util.get(this.templateEntry, store.state.template);
+			const fontParts = util.fontToFontParts(template.font);
+			return {
+				face: fontParts.fontFamily,
+				bold: fontParts.fontWeight === 'bold',
+				italic: fontParts.fontStyle === 'italic',
+				underline: false,
+				size: parseInt(fontParts.fontSize, 10),
+				color: template.color
+			};
+		},
+		methods: {
+			toggleProp(prop) {
+				this[prop] = !this[prop];
+				this.$emit('new-values', util.prettyPrint(this.templateEntry));
+			},
+			updateValues() {
+				const template = util.get(this.templateEntry, store.state.template);
+				template.color = rgbaToString(this.color);
+				this.$emit('new-values', util.prettyPrint(this.templateEntry));
 			}
 		}
 	};
@@ -132,7 +170,9 @@ Vue.component('templatePanel', {
 		calloutArrow: borderTemplatePanel('callout.arrow'),
 		submodelImage: fillAndBorderTemplatePanel('submodelImage'),
 		divider: borderTemplatePanel('page.divider'),
-		rotateIcon: rotateIconTemplatePanel
+		rotateIcon: rotateIconTemplatePanel,
+		numberLabel: fontTemplatePanel('step.numberLabel'),
+		quantityLabel: fontTemplatePanel('pliItem.quantityLabel')
 	},
 	data() {
 		return {lastEdit: ''};
