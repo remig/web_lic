@@ -446,6 +446,36 @@
 		</div>
 	</script>
 
+	<script type="text/x-template" id="rotateTemplatePanel">
+		<div>
+			<div class="panel panel-template">
+				<h5>Rotation</h5>
+				<div class="panel-body">
+					<form class="form-horizontal">
+						<div class="form-group">
+							<label for="xRotation" class="control-label col-sm-5">X</label>
+							<div class="col-sm-5">
+								<input id="xRotation" v-model.number="x" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="yRotation" class="control-label col-sm-5">Y</label>
+							<div class="col-sm-5">
+								<input id="yRotation" v-model.number="y" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="zRotation" class="control-label col-sm-5">Z</label>
+							<div class="col-sm-5">
+								<input id="zRotation" v-model.number="z" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" />
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</script>
+
 	<script type="text/x-template" id="rotateIconTemplatePanel">
 		<div class="panel panel-template">
 			<color-template-panel v-on:new-values="newValues"></color-template-panel>

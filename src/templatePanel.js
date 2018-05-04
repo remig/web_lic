@@ -116,6 +116,36 @@ function fillAndBorderTemplatePanel(templateEntry) {
 	};
 }
 
+function rotateTemplatePanel(templateEntry) {
+	return {
+		template: '#rotateTemplatePanel',
+		props: {
+			templateEntry: {type: String, default: templateEntry}
+		},
+		data() {
+			const rotation = util.get(this.templateEntry, store.state.template).rotation || {};
+			return {
+				x: rotation.x || 0,
+				y: rotation.y || 0,
+				z: rotation.z || 0
+			};
+		},
+		methods: {
+			updateValues() {
+				let template = util.get(this.templateEntry, store.state.template).rotation;
+				if (!template || template.x !== this.x || template.y !== this.y || template.z !== this.z) {
+					template = template || {};
+					template.x = this.x;
+					template.y = this.y;
+					template.z = this.z;
+					store.state.templatePage.needsLayout = true;
+					this.$emit('new-values', util.prettyPrint(this.templateEntry));
+				}
+			}
+		}
+	};
+}
+
 const pageTemplatePanel = {
 	template: '#pageTemplatePanel',
 	data() {
@@ -177,6 +207,7 @@ Vue.component('templatePanel', {
 	props: ['entry', 'app'],
 	components: {
 		templatePage: pageTemplatePanel,
+		csi: rotateTemplatePanel('csi'),
 		pli: fillAndBorderTemplatePanel('pli'),
 		callout: fillAndBorderTemplatePanel('callout'),
 		calloutArrow: borderTemplatePanel('callout.arrow'),
@@ -220,30 +251,7 @@ Vue.component('templatePanel', {
 	}
 });
 
-let app;
-
 const templateMenu = {
-	numberLabel(selectedItem) {
-		const parent = store.get.parent(selectedItem);
-		switch (parent.type) {
-			case 'templatePage':
-				return [
-					{text: 'Set Color...', cb: setColor('page', 'numberLabel')}
-				];
-			case 'step':
-				switch (store.get.parent(parent).type) {
-					case 'templatePage':
-						return [
-							{text: 'Set Color...', cb: setColor('step', 'numberLabel')}
-						];
-					case 'callout':
-						return [
-							{text: 'Set Color...', cb: setColor('callout.step', 'numberLabel')}
-						];
-				}
-		}
-		return [];
-	},
 	csi: [
 		{
 			text: 'Change Default Rotation... (NYI)',
@@ -253,23 +261,7 @@ const templateMenu = {
 			text: 'Change Default Scale... (NYI)',
 			cb() {}
 		}
-	],
-	quantityLabel(selectedItem) {
-		const parent = store.get.parent(selectedItem);
-		switch (parent.type) {
-			case 'submodelImage':
-				return [
-					{text: 'Set Font... (NYI)', cb() {}},
-					{text: 'Set Color...', cb: setColor('submodelImage', 'quantityLabel')}
-				];
-			case 'pliItem':
-				return [
-					{text: 'Set Font... (NYI)', cb() {}},
-					{text: 'Set Color...', cb: setColor('pliItem', 'quantityLabel')}
-				];
-		}
-		return [];
-	}
+	]
 };
 
 function rgbaToString(c) {
@@ -280,42 +272,7 @@ function rgbaToString(c) {
 	return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
 }
 
-function setColor(templateEntry, colorType = 'fill') {
-	return function() {
-		const fill = util.get(templateEntry, store.state.template)[colorType];
-		const originalColor = util.clone(fill.color);
-
-		app.currentDialog = 'colorDialog';
-		app.clearSelected();
-
-		Vue.nextTick(() => {
-			const dialog = app.$refs.currentDialog;
-			dialog.$off();
-			dialog.$on('ok', newValues => {
-				const entry = `${templateEntry}.${colorType}`;
-				undoStack.commit(
-					'templatePage.set',
-					{entry, value: {color: rgbaToString(newValues.color)}},
-					'Set Template Fill'
-				);
-				app.redrawUI(true);
-			});
-			dialog.$on('cancel', () => {
-				fill.color = originalColor;
-				app.redrawUI(true);
-			});
-			dialog.$on('update', newValues => {
-				fill.color = rgbaToString(newValues.color);
-				app.redrawUI(true);
-			});
-			dialog.color = originalColor || 'black';
-			dialog.show({x: 400, y: 150});
-		});
-	};
-}
-
-module.exports = function TemplateMenu(entry, localApp) {
-	app = localApp;
+module.exports = function TemplateMenu(entry) {
 	let menu = templateMenu[entry.type];
 	menu = (typeof menu === 'function') ? menu(entry) : menu;
 	if (menu) {
