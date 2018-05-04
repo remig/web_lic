@@ -256,17 +256,6 @@ ul {
 	position: absolute;
 }
 
-#templatePanel {
-	width: 265px;
-	height: 100%;
-	border: 1px solid grey;
-	background-color: white;
-}
-
-#templatePanel h4 {
-	text-align: center;
-}
-
 #statusBar {
 	background-color: #bbb;
 	border-top: 1px solid #333;
@@ -312,15 +301,33 @@ ul {
 }
 
 /* Template Page Panel */
+#templatePanel {
+	width: 265px;
+	height: 100%;
+	border: 1px solid grey;
+	background-color: white;
+	overflow:hidden;
+	overflow-y: scroll;
+}
+
+#templatePanel h4 {
+	text-align: center;
+	font-weight: 600;
+	border-bottom: 1px solid #8d8d8d;
+	padding-bottom: 10px;
+}
+
 .panel-group .panel {
 	border-radius: 0;
+	margin-bottom: 10px;
+	padding-bottom: 20px;
 }
 
 .panel-template {
-    margin-bottom: 10px;
-    background-color: #fff;
-    border-bottom: 1px solid #888;
-    border-radius: 0;
+	margin-bottom: 10px;
+	background-color: #fff;
+	border-bottom: 1px solid #8d8d8d;
+	border-radius: 0;
 }
 
 .panel-template .panel-body {
@@ -329,9 +336,53 @@ ul {
 
 .panel-template h5 {
 	font-weight: 600;
+	font-size: 16px;
 }
 
-/* Padding */
+.panel-template .form-horizontal .control-label {
+	font-weight: 600;
+	text-align: left;
+}
+
+.panel-template .form-horizontal .col-sm-5 {
+	padding-left: 0px;	
+}
+
+.panel-template .btn-secondary {
+	min-width: 35px;
+	font-weight: 600;
+}
+
+.panel-template .btn-secondary strong {
+	font-weight: 800;
+}
+
+/* Margin/Padding */
+
+.marginT05 {
+	margin-top: 5px;
+}
+.marginT10 {
+	margin-top: 10px;
+}
+.marginT15 {
+	margin-top: 15px;
+}
+.marginT20 {
+	margin-top: 20px;
+}
+.marginB05 {
+	margin-bottom: 5px;
+}
+.marginB10 {
+	margin-bottom: 10px;
+}
+.marginB15 {
+	margin-bottom: 15px;
+}
+.marginB20 {
+	margin-bottom: 20px;
+}
 
 .paddingT05 {
 	padding-top: 5px;
@@ -344,4 +395,16 @@ ul {
 }
 .paddingT20 {
 	padding-top: 20px;
+}
+.paddingB05 {
+	padding-bottom: 5px;
+}
+.paddingB10 {
+	padding-bottom: 10px;
+}
+.paddingB15 {
+	padding-bottom: 15px;
+}
+.paddingB20 {
+	padding-bottom: 20px;
 }
