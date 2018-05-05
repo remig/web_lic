@@ -44,17 +44,17 @@ div#container {
 }
 
 .shortcut {
-  line-height: 22px;
-  position: absolute;
-  text-align: right;
-  max-width: 60px;
-  right: 8px;
-  color: #888;
-  overflow: hidden;
-  white-space: nowrap;
-  word-wrap: normal;
-  -o-text-overflow: ellipsis;
-  text-overflow: ellipsis;
+	line-height: 22px;
+	position: absolute;
+	text-align: right;
+	max-width: 60px;
+	right: 8px;
+	color: #888;
+	overflow: hidden;
+	white-space: nowrap;
+	word-wrap: normal;
+	-o-text-overflow: ellipsis;
+	text-overflow: ellipsis;
 }
 
 .dropdown-menu > .disabled > a {
@@ -231,7 +231,7 @@ ul {
 }
 
 #leftPane {
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 #rightPane {
@@ -302,12 +302,13 @@ ul {
 
 /* Template Page Panel */
 #templatePanel {
+	min-width: 265px;
 	width: 265px;
 	height: 100%;
 	border: 1px solid grey;
 	background-color: white;
-	overflow:hidden;
-	overflow-y: scroll;
+	overflow: hidden;
+	overflow-y: auto;
 }
 
 #templatePanel h4 {

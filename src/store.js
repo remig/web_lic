@@ -369,6 +369,27 @@ const store = {
 				return null;
 			}
 			return {type: item.type, id: item.id};
+		},
+		targetBox(t) {
+			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
+			if (t.align === 'right') {
+				box.x -= box.width;
+			}
+			if (t.valign === 'bottom') {
+				box.y -= box.height;
+			} else if (t.valign === 'top') {
+				box.y += 5;
+			} else if (t.valign === 'hanging') {
+				box.y -= 5;
+			}
+			while (t) {
+				t = store.get.parent(t);
+				if (t) {
+					box.x += t.x || 0;
+					box.y += t.y || 0;
+				}
+			}
+			return box;
 		}
 	},
 	// TODO: convert all 'opts' arguments into {opts} for automatic destructuring.  duh.

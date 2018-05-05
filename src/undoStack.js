@@ -6,6 +6,7 @@ const store = require('./store');
 // stack is an array of state; undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone.
 // index points to the currently visible state in the UI.
 // TODO: don't let this grow unbound - support max undo stack size.  Need performance metrics here, for decent max stack size.
+// TODO: check if previous undo stack entry has same text as newest one; if so, merge them (if allowed & sensical)
 
 const state = {
 	stack: [],
@@ -46,7 +47,7 @@ const api = {
 			store.save('localStorage');
 			state.localStorageTimer = setTimeout(() => {
 				state.localStorageTimer = null;
-			}, 30 * 1000);
+			}, 1 * 1000);
 		}
 	},
 

@@ -8,8 +8,8 @@ const LDParse = require('./LDParse');
 const LDRender = require('./LDRender');
 const Menu = require('./menu');
 const ContextMenu = require('./contextMenu');
-const Draw = require('./draw');
 require('./tree');
+require('./pageView');
 require('./dialog');
 require('./templatePanel');
 
@@ -45,10 +45,6 @@ const app = new Vue({
 		dirtyState: {
 			undoIndex: 0,
 			lastSaveIndex: 0
-		},
-		pageSize: {
-			width: store.state.template.page.width,
-			height: store.state.template.page.height
 		},
 		lastRightClickPos: {
 			x: null,
@@ -119,8 +115,6 @@ const app = new Vue({
 			}
 			store.load(content);
 			this.filename = store.model.filename;
-			this.pageSize.width = store.state.template.page.width;
-			this.pageSize.height = store.state.template.page.height;
 			const firstPage = store.get.titlePage() || store.get.firstPage();
 			this.currentPageLookup = store.get.itemToLookup(firstPage);
 			store.save('localStorage');
@@ -129,8 +123,8 @@ const app = new Vue({
 			const time = util.formatTime(start, Date.now());
 			this.statusText = `"${this.filename}" openend successfully (${time})`;
 			Vue.nextTick(() => {
-				this.drawCurrentPage();
 				this.forceUIUpdate();
+				this.drawCurrentPage();
 			});
 		},
 		save() {
@@ -181,7 +175,7 @@ const app = new Vue({
 			util.emptyNode(document.getElementById('canvasHolder'));
 			Vue.nextTick(() => {
 				this.clearSelected();
-				this.clearPageCanvas();
+				this.$refs.pageView.clearPageCanvas();
 			});
 		},
 		setCurrentPage(page) {
@@ -242,15 +236,8 @@ const app = new Vue({
 			};
 		})(),
 		forceUIUpdate() {
-			const pageSize = store.state.template.page;
-			if ((this.pageSize.width !== pageSize.width) || (this.pageSize.height !== pageSize.height)) {
-				this.pageSize.width = store.state.template.page.width;
-				this.pageSize.height = store.state.template.page.height;
-				Vue.nextTick(() => {
-					this.drawCurrentPage();
-				});
-			}
 			// If I understood Vue better, I'd create components that damn well updated themselves properly.
+			this.$refs.pageView.update();
 			this.treeUpdateState = !this.treeUpdateState;
 			this.menuUpdateState = !this.menuUpdateState;
 			if (this.selectedItemLookup && this.selectedItemLookup.id != null) {
@@ -278,29 +265,8 @@ const app = new Vue({
 			this.dirtyState.lastSaveIndex = 0;
 			this.forceUIUpdate();
 		},
-		targetBox(t) {
-			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
-			if (t.align === 'right') {
-				box.x -= box.width;
-			}
-			if (t.valign === 'bottom') {
-				box.y -= box.height;
-			} else if (t.valign === 'top') {
-				box.y += 5;
-			} else if (t.valign === 'hanging') {
-				box.y -= 5;
-			}
-			while (t) {
-				t = store.get.parent(t);
-				if (t) {
-					box.x += t.x || 0;
-					box.y += t.y || 0;
-				}
-			}
-			return box;
-		},
 		inBox(x, y, t) {
-			const box = this.targetBox(t);
+			const box = store.get.targetBox(t);
 			return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
 		},
 		// TODO: abstract the details in here better.  Shouldn't have to add more code here for each simple box container
@@ -561,28 +527,27 @@ const app = new Vue({
 				}
 			}
 		},
-		clearPageCanvas() {
-			const canvas = document.getElementById('pageCanvas');
-			canvas.width = canvas.width;
+		setPageView({facingPage = false, scroll = false}) {
+			// TODO: Store this in something new like localCache.UISettings
+			this.pageView.facingPage = facingPage;
+			this.pageView.scroll = scroll;
+			this.redrawUI();
 		},
 		drawCurrentPage() {
 			if (this.currentPageLookup != null) {
-				this.clearPageCanvas();
 				let page = store.get.lookupToItem(this.currentPageLookup);
-				if (page == null) {  // This can happen if, say, a page got deleted without updating the cucrrent page (like in undo / redo)
+				if (page == null) {  // This can happen if, say, a page got deleted without updating the current page (like in undo / redo)
 					page = store.get.firstPage();
 					this.currentPageLookup = store.get.itemToLookup(page);
 				}
-				this.drawPage(page, document.getElementById('pageCanvas'));
+				Vue.nextTick(() => {
+					this.$refs.pageView.drawCurrentPage();
+				});
 			}
 		},
 		drawPage(page, canvas, scale = 1) {
-			const selItem = this.selectedItemLookup;
-			const selectedPart = (selItem && selItem.type === 'part') ? selItem : null;
-			Draw.page(page, canvas, scale, selectedPart);
-		},
-		pages() {
-			return store.state.pages.filter(p => p != null);
+			// TODO: this is only called from PDF export.  Find a cleaner way.
+			this.$refs.pageView.drawPage(page, canvas, scale);
 		}
 	},
 	computed: {
@@ -601,49 +566,6 @@ const app = new Vue({
 		},
 		version() {
 			return version.slice(0, version.lastIndexOf('.'));  // major.minor is enough for public consumption
-		},
-		highlightStyle() {
-			const selItem = store.get.lookupToItem(this.selectedItemLookup);
-			if (!selItem || selItem.type === 'part') {
-				return {display: 'none'};
-			}
-			const type = selItem.type;
-			const page = store.get.pageForItem(selItem);
-			if (page.needsLayout) {
-				store.mutations.page.layout({page});
-			}
-			let box;
-			if (type === 'page' || type === 'titlePage' || type === 'templatePage') {
-				box = {x: 0, y: 0, width: this.pageSize.width, height: this.pageSize.height};
-			} else if (type === 'calloutArrow') {
-				// TODO: store arrow / divider / stuff with points bounding box in item itself at layout time, then use it like any other target
-				const points = store.get.calloutArrowToPoints(selItem);
-				let pointBox = util.geom.bbox(points);
-				pointBox = util.geom.expandBox(pointBox, 8, 8);
-				box = this.targetBox({...selItem, ...pointBox});
-			} else if (type === 'divider') {
-				let pointBox = util.geom.bbox([selItem.p1, selItem.p2]);
-				pointBox = util.geom.expandBox(pointBox, 8, 8);
-				box = this.targetBox({...selItem, ...pointBox});
-			} else {
-				box = this.targetBox(selItem);
-				if (type === 'point') {
-					box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
-				}
-			}
-			// TODO: Handle wide borders better: x & y should be outside the border, then layout inside minus entire border width
-			let borderWidth = 0;
-			var template = store.get.templateForItem(selItem);
-			if (template && template.border && template.border.width) {
-				borderWidth = Math.ceil(template.border.width / 2);
-			}
-			return {
-				display: 'block',
-				left: `${box.x - 4 - borderWidth}px`,
-				top: `${box.y - 4 - borderWidth}px`,
-				width: `${box.width + ((4 + borderWidth) * 2)}px`,
-				height: `${box.height + ((4 + borderWidth) * 2)}px`
-			};
 		}
 	},
 	mounted() {
