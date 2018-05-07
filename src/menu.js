@@ -224,18 +224,40 @@ const menu = [
 		{text: 'Snap To (NYI)', enabled: () => false, cb() {}},
 		{text: 'Brick Colors... (NYI)', enabled: () => false, cb() {}}
 	]},
-	{name: 'View (NYI)', children: [
-		{text: 'Add Horizontal Guide', enabled: () => false, cb() {}},
-		{text: 'Add Vertical Guide', enabled: () => false, cb() {}},
-		{text: 'Remove Guides', enabled: () => false, cb() {}},
+	{name: 'View', children: [
+		{
+			text: 'Show Pages',
+			enabled: enableIfModel,
+			children: [
+				{
+					text: 'One Page',
+					cb: () => app.setPageView({facingPage: false, scroll: false})
+				},
+				{
+					text: 'Two Facing Pages (NYI)',
+					enabled: false,
+					cb: () => app.setPageView({facingPage: true, scroll: false})
+				},
+				{
+					text: 'One Page Scrolling View',
+					cb: () => app.setPageView({facingPage: false, scroll: true})
+				},
+				{
+					text: 'Two Pages Scrolling View (NYI)',
+					enabled: false,
+					cb: () => app.setPageView({facingPage: true, scroll: true})
+				}
+			]
+		},
 		{text: 'separator'},
 		{text: 'Zoom 100%', enabled: () => false, cb() {}},
 		{text: 'Zoom To Fit', enabled: () => false, cb() {}},
 		{text: 'Zoom In', enabled: () => false, cb() {}},
 		{text: 'Zoom Out', enabled: () => false, cb() {}},
 		{text: 'separator'},
-		{text: 'Show One Page', enabled: () => false, cb() {}},
-		{text: 'Show Two Pages', enabled: () => false, cb() {}}
+		{text: 'Add Horizontal Guide', enabled: () => false, cb() {}},
+		{text: 'Add Vertical Guide', enabled: () => false, cb() {}},
+		{text: 'Remove Guides', enabled: () => false, cb() {}}
 	]},
 	{name: 'Export', children: [
 		{

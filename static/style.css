@@ -9,6 +9,8 @@ div#container {
 	height: 100%;
 }
 
+/* TODO: Add checkbox to 'selected' menu entries, like the currently selected view entry */
+
 /* Overwrite Bootstrap stuff */
 .navbar {
 	margin-bottom: 0px;
@@ -237,23 +239,29 @@ ul {
 #rightPane {
 	background-color: #bbb;
 	display: flex;
+	overflow: hidden;
 }
 
 #rightSubPane {
+	position: relative;
 	height: 100%;
 	flex: 1 1 auto;
 	display: flex;
 	justify-content: center;
+	overflow-y: auto;
+}
+
+#rightSubPane.singleEntry {
 	align-items: center;
 }
 
-#pageContainer {
+.pageCanvas {
     background-color: #fff;
     box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
 }
 
-#pageCanvas {
-	position: absolute;
+.pageCanvas.singleEntry {
+	margin: 15px 0;
 }
 
 #statusBar {
@@ -281,7 +289,7 @@ ul {
 
 #highlight {  /* Style the border around selected items */
 	display: none;
-	position: relative;
+	position: absolute;
 	pointer-events: none;
 	border: 3px dashed #2eb9ce;
 }

@@ -38,7 +38,7 @@
 			</div>
 
 			<div id="rightPane" class="split split-horizontal">
-				<page-canvas-view ref="pageView" :selected-item="selectedItemLookup" :current-page-lookup="currentPageLookup"></page-canvas-view>
+				<page-canvas-view ref="pageView" :app="this" :selected-item="selectedItemLookup" :current-page-lookup="currentPageLookup"></page-canvas-view>
 				<template-panel id="templatePanel" :app="this" :entry="selectedItemLookup" v-if="currentPageLookup && currentPageLookup.type === 'templatePage'"></template-panel>
 			</div>
 
@@ -64,11 +64,26 @@
 	<!-- Component Templates -->
 
 	<script type="text/x-template" id="pageCanvasView">
-		<div id="rightSubPane">
-			<div id="pageContainer" :style="{width: pageSize.width + 'px', height: pageSize.height + 'px'}">
-				<canvas id="pageCanvas" :width="pageSize.width" :height="pageSize.height"></canvas>
-				<div id="highlight" :style="highlightStyle"></div>
+		<div id="rightSubPane" :class="[{singleEntry: !isScrollingView}]">
+			<div class="pageCanvasContainer" v-if="isScrollingView" :style="{width: pageSize.width + 5 + 'px'}">
+				<canvas
+					v-for="n in pageCount"
+					:id="'pageCanvas' + pageIndexToID(n - 1)"
+					class="pageCanvas singleEntry"
+					:style="{marginTop: (n === 1) ? pageCenterOffset : '', marginBottom: (n === pageCount) ? pageCenterOffset : ''}"
+					:width="pageSize.width" :height="pageSize.height"
+					@click.stop="click($event, pageIndexToID(n - 1))"
+				></canvas>
 			</div>
+			<div v-else :style="{width: pageSize.width + 5 + 'px', height: pageSize.height + 5 + 'px'}">
+				<canvas
+					id="pageCanvas"
+					class="pageCanvas"
+					:width="pageSize.width" :height="pageSize.height"
+					@click.stop="click($event)"
+					></canvas>
+			</div>
+			<div id="highlight" :style="highlightStyle"></div>
 		</div>
 	</script>
 

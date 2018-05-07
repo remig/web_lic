@@ -180,6 +180,7 @@ const contextMenu = {
 				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
 				undoStack.commit('page.delete', {page}, 'Delete Page');
 				Vue.nextTick(() => {
+					app.redrawUI(true);
 					app.setCurrentPage(nextPage);
 				});
 			}
