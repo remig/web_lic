@@ -5,7 +5,6 @@ const util = require('./util');
 const LDParse = require('./LDParse');
 const store = require('./store');
 const undoStack = require('./undoStack');
-const TemplateMenu = require('./templatePanel');
 
 let app;
 
@@ -802,10 +801,6 @@ function displacePart(direction) {
 module.exports = function ContextMenu(entry, localApp) {
 	app = localApp;
 	let menu = contextMenu[entry.type];
-	const page = store.get.pageForItem(app.selectedItemLookup);
-	if (store.get.isTemplatePage(page)) {  // Special case: template page items should use template page item menus
-		menu = TemplateMenu(entry, localApp);
-	}
 	menu = (typeof menu === 'function') ? menu(entry) : menu;
 	if (menu) {
 		menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above

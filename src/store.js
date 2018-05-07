@@ -83,6 +83,17 @@ const store = {
 			return container;
 		}
 
+		function getRotation(item) {
+			if (item.rotation) {
+				return item.rotation;
+			}
+			const rot = store.state.template[item.type].rotation;
+			if (rot && rot.x === 0 && rot.y === 0 && rot.z === 0) {
+				return null;
+			}
+			return rot;
+		}
+
 		return {
 			csi(localModel, step, csi, selectedPartIDs, scale = 1) {
 				const domID = `CSI_${step.csiID}`;
@@ -101,7 +112,7 @@ const store = {
 							selectedPartIDs,
 							resizeContainer: true,
 							displacedParts: step.displacedParts,
-							rotation: csi.rotation
+							rotation: getRotation(csi)
 						};
 						LDRender.renderModel(localModel, container, 1000 * scale, config);
 					}
@@ -115,7 +126,7 @@ const store = {
 					selectedPartIDs,
 					resizeContainer: true,
 					displacedParts: step.displacedParts,
-					rotation: csi.rotation
+					rotation: getRotation(csi)
 				};
 				const container = document.getElementById('generateImagesCanvas');
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
@@ -962,11 +973,7 @@ const store = {
 				step.model = modelData.model;
 				step.parts = [0, 1];
 
-				store.mutations.csi.rotate({
-					csi: {type: 'csi', id: step.csiID},
-					rotation: {x: 0, y: 360, z: 0},
-					addRotateIcon: true
-				});
+				store.mutations.step.toggleRotateIcon({step, display: true});
 
 				store.mutations.submodelImage.add({
 					parent: step, submodel: [], quantity: 2

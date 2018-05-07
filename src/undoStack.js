@@ -21,6 +21,10 @@ const api = {
 		state.onChangeCB = onChangeCB;
 	},
 
+	// Perform a new state mutation action then push it to the undo / redo stack
+	// clearCacheTargets is an array of either:
+	//  - items or {id, type} selectionItems that will get their 'isDirty' flag set when an undo / reo
+	//  - a item type string like 'csi', which resets all items of that type
 	commit(mutationName, opts, undoText, clearCacheTargets) {
 
 		const mutation = util.get(mutationName, store.mutations);
@@ -47,7 +51,7 @@ const api = {
 			store.save('localStorage');
 			state.localStorageTimer = setTimeout(() => {
 				state.localStorageTimer = null;
-			}, 1 * 1000);
+			}, 30 * 1000);
 		}
 	},
 
@@ -115,10 +119,14 @@ function performUndoRedoAction(newIndex) {
 		clearCacheTargets.push(...state.stack[state.index].clearCacheTargets);
 	}
 	clearCacheTargets.forEach(item => {
-		item = {type: item.type, id: item.id};  // Some cache items were cloned from previous states; ensure we pull only the actual item from the current state
-		item = store.get.lookupToItem(item);
-		if (item) {
-			item.isDirty = true;
+		if (typeof item === 'string') {
+			store.state[item + 's'].forEach(item => (item.isDirty = true));
+		} else {
+			item = {type: item.type, id: item.id};  // Some cache items were cloned from previous states; ensure we pull only the actual item from the current state
+			item = store.get.lookupToItem(item);
+			if (item) {
+				item.isDirty = true;
+			}
 		}
 	});
 }

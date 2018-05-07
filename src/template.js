@@ -37,7 +37,7 @@ const template = {
 		innerMargin: 0.017,
 		csi: {
 			scale: 1,
-			rotation: null
+			rotation: {x: 0, y: 0, z: 0}
 		},
 		fill: {
 			color: null
@@ -54,7 +54,7 @@ const template = {
 	},
 	csi: {
 		scale: 1,
-		rotation: null
+		rotation: {x: 0, y: 0, z: 0}
 	},
 	pli: {
 		innerMargin: 0.017,
@@ -70,7 +70,7 @@ const template = {
 	pliItem: {
 		csi: {
 			scale: 1,
-			rotation: null
+			rotation: {x: 0, y: 0, z: 0}
 		},
 		quantityLabel: {
 			font: 'bold 10pt Helvetica',

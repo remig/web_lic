@@ -285,7 +285,8 @@ const app = new Vue({
 			this.lastRightClickPos.x = e.clientX;
 			this.lastRightClickPos.y = e.clientY;
 			this.contextMenu = null;
-			if (this.selectedItemLookup != null) {
+			if (this.selectedItemLookup != null && this.currentPageLookup != null
+					&& this.currentPageLookup.type !== 'templatePage') {  // Template page doesn't have any right click menus
 				Vue.nextTick(() => {
 					// Delay menu creation so that earlier menu clear has time to take effect
 					// This is necessary as menu content may change without selected item changing

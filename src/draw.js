@@ -38,6 +38,7 @@ const api = {
 			ctx.strokeStyle = template.divider.border.color;
 			ctx.lineWidth = template.divider.border.width;
 			ctx.beginPath();
+			// TODO: half pixel offset needed here too. Can't just floor everything; border thickness might offset too
 			ctx.moveTo(divider.p1.x, divider.p1.y);
 			ctx.lineTo(divider.p2.x, divider.p2.y);
 			ctx.stroke();
@@ -258,12 +259,15 @@ const api = {
 			ctx.stroke();
 			ctx.fillStyle = template.arrow.color;
 			const tip = offset(arrowPoints[arrowPoints.length - 1], template.arrow.border.width);
+			// TODO: consider arrow line width when drawing arrow, so it grows along with line width
+			// TODO: line width 0 should not draw anything
 			api.arrowHead(ctx, tip.x, tip.y, arrow.direction);
 			ctx.fill();
 		});
 		ctx.restore();
 	},
 
+	// TODO: rotateIcons are positioned and sized totally wrong.  Something's broken.
 	rotateIcon(icon, ctx) {
 		const template = store.state.template.rotateIcon;
 		icon = store.get.rotateIcon(icon);

@@ -123,21 +123,23 @@ function rotateTemplatePanel(templateEntry) {
 			templateEntry: {type: String, default: templateEntry}
 		},
 		data() {
-			const rotation = util.get(this.templateEntry, store.state.template).rotation || {};
-			return {
-				x: rotation.x || 0,
-				y: rotation.y || 0,
-				z: rotation.z || 0
-			};
+			const rotation = util.get(this.templateEntry, store.state.template).rotation;
+			return util.clone(rotation);
 		},
 		methods: {
+			apply() {
+				undoStack.commit('', null, 'Change CSI Template', ['csi']);
+				store.state.csis.forEach(csi => (csi.isDirty = true));
+			},
 			updateValues() {
-				let template = util.get(this.templateEntry, store.state.template).rotation;
-				if (!template || template.x !== this.x || template.y !== this.y || template.z !== this.z) {
-					template = template || {};
+				const template = util.get(this.templateEntry, store.state.template).rotation;
+				if (template.x !== this.x || template.y !== this.y || template.z !== this.z) {
 					template.x = this.x;
 					template.y = this.y;
 					template.z = this.z;
+					const step = store.get.step(store.state.templatePage.steps[0]);
+					const csi = store.get.csi(step.csiID);
+					csi.isDirty = true;
 					store.state.templatePage.needsLayout = true;
 					this.$emit('new-values', util.prettyPrint(this.templateEntry));
 				}
@@ -146,6 +148,10 @@ function rotateTemplatePanel(templateEntry) {
 	};
 }
 
+// TODO: add default page layout UI
+// TODO: when resizing the default page, need to redo layout of all other pages
+// TODO: should also add UI to choose wheterh to redo layout or jus extend canvas
+// TODO: when page resizes, page highlight resizes correctly but does not reposition
 const pageTemplatePanel = {
 	template: '#pageTemplatePanel',
 	data() {
@@ -202,6 +208,7 @@ const rotateIconTemplatePanel = {
 };
 
 // TODO: need to be able to select the CSI inside submodel image
+// TODO: rename 'entry' to 'selectedItem', to match naming in all other components
 Vue.component('templatePanel', {
 	template: '#templatePanel',
 	props: ['entry', 'app'],
@@ -223,9 +230,13 @@ Vue.component('templatePanel', {
 	watch: {
 		entry() {
 			if (this.lastEdit) {
-				undoStack.commit('', null, `Change ${this.lastEdit} Template`);
-				this.lastEdit = '';
+				if (typeof this.$refs.currentTemplatePanel.apply === 'function') {
+					this.$refs.currentTemplatePanel.apply();
+				} else {
+					undoStack.commit('', null, `Change ${this.lastEdit} Template`);
+				}
 				this.app.redrawUI(false);
+				this.lastEdit = '';
 			}
 		}
 	},
@@ -251,19 +262,6 @@ Vue.component('templatePanel', {
 	}
 });
 
-const templateMenu = {
-	csi: [
-		{
-			text: 'Change Default Rotation... (NYI)',
-			cb() {}
-		},
-		{
-			text: 'Change Default Scale... (NYI)',
-			cb() {}
-		}
-	]
-};
-
 function rgbaToString(c) {
 	if (typeof c === 'string') {
 		return c;
@@ -271,13 +269,3 @@ function rgbaToString(c) {
 	c = c.rgba;
 	return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
 }
-
-module.exports = function TemplateMenu(entry) {
-	let menu = templateMenu[entry.type];
-	menu = (typeof menu === 'function') ? menu(entry) : menu;
-	if (menu) {
-		menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above
-		return menu;
-	}
-	return null;
-};
