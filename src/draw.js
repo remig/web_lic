@@ -19,6 +19,9 @@ const api = {
 		}
 
 		const template = store.state.template.page;
+		ctx.fillStyle = 'white';  // Erase any previous content.  Saves having to worry about clearing the canvas before redraws.
+		ctx.fillRect(0, 0, template.width, template.height);
+
 		const rectStyle = {
 			strokeStyle: template.border.color,
 			lineWidth: template.border.width * 2
@@ -357,6 +360,16 @@ const api = {
 			ctx.restore();
 		};
 	})(),
+
+	highlight(canvas, x, y, w, h) {
+		const ctx = canvas.getContext('2d');
+		ctx.save();
+		ctx.strokeStyle = '#2eb9ce';
+		ctx.lineWidth = 3;
+		ctx.setLineDash([5, 3]);
+		ctx.strokeRect(x, y, w, h);
+		ctx.restore();
+	},
 
 	roundedRectStyled(ctx, x, y, w, h, r, style) {
 		ctx.save();

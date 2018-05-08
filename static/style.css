@@ -287,13 +287,6 @@ ul {
 	display: block;
 }
 
-#highlight {  /* Style the border around selected items */
-	display: none;
-	position: absolute;
-	pointer-events: none;
-	border: 3px dashed #2eb9ce;
-}
-
 [v-cloak] {
 	display: none;
 }

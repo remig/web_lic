@@ -409,7 +409,16 @@ const app = new Vue({
 			this.clearSelected();
 			this.$refs.pageView.facingPage = facingPage;
 			this.$refs.pageView.scroll = scroll;
-			this.redrawUI();
+			if (scroll) {
+				Vue.nextTick(() => {
+					this.$refs.pageView.drawAllPages();
+					this.$refs.pageView.scrollToPage(this.currentPageLookup);
+				});
+			} else {
+				Vue.nextTick(() => {
+					this.$refs.pageView.drawCurrentPage();
+				});
+			}
 		},
 		drawCurrentPage() {
 			if (this.currentPageLookup != null) {
