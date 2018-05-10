@@ -249,6 +249,7 @@ ul {
 	display: flex;
 	justify-content: center;
 	overflow-y: auto;
+	line-height: 0;
 }
 
 #rightSubPane.singleEntry {
@@ -260,7 +261,7 @@ ul {
     box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
 }
 
-.pageCanvas.singleEntry {
+.pageCanvas.multipleEntries {
 	margin: 15px 0;
 }
 

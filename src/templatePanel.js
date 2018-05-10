@@ -150,7 +150,7 @@ function rotateTemplatePanel(templateEntry) {
 
 // TODO: add default page layout UI
 // TODO: when resizing the default page, need to redo layout of all other pages
-// TODO: should also add UI to choose wheterh to redo layout or jus extend canvas
+// TODO: should also add UI to choose whether to redo layout or just extend canvas
 // TODO: when page resizes, page highlight resizes correctly but does not reposition
 const pageTemplatePanel = {
 	template: '#pageTemplatePanel',

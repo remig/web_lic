@@ -64,15 +64,15 @@
 	<!-- Component Templates -->
 
 	<script type="text/x-template" id="pageCanvasView">
-		<div id="rightSubPane" :class="[{singleEntry: !isScrollingView}]">
+		<div id="rightSubPane" :class="[{singleEntry: !isScrollingView}]" @scroll="handleScroll()">
 			<div class="pageCanvasContainer" v-if="isScrollingView" :style="{width: pageSize.width + 5 + 'px'}">
 				<canvas
-					v-for="n in pageCount"
-					:id="'pageCanvas' + pageIndexToID(n - 1)"
-					class="pageCanvas singleEntry"
-					:style="{marginTop: (n === 1) ? pageCenterOffset : '', marginBottom: (n === pageCount) ? pageCenterOffset : ''}"
+					v-for="(page, idx) in pageList"
+					:id="'pageCanvas' + page.id"
+					class="pageCanvas multipleEntries"
+					:style="{marginTop: (idx === 0) ? pageCenterOffset : '', marginBottom: (idx === pageList.length - 1) ? pageCenterOffset : ''}"
 					:width="pageSize.width" :height="pageSize.height"
-					@click.stop="click($event, pageIndexToID(n - 1))"
+					@click.stop="click($event, page)"
 				></canvas>
 			</div>
 			<div v-else :style="{width: pageSize.width + 5 + 'px', height: pageSize.height + 5 + 'px'}">

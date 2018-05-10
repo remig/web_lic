@@ -14,7 +14,7 @@ Vue.component('pageCanvasView', {
 				width: store.state.template.page.width,
 				height: store.state.template.page.height
 			},
-			pageCount: store.get.pageCount(),
+			pageCount: 0,
 			facingPage: false,
 			scroll: false
 		};
@@ -32,11 +32,12 @@ Vue.component('pageCanvasView', {
 			}
 		},
 		currentPageLookup(newPage) {
+			this.drawCurrentPage();
 			this.scrollToPage(newPage);
 		}
 	},
 	methods: {
-		update() {
+		forceUpdate() {
 			let needsRedraw = false;
 			const pageSize = store.state.template.page;
 			if ((this.pageSize.width !== pageSize.width) || (this.pageSize.height !== pageSize.height)) {
@@ -44,8 +45,10 @@ Vue.component('pageCanvasView', {
 				this.pageSize.height = store.state.template.page.height;
 				needsRedraw = true;
 			}
-			if (this.pageCount !== store.get.pageCount()) {
-				this.pageCount = store.get.pageCount();
+			const latestPageCount = store.get.pageCount(true);
+			if (this.pageCount !== latestPageCount) {
+				this.pageCount = latestPageCount;
+				store.state.pages.forEach(p => (p.needsDrawing = true));
 				needsRedraw = true;
 			}
 			if (needsRedraw) {
@@ -54,13 +57,36 @@ Vue.component('pageCanvasView', {
 				});
 			}
 		},
-		click(e, pageID) {
-			const page = (pageID == null) ? this.currentPageLookup : store.get.page(pageID);
+		click(e, page) {
+			page = (page == null) ? this.currentPageLookup : page;
 			const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
 			if (target) {
 				this.app.setSelected(target);
 			} else {
 				this.app.clearSelected();
+			}
+		},
+		handleScroll() {
+			const container = document.getElementById('rightSubPane');
+			const topOffset = container.querySelector('canvas').offsetTop;
+			const pageHeight = store.state.template.page.height + 30;
+			let pageIndex = Math.ceil((container.scrollTop - topOffset) / pageHeight);
+			pageIndex -= store.get.titlePage() ? 1 : 0;
+			const page = (pageIndex < 0) ? store.get.titlePage() : store.state.pages[pageIndex];
+			this.drawNearbyPages(page);
+		},
+		scrollToPage(page) {
+			if (!this.isScrollingView) {
+				return;
+			}
+			page = store.get.lookupToItem(page);
+			if (page) {
+				const pageCanvas = this.getCanvasForPage(page);
+				if (pageCanvas) {
+					const container = document.getElementById('rightSubPane');
+					const dy = (container.offsetHeight - pageCanvas.offsetHeight) / 2;
+					container.scrollTop = pageCanvas.offsetTop - dy;
+				}
 			}
 		},
 		clearPageCanvas() {
@@ -69,51 +95,45 @@ Vue.component('pageCanvasView', {
 				canvas.width = canvas.width;
 			});
 		},
-		drawAllPages() {
-			// Can't really draw all pages at once; too slow.  Instead draw 5 pages centered on the currently visible page.
-			// Draw the other pages later, when the browser isn't busy.
-
-			const pageList = store.state.pages.map(page => page.id);
-			const currentPageIdx = pageList.indexOf(this.currentPageLookup.id);
-			const firstPage = Math.max(0, currentPageIdx - 2);
-			for (let i = firstPage; i < firstPage + 5; i++) {
-				const page = store.get.page(pageList[i]);
-				this.drawPage(page, document.getElementById('pageCanvas' + page.id));
-			}
-
-			let lastDrawnPage = 0;
-			const pagesToDraw = [
-				...pageList.slice(firstPage + 5),
-				...pageList.slice(0, firstPage).reverse()
-			];
-
-			function drawOnePage(component) {
-				return function() {
-					const page = store.get.page(pagesToDraw[lastDrawnPage]);
-					component.drawPage(page, document.getElementById('pageCanvas' + page.id));
-					lastDrawnPage += 1;
-					if (lastDrawnPage < pagesToDraw.length) {
-						window.setTimeout(drawOnePage(component), 100);
-					}
-				};
-			}
-			window.setTimeout(drawOnePage(this), 100);
-		},
 		drawCurrentPage() {
 			if (this.currentPageLookup) {
 				this.drawPage(this.currentPageLookup);
+				if (this.scroll) {
+					this.drawNearbyPages(this.currentPageLookup);
+				}
+			}
+		},
+		drawNearbyPages(page) {
+			page = store.get.lookupToItem(page);
+			let currentPageIdx;
+			if (page.type === 'titlePage') {
+				currentPageIdx = 0;
+			} else {
+				currentPageIdx = store.state.pages.findIndex(el => el.id === page.id);
+			}
+			if (currentPageIdx < 0) {
+				return;
+			}
+			const firstPage = Math.max(0, currentPageIdx - 2);
+			for (let i = firstPage; i < firstPage + 5; i++) {
+				page = store.state.pages[i];
+				if (page && page.needsDrawing) {
+					this.drawPage(page);
+				}
 			}
 		},
 		drawPage(page, canvas, scale = 1) {
 			page = store.get.lookupToItem(page);
 			if (canvas == null) {
-				canvas = document.getElementById('pageCanvas' + (this.isScrollingView ? page.id : ''));
+				canvas = this.getCanvasForPage(page);
 			}
 			if (canvas == null) {
-				return;  // Can't find canvas for this page - ignore draw call.  Happens when we're transitioning between view modes.
+				return;  // Can't find a canvas for this page - ignore draw call.  Happens when we're transitioning between view modes.
 			}
 			const selectedPart = (this.selectedItem && this.selectedItem.type === 'part') ? this.selectedItem : null;
 			Draw.page(page, canvas, scale, selectedPart);
+			console.log('Drawing Page: ' + page.id);
+			delete page.needsDrawing;
 			if (this.currentPageLookup && page.id === this.currentPageLookup.id) {
 				const itemPage = store.get.pageForItem(this.selectedItem);
 				if (util.itemEq(itemPage, this.currentPageLookup)) {
@@ -122,25 +142,23 @@ Vue.component('pageCanvasView', {
 				}
 			}
 		},
-		scrollToPage(page) {
-			if (!this.isScrollingView) {
-				return;
+		getCanvasForPage(page) {
+			let id = 'pageCanvas';
+			if (this.isScrollingView) {
+				id += (page.type === 'titlePage') ? 'titlePage' : page.id;
 			}
-			page = store.get.lookupToItem(page);
-			if (page) {
-				const pageCanvas = document.getElementById('pageCanvas' + page.id);
-				if (pageCanvas) {
-					const container = document.getElementById('rightSubPane');
-					const dy = (container.offsetHeight - pageCanvas.offsetHeight) / 2;
-					container.scrollTop = pageCanvas.offsetTop - dy;
-				}
-			}
-		},
-		pageIndexToID(pageIndex) {
-			return store.state.pages[pageIndex].id;
+			return document.getElementById(id);
 		}
 	},
 	computed: {
+		pageList() {
+			const pageList = store.state.pages.map(page => ({id: page.id, type: 'page'}));
+			if (store.get.titlePage()) {
+				pageList.unshift({id: 'titlePage', type: 'titlePage'});
+			}
+			pageList.pageCount = this.pageCount;
+			return pageList;
+		},
 		isScrollingView() {
 			if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
 				return false;

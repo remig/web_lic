@@ -238,7 +238,7 @@ const app = new Vue({
 		})(),
 		forceUIUpdate() {
 			// If I understood Vue better, I'd create components that damn well updated themselves properly.
-			this.$refs.pageView.update();
+			this.$refs.pageView.forceUpdate();
 			this.treeUpdateState = !this.treeUpdateState;
 			this.menuUpdateState = !this.menuUpdateState;
 			if (this.selectedItemLookup && this.selectedItemLookup.id != null) {
@@ -410,8 +410,9 @@ const app = new Vue({
 			this.$refs.pageView.facingPage = facingPage;
 			this.$refs.pageView.scroll = scroll;
 			if (scroll) {
+				store.state.pages.forEach(p => (p.needsDrawing = true));
 				Vue.nextTick(() => {
-					this.$refs.pageView.drawAllPages();
+					this.$refs.pageView.drawCurrentPage();
 					this.$refs.pageView.scrollToPage(this.currentPageLookup);
 				});
 			} else {

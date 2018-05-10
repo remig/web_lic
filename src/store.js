@@ -144,8 +144,8 @@ const store = {
 		};
 	})(),
 	get: {
-		pageCount() {
-			return store.state.pages.length;
+		pageCount(includeTitlePage) {
+			return store.state.pages.length + (includeTitlePage && store.state.titlePage ? 1 : 0);
 		},
 		modelName(nice) {
 			if (!store.model) {
@@ -360,7 +360,7 @@ const store = {
 			if (typeof lookup === 'number' && type != null) {
 				lookup = {type, id: lookup};
 			}
-			if (lookup.parent || lookup.number != null) {
+			if (lookup.parent || lookup.number != null || lookup.steps != null) {
 				return lookup;  // lookup is already an item
 			} else if (store.state.hasOwnProperty(lookup.type)) {
 				return store.state[lookup.type];
