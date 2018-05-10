@@ -104,14 +104,20 @@ const api = {
 		pli.height = margin + maxHeight + margin;
 	},
 	submodelImage(submodelImage) {
+
 		const step = store.get.parent(submodelImage);
+		const csi = store.get.csi(submodelImage.csiID);
 		const part = LDParse.model.get.submodelDescendant(step.model || store.model, submodelImage.submodel);
-		const pliSize = store.render.pli(part, submodelImage);
+		const csiSize = store.render.pli(part, csi);
 		const margin = getMargin(store.state.template.submodelImage.innerMargin);
+
+		csi.x = csi.y = margin;
+		csi.width = csiSize.width;
+		csi.height = csiSize.height;
+
 		submodelImage.x = submodelImage.y = 0;
-		submodelImage.contentX = submodelImage.contentY = margin;
-		submodelImage.width = margin + pliSize.width + margin;
-		submodelImage.height = margin + pliSize.height + margin;
+		submodelImage.width = margin + csiSize.width + margin;
+		submodelImage.height = margin + csiSize.height + margin;
 
 		if (submodelImage.quantityLabelID != null) {
 			const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);

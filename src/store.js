@@ -87,7 +87,7 @@ const store = {
 			if (item.rotation) {
 				return item.rotation;
 			}
-			const rot = store.state.template[item.type].rotation;
+			const rot = store.get.templateForItem(item).rotation;
 			if (rot && rot.x === 0 && rot.y === 0 && rot.z === 0) {
 				return null;
 			}
@@ -232,6 +232,8 @@ const store = {
 			item = store.get.lookupToItem(item);
 			const parent = store.get.parent(item);
 			switch (item.type) {
+				case 'csi':
+					return template[parent.type].csi;
 				case 'templatePage':
 					return template.page;
 				case 'divider':
@@ -588,20 +590,22 @@ const store = {
 		},
 		submodelImage: {
 			add(opts) {  // opts: {parent, submodel, quantity}
-				const item = store.mutations.item.add({item: {
-					type: 'submodelImage', quantityLabelID: null,
+				const submodelImage = store.mutations.item.add({item: {
+					type: 'submodelImage', csiID: null, quantityLabelID: null,
 					submodel: opts.submodel, quantity: opts.quantity || 1,
-					x: null, y: null, width: null, height: null, contentX: null, contentY: null
+					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
+
+				store.mutations.csi.add({parent: submodelImage});
 
 				if (opts.quantity > 1) {
 					store.mutations.item.add({item: {
 						type: 'quantityLabel',
 						align: 'right', valign: 'bottom',
 						x: null, y: null, width: null, height: null
-					}, parent: item});
+					}, parent: submodelImage});
 				}
-				return item;
+				return submodelImage;
 			}
 		},
 		annotation: {

@@ -28,6 +28,10 @@ const template = {
 	},
 	step: {
 		innerMargin: 0.02,
+		csi: {
+			scale: 1,
+			rotation: {x: 0, y: 0, z: 0}
+		},
 		numberLabel: {
 			font: 'bold 22pt Helvetica',
 			color: 'black'
@@ -51,10 +55,6 @@ const template = {
 			font: 'bold 18pt Helvetica',
 			color: 'black'
 		}
-	},
-	csi: {
-		scale: 1,
-		rotation: {x: 0, y: 0, z: 0}
 	},
 	pli: {
 		innerMargin: 0.017,

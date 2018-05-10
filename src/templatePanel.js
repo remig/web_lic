@@ -123,10 +123,19 @@ function rotateTemplatePanel(templateEntry) {
 			templateEntry: {type: String, default: templateEntry}
 		},
 		data() {
-			const rotation = util.get(this.templateEntry, store.state.template).rotation;
-			return util.clone(rotation);
+			return {
+				templateItem: null,
+				x: 0, y: 0, z: 0
+			};
 		},
 		methods: {
+			init(entry) {
+				const rotation = store.get.templateForItem(entry).rotation;
+				this.x = rotation.x;
+				this.y = rotation.y;
+				this.z = rotation.z;
+				this.templateItem = util.clone(entry);
+			},
 			apply() {
 				// TODO: this works, but can be really slow for big instruction books:
 				// redoing every page layout means measuring (and re-rendering) every rendered image again...
@@ -135,15 +144,21 @@ function rotateTemplatePanel(templateEntry) {
 				undoStack.commit('page.layoutAllPages', null, text, [this.templateEntry]);
 			},
 			updateValues() {
-				const template = util.get(this.templateEntry, store.state.template).rotation;
+				const template = store.get.templateForItem(this.templateItem).rotation;
 				if (template.x !== this.x || template.y !== this.y || template.z !== this.z) {
 					template.x = this.x;
 					template.y = this.y;
 					template.z = this.z;
 					const step = store.get.step(store.state.templatePage.steps[0]);
-					if (this.templateEntry === 'csi') {
-						store.get.csi(step.csiID).isDirty = true;
-					} else if (this.templateEntry === 'pliItem') {
+					if (this.templateItem.type === 'csi') {
+						let parent = store.get.parent(this.templateItem).type;
+						if (parent === 'step') {
+							parent = step;
+						} else if (parent === 'submodelImage') {
+							parent = store.get.submodelImage(step.submodelImageID);
+						}
+						store.get.csi(parent.csiID).isDirty = true;
+					} else if (this.templateItem.type === 'pliItem') {
 						const pli = store.get.pli(step.pliID);
 						pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
 					}

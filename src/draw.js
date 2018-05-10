@@ -131,34 +131,39 @@ const api = {
 	},
 
 	submodelImage(submodelImage, ctx, scale = 1) {
+		submodelImage = store.get.submodelImage(submodelImage);
 		const template = store.state.template.submodelImage;
-		const si = store.get.submodelImage(submodelImage);
-		const step = store.get.parent(si);
+		const step = store.get.parent(submodelImage);
+		const csi = store.get.csi(submodelImage.csiID);
 
 		const rectStyle = {
 			fillStyle: template.fill.color,
 			strokeStyle: template.border.color,
 			lineWidth: template.border.width
 		};
-		api.roundedRectStyled(ctx, si.x, si.y, si.width, si.height, template.border.cornerRadius, rectStyle);
+		api.roundedRectStyled(
+			ctx, submodelImage.x, submodelImage.y,
+			submodelImage.width, submodelImage.height,
+			template.border.cornerRadius, rectStyle
+		);
 
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
-		const part = LDParse.model.get.submodelDescendant(step.model || store.model, si.submodel);
-		const siCanvas = store.render.pli(part, submodelImage, scale).container;
-		const x = Math.floor((si.x + si.contentX) * scale);
-		const y = Math.floor((si.y + si.contentY) * scale);
+		const part = LDParse.model.get.submodelDescendant(step.model || store.model, submodelImage.submodel);
+		const siCanvas = store.render.pli(part, csi, scale).container;
+		const x = Math.floor((submodelImage.x + csi.x) * scale);
+		const y = Math.floor((submodelImage.y + csi.y) * scale);
 		ctx.drawImage(siCanvas, x, y);
 		ctx.restore();
 
-		if (si.quantityLabelID != null) {
+		if (submodelImage.quantityLabelID != null) {
 			ctx.save();
-			const lbl = store.get.quantityLabel(si.quantityLabelID);
+			const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
 			ctx.fillStyle = template.quantityLabel.color;
 			ctx.font = template.quantityLabel.font;
 			ctx.textAlign = lbl.align || 'start';
 			ctx.textBaseline = lbl.valign || 'alphabetic';
-			ctx.fillText('x' + si.quantity, lbl.x, lbl.y);
+			ctx.fillText('x' + submodelImage.quantity, lbl.x, lbl.y);
 			ctx.restore();
 		}
 	},

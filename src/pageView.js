@@ -132,7 +132,6 @@ Vue.component('pageCanvasView', {
 			}
 			const selectedPart = (this.selectedItem && this.selectedItem.type === 'part') ? this.selectedItem : null;
 			Draw.page(page, canvas, scale, selectedPart);
-			console.log('Drawing Page: ' + page.id);
 			delete page.needsDrawing;
 			if (this.currentPageLookup && page.id === this.currentPageLookup.id) {
 				const itemPage = store.get.pageForItem(this.selectedItem);
@@ -222,6 +221,7 @@ function inBox(x, y, t) {
 }
 
 // TODO: abstract the details in here better.  Shouldn't have to add more code here for each simple box container
+// TODO: change bounding box check order to more quickly eliminate impossible hits based on parent - child hierarchy
 function findClickTargetInStep(step, mx, my) {
 	const csi = store.get.csi(step.csiID);
 	if (step.csiID != null && inBox(mx, my, csi)) {
@@ -241,6 +241,10 @@ function findClickTargetInStep(step, mx, my) {
 				if (inBox(mx, my, quantityLabel)) {
 					return quantityLabel;
 				}
+			}
+			const submodelCSI = store.get.csi(submodelImage.csiID);
+			if (inBox(mx, my, submodelCSI)) {
+				return submodelCSI;
 			}
 			return submodelImage;
 		}
