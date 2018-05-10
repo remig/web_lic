@@ -81,7 +81,7 @@ const api = {
 		for (let i = 0; i < pli.pliItems.length; i++) {
 
 			const pliItem = store.get.pliItem(pli.pliItems[i]);
-			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]]);
+			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem);
 			pliItem.x = left;
 			pliItem.y = margin;
 			pliItem.width = pliSize.width;
@@ -106,7 +106,7 @@ const api = {
 	submodelImage(submodelImage) {
 		const step = store.get.parent(submodelImage);
 		const part = LDParse.model.get.submodelDescendant(step.model || store.model, submodelImage.submodel);
-		const pliSize = store.render.pli(part);
+		const pliSize = store.render.pli(part, submodelImage);
 		const margin = getMargin(store.state.template.submodelImage.innerMargin);
 		submodelImage.x = submodelImage.y = 0;
 		submodelImage.contentX = submodelImage.contentY = margin;

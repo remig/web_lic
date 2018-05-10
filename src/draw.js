@@ -145,7 +145,7 @@ const api = {
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
 		const part = LDParse.model.get.submodelDescendant(step.model || store.model, si.submodel);
-		const siCanvas = store.render.pli(part, scale).container;
+		const siCanvas = store.render.pli(part, submodelImage, scale).container;
 		const x = Math.floor((si.x + si.contentX) * scale);
 		const y = Math.floor((si.y + si.contentY) * scale);
 		ctx.drawImage(siCanvas, x, y);
@@ -202,7 +202,7 @@ const api = {
 		pli.pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const part = localModel.parts[pliItem.partNumbers[0]];
-			const pliCanvas = store.render.pli(part, scale).container;
+			const pliCanvas = store.render.pli(part, pliItem, scale).container;
 			const x = Math.floor((pli.x + pliItem.x) * scale);
 			const y = Math.floor((pli.y + pliItem.y) * scale);
 			ctx.drawImage(pliCanvas, x, y);

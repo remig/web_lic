@@ -68,10 +68,8 @@ const template = {
 		}
 	},
 	pliItem: {
-		csi: {
-			scale: 1,
-			rotation: {x: 0, y: 0, z: 0}
-		},
+		scale: 1,
+		rotation: {x: 0, y: 0, z: 0},
 		quantityLabel: {
 			font: 'bold 10pt Helvetica',
 			color: 'black'

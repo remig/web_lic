@@ -132,12 +132,16 @@ const store = {
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
 				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
 			},
-			pli(part, scale = 1) {
+			pli(part, item, scale = 1) {
 				const domID = `PLI_${part.filename}_${part.colorCode}`;
 				let container = document.getElementById(domID);
-				if (!container) {
+				if ((item && item.isDirty) || container == null) {
 					container = getCanvas(domID);
-					LDRender.renderPart(part, container, 1000 * scale, {resizeContainer: true});
+					const config = {
+						resizeContainer: true,
+						rotation: getRotation(item)
+					};
+					LDRender.renderPart(part, container, 1000 * scale, config);
 				}
 				return {width: container.width, height: container.height, container};
 			}
@@ -893,6 +897,9 @@ const store = {
 			layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
 				const page = store.get.lookupToItem(opts.page);
 				Layout.page(page, opts.layout || page.layout);
+			},
+			layoutAllPages() {
+				store.state.pages.forEach(page => store.mutations.page.layout({page}));
 			}
 		},
 		divider: {

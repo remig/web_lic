@@ -128,8 +128,11 @@ function rotateTemplatePanel(templateEntry) {
 		},
 		methods: {
 			apply() {
-				undoStack.commit('', null, 'Change CSI Template', ['csi']);
-				store.state.csis.forEach(csi => (csi.isDirty = true));
+				// TODO: this works, but can be really slow for big instruction books:
+				// redoing every page layout means measuring (and re-rendering) every rendered image again...
+				const text = `Change ${util.prettyPrint(this.templateEntry)} Template`;
+				store.state[this.templateEntry + 's'].forEach(item => (item.isDirty = true));
+				undoStack.commit('page.layoutAllPages', null, text, [this.templateEntry]);
 			},
 			updateValues() {
 				const template = util.get(this.templateEntry, store.state.template).rotation;
@@ -138,8 +141,12 @@ function rotateTemplatePanel(templateEntry) {
 					template.y = this.y;
 					template.z = this.z;
 					const step = store.get.step(store.state.templatePage.steps[0]);
-					const csi = store.get.csi(step.csiID);
-					csi.isDirty = true;
+					if (this.templateEntry === 'csi') {
+						store.get.csi(step.csiID).isDirty = true;
+					} else if (this.templateEntry === 'pliItem') {
+						const pli = store.get.pli(step.pliID);
+						pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
+					}
 					store.state.templatePage.needsLayout = true;
 					this.$emit('new-values', util.prettyPrint(this.templateEntry));
 				}
@@ -215,6 +222,7 @@ Vue.component('templatePanel', {
 	components: {
 		templatePage: pageTemplatePanel,
 		csi: rotateTemplatePanel('csi'),
+		pliItem: rotateTemplatePanel('pliItem'),
 		pli: fillAndBorderTemplatePanel('pli'),
 		callout: fillAndBorderTemplatePanel('callout'),
 		calloutArrow: borderTemplatePanel('callout.arrow'),
