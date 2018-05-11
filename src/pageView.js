@@ -221,17 +221,23 @@ function inBox(x, y, t) {
 }
 
 // TODO: abstract the details in here better.  Shouldn't have to add more code here for each simple box container
-// TODO: change bounding box check order to more quickly eliminate impossible hits based on parent - child hierarchy
 function findClickTargetInStep(step, mx, my) {
-	const csi = store.get.csi(step.csiID);
-	if (step.csiID != null && inBox(mx, my, csi)) {
-		return csi;
-	}
+
 	if (step.numberLabelID != null) {
 		const lbl = store.get.numberLabel(step.numberLabelID);
 		if (inBox(mx, my, lbl)) {
 			return lbl;
 		}
+	}
+	if (step.rotateIconID != null) {
+		const icon = store.get.rotateIcon(step.rotateIconID);
+		if (inBox(mx, my, icon)) {
+			return icon;
+		}
+	}
+	const csi = store.get.csi(step.csiID);
+	if (step.csiID != null && inBox(mx, my, csi)) {
+		return csi;
 	}
 	if (step.submodelImageID != null) {
 		const submodelImage = store.get.submodelImage(step.submodelImageID);
@@ -251,31 +257,31 @@ function findClickTargetInStep(step, mx, my) {
 	}
 	if (step.pliID != null && store.state.plisVisible) {
 		const pli = store.get.pli(step.pliID);
-		for (let i = 0; i < pli.pliItems.length; i++) {
-			const pliItem = store.get.pliItem(pli.pliItems[i]);
-			if (inBox(mx, my, pliItem)) {
-				return pliItem;
-			}
-			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-			if (inBox(mx, my, quantityLabel)) {
-				return quantityLabel;
-			}
-		}
 		if (inBox(mx, my, pli)) {
+			for (let i = 0; i < pli.pliItems.length; i++) {
+				const pliItem = store.get.pliItem(pli.pliItems[i]);
+				if (inBox(mx, my, pliItem)) {
+					return pliItem;
+				}
+				const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+				if (inBox(mx, my, quantityLabel)) {
+					return quantityLabel;
+				}
+			}
 			return pli;
 		}
 	}
 	if (step.callouts) {
 		for (let i = 0; i < step.callouts.length; i++) {
 			const callout = store.get.callout(step.callouts[i]);
-			for (let j = 0; j < callout.steps.length; j++) {
-				const step = store.get.step(callout.steps[j]);
-				const innerTarget = findClickTargetInStep(step, mx, my);
-				if (innerTarget) {
-					return innerTarget;
-				}
-			}
 			if (inBox(mx, my, callout)) {
+				for (let j = 0; j < callout.steps.length; j++) {
+					const step = store.get.step(callout.steps[j]);
+					const innerTarget = findClickTargetInStep(step, mx, my);
+					if (innerTarget) {
+						return innerTarget;
+					}
+				}
 				return callout;
 			}
 			for (let k = 0; k < callout.calloutArrows.length; k++) {
@@ -287,12 +293,6 @@ function findClickTargetInStep(step, mx, my) {
 					return arrow;
 				}
 			}
-		}
-	}
-	if (step.rotateIconID != null) {
-		const icon = store.get.rotateIcon(step.rotateIconID);
-		if (inBox(mx, my, icon)) {
-			return icon;
 		}
 	}
 	if (inBox(mx, my, step)) {
