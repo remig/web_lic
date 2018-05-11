@@ -362,7 +362,7 @@ const contextMenu = {
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'csi.rotate',
-									{csi, ...util.clone(newValues)},
+									{csi, ...util.clone(newValues), doLayout: true},
 									'Rotate Step Image',
 									[csi]
 								);
