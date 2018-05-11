@@ -521,15 +521,17 @@ function addModelToScene(scene, model, partIDList, config) {
 			matrix.premultiply(new THREE.Matrix4().makeTranslation(x, y, z));
 		}
 
+		let euler;
 		if (config.rotation) {
 			const {x, y, z} = config.rotation;
-			const euler = new THREE.Euler(
+			euler = new THREE.Euler(
 				THREE.Math.degToRad(x),
 				THREE.Math.degToRad(y),
 				THREE.Math.degToRad(z),
 				'XYZ'
 			);
-			matrix.premultiply(new THREE.Matrix4().makeRotationFromEuler(euler));
+			euler = new THREE.Matrix4().makeRotationFromEuler(euler);
+			matrix.premultiply(euler);
 		}
 
 		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;
@@ -542,7 +544,11 @@ function addModelToScene(scene, model, partIDList, config) {
 		scene.add(line);
 
 		if (displacement) {
-			scene.add(getArrowMesh(mesh, part.matrix, displacement));
+			const arrowMesh = getArrowMesh(mesh, part.matrix, displacement);
+			if (euler) {
+				arrowMesh.applyMatrix(new THREE.Matrix4().premultiply(euler));
+			}
+			scene.add(arrowMesh);
 		}
 
 		if (drawSelected) {

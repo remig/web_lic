@@ -84,14 +84,12 @@ const store = {
 		}
 
 		function getRotation(item) {
-			if (item.rotation) {
-				return item.rotation;
+			let rot = item.rotation;
+			if (rot) {
+				return (rot.x === 0 && rot.y === 0 && rot.z === 0) ? null : rot;
 			}
-			const rot = store.get.templateForItem(item).rotation;
-			if (rot && rot.x === 0 && rot.y === 0 && rot.z === 0) {
-				return null;
-			}
-			return rot;
+			rot = store.get.templateForItem(item).rotation;
+			return (rot && rot.x === 0 && rot.y === 0 && rot.z === 0) ? null : rot;
 		}
 
 		return {

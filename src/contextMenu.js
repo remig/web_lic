@@ -341,7 +341,7 @@ const contextMenu = {
 					text: 'Rotate Front to Back',
 					cb(selectedItem) {
 						const csi = selectedItem;
-						const opts = {csi, rotation: {x: 0, y: 180, z: 0}, addRotateIcon: true};
+						const opts = {csi, rotation: {x: 0, y: 180, z: 0}, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts, 'Rotate Step Image', [csi]);
 						app.redrawUI(true);
 					}
@@ -381,6 +381,19 @@ const contextMenu = {
 							dialog.rotation = csi.rotation;
 							dialog.show({x: 400, y: 150});
 						});
+					}
+				},
+				{
+					text: 'None',
+					shown(selectedItem) {
+						const csi = store.get.csi(selectedItem.id);
+						return csi.rotation != null;
+					},
+					cb(selectedItem) {
+						const csi = selectedItem;
+						const opts = {csi, rotation: null, addRotateIcon: false, doLayout: true};
+						undoStack.commit('csi.rotate', opts, 'Remove Step Image Rotation', [csi]);
+						app.redrawUI(true);
 					}
 				}
 			]
