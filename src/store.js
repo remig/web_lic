@@ -468,12 +468,14 @@ const store = {
 			}
 		},
 		part: {
-			displace(opts) { // opts: {partID, step, direction, distance = 60, arrowOffset = 0}.  If direction == null, remove displacement
+			displace(opts) { // opts: {partID, step, direction, distance = 60, arrowOffset = 0, arrowLength = 35, arrowRotation = 0}.  If direction == null, remove displacement
 				const step = store.get.lookupToItem(opts.step);
 				delete opts.step;
 				store.mutations.csi.resetSize({csi: step.csiID});
 				opts.distance = (opts.distance == null) ? 60 : opts.distance;
 				opts.arrowOffset = (opts.arrowOffset == null) ? 0 : opts.arrowOffset;
+				opts.arrowLength = (opts.arrowLength == null) ? 35 : opts.arrowLength;
+				opts.arrowRotation = (opts.arrowRotation == null) ? 0 : opts.arrowRotation;
 				step.displacedParts = step.displacedParts || [];
 				const idx = step.displacedParts.findIndex(p => p.partID === opts.partID);
 				if (opts.direction) {
@@ -481,6 +483,8 @@ const store = {
 						step.displacedParts[idx].direction = opts.direction;
 						step.displacedParts[idx].distance = opts.distance;
 						step.displacedParts[idx].arrowOffset = opts.arrowOffset;
+						step.displacedParts[idx].arrowLength = opts.arrowLength;
+						step.displacedParts[idx].arrowRotation = opts.arrowRotation;
 					} else {
 						step.displacedParts.push(opts);
 					}

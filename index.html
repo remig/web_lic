@@ -260,6 +260,14 @@
 						<div class="col-sm-2">
 							<input v-model.number="arrowOffset" v-on:input="updateValues" type="number" class="form-control" id="inputArrowDistance"/>
 						</div>
+						<label class="col-sm-3 control-label" for="inputArrowLength">Arrow Length</label>
+						<div class="col-sm-2">
+							<input v-model.number="arrowLength" v-on:input="updateValues" type="number" min="0" class="form-control" id="inputArrowLength"/>
+						</div>
+						<label class="col-sm-3 control-label" for="inputArrowRotation">Arrow Rotation</label>
+						<div class="col-sm-2">
+							<input v-model.number="arrowRotation" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" id="inputArrowRotation"/>
+						</div>
 					</div>
 				</form>
 			</div>

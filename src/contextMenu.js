@@ -668,19 +668,25 @@ const contextMenu = {
 						app.redrawUI(true);
 					});
 					dialog.$on('cancel', () => {
-						csi.isDirty = true;
 						displacement.distance = originalDisplacement.distance;
 						displacement.arrowOffset = originalDisplacement.arrowOffset;
+						displacement.arrowLength = originalDisplacement.arrowLength;
+						displacement.arrowRotation = originalDisplacement.arrowRotation;
+						csi.isDirty = true;
 						app.redrawUI(true);
 					});
 					dialog.$on('update', newValues => {
-						csi.isDirty = true;
 						displacement.distance = newValues.partDistance;
 						displacement.arrowOffset = newValues.arrowOffset;
+						displacement.arrowLength = newValues.arrowLength;
+						displacement.arrowRotation = newValues.arrowRotation;
+						csi.isDirty = true;
 						app.redrawUI(true);
 					});
-					dialog.arrowOffset = displacement.arrowOffset;
 					dialog.partDistance = displacement.distance;
+					dialog.arrowOffset = displacement.arrowOffset;
+					dialog.arrowLength = displacement.arrowLength;
+					dialog.arrowRotation = displacement.arrowRotation;
 					dialog.show({x: 400, y: 150});
 				});
 			}

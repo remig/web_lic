@@ -9,6 +9,7 @@ if (typeof window !== 'undefined' && window.THREE) {
 	THREE = require('../lib/three');
 }
 
+const rad = THREE.Math.degToRad;
 let renderer, camera;
 let isInitialized = false;
 
@@ -426,10 +427,8 @@ function getPartDisplacement(displacement) {
 
 function positionArrow(arrowMesh, partMesh, partMatrix, direction, offset) {
 
-	const arrowMatrix = LDMatrixToMatrix(partMatrix);
-	arrowMatrix.extractRotation(new THREE.Matrix4());
 	const partBox = new THREE.Box3().setFromObject(partMesh);
-	let dx = 0, dy = 0, dz = 0;
+	let dx = 0, dy = 0;
 
 	switch (direction) {
 		case 'left':
@@ -454,46 +453,62 @@ function positionArrow(arrowMesh, partMesh, partMatrix, direction, offset) {
 			break;
 	}
 
-	arrowMatrix.multiply(new THREE.Matrix4().makeTranslation(dx, dy, dz));
-	arrowMesh.applyMatrix(arrowMatrix);
+	const arrowMatrix = LDMatrixToMatrix(partMatrix);
+	arrowMatrix.extractRotation(new THREE.Matrix4());
+	arrowMatrix.multiply(new THREE.Matrix4().makeTranslation(dx, dy, 0));
+	return arrowMatrix;
 }
 
-function rotateArrow(arrowMesh, direction) {
+function rotateArrow(arrowMesh, direction, initialRotation) {
+	let x = 0, y = 0, z = 0;
 	switch (direction) {
 		case 'left':
-			arrowMesh.rotation.z = THREE.Math.degToRad(-90);
-			arrowMesh.rotation.x = THREE.Math.degToRad(-45);
+			z = -90;
+			x = -45 + initialRotation;
 			break;
 		case 'right':
-			arrowMesh.rotation.z = THREE.Math.degToRad(90);
-			arrowMesh.rotation.x = THREE.Math.degToRad(-45);
+			z = 90;
+			x = -45 + initialRotation;
 			break;
 		case 'forward':
-			arrowMesh.rotation.x = THREE.Math.degToRad(90);
-			arrowMesh.rotation.y = THREE.Math.degToRad(45);
+			x = 90;
+			y = 45 + initialRotation;
 			break;
 		case 'backward':
-			arrowMesh.rotation.x = THREE.Math.degToRad(-90);
-			arrowMesh.rotation.y = THREE.Math.degToRad(-45);
+			x = -90;
+			y = -45 + initialRotation;
 			break;
 		case 'down':
-			arrowMesh.rotation.x = THREE.Math.degToRad(180);
-			arrowMesh.rotation.y = THREE.Math.degToRad(45);
+			x = 180;
+			y = 45 + initialRotation;
 			break;
 		case 'up':
 		default:
-			arrowMesh.rotation.y = THREE.Math.degToRad(-45);
+			y = -45 + initialRotation;
 			break;
 	}
+	const rot = new THREE.Euler(rad(x), rad(y), rad(z), 'XYZ');
+	return new THREE.Matrix4().makeRotationFromEuler(rot);
 }
 
-function getArrowMesh(partMesh, partMatrix, displacement) {
+function getArrowMesh(partMesh, partMatrix, partRotation, displacement) {
+
 	const direction = displacement.direction;
 	const offset = displacement.arrowOffset || 0;
-	const length = (displacement.distance || 60) - offset - 25;
+	const rotation = displacement.arrowRotation || 0;
+	const length = (displacement.arrowLength == null)
+		? (displacement.distance || 60) - offset - 25
+		: displacement.arrowLength;
+
 	const arrowMesh = new THREE.Mesh(getArrowGeometry(length), arrowMaterial);
-	positionArrow(arrowMesh, partMesh, partMatrix, direction, offset);
-	rotateArrow(arrowMesh, direction);
+
+	const arrowMatrix = positionArrow(arrowMesh, partMesh, partMatrix, direction, offset);
+	if (partRotation) {
+		arrowMatrix.premultiply(partRotation);
+	}
+	arrowMatrix.multiply(rotateArrow(arrowMesh, direction, rotation));
+	arrowMesh.applyMatrix(arrowMatrix);
+
 	return arrowMesh;
 }
 
@@ -521,17 +536,12 @@ function addModelToScene(scene, model, partIDList, config) {
 			matrix.premultiply(new THREE.Matrix4().makeTranslation(x, y, z));
 		}
 
-		let euler;
+		let partRotation;
 		if (config.rotation) {
 			const {x, y, z} = config.rotation;
-			euler = new THREE.Euler(
-				THREE.Math.degToRad(x),
-				THREE.Math.degToRad(y),
-				THREE.Math.degToRad(z),
-				'XYZ'
-			);
-			euler = new THREE.Matrix4().makeRotationFromEuler(euler);
-			matrix.premultiply(euler);
+			partRotation = new THREE.Euler(rad(x), rad(y), rad(z), 'XYZ');
+			partRotation = new THREE.Matrix4().makeRotationFromEuler(partRotation);
+			matrix.premultiply(partRotation);
 		}
 
 		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;
@@ -544,10 +554,7 @@ function addModelToScene(scene, model, partIDList, config) {
 		scene.add(line);
 
 		if (displacement) {
-			const arrowMesh = getArrowMesh(mesh, part.matrix, displacement);
-			if (euler) {
-				arrowMesh.applyMatrix(new THREE.Matrix4().premultiply(euler));
-			}
+			const arrowMesh = getArrowMesh(mesh, part.matrix, partRotation, displacement);
 			scene.add(arrowMesh);
 		}
 

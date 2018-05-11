@@ -59,8 +59,10 @@ const dialogs = {
 		height: 700
 	},
 	partDisplacement: {
+		partDistance: 60,
 		arrowOffset: 0,
-		partDistance: 60
+		arrowLength: 0,
+		arrowRotation: 0
 	},
 	pageRowColLayout: {
 		rows: 2,
