@@ -23,7 +23,7 @@ Vue.component('pageCanvasView', {
 		selectedItem(newItem, prevItem) {
 			const prevPage = store.get.pageForItem(prevItem);
 			const newPage = store.get.pageForItem(newItem);
-			if (prevPage && (!newPage || prevPage.id !== newPage.id)) {
+			if (prevPage && (!newPage || !util.itemEq(prevPage, newPage))) {
 				this.drawPage(prevPage);
 			}
 			if (newPage) {
@@ -31,9 +31,15 @@ Vue.component('pageCanvasView', {
 				this.scrollToPage(newPage);
 			}
 		},
-		currentPageLookup(newPage) {
-			this.drawCurrentPage();
-			this.scrollToPage(newPage);
+		currentPageLookup(newPage, prevPage) {
+			Vue.nextTick(() => {
+				if (this.scroll && prevPage && prevPage.type === 'templatePage') {
+					// When switching from template's single-page view to scrolling multi-page view, need to reset all pages, as they're blank
+					store.mutations.page.setDirty({includeTitlePage: true});
+				}
+				this.drawCurrentPage();
+				this.scrollToPage(newPage);
+			});
 		}
 	},
 	methods: {
@@ -48,7 +54,7 @@ Vue.component('pageCanvasView', {
 			const latestPageCount = store.get.pageCount(true);
 			if (this.pageCount !== latestPageCount) {
 				this.pageCount = latestPageCount;
-				store.state.pages.forEach(p => (p.needsDrawing = true));
+				store.mutations.page.setDirty({includeTitlePage: true});
 				needsRedraw = true;
 			}
 			if (needsRedraw) {
@@ -121,6 +127,9 @@ Vue.component('pageCanvasView', {
 					this.drawPage(page);
 				}
 			}
+			if (currentPageIdx < 3 && store.state.titlePage && store.state.titlePage.needsDrawing) {
+				this.drawPage({id: 0, type: 'titlePage'});
+			}
 		},
 		drawPage(page, canvas, scale = 1) {
 			page = store.get.lookupToItem(page);
@@ -133,7 +142,7 @@ Vue.component('pageCanvasView', {
 			const selectedPart = (this.selectedItem && this.selectedItem.type === 'part') ? this.selectedItem : null;
 			Draw.page(page, canvas, scale, selectedPart);
 			delete page.needsDrawing;
-			if (this.currentPageLookup && page.id === this.currentPageLookup.id) {
+			if (this.currentPageLookup && util.itemEq(page, this.currentPageLookup)) {
 				const itemPage = store.get.pageForItem(this.selectedItem);
 				if (util.itemEq(itemPage, this.currentPageLookup)) {
 					const box = itemHighlightBox(this.selectedItem, this.pageSize);

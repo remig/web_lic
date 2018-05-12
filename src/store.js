@@ -906,6 +906,12 @@ const store = {
 			},
 			layoutAllPages() {
 				store.state.pages.forEach(page => store.mutations.page.layout({page}));
+			},
+			setDirty(opts) {  // opts: {includeTitlePage}
+				store.state.pages.forEach(p => (p.needsDrawing = true));
+				if (opts && opts.includeTitlePage && store.state.titlePage) {
+					store.state.titlePage.needsDrawing = true;
+				}
 			}
 		},
 		divider: {
