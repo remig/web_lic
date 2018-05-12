@@ -36,6 +36,7 @@ const store = {
 	model: null,  // Not in state because it is saved separately, and not affected by undo / redo
 	setModel(model) {
 		store.model = model;
+		LDRender.setPartDictionary(LDParse.partDictionary);
 	},
 	// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic (except static stuff in model, like part geometries)
 	state: util.clone(emptyState),
@@ -110,7 +111,8 @@ const store = {
 							selectedPartIDs,
 							resizeContainer: true,
 							displacedParts: step.displacedParts,
-							rotation: getRotation(csi)
+							rotation: getRotation(csi),
+							displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
 						};
 						LDRender.renderModel(localModel, container, 1000 * scale, config);
 					}
@@ -124,7 +126,8 @@ const store = {
 					selectedPartIDs,
 					resizeContainer: true,
 					displacedParts: step.displacedParts,
-					rotation: getRotation(csi)
+					rotation: getRotation(csi),
+					displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
 				};
 				const container = document.getElementById('generateImagesCanvas');
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);

@@ -5,7 +5,6 @@ const util = require('./util');
 const store = require('./store');
 const undoStack = require('./undoStack');
 const LDParse = require('./LDParse');
-const LDRender = require('./LDRender');
 const Menu = require('./menu');
 const ContextMenu = require('./contextMenu');
 require('./tree');
@@ -71,7 +70,6 @@ const app = new Vue({
 				store.mutations.templatePage.add();
 				store.setModel(model);
 				this.filename = store.model.filename;
-				LDRender.setPartDictionary(LDParse.partDictionary);
 
 				this.currentDialog = 'importModelDialog';
 
@@ -410,7 +408,7 @@ const app = new Vue({
 			this.$refs.pageView.facingPage = facingPage;
 			this.$refs.pageView.scroll = scroll;
 			if (scroll) {
-				store.state.pages.forEach(p => (p.needsDrawing = true));
+				store.mutations.page.setDirty({includeTitlePage: true});
 				Vue.nextTick(() => {
 					this.$refs.pageView.drawCurrentPage();
 					this.$refs.pageView.scrollToPage(this.currentPageLookup);

@@ -30,7 +30,16 @@ const template = {
 		innerMargin: 0.02,
 		csi: {
 			scale: 1,
-			rotation: {x: 0, y: 0, z: 0}
+			rotation: {x: 0, y: 0, z: 0},
+			displacementArrow: {
+				fill: {
+					color: 'red'
+				},
+				border: {
+					width: 0,
+					color: null
+				}
+			}
 		},
 		numberLabel: {
 			font: 'bold 22pt Helvetica',

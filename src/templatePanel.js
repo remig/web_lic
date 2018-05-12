@@ -170,6 +170,31 @@ function rotateTemplatePanel(templateEntry) {
 	};
 }
 
+const csiTemplatePanel = {
+	template: '#csiTemplatePanel',
+	components: {
+		rotateTemplatePanel: rotateTemplatePanel('csi'),
+		colorTemplatePanel: colorTemplatePanel('step.csi.displacementArrow'),
+		borderTemplatePanel: borderTemplatePanel('step.csi.displacementArrow')
+	},
+	methods: {
+		init(entry) {
+			this.templateItem = util.clone(entry);
+			this.$refs.rotateTemplatePanel.init(entry);
+		},
+		apply() {
+			this.$refs.rotateTemplatePanel.apply();
+		},
+		newArrowStyle() {
+			store.get.csi(this.templateItem).isDirty = true;
+			this.$emit('new-values', 'CSI');
+		},
+		newValues() {
+			this.$emit('new-values', 'CSI');
+		}
+	}
+};
+
 // TODO: add default page layout UI
 // TODO: when resizing the default page, need to redo layout of all other pages
 // TODO: should also add UI to choose whether to redo layout or just extend canvas
@@ -236,7 +261,7 @@ Vue.component('templatePanel', {
 	props: ['entry', 'app'],
 	components: {
 		templatePage: pageTemplatePanel,
-		csi: rotateTemplatePanel('csi'),
+		csi: csiTemplatePanel,
 		pliItem: rotateTemplatePanel('pliItem'),
 		pli: fillAndBorderTemplatePanel('pli'),
 		callout: fillAndBorderTemplatePanel('callout'),

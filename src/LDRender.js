@@ -554,6 +554,9 @@ function addModelToScene(scene, model, partIDList, config) {
 		scene.add(line);
 
 		if (displacement) {
+			if (config.displacementArrowColor) {
+				arrowMaterial.color.set(config.displacementArrowColor);
+			}
 			const arrowMesh = getArrowMesh(mesh, part.matrix, partRotation, displacement);
 			scene.add(arrowMesh);
 		}

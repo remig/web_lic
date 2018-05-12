@@ -511,6 +511,14 @@
 		</div>
 	</script>
 
+	<script type="text/x-template" id="csiTemplatePanel">
+		<div>
+			<rotate-template-panel v-on:new-values="newValues" ref="rotateTemplatePanel"></rotate-template-panel>
+			<color-template-panel title="Displacement Arrow Color" v-on:new-values="newArrowStyle"></color-template-panel>
+			<!-- <border-template-panel title="Displacement Arrow Border" v-on:new-values="newArrowStyle"></border-template-panel> -->
+		</div>
+	</script>
+
 	<script type="text/x-template" id="rotateIconTemplatePanel">
 		<div>
 			<color-template-panel v-on:new-values="newValues"></color-template-panel>
