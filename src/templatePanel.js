@@ -55,6 +55,23 @@ function borderTemplatePanel(templateEntry) {
 	};
 }
 
+// TODO: consider moving all font UI / state management to dedicated font.js or something.
+const familyNames = [
+	{text: 'Helvetica', value: 'helvetica'},
+	{text: 'Times New Roman', value: 'times new roman'}
+];
+const customFamilyNames = JSON.parse(window.localStorage.getItem('lic_custom_fonts')) || [];
+
+function getFamilyNames() {
+	const separator = {value: 'separator'};
+	const names = [...familyNames, separator, ...customFamilyNames];
+	if (customFamilyNames.length) {
+		names.push(separator);
+	}
+	names.push({text: 'Custom...', value: 'custom'});
+	return names;
+}
+
 // TODO: support underlining fonts in general
 const fontTemplatePanel = {
 	template: '#fontTemplatePanel',
@@ -66,37 +83,71 @@ const fontTemplatePanel = {
 			bold: false,
 			italic: false,
 			underline: false,
-			color: 'transparent'
+			color: 'transparent',
+			familyNames: getFamilyNames()
 		};
 	},
 	methods: {
-		init(entry) {
+		init(entry, app) {
 			const template = store.get.templateForItem(entry);
 			const fontParts = util.fontToFontParts(template.font);
 			this.templateItem = util.clone(entry);
-			this.family = fontParts.fontFamily;
+			this.family = fontParts.fontFamily.toLowerCase();
+			this.addCustomFont(fontParts.fontFamily);
 			this.size = parseInt(fontParts.fontSize, 10);
 			this.bold = fontParts.fontWeight === 'bold';
 			this.italic = fontParts.fontStyle === 'italic';
 			this.underline = false;
 			this.color = template.color;
+			this.app = app;
 		},
 		toggleProp(prop) {
 			this[prop] = !this[prop];
 			this.updateValues();
 		},
+		updateFontName() {
+			if (this.family === 'custom') {
+				this.app.currentDialog = 'fontNameDialog';
+				Vue.nextTick(() => {
+					const dialog = this.app.$refs.currentDialog;
+					dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
+					dialog.$on('ok', newValues => {
+						this.family = newValues.fontName.toLowerCase();
+						this.addCustomFont(newValues.fontName);
+						this.updateValues();
+					});
+					dialog.font = this.fontString();
+					dialog.fontName = '';
+					dialog.show({x: 400, y: 150});
+				});
+			} else {
+				this.updateValues();
+			}
+		},
 		updateValues() {
 			const template = store.get.templateForItem(this.templateItem);
-			const fontParts = {
+			template.font = this.fontString();
+			template.color = rgbaToString(this.color);
+			store.state.templatePage.needsLayout = true;
+			this.$emit('new-values', util.prettyPrint(this.templateItem.type));
+		},
+		fontString() {
+			return util.fontPartsToFont({
 				fontSize: this.size + 'pt',
 				fontFamily: this.family,
 				fontWeight: this.bold ? 'bold' : null,
 				fontStyle: this.italic ? 'italic' : null
-			};
-			template.font = util.fontPartsToFont(fontParts);
-			template.color = rgbaToString(this.color);
-			store.state.templatePage.needsLayout = true;
-			this.$emit('new-values', util.prettyPrint(this.templateEntry));
+			});
+		},
+		addCustomFont(family) {
+			if (!util.isEmpty(family)) {
+				const familyLower = family.toLowerCase();
+				if (!getFamilyNames().map(f => f.value).includes(familyLower)) {
+					customFamilyNames.push({text: family, value: familyLower});
+					window.localStorage.setItem('lic_custom_fonts', JSON.stringify(customFamilyNames));
+				}
+			}
+			this.familyNames = getFamilyNames();
 		}
 	}
 };
@@ -300,7 +351,7 @@ Vue.component('templatePanel', {
 			if (templateName && templateName in this.$options.components) {
 				Vue.nextTick(() => {
 					if (typeof this.$refs.currentTemplatePanel.init === 'function') {
-						this.$refs.currentTemplatePanel.init(this.entry);
+						this.$refs.currentTemplatePanel.init(this.entry, this.app);
 					}
 				});
 				return this.entry.type;

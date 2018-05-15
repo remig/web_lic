@@ -374,6 +374,23 @@
 		</baseDialog>
 	</script>
 
+	<script type="text/x-template" id="fontNameTemplate">
+		<baseDialog title="Custom Font">
+			<div slot="body" class="container-fluid">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<label class="col-sm-4 control-label" for="fontNameInput">Enter the name of a font on your system</label>
+						<div class="col-sm-8">
+							<input v-model="fontName" v-on:input="updateValues" type="text" class="form-control" id="fontNameInput" />
+						</div>
+					</div>
+				</form>
+				<div>Sample Text:</div>
+				<div :style="{font: font}">abc ABC 0 1 2 3 4 5 6 7 8 9</div>
+			</div>
+		</baseDialog>
+	</script>
+
 	<!-- Template Page Components -->
 	<script type="text/x-template" id="colorTemplatePanel">
 		<div class="panel panel-template">
@@ -422,9 +439,11 @@
 						<div class="form-group">
 							<label for="font" class="sr-only">Select a font</label>
 							<div class="col-sm-10">
-								<select v-model="family" class="form-control" id="font">
-									<option>Helvetica</option>
-									<option>Times New Roman</option>
+								<select v-model="family" @change="updateFontName" class="form-control" id="font">
+									<template v-for="font in familyNames">
+										<option v-if="font.value === 'separator'" disabled="disabled">---------------------------</option>
+										<option v-else :value="font.value">{{font.text}}</option>
+									</template>
 								</select>
 							</div>
 						</div>

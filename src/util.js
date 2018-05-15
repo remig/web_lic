@@ -108,7 +108,7 @@ const api = {
 		return function(font = '') {
 			const fullFontParts = {
 				fontStyle: '', fontVariant: '', fontWeight: '',
-				fontStretch: '', fontSize: '', fontFamily: ''
+				fontStretch: '', fontSize: '', fontFamily: []
 			};
 			var haveFontSize = false;
 			font = (font || '') + '';
@@ -135,10 +135,11 @@ const api = {
 						fullFontParts.fontSize = el;
 						haveFontSize = true;
 					} else {
-						fullFontParts.fontFamily = el;
+						fullFontParts.fontFamily.push(el);
 					}
 				}
 			});
+			fullFontParts.fontFamily = fullFontParts.fontFamily.join(' ');
 			return fullFontParts;
 		};
 	})(),
@@ -146,12 +147,8 @@ const api = {
 		fontStyle = '', fontVariant = '', fontWeight = '',
 		fontStretch = '', fontSize = '', fontFamily = ''
 	} = {}) {
-		let family = fontFamily.trim();
-		if (family.includes(' ') && family[0] !== '"' && family[0] !== "'") {
-			family = `"${family}"`;  // Font families that contain spaces must be quoted
-		}
 		return [
-			fontStyle, fontVariant, fontWeight, fontStretch, fontSize, family
+			fontStyle, fontVariant, fontWeight, fontStretch, fontSize, fontFamily.trim()
 		].filter(el => el !== '').join(' ').trim();
 	},
 	degrees(radians) {

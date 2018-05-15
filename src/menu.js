@@ -157,7 +157,7 @@ const menu = [
 		{
 			text: 'Clear Local Cache',
 			cb() {
-				window.localStorage.removeItem('lic_state');
+				window.localStorage.clear();
 			}
 		}
 	]},

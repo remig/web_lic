@@ -92,12 +92,13 @@ const dialogs = {
 		cornerRadius: 0
 	}
 };
-util.forEach(dialogs, (name, props) => {
+
+util.forEach(dialogs, (name, data) => {
 	Vue.component(name + 'Dialog', {
 		template: `#${name}Template`,
 		mixins: [baseDialogPropagator],
 		data: function() {
-			return props;
+			return data;
 		},
 		methods: {
 			updateValues() {
@@ -105,4 +106,23 @@ util.forEach(dialogs, (name, props) => {
 			}
 		}
 	});
+});
+
+Vue.component('fontNameDialog', {
+	template: `#fontNameTemplate`,
+	mixins: [baseDialogPropagator],
+	data: function() {
+		return {
+			font: '',
+			fontName: ''
+		};
+	},
+	methods: {
+		updateValues() {
+			const fontParts = util.fontToFontParts(this.font);
+			fontParts.fontFamily = this.fontName;
+			this.font = util.fontPartsToFont(fontParts);
+			this.$emit('update', {fontName: this.fontName});
+		}
+	}
 });
