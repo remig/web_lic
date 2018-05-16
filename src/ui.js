@@ -12,6 +12,8 @@ require('./pageView');
 require('./dialog');
 require('./templatePanel');
 
+ELEMENT.locale(ELEMENT.lang.en);
+
 Vue.component('color-picker', require('vue-color/dist/vue-color').Chrome);
 
 const version = require('../package.json').version;

@@ -63,13 +63,11 @@ const familyNames = [
 const customFamilyNames = JSON.parse(window.localStorage.getItem('lic_custom_fonts')) || [];
 
 function getFamilyNames() {
-	const separator = {value: 'separator'};
-	const names = [...familyNames, separator, ...customFamilyNames];
-	if (customFamilyNames.length) {
-		names.push(separator);
-	}
-	names.push({text: 'Custom...', value: 'custom'});
-	return names;
+	return [
+		{options: familyNames},
+		{options: customFamilyNames},
+		{options: [{text: 'Custom...', value: 'custom'}]}
+	];
 }
 
 // TODO: support underlining fonts in general
@@ -124,10 +122,14 @@ const fontTemplatePanel = {
 				this.updateValues();
 			}
 		},
+		updateColor(newColor) {
+			this.color = (newColor === 'transparent') ? null : newColor;
+			this.updateValues();
+		},
 		updateValues() {
 			const template = store.get.templateForItem(this.templateItem);
 			template.font = this.fontString();
-			template.color = rgbaToString(this.color);
+			template.color = this.color;
 			store.state.templatePage.needsLayout = true;
 			this.$emit('new-values', util.prettyPrint(this.templateItem.type));
 		},
@@ -142,7 +144,7 @@ const fontTemplatePanel = {
 		addCustomFont(family) {
 			if (!util.isEmpty(family)) {
 				const familyLower = family.toLowerCase();
-				if (!getFamilyNames().map(f => f.value).includes(familyLower)) {
+				if (!getFamilyNames().map(f => f.options).map(f => f.value).includes(familyLower)) {
 					customFamilyNames.push({text: family, value: familyLower});
 					window.localStorage.setItem('lic_custom_fonts', JSON.stringify(customFamilyNames));
 				}
