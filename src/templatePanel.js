@@ -15,13 +15,17 @@ function colorTemplatePanel(templateEntry) {
 		data() {
 			const template = util.get(this.templateEntry, store.state.template).fill;
 			return {
-				fill: template.color || 'transparent'
+				color: colorNameToRGB(template.color)
 			};
 		},
 		methods: {
+			updateColor(newColor) {
+				this.color = (newColor === 'transparent') ? null : newColor;
+				this.updateValues();
+			},
 			updateValues() {
 				const template = util.get(this.templateEntry, store.state.template).fill;
-				template.color = rgbaToString(this.fill);
+				template.color = this.color;
 				this.$emit('new-values', util.prettyPrint(this.templateEntry));
 			}
 		}
@@ -39,15 +43,19 @@ function borderTemplatePanel(templateEntry) {
 			const template = util.get(this.templateEntry, store.state.template).border;
 			return {
 				width: template.width || 0,
-				color: template.color || 'transparent',
+				color: colorNameToRGB(template.color),
 				cornerRadius: template.cornerRadius
 			};
 		},
 		methods: {
+			updateColor(newColor) {
+				this.color = (newColor === 'transparent') ? null : newColor;
+				this.updateValues();
+			},
 			updateValues() {
 				const template = util.get(this.templateEntry, store.state.template).border;
 				template.width = this.width;
-				template.color = rgbaToString(this.color);
+				template.color = this.color;
 				template.cornerRadius = this.cornerRadius;
 				this.$emit('new-values', util.prettyPrint(this.templateEntry));
 			}
@@ -99,7 +107,7 @@ const fontTemplatePanel = {
 			this.bold = fontParts.fontWeight === 'bold';
 			this.italic = fontParts.fontStyle === 'italic';
 			this.underline = false;
-			this.color = template.color;
+			this.color = colorNameToRGB(template.color);
 			this.app = app;
 		},
 		toggleProp(prop) {
@@ -370,10 +378,15 @@ Vue.component('templatePanel', {
 	}
 });
 
-function rgbaToString(c) {
-	if (typeof c === 'string') {
-		return c;
+const colorNames = {
+	white: '#ffffff',
+	black: '#000000',
+	red: '#ff0000'
+};
+
+function colorNameToRGB(c) {
+	if (colorNames.hasOwnProperty(c)) {
+		return colorNames[c];
 	}
-	c = c.rgba;
-	return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
+	return c;
 }
