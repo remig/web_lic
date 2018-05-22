@@ -56,17 +56,20 @@ function borderTemplatePanel(templateEntry) {
 }
 
 // TODO: consider moving all font UI / state management to dedicated font.js or something.
-const familyNames = [
-	{text: 'Helvetica', value: 'helvetica'},
-	{text: 'Times New Roman', value: 'times new roman'}
-];
+const familyNames = ['Helvetica', 'Times New Roman'];
 const customFamilyNames = JSON.parse(window.localStorage.getItem('lic_custom_fonts')) || [];
 
 function getFamilyNames() {
+	if (customFamilyNames.length) {
+		return [
+			{label: 'builtInFonts', options: familyNames},
+			{label: 'customFonts', options: customFamilyNames},
+			{label: 'custom', options: ['Custom...']}
+		];
+	}
 	return [
-		{options: familyNames},
-		{options: customFamilyNames},
-		{options: [{text: 'Custom...', value: 'custom'}]}
+		{label: 'builtInFonts', options: familyNames},
+		{label: 'customFonts', options: ['Custom...']}
 	];
 }
 
@@ -90,7 +93,7 @@ const fontTemplatePanel = {
 			const template = store.get.templateForItem(entry);
 			const fontParts = util.fontToFontParts(template.font);
 			this.templateItem = util.clone(entry);
-			this.family = fontParts.fontFamily.toLowerCase();
+			this.family = fontParts.fontFamily;
 			this.addCustomFont(fontParts.fontFamily);
 			this.size = parseInt(fontParts.fontSize, 10);
 			this.bold = fontParts.fontWeight === 'bold';
@@ -104,13 +107,13 @@ const fontTemplatePanel = {
 			this.updateValues();
 		},
 		updateFontName() {
-			if (this.family === 'custom') {
+			if (this.family === 'Custom...') {
 				this.app.currentDialog = 'fontNameDialog';
 				Vue.nextTick(() => {
 					const dialog = this.app.$refs.currentDialog;
 					dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
 					dialog.$on('ok', newValues => {
-						this.family = newValues.fontName.toLowerCase();
+						this.family = newValues.fontName;
 						this.addCustomFont(newValues.fontName);
 						this.updateValues();
 					});
@@ -144,8 +147,12 @@ const fontTemplatePanel = {
 		addCustomFont(family) {
 			if (!util.isEmpty(family)) {
 				const familyLower = family.toLowerCase();
-				if (!getFamilyNames().map(f => f.options).map(f => f.value).includes(familyLower)) {
-					customFamilyNames.push({text: family, value: familyLower});
+				const names = [
+					...familyNames.map(f => f.toLowerCase()),
+					...customFamilyNames.map(f => f.toLowerCase())
+				];
+				if (!names.includes(familyLower)) {
+					customFamilyNames.push(family);
 					window.localStorage.setItem('lic_custom_fonts', JSON.stringify(customFamilyNames));
 				}
 			}

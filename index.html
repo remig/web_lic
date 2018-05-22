@@ -444,9 +444,9 @@
 						<div class="form-group">
 							<label for="font" class="sr-only">Select a font</label>
 							<div class="col-sm-10">
-								<el-select v-model="family" @change="updateFontName" class="form-control" id="font">
-									<el-option-group v-for="group in familyNames">
-										<el-option v-for="font in group.options" :value="font.value">{{font.text}}</el-option>
+								<el-select v-model="family" @change="updateFontName" id="font">
+									<el-option-group v-for="group in familyNames" :key="group.label">
+										<el-option v-for="font in group.options" :key="font" :value="font">{{font}}</el-option>
 									</el-option-group>
 								</el-select>
 							</div>
