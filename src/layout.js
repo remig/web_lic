@@ -66,7 +66,14 @@ const api = {
 	},
 	pli(pli) {
 
-		if (util.isEmpty(pli.pliItems)) {
+		let pliItems = pli.pliItems;
+		if (!store.state.template.pli.includeSubmodels) {
+			pliItems = pliItems.filter(id => {
+				return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
+			});
+		}
+
+		if (util.isEmpty(pliItems)) {
 			pli.x = pli.y = pli.width = pli.height = 0;
 			return;
 		}
@@ -78,9 +85,9 @@ const api = {
 		let maxHeight = 0, left = margin + qtyLabelOffset;
 
 		//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
-		for (let i = 0; i < pli.pliItems.length; i++) {
+		for (let i = 0; i < pliItems.length; i++) {
 
-			const pliItem = store.get.pliItem(pli.pliItems[i]);
+			const pliItem = store.get.pliItem(pliItems[i]);
 			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem);
 			pliItem.x = left;
 			pliItem.y = margin;

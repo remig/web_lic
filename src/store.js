@@ -309,6 +309,14 @@ const store = {
 				.filter(i => i.filename === part.filename && i.colorCode === part.colorCode);
 			return targets.length ? targets[0] : null;
 		},
+		pliItemIsSubmodel(pliItem) {
+			pliItem = store.get.lookupToItem(pliItem);
+			const pli = store.get.parent(pliItem);
+			const step = store.get.parent(pli);
+			const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
+			const part = localModel.parts[pliItem.partNumbers[0]];
+			return LDParse.partDictionary[part.filename].isSubModel;
+		},
 		calloutArrowToPoints(arrow) {
 			const points = arrow.points.map(store.get.point);
 			const tip = points[points.length - 1];
@@ -1168,10 +1176,6 @@ const store = {
 				parts.forEach(partID => {
 
 					const part = localModel.parts[partID];
-					if (LDParse.partDictionary[localModel.parts[partID].filename].isSubModel) {  // TODO: checking if a part is a submodel is horrendously ugly
-						return;  // Don't create PLI items for submodels
-					}
-
 					const target = store.get.matchingPLIItem(pli, partID);
 					if (target) {
 						target.quantity++;

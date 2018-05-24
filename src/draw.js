@@ -189,7 +189,15 @@ const api = {
 	pli(pli, localModel, ctx, scale = 1) {
 		const template = store.state.template;
 		pli = store.get.pli(pli);
-		if (util.isEmpty(pli.pliItems)) {
+
+		let pliItems = pli.pliItems;
+		if (!store.state.template.pli.includeSubmodels) {
+			pliItems = pliItems.filter(id => {
+				return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
+			});
+		}
+
+		if (util.isEmpty(pliItems)) {
 			return;
 		}
 		const rectStyle = {
@@ -204,7 +212,7 @@ const api = {
 
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
-		pli.pliItems.forEach(idx => {
+		pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const part = localModel.parts[pliItem.partNumbers[0]];
 			const pliCanvas = store.render.pli(part, pliItem, scale).container;
@@ -214,7 +222,7 @@ const api = {
 		});
 		ctx.restore();
 
-		pli.pliItems.forEach(idx => {
+		pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 			ctx.fillStyle = template.pliItem.quantityLabel.color;

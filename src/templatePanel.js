@@ -207,6 +207,7 @@ function rotateTemplatePanel(templateEntry) {
 			apply() {
 				// TODO: this works, but can be really slow for big instruction books:
 				// redoing every page layout means measuring (and re-rendering) every rendered image again...
+				// Consider simply setting page.needsLayout on each page; fully test that with undo / redo
 				const text = `Change ${util.prettyPrint(this.templateEntry)} Template`;
 				store.state[this.templateEntry + 's'].forEach(item => (item.isDirty = true));
 				undoStack.commit('page.layoutAllPages', null, text, [this.templateEntry]);
@@ -259,6 +260,38 @@ const csiTemplatePanel = {
 		},
 		newValues() {
 			this.$emit('new-values', 'CSI');
+		}
+	}
+};
+
+const pliTemplatePanel = {
+	template: '#pliTemplatePanel',
+	data() {
+		return {
+			includeSubmodels: store.state.template.pli.includeSubmodels
+		};
+	},
+	components: {
+		colorTemplatePanel: colorTemplatePanel('pli'),
+		borderTemplatePanel: borderTemplatePanel('pli')
+	},
+	methods: {
+		apply() {
+			// TODO: this works, but can be really slow for big instruction books:
+			// redoing every page layout means measuring (and re-rendering) every rendered image again...
+			// Consider simply setting page.needsLayout on each page; fully test that with undo / redo
+			undoStack.commit('page.layoutAllPages', null, 'Change PLI Template');
+		},
+		newValues() {
+			this.$emit('new-values', 'PLI');
+		},
+		updateValues() {
+			const template = store.state.template.pli;
+			if (this.includeSubmodels !== template.includeSubmodels) {
+				template.includeSubmodels = this.includeSubmodels;
+				store.state.templatePage.needsLayout = true;
+				this.$emit('new-values', 'Page');
+			}
 		}
 	}
 };
@@ -331,7 +364,7 @@ Vue.component('templatePanel', {
 		templatePage: pageTemplatePanel,
 		csi: csiTemplatePanel,
 		pliItem: rotateTemplatePanel('pliItem'),
-		pli: fillAndBorderTemplatePanel('pli'),
+		pli: pliTemplatePanel,
 		callout: fillAndBorderTemplatePanel('callout'),
 		calloutArrow: borderTemplatePanel('callout.arrow'),
 		submodelImage: fillAndBorderTemplatePanel('submodelImage'),
@@ -345,6 +378,15 @@ Vue.component('templatePanel', {
 	},
 	watch: {
 		entry() {
+			this.applyChanges();
+		}
+	},
+	methods: {
+		newValues(type) {
+			this.lastEdit = type;
+			this.app.redrawUI(false);
+		},
+		applyChanges() {
 			if (this.lastEdit) {
 				if (typeof this.$refs.currentTemplatePanel.apply === 'function') {
 					this.$refs.currentTemplatePanel.apply();
@@ -354,12 +396,6 @@ Vue.component('templatePanel', {
 				this.app.redrawUI(false);
 				this.lastEdit = '';
 			}
-		}
-	},
-	methods: {
-		newValues(type) {
-			this.lastEdit = type;
-			this.app.redrawUI(false);
 		}
 	},
 	computed: {
@@ -375,6 +411,9 @@ Vue.component('templatePanel', {
 			}
 			return null;
 		}
+	},
+	beforeDestroy() {
+		this.applyChanges();  // Catch any changes if user switches from template panel directly to nav tree or new page via keyboard
 	}
 });
 

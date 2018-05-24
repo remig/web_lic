@@ -67,6 +67,7 @@ const template = {
 	},
 	pli: {
 		innerMargin: 0.017,
+		includeSubmodels: true,
 		fill: {
 			color: null
 		},

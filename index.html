@@ -507,6 +507,25 @@
 		</div>
 	</script>
 
+	<script type="text/x-template" id="pliTemplatePanel">
+		<div>
+			<div class="panel panel-template">
+				<div class="panel-body">
+					<form class="form-horizontal">
+						<div class="checkbox">
+							<label for="includeSubmodels">
+								<input v-model="includeSubmodels" v-on:click="updateValues" type="checkbox" id="includeSubmodels" />
+								Include Submodels in PLI
+							</label>
+						</div>
+					</form>
+				</div>
+			</div>
+			<color-template-panel v-on:new-values="newValues"></color-template-panel>
+			<border-template-panel v-on:new-values="newValues"></border-template-panel>
+		</div>
+	</script>
+
 	<script type="text/x-template" id="rotateTemplatePanel">
 		<div class="panel panel-template">
 			<h5>Rotation</h5>
