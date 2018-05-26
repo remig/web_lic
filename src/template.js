@@ -18,7 +18,9 @@ const template = {
 			}
 		},
 		fill: {
-			color: 'white'
+			color: 'white',
+			gradient: '',
+			image: ''
 		},
 		border: {
 			width: 0,

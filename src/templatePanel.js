@@ -5,9 +5,9 @@ const util = require('./util');
 const store = require('./store');
 const undoStack = require('./undoStack');
 
-function colorTemplatePanel(templateEntry) {
+function fillTemplatePanel(templateEntry) {
 	return {
-		template: '#colorTemplatePanel',
+		template: '#fillTemplatePanel',
 		props: {
 			title: {type: String, default: 'Fill'},
 			templateEntry: {type: String, default: templateEntry}
@@ -15,7 +15,9 @@ function colorTemplatePanel(templateEntry) {
 		data() {
 			const template = util.get(this.templateEntry, store.state.template).fill;
 			return {
-				color: colorNameToRGB(template.color)
+				color: colorNameToRGB(template.color),
+				gradient: template.gradient,
+				image: template.image
 			};
 		},
 		methods: {
@@ -173,7 +175,7 @@ function fillAndBorderTemplatePanel(templateEntry) {
 	return {
 		template: '#fillAndBorderTemplatePanel',
 		components: {
-			colorTemplatePanel: colorTemplatePanel(templateEntry),
+			fillTemplatePanel: fillTemplatePanel(templateEntry),
 			borderTemplatePanel: borderTemplatePanel(templateEntry)
 		},
 		methods: {
@@ -243,7 +245,7 @@ const csiTemplatePanel = {
 	template: '#csiTemplatePanel',
 	components: {
 		rotateTemplatePanel: rotateTemplatePanel('csi'),
-		colorTemplatePanel: colorTemplatePanel('step.csi.displacementArrow'),
+		fillTemplatePanel: fillTemplatePanel('step.csi.displacementArrow'),
 		borderTemplatePanel: borderTemplatePanel('step.csi.displacementArrow')
 	},
 	methods: {
@@ -272,7 +274,7 @@ const pliTemplatePanel = {
 		};
 	},
 	components: {
-		colorTemplatePanel: colorTemplatePanel('pli'),
+		fillTemplatePanel: fillTemplatePanel('pli'),
 		borderTemplatePanel: borderTemplatePanel('pli')
 	},
 	methods: {
@@ -312,7 +314,7 @@ const pageTemplatePanel = {
 		};
 	},
 	components: {
-		colorTemplatePanel: colorTemplatePanel('page'),
+		fillTemplatePanel: fillTemplatePanel('page'),
 		borderTemplatePanel: borderTemplatePanel('page')
 	},
 	methods: {
@@ -345,7 +347,7 @@ const pageTemplatePanel = {
 const rotateIconTemplatePanel = {
 	template: '#rotateIconTemplatePanel',
 	components: {
-		colorTemplatePanel: colorTemplatePanel('rotateIcon'),
+		fillTemplatePanel: fillTemplatePanel('rotateIcon'),
 		borderTemplatePanel: borderTemplatePanel('rotateIcon')
 	},
 	methods: {

@@ -113,6 +113,24 @@ div#container {
 }
 */
 
+/* Overwrite Vue Element stuff */
+
+.el-color-picker {
+	display: block;
+	height: 34px;
+}
+
+.el-color-picker__trigger {
+	border-color: #ccc;
+	width: 34px;
+	height: 34px;
+}
+
+.el-button {
+	border-color: #ccc;
+	padding: 9px 20px;
+}
+
 /* Splitter stuff */
 .gutter.gutter-horizontal {
 	cursor: ew-resize;

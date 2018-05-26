@@ -7,7 +7,6 @@
 	<title>Web Lic!</title>
 	<link rel="icon" href="favicon.ico" type="image/x-icon">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-	<link rel="stylesheet" href="static/style.css">
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
 	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/89/three.js"></script>
@@ -20,6 +19,8 @@
 	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 	<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
+
+	<link rel="stylesheet" href="static/style.css">
 
 </head>
 <body>
@@ -397,10 +398,27 @@
 	</script>
 
 	<!-- Template Page Components -->
-	<script type="text/x-template" id="colorTemplatePanel">
+	<script type="text/x-template" id="fillTemplatePanel">
 		<div class="panel panel-template">
 			<h5>{{title}}</h5>
-			<el-color-picker v-model="color" v-on:active-change="updateColor" v-on:change="updateValues" show-alpha></el-color-picker>
+			<div class="panel-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label for="fillColorInput" class="control-label col-sm-6">Color</label>
+						<el-color-picker v-model="color" v-on:active-change="updateColor" v-on:change="updateValues" show-alpha  id="fillColorInput"></el-color-picker>
+					</div>
+					<div class="form-group" v-if="gradient != null">
+						<label for="gradientInput" class="control-label col-sm-6">Gradient</label>
+						<label class="control-label col-sm-5">NYI</label>
+						<!-- <input v-model="gradient" v-on:input="updateValues" type="number" min="0" class="form-control" id="gradientInput"/> -->
+					</div>
+					<div class="form-group" v-if="image != null">
+						<label for="imageInput" class="control-label col-sm-6">Image</label>
+						<label class="control-label col-sm-5">NYI</label>
+						<!-- <el-button icon="el-icon-picture-outline" v-on:click="pickImage"></el-button> -->
+					</div>
+				</form>
+			</div>
 		</div>
 	</script>
 
@@ -410,27 +428,29 @@
 			<div class="panel-body">
 				<form class="form-horizontal">
 					<div class="form-group">
-						<label for="lineWidth" class="control-label col-sm-7">Line Width</label>
-						<div class="col-sm-5">
-						<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
-						</div>
+						<label for="borderColorInput" class="control-label col-sm-7">Color</label>
+						<el-color-picker v-model="color" v-on:active-change="updateColor" v-on:change="updateValues" show-alpha></el-color-picker>
 					</div>
 					<div class="form-group">
-						<label v-if="cornerRadius != null" for="cornerRadius" class="control-label col-sm-7">Corner Radius</label>
+						<label for="lineWidth" class="control-label col-sm-7">Line Width</label>
 						<div class="col-sm-5">
-							<input v-if="cornerRadius != null" v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
+							<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
+						</div>
+					</div>
+					<div class="form-group" v-if="cornerRadius != null">
+						<label for="cornerRadius" class="control-label col-sm-7">Corner Radius</label>
+						<div class="col-sm-5">
+							<input v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
 						</div>
 					</div>
 				</form>
 			</div>
-			<h5 class="paddingT10">{{title}} Color</h5>
-			<el-color-picker v-model="color" v-on:active-change="updateColor" v-on:change="updateValues" show-alpha></el-color-picker>
 		</div>
 	</script>
 
 	<script type="text/x-template" id="fillAndBorderTemplatePanel">
 		<div>
-			<color-template-panel v-on:new-values="newValues"></color-template-panel>
+			<fill-template-panel v-on:new-values="newValues"></fill-template-panel>
 			<border-template-panel v-on:new-values="newValues"></border-template-panel>
 		</div>
 	</script>
@@ -459,17 +479,18 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="fontSize" class="control-label col-sm-3">Size</label>
+							<label for="fontSize" class="control-label col-sm-4">Size</label>
 							<div class="col-sm-5">
 								<input v-model.number="size" v-on:input="updateValues" type="number" min="0" class="form-control" id="fontSize" />
 							</div>
 						</div>
+						<div class="form-group">
+							<label for="borderColorInput" class="control-label col-sm-4">Color</label>
+							<el-color-picker v-model="color" v-on:active-change="updateColor" v-on:change="updateValues" show-alpha></el-color-picker>
+						</div>
 					</form>
 				</div>
 			</div>
-			<div class="panel panel-template">
-				<div class="col-sm-5">Color</div>
-					<el-color-picker v-model="color" v-on:active-change="updateColor" v-on:change="updateValues" show-alpha></el-color-picker>
 				</div>
 			</div>
 		</div>
@@ -502,7 +523,7 @@
 					</form>
 				</div>
 			</div>
-			<color-template-panel v-on:new-values="newValues"></color-template-panel>
+			<fill-template-panel v-on:new-values="newValues"></fill-template-panel>
 			<border-template-panel v-on:new-values="newValues"></border-template-panel>
 		</div>
 	</script>
@@ -521,7 +542,7 @@
 					</form>
 				</div>
 			</div>
-			<color-template-panel v-on:new-values="newValues"></color-template-panel>
+			<fill-template-panel v-on:new-values="newValues"></fill-template-panel>
 			<border-template-panel v-on:new-values="newValues"></border-template-panel>
 		</div>
 	</script>
@@ -557,14 +578,14 @@
 	<script type="text/x-template" id="csiTemplatePanel">
 		<div>
 			<rotate-template-panel v-on:new-values="newValues" ref="rotateTemplatePanel"></rotate-template-panel>
-			<color-template-panel title="Displacement Arrow Color" v-on:new-values="newArrowStyle"></color-template-panel>
+			<fill-template-panel title="Displacement Arrow Color" v-on:new-values="newArrowStyle"></fill-template-panel>
 			<!-- <border-template-panel title="Displacement Arrow Border" v-on:new-values="newArrowStyle"></border-template-panel> -->
 		</div>
 	</script>
 
 	<script type="text/x-template" id="rotateIconTemplatePanel">
 		<div>
-			<color-template-panel v-on:new-values="newValues"></color-template-panel>
+			<fill-template-panel v-on:new-values="newValues"></fill-template-panel>
 			<border-template-panel v-on:new-values="newValues"></border-template-panel>
 			<border-template-panel v-on:new-values="newValues" title="Arrow" templateEntry="rotateIcon.arrow"></border-template-panel>
 		</div>
