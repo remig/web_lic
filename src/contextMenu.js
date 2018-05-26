@@ -5,6 +5,7 @@ const util = require('./util');
 const LDParse = require('./LDParse');
 const store = require('./store');
 const undoStack = require('./undoStack');
+const openFileHandler = require('./fileUploader');
 
 let app;
 
@@ -150,19 +151,14 @@ const contextMenu = {
 					text: 'Image',
 					cb(selectedItem) {
 						const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
-						app.openFileChooser('.png', e => {
-							const reader = new FileReader();
-							reader.onload = e => {
-								const opts = {
-									annotationType: 'image',
-									properties: {src: e.target.result, ...clickPos},
-									parent: selectedItem
-								};
-								undoStack.commit('annotation.add', opts, 'Add Image');
-								app.redrawUI(true);
+						openFileHandler('.png', 'dataURL', result => {
+							const opts = {
+								annotationType: 'image',
+								properties: {src: result, ...clickPos},
+								parent: selectedItem
 							};
-							reader.readAsDataURL(e.target.files[0]);
-							e.target.value = '';
+							undoStack.commit('annotation.add', opts, 'Add Image');
+							app.redrawUI(true);
 						});
 					}
 				}

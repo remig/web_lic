@@ -5,6 +5,8 @@ const util = require('./util');
 const InstructionExporter = require('./export');
 const store = require('./store');
 const undoStack = require('./undoStack');
+const openFileHandler = require('./fileUploader');
+
 let app;
 
 Vue.component('menu-list', {
@@ -75,7 +77,7 @@ const menu = [
 			text: 'Open Lic File...',
 			id: 'open',
 			cb() {
-				app.openFileChooser('.lic', app.triggerOpenLicFile);
+				openFileHandler('.lic', 'text', app.openLicFile);
 			}
 		},
 		{text: 'Open Recent (NYI)', enabled: () => false, cb: () => {}},
@@ -94,7 +96,7 @@ const menu = [
 		{
 			text: 'Import Custom Model...',
 			cb() {
-				app.openFileChooser('.ldr, .mpd', app.triggerModelImport);
+				openFileHandler('.ldr, .mpd', 'text', app.importLocalModel);
 			}
 		},
 		{
@@ -140,7 +142,7 @@ const menu = [
 				{
 					text: 'Load',
 					cb() {
-						app.openFileChooser('.lit', app.triggerTemplateImport);
+						openFileHandler('.lit', 'text', app.importTemplate);
 					}
 				},
 				{text: 'Load Built-in (NYI)', enabled: false, cb() {}},

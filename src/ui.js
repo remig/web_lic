@@ -1,4 +1,4 @@
-/* global Vue: false, Split: false, */
+/* global Vue: false, Split: false, ELEMENT: false */
 'use strict';
 
 const util = require('./util');
@@ -108,6 +108,7 @@ const app = new Vue({
 			});
 		},
 		openLicFile(content) {
+			content = JSON.parse(content);
 			const start = Date.now();
 			if (store.model) {
 				this.closeModel();
@@ -130,41 +131,13 @@ const app = new Vue({
 			store.save('file');
 			this.dirtyState.lastSaveIndex = undoStack.getIndex();
 		},
-		triggerModelImport(e) {
-			this.openFile(e, (result, filename) => {
-				this.importLocalModel(result, filename);
+		importTemplate(result, filename) {
+			undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template');
+			this.statusText = `"${filename}" template openend successfully`;
+			Vue.nextTick(() => {
+				this.drawCurrentPage();
+				this.forceUIUpdate();
 			});
-		},
-		triggerTemplateImport(e) {
-			this.openFile(e, (result, filename) => {
-				undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template');
-				this.statusText = `"${filename}" template openend successfully`;
-				Vue.nextTick(() => {
-					this.drawCurrentPage();
-					this.forceUIUpdate();
-				});
-			});
-		},
-		triggerOpenLicFile(e) {
-			this.openFile(e, result => {
-				this.openLicFile(JSON.parse(result));
-			});
-		},
-		openFileChooser(accept, callback) {
-			var input = document.getElementById('openFileChooser');
-			input.onchange = callback;
-			input.setAttribute('accept', accept);
-			input.click();
-		},
-		openFile(e, cb) {
-			const reader = new FileReader();
-			reader.onload = (filename => {
-				return e => {
-					cb(e.target.result, filename);
-				};
-			})(e.target.files[0].name);
-			reader.readAsText(e.target.files[0]);
-			e.target.value = '';
 		},
 		closeModel() {
 			store.model = null;
@@ -490,7 +463,7 @@ const app = new Vue({
 		LDParse.setProgressCallback(this.updateProgress);
 		var localState = localStorage.getItem('lic_state');
 		if (localState) {
-			this.openLicFile(JSON.parse(localState));
+			this.openLicFile(localState);
 		}
 	}
 });
