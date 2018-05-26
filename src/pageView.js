@@ -213,7 +213,7 @@ function itemHighlightBox(selItem, pageSize) {
 	// TODO: Handle wide borders better: x & y should be outside the border, then layout inside minus entire border width
 	let borderWidth = 0;
 	var template = store.get.templateForItem(selItem);
-	if (template && template.border && template.border.width) {
+	if (template && template.border && template.border.width && !selItem.type.includes('Page')) {
 		borderWidth = Math.ceil(template.border.width / 2);
 	}
 	return {
