@@ -4,6 +4,7 @@
 const util = require('./util');
 const store = require('./store');
 const undoStack = require('./undoStack');
+const openFileHandler = require('./fileUploader');
 
 function fillTemplatePanel(templateEntry) {
 	return {
@@ -17,10 +18,30 @@ function fillTemplatePanel(templateEntry) {
 			return {
 				color: colorNameToRGB(template.color),
 				gradient: template.gradient,
-				image: template.image
+				imageFilename: template.image == null ? null : template.image.filename || ''
 			};
 		},
 		methods: {
+			pickImage() {
+				openFileHandler('.png', 'dataURL', (src, filename) => {
+
+					const template = util.get(this.templateEntry, store.state.template).fill;
+					template.image = {filename, src};
+					this.imageFilename = filename;
+
+					const image = new Image();
+					image.onload = () => {
+						store.cache.set('page', 'backgroundImage', image);
+						this.updateValues();
+					};
+					image.src = src;
+				});
+			},
+			removeImage() {
+				const template = util.get(this.templateEntry, store.state.template).fill;
+				this.imageFilename = template.image = '';
+				this.updateValues();
+			},
 			updateColor(newColor) {
 				this.color = (newColor === 'transparent') ? null : newColor;
 				this.updateValues();
@@ -29,6 +50,12 @@ function fillTemplatePanel(templateEntry) {
 				const template = util.get(this.templateEntry, store.state.template).fill;
 				template.color = this.color;
 				this.$emit('new-values', util.prettyPrint(this.templateEntry));
+			}
+		},
+		computed: {
+			truncatedImageName() {
+				const fn = this.imageFilename;
+				return (fn.length > 12) ? fn.substr(0, 8) + '...png' : fn;
 			}
 		}
 	};

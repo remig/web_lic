@@ -29,6 +29,22 @@ const api = {
 		ctx.fillStyle = template.fill.color;
 		ctx.fillRect(0, 0, template.width, template.height);
 
+		if (template.fill.image) {
+			const cachedImage = store.cache.get('page', 'backgroundImage');
+			if (cachedImage) {
+				ctx.drawImage(cachedImage, 0, 0);
+			} else {
+				const image = new Image();
+				image.onload = () => {
+					// TODO: this gets called multiple times on initial page load
+					store.cache.set('page', 'backgroundImage', image);
+					api.page(page, canvas, scale, selectedPart);
+				};
+				image.src = template.fill.image.src;
+				return;
+			}
+		}
+
 		api.roundedRectStyled(
 			ctx, 0, 0, template.width, template.height,
 			template.border.cornerRadius * 2, rectStyle
@@ -75,13 +91,19 @@ const api = {
 				break;
 			}
 			case 'image': {
-				const image = new Image();
-				image.onload = function() {
-					annotation.width = this.width;
-					annotation.height = this.height;
-					ctx.drawImage(image, Math.floor(annotation.x), Math.floor(annotation.y));
-				};
-				image.src = annotation.src;
+				const cachedImage = store.cache.get(annotation, 'rawImage');
+				if (cachedImage) {
+					ctx.drawImage(cachedImage, Math.floor(annotation.x), Math.floor(annotation.y));
+				} else {
+					const image = new Image();
+					image.onload = function() {
+						annotation.width = this.width;
+						annotation.height = this.height;
+						ctx.drawImage(image, Math.floor(annotation.x), Math.floor(annotation.y));
+						store.cache.set(annotation, 'rawImage', image);
+					};
+					image.src = annotation.src;
+				}
 				break;
 			}
 		}

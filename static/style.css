@@ -131,6 +131,15 @@ div#container {
 	padding: 9px 20px;
 }
 
+.el-button.tight {
+	padding: 9px;
+}
+
+.el-button.template-close {
+	border: none;
+	padding: 0;
+}
+
 /* Splitter stuff */
 .gutter.gutter-horizontal {
 	cursor: ew-resize;
@@ -366,7 +375,7 @@ ul {
 }
 
 .panel-template .form-horizontal .col-sm-5 {
-	padding-left: 0px;	
+	/*padding-left: 0px;	*/
 }
 
 .panel-template .btn-secondary {

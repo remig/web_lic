@@ -42,9 +42,11 @@ const store = {
 	state: util.clone(emptyState),
 	replaceState(state) {
 		store.state = state;
+		store.cache.reset();
 	},
 	resetState() {
 		store.state = util.clone(emptyState);
+		store.cache.reset();
 	},
 	load(content) {
 		store.model = content.model;
@@ -70,7 +72,7 @@ const store = {
 			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
 			saveAs(blob, store.get.modelFilenameBase((target === 'template') ? '.lit' : '.lic'));
 		} else if (mode === 'localStorage' && target !== 'template') {
-			console.log('Updating localStorage');
+			console.log('Updating localStorage');  // eslint-disable-line no-console
 			window.localStorage.setItem('lic_state', content);
 		}
 	},
@@ -148,6 +150,35 @@ const store = {
 			}
 		};
 	})(),
+	cache: {
+		// For temporary state-based data that's transient yet expensive to recompute.
+		// Keys are either [item type][item ID][cache key] for info specific to exactly one item, or
+		// [item type][cache key] for info specific to all items of one type.
+		stateCache: {},
+		get(item, key, defaultValue) {
+			const cache = store.cache.stateCache;
+			if (item && item.type && item.id != null && cache[item.type] && cache[item.type][item.id]) {
+				return cache[item.type][item.id][key];
+			} else if (typeof item === 'string' && cache[item] && cache[item][key]) {
+				return cache[item][key];
+			}
+			return defaultValue;
+		},
+		set(item, key, newValue) {
+			const cache = store.cache.stateCache;
+			if (item && item.type && item.id != null) {
+				cache[item.type] = cache[item.type] || {};
+				cache[item.type][item.id] = cache[item.type][item.id] || {};
+				cache[item.type][item.id][key] = newValue;
+			} else if (typeof item === 'string') {
+				cache[item] = cache[item] || {};
+				cache[item][key] = newValue;
+			}
+		},
+		reset() {
+			store.cache.stateCache = {};
+		}
+	},
 	get: {
 		pageCount(includeTitlePage) {
 			return store.state.pages.length + (includeTitlePage && store.state.titlePage ? 1 : 0);

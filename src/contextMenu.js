@@ -151,10 +151,10 @@ const contextMenu = {
 					text: 'Image',
 					cb(selectedItem) {
 						const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
-						openFileHandler('.png', 'dataURL', result => {
+						openFileHandler('.png', 'dataURL', src => {
 							const opts = {
 								annotationType: 'image',
-								properties: {src: result, ...clickPos},
+								properties: {src, ...clickPos},
 								parent: selectedItem
 							};
 							undoStack.commit('annotation.add', opts, 'Add Image');
