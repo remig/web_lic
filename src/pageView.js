@@ -65,11 +65,14 @@ Vue.component('pageCanvasView', {
 			}
 		},
 		mouseDown(e) {
+			if (e.button !== 0) {
+				return;
+			}
 			// Record mouse down pos so we can check if mouse up is close enough to down to trigger a 'click' for selection
 			this.mouseDownPt = {x: e.offsetX, y: e.offsetY};
 			if (this.app.selectedItemLookup) {
 				const item = store.get.lookupToItem(this.app.selectedItemLookup);
-				if (inBox(e.offsetX, e.offsetY, item)) {
+				if (this.app.isMoveable(this.app.selectedItemLookup) && inBox(e.offsetX, e.offsetY, item)) {
 					// If mouse down is inside a selected item, store item & down pos in case mouse move follows, to support dragging items
 					this.mouseDragItem = {item, x: e.offsetX, y: e.offsetY};
 				}
@@ -95,6 +98,9 @@ Vue.component('pageCanvasView', {
 			this.app.drawCurrentPage();
 		},
 		mouseUp(e, page) {
+			if (e.button !== 0) {
+				return;
+			}
 			const up = {x: e.offsetX, y: e.offsetY};
 			if (this.mouseDragItem && this.mouseDragItem.moved) {
 				// Mouse drag is complete; add undo event to stack
