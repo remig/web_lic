@@ -71,14 +71,17 @@
 
 	<script type="text/x-template" id="pageCanvasView">
 		<div id="rightSubPane" :class="[{singleEntry: !isScrollingView}]" @scroll="handleScroll()">
-			<div class="pageCanvasContainer" v-if="isScrollingView" :style="{width: pageSize.width + 5 + 'px'}">
+			<div v-if="isScrollingView" :style="{width: pageSize.width + 5 + 'px'}" class="pageCanvasContainer">
 				<canvas
 					v-for="(page, idx) in pageList"
 					:id="'pageCanvas' + page.id"
 					class="pageCanvas multipleEntries"
 					:style="{marginTop: (idx === 0) ? pageCenterOffset : '', marginBottom: (idx === pageList.length - 1) ? pageCenterOffset : ''}"
 					:width="pageSize.width" :height="pageSize.height"
-					@click.stop="click($event, page)"
+					@mousedown.stop="mouseDown($event, page)"
+					@mousemove.stop="mouseMove($event, page)"
+					@mouseup.stop="mouseUp($event, page)"
+					@click.stop
 				></canvas>
 			</div>
 			<div v-else :style="{width: pageSize.width + 5 + 'px', height: pageSize.height + 5 + 'px'}">
@@ -86,7 +89,10 @@
 					id="pageCanvas"
 					class="pageCanvas"
 					:width="pageSize.width" :height="pageSize.height"
-					@click.stop="click($event)"
+					@mousedown.stop="mouseDown($event)"
+					@mousemove.stop="mouseMove($event)"
+					@mouseup.stop="mouseUp($event)"
+					@click.stop
 				></canvas>
 			</div>
 		</div>

@@ -4,6 +4,7 @@
 const util = require('./util');
 const Draw = require('./draw');
 const store = require('./store');
+const undoStack = require('./undoStack');
 
 Vue.component('pageCanvasView', {
 	props: ['app', 'selectedItem', 'currentPageLookup'],
@@ -63,14 +64,53 @@ Vue.component('pageCanvasView', {
 				});
 			}
 		},
-		click(e, page) {
-			page = (page == null) ? this.currentPageLookup : page;
-			const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
-			if (target) {
-				this.app.setSelected(target);
-			} else {
-				this.app.clearSelected();
+		mouseDown(e) {
+			// Record mouse down pos so we can check if mouse up is close enough to down to trigger a 'click' for selection
+			this.mouseDownPt = {x: e.offsetX, y: e.offsetY};
+			if (this.app.selectedItemLookup) {
+				const item = store.get.lookupToItem(this.app.selectedItemLookup);
+				if (inBox(e.offsetX, e.offsetY, item)) {
+					// If mouse down is inside a selected item, store item & down pos in case mouse move follows, to support dragging items
+					this.mouseDragItem = {item, x: e.offsetX, y: e.offsetY};
+				}
 			}
+		},
+		mouseMove(e) {
+			if (!this.mouseDragItem) {
+				return;
+			}
+			const dx = Math.floor(e.offsetX - this.mouseDragItem.x);
+			const dy = Math.floor(e.offsetY - this.mouseDragItem.y);
+			if (dx === 0 && dy === 0) {
+				return;
+			}
+			// TODO: Prevent dragging items off the page canvas
+			// TODO: Some items can't be dragged about freely, like callout arrow base points
+			// TODO: Try drawing callout arrows so that the tip is always anchored relative to the CSI, so that moving the callout or CSI doesn't reposition the tip
+			// TODO: Update parent bounding boxes for children like PLI, CSI, etc
+			store.mutations.item.reposition({item: this.mouseDragItem.item, dx, dy});
+			this.mouseDragItem.x = e.offsetX;
+			this.mouseDragItem.y = e.offsetY;
+			this.mouseDragItem.moved = true;
+			this.app.drawCurrentPage();
+		},
+		mouseUp(e, page) {
+			const up = {x: e.offsetX, y: e.offsetY};
+			if (this.mouseDragItem && this.mouseDragItem.moved) {
+				// Mouse drag is complete; add undo event to stack
+				undoStack.commit(null, null, `Move ${util.prettyPrint(this.mouseDragItem.item.type)}`);
+				this.app.redrawUI(false);
+			} else if (util.geom.distance(this.mouseDownPt, up) < 3) {
+				// If simple mouse down + mouse up with very little movement, handle as if 'click' for selection
+				page = (page == null) ? this.currentPageLookup : page;
+				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
+				if (target) {
+					this.app.setSelected(target);
+				} else {
+					this.app.clearSelected();
+				}
+			}
+			this.mouseDownPt = this.mouseDragItem = null;
 		},
 		handleScroll() {
 			const container = document.getElementById('rightSubPane');
