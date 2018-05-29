@@ -39,30 +39,32 @@ const api = {
 		api.calloutArrow(callout);
 	},
 	calloutArrow(callout) {
-		// TODO: do not recreate callout arrow on layout; just alter the existing one
-		// TODO: arrow should come out of the center of the last step in the callout
+		// TODO: consider adding a full automatic 'stairstep' callout arrow, which maintains orthogonal segments regardless of anchor or tip movement.
+
+		// Delete all but first callout arrow
+		while (callout.calloutArrows.length > 1) {
+			store.mutations.item.delete({item: {type: 'calloutArrow', id: callout.calloutArrows[1]}});
+		}
+
+		// Delete all but first & last point in first arrow
+		const arrow = store.get.calloutArrow(callout.calloutArrows[0]);
+		while (arrow.points.length > 2) {
+			store.mutations.item.delete({item: {type: 'point', id: arrow.points[1]}});
+		}
+
+		// Coordinates for first point (base) are relative to the *callout*
+		const p1 = store.get.point(arrow.points[0]);
+		const h = callout.height;
+		p1.x = callout.width;
+		p1.y = h - (h / (callout.steps.length || 1) / 2);
+
+		// Coordinates for last point (tip) are relative to the *CSI*
 		const step = store.get.step(callout.parent.id);
 		const csi = store.get.csi(step.csiID);
-		callout.calloutArrows.forEach(id => {
-			const arrow = store.get.calloutArrow(id);
-			store.mutations.item.deleteChildList({item: arrow, listType: 'point'});
-			store.mutations.item.delete({item: {type: 'calloutArrow', id}});
-		});
-		callout.calloutArrows = [];
-		const arrow = store.mutations.item.add({item: {
-			type: 'calloutArrow',
-			points: [],
-			direction: 'right'
-		}, parent: callout});
-
-		store.mutations.item.add({item: {
-			type: 'point', x: callout.width, y: callout.height / 2
-		}, parent: arrow});
-		store.mutations.item.add({item: {
-			type: 'point',
-			x: csi ? csi.x - callout.x : callout.width + 100,
-			y: callout.height / 2
-		}, parent: arrow});
+		const p2 = store.get.point(arrow.points[1]);
+		p2.relativeTo = {type: 'csi', id: csi.id};
+		p2.x = 0;
+		p2.y = csi ? csi.height / 2 : 50;
 	},
 	pli(pli) {
 
@@ -383,6 +385,8 @@ const api = {
 			}
 			util.array.removeIndex(stepsToMerge, 0);
 		}
+	},
+	boundingBox: {
 	}
 };
 
@@ -391,6 +395,7 @@ function getMargin(margin) {
 	return margin * Math.max(pageSize.width, pageSize.height);
 }
 
+// TODO: should push callouts down too
 function alignStepContent(page) {
 	const margin = getMargin(store.state.template.step.innerMargin);
 	const steps = page.steps.map(stepID => store.get.step(stepID));

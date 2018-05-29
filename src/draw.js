@@ -57,9 +57,10 @@ const api = {
 			ctx.strokeStyle = template.divider.border.color;
 			ctx.lineWidth = template.divider.border.width;
 			ctx.beginPath();
-			// TODO: half pixel offset needed here too. Can't just floor everything; border thickness might offset too
-			ctx.moveTo(divider.p1.x, divider.p1.y);
-			ctx.lineTo(divider.p2.x, divider.p2.y);
+			const p1 = pixelOffset(divider.p1, template.divider.border.width);
+			ctx.moveTo(p1.x, p1.y);
+			const p2 = pixelOffset(divider.p2, template.divider.border.width);
+			ctx.lineTo(p2.x, p2.y);
 			ctx.stroke();
 		});
 
@@ -258,15 +259,6 @@ const api = {
 	},
 
 	callout(callout, ctx, scale = 1, selectedPart) {
-		function offset({x, y}, lineWidth) {
-			x = Math.floor(x);
-			y = Math.floor(y);
-			if (lineWidth % 2) {  // Avoid half-pixel offset blurry lines
-				x += 0.5;
-				y += 0.5;
-			}
-			return {x, y};
-		}
 		const template = store.state.template.callout;
 		callout = store.get.callout(callout);
 		ctx.save();
@@ -280,32 +272,36 @@ const api = {
 		api.roundedRectStyled(ctx, 0, 0, callout.width, callout.height, template.border.cornerRadius, rectStyle);
 
 		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
+		ctx.restore();
 
 		ctx.strokeStyle = template.arrow.border.color;
 		ctx.fillStyle = template.arrow.border.color;
 		ctx.lineWidth = template.arrow.border.width;
 		(callout.calloutArrows || []).forEach(arrowID => {
-			const arrow = store.get.calloutArrow(arrowID);
-			const arrowPoints = store.get.calloutArrowToPoints(arrow);
-			const pt = offset(arrowPoints[0], template.arrow.border.width);
-			ctx.beginPath();
-			ctx.moveTo(pt.x, pt.y);
-			arrowPoints.slice(1, -1).forEach(pt => {
-				pt = offset(pt, template.arrow.border.width);
-				ctx.lineTo(pt.x, pt.y);
-			});
-			ctx.stroke();
-			ctx.fillStyle = template.arrow.color;
-			const tip = offset(arrowPoints[arrowPoints.length - 1], template.arrow.border.width);
-			// TODO: consider arrow line width when drawing arrow, so it grows along with line width
-			// TODO: line width 0 should not draw anything
-			api.arrowHead(ctx, tip.x, tip.y, arrow.direction);
-			ctx.fill();
+			api.calloutArrow(arrowID, ctx);
 		});
-		ctx.restore();
 	},
 
-	// TODO: rotateIcons are positioned and sized totally wrong.  Something's broken.
+	calloutArrow(arrow, ctx) {
+		arrow = store.get.calloutArrow(arrow);
+		const template = store.state.template.callout.arrow;
+		const arrowPoints = store.get.calloutArrowToPoints(arrow);
+		const pt = pixelOffset(arrowPoints[0], template.border.width);
+		ctx.beginPath();
+		ctx.moveTo(pt.x, pt.y);
+		arrowPoints.slice(1, -1).forEach(pt => {
+			pt = pixelOffset(pt, template.border.width);
+			ctx.lineTo(pt.x, pt.y);
+		});
+		ctx.stroke();
+		ctx.fillStyle = template.color;
+		const tip = pixelOffset(arrowPoints[arrowPoints.length - 1], template.border.width);
+		// TODO: consider arrow line width when drawing arrow, so it grows along with line width
+		// TODO: line width 0 should not draw anything
+		api.arrowHead(ctx, tip.x, tip.y, arrow.direction);
+		ctx.fill();
+	},
+
 	rotateIcon(icon, ctx) {
 		const template = store.state.template.rotateIcon;
 		icon = store.get.rotateIcon(icon);
@@ -424,14 +420,9 @@ const api = {
 
 	roundedRect(ctx, x, y, w, h, r, lineWidth) {
 		// TODO: this looks bad if border line width is thick; make 'r' define inner curve, not the middle of the curve
-		x = Math.floor(x);
-		y = Math.floor(y);
 		w = Math.floor(w);
 		h = Math.floor(h);
-		if (lineWidth % 2) {  // Avoid half-pixel offset blurry lines
-			x += 0.5;
-			y += 0.5;
-		}
+		({x, y} = pixelOffset({x, y}, lineWidth));
 		ctx.beginPath();
 		ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
 		ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);
@@ -439,7 +430,16 @@ const api = {
 		ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
 		ctx.closePath();
 	}
-
 };
+
+function pixelOffset({x, y}, lineWidth) {
+	x = Math.floor(x);
+	y = Math.floor(y);
+	if (lineWidth % 2) {  // Avoid half-pixel offset blurry lines
+		x += 0.5;
+		y += 0.5;
+	}
+	return {x, y};
+}
 
 module.exports = api;

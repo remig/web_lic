@@ -349,15 +349,41 @@ const store = {
 			return LDParse.partDictionary[part.filename].isSubModel;
 		},
 		calloutArrowToPoints(arrow) {
-			const points = arrow.points.map(store.get.point);
-			const tip = points[points.length - 1];
+			// Return list of points in arrow, all relative to *step*.
+			// Last arrow point is the very arrowhead tip, but arrow line should end at at arrowhead base.
+			// Last arrow point is also relative to CSI.
+			const callout = store.get.parent(arrow);
+			const step = store.get.parent(callout);
+			const csi = store.get.csi(step.csiID);
 
-			const base = {x: tip.x, y: tip.y};
+			const points = arrow.points.slice(0, -1).map(pointID => {
+				const point = store.get.point(pointID);
+				return {
+					x: point.x + callout.x,
+					y: point.y + callout.y
+				};
+			});
+
+			let tip = arrow.points[arrow.points.length - 1];
+			tip = store.get.point(tip);
+			tip = {x: tip.x + csi.x, y: tip.y + csi.y};
+
+			const base = util.clone(tip);
 			const direction = arrow.direction;
 			base.x += (direction === 'right') ? -24 : (direction === 'left') ? 24 : 0;  // TODO: abstract callout arrow dimension... somewhere...
 			base.y += (direction === 'down') ? -24 : (direction === 'up') ? 24 : 0;
 
-			return [...points.slice(0, -1), base, tip];
+			return [...points, base, tip];
+		},
+		calloutArrowBoundingBox(arrow) {
+			const callout = store.get.parent(arrow);
+			const step = store.get.parent(callout);
+			const points = store.get.calloutArrowToPoints(arrow);
+			let box = util.geom.bbox(points);
+			box = util.geom.expandBox(box, 8, 8);
+			box.x += step.x;
+			box.y += step.y;
+			return box;
 		},
 		prev(item, itemList) {  // Get the previous item in the specified item's list, based on item.number and matching parent types
 			item = store.get.lookupToItem(item);
@@ -440,7 +466,11 @@ const store = {
 				box.y -= 5;
 			}
 			while (t) {
-				t = store.get.parent(t);
+				if (t.relativeTo) {
+					t = store.get.lookupToItem(t.relativeTo);
+				} else {
+					t = store.get.parent(t);
+				}
 				if (t) {
 					box.x += t.x || 0;
 					box.y += t.y || 0;
@@ -506,6 +536,10 @@ const store = {
 				items.forEach(item => {
 					item.x += opts.dx;
 					item.y += opts.dy;
+					// const parent = store.get.parent(item);
+					// if (Layout.boundingBox[parent.type]) {
+					// 	Layout.boundingBox[parent.type](parent);
+					// }
 				});
 			}
 		},
@@ -843,12 +877,15 @@ const store = {
 		callout: {
 			add(opts) {  // opts: {parent}
 				const pageSize = store.state.template.page;
-				return store.mutations.item.add({item: {
+				const callout = store.mutations.item.add({item: {
 					type: 'callout',
 					steps: [], calloutArrows: [],
 					x: null, y: null, width: null, height: null,
 					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
 				}, parent: opts.parent});
+
+				store.mutations.calloutArrow.add({parent: callout});
+				return callout;
 			},
 			delete(opts) {  // opts: {callout}
 				const item = store.get.lookupToItem(opts.callout);
@@ -875,6 +912,21 @@ const store = {
 			}
 		},
 		calloutArrow: {
+			add(opts) {  // opts: {parent}
+				const arrow = store.mutations.item.add({item: {
+					type: 'calloutArrow', points: [], direction: 'right'
+				}, parent: opts.parent});
+
+				store.mutations.item.add({item: {
+					type: 'point', x: 0, y: 0
+				}, parent: arrow});
+
+				store.mutations.item.add({item: {
+					type: 'point', x: 0, y: 0
+				}, parent: arrow});
+
+				return arrow;
+			},
 			delete(opts) {  // opts: {calloutArrow}
 				const item = opts.calloutArrow;
 				store.mutations.item.deleteChildList({item, listType: 'point'});
@@ -882,10 +934,14 @@ const store = {
 			},
 			addPoint(opts) { // opts: {calloutArrow, doLayout}
 				const arrow = store.get.calloutArrow(opts.calloutArrow);
+				const callout = store.get.parent(arrow);
 				const parentInsertionIndex = Math.ceil(arrow.points.length / 2);
-				const p1 = store.get.point(arrow.points[parentInsertionIndex - 1]);
-				const p2 = store.get.point(arrow.points[parentInsertionIndex]);
+				const arrowPoints = store.get.calloutArrowToPoints(arrow);
+				const p1 = arrowPoints[parentInsertionIndex - 1];
+				const p2 = arrowPoints[parentInsertionIndex];
 				const midpoint = util.geom.midpoint(p1, p2);
+				midpoint.x -= callout.x;
+				midpoint.y -= callout.y;
 				store.mutations.item.add({
 					item: {type: 'point', ...midpoint},
 					parent: arrow,
