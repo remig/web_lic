@@ -148,6 +148,10 @@ const contextMenu = {
 					cb() {}
 				},
 				{
+					text: 'Circle (NYI)',
+					cb() {}
+				},
+				{
 					text: 'Image',
 					cb(selectedItem) {
 						const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
@@ -575,7 +579,13 @@ const contextMenu = {
 			text: 'Delete Empty Callout',
 			shown(selectedItem) {
 				const callout = store.get.callout(selectedItem);
-				return util.isEmpty(callout.steps);
+				if (callout.steps.length < 1) {
+					return true;
+				} else if (callout.steps.length > 1) {
+					return false;
+				}
+				const step = store.get.step(callout.steps[0]);
+				return step.parts.length < 1;
 			},
 			cb(selectedItem) {
 				undoStack.commit('callout.delete', {callout: selectedItem}, this.text);
