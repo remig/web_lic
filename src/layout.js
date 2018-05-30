@@ -309,6 +309,31 @@ const api = {
 			api.step.outsideIn(store.get.step(page.steps[i]), box);
 		}
 
+		if (stepCount < (rows * cols)) {  // Have fewer steps than fit in the grid; expand steps in last row / col to fill empty cell
+			const emptySlots = (rows * cols) - stepCount;
+			if (layoutDirection === 'vertical') {
+				const stepsInLastCol = rows - emptySlots;
+				box.width = colSize;
+				box.height = Math.floor(pageSize.height / stepsInLastCol);
+				box.x = (cols - 1) * colSize;
+				for (let i = 0; i < stepsInLastCol; i++) {
+					box.y = box.height * i;
+					const stepIndex = ((cols - 1) * rows) + i;
+					api.step.outsideIn(store.get.step(page.steps[stepIndex]), box);
+				}
+			} else {
+				const stepsInLastRow = cols - emptySlots;
+				box.width = Math.floor(pageSize.width / stepsInLastRow);
+				box.height = rowSize;
+				box.y = (rows - 1) * rowSize;
+				for (let i = 0; i < stepsInLastRow; i++) {
+					box.x = box.width * i;
+					const stepIndex = ((rows - 1) * cols) + i;
+					api.step.outsideIn(store.get.step(page.steps[stepIndex]), box);
+				}
+			}
+		}
+
 		page.layout = layout;
 		page.actualLayout = (rows > 1 || cols > 1) ? {rows, cols, direction: layoutDirection} : 'horizontal';
 		api.dividers(page, layoutDirection, rows, cols);

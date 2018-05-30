@@ -173,6 +173,12 @@ const api = {
 				minY = Math.min(minY, p.y);
 				maxX = Math.max(maxX, p.x);
 				maxY = Math.max(maxY, p.y);
+				if (p.hasOwnProperty('width')) {
+					maxX = Math.max(maxX, p.x + p.width);
+				}
+				if (p.hasOwnProperty('height')) {
+					maxY = Math.max(maxY, p.y + p.height);
+				}
 			}
 			return {
 				x: minX, y: minY,
