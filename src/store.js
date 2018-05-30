@@ -313,7 +313,7 @@ const store = {
 			let nextStep = store.get.next(step);
 			if (limitToSubmodel) {
 				while (nextStep && !util.array.eq(step.submodel, nextStep.submodel)) {
-					nextStep = store.get.prev(nextStep);
+					nextStep = store.get.next(nextStep);
 				}
 			}
 			return nextStep;

@@ -242,6 +242,7 @@ const contextMenu = {
 			]
 		},
 		{
+			// TODO: If step being merged contains a submodel, must reorder all steps in that submodel too
 			text: 'Merge Step with...',
 			children: [
 				{
@@ -251,7 +252,7 @@ const contextMenu = {
 					},
 					cb(selectedItem) {
 						const srcStep = selectedItem;
-						const destStep = store.get.prevStep(selectedItem);
+						const destStep = store.get.prevStep(selectedItem, true);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
 						app.redrawUI(true);
 					}
@@ -263,7 +264,7 @@ const contextMenu = {
 					},
 					cb(selectedItem) {
 						const srcStep = selectedItem;
-						const destStep = store.get.nextStep(selectedItem);
+						const destStep = store.get.nextStep(selectedItem, true);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
 						app.redrawUI(true);
 					}
