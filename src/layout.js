@@ -412,29 +412,32 @@ const api = {
 			util.array.removeIndex(stepsToMerge, 0);
 		}
 	},
-	boundingBox: {
+	adjustBoundingBox: {
+		pliItem(item) {
+			const pli = store.get.parent(item);
+			const boxes = [];
+			pli.pliItems.forEach(itemID => {
+				const pliItem = store.get.pliItem(itemID);
+				boxes.push({
+					x: pli.x + pliItem.x, y: pli.y + pliItem.y,
+					width: pliItem.width, height: pliItem.height
+				});
+				const qtyLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+				boxes.push({
+					x: pli.x + pliItem.x + qtyLabel.x, y: pli.y + pliItem.y + qtyLabel.y,
+					width: qtyLabel.width, height: qtyLabel.height
+				});
+			});
+			const margin = getMargin(store.state.template.pli.innerMargin);
+			const bbox = util.geom.bbox(boxes);
+			pli.borderOffset.x = bbox.x - pli.x - margin;
+			pli.borderOffset.y = bbox.y - pli.y - margin;
+			pli.width = margin + bbox.width + margin;
+			pli.height = margin + bbox.height + margin;
+		},
 		quantityLabel(item) {
 			if (item.parent.type === 'pliItem') {
-				const pli = store.get.parent(store.get.parent(item));
-				const boxes = [];
-				pli.pliItems.forEach(itemID => {
-					const pliItem = store.get.pliItem(itemID);
-					boxes.push({
-						x: pli.x + pliItem.x, y: pli.y + pliItem.y,
-						width: pliItem.width, height: pliItem.height
-					});
-					const qtyLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-					boxes.push({
-						x: pli.x + pliItem.x + qtyLabel.x, y: pli.y + pliItem.y + qtyLabel.y,
-						width: qtyLabel.width, height: qtyLabel.height
-					});
-				});
-				const margin = getMargin(store.state.template.pli.innerMargin);
-				const bbox = util.geom.bbox(boxes);
-				pli.borderOffset.x = bbox.x - pli.x - margin;
-				pli.borderOffset.y = bbox.y - pli.y - margin;
-				pli.width = margin + bbox.width + margin;
-				pli.height = margin + bbox.height + margin;
+				api.adjustBoundingBox.pliItem(store.get.parent(item));
 			}
 		}
 	}

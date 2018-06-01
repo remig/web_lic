@@ -540,8 +540,8 @@ const store = {
 				items.forEach(item => {
 					item.x += opts.dx;
 					item.y += opts.dy;
-					if (Layout.boundingBox[item.type]) {
-						Layout.boundingBox[item.type](item);
+					if (Layout.adjustBoundingBox[item.type]) {
+						Layout.adjustBoundingBox[item.type](item);
 					}
 				});
 			}
