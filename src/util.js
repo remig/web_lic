@@ -197,6 +197,24 @@ const api = {
 			}
 			return box;
 		},
+		moveBoxEdge(box, edge, dt) {
+			switch (edge) {
+				case 'top':
+					box.y += dt;
+					box.height -= dt;
+					break;
+				case 'right':
+					box.width += dt;
+					break;
+				case 'bottom':
+					box.height += dt;
+					break;
+				case 'left':
+					box.x += dt;
+					box.width -= dt;
+					break;
+			}
+		},
 		distance(p1, p2) {
 			if (typeof p1 === 'number' && typeof p2 === 'number') {
 				return Math.abs(p1 - p2);

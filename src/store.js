@@ -532,8 +532,16 @@ const store = {
 				const oldParent = store.get.parent(item);
 				const newParent = store.get.lookupToItem(opts.newParent);
 				item.parent.id = newParent.id;
-				util.array.remove(oldParent[item.type + 's'], item.id);
-				util.array.insert(newParent[item.type + 's'], item.id, opts.parentInsertionIndex);
+				if (oldParent.hasOwnProperty(item.type + 's')) {
+					util.array.remove(oldParent[item.type + 's'], item.id);
+				} else if (oldParent.hasOwnProperty(item.type + 'ID')) {
+					oldParent[item.type + 'ID'] = null;
+				}
+				if (newParent.hasOwnProperty(item.type + 's')) {
+					util.array.insert(newParent[item.type + 's'], item.id, opts.parentInsertionIndex);
+				} else if (newParent.hasOwnProperty(item.type + 'ID')) {
+					newParent[item.type + 'ID'] = item.id;
+				}
 			},
 			reposition(opts) {  // opts: {item or [items], dx, dy}
 				const items = Array.isArray(opts.item) ? opts.item : [opts.item];
@@ -745,7 +753,7 @@ const store = {
 					item: {
 						type: 'step',
 						number: opts.stepNumber, numberLabelID: null,
-						parts: [], callouts: [], submodel: [],
+						parts: [], callouts: [], submodel: [], steps: [],
 						csiID: null, pliID: null, rotateIconID: null, submodelImageID: null,
 						x: null, y: null, width: null, height: null
 					},
@@ -851,6 +859,21 @@ const store = {
 				step.callouts = step.callouts || [];
 				store.mutations.callout.add({parent: step});
 				store.mutations.page.layout({page: store.get.pageForItem(step)});
+			},
+			addSubStep(opts) {  // opts: {step, doLayout}
+				const step = store.get.lookupToItem(opts.step);
+				const newStep = store.mutations.step.add({
+					dest: step, stepNumber: 1, doLayout: false, renumber: false
+				});
+				newStep.pliID = null;
+				store.mutations.item.reparent({
+					item: store.get.csi(step.csiID),
+					newParent: newStep
+				});
+				newStep.parts = util.clone(step.parts);
+				if (opts.doLayout) {
+					store.mutations.page.layout({page: store.get.pageForItem(step)});
+				}
 			},
 			toggleRotateIcon(opts) { // opts: {step, display}
 				const step = store.get.lookupToItem(opts.step);

@@ -290,6 +290,15 @@ function findClickTargetInStep(step, mx, my) {
 	if (step.csiID != null && inBox(mx, my, csi)) {
 		return csi;
 	}
+	if (step.steps.length) {
+		for (let i = 0; i < step.steps.length; i++) {
+			const innerStep = store.get.step(step.steps[i]);
+			const innerTarget = findClickTargetInStep(innerStep, mx, my);
+			if (innerTarget) {
+				return innerTarget;
+			}
+		}
+	}
 	if (step.submodelImageID != null) {
 		const submodelImage = store.get.submodelImage(step.submodelImageID);
 		if (inBox(mx, my, submodelImage)) {
@@ -322,7 +331,7 @@ function findClickTargetInStep(step, mx, my) {
 			return pli;
 		}
 	}
-	if (step.callouts) {
+	if (step.callouts.length) {
 		for (let i = 0; i < step.callouts.length; i++) {
 			const callout = store.get.callout(step.callouts[i]);
 			if (inBox(mx, my, callout)) {

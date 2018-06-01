@@ -113,6 +113,16 @@ const api = {
 		pli.width = left;
 		pli.height = margin + maxHeight + margin;
 	},
+	csi(csi, box) {
+		// Draw CSI centered in box
+		const step = store.get.parent(csi);
+		const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
+		const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
+		csi.x = box.x + ((box.width - csiSize.width) / 2);
+		csi.y = box.y + ((box.height - csiSize.height) / 2);
+		csi.width = csiSize.width;
+		csi.height = csiSize.height;
+	},
 	submodelImage(submodelImage) {
 
 		const step = store.get.parent(submodelImage);
@@ -140,52 +150,77 @@ const api = {
 			lbl.height = lblSize.height;
 		}
 	},
+	subSteps(step, stepBox) {
+		const stepCount = step.steps.length;
+		const cols = Math.ceil(Math.sqrt(stepCount));
+		const rows = Math.ceil(stepCount / cols);
+		const layoutDirection = 'vertical';
+		const colSize = Math.floor(stepBox.width / cols);
+		const rowSize = Math.floor(stepBox.height / rows);
+
+		const box = {x: stepBox.x, y: stepBox.y, width: colSize, height: rowSize};
+
+		for (let i = 0; i < stepCount; i++) {
+			if (layoutDirection === 'vertical') {
+				box.x = stepBox.x + (colSize * Math.floor(i / rows));
+				box.y = stepBox.y + (rowSize * (i % rows));
+			} else {
+				box.x = stepBox.x + (colSize * (i % cols));
+				box.y = stepBox.y + (rowSize * Math.floor(i / cols));
+			}
+			api.step.outsideIn(store.get.step(step.steps[i]), box);
+		}
+	},
 	step: {
 		outsideIn(step, box) {  // Starting with a pre-defined box, layout everything in this step inside it
 
-			const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
-
 			const pageMargin = getMargin(store.state.template.page.innerMargin);
 			const innerMargin = getMargin(store.state.template.step.innerMargin);
+
+			// Position step in parent coordinates
 			step.x = box.x + pageMargin;
 			step.y = box.y + pageMargin;
 			step.width = box.width - pageMargin - pageMargin;
 			step.height = box.height - pageMargin - pageMargin;
 
+			// transform box to step coordinates
+			box = util.clone(box);
+			box.x = box.y = 0;
+			box.width = step.width;
+			box.height = step.height;
+
 			const submodelImage = (step.submodelImageID != null) ? store.get.submodelImage(step.submodelImageID) : null;
 			if (submodelImage) {
 				api.submodelImage(submodelImage);
+				util.geom.moveBoxEdge(box, 'top', submodelImage.height + innerMargin);
 			}
-			const submodelHeight = submodelImage ? submodelImage.height + innerMargin : 0;
 
 			const pli = (step.pliID != null && store.state.plisVisible) ? store.get.pli(step.pliID) : null;
 			if (pli) {
 				api.pli(pli);
-				pli.y += submodelHeight;
+				pli.y = box.y;
+				util.geom.moveBoxEdge(box, 'top', pli.height + innerMargin);
 			}
-			const pliHeight = pli ? pli.height + submodelHeight : submodelHeight;
-
-			if (step.csiID != null) {
-				const csi = store.get.csi(step.csiID);
-				const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
-				csi.x = (step.width - csiSize.width) / 2;
-				csi.y = (step.height + pliHeight - csiSize.height) / 2;
-				csi.width = csiSize.width;
-				csi.height = csiSize.height;
-			}
-
-			(step.callouts || []).forEach(calloutID => {
-				api.callout(store.get.callout(calloutID));
-			});
 
 			if (step.numberLabelID != null) {
 				const lblSize = util.measureLabel(store.state.template.step.numberLabel.font, step.number);
 				const lbl = store.get.numberLabel(step.numberLabelID);
 				lbl.x = 0;
-				lbl.y = pliHeight ? pliHeight + innerMargin : 0;
+				lbl.y = box.y;
 				lbl.width = lblSize.width;
 				lbl.height = lblSize.height;
+				util.geom.moveBoxEdge(box, 'top', lbl.height + innerMargin);
 			}
+
+			if (step.csiID == null && step.steps.length) {
+				api.subSteps(step, box);
+			} else if (step.csiID != null) {
+				api.csi(store.get.csi(step.csiID), box);
+			}
+
+			(step.callouts || []).forEach(calloutID => {
+				api.callout(store.get.callout(calloutID));
+			});
 
 			if (step.rotateIconID != null && step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
@@ -413,6 +448,11 @@ const api = {
 		}
 	},
 	adjustBoundingBox: {
+		// csi(item) {
+		// 	const step = store.get.parent(item);
+		// 	if (step.parent.type === 'callout') {
+		// 	}
+		// },
 		pliItem(item) {
 			const pli = store.get.parent(item);
 			const boxes = [];

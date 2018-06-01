@@ -188,22 +188,41 @@ const contextMenu = {
 	step: [
 		{
 			text: 'Add Callout',
+			shown(selectedItem) {
+				const step = store.get.step(selectedItem.id);
+				return !step.steps.length;
+			},
 			cb(selectedItem) {
 				undoStack.commit('step.addCallout', {step: selectedItem}, this.text);
 				app.redrawUI(true);
 			}
 		},
 		{
-			text: 'Convert to Callout (NYI)',
+			text: 'Divide into Sub-Steps',
 			shown(selectedItem) {
-				const step = store.get.lookupToItem(selectedItem);
-				return !util.isEmpty(step.submodel);
+				const step = store.get.step(selectedItem.id);
+				const parent = store.get.parent(selectedItem);
+				if (parent.type === 'page' && !step.callouts.length && !step.steps.length) {
+					return true;
+				}
+				return false;
 			},
-			cb() {
-				// const step = store.get.lookupToItem(selectedItem);
-				// undoStack.commit('convertSubmodelToCallout', step, 'Convert to Callout');
+			cb(selectedItem) {
+				undoStack.commit('step.addSubStep', {step: selectedItem, doLayout: true}, this.text);
+				app.redrawUI(true);
 			}
 		},
+		// {
+		// 	text: 'Convert to Callout (NYI)',
+		// 	shown(selectedItem) {
+		// 		const step = store.get.lookupToItem(selectedItem);
+		// 		return !util.isEmpty(step.submodel);
+		// 	},
+		// 	cb() {
+		// 		// const step = store.get.lookupToItem(selectedItem);
+		// 		// undoStack.commit('convertSubmodelToCallout', step, 'Convert to Callout');
+		// 	}
+		// },
 		{
 			text: 'Move Step to',
 			children: [
@@ -286,7 +305,7 @@ const contextMenu = {
 			text: 'Prepend Blank Step',
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
-				const dest = store.get.pageForItem(step);
+				const dest = store.get.parent(step);
 				const opts = {
 					dest, stepNumber: step.number, doLayout: true, renumber: true,
 					insertionIndex: store.state.steps.indexOf(step),
@@ -300,7 +319,7 @@ const contextMenu = {
 			text: 'Append Blank Step',
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
-				const dest = store.get.pageForItem(step);
+				const dest = store.get.parent(step);
 				const opts = {
 					dest, stepNumber: step.number + 1, doLayout: true, renumber: true,
 					insertionIndex: store.state.steps.indexOf(step) + 1,
