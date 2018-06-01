@@ -1,4 +1,4 @@
-/* global Vue: false, Split: false, ELEMENT: false */
+/* global Vue: false, Split: false, ELEMENT: false*/
 'use strict';
 
 const util = require('./util');
@@ -294,13 +294,9 @@ const app = new Vue({
 					this.setCurrentPage(prevPage);
 				}
 			} else if (selItem && e.key.startsWith('Arrow') && this.isMoveable(selItem)) {
-				let dx = 0, dy = 0, dv = 5;
-				if (e.shiftKey) {
-					dv *= 2;
-				}
-				if (e.ctrlKey) {
-					dv *= 10;
-				}
+				let dx = 0, dy = 0, dv = 1;
+				dv *= e.shiftKey ? 5 : 1;
+				dv *= e.ctrlKey ? 20 : 1;
 				if (e.key === 'ArrowUp') {
 					dy = -dv;
 				} else if (e.key === 'ArrowDown') {
@@ -310,7 +306,7 @@ const app = new Vue({
 				} else if (e.key === 'ArrowRight') {
 					dx = dv;
 				}
-				let item = store.get.lookupToItem(selItem);
+				const item = store.get.lookupToItem(selItem);
 				// Special case: the first point in a callout arrow can't move away from the callout itself
 				// TODO: this doesn't prevent arrow base from coming off the rounded corner of a callout
 				// TOOD: consider a similar case of moving a CSI with callout arrows pointing to it: move the arrow tips with the callout?
@@ -334,28 +330,6 @@ const app = new Vue({
 							}
 						}
 					}
-				} else if (item.type === 'csi') {
-					// TODO: If you move a CSI, the Step's bounding box needs to be updated
-					// If we're moving a CSI on a step with callouts, move each callout arrow tip too so it stays anchored to the CSI
-					const step = store.get.parent(item);
-					if (!util.isEmpty(step.callouts)) {
-						item = [item];
-						step.callouts.forEach(calloutID => {
-							const callout = store.get.callout(calloutID);
-							callout.calloutArrows.forEach(arrowID => {
-								const arrow = store.get.calloutArrow(arrowID);
-								item.push(store.get.point(arrow.points[arrow.points.length - 1]));
-							});
-						});
-					}
-				} else if (item.type === 'callout') {
-					// If we're moving a callout, move each callout arrow tip in the opposite direction so it stays in place anchored to the CSI
-					item.calloutArrows.forEach(arrowID => {
-						const arrow = store.get.calloutArrow(arrowID);
-						const tip = store.get.point(arrow.points[arrow.points.length - 1]);
-						tip.x -= dx;
-						tip.y -= dy;
-					});
 				}
 
 				const undoText = `Move ${util.prettyPrint(selItem.type)}`;
