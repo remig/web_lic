@@ -455,6 +455,10 @@ const store = {
 		},
 		targetBox(t) {
 			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
+			if (t.borderOffset) {
+				box.x += t.borderOffset.x;
+				box.y += t.borderOffset.y;
+			}
 			if (t.align === 'right') {
 				box.x -= box.width;
 			}
@@ -536,10 +540,9 @@ const store = {
 				items.forEach(item => {
 					item.x += opts.dx;
 					item.y += opts.dy;
-					// const parent = store.get.parent(item);
-					// if (Layout.boundingBox[parent.type]) {
-					// 	Layout.boundingBox[parent.type](parent);
-					// }
+					if (Layout.boundingBox[item.type]) {
+						Layout.boundingBox[item.type](item);
+					}
 				});
 			}
 		},
@@ -1027,7 +1030,8 @@ const store = {
 				return store.mutations.item.add({item: {
 					type: 'pli',
 					pliItems: [],
-					x: null, y: null, width: null, height: null
+					x: null, y: null, width: null, height: null,
+					borderOffset: {x: 0, y: 0}
 				}, parent: opts.parent});
 			},
 			delete(opts) {  // opts: {pli, deleteItem: false}

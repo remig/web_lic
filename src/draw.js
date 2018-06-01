@@ -229,18 +229,20 @@ const api = {
 			lineWidth: template.pli.border.width
 		};
 		api.roundedRectStyled(
-			ctx, pli.x, pli.y, pli.width, pli.height,
+			ctx, pli.x + pli.borderOffset.x, pli.y + pli.borderOffset.y,
+			pli.width, pli.height,
 			template.pli.border.cornerRadius, rectStyle
 		);
 
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
+		ctx.translate(Math.floor(pli.x), Math.floor(pli.y));
 		pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const part = localModel.parts[pliItem.partNumbers[0]];
 			const pliCanvas = store.render.pli(part, pliItem, scale).container;
-			const x = Math.floor((pli.x + pliItem.x) * scale);
-			const y = Math.floor((pli.y + pliItem.y) * scale);
+			const x = Math.floor(pliItem.x * scale);
+			const y = Math.floor(pliItem.y * scale);
 			ctx.drawImage(pliCanvas, x, y);
 		});
 		ctx.restore();
