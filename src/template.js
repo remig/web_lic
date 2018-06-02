@@ -11,12 +11,6 @@ const template = {
 			color: 'black',
 			position: 'right'  // One of "right', "left", "even-right", "even-left"
 		},
-		divider: {
-			border: {
-				width: 2,
-				color: 'black'
-			}
-		},
 		fill: {
 			color: 'white',
 			gradient: '',
@@ -108,6 +102,12 @@ const template = {
 				font: 'bold 18pt Helvetica',
 				color: 'black'
 			}
+		}
+	},
+	divider: {
+		border: {
+			width: 2,
+			color: 'black'
 		}
 	},
 	rotateIcon: {

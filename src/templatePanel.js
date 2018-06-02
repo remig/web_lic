@@ -397,7 +397,7 @@ Vue.component('templatePanel', {
 		callout: fillAndBorderTemplatePanel('callout'),
 		calloutArrow: borderTemplatePanel('callout.arrow'),
 		submodelImage: fillAndBorderTemplatePanel('submodelImage'),
-		divider: borderTemplatePanel('page.divider'),
+		divider: borderTemplatePanel('divider'),
 		rotateIcon: rotateIconTemplatePanel,
 		numberLabel: fontTemplatePanel,
 		quantityLabel: fontTemplatePanel
