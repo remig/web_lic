@@ -179,6 +179,9 @@ Vue.component('pageCanvasView', {
 		},
 		drawPage(page, canvas, scale = 1) {
 			page = store.get.lookupToItem(page);
+			if (page == null) {
+				return;  // This can happen if, say, a page got deleted without updating the current page (like in undo / redo)
+			}
 			if (canvas == null) {
 				canvas = this.getCanvasForPage(page);
 			}
