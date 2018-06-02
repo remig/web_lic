@@ -262,6 +262,7 @@ const contextMenu = {
 		},
 		{
 			// TODO: If step being merged contains a submodel, must reorder all steps in that submodel too
+			// TODO: undo / redo text is broken for context menus with children
 			text: 'Merge Step with...',
 			children: [
 				{
@@ -296,7 +297,7 @@ const contextMenu = {
 				return util.isEmpty(store.get.step(selectedItem).parts);
 			},
 			cb(selectedItem) {
-				undoStack.commit('step.delete', {step: selectedItem}, this.text);
+				undoStack.commit('step.delete', {step: selectedItem, doLayout: true}, this.text);
 				app.redrawUI(true);
 			}
 		},

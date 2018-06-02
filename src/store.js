@@ -297,11 +297,11 @@ const store = {
 		prevStep(step, limitToSubmodel) {
 			step = store.get.lookupToItem(step);
 			let itemList;
-			if (step.parent.type === 'callout') {
-				itemList = store.get.callout(step.parent.id).steps.map(store.get.step);
+			if (step.parent.type === 'step' || step.parent.type === 'callout') {
+				itemList = store.get.parent(step).steps.map(store.get.step);
 			}
 			let prevStep = store.get.prev(step, itemList);
-			if (limitToSubmodel) {
+			if (limitToSubmodel && itemList == null) {
 				while (prevStep && !util.array.eq(step.submodel, prevStep.submodel)) {
 					prevStep = store.get.prev(prevStep);
 				}
@@ -310,8 +310,12 @@ const store = {
 		},
 		nextStep(step, limitToSubmodel) {
 			step = store.get.lookupToItem(step);
-			let nextStep = store.get.next(step);
-			if (limitToSubmodel) {
+			let itemList;
+			if (step.parent.type === 'step' || step.parent.type === 'callout') {
+				itemList = store.get.parent(step).steps.map(store.get.step);
+			}
+			let nextStep = store.get.next(step, itemList);
+			if (limitToSubmodel && itemList == null) {
 				while (nextStep && !util.array.eq(step.submodel, nextStep.submodel)) {
 					nextStep = store.get.next(nextStep);
 				}
@@ -764,7 +768,9 @@ const store = {
 
 				store.mutations.csi.add({parent: step});
 
-				store.mutations.pli.add({parent: step});
+				if (dest.type === 'page') {
+					store.mutations.pli.add({parent: step});
+				}
 
 				if (opts.stepNumber != null) {
 					store.mutations.item.add({item: {
@@ -774,14 +780,14 @@ const store = {
 					}, parent: step});
 				}
 				if (opts.renumber) {
-					store.mutations.step.renumber();
+					store.mutations.step.renumber(step);
 				}
 				if (opts.doLayout) {
 					store.mutations.page.layout({page: store.get.pageForItem(dest)});
 				}
 				return step;
 			},
-			delete(opts) { // opts: {step}
+			delete(opts) { // opts: {step, doLayout}
 				const step = store.get.lookupToItem(opts.step);
 				if (step.parts && step.parts.length) {
 					throw 'Cannot delete a step with parts';
@@ -797,11 +803,22 @@ const store = {
 				}
 				store.mutations.item.deleteChildList({item: step, listType: 'callout'});
 				store.mutations.item.delete({item: step});
-				store.mutations.step.renumber();
+				store.mutations.step.renumber(step);
+				if (opts.doLayout) {
+					store.mutations.page.layout({page: store.get.pageForItem(step)});
+				}
 			},
-			renumber() {
-				// TODO: this only renumbers top level steps, not sub steps or callout steps
-				const stepList = store.state.steps.filter(el => el.parent.type === 'page');
+			renumber(step) {
+				step = store.get.lookupToItem(step);
+				let stepList;
+				if (step.parent.type === 'step' || step.parent.type === 'callout') {
+					// Renumber steps in target callout / parent step
+					const parent = store.get.parent(step);
+					stepList = parent.steps.map(store.get.step);
+				} else {
+					// Renumber all base steps across all pages
+					stepList = store.state.steps.filter(el => el.parent.type === 'page');
+				}
 				store.mutations.renumber(stepList);
 			},
 			layout(opts) {  // opts: {step, box}
