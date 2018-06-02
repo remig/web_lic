@@ -151,17 +151,21 @@ const api = {
 		}
 	},
 	subSteps(step, stepBox) {
+		// TODO: this dupes a lot of logic from page.layout; abstract both to a generic 'grid' layout call
 		const stepCount = step.steps.length;
-		const cols = Math.ceil(Math.sqrt(stepCount));
-		const rows = Math.ceil(stepCount / cols);
-		const layoutDirection = 'vertical';
+		let cols = Math.ceil(Math.sqrt(stepCount));
+		let rows = Math.ceil(stepCount / cols);
+		const layout = step.subStepLayout;
+		if (layout === 'vertical') {
+			[cols, rows] = [rows, cols];
+		}
 		const colSize = Math.floor(stepBox.width / cols);
 		const rowSize = Math.floor(stepBox.height / rows);
 
 		const box = {x: stepBox.x, y: stepBox.y, width: colSize, height: rowSize};
 
 		for (let i = 0; i < stepCount; i++) {
-			if (layoutDirection === 'vertical') {
+			if (layout === 'vertical') {
 				box.x = stepBox.x + (colSize * Math.floor(i / rows));
 				box.y = stepBox.y + (rowSize * (i % rows));
 			} else {
@@ -170,6 +174,7 @@ const api = {
 			}
 			api.step.outsideIn(store.get.step(step.steps[i]), box);
 		}
+		api.dividers(step, step.subStepLayout, rows, cols, stepBox);
 	},
 	step: {
 		outsideIn(step, box) {  // Starting with a pre-defined box, layout everything in this step inside it
@@ -272,36 +277,37 @@ const api = {
 			p2: {x, y: template.height - margin}
 		});
 	},
-	dividers(page, layoutDirection, rows, cols) {
+	dividers(target, layoutDirection, rows, cols, box) {
 
-		// Delete any dividers already on the page, then re-add new ones in the right places
-		page.dividers = page.dividers || [];
-		store.mutations.item.deleteChildList({item: page, listType: 'divider'});
+		// Delete any dividers already on the target, then re-add new ones in the right places
+		target.dividers = target.dividers || [];
+		store.mutations.item.deleteChildList({item: target, listType: 'divider'});
 
-		if (page.type === 'templatePage') {
-			api.templatePageDividers(page);
+		if (target.type === 'templatePage') {
+			api.templatePageDividers(target);
 			return;
 		}
 
-		const pageSize = store.state.template.page;
-		const colSize = Math.floor(pageSize.width / cols);
-		const rowSize = Math.floor(pageSize.height / rows);
-		const margin = getMargin(store.state.template.page.innerMargin);
+		const x = box.x || 0, y = box.y || 0;
+		const template = store.state.template;
+		const margin = getMargin(template[target.type].innerMargin);
+		const colSize = Math.floor(box.width / cols);
+		const rowSize = Math.floor(box.height / rows);
 
 		if (layoutDirection === 'horizontal') {
 			for (let i = 1; i < rows; i++) {
 				store.mutations.divider.add({
-					parent: page,
-					p1: {x: margin, y: rowSize * i},
-					p2: {x: pageSize.width - margin, y: rowSize * i}
+					parent: target,
+					p1: {x: x + margin, y: y + (rowSize * i)},
+					p2: {x: x + box.width - margin, y: y + (rowSize * i)}
 				});
 			}
 		} else {
 			for (let i = 1; i < cols; i++) {
 				store.mutations.divider.add({
-					parent: page,
-					p1: {x: colSize * i, y: margin},
-					p2: {x: colSize * i, y: pageSize.height - margin}
+					parent: target,
+					p1: {x: x + (colSize * i), y: y + margin},
+					p2: {x: x + (colSize * i), y: y + box.height - margin}
 				});
 			}
 		}
@@ -372,7 +378,7 @@ const api = {
 
 		page.layout = layout;
 		page.actualLayout = (rows > 1 || cols > 1) ? {rows, cols, direction: layoutDirection} : 'horizontal';
-		api.dividers(page, layoutDirection, rows, cols);
+		api.dividers(page, layoutDirection, rows, cols, pageSize);
 
 		if (store.state.plisVisible) {
 			alignStepContent(page);

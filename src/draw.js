@@ -52,17 +52,7 @@ const api = {
 
 		page.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 
-		(page.dividers || []).forEach(id => {
-			const divider = store.get.divider(id);
-			ctx.strokeStyle = template.divider.border.color;
-			ctx.lineWidth = template.divider.border.width;
-			ctx.beginPath();
-			const p1 = pixelOffset(divider.p1, template.divider.border.width);
-			ctx.moveTo(p1.x, p1.y);
-			const p2 = pixelOffset(divider.p2, template.divider.border.width);
-			ctx.lineTo(p2.x, p2.y);
-			ctx.stroke();
-		});
+		api.dividers(page.dividers || [], ctx);
 
 		if (page.numberLabelID != null) {
 			ctx.save();
@@ -151,6 +141,8 @@ const api = {
 		if (step.rotateIconID != null) {
 			api.rotateIcon(step.rotateIconID, ctx);
 		}
+
+		api.dividers(step.dividers || [], ctx);
 
 		ctx.restore();
 	},
@@ -395,6 +387,21 @@ const api = {
 			ctx.restore();
 		};
 	})(),
+
+	dividers(dividerList, ctx) {
+		const template = store.state.template.divider.border;
+		ctx.strokeStyle = template.color;
+		ctx.lineWidth = template.width;
+		dividerList.forEach(id => {
+			const divider = store.get.divider(id);
+			ctx.beginPath();
+			const p1 = pixelOffset(divider.p1, template.width);
+			ctx.moveTo(p1.x, p1.y);
+			const p2 = pixelOffset(divider.p2, template.width);
+			ctx.lineTo(p2.x, p2.y);
+			ctx.stroke();
+		});
+	},
 
 	highlight(canvas, x, y, w, h) {
 		const ctx = canvas.getContext('2d');

@@ -757,9 +757,9 @@ const store = {
 					item: {
 						type: 'step',
 						number: opts.stepNumber, numberLabelID: null,
-						parts: [], callouts: [], submodel: [], steps: [],
+						parts: [], callouts: [], submodel: [], steps: [], dividers: [],
 						csiID: null, pliID: null, rotateIconID: null, submodelImageID: null,
-						x: null, y: null, width: null, height: null
+						x: null, y: null, width: null, height: null, subStepLayout: 'vertical'
 					},
 					parent: dest,
 					insertionIndex: opts.insertionIndex,
@@ -892,6 +892,13 @@ const store = {
 					store.mutations.page.layout({page: store.get.pageForItem(step)});
 				}
 			},
+			setSubStepLayout(opts) {  // opts: {step, layout, doLayout}
+				const step = store.get.lookupToItem(opts.step);
+				step.subStepLayout = opts.layout;
+				if (opts.doLayout) {
+					store.mutations.page.layout({page: store.get.pageForItem(step)});
+				}
+			},
 			toggleRotateIcon(opts) { // opts: {step, display}
 				const step = store.get.lookupToItem(opts.step);
 				if (opts.display) {
@@ -1001,9 +1008,7 @@ const store = {
 				const pageType = opts.pageType || 'page';
 				const page = store.mutations.item.add({item: {
 					type: pageType,
-					steps: [],
-					dividers: [],
-					annotations: [],
+					steps: [], dividers: [], annotations: [],
 					needsLayout: true,
 					number: opts.pageNumber,
 					numberLabelID: null,

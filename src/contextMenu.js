@@ -198,6 +198,77 @@ const contextMenu = {
 	],
 	step: [
 		{
+			text: 'Layout',
+			shown(selectedItem) {
+				const step = store.get.lookupToItem(selectedItem);
+				return step.steps.length > 0;
+			},
+			children: [
+				{
+					text: 'Vertical',
+					shown(selectedItem) {
+						const step = store.get.lookupToItem(selectedItem);
+						return step.subStepLayout !== 'vertical';
+					},
+					cb(selectedItem) {
+						const opts = {step: selectedItem, layout: 'vertical', doLayout: true};
+						undoStack.commit('step.setSubStepLayout', opts, this.text);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'Horizontal',
+					shown(selectedItem) {
+						const step = store.get.lookupToItem(selectedItem);
+						return step.subStepLayout !== 'horizontal';
+					},
+					cb(selectedItem) {
+						const opts = {step: selectedItem, layout: 'horizontal', doLayout: true};
+						undoStack.commit('step.setSubStepLayout', opts, this.text);
+						app.redrawUI(true);
+					}
+				},
+				{
+					text: 'By Row and Column... (NYI)',
+					cb(selectedItem) {
+						return;
+						const page = store.get.page(selectedItem);
+						const originalLayout = util.clone(page.layout);
+
+						app.currentDialog = 'pageRowColLayoutDialog';
+						app.clearSelected();
+
+						Vue.nextTick(() => {
+							const dialog = app.$refs.currentDialog;
+							dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
+							dialog.$on('ok', newValues => {
+								undoStack.commit(
+									'page.layout',
+									{page, layout: newValues},
+									'Layout Page by Row and Column'
+								);
+								app.redrawUI(true);
+							});
+							dialog.$on('cancel', () => {
+								store.mutations.page.layout({page, layout: originalLayout});
+								app.redrawUI(true);
+							});
+							dialog.$on('update', newValues => {
+								store.mutations.page.layout({page, layout: newValues});
+								app.redrawUI(true);
+							});
+							dialog.rows = originalLayout.rows || 2;
+							dialog.cols = originalLayout.cols || 2;
+							dialog.direction = originalLayout.direction || 'vertical';
+							dialog.show({x: 400, y: 150});
+						});
+
+						app.redrawUI(true);
+					}
+				}
+			]
+		},
+		{
 			text: 'Add Callout',
 			shown(selectedItem) {
 				const step = store.get.step(selectedItem.id);
