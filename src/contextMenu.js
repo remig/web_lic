@@ -114,13 +114,24 @@ const contextMenu = {
 			text: 'Add Blank Step',
 			cb(selectedItem) {
 				const dest = store.get.page(selectedItem.id);
-				const lastStep = store.get.step(dest.steps[dest.steps.length - 1]);
-				const stepNumber = lastStep.number + 1;
+				let prevStep = store.get.step(dest.steps[dest.steps.length - 1]);
+				if (prevStep == null) {
+					let prevPage = dest;
+					while (prevPage && prevPage.type === 'page' && !prevPage.steps.length) {
+						prevPage = store.get.prevPage(prevPage);
+					}
+					if (prevPage && prevPage.type === 'page' && prevPage.steps.length) {
+						prevStep = store.get.step(prevPage.steps[prevPage.steps.length - 1]);
+					} else {
+						prevStep = {number: 0};
+					}
+				}
+				const stepNumber = prevStep.number + 1;
 				undoStack.commit(
 					'step.add',
 					{
 						dest, stepNumber, doLayout: true, renumber: true,
-						insertionIndex: store.state.steps.indexOf(lastStep) + 1
+						insertionIndex: store.state.steps.indexOf(prevStep) + 1
 					},
 					this.text
 				);
@@ -262,7 +273,6 @@ const contextMenu = {
 		},
 		{
 			// TODO: If step being merged contains a submodel, must reorder all steps in that submodel too
-			// TODO: undo / redo text is broken for context menus with children
 			text: 'Merge Step with...',
 			children: [
 				{
