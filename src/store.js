@@ -768,7 +768,7 @@ const store = {
 
 				store.mutations.csi.add({parent: step});
 
-				if (dest.type === 'page') {
+				if (dest.type === 'page' || dest.type === 'templatePage') {
 					store.mutations.pli.add({parent: step});
 				}
 
