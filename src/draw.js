@@ -115,9 +115,9 @@ const api = {
 			api.csi(step.csiID, localModel, ctx, scale, selectedPart);
 		}
 
-		if (step.submodelImageID != null) {
-			api.submodelImage(step.submodelImageID, ctx, scale);
-		}
+		(step.submodelImages || []).forEach(submodelImageID => {
+			api.submodelImage(submodelImageID, ctx, scale);
+		});
 
 		(step.callouts || []).forEach(calloutID => {
 			api.callout(calloutID, ctx, scale, selectedPart);

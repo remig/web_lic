@@ -156,9 +156,11 @@
 						<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="step" />
 					</li>
 				</template>
-				<li v-if="target.submodelImageID != null" class="unindent">
-					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.submodelImage(target.submodelImageID)" />
-				</li>
+				<template v-if="target.submodelImages != null">
+					<li v-for="submodelImage in target.submodelImages.map(id => treeData.store.get.submodelImage(id))">
+						<treeRow :currentItem="currentItem" :target="submodelImage" :selectionCallback="treeData.selectionCallback" />
+					</li>
+				</template>
 				<li v-if="target.csiID != null">
 					<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(target.csiID)" :selectionCallback="treeData.selectionCallback" />
 				</li>

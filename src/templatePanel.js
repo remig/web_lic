@@ -213,12 +213,9 @@ function fillAndBorderTemplatePanel(templateEntry) {
 	};
 }
 
-function rotateTemplatePanel(templateEntry) {
+function rotateTemplatePanel() {
 	return {
 		template: '#rotateTemplatePanel',
-		props: {
-			templateEntry: {type: String, default: templateEntry}
-		},
 		data() {
 			return {
 				templateItem: null,
@@ -237,9 +234,9 @@ function rotateTemplatePanel(templateEntry) {
 				// TODO: this works, but can be really slow for big instruction books:
 				// redoing every page layout means measuring (and re-rendering) every rendered image again...
 				// Consider simply setting page.needsLayout on each page; fully test that with undo / redo
-				const text = `Change ${util.prettyPrint(this.templateEntry)} Template`;
-				store.state[this.templateEntry + 's'].forEach(item => (item.isDirty = true));
-				undoStack.commit('page.layoutAllPages', null, text, [this.templateEntry]);
+				const text = `Change ${util.prettyPrint(this.templateItem.type)} Template`;
+				store.state[this.templateItem.type + 's'].forEach(item => (item.isDirty = true));
+				undoStack.commit('page.layoutAllPages', null, text, [this.templateItem.type]);
 			},
 			updateValues() {
 				const template = store.get.templateForItem(this.templateItem).rotation;
@@ -247,21 +244,14 @@ function rotateTemplatePanel(templateEntry) {
 					template.x = this.x;
 					template.y = this.y;
 					template.z = this.z;
-					const step = store.get.step(store.state.templatePage.steps[0]);
 					if (this.templateItem.type === 'csi') {
-						let parent = store.get.parent(this.templateItem).type;
-						if (parent === 'step') {
-							parent = step;
-						} else if (parent === 'submodelImage') {
-							parent = store.get.submodelImage(step.submodelImageID);
-						}
-						store.get.csi(parent.csiID).isDirty = true;
+						store.get.csi(this.templateItem).isDirty = true;
 					} else if (this.templateItem.type === 'pliItem') {
-						const pli = store.get.pli(step.pliID);
+						const pli = store.get.parent(this.templateItem);
 						pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
 					}
 					store.state.templatePage.needsLayout = true;
-					this.$emit('new-values', util.prettyPrint(this.templateEntry));
+					this.$emit('new-values', util.prettyPrint(this.templateItem.type));
 				}
 			}
 		}
@@ -271,7 +261,7 @@ function rotateTemplatePanel(templateEntry) {
 const csiTemplatePanel = {
 	template: '#csiTemplatePanel',
 	components: {
-		rotateTemplatePanel: rotateTemplatePanel('csi'),
+		rotateTemplatePanel: rotateTemplatePanel(),
 		fillTemplatePanel: fillTemplatePanel('step.csi.displacementArrow'),
 		borderTemplatePanel: borderTemplatePanel('step.csi.displacementArrow')
 	},
@@ -392,7 +382,7 @@ Vue.component('templatePanel', {
 	components: {
 		templatePage: pageTemplatePanel,
 		csi: csiTemplatePanel,
-		pliItem: rotateTemplatePanel('pliItem'),
+		pliItem: rotateTemplatePanel(),
 		pli: pliTemplatePanel,
 		callout: fillAndBorderTemplatePanel('callout'),
 		calloutArrow: borderTemplatePanel('callout.arrow'),

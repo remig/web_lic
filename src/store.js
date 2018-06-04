@@ -757,8 +757,8 @@ const store = {
 					item: {
 						type: 'step',
 						number: opts.stepNumber, numberLabelID: null,
-						parts: [], callouts: [], submodel: [], steps: [], dividers: [],
-						csiID: null, pliID: null, rotateIconID: null, submodelImageID: null,
+						parts: [], callouts: [], submodel: [], steps: [], dividers: [], submodelImages: [],
+						csiID: null, pliID: null, rotateIconID: null,
 						x: null, y: null, width: null, height: null, subStepLayout: 'vertical'
 					},
 					parent: dest,

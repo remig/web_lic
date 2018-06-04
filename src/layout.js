@@ -123,8 +123,9 @@ const api = {
 		csi.width = csiSize.width;
 		csi.height = csiSize.height;
 	},
-	submodelImage(submodelImage) {
+	submodelImage(submodelImage, box) {
 
+		// TODO: if submodel image is too big, shrink it
 		const step = store.get.parent(submodelImage);
 		const csi = store.get.csi(submodelImage.csiID);
 		const part = LDParse.model.get.submodelDescendant(step.model || store.model, submodelImage.submodel);
@@ -135,7 +136,8 @@ const api = {
 		csi.width = csiSize.width;
 		csi.height = csiSize.height;
 
-		submodelImage.x = submodelImage.y = 0;
+		submodelImage.x = box.x;
+		submodelImage.y = box.y;
 		submodelImage.width = margin + csiSize.width + margin;
 		submodelImage.height = margin + csiSize.height + margin;
 
@@ -144,8 +146,8 @@ const api = {
 			const font = store.state.template.submodelImage.quantityLabel.font;
 			const lblSize = util.measureLabel(font, 'x' + submodelImage.quantity);
 			submodelImage.width += lblSize.width + margin;
-			lbl.x = submodelImage.width - margin;
-			lbl.y = submodelImage.height - margin;
+			lbl.x = submodelImage.x + submodelImage.width - margin;
+			lbl.y = submodelImage.y + submodelImage.height - margin;
 			lbl.width = lblSize.width;
 			lbl.height = lblSize.height;
 		}
@@ -194,11 +196,13 @@ const api = {
 			box.width = step.width;
 			box.height = step.height;
 
-			const submodelImage = (step.submodelImageID != null) ? store.get.submodelImage(step.submodelImageID) : null;
-			if (submodelImage) {
-				api.submodelImage(submodelImage);
-				util.geom.moveBoxEdge(box, 'top', submodelImage.height + innerMargin);
-			}
+			(step.submodelImages || []).forEach(submodelImageID => {
+				const submodelImage = store.get.submodelImage(submodelImageID);
+				if (submodelImage) {
+					api.submodelImage(submodelImage, box);
+					util.geom.moveBoxEdge(box, 'top', submodelImage.height + innerMargin);
+				}
+			});
 
 			const pli = (step.pliID != null && store.state.plisVisible) ? store.get.pli(step.pliID) : null;
 			if (pli) {
@@ -503,7 +507,7 @@ function alignStepContent(page) {
 	}
 	const stepsByRow = util.array.chunk(steps, page.actualLayout.cols);
 	stepsByRow.forEach(stepList => {
-		stepList = stepList.filter(el => el.submodelImageID == null);  // Don't adjust steps with submodel images here
+		stepList = stepList.filter(el => !el.submodelImages.length);  // Don't adjust steps with submodel images here
 		const tallestPLIHeight = Math.max(...stepList.map(step => (store.get.pli(step.pliID) || {}).height || 0));
 		stepList.forEach(step => {
 			const csi = store.get.csi(step.csiID);
@@ -522,16 +526,20 @@ function isStepTooSmall(step) {
 	const csi = store.get.csi(step.csiID);
 	const pli = store.state.plisVisible ? store.get.pli(step.pliID) : null;
 	const pliHeight = pli ? pli.height : 0;
-	const submodelImage = store.get.submodelImage(step.submodelImageID);
-	const submodelHeight = submodelImage ? submodelImage.height : 0;
+	const submodelSpace = {width: 0, height: 0};
+	(step.submodelImages || []).forEach(submodelImageID => {
+		const submodel = store.get.submodelImage(submodelImageID);
+		submodelSpace.width = Math.max(submodel.width * 1.05, submodelSpace.width);
+		submodelSpace.height += submodel.height;
+	});
 
 	if (step.width < csi.width * 1.1) {
 		return true;
 	} else if (pli && step.width < pli.width * 1.05) {
 		return true;
-	} else if (submodelImage && step.width < submodelImage.width * 1.05) {
+	} else if (step.width < submodelSpace.width) {
 		return true;
-	} else if (step.height < (submodelHeight + pliHeight + csi.height) * 1.2) {
+	} else if (step.height < (submodelSpace.height + pliHeight + csi.height) * 1.2) {
 		return true;
 	}
 	return false;

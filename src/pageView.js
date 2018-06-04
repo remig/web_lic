@@ -302,20 +302,22 @@ function findClickTargetInStep(step, mx, my) {
 			}
 		}
 	}
-	if (step.submodelImageID != null) {
-		const submodelImage = store.get.submodelImage(step.submodelImageID);
-		if (inBox(mx, my, submodelImage)) {
-			if (submodelImage.quantityLabelID != null) {
-				const quantityLabel = store.get.quantityLabel(submodelImage.quantityLabelID);
-				if (inBox(mx, my, quantityLabel)) {
-					return quantityLabel;
+	if (step.submodelImages.length) {
+		for (let i = 0; i < step.submodelImages.length; i++) {
+			const submodelImage = store.get.submodelImage(step.submodelImages[i]);
+			if (inBox(mx, my, submodelImage)) {
+				if (submodelImage.quantityLabelID != null) {
+					const quantityLabel = store.get.quantityLabel(submodelImage.quantityLabelID);
+					if (inBox(mx, my, quantityLabel)) {
+						return quantityLabel;
+					}
 				}
+				const submodelCSI = store.get.csi(submodelImage.csiID);
+				if (inBox(mx, my, submodelCSI)) {
+					return submodelCSI;
+				}
+				return submodelImage;
 			}
-			const submodelCSI = store.get.csi(submodelImage.csiID);
-			if (inBox(mx, my, submodelCSI)) {
-				return submodelCSI;
-			}
-			return submodelImage;
 		}
 	}
 	if (step.pliID != null && store.state.plisVisible) {
