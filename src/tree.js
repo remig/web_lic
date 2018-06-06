@@ -40,6 +40,8 @@ Vue.component('treeRow', {
 				return 'Page ' + (t.number || '');
 			} else if (t.type === 'step') {
 				return 'Step ' + (t.number || '');
+			} else if (t.type === 'submodel') {
+				return t.filename;
 			} else if (t.type === 'annotation') {
 				switch (t.annotationType) {
 					case 'label':

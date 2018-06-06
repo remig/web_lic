@@ -418,6 +418,57 @@ const store = {
 			}
 			return item;
 		},
+		submodels() {  // Return list of submodels used in the main model, the step they are first used on and how many are used in that step
+			if (!store.model) {
+				return [];
+			}
+			const submodels = [];
+			const mainModelFilename = store.model.filename;
+			const addedModelNames = new Set([mainModelFilename]);
+			store.state.steps.filter(step => {
+				return step.parent.type === 'page' && step.model.filename !== mainModelFilename;
+			}).forEach(step => {
+
+				if (!addedModelNames.has(step.model.filename)) {
+					const modelHierarchy = [{filename: step.model.filename, quantity: 1}];
+					let parentStepID = step.model.parentStepID;
+					while (parentStepID != null) {
+						const parentStep = store.get.step(parentStepID);
+						if (parentStep.parts.length > 1) {
+							// Check if parent step contains multiple copies of the current submodel; adjust quantity label accordingly
+							const partNames = parentStep.parts.map(partID => {
+								return LDParse.model.get.partFromID(partID, parentStep.model.filename).filename;
+							});
+							const count = util.array.count(partNames, step.model.filename);
+							modelHierarchy[modelHierarchy.length - 1].quantity = count;
+						}
+						modelHierarchy.push({filename: parentStep.model.filename, quantity: 1});
+						parentStepID = parentStep.model.parentStepID;
+					}
+					modelHierarchy.reverse().forEach(entry => {
+						if (!addedModelNames.has(entry.filename)) {
+							submodels.push({stepID: step.id, ...entry});
+							addedModelNames.add(entry.filename);
+						}
+					});
+				}
+			});
+			return submodels;
+		},
+		topLevelTreeNodes() {  // Return list of pages & submodels to be drawn in the nav tree
+			const nodes = [];
+			for (let i = 0; i < store.state.pages.length; i++) {
+				nodes.push(store.state.pages[i]);
+			}
+			store.get.submodels().forEach(submodel => {
+				const page = store.get.pageForItem({id: submodel.stepID, type: 'step'})
+				const pageIndex = nodes.indexOf(page);
+				submodel.type = 'submodel';
+				submodel.id = nodes.length;
+				util.array.insert(nodes, submodel, pageIndex);
+			});
+			return nodes;
+		},
 		nextItemID(item) {  // Get the next unused ID in this item's list
 			if (item && item.type) {
 				item = item.type;
@@ -1319,40 +1370,12 @@ const store = {
 			return pagesAdded;
 		},
 		addInitialSubmodelImages() {
-			// Walk over each step, look for the first use of each submodel then add a submodel image to that step
-			const mainModelFilename = store.model.filename;
-			const addedModelNames = new Set([mainModelFilename]);
-			store.state.steps.filter(step => {
-				return step.parent.type === 'page' && step.model.filename !== mainModelFilename;
-			}).forEach(step => {
-
-				if (!addedModelNames.has(step.model.filename)) {
-					const modelHierarchy = [{filename: step.model.filename, quantity: 1}];
-					let parentStepID = step.model.parentStepID;
-					while (parentStepID != null) {
-						const parentStep = store.get.step(parentStepID);
-						if (parentStep.parts.length > 1) {
-							// Check if parent step contains multiple copies of the current submodel; adjust quantity label accordingly
-							const partNames = parentStep.parts.map(partID => {
-								return LDParse.model.get.partFromID(partID, parentStep.model.filename).filename;
-							});
-							const count = util.array.count(partNames, step.model.filename);
-							modelHierarchy[modelHierarchy.length - 1].quantity = count;
-						}
-						modelHierarchy.push({filename: parentStep.model.filename, quantity: 1});
-						parentStepID = parentStep.model.parentStepID;
-					}
-					modelHierarchy.reverse().forEach(entry => {
-						if (!addedModelNames.has(entry.filename)) {
-							store.mutations.submodelImage.add({
-								parent: step,
-								modelFilename: entry.filename,
-								quantity: entry.quantity
-							});
-							addedModelNames.add(entry.filename);
-						}
-					});
-				}
+			store.get.submodels().forEach(submodel => {
+				store.mutations.submodelImage.add({
+					parent: {id: submodel.stepID, type: 'step'},
+					modelFilename: submodel.filename,
+					quantity: submodel.quantity
+				});
 			});
 		},
 		mergeInitialPages() {

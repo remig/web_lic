@@ -193,8 +193,9 @@
 				<li v-if="treeData.store.get.titlePage() != null">
 					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.titlePage()" />
 				</li>
-				<li v-for="page in treeData.store.state.pages">
-					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="page" />
+				<li v-for="node in treeData.store.get.topLevelTreeNodes()">
+					<treeParentRow v-if="node.type === 'page'" :tree-data="treeData" :currentItem="currentItem" :target="node" />
+					<treeRow v-else :currentItem="currentItem" :target="node" :selectionCallback="treeData.selectionCallback" />
 				</li>
 			</ul>
 		</div>

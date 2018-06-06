@@ -169,6 +169,12 @@ const app = new Vue({
 			if (target.type === 'part') {
 				this.selectedItemLookup = target;
 				this.drawCurrentPage();
+			} else if (target.type === 'submodel') {
+				const targetPage = store.get.pageForItem({type: 'step', id: target.stepID});
+				if (targetPage && !util.itemEq(targetPage, this.currentPageLookup)) {
+					this.setCurrentPage(targetPage);
+				}
+				this.selectedItemLookup = target;
 			} else {
 				this.clearSelected();
 				const targetPage = store.get.pageForItem(target);
