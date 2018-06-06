@@ -109,7 +109,7 @@ const api = {
 		ctx.save();
 		ctx.translate(Math.floor(step.x), Math.floor(step.y));
 
-		if (step.csi == null && step.steps.length) {
+		if (step.csiID == null && step.steps.length) {
 			step.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 		} else if (step.csiID != null) {
 			api.csi(step.csiID, localModel, ctx, scale, selectedPart);

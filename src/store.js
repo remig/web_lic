@@ -1208,13 +1208,9 @@ const store = {
 
 			const page = store.state.titlePage = store.mutations.page.add({pageType: 'titlePage'});
 
-			const step = store.mutations.item.add({item: {
-				type: 'step',
-				csiID: null, pliID: null,
-				x: null, y: null, width: null, height: null
-			}, parent: page});
-
-			store.mutations.csi.add({parent: step});
+			const step = store.mutations.step.add({dest: page});
+			step.model.filename = store.model.filename;
+			step.parts = null;
 
 			store.mutations.annotation.add({
 				annotationType: 'label',
