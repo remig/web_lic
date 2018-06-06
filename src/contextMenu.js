@@ -114,14 +114,14 @@ const contextMenu = {
 			text: 'Add Blank Step',
 			cb(selectedItem) {
 				const dest = store.get.page(selectedItem.id);
-				let prevStep = store.get.step(dest.steps[dest.steps.length - 1]);
+				let prevStep = store.get.step(_.last(dest.steps));
 				if (prevStep == null) {
 					let prevPage = dest;
 					while (prevPage && prevPage.type === 'page' && !prevPage.steps.length) {
 						prevPage = store.get.prevPage(prevPage);
 					}
 					if (prevPage && prevPage.type === 'page' && prevPage.steps.length) {
-						prevStep = store.get.step(prevPage.steps[prevPage.steps.length - 1]);
+						prevStep = store.get.step(_.last(prevPage.steps));
 					} else {
 						prevStep = {number: 0};
 					}

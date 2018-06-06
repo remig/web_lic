@@ -290,7 +290,7 @@ const api = {
 		});
 		ctx.stroke();
 		ctx.fillStyle = template.color;
-		const tip = pixelOffset(arrowPoints[arrowPoints.length - 1], template.border.width);
+		const tip = pixelOffset(_.last(arrowPoints), template.border.width);
 		// TODO: consider arrow line width when drawing arrow, so it grows along with line width
 		// TODO: line width 0 should not draw anything
 		api.arrowHead(ctx, tip.x, tip.y, arrow.direction);

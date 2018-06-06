@@ -222,7 +222,7 @@ const store = {
 			} else if (page.type === 'titlePage') {
 				return store.state.pages.length < 1;
 			}
-			return page.id === store.state.pages[store.state.pages.length - 1].id;
+			return page.id === _.last(store.state.pages).id;
 		},
 		nextPage(page) {
 			if (!page || store.get.isLastPage(page)) {
@@ -292,7 +292,7 @@ const store = {
 			return store.state.pages[0];
 		},
 		lastPage() {
-			return store.state.pages[store.state.pages.length - 1];
+			return _.last(store.state.pages);
 		},
 		prevStep(step, limitToSubmodel) {
 			step = store.get.lookupToItem(step);
@@ -367,7 +367,7 @@ const store = {
 				};
 			});
 
-			let tip = arrow.points[arrow.points.length - 1];
+			let tip = _.last(arrow.points);
 			tip = store.get.point(tip);
 			tip = {x: tip.x + csi.x, y: tip.y + csi.y};
 
@@ -440,7 +440,7 @@ const store = {
 								return LDParse.model.get.partFromID(partID, parentStep.model.filename).filename;
 							});
 							const count = _.count(partNames, step.model.filename);
-							modelHierarchy[modelHierarchy.length - 1].quantity = count;
+							_.last(modelHierarchy).quantity = count;
 						}
 						modelHierarchy.push({filename: parentStep.model.filename, quantity: 1});
 						parentStepID = parentStep.model.parentStepID;
@@ -688,7 +688,7 @@ const store = {
 				if (_.isEmpty(callout.steps)) {
 					destCalloutStep = store.mutations.step.add({dest: callout});
 				} else {
-					destCalloutStep = store.get.step(callout.steps[callout.steps.length - 1]);
+					destCalloutStep = store.get.step(_.last(callout.steps));
 				}
 				destCalloutStep.model = _.clone(step.model);
 				destCalloutStep.parts.push(partID);
