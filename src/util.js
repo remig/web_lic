@@ -19,50 +19,51 @@ const api = {
 	toArray(fakeArray) {
 		return [].slice.apply(fakeArray);
 	},
-	array: {
-		insert(array, item, idx) {
-			if (idx == null || idx === -1) {
-				array.push(item);
-			} else {
-				array.splice(idx, 0, item);
-			}
-		},
-		remove(array, item) {
-			const idx = array.indexOf(item);
-			if (idx >= 0) {
-				array.splice(idx, 1);
-			}
-		},
-		removeIndex(array, idx) {
+	insert(array, item, idx) {
+		if (idx == null || idx === -1) {
+			array.push(item);
+		} else {
+			array.splice(idx, 0, item);
+		}
+	},
+	remove(array, item) {
+		const idx = array.indexOf(item);
+		if (idx >= 0) {
 			array.splice(idx, 1);
-		},
-		chunk(array, size = 1) {
-			const res = [];
-			for (let i = 0; i < array.length; i += size) {
-				res.push(array.slice(i, i + size));
+		}
+	},
+	removeIndex(array, idx) {
+		array.splice(idx, 1);
+	},
+	last(array) {
+		return array[array.length - 1];
+	},
+	chunk(array, size = 1) {
+		const res = [];
+		for (let i = 0; i < array.length; i += size) {
+			res.push(array.slice(i, i + size));
+		}
+		return res;
+	},
+	count(array, serach) {
+		let count = 0;
+		for (let i = 0; i < array.length; i++) {
+			if (array[i] === serach) {
+				count++;
 			}
-			return res;
-		},
-		count(array, serach) {
-			let count = 0;
-			for (let i = 0; i < array.length; i++) {
-				if (array[i] === serach) {
-					count++;
-				}
-			}
-			return count;
-		},
-		eq(a, b) {
-			if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+		}
+		return count;
+	},
+	eq(a, b) {
+		if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+			return false;
+		}
+		for (var i = 0; i < a.length; i++) {
+			if (a[i] !== b[i]) {
 				return false;
 			}
-			for (var i = 0; i < a.length; i++) {
-				if (a[i] !== b[i]) {
-					return false;
-				}
-			}
-			return true;
 		}
+		return true;
 	},
 	itemEq(a, b) {
 		return a && b && a.id === b.id && a.type === b.type;

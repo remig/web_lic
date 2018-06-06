@@ -1,7 +1,7 @@
 /* global jsPDF: false, JSZip: false, saveAs: false */
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 
 function exportInstructions(app, store, exportType, drawPageCallback, doneCallback) {
 
@@ -44,7 +44,7 @@ function exportInstructions(app, store, exportType, drawPageCallback, doneCallba
 			doneCallback(() => {
 				app.updateProgress({clear: true});
 				const end = Date.now();
-				app.statusText = `${exportType} Generated Successfully (${util.formatTime(start, end)})`;
+				app.statusText = `${exportType} Generated Successfully (${_.formatTime(start, end)})`;
 			});
 		});
 	}, 0);

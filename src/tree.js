@@ -1,7 +1,7 @@
 /* global Vue: false */
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const LDParse = require('./LDParse');
 
 Vue.component('treeRow', {
@@ -15,7 +15,7 @@ Vue.component('treeRow', {
 	watch: {
 		currentItem(newItem) {
 			// When an arbitrary item gets selected, make sure all of its ancestors in the tree are expanded
-			if (util.itemEq(newItem, this.target)) {
+			if (_.itemEq(newItem, this.target)) {
 				let parent = this.$parent;
 				while (parent && parent.hasOwnProperty('expanded')) {
 					parent.expanded = true;
@@ -26,7 +26,7 @@ Vue.component('treeRow', {
 	},
 	computed: {
 		selected() {
-			return util.itemEq(this.currentItem, this.target);
+			return _.itemEq(this.currentItem, this.target);
 		},
 		text() {
 			const t = this.target;
@@ -58,7 +58,7 @@ Vue.component('treeRow', {
 				const partColor = LDParse.colorTable[t.colorCode].name.replace('_', ' ');
 				return partName + ' - ' + partColor;
 			}
-			return util.prettyPrint(t.type);
+			return _.prettyPrint(t.type);
 		}
 	}
 });

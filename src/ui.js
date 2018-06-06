@@ -1,7 +1,7 @@
 /* global Vue: false, Split: false, ELEMENT: false*/
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const store = require('./store');
 const undoStack = require('./undoStack');
 const LDParse = require('./LDParse');
@@ -29,7 +29,7 @@ Vue.filter('sanitizeMenuID', id => {
 		.replace(/[^a-z_]/g, '') + '_menu';
 });
 
-Vue.filter('prettyPrint', util.prettyPrint);
+Vue.filter('prettyPrint', _.prettyPrint);
 
 const app = new Vue({
 	el: '#container',
@@ -103,7 +103,7 @@ const app = new Vue({
 						undoStack.saveBaseState();
 						this.forceUIUpdate();
 
-						const time = util.formatTime(start, Date.now());
+						const time = _.formatTime(start, Date.now());
 						this.updateProgress({clear: true});
 						this.statusText = `"${store.get.modelFilename()}" loaded successfully (${time})`;
 						Vue.nextTick(this.drawCurrentPage);
@@ -125,7 +125,7 @@ const app = new Vue({
 			store.save('localStorage');
 			undoStack.saveBaseState();
 			this.clearSelected();
-			const time = util.formatTime(start, Date.now());
+			const time = _.formatTime(start, Date.now());
 			this.statusText = `"${this.filename}" openend successfully (${time})`;
 			Vue.nextTick(() => {
 				this.forceUIUpdate();
@@ -149,21 +149,21 @@ const app = new Vue({
 			store.resetState();
 			undoStack.clear();
 			this.clearState();
-			util.emptyNode(document.getElementById('canvasHolder'));
+			_.emptyNode(document.getElementById('canvasHolder'));
 			Vue.nextTick(() => {
 				this.clearSelected();
 				this.$refs.pageView.clearPageCanvas();
 			});
 		},
 		setCurrentPage(page) {
-			if (!util.itemEq(page, this.currentPageLookup.type)) {
+			if (!_.itemEq(page, this.currentPageLookup.type)) {
 				this.clearSelected();
 				this.currentPageLookup = store.get.itemToLookup(page);
 			}
 			Vue.nextTick(this.drawCurrentPage);
 		},
 		setSelected(target) {
-			if (util.itemEq(target, this.selectedItemLookup)) {
+			if (_.itemEq(target, this.selectedItemLookup)) {
 				return;
 			}
 			if (target.type === 'part') {
@@ -171,14 +171,14 @@ const app = new Vue({
 				this.drawCurrentPage();
 			} else if (target.type === 'submodel') {
 				const targetPage = store.get.pageForItem({type: 'step', id: target.stepID});
-				if (targetPage && !util.itemEq(targetPage, this.currentPageLookup)) {
+				if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
 					this.setCurrentPage(targetPage);
 				}
 				this.selectedItemLookup = target;
 			} else {
 				this.clearSelected();
 				const targetPage = store.get.pageForItem(target);
-				if (targetPage && !util.itemEq(targetPage, this.currentPageLookup)) {
+				if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
 					this.setCurrentPage(targetPage);
 				}
 				this.selectedItemLookup = store.get.itemToLookup(target);
@@ -326,7 +326,7 @@ const app = new Vue({
 					if (arrow.points.indexOf(item.id) === 0) {
 						const callout = store.get.callout(arrow.parent.id);
 						const newPos = {x: item.x + dx, y: item.y + dy};
-						const dt = util.geom.distance;
+						const dt = _.geom.distance;
 						if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
 							if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
 								dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
@@ -343,7 +343,7 @@ const app = new Vue({
 					}
 				}
 
-				const undoText = `Move ${util.prettyPrint(selItem.type)}`;
+				const undoText = `Move ${_.prettyPrint(selItem.type)}`;
 				undoStack.commit('item.reposition', {item: item, dx, dy}, undoText);
 				this.redrawUI();
 			} else {
@@ -455,5 +455,5 @@ const app = new Vue({
 
 window.__Web_lic_testScope = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
-	util, app, store, undoStack, LDParse
+	_, app, store, undoStack, LDParse
 };

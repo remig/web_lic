@@ -1,6 +1,6 @@
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const store = require('./store');
 
 // stack is an array of state; undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone.
@@ -27,7 +27,7 @@ const api = {
 	//  - a item type string like 'csi', which resets all items of that type
 	commit(mutationName, opts, undoText, clearCacheTargets) {
 
-		const mutation = util.get(mutationName, store.mutations);
+		const mutation = _.get(mutationName, store.mutations);
 		if (mutation) {
 			mutation(opts);  // Perform the actual action
 		}
@@ -39,7 +39,7 @@ const api = {
 		// TODO: state can be really big; consider detecting just some guaranteed minimal
 		// delta between the current state and new state, and push only that.
 		state.stack.push({
-			state: util.clone(store.state),
+			state: _.clone(store.state),
 			undoText,
 			clearCacheTargets
 		});
@@ -57,7 +57,7 @@ const api = {
 
 	// Copy the store's current state into the undoStack's initial base state
 	saveBaseState() {
-		state.stack = [{state: util.clone(store.state), undoText: null}];
+		state.stack = [{state: _.clone(store.state), undoText: null}];
 		setIndex(state, 0);
 	},
 
@@ -108,7 +108,7 @@ function performUndoRedoAction(newIndex) {
 	const prevIndex = state.index;
 	setIndex(state, newIndex);
 	const stackContent = state.stack[state.index];
-	const newState = util.clone(stackContent.state);
+	const newState = _.clone(stackContent.state);
 	store.replaceState(newState);
 
 	const clearCacheTargets = [];

@@ -1,6 +1,6 @@
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const LDParse = require('./LDParse');
 const store = require('./store');
 
@@ -14,7 +14,7 @@ const api = {
 		const csi = store.get.csi(step.csiID);
 		const margin = getMargin(store.state.template.callout.innerMargin);
 
-		if (util.isEmpty(callout.steps)) {
+		if (_.isEmpty(callout.steps)) {
 			callout.width = callout.height = emptyCalloutSize;
 		} else {
 			let totalHeight = 0, maxWidth = 0;
@@ -76,7 +76,7 @@ const api = {
 		}
 
 		pli.borderOffset.x = pli.borderOffset.y = 0;
-		if (util.isEmpty(pliItems)) {
+		if (_.isEmpty(pliItems)) {
 			pli.x = pli.y = pli.width = pli.height = 0;
 			return;
 		}
@@ -98,7 +98,7 @@ const api = {
 			pliItem.height = pliSize.height;
 
 			const font = store.state.template.pliItem.quantityLabel.font;
-			const lblSize = util.measureLabel(font, 'x' + pliItem.quantity);
+			const lblSize = _.measureLabel(font, 'x' + pliItem.quantity);
 			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 			quantityLabel.x = -qtyLabelOffset;
 			quantityLabel.y = pliSize.height - qtyLabelOffset;
@@ -143,7 +143,7 @@ const api = {
 		if (submodelImage.quantityLabelID != null) {
 			const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
 			const font = store.state.template.submodelImage.quantityLabel.font;
-			const lblSize = util.measureLabel(font, 'x' + submodelImage.quantity);
+			const lblSize = _.measureLabel(font, 'x' + submodelImage.quantity);
 			submodelImage.width += lblSize.width + margin;
 			lbl.x = submodelImage.x + submodelImage.width - margin;
 			lbl.y = submodelImage.y + submodelImage.height - margin;
@@ -190,7 +190,7 @@ const api = {
 			step.height = box.height - pageMargin - pageMargin;
 
 			// transform box to step coordinates
-			box = util.clone(box);
+			box = _.clone(box);
 			box.x = box.y = 0;
 			box.width = step.width;
 			box.height = step.height;
@@ -199,7 +199,7 @@ const api = {
 				const submodelImage = store.get.submodelImage(submodelImageID);
 				if (submodelImage) {
 					api.submodelImage(submodelImage, box);
-					util.geom.moveBoxEdge(box, 'top', submodelImage.height + innerMargin);
+					_.geom.moveBoxEdge(box, 'top', submodelImage.height + innerMargin);
 				}
 			});
 
@@ -207,17 +207,17 @@ const api = {
 			if (pli) {
 				api.pli(pli);
 				pli.y = box.y;
-				util.geom.moveBoxEdge(box, 'top', pli.height + innerMargin);
+				_.geom.moveBoxEdge(box, 'top', pli.height + innerMargin);
 			}
 
 			if (step.numberLabelID != null) {
-				const lblSize = util.measureLabel(store.state.template.step.numberLabel.font, step.number);
+				const lblSize = _.measureLabel(store.state.template.step.numberLabel.font, step.number);
 				const lbl = store.get.numberLabel(step.numberLabelID);
 				lbl.x = 0;
 				lbl.y = box.y;
 				lbl.width = lblSize.width;
 				lbl.height = lblSize.height;
-				util.geom.moveBoxEdge(box, 'top', lbl.height + innerMargin);
+				_.geom.moveBoxEdge(box, 'top', lbl.height + innerMargin);
 			}
 
 			if (step.csiID == null && step.steps.length) {
@@ -246,7 +246,7 @@ const api = {
 
 			let lblSize = {width: 0, height: 0};
 			if (step.numberLabelID != null) {
-				lblSize = util.measureLabel(store.state.template.callout.step.numberLabel.font, step.number);
+				lblSize = _.measureLabel(store.state.template.callout.step.numberLabel.font, step.number);
 				const lbl = store.get.numberLabel(step.numberLabelID);
 				lbl.x = lbl.y = 0;
 				lbl.width = lblSize.width;
@@ -388,7 +388,7 @@ const api = {
 		}
 
 		if (page.numberLabelID != null) {
-			const lblSize = util.measureLabel(store.state.template.page.numberLabel.font, page.number);
+			const lblSize = _.measureLabel(store.state.template.page.numberLabel.font, page.number);
 			const lbl = store.get.numberLabel(page.numberLabelID);
 			lbl.x = pageSize.width - margin;
 			lbl.y = pageSize.height - margin;
@@ -422,7 +422,7 @@ const api = {
 		delete page.needsLayout;
 	},
 	label(label) {
-		const labelSize = util.measureLabel(label.font, label.text);
+		const labelSize = _.measureLabel(label.font, label.text);
 		label.width = labelSize.width;
 		label.height = labelSize.height;
 	},
@@ -445,7 +445,7 @@ const api = {
 				// Step fits; delete the now-empty page the step moved from
 				store.mutations.page.delete({page: originalPage});
 			}
-			util.array.removeIndex(stepsToMerge, 0);
+			_.removeIndex(stepsToMerge, 0);
 		}
 	},
 	adjustBoundingBox: {
@@ -470,7 +470,7 @@ const api = {
 				});
 			});
 			const margin = getMargin(store.state.template.pli.innerMargin);
-			const bbox = util.geom.bbox(boxes);
+			const bbox = _.geom.bbox(boxes);
 			pli.borderOffset.x = bbox.x - pli.x - margin;
 			pli.borderOffset.y = bbox.y - pli.y - margin;
 			pli.width = margin + bbox.width + margin;
@@ -496,7 +496,7 @@ function alignStepContent(page) {
 	if (steps.length < 2 || typeof page.actualLayout !== 'object' || page.actualLayout.direction !== 'horizontal') {
 		return;  // only align step content across horizontally laid out pages with multiple steps
 	}
-	const stepsByRow = util.array.chunk(steps, page.actualLayout.cols);
+	const stepsByRow = _.chunk(steps, page.actualLayout.cols);
 	stepsByRow.forEach(stepList => {
 		stepList = stepList.filter(el => !el.submodelImages.length);  // Don't adjust steps with submodel images here
 		const tallestPLIHeight = Math.max(...stepList.map(step => (store.get.pli(step.pliID) || {}).height || 0));

@@ -1,7 +1,7 @@
 /* global Vue: false, $: false */
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const InstructionExporter = require('./export');
 const store = require('./store');
 const undoStack = require('./undoStack');
@@ -40,7 +40,7 @@ Vue.component('menu-list', {
 				return entry.shown(this.selectedItem);
 			} else if (entry.children) {
 				if (typeof entry.children === 'function') {
-					return !util.isEmpty(entry.children(this.selectedItem));
+					return !_.isEmpty(entry.children(this.selectedItem));
 				}
 				return entry.children.some(el => el.shown ? el.shown(this.selectedItem) : true);
 			}

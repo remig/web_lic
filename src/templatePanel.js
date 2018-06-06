@@ -1,7 +1,7 @@
 /* global Vue: false */
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const store = require('./store');
 const undoStack = require('./undoStack');
 const openFileHandler = require('./fileUploader');
@@ -14,7 +14,7 @@ function fillTemplatePanel(templateEntry) {
 			templateEntry: {type: String, default: templateEntry}
 		},
 		data() {
-			const template = util.get(this.templateEntry, store.state.template).fill;
+			const template = _.get(this.templateEntry, store.state.template).fill;
 			return {
 				color: colorNameToRGB(template.color),
 				gradient: template.gradient,
@@ -25,7 +25,7 @@ function fillTemplatePanel(templateEntry) {
 			pickImage() {
 				openFileHandler('.png', 'dataURL', (src, filename) => {
 
-					const template = util.get(this.templateEntry, store.state.template).fill;
+					const template = _.get(this.templateEntry, store.state.template).fill;
 					template.image = {filename, src};
 					this.imageFilename = filename;
 
@@ -38,7 +38,7 @@ function fillTemplatePanel(templateEntry) {
 				});
 			},
 			removeImage() {
-				const template = util.get(this.templateEntry, store.state.template).fill;
+				const template = _.get(this.templateEntry, store.state.template).fill;
 				this.imageFilename = template.image = '';
 				this.updateValues();
 			},
@@ -47,9 +47,9 @@ function fillTemplatePanel(templateEntry) {
 				this.updateValues();
 			},
 			updateValues() {
-				const template = util.get(this.templateEntry, store.state.template).fill;
+				const template = _.get(this.templateEntry, store.state.template).fill;
 				template.color = this.color;
-				this.$emit('new-values', util.prettyPrint(this.templateEntry));
+				this.$emit('new-values', _.prettyPrint(this.templateEntry));
 			}
 		},
 		computed: {
@@ -69,7 +69,7 @@ function borderTemplatePanel(templateEntry) {
 			templateEntry: {type: String, default: templateEntry}
 		},
 		data() {
-			const template = util.get(this.templateEntry, store.state.template).border;
+			const template = _.get(this.templateEntry, store.state.template).border;
 			return {
 				width: template.width || 0,
 				color: colorNameToRGB(template.color),
@@ -82,11 +82,11 @@ function borderTemplatePanel(templateEntry) {
 				this.updateValues();
 			},
 			updateValues() {
-				const template = util.get(this.templateEntry, store.state.template).border;
+				const template = _.get(this.templateEntry, store.state.template).border;
 				template.width = this.width;
 				template.color = this.color;
 				template.cornerRadius = this.cornerRadius;
-				this.$emit('new-values', util.prettyPrint(this.templateEntry));
+				this.$emit('new-values', _.prettyPrint(this.templateEntry));
 			}
 		}
 	};
@@ -128,8 +128,8 @@ const fontTemplatePanel = {
 	methods: {
 		init(entry, app) {
 			const template = store.get.templateForItem(entry);
-			const fontParts = util.fontToFontParts(template.font);
-			this.templateItem = util.clone(entry);
+			const fontParts = _.fontToFontParts(template.font);
+			this.templateItem = _.clone(entry);
 			this.family = fontParts.fontFamily;
 			this.addCustomFont(fontParts.fontFamily);
 			this.size = parseInt(fontParts.fontSize, 10);
@@ -171,10 +171,10 @@ const fontTemplatePanel = {
 			template.font = this.fontString();
 			template.color = this.color;
 			store.state.templatePage.needsLayout = true;
-			this.$emit('new-values', util.prettyPrint(this.templateItem.type));
+			this.$emit('new-values', _.prettyPrint(this.templateItem.type));
 		},
 		fontString() {
-			return util.fontPartsToFont({
+			return _.fontPartsToFont({
 				fontSize: this.size + 'pt',
 				fontFamily: this.family,
 				fontWeight: this.bold ? 'bold' : null,
@@ -182,7 +182,7 @@ const fontTemplatePanel = {
 			});
 		},
 		addCustomFont(family) {
-			if (!util.isEmpty(family)) {
+			if (!_.isEmpty(family)) {
 				const familyLower = family.toLowerCase();
 				const names = [
 					...familyNames.map(f => f.toLowerCase()),
@@ -207,7 +207,7 @@ function fillAndBorderTemplatePanel(templateEntry) {
 		},
 		methods: {
 			newValues() {
-				this.$emit('new-values', util.prettyPrint(templateEntry));
+				this.$emit('new-values', _.prettyPrint(templateEntry));
 			}
 		}
 	};
@@ -228,13 +228,13 @@ function rotateTemplatePanel() {
 				this.x = rotation.x;
 				this.y = rotation.y;
 				this.z = rotation.z;
-				this.templateItem = util.clone(entry);
+				this.templateItem = _.clone(entry);
 			},
 			apply() {
 				// TODO: this works, but can be really slow for big instruction books:
 				// redoing every page layout means measuring (and re-rendering) every rendered image again...
 				// Consider simply setting page.needsLayout on each page; fully test that with undo / redo
-				const text = `Change ${util.prettyPrint(this.templateItem.type)} Template`;
+				const text = `Change ${_.prettyPrint(this.templateItem.type)} Template`;
 				store.state[this.templateItem.type + 's'].forEach(item => (item.isDirty = true));
 				undoStack.commit('page.layoutAllPages', null, text, [this.templateItem.type]);
 			},
@@ -251,7 +251,7 @@ function rotateTemplatePanel() {
 						pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
 					}
 					store.state.templatePage.needsLayout = true;
-					this.$emit('new-values', util.prettyPrint(this.templateItem.type));
+					this.$emit('new-values', _.prettyPrint(this.templateItem.type));
 				}
 			}
 		}
@@ -267,7 +267,7 @@ const csiTemplatePanel = {
 	},
 	methods: {
 		init(entry) {
-			this.templateItem = util.clone(entry);
+			this.templateItem = _.clone(entry);
 			this.$refs.rotateTemplatePanel.init(entry);
 		},
 		apply() {

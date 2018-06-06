@@ -1,7 +1,7 @@
 /* global Vue: false */
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const LDParse = require('./LDParse');
 const store = require('./store');
 const undoStack = require('./undoStack');
@@ -50,7 +50,7 @@ const contextMenu = {
 					text: 'By Row and Column...',
 					cb(selectedItem) {
 						const page = store.get.page(selectedItem);
-						const originalLayout = util.clone(page.layout);
+						const originalLayout = _.clone(page.layout);
 
 						app.currentDialog = 'pageRowColLayoutDialog';
 						app.clearSelected();
@@ -233,7 +233,7 @@ const contextMenu = {
 					cb(selectedItem) {
 						return;
 						const page = store.get.page(selectedItem);
-						const originalLayout = util.clone(page.layout);
+						const originalLayout = _.clone(page.layout);
 
 						app.currentDialog = 'pageRowColLayoutDialog';
 						app.clearSelected();
@@ -298,7 +298,7 @@ const contextMenu = {
 		// 	text: 'Convert to Callout (NYI)',
 		// 	shown(selectedItem) {
 		// 		const step = store.get.lookupToItem(selectedItem);
-		// 		return !util.isEmpty(step.submodel);
+		// 		return !_.isEmpty(step.submodel);
 		// 	},
 		// 	cb() {
 		// 		// const step = store.get.lookupToItem(selectedItem);
@@ -375,7 +375,7 @@ const contextMenu = {
 		{
 			text: 'Delete Empty Step',
 			shown(selectedItem) {
-				return util.isEmpty(store.get.step(selectedItem).parts);
+				return _.isEmpty(store.get.step(selectedItem).parts);
 			},
 			cb(selectedItem) {
 				undoStack.commit('step.delete', {step: selectedItem, doLayout: true}, this.text);
@@ -452,7 +452,7 @@ const contextMenu = {
 					text: 'Custom Rotation...',
 					cb(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
-						const originalRotation = util.clone(csi.rotation);
+						const originalRotation = _.clone(csi.rotation);
 						csi.rotation = csi.rotation || {x: 0, y: 0, z: 0};
 
 						app.currentDialog = 'rotateCSIDialog';
@@ -464,7 +464,7 @@ const contextMenu = {
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'csi.rotate',
-									{csi, ...util.clone(newValues), doLayout: true},
+									{csi, ..._.clone(newValues), doLayout: true},
 									'Rotate Step Image',
 									[csi]
 								);
@@ -509,7 +509,7 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				const csi = store.get.csi(selectedItem.id);
-				const rotation = util.clone(csi.rotation);
+				const rotation = _.clone(csi.rotation);
 				const step = store.get.step(csi.parent.id);
 				const originalRotations = [];
 
@@ -731,7 +731,7 @@ const contextMenu = {
 			text: 'Rotate Tip...',
 			children: ['up', 'right', 'down', 'left'].map(direction => {
 				return {
-					text: util.titleCase(direction),
+					text: _.titleCase(direction),
 					shown: calloutTipRotationVisible(direction),
 					cb: rotateCalloutTip(direction)
 				};
@@ -744,7 +744,7 @@ const contextMenu = {
 			text: 'Displace Part...',
 			children: ['up', 'down', 'left', 'right', 'forward', 'backward', null].map(direction => {
 				return {
-					text: util.titleCase(direction || 'None'),
+					text: _.titleCase(direction || 'None'),
 					shown: showDisplacement(direction),
 					cb: displacePart(direction)
 				};
@@ -763,7 +763,7 @@ const contextMenu = {
 				const step = store.get.step(selectedItem.stepID);
 				const csi = store.get.csi(step.csiID);
 				const displacement = step.displacedParts.find(p => p.partID === selectedItem.id);
-				const originalDisplacement = util.clone(displacement);
+				const originalDisplacement = _.clone(displacement);
 
 				app.currentDialog = 'partDisplacementDialog';
 				app.clearSelected();
@@ -849,7 +849,7 @@ const contextMenu = {
 			text: 'Add Part to Callout',
 			shown(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
-				return !util.isEmpty(step.callouts);
+				return !_.isEmpty(step.callouts);
 			},
 			cb(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
@@ -918,7 +918,7 @@ function displacePart(direction) {
 		undoStack.commit(
 			'part.displace',
 			{partID: selectedItem.id, step, direction},
-			`Displace Part ${util.titleCase(direction || 'None')}`,
+			`Displace Part ${_.titleCase(direction || 'None')}`,
 			[{type: 'csi', id: step.csiID}]
 		);
 		app.redrawUI();

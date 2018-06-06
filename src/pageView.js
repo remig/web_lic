@@ -1,7 +1,7 @@
 /* global Vue: false */
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const Draw = require('./draw');
 const store = require('./store');
 const undoStack = require('./undoStack');
@@ -24,7 +24,7 @@ Vue.component('pageCanvasView', {
 		selectedItem(newItem, prevItem) {
 			const prevPage = store.get.pageForItem(prevItem);
 			const newPage = store.get.pageForItem(newItem);
-			if (prevPage && (!newPage || !util.itemEq(prevPage, newPage))) {
+			if (prevPage && (!newPage || !_.itemEq(prevPage, newPage))) {
 				this.drawPage(prevPage);
 			}
 			if (newPage) {
@@ -104,9 +104,9 @@ Vue.component('pageCanvasView', {
 			const up = {x: e.offsetX, y: e.offsetY};
 			if (this.mouseDragItem && this.mouseDragItem.moved) {
 				// Mouse drag is complete; add undo event to stack
-				undoStack.commit(null, null, `Move ${util.prettyPrint(this.mouseDragItem.item.type)}`);
+				undoStack.commit(null, null, `Move ${_.prettyPrint(this.mouseDragItem.item.type)}`);
 				this.app.redrawUI(false);
-			} else if (util.geom.distance(this.mouseDownPt, up) < 3) {
+			} else if (_.geom.distance(this.mouseDownPt, up) < 3) {
 				// If simple mouse down + mouse up with very little movement, handle as if 'click' for selection
 				page = (page == null) ? this.currentPageLookup : page;
 				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
@@ -143,7 +143,7 @@ Vue.component('pageCanvasView', {
 		},
 		clearPageCanvas() {
 			const canvasList = document.querySelectorAll('canvas[id^="pageCanvas"]');
-			util.toArray(canvasList).forEach(canvas => {
+			_.toArray(canvasList).forEach(canvas => {
 				canvas.width = canvas.width;
 			});
 		},
@@ -191,9 +191,9 @@ Vue.component('pageCanvasView', {
 			const selectedPart = (this.selectedItem && this.selectedItem.type === 'part') ? this.selectedItem : null;
 			Draw.page(page, canvas, scale, selectedPart);
 			delete page.needsDrawing;
-			if (this.currentPageLookup && util.itemEq(page, this.currentPageLookup)) {
+			if (this.currentPageLookup && _.itemEq(page, this.currentPageLookup)) {
 				const itemPage = store.get.pageForItem(this.selectedItem);
-				if (util.itemEq(itemPage, this.currentPageLookup)) {
+				if (_.itemEq(itemPage, this.currentPageLookup)) {
 					const box = itemHighlightBox(this.selectedItem, this.pageSize);
 					Draw.highlight(canvas, box.x, box.y, box.width, box.height);
 				}
@@ -246,8 +246,8 @@ function itemHighlightBox(selItem, pageSize) {
 	} else if (type === 'calloutArrow') {
 		box = store.get.calloutArrowBoundingBox(selItem);
 	} else if (type === 'divider') {
-		let pointBox = util.geom.bbox([selItem.p1, selItem.p2]);
-		pointBox = util.geom.expandBox(pointBox, 8, 8);
+		let pointBox = _.geom.bbox([selItem.p1, selItem.p2]);
+		pointBox = _.geom.expandBox(pointBox, 8, 8);
 		box = store.get.targetBox({...selItem, ...pointBox});
 	} else {
 		box = store.get.targetBox(selItem);
@@ -386,8 +386,8 @@ function findClickTargetInPage(page, mx, my) {
 	for (let i = 0; i < page.dividers.length; i++) {
 		const divider = store.get.divider(page.dividers[i]);
 
-		let box = util.geom.bbox([divider.p1, divider.p2]);
-		box = util.geom.expandBox(box, 8, 8);
+		let box = _.geom.bbox([divider.p1, divider.p2]);
+		box = _.geom.expandBox(box, 8, 8);
 		if (inBox(mx, my, {...divider, ...box})) {
 			return divider;
 		}

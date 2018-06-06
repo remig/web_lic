@@ -1,7 +1,7 @@
 /* global saveAs: false */
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const LDParse = require('./LDParse');
 const LDRender = require('./LDRender');
 const defaultTemplate = require('./template.js');
@@ -10,7 +10,7 @@ const defaultTemplate = require('./template.js');
 let Layout;  // eslint-disable-line prefer-const
 
 const emptyState = {
-	template: util.clone(defaultTemplate),
+	template: _.clone(defaultTemplate),
 	templatePage: null,
 	titlePage: null,
 	plisVisible: true,
@@ -39,13 +39,13 @@ const store = {
 		LDRender.setPartDictionary(LDParse.partDictionary);
 	},
 	// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic (except static stuff in model, like part geometries)
-	state: util.clone(emptyState),
+	state: _.clone(emptyState),
 	replaceState(state) {
 		store.state = state;
 		store.cache.reset();
 	},
 	resetState() {
-		store.state = util.clone(emptyState);
+		store.state = _.clone(emptyState);
 		store.cache.reset();
 	},
 	load(content) {
@@ -105,7 +105,7 @@ const store = {
 						LDRender.renderModel(localModel, container, 1000 * scale, {resizeContainer: true});
 					} else {
 						const partList = store.get.partList(step);
-						if (util.isEmpty(partList)) {
+						if (_.isEmpty(partList)) {
 							return null;
 						}
 						const config = {
@@ -191,7 +191,7 @@ const store = {
 			}
 			const name = store.get.modelFilenameBase();
 			if (nice) {
-				return util.prettyPrint(name.replace(/\//g, '-').replace(/_/g, ' '));
+				return _.prettyPrint(name.replace(/\//g, '-').replace(/_/g, ' '));
 			}
 			return name;
 		},
@@ -371,7 +371,7 @@ const store = {
 			tip = store.get.point(tip);
 			tip = {x: tip.x + csi.x, y: tip.y + csi.y};
 
-			const base = util.clone(tip);
+			const base = _.clone(tip);
 			const direction = arrow.direction;
 			base.x += (direction === 'right') ? -24 : (direction === 'left') ? 24 : 0;  // TODO: abstract callout arrow dimension... somewhere...
 			base.y += (direction === 'down') ? -24 : (direction === 'up') ? 24 : 0;
@@ -382,8 +382,8 @@ const store = {
 			const callout = store.get.parent(arrow);
 			const step = store.get.parent(callout);
 			const points = store.get.calloutArrowToPoints(arrow);
-			let box = util.geom.bbox(points);
-			box = util.geom.expandBox(box, 8, 8);
+			let box = _.geom.bbox(points);
+			box = _.geom.expandBox(box, 8, 8);
 			box.x += step.x;
 			box.y += step.y;
 			return box;
@@ -439,7 +439,7 @@ const store = {
 							const partNames = parentStep.parts.map(partID => {
 								return LDParse.model.get.partFromID(partID, parentStep.model.filename).filename;
 							});
-							const count = util.array.count(partNames, step.model.filename);
+							const count = _.count(partNames, step.model.filename);
 							modelHierarchy[modelHierarchy.length - 1].quantity = count;
 						}
 						modelHierarchy.push({filename: parentStep.model.filename, quantity: 1});
@@ -461,11 +461,11 @@ const store = {
 				nodes.push(store.state.pages[i]);
 			}
 			store.get.submodels().forEach(submodel => {
-				const page = store.get.pageForItem({id: submodel.stepID, type: 'step'})
+				const page = store.get.pageForItem({id: submodel.stepID, type: 'step'});
 				const pageIndex = nodes.indexOf(page);
 				submodel.type = 'submodel';
 				submodel.id = nodes.length;
-				util.array.insert(nodes, submodel, pageIndex);
+				_.insert(nodes, submodel, pageIndex);
 			});
 			return nodes;
 		},
@@ -474,7 +474,7 @@ const store = {
 				item = item.type;
 			}
 			const itemList = store.state[item + 's'];
-			if (util.isEmpty(itemList)) {
+			if (_.isEmpty(itemList)) {
 				return 0;
 			}
 			return Math.max.apply(null, itemList.map(el => el.id)) + 1;
@@ -546,13 +546,13 @@ const store = {
 				if (store.state.hasOwnProperty(item.type)) {
 					store.state[item.type] = item;
 				} else {
-					util.array.insert(store.state[item.type + 's'], item, opts.insertionIndex);
+					_.insert(store.state[item.type + 's'], item, opts.insertionIndex);
 				}
 				if (opts.parent) {
 					const parent = store.get.lookupToItem(opts.parent);
 					item.parent = {type: parent.type, id: parent.id};
 					if (parent.hasOwnProperty(item.type + 's')) {
-						util.array.insert(parent[item.type + 's'], item.id, opts.parentInsertionIndex);
+						_.insert(parent[item.type + 's'], item.id, opts.parentInsertionIndex);
 					} else if (parent.hasOwnProperty(item.type + 'ID')) {
 						parent[item.type + 'ID'] = item.id;
 					}
@@ -561,11 +561,11 @@ const store = {
 			},
 			delete(opts) {  // opts: {item}
 				const item = store.get.lookupToItem(opts.item);
-				util.array.remove(store.state[item.type + 's'], item);
+				_.remove(store.state[item.type + 's'], item);
 				if (item.parent) {
 					const parent = store.get.lookupToItem(item.parent);
 					if (parent.hasOwnProperty(item.type + 's')) {
-						util.array.remove(parent[item.type + 's'], item.id);
+						_.remove(parent[item.type + 's'], item.id);
 					} else if (parent.hasOwnProperty(item.type + 'ID')) {
 						parent[item.type + 'ID'] = null;
 					}
@@ -573,7 +573,7 @@ const store = {
 			},
 			deleteChildList(opts) {  // opts: {item, listType}
 				const item = store.get.lookupToItem(opts.item);
-				const list = util.clone(item[opts.listType + 's'] || []);
+				const list = _.clone(item[opts.listType + 's'] || []);
 				const itemType = store.mutations[opts.listType] ? opts.listType : 'item';
 				list.forEach(id => {
 					const arg = {};
@@ -587,12 +587,12 @@ const store = {
 				const newParent = store.get.lookupToItem(opts.newParent);
 				item.parent.id = newParent.id;
 				if (oldParent.hasOwnProperty(item.type + 's')) {
-					util.array.remove(oldParent[item.type + 's'], item.id);
+					_.remove(oldParent[item.type + 's'], item.id);
 				} else if (oldParent.hasOwnProperty(item.type + 'ID')) {
 					oldParent[item.type + 'ID'] = null;
 				}
 				if (newParent.hasOwnProperty(item.type + 's')) {
-					util.array.insert(newParent[item.type + 's'], item.id, opts.parentInsertionIndex);
+					_.insert(newParent[item.type + 's'], item.id, opts.parentInsertionIndex);
 				} else if (newParent.hasOwnProperty(item.type + 'ID')) {
 					newParent[item.type + 'ID'] = item.id;
 				}
@@ -630,7 +630,7 @@ const store = {
 						step.displacedParts.push(opts);
 					}
 				} else if (idx >= 0) {
-					util.array.removeIndex(step.displacedParts, idx);
+					_.removeIndex(step.displacedParts, idx);
 				}
 				store.mutations.page.layout({page: store.get.pageForItem(step)});  // TODO: no need to layout entire page; can layout just the step containing the newly displaced part
 			},
@@ -639,12 +639,12 @@ const store = {
 				const partID = opts.partID;
 				const srcStep = store.get.lookupToItem(opts.srcStep);
 				store.mutations.csi.resetSize({csi: srcStep.csiID});
-				util.array.remove(srcStep.parts, partID);
+				_.remove(srcStep.parts, partID);
 
 				const destStep = store.get.lookupToItem(opts.destStep);
 				store.mutations.csi.resetSize({csi: destStep.csiID});
 				destStep.parts.push(partID);
-				destStep.parts.sort(util.sort.numeric.ascending);
+				destStep.parts.sort(_.sort.numeric.ascending);
 
 				if (srcStep.pliID != null && destStep.pliID != null) {
 					const destPLI = store.get.pli(destStep.pliID);
@@ -669,7 +669,7 @@ const store = {
 						store.mutations.pliItem.delete({pliItem});
 					} else {
 						pliItem.quantity -= 1;
-						util.array.remove(pliItem.partNumbers, partID);
+						_.remove(pliItem.partNumbers, partID);
 					}
 				}
 
@@ -685,12 +685,12 @@ const store = {
 				const step = store.get.lookupToItem(opts.step);
 				const callout = store.get.lookupToItem(opts.callout);
 				let destCalloutStep;
-				if (util.isEmpty(callout.steps)) {
+				if (_.isEmpty(callout.steps)) {
 					destCalloutStep = store.mutations.step.add({dest: callout});
 				} else {
 					destCalloutStep = store.get.step(callout.steps[callout.steps.length - 1]);
 				}
-				destCalloutStep.model = util.clone(step.model);
+				destCalloutStep.model = _.clone(step.model);
 				destCalloutStep.parts.push(partID);
 				store.mutations.csi.resetSize({csi: destCalloutStep.csiID});
 				if (opts.doLayout) {
@@ -699,7 +699,7 @@ const store = {
 			},
 			removeFromCallout(opts) {  // opts: {partID, step}
 				const step = store.get.lookupToItem(opts.step);
-				util.array.remove(step.parts, opts.partID);
+				_.remove(step.parts, opts.partID);
 				store.mutations.csi.resetSize({csi: step.csiID});
 				store.mutations.page.layout({page: store.get.pageForItem(step)});
 			}
@@ -761,7 +761,7 @@ const store = {
 				}, parent: opts.parent});
 
 				opts.properties = opts.properties || {};
-				util.copy(annotation, opts.properties);
+				_.copy(annotation, opts.properties);
 
 				// Guarantee some nice defaults
 				if (annotation.annotationType === 'label') {
@@ -910,7 +910,7 @@ const store = {
 				if (!srcStep || !destStep) {
 					return;
 				}
-				util.clone(srcStep.parts).forEach(partID => {
+				_.clone(srcStep.parts).forEach(partID => {
 					store.mutations.part.moveToStep({partID, srcStep, destStep, doLayout: false});
 				});
 				store.mutations.step.delete({step: srcStep});
@@ -938,7 +938,7 @@ const store = {
 					item: store.get.csi(step.csiID),
 					newParent: newStep
 				});
-				newStep.parts = util.clone(step.parts);
+				newStep.parts = _.clone(step.parts);
 				if (opts.doLayout) {
 					store.mutations.page.layout({page: store.get.pageForItem(step)});
 				}
@@ -1040,7 +1040,7 @@ const store = {
 				const arrowPoints = store.get.calloutArrowToPoints(arrow);
 				const p1 = arrowPoints[parentInsertionIndex - 1];
 				const p2 = arrowPoints[parentInsertionIndex];
-				const midpoint = util.geom.midpoint(p1, p2);
+				const midpoint = _.geom.midpoint(p1, p2);
 				midpoint.x -= callout.x;
 				midpoint.y -= callout.y;
 				store.mutations.item.add({
@@ -1214,14 +1214,14 @@ const store = {
 				});
 			},
 			set(opts) {  // opts: {entry, value}
-				const entry = util.get(opts.entry, store.state.template);
-				util.copy(entry, opts.value);
+				const entry = _.get(opts.entry, store.state.template);
+				_.copy(entry, opts.value);
 			},
 			load(opts) {  // opts: {template}
 				store.state.template = opts.template;
 			},
 			reset() {
-				store.state.template = util.clone(defaultTemplate);
+				store.state.template = _.clone(defaultTemplate);
 				store.state.templatePage.needsLayout = true;
 			},
 			setPageSize(opts) {  // opts: {width, height}
@@ -1313,7 +1313,7 @@ const store = {
 
 			localModel.steps.forEach(modelStep => {
 
-				const parts = util.clone(modelStep.parts || []);
+				const parts = _.clone(modelStep.parts || []);
 				const submodelIDs = parts.filter(pID => {
 					return LDParse.model.isSubmodel(localModel.parts[pID].filename);
 				});

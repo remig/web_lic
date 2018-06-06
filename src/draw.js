@@ -1,6 +1,6 @@
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 const store = require('./store');
 const LDParse = require('./LDParse');
 
@@ -109,7 +109,7 @@ const api = {
 		ctx.save();
 		ctx.translate(Math.floor(step.x), Math.floor(step.y));
 
-		if (step.csiID == null && step.steps.length) {
+		if (step.csi == null && step.steps.length) {
 			step.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 		} else if (step.csiID != null) {
 			api.csi(step.csiID, localModel, ctx, scale, selectedPart);
@@ -213,7 +213,7 @@ const api = {
 			});
 		}
 
-		if (util.isEmpty(pliItems)) {
+		if (_.isEmpty(pliItems)) {
 			return;
 		}
 		const rectStyle = {
@@ -317,7 +317,7 @@ const api = {
 			ctx.fill();
 		}
 
-		const haveBorder = util.isBorderVisible(template.border);
+		const haveBorder = _.isBorderVisible(template.border);
 		if (haveBorder) {
 			api.roundedRect(ctx, 0, 0, 100, 94, 15);
 		}
@@ -332,11 +332,11 @@ const api = {
 		ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
 		ctx.scale(scale.width, scale.height);
 		ctx.beginPath();
-		ctx.arc(50, 38, 39, util.radians(29), util.radians(130));
+		ctx.arc(50, 38, 39, _.radians(29), _.radians(130));
 		ctx.stroke();
 
 		ctx.beginPath();
-		ctx.arc(50, 56, 39, util.radians(180 + 29), util.radians(180 + 130));
+		ctx.arc(50, 56, 39, _.radians(180 + 29), _.radians(180 + 130));
 		ctx.stroke();
 
 		api.arrowHead(ctx, 15, 57, 135, [1, 0.7]);
@@ -365,9 +365,9 @@ const api = {
 			ctx.save();
 			ctx.translate(tipX, tipY);
 			if (rotation in presetAngles) {
-				ctx.rotate(util.radians(presetAngles[rotation]));
+				ctx.rotate(_.radians(presetAngles[rotation]));
 			} else if (typeof rotation === 'number') {
-				ctx.rotate(util.radians(rotation));
+				ctx.rotate(_.radians(rotation));
 			}
 			if (scale) {
 				if (Array.isArray(scale)) {
@@ -419,7 +419,7 @@ const api = {
 			api.roundedRect(ctx, x, y, w, h, r, style.lineWidth);
 			ctx.fill();
 		}
-		if (util.isBorderVisible({width: style.lineWidth, color: style.strokeStyle})) {
+		if (_.isBorderVisible({width: style.lineWidth, color: style.strokeStyle})) {
 			ctx.strokeStyle = style.strokeStyle;
 			ctx.lineWidth = style.lineWidth;
 			api.roundedRect(ctx, x, y, w, h, r, style.lineWidth);

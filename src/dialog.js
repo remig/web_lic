@@ -1,7 +1,7 @@
 /* global Vue: false, $: false */
 'use strict';
 
-const util = require('./util');
+const _ = require('./util');
 
 Vue.component('baseDialog', {
 	template: '#baseDialogTemplate',
@@ -93,7 +93,7 @@ const dialogs = {
 	}
 };
 
-util.forEach(dialogs, (name, data) => {
+_.forEach(dialogs, (name, data) => {
 	Vue.component(name + 'Dialog', {
 		template: `#${name}Template`,
 		mixins: [baseDialogPropagator],
@@ -109,7 +109,7 @@ util.forEach(dialogs, (name, data) => {
 });
 
 Vue.component('fontNameDialog', {
-	template: `#fontNameTemplate`,
+	template: '#fontNameTemplate',
 	mixins: [baseDialogPropagator],
 	data: function() {
 		return {
@@ -119,9 +119,9 @@ Vue.component('fontNameDialog', {
 	},
 	methods: {
 		updateValues() {
-			const fontParts = util.fontToFontParts(this.font);
+			const fontParts = _.fontToFontParts(this.font);
 			fontParts.fontFamily = this.fontName;
-			this.font = util.fontPartsToFont(fontParts);
+			this.font = _.fontPartsToFont(fontParts);
 			this.$emit('update', {fontName: this.fontName});
 		}
 	}
