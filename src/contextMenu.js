@@ -926,11 +926,27 @@ function displacePart(direction) {
 }
 
 module.exports = function ContextMenu(entry, localApp) {
+
+	function shown(menu) {
+		return menu.shown ? menu.shown(entry) : true;
+	}
+
 	app = localApp;
 	let menu = contextMenu[entry.type];
 	menu = (typeof menu === 'function') ? menu(entry) : menu;
-	if (menu) {
-		menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above
-		return menu;
-	}
+
+	// Filter out invisible menu entries here so that if menu ends up empty, we don't draw anything in the UI
+	menu = (menu || []).filter(shown);
+	menu = menu.map(menuEntry => {
+		if (menuEntry.children) {
+			let children = menuEntry.children;
+			children = (typeof children === 'function') ? children(entry) : children;
+			return {
+				text: menuEntry.text,
+				children: children.filter(shown)
+			};
+		}
+		return menuEntry;
+	});
+	return menu;
 };
