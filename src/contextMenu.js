@@ -578,7 +578,7 @@ const contextMenu = {
 			children(selectedItem) {
 				const step = store.get.parent(selectedItem);
 				return (step.parts || []).map(partID => {
-					const part = LDParse.model.get.partFromID(partID, store.model, step.submodel);
+					const part = LDParse.model.get.partFromID(partID, step.model.filename);
 					const abstractPart = LDParse.partDictionary[part.filename];
 					return {
 						text: abstractPart.name,

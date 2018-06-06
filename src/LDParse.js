@@ -70,6 +70,9 @@ const api = {
 	},
 
 	model: {  // All 'model' arguments below are abstractParts
+		isSubmodel(filename) {
+			return api.partDictionary[filename].isSubModel;
+		},
 		get: {
 			// Return the total number of parts in this model, including parts in submodels
 			partCount(model) {
@@ -84,17 +87,11 @@ const api = {
 					return (p.isSubModel ? p.parts.length : 1) + acc;
 				}, 0);
 			},
-			partFromID(partID, model, submodelList) {
-				model = api.model.get.submodelDescendant(model, submodelList);
-				return model.parts[partID];
+			part(filename) {
+				return api.partDictionary[filename];
 			},
-			// submodelIDList is an array of submodel IDs representing a deeply nested submodel hierarchy.
-			// Traverse the submodel tree in submodelIDList and return the abstractPart associated with the final submodelIDList entry.
-			submodelDescendant(model, submodelIDList) {
-				if (!submodelIDList || !submodelIDList.length) {
-					return model;
-				}
-				return (submodelIDList || []).reduce((p, id) => api.partDictionary[p.parts[id].filename], model);
+			partFromID(partID, filename) {
+				return api.partDictionary[filename].parts[partID];
 			},
 			// Return an array of abstractParts, one for each submodel in this model.
 			submodels(model) {
@@ -137,7 +134,7 @@ async function requestPart(fn) {
 		resp = await fetch(api.LDrawPath + pathsToTry[2] + fn);
 	}
 	if (resp == null || !resp.ok) {
-		console.log(`   *** FAILED TO LOAD: ${fn}`);
+		console.log(`   *** FAILED TO LOAD: ${fn}`);  // eslint-disable-line no-console
 	}
 	return await resp.text() || '';
 }
@@ -183,6 +180,8 @@ function parseComment(abstractPart, line) {
 			// NYI
 		}
 	} else if (command === 'FILE') {
+		// NYI
+	} else if (command === 'ROTSTEP') {
 		// NYI
 	} else if (command === 'STEP') {
 		if (abstractPart.steps == null) {
@@ -363,7 +362,7 @@ async function loadPart(fn, content, progressCallback) {
 			part = await lineListToAbstractPart(fn, lineList, progressCallback);
 		}
 	}
-	api.partDictionary[fn || part.filename] = part;
+	api.partDictionary[part.filename] = part;
 	if (part.steps) {
 		delete part.steps.lastPart;
 		// Check if any parts were left out of the last step; add them to a new step if so.

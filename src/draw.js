@@ -104,7 +104,7 @@ const api = {
 	step(step, ctx, scale = 1, selectedPart) {
 
 		step = store.get.step(step);
-		const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
+		const localModel = LDParse.model.get.part(step.model.filename);
 
 		ctx.save();
 		ctx.translate(Math.floor(step.x), Math.floor(step.y));
@@ -150,7 +150,6 @@ const api = {
 	submodelImage(submodelImage, ctx, scale = 1) {
 		submodelImage = store.get.submodelImage(submodelImage);
 		const template = store.state.template.submodelImage;
-		const step = store.get.parent(submodelImage);
 		const csi = store.get.csi(submodelImage.csiID);
 
 		const rectStyle = {
@@ -166,7 +165,7 @@ const api = {
 
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
-		const part = LDParse.model.get.submodelDescendant(step.model || store.model, submodelImage.submodel);
+		const part = LDParse.model.get.part(submodelImage.modelFilename);
 		const siCanvas = store.render.pli(part, csi, scale).container;
 		const x = Math.floor((submodelImage.x + csi.x) * scale);
 		const y = Math.floor((submodelImage.y + csi.y) * scale);
@@ -208,7 +207,7 @@ const api = {
 		pli = store.get.pli(pli);
 
 		let pliItems = pli.pliItems;
-		if (!store.state.template.pli.includeSubmodels) {
+		if (!template.pli.includeSubmodels) {
 			pliItems = pliItems.filter(id => {
 				return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
 			});

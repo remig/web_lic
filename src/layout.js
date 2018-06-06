@@ -82,7 +82,7 @@ const api = {
 		}
 
 		const step = store.get.step(pli.parent.id);
-		const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
+		const localModel = LDParse.model.get.part(step.model.filename);
 		const qtyLabelOffset = 5;
 		const margin = getMargin(store.state.template.pli.innerMargin);
 		let maxHeight = 0, left = margin + qtyLabelOffset;
@@ -116,7 +116,7 @@ const api = {
 	csi(csi, box) {
 		// Draw CSI centered in box
 		const step = store.get.parent(csi);
-		const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
+		const localModel = LDParse.model.get.part(step.model.filename);
 		const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
 		csi.x = box.x + ((box.width - csiSize.width) / 2);
 		csi.y = box.y + ((box.height - csiSize.height) / 2);
@@ -126,9 +126,8 @@ const api = {
 	submodelImage(submodelImage, box) {
 
 		// TODO: if submodel image is too big, shrink it
-		const step = store.get.parent(submodelImage);
 		const csi = store.get.csi(submodelImage.csiID);
-		const part = LDParse.model.get.submodelDescendant(step.model || store.model, submodelImage.submodel);
+		const part = LDParse.model.get.part(submodelImage.modelFilename);
 		const csiSize = store.render.pli(part, csi);
 		const margin = getMargin(store.state.template.submodelImage.innerMargin);
 
@@ -241,7 +240,7 @@ const api = {
 			}
 		},
 		insideOut(step, margin) {
-			const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
+			const localModel = LDParse.model.get.part(step.model.filename);
 			const contentSize = {width: 0, height: 0};
 			margin = margin || getMargin(store.state.template.page.innerMargin);
 
@@ -427,32 +426,24 @@ const api = {
 		label.width = labelSize.width;
 		label.height = labelSize.height;
 	},
-	mergePages(pagesAdded) {
+	mergeSteps(stepsToMerge) {
 		// Starting with one step per page, move adjacent steps to the previous page until the page is full-ish
-
-		const pages = pagesAdded.map(pageID => store.get.page(pageID));
-		pages.forEach(page => api.page(page));
-
-		const stepsToMerge = [].concat(...pages.map(page => page.steps)).slice(1);
+		stepsToMerge = stepsToMerge.slice(1);
 		while (stepsToMerge.length) {
 
-			const step = {type: 'step', id: stepsToMerge[0]};
+			const step = stepsToMerge[0];
 			const originalPage = store.get.pageForItem(step);
-
 			const prevPage = store.get.prevPage(originalPage, false);
-			if (pagesAdded.includes(prevPage.id)) {  // previous page must be in the list of pages that can be altered, in order to move steps to it
 
-				store.mutations.step.moveToPreviousPage({step});  // Move this step to previous page
-				const destPage = store.get.pageForItem(step);
-				const stepsOverlap = destPage.steps.some(stepID => isStepTooSmall(store.get.step(stepID)));
+			store.mutations.step.moveToPreviousPage({step});
 
-				if (stepsOverlap) {
-					// Not enough room; move step back then start filling the next page
-					store.mutations.step.moveToNextPage({step});
-				} else {
-					// Step fits; delete the now-empty page the step moved from
-					store.mutations.page.delete({page: originalPage});
-				}
+			const stepsOverlap = prevPage.steps.some(stepID => isStepTooSmall(store.get.step(stepID)));
+			if (stepsOverlap) {
+				// Not enough room; move step back then start filling the next page
+				store.mutations.step.moveToNextPage({step});
+			} else {
+				// Step fits; delete the now-empty page the step moved from
+				store.mutations.page.delete({page: originalPage});
 			}
 			util.array.removeIndex(stepsToMerge, 0);
 		}
@@ -528,9 +519,9 @@ function isStepTooSmall(step) {
 	const pliHeight = pli ? pli.height : 0;
 	const submodelSpace = {width: 0, height: 0};
 	(step.submodelImages || []).forEach(submodelImageID => {
-		const submodel = store.get.submodelImage(submodelImageID);
-		submodelSpace.width = Math.max(submodel.width * 1.05, submodelSpace.width);
-		submodelSpace.height += submodel.height;
+		const submodelImage = store.get.submodelImage(submodelImageID);
+		submodelSpace.width = Math.max(submodelImage.width * 1.05, submodelSpace.width);
+		submodelSpace.height += submodelImage.height;
 	});
 
 	if (step.width < csi.width * 1.1) {

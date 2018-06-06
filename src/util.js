@@ -43,6 +43,15 @@ const api = {
 			}
 			return res;
 		},
+		count(array, serach) {
+			let count = 0;
+			for (let i = 0; i < array.length; i++) {
+				if (array[i] === serach) {
+					count++;
+				}
+			}
+			return count;
+		},
 		eq(a, b) {
 			if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
 				return false;

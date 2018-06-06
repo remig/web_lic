@@ -302,7 +302,7 @@ const store = {
 			}
 			let prevStep = store.get.prev(step, itemList);
 			if (limitToSubmodel && itemList == null) {
-				while (prevStep && !util.array.eq(step.submodel, prevStep.submodel)) {
+				while (prevStep && step.model.filename !== prevStep.model.filename) {
 					prevStep = store.get.prev(prevStep);
 				}
 			}
@@ -316,7 +316,7 @@ const store = {
 			}
 			let nextStep = store.get.next(step, itemList);
 			if (limitToSubmodel && itemList == null) {
-				while (nextStep && !util.array.eq(step.submodel, nextStep.submodel)) {
+				while (nextStep && step.model.filename !== nextStep.model.filename) {
 					nextStep = store.get.next(nextStep);
 				}
 			}
@@ -339,7 +339,7 @@ const store = {
 		matchingPLIItem(pli, partID) {  // Given a pli and a part, find a pliItem in the pli that matches the part's filename & color (if any)
 			pli = store.get.lookupToItem(pli);
 			const step = store.get.parent(pli);
-			const part = LDParse.model.get.partFromID(partID, store.model, step.submodel);
+			const part = LDParse.model.get.partFromID(partID, step.model.filename);
 			const targets = pli.pliItems.map(id => store.get.pliItem(id))
 				.filter(i => i.filename === part.filename && i.colorCode === part.colorCode);
 			return targets.length ? targets[0] : null;
@@ -348,9 +348,8 @@ const store = {
 			pliItem = store.get.lookupToItem(pliItem);
 			const pli = store.get.parent(pliItem);
 			const step = store.get.parent(pli);
-			const localModel = LDParse.model.get.submodelDescendant(step.model || store.model, step.submodel);
-			const part = localModel.parts[pliItem.partNumbers[0]];
-			return LDParse.partDictionary[part.filename].isSubModel;
+			const part = LDParse.model.get.partFromID(pliItem.partNumbers[0], step.model.filename);
+			return LDParse.model.isSubmodel(part.filename);
 		},
 		calloutArrowToPoints(arrow) {
 			// Return list of points in arrow, all relative to *step*.
@@ -640,7 +639,7 @@ const store = {
 				} else {
 					destCalloutStep = store.get.step(callout.steps[callout.steps.length - 1]);
 				}
-				destCalloutStep.submodel = util.clone(step.submodel);
+				destCalloutStep.model = util.clone(step.model);
 				destCalloutStep.parts.push(partID);
 				store.mutations.csi.resetSize({csi: destCalloutStep.csiID});
 				if (opts.doLayout) {
@@ -682,10 +681,10 @@ const store = {
 			}
 		},
 		submodelImage: {
-			add(opts) {  // opts: {parent, submodel, quantity}
+			add(opts) {  // opts: {parent, modelFilename, quantity}
 				const submodelImage = store.mutations.item.add({item: {
 					type: 'submodelImage', csiID: null, quantityLabelID: null,
-					submodel: opts.submodel, quantity: opts.quantity || 1,
+					modelFilename: opts.modelFilename, quantity: opts.quantity || 1,
 					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
 
@@ -757,8 +756,9 @@ const store = {
 					item: {
 						type: 'step',
 						number: opts.stepNumber, numberLabelID: null,
-						parts: [], callouts: [], submodel: [], steps: [], dividers: [], submodelImages: [],
+						parts: [], callouts: [], steps: [], dividers: [], submodelImages: [],
 						csiID: null, pliID: null, rotateIconID: null,
+						model: {filename: null, parentStepID: null},
 						x: null, y: null, width: null, height: null, subStepLayout: 'vertical'
 					},
 					parent: dest,
@@ -1136,13 +1136,13 @@ const store = {
 				);
 
 				const step = store.mutations.step.add({stepNumber: 1, dest: page});
-				step.model = modelData.model;
+				step.model = {filename: modelData.model.filename};
 				step.parts = [0, 1];
 
 				store.mutations.step.toggleRotateIcon({step, display: true});
 
 				store.mutations.submodelImage.add({
-					parent: step, submodel: [], quantity: 2
+					parent: step, modelFilename: modelData.model.filename, quantity: 2
 				});
 
 				const pli = store.get.pli(step.pliID);
@@ -1159,7 +1159,7 @@ const store = {
 				store.mutations.callout.addStep({callout});
 				store.mutations.part.addToCallout({partID: 1, step, callout});
 				callout.steps.forEach(s => {
-					store.get.step(s).model = modelData.model;
+					store.get.step(s).model.filename = modelData.model.filename;
 				});
 			},
 			set(opts) {  // opts: {entry, value}
@@ -1245,16 +1245,12 @@ const store = {
 			store.mutations.item.deleteChildList({item, listType: 'step'});
 			store.state.titlePage = null;
 		},
-		addInitialPages(opts) {  // opts: {layoutChoices, localModelIDList = [], submodelQuantity, lastStepNumber}
+		addInitialPages(opts) {  // opts: {modelFilename,  lastStepNumber}
 
 			opts = opts || {};
 			const lastStepNumber = opts.lastStepNumber || {num: opts.lastStepNumber || 1};  // Object so it can be modified recursively
-			const localModelIDList = opts.localModelIDList || [];  // Array of submodel IDs used to traverse the submodel tree
-			const localModel = LDParse.model.get.submodelDescendant(store.model, localModelIDList);
-
-			if (!localModel) {
-				return;
-			}
+			const modelFilename = opts.modelFilename || store.model.filename;
+			const localModel = LDParse.model.get.part(modelFilename);
 
 			if (!localModel.steps) {
 				const submodels = LDParse.model.get.submodels(localModel);
@@ -1262,7 +1258,7 @@ const store = {
 					// If main model contains no steps but contains submodels that contain steps, add one step per part in main model.
 					localModel.steps = localModel.parts.map((p, idx) => ({parts: [idx]}));
 				} else {
-					return;  // No steps; can't add any pages.  TODO: big complicated automatic step insertion algorithm goes here.
+					return null;  // No steps; can't add any pages.  TODO: big complicated automatic step insertion algorithm goes here.
 				}
 			}
 
@@ -1271,22 +1267,21 @@ const store = {
 			localModel.steps.forEach(modelStep => {
 
 				const parts = util.clone(modelStep.parts || []);
-				const submodels = parts.filter(p => LDParse.partDictionary[localModel.parts[p].filename].isSubModel);
-				const submodelsByQuantity = {};
-				submodels.forEach(submodel => {
-					const filename = localModel.parts[submodel].filename;
-					submodelsByQuantity[filename] = submodelsByQuantity[filename] || {id: submodel, quantity: 0};
-					submodelsByQuantity[filename].quantity++;
+				const submodelIDs = parts.filter(pID => {
+					return LDParse.model.isSubmodel(localModel.parts[pID].filename);
 				});
+				const submodelFilenames = new Set(submodelIDs.map(pID => localModel.parts[pID].filename));
 
-				Object.values(submodelsByQuantity).forEach(entry => {
-					store.mutations.addInitialPages({
-						layoutChoices: opts.layoutChoices,
-						localModelIDList: localModelIDList.concat(entry.id),
-						submodelQuantity: entry.quantity,
+				const submodelPagesAdded = [];
+				for (const filename of submodelFilenames) {
+					const newPages = store.mutations.addInitialPages({
+						modelFilename: filename,
 						lastStepNumber
 					});
-				});
+					if (newPages) {
+						submodelPagesAdded.push(newPages);
+					}
+				}
 
 				const page = store.mutations.page.add({pageNumber: 'id'});
 				pagesAdded.push(page.id);
@@ -1296,21 +1291,19 @@ const store = {
 				});
 				lastStepNumber.num += 1;
 				step.parts = parts;
-				step.submodel = util.clone(localModelIDList);
+				step.model.filename = modelFilename;
 
-				if (opts.submodelQuantity != null) {
-					store.mutations.submodelImage.add({
-						parent: step,
-						submodel: util.clone(localModelIDList),
-						quantity: opts.submodelQuantity
+				submodelPagesAdded.forEach(submodelPageGroup => {
+					submodelPageGroup.forEach(pageID => {
+						const submodelPage = store.get.page(pageID);
+						const submodelStep = store.get.step(submodelPage.steps[0]);
+						submodelStep.model.parentStepID = step.id;
 					});
-					opts.submodelQuantity = null;
-				}
+				});
 
 				const pli = store.get.pli(step.pliID);
 
 				parts.forEach(partID => {
-
 					const part = localModel.parts[partID];
 					const target = store.get.matchingPLIItem(pli, partID);
 					if (target) {
@@ -1327,8 +1320,60 @@ const store = {
 				});
 			});
 
-			if (opts.layoutChoices && opts.layoutChoices.useMaxSteps) {
-				Layout.mergePages(pagesAdded);
+			return pagesAdded;
+		},
+		addInitialSubmodelImages() {
+			// Walk over each step, look for the first use of each submodel then add a submodel image to that step
+			const mainModelFilename = store.model.filename;
+			const addedModelNames = new Set([mainModelFilename]);
+			store.state.steps.filter(step => {
+				return step.parent.type === 'page' && step.model.filename !== mainModelFilename;
+			}).forEach(step => {
+
+				if (!addedModelNames.has(step.model.filename)) {
+					const modelHierarchy = [{filename: step.model.filename, quantity: 1}];
+					let parentStepID = step.model.parentStepID;
+					while (parentStepID != null) {
+						const parentStep = store.get.step(parentStepID);
+						if (parentStep.parts.length > 1) {
+							// Check if parent step contains multiple copies of the current submodel; adjust quantity label accordingly
+							const partNames = parentStep.parts.map(partID => {
+								return LDParse.model.get.partFromID(partID, parentStep.model.filename).filename;
+							});
+							const count = util.array.count(partNames, step.model.filename);
+							modelHierarchy[modelHierarchy.length - 1].quantity = count;
+						}
+						modelHierarchy.push({filename: parentStep.model.filename, quantity: 1});
+						parentStepID = parentStep.model.parentStepID;
+					}
+					modelHierarchy.reverse().forEach(entry => {
+						if (!addedModelNames.has(entry.filename)) {
+							store.mutations.submodelImage.add({
+								parent: step,
+								modelFilename: entry.filename,
+								quantity: entry.quantity
+							});
+							addedModelNames.add(entry.filename);
+						}
+					});
+				}
+			});
+		},
+		mergeInitialPages() {
+			let stepSet = [], prevModelName;
+			store.state.steps.filter(step => {
+				return step.parent.type === 'page';
+			}).forEach(step => {
+				if (!prevModelName || prevModelName === step.model.filename) {
+					stepSet.push(step);
+				} else {
+					Layout.mergeSteps(stepSet);
+					stepSet = [step];
+				}
+				prevModelName = step.model.filename;
+			});
+			if (stepSet.length > 1) {
+				Layout.mergeSteps(stepSet);  // Be sure to merge last set of step in the book
 			}
 		}
 	}
