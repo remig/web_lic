@@ -282,12 +282,52 @@ const api = {
 		const template = store.state.template.callout.arrow;
 		const arrowPoints = store.get.calloutArrowToPoints(arrow);
 		const pt = pixelOffset(arrowPoints[0], template.border.width);
-		ctx.beginPath();
-		ctx.moveTo(pt.x, pt.y);
-		arrowPoints.slice(1, -1).forEach(pt => {
+
+		function line(pt) {
 			pt = pixelOffset(pt, template.border.width);
 			ctx.lineTo(pt.x, pt.y);
-		});
+		}
+
+		ctx.beginPath();
+		ctx.moveTo(pt.x, pt.y);
+		if (arrowPoints.length > 3) {
+			// Custom arrow points
+			arrowPoints.slice(1, -1).forEach(pt => {
+				pt = pixelOffset(pt, template.border.width);
+				ctx.lineTo(pt.x, pt.y);
+			});
+		} else {
+			// Default arrow points - use stair step path
+			const bbox = _.geom.bbox(arrowPoints.slice(0, -1));
+			switch (arrow.direction) {
+				case 'up': {
+					pt.y -= bbox.height / 2;
+					line(pt);
+					pt.x += bbox.width * (pt.x > arrowPoints[1].x ? -1 : 1);
+					break;
+				}
+				case 'right': {
+					pt.x += bbox.width / 2;
+					line(pt);
+					pt.y += bbox.height * (pt.y > arrowPoints[1].y ? -1 : 1);
+					break;
+				}
+				case 'down': {
+					pt.y += bbox.height / 2;
+					line(pt);
+					pt.x += bbox.width * (pt.x > arrowPoints[1].x ? -1 : 1);
+					break;
+				}
+				case 'left': {
+					pt.x -= bbox.width / 2;
+					line(pt);
+					pt.y += bbox.height * (pt.y > arrowPoints[1].y ? -1 : 1);
+					break;
+				}
+			}
+			line(pt);
+			line(arrowPoints[1]);
+		}
 		ctx.stroke();
 		ctx.fillStyle = template.color;
 		const tip = pixelOffset(_.last(arrowPoints), template.border.width);
