@@ -94,14 +94,13 @@ const api = {
 		const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
 		return function(font, text) {
 			if (labelSizeCache[font] && labelSizeCache[font][text]) {
-				return labelSizeCache[font][text];
+				return api.clone(labelSizeCache[font][text]);
 			}
 			const container = document.getElementById('fontMeasureContainer');
 			container.style.font = font;
 			container.firstChild.textContent = text;
-			const res = container.getBBox();
-			res.width = Math.ceil(res.width);
-			res.height = Math.ceil(res.height);
+			let res = container.getBBox();
+			res = {width: Math.ceil(res.width), height: Math.ceil(res.height)};
 			labelSizeCache[font] = labelSizeCache[font] || {};
 			labelSizeCache[font][text] = res;
 			return res;

@@ -82,7 +82,7 @@ const template = {
 		}
 	},
 	callout: {
-		innerMargin: 0.012,
+		innerMargin: 0.015,
 		fill: {
 			color: null
 		},
