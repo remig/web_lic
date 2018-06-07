@@ -586,6 +586,7 @@ const store = {
 				const oldParent = store.get.parent(item);
 				const newParent = store.get.lookupToItem(opts.newParent);
 				item.parent.id = newParent.id;
+				item.parent.type = newParent.type;
 				if (oldParent.hasOwnProperty(item.type + 's')) {
 					_.remove(oldParent[item.type + 's'], item.id);
 				} else if (oldParent.hasOwnProperty(item.type + 'ID')) {
@@ -704,6 +705,46 @@ const store = {
 				store.mutations.page.layout({page: store.get.pageForItem(step)});
 			}
 		},
+		submodel: {
+			convertToCallout(opts) {  // opts: {modelFilename, destStep, doLayout}
+
+				// Create a new callout in the step that this submodel is added to
+				const destStep = store.get.lookupToItem(opts.destStep);
+				const callout = store.mutations.callout.add({parent: destStep});
+
+				// Move each step in the submodel into the new callout
+				const submodelSteps = store.state.steps.filter(step => step.model.filename === opts.modelFilename);
+
+				const pagesToDelete = new Set();
+				submodelSteps.forEach((step, stepIdx) => {
+					if (step.pliID) {
+						store.mutations.pli.delete({
+							pli: {type: 'pli', id: step.pliID},
+							deleteItems: true
+						});
+					}
+					step.submodelImages.forEach(submodelImageID => {
+						store.mutations.submodelImage.delete({
+							submodelImage: {type: 'submodelImage', id: submodelImageID}
+						});
+					});
+					pagesToDelete.add(step.parent.id);
+					store.mutations.item.reparent({item: step, newParent: callout});
+					step.number = stepIdx + 1;
+				});
+
+				for (const pageID of pagesToDelete) {
+					const page = store.get.page(pageID);
+					if (page && !page.steps.length) {
+						store.mutations.page.delete({page});
+					}
+				}
+				store.mutations.step.renumber();
+				if (opts.doLayout) {
+					store.mutations.page.layout({page: destStep.parent});
+				}
+			}
+		},
 		csi: {
 			add(opts) { // opts: {parent}
 				return store.mutations.item.add({item: {
@@ -749,6 +790,19 @@ const store = {
 					}, parent: submodelImage});
 				}
 				return submodelImage;
+			},
+			delete(opts) {  // opts: {submodelImage, doLayout}
+				const submodelImage = store.get.lookupToItem(opts.submodelImage);
+				if (submodelImage.csiID != null) {
+					store.mutations.item.delete({item: store.get.csi(submodelImage.csiID)});
+				}
+				if (submodelImage.quantityLabelID != null) {
+					store.mutations.item.delete({item: {type: 'quantityLabel', id: submodelImage.quantityLabelID}});
+				}
+				store.mutations.item.delete({item: submodelImage});
+				if (opts.doLayout) {
+					store.mutations.page.layout({page: store.get.pageForItem(submodelImage)});
+				}
 			}
 		},
 		annotation: {
@@ -862,7 +916,7 @@ const store = {
 			renumber(step) {
 				step = store.get.lookupToItem(step);
 				let stepList;
-				if (step.parent.type === 'step' || step.parent.type === 'callout') {
+				if (step && (step.parent.type === 'step' || step.parent.type === 'callout')) {
 					// Renumber steps in target callout / parent step
 					const parent = store.get.parent(step);
 					stepList = parent.steps.map(store.get.step);
@@ -997,7 +1051,12 @@ const store = {
 			addStep(opts) {  // opts: {callout, doLayout = false}
 				const callout = store.get.lookupToItem(opts.callout);
 				const stepNumber = callout.steps.length > 0 ? callout.steps.length + 1 : null;
-				store.mutations.step.add({dest: callout, stepNumber});
+				const newStep = store.mutations.step.add({dest: callout, stepNumber});
+				if (callout.steps.length > 1) {
+					newStep.model = _.clone(store.get.step(callout.steps[0])).model;
+				} else {
+					newStep.model = _.clone(store.get.step(callout.parent));
+				}
 				if (stepNumber === 2) {  // Special case: callouts with one step have no step numbers; turn on step numbers when adding a 2nd step
 					const firstStep = store.get.step(callout.steps[0]);
 					firstStep.number = 1;

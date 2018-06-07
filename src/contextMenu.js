@@ -294,17 +294,6 @@ const contextMenu = {
 				app.redrawUI(true);
 			}
 		},
-		// {
-		// 	text: 'Convert to Callout (NYI)',
-		// 	shown(selectedItem) {
-		// 		const step = store.get.lookupToItem(selectedItem);
-		// 		return !_.isEmpty(step.submodel);
-		// 	},
-		// 	cb() {
-		// 		// const step = store.get.lookupToItem(selectedItem);
-		// 		// undoStack.commit('convertSubmodelToCallout', step, 'Convert to Callout');
-		// 	}
-		// },
 		{
 			text: 'Move Step to',
 			children: [
@@ -739,6 +728,29 @@ const contextMenu = {
 		}
 	],
 	divider: [],
+	submodel: [
+		{
+			text: 'Convert to Callout',
+			shown(selectedItem) {
+				// Only allow submodel -> callout conversion if submodel contains no submodels
+				const submodel = LDParse.model.get.part(selectedItem.filename);
+				for (let i = 0; i < submodel.parts.length; i++) {
+					if (LDParse.model.isSubmodel(submodel.parts[i].filename)) {
+						return false;
+					}
+				}
+				return true;
+			},
+			cb(selectedItem) {
+				const step = store.get.step(selectedItem.stepID);
+				const destStep = {type: 'step', id: step.model.parentStepID};
+				const opts = {modelFilename: selectedItem.filename, destStep, doLayout: true};
+				undoStack.commit('submodel.convertToCallout', opts, this.text);
+				app.setCurrentPage(store.get.pageForItem(destStep));
+				app.redrawUI(true);
+			}
+		}
+	],
 	part: [
 		{
 			text: 'Displace Part...',
@@ -948,5 +960,8 @@ module.exports = function ContextMenu(entry, localApp) {
 		}
 		return menuEntry;
 	});
-	return menu;
+	if (menu) {
+		menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above
+		return menu;
+	}
 };
