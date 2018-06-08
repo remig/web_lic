@@ -126,10 +126,10 @@ const fontTemplatePanel = {
 		};
 	},
 	methods: {
-		init(entry, app) {
-			const template = store.get.templateForItem(entry);
+		init(item, app) {
+			const template = store.get.templateForItem(item);
 			const fontParts = _.fontToFontParts(template.font);
-			this.templateItem = _.clone(entry);
+			this.templateItem = _.clone(item);
 			this.family = fontParts.fontFamily;
 			this.addCustomFont(fontParts.fontFamily);
 			this.size = parseInt(fontParts.fontSize, 10);
@@ -223,12 +223,12 @@ function rotateTemplatePanel() {
 			};
 		},
 		methods: {
-			init(entry) {
-				const rotation = store.get.templateForItem(entry).rotation;
+			init(item) {
+				const rotation = store.get.templateForItem(item).rotation;
 				this.x = rotation.x;
 				this.y = rotation.y;
 				this.z = rotation.z;
-				this.templateItem = _.clone(entry);
+				this.templateItem = _.clone(item);
 			},
 			apply() {
 				// TODO: this works, but can be really slow for big instruction books:
@@ -266,9 +266,9 @@ const csiTemplatePanel = {
 		borderTemplatePanel: borderTemplatePanel('step.csi.displacementArrow')
 	},
 	methods: {
-		init(entry) {
-			this.templateItem = _.clone(entry);
-			this.$refs.rotateTemplatePanel.init(entry);
+		init(item) {
+			this.templateItem = _.clone(item);
+			this.$refs.rotateTemplatePanel.init(item);
 		},
 		apply() {
 			this.$refs.rotateTemplatePanel.apply();
@@ -374,11 +374,9 @@ const rotateIconTemplatePanel = {
 	}
 };
 
-// TODO: need to be able to select the CSI inside submodel image
-// TODO: rename 'entry' to 'selectedItem', to match naming in all other components
 Vue.component('templatePanel', {
 	template: '#templatePanel',
-	props: ['entry', 'app'],
+	props: ['selectedItem', 'app'],
 	components: {
 		templatePage: pageTemplatePanel,
 		csi: csiTemplatePanel,
@@ -396,7 +394,7 @@ Vue.component('templatePanel', {
 		return {lastEdit: ''};
 	},
 	watch: {
-		entry() {
+		selectedItem() {
 			this.applyChanges();
 		}
 	},
@@ -419,14 +417,14 @@ Vue.component('templatePanel', {
 	},
 	computed: {
 		currentTemplatePanel: function() {
-			const templateName = this.entry ? this.entry.type : null;
+			const templateName = this.selectedItem ? this.selectedItem.type : null;
 			if (templateName && templateName in this.$options.components) {
 				Vue.nextTick(() => {
 					if (typeof this.$refs.currentTemplatePanel.init === 'function') {
-						this.$refs.currentTemplatePanel.init(this.entry, this.app);
+						this.$refs.currentTemplatePanel.init(this.selectedItem, this.app);
 					}
 				});
-				return this.entry.type;
+				return this.selectedItem.type;
 			}
 			return null;
 		}

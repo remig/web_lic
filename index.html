@@ -45,7 +45,7 @@
 
 			<div id="rightPane" class="split split-horizontal">
 				<page-canvas-view ref="pageView" :app="this" :selected-item="selectedItemLookup" :current-page-lookup="currentPageLookup"></page-canvas-view>
-				<template-panel id="templatePanel" :app="this" :entry="selectedItemLookup" v-if="currentPageLookup && currentPageLookup.type === 'templatePage'"></template-panel>
+				<template-panel id="templatePanel" :app="this" :selected-item="selectedItemLookup" v-if="currentPageLookup && currentPageLookup.type === 'templatePage'"></template-panel>
 			</div>
 
 		</div>
@@ -605,7 +605,7 @@
 
 	<script type="text/x-template" id="templatePanel">
 		<div @click.stop="" class="container">
-			<h4>{{entry ? entry.type : 'Select a Page Item' | prettyPrint}}</h4>
+			<h4>{{selectedItem ? selectedItem.type : 'Select a Page Item' | prettyPrint}}</h4>
 			<div class="panel-group">
 				<component :is="currentTemplatePanel" ref="currentTemplatePanel" v-on:new-values="newValues"></component>
 			</div>
