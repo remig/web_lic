@@ -87,9 +87,7 @@ Vue.component('pageCanvasView', {
 			if (dx === 0 && dy === 0) {
 				return;
 			}
-			// TODO: Prevent dragging items off the page canvas
 			// TODO: Some items can't be dragged about freely, like callout arrow base points
-			// TODO: Try drawing callout arrows so that the tip is always anchored relative to the CSI, so that moving the callout or CSI doesn't reposition the tip
 			// TODO: Update parent bounding boxes for children like PLI, CSI, etc
 			store.mutations.item.reposition({item: this.mouseDragItem.item, dx, dy});
 			this.mouseDragItem.x = e.offsetX;

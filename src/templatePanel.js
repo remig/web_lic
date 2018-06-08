@@ -231,12 +231,10 @@ function rotateTemplatePanel() {
 				this.templateItem = _.clone(item);
 			},
 			apply() {
-				// TODO: this works, but can be really slow for big instruction books:
-				// redoing every page layout means measuring (and re-rendering) every rendered image again...
-				// Consider simply setting page.needsLayout on each page; fully test that with undo / redo
-				const text = `Change ${_.prettyPrint(this.templateItem.type)} Template`;
 				store.state[this.templateItem.type + 's'].forEach(item => (item.isDirty = true));
-				undoStack.commit('page.layoutAllPages', null, text, [this.templateItem.type]);
+				store.state.pages.forEach(page => (page.needsLayout = true));
+				const text = `Change ${_.prettyPrint(this.templateItem.type)} Template`;
+				undoStack.commit('', null, text, [this.templateItem.type]);
 			},
 			updateValues() {
 				const template = store.get.templateForItem(this.templateItem).rotation;
@@ -295,30 +293,22 @@ const pliTemplatePanel = {
 		borderTemplatePanel: borderTemplatePanel('pli')
 	},
 	methods: {
-		apply() {
-			// TODO: this works, but can be really slow for big instruction books:
-			// redoing every page layout means measuring (and re-rendering) every rendered image again...
-			// Consider simply setting page.needsLayout on each page; fully test that with undo / redo
-			undoStack.commit('page.layoutAllPages', null, 'Change PLI Template');
-		},
 		newValues() {
-			this.$emit('new-values', 'PLI');
+			this.$emit('new-values', {type: 'PLI', layoutAllPages: true});
 		},
 		updateValues() {
 			const template = store.state.template.pli;
 			if (this.includeSubmodels !== template.includeSubmodels) {
 				template.includeSubmodels = this.includeSubmodels;
 				store.state.templatePage.needsLayout = true;
-				this.$emit('new-values', 'Page');
+				this.$emit('new-values', {type: 'PLI', layoutAllPages: true});
 			}
 		}
 	}
 };
 
 // TODO: add default page layout UI
-// TODO: when resizing the default page, need to redo layout of all other pages
-// TODO: should also add UI to choose whether to redo layout or just extend canvas
-// TODO: when page resizes, page highlight resizes correctly but does not reposition
+// TODO: should add UI to choose whether to redo layout or just extend canvas
 const pageTemplatePanel = {
 	template: '#pageTemplatePanel',
 	data() {
@@ -340,7 +330,8 @@ const pageTemplatePanel = {
 			this.updateValues();
 		},
 		newValues() {
-			this.$emit('new-values', 'Page');
+			store.state.templatePage.needsLayout = true;
+			this.$emit('new-values', {type: 'Page', layoutAllPages: true});
 		},
 		updateValues() {
 			const template = store.state.template.page;
@@ -355,7 +346,7 @@ const pageTemplatePanel = {
 				template.width = this.width;
 				template.height = this.height;
 				store.state.templatePage.needsLayout = true;
-				this.$emit('new-values', 'Page');
+				this.$emit('new-values', {type: 'Page', layoutAllPages: true});
 			}
 		}
 	}
@@ -383,7 +374,7 @@ const pageNumberTemplatePanel = {
 			this.newValues();
 		},
 		newValues() {
-			this.$emit('new-values', 'Page Number');
+			this.$emit('new-values', {type: 'Page Number', layoutAllPages: true});
 		}
 	}
 };
@@ -422,7 +413,7 @@ Vue.component('templatePanel', {
 	template: '#templatePanel',
 	props: ['selectedItem', 'app'],
 	data() {
-		return {lastEdit: ''};
+		return {lastEdit: null};
 	},
 	watch: {
 		selectedItem() {
@@ -430,8 +421,8 @@ Vue.component('templatePanel', {
 		}
 	},
 	methods: {
-		newValues(type) {
-			this.lastEdit = type;
+		newValues(opts) {
+			this.lastEdit = (typeof opts === 'string') ? {type: opts} : opts;
 			this.app.redrawUI(false);
 		},
 		applyChanges() {
@@ -439,10 +430,13 @@ Vue.component('templatePanel', {
 				if (typeof this.$refs.currentTemplatePanel.apply === 'function') {
 					this.$refs.currentTemplatePanel.apply();
 				} else {
-					undoStack.commit('', null, `Change ${this.lastEdit} Template`);
+					if (this.lastEdit.layoutAllPages) {
+						store.state.pages.forEach(page => (page.needsLayout = true));
+					}
+					undoStack.commit('', null, `Change ${this.lastEdit.type} Template`);
 				}
 				this.app.redrawUI(false);
-				this.lastEdit = '';
+				this.lastEdit = null;
 			}
 		}
 	},

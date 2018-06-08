@@ -9,6 +9,7 @@ div#container {
 	height: 100%;
 }
 
+/* TODO: if nav tree is too narrow, menu entries wrap; should put up scroll bar instead */
 /* TODO: Add checkbox to 'selected' menu entries, like the currently selected view entry */
 
 /* Overwrite Bootstrap stuff */
