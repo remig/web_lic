@@ -73,33 +73,6 @@ const api = {
 		ctx.restore();
 	},
 
-	annotation(annotation, ctx) {
-		switch (annotation.annotationType) {
-			case 'label': {
-				ctx.fillStyle = annotation.color || 'black';
-				ctx.font = annotation.font || 'bold 20pt Helvetica';
-				ctx.fillText(annotation.text, annotation.x, annotation.y + annotation.height);
-				break;
-			}
-			case 'image': {
-				const cachedImage = store.cache.get(annotation, 'rawImage');
-				if (cachedImage) {
-					ctx.drawImage(cachedImage, Math.floor(annotation.x), Math.floor(annotation.y));
-				} else {
-					const image = new Image();
-					image.onload = function() {
-						annotation.width = this.width;
-						annotation.height = this.height;
-						ctx.drawImage(image, Math.floor(annotation.x), Math.floor(annotation.y));
-						store.cache.set(annotation, 'rawImage', image);
-					};
-					image.src = annotation.src;
-				}
-				break;
-			}
-		}
-	},
-
 	// TODO: Add support for a quantity label to a step. Useful on the last step of a submodel build many times.
 	step(step, ctx, scale = 1, selectedPart) {
 
@@ -426,6 +399,33 @@ const api = {
 			ctx.restore();
 		};
 	})(),
+
+	annotation(annotation, ctx) {
+		switch (annotation.annotationType) {
+			case 'label': {
+				ctx.fillStyle = annotation.color || 'black';
+				ctx.font = annotation.font || 'bold 20pt Helvetica';
+				ctx.fillText(annotation.text, annotation.x, annotation.y + annotation.height);
+				break;
+			}
+			case 'image': {
+				const cachedImage = store.cache.get(annotation, 'rawImage');
+				if (cachedImage) {
+					ctx.drawImage(cachedImage, Math.floor(annotation.x), Math.floor(annotation.y));
+				} else {
+					const image = new Image();
+					image.onload = function() {
+						annotation.width = this.width;
+						annotation.height = this.height;
+						ctx.drawImage(image, Math.floor(annotation.x), Math.floor(annotation.y));
+						store.cache.set(annotation, 'rawImage', image);
+					};
+					image.src = annotation.src;
+				}
+				break;
+			}
+		}
+	},
 
 	dividers(dividerList, ctx) {
 		const template = store.state.template.divider.border;

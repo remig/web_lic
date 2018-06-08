@@ -9,289 +9,31 @@ const rotateIconAspectRatio = 0.94; // height / width
 
 const api = {
 
-	callout(callout, box) {
-		// TODO: add horizontal / vertical layout options to callout
-		const margin = getMargin(store.state.template.callout.innerMargin);
-		const calloutBox = {x: box.x, y: box.y, width: 0, height: margin};
-
-		if (_.isEmpty(callout.steps)) {
-			calloutBox.width = calloutBox.height = emptyCalloutSize;
-		} else {
-			const stepSizes = callout.steps.map(stepID => {
-				const step = store.get.step(stepID);
-				return {step, ...measureStep(step)};
-			});
-			const widestStep = Math.max(...stepSizes.map(el => el.width));
-			const stepBox = {x: margin, y: margin, width: widestStep, height: null};
-			calloutBox.width = margin + widestStep + margin;
-
-			stepSizes.forEach(entry => {
-				if (stepBox.y + entry.height + margin > box.height) {
-					// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
-					stepBox.y = margin;
-					stepBox.x += widestStep + margin;
-					calloutBox.width += widestStep + margin;
-				}
-				stepBox.height = entry.height + margin;
-				api.step(entry.step, stepBox, 0);
-				stepBox.y += stepBox.height + margin;
-				calloutBox.height = Math.max(calloutBox.height, stepBox.y);
-			});
-		}
-		_.copy(callout, calloutBox);
-		callout.y = box.y + ((box.height - callout.height) / 2);  // Center callout vertically
-		api.calloutArrow(callout);
-	},
-	calloutArrow(callout) {
-		// TODO: consider adding a full automatic 'stairstep' callout arrow, which maintains orthogonal segments regardless of anchor or tip movement.
-
-		// Delete all but first callout arrow
-		while (callout.calloutArrows.length > 1) {
-			store.mutations.item.delete({item: {type: 'calloutArrow', id: callout.calloutArrows[1]}});
-		}
-
-		// Delete all but first & last point in first arrow
-		const arrow = store.get.calloutArrow(callout.calloutArrows[0]);
-		while (arrow.points.length > 2) {
-			store.mutations.item.delete({item: {type: 'point', id: arrow.points[1]}});
-		}
-
-		// Coordinates for first point (base) are relative to the *callout*
-		const p1 = store.get.point(arrow.points[0]);
-		const h = callout.height;
-		p1.x = callout.width;
-		p1.y = h - (h / (callout.steps.length || 1) / 2);
-
-		// Coordinates for last point (tip) are relative to the *CSI*
-		// TODO: try to position arrow tip centered to inserted part bounding box instead of overall CSI box
-		const step = store.get.step(callout.parent.id);
-		const csi = store.get.csi(step.csiID);
-		const p2 = store.get.point(arrow.points[1]);
-		p2.relativeTo = {type: 'csi', id: csi.id};
-		p2.x = 0;
-		p2.y = csi ? csi.height / 2 : 50;
-	},
-	pli(pli) {
-
-		let pliItems = pli.pliItems;
-		if (!store.state.template.pli.includeSubmodels) {
-			pliItems = pliItems.filter(id => {
-				return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
-			});
-		}
-
-		pli.borderOffset.x = pli.borderOffset.y = 0;
-		if (_.isEmpty(pliItems)) {
-			pli.x = pli.y = pli.width = pli.height = 0;
-			return;
-		}
-
-		const step = store.get.step(pli.parent.id);
-		const localModel = LDParse.model.get.part(step.model.filename);
-		const qtyLabelOffset = 5;
-		const margin = getMargin(store.state.template.pli.innerMargin);
-		let maxHeight = 0, left = margin + qtyLabelOffset;
-
-		//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
-		for (let i = 0; i < pliItems.length; i++) {
-
-			const pliItem = store.get.pliItem(pliItems[i]);
-			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem);
-			pliItem.x = left;
-			pliItem.y = margin;
-			pliItem.width = pliSize.width;
-			pliItem.height = pliSize.height;
-
-			const font = store.state.template.pliItem.quantityLabel.font;
-			const lblSize = _.measureLabel(font, 'x' + pliItem.quantity);
-			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-			quantityLabel.x = -qtyLabelOffset;
-			quantityLabel.y = pliSize.height - qtyLabelOffset;
-			quantityLabel.width = lblSize.width;
-			quantityLabel.height = lblSize.height;
-
-			left += pliSize.width + margin;
-			maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + quantityLabel.height);
-		}
-
-		pli.x = pli.y = 0;
-		pli.width = left;
-		pli.height = margin + maxHeight + margin;
-	},
-	csi(csi, box) {
-		// Draw CSI centered in box
-		const step = store.get.parent(csi);
-		const localModel = LDParse.model.get.part(step.model.filename);
-		const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
-		csi.x = box.x + ((box.width - csiSize.width) / 2);
-		csi.y = box.y + ((box.height - csiSize.height) / 2);
-		csi.width = csiSize.width;
-		csi.height = csiSize.height;
-	},
-	submodelImage(submodelImage, box) {
-
-		// TODO: if submodel image is too big, shrink it
-		const csi = store.get.csi(submodelImage.csiID);
-		const part = LDParse.model.get.part(submodelImage.modelFilename);
-		const csiSize = store.render.pli(part, csi);
-		const margin = getMargin(store.state.template.submodelImage.innerMargin);
-
-		csi.x = csi.y = margin;
-		csi.width = csiSize.width;
-		csi.height = csiSize.height;
-
-		submodelImage.x = box.x;
-		submodelImage.y = box.y;
-		submodelImage.width = margin + csiSize.width + margin;
-		submodelImage.height = margin + csiSize.height + margin;
-
-		if (submodelImage.quantityLabelID != null) {
-			const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
-			const font = store.state.template.submodelImage.quantityLabel.font;
-			const lblSize = _.measureLabel(font, 'x' + submodelImage.quantity);
-			submodelImage.width += lblSize.width + margin;
-			lbl.x = submodelImage.x + submodelImage.width - margin;
-			lbl.y = submodelImage.y + submodelImage.height - margin;
-			lbl.width = lblSize.width;
-			lbl.height = lblSize.height;
-		}
-	},
-	subSteps(step, stepBox) {
-		// TODO: this dupes a lot of logic from page.layout; abstract both to a generic 'grid' layout call
-		const stepCount = step.steps.length;
-		let cols = Math.ceil(Math.sqrt(stepCount));
-		let rows = Math.ceil(stepCount / cols);
-		const layout = step.subStepLayout;
-		if (layout === 'vertical') {
-			[cols, rows] = [rows, cols];
-		}
-		const colSize = Math.floor(stepBox.width / cols);
-		const rowSize = Math.floor(stepBox.height / rows);
-
-		const box = {x: stepBox.x, y: stepBox.y, width: colSize, height: rowSize};
-
-		for (let i = 0; i < stepCount; i++) {
-			if (layout === 'vertical') {
-				box.x = stepBox.x + (colSize * Math.floor(i / rows));
-				box.y = stepBox.y + (rowSize * (i % rows));
-			} else {
-				box.x = stepBox.x + (colSize * (i % cols));
-				box.y = stepBox.y + (rowSize * Math.floor(i / cols));
-			}
-			api.step(store.get.step(step.steps[i]), box);
-		}
-		api.dividers(step, step.subStepLayout, rows, cols, stepBox);
-	},
-	step(step, box, pageMargin) {  // Starting with a pre-defined box, layout everything in this step inside it
-
-		pageMargin = (pageMargin == null) ? getMargin(store.state.template.page.innerMargin) : pageMargin;
-		const margin = getMargin(store.state.template.step.innerMargin);
-
-		// Position step in parent coordinates
-		step.x = box.x + pageMargin;
-		step.y = box.y + pageMargin;
-		step.width = box.width - pageMargin - pageMargin;
-		step.height = box.height - pageMargin - pageMargin;
-
-		// transform box to step coordinates
-		box = _.clone(box);
-		box.x = box.y = 0;
-		box.width = step.width;
-		box.height = step.height;
-
-		(step.submodelImages || []).forEach(submodelImageID => {
-			const submodelImage = store.get.submodelImage(submodelImageID);
-			if (submodelImage) {
-				api.submodelImage(submodelImage, box);
-				_.geom.moveBoxEdge(box, 'top', submodelImage.height + margin);
-			}
-		});
-
-		const pli = (step.pliID != null && store.state.plisVisible) ? store.get.pli(step.pliID) : null;
-		if (pli) {
-			api.pli(pli);
-			pli.y = box.y;
-			_.geom.moveBoxEdge(box, 'top', pli.height + margin);
-		}
-
-		if (step.numberLabelID != null) {
-			const lblSize = _.measureLabel(store.state.template.step.numberLabel.font, step.number);
-			const lbl = store.get.numberLabel(step.numberLabelID);
-			lbl.x = 0;
-			lbl.y = box.y;
-			lbl.width = lblSize.width;
-			lbl.height = lblSize.height;
-			_.geom.moveBoxEdge(box, 'top', lbl.height + margin);
-		}
-
-		(step.callouts || []).forEach(calloutID => {
-			const callout = store.get.callout(calloutID);
-			api.callout(callout, box);
-			_.geom.moveBoxEdge(box, 'left', callout.width + margin);
-		});
-
-		if (step.csiID == null && step.steps.length) {
-			api.subSteps(step, box);
-		} else if (step.csiID != null) {
-			api.csi(store.get.csi(step.csiID), box);
-		}
-
-		if (step.rotateIconID != null && step.csiID != null) {
-			const csi = store.get.csi(step.csiID);
-			const icon = store.get.rotateIcon(step.rotateIconID);
-			icon.width = store.state.template.rotateIcon.size;
-			icon.height = icon.width * rotateIconAspectRatio;
-			icon.x = csi.x - icon.width - margin;
-			icon.y = csi.y - icon.height;
-		}
-	},
-	templatePageDividers(page) {
-		const template = store.state.template.page;
-		const margin = getMargin(store.state.template.page.innerMargin);
+	titlePage(page) {
+		page = store.get.lookupToItem(page);
+		const pageSize = store.state.template.page;
 		const step = store.get.step(page.steps[0]);
 		const csi = store.get.csi(step.csiID);
-		const x = csi.x + csi.width + (margin * 5);
-		store.mutations.divider.add({
-			parent: page,
-			p1: {x, y: margin},
-			p2: {x, y: template.height - margin}
-		});
+		const box = {x: 0, y: 0, width: pageSize.width, height: pageSize.height};
+		store.mutations.step.layout({step, box});
+		step.width = csi.width + 40;
+		step.height = csi.height + 40;
+		step.x = (pageSize.width - step.width) / 2;
+		step.y = (pageSize.height - step.height) / 2;
+		csi.x = csi.y = 20;
+
+		const title = store.get.annotation(page.annotations[0]);
+		api.label(title);
+		title.x = (pageSize.width - title.width) / 2;
+		title.y = (step.y - title.height) / 2;
+
+		const modelInfo = store.get.annotation(page.annotations[1]);
+		api.label(modelInfo);
+		modelInfo.x = (pageSize.width - modelInfo.width) / 2;
+		modelInfo.y = ((step.y - modelInfo.height) / 2) + step.y + step.height;
+		delete page.needsLayout;
 	},
-	dividers(target, layoutDirection, rows, cols, box) {
 
-		// Delete any dividers already on the target, then re-add new ones in the right places
-		target.dividers = target.dividers || [];
-		store.mutations.item.deleteChildList({item: target, listType: 'divider'});
-
-		if (target.type === 'templatePage') {
-			api.templatePageDividers(target);
-			return;
-		}
-
-		const x = box.x || 0, y = box.y || 0;
-		const template = store.state.template;
-		const margin = getMargin(template[target.type].innerMargin);
-		const colSize = Math.floor(box.width / cols);
-		const rowSize = Math.floor(box.height / rows);
-
-		if (layoutDirection === 'horizontal') {
-			for (let i = 1; i < rows; i++) {
-				store.mutations.divider.add({
-					parent: target,
-					p1: {x: x + margin, y: y + (rowSize * i)},
-					p2: {x: x + box.width - margin, y: y + (rowSize * i)}
-				});
-			}
-		} else {
-			for (let i = 1; i < cols; i++) {
-				store.mutations.divider.add({
-					parent: target,
-					p1: {x: x + (colSize * i), y: y + margin},
-					p2: {x: x + (colSize * i), y: y + box.height - margin}
-				});
-			}
-		}
-	},
 	page(page, layout = 'horizontal') {
 
 		if (page.type === 'titlePage') {
@@ -374,35 +116,304 @@ const api = {
 		}
 		delete page.needsLayout;
 	},
-	titlePage(page) {
-		page = store.get.lookupToItem(page);
-		const pageSize = store.state.template.page;
+
+	step(step, box, pageMargin) {  // Starting with a pre-defined box, layout everything in this step inside it
+		pageMargin = (pageMargin == null) ? getMargin(store.state.template.page.innerMargin) : pageMargin;
+		const margin = getMargin(store.state.template.step.innerMargin);
+
+		// Position step in parent coordinates
+		step.x = box.x + pageMargin;
+		step.y = box.y + pageMargin;
+		step.width = box.width - pageMargin - pageMargin;
+		step.height = box.height - pageMargin - pageMargin;
+
+		// transform box to step coordinates
+		box = _.clone(box);
+		box.x = box.y = 0;
+		box.width = step.width;
+		box.height = step.height;
+
+		(step.submodelImages || []).forEach(submodelImageID => {
+			const submodelImage = store.get.submodelImage(submodelImageID);
+			if (submodelImage) {
+				api.submodelImage(submodelImage, box);
+				_.geom.moveBoxEdge(box, 'top', submodelImage.height + margin);
+			}
+		});
+
+		const pli = (step.pliID != null && store.state.plisVisible) ? store.get.pli(step.pliID) : null;
+		if (pli) {
+			api.pli(pli);
+			pli.y = box.y;
+			_.geom.moveBoxEdge(box, 'top', pli.height + margin);
+		}
+
+		if (step.numberLabelID != null) {
+			const lblSize = _.measureLabel(store.state.template.step.numberLabel.font, step.number);
+			const lbl = store.get.numberLabel(step.numberLabelID);
+			lbl.x = 0;
+			lbl.y = box.y;
+			lbl.width = lblSize.width;
+			lbl.height = lblSize.height;
+			_.geom.moveBoxEdge(box, 'top', lbl.height + margin);
+		}
+
+		(step.callouts || []).forEach(calloutID => {
+			const callout = store.get.callout(calloutID);
+			api.callout(callout, box);
+			_.geom.moveBoxEdge(box, 'left', callout.width + margin);
+		});
+
+		if (step.csiID == null && step.steps.length) {
+			api.subSteps(step, box);
+		} else if (step.csiID != null) {
+			api.csi(store.get.csi(step.csiID), box);
+		}
+
+		if (step.rotateIconID != null && step.csiID != null) {
+			const csi = store.get.csi(step.csiID);
+			const icon = store.get.rotateIcon(step.rotateIconID);
+			icon.width = store.state.template.rotateIcon.size;
+			icon.height = icon.width * rotateIconAspectRatio;
+			icon.x = csi.x - icon.width - margin;
+			icon.y = csi.y - icon.height;
+		}
+	},
+
+	submodelImage(submodelImage, box) {
+
+		// TODO: if submodel image is too big, shrink it
+		const csi = store.get.csi(submodelImage.csiID);
+		const part = LDParse.model.get.part(submodelImage.modelFilename);
+		const csiSize = store.render.pli(part, csi);
+		const margin = getMargin(store.state.template.submodelImage.innerMargin);
+
+		csi.x = csi.y = margin;
+		csi.width = csiSize.width;
+		csi.height = csiSize.height;
+
+		submodelImage.x = box.x;
+		submodelImage.y = box.y;
+		submodelImage.width = margin + csiSize.width + margin;
+		submodelImage.height = margin + csiSize.height + margin;
+
+		if (submodelImage.quantityLabelID != null) {
+			const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
+			const font = store.state.template.submodelImage.quantityLabel.font;
+			const lblSize = _.measureLabel(font, 'x' + submodelImage.quantity);
+			submodelImage.width += lblSize.width + margin;
+			lbl.x = submodelImage.x + submodelImage.width - margin;
+			lbl.y = submodelImage.y + submodelImage.height - margin;
+			lbl.width = lblSize.width;
+			lbl.height = lblSize.height;
+		}
+	},
+
+	csi(csi, box) {
+		// Draw CSI centered in box
+		const step = store.get.parent(csi);
+		const localModel = LDParse.model.get.part(step.model.filename);
+		const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
+		csi.x = box.x + ((box.width - csiSize.width) / 2);
+		csi.y = box.y + ((box.height - csiSize.height) / 2);
+		csi.width = csiSize.width;
+		csi.height = csiSize.height;
+	},
+
+	pli(pli) {
+
+		let pliItems = pli.pliItems;
+		if (!store.state.template.pli.includeSubmodels) {
+			pliItems = pliItems.filter(id => {
+				return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
+			});
+		}
+
+		pli.borderOffset.x = pli.borderOffset.y = 0;
+		if (_.isEmpty(pliItems)) {
+			pli.x = pli.y = pli.width = pli.height = 0;
+			return;
+		}
+
+		const step = store.get.step(pli.parent.id);
+		const localModel = LDParse.model.get.part(step.model.filename);
+		const qtyLabelOffset = 5;
+		const margin = getMargin(store.state.template.pli.innerMargin);
+		let maxHeight = 0, left = margin + qtyLabelOffset;
+
+		//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
+		for (let i = 0; i < pliItems.length; i++) {
+
+			const pliItem = store.get.pliItem(pliItems[i]);
+			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem);
+			pliItem.x = left;
+			pliItem.y = margin;
+			pliItem.width = pliSize.width;
+			pliItem.height = pliSize.height;
+
+			const font = store.state.template.pliItem.quantityLabel.font;
+			const lblSize = _.measureLabel(font, 'x' + pliItem.quantity);
+			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+			quantityLabel.x = -qtyLabelOffset;
+			quantityLabel.y = pliSize.height - qtyLabelOffset;
+			quantityLabel.width = lblSize.width;
+			quantityLabel.height = lblSize.height;
+
+			left += pliSize.width + margin;
+			maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + quantityLabel.height);
+		}
+
+		pli.x = pli.y = 0;
+		pli.width = left;
+		pli.height = margin + maxHeight + margin;
+	},
+
+	callout(callout, box) {
+		// TODO: add horizontal / vertical layout options to callout
+		const margin = getMargin(store.state.template.callout.innerMargin);
+		const calloutBox = {x: box.x, y: box.y, width: 0, height: margin};
+
+		if (_.isEmpty(callout.steps)) {
+			calloutBox.width = calloutBox.height = emptyCalloutSize;
+		} else {
+			const stepSizes = callout.steps.map(stepID => {
+				const step = store.get.step(stepID);
+				return {step, ...measureStep(step)};
+			});
+			const widestStep = Math.max(...stepSizes.map(el => el.width));
+			const stepBox = {x: margin, y: margin, width: widestStep, height: null};
+			calloutBox.width = margin + widestStep + margin;
+
+			stepSizes.forEach(entry => {
+				if (stepBox.y + entry.height + margin > box.height) {
+					// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
+					stepBox.y = margin;
+					stepBox.x += widestStep + margin;
+					calloutBox.width += widestStep + margin;
+				}
+				stepBox.height = entry.height + margin;
+				api.step(entry.step, stepBox, 0);
+				stepBox.y += stepBox.height + margin;
+				calloutBox.height = Math.max(calloutBox.height, stepBox.y);
+			});
+		}
+		_.copy(callout, calloutBox);
+		callout.y = box.y + ((box.height - callout.height) / 2);  // Center callout vertically
+		api.calloutArrow(callout);
+	},
+
+	calloutArrow(callout) {
+		// TODO: consider adding a full automatic 'stairstep' callout arrow, which maintains orthogonal segments regardless of anchor or tip movement.
+
+		// Delete all but first callout arrow
+		while (callout.calloutArrows.length > 1) {
+			store.mutations.item.delete({item: {type: 'calloutArrow', id: callout.calloutArrows[1]}});
+		}
+
+		// Delete all but first & last point in first arrow
+		const arrow = store.get.calloutArrow(callout.calloutArrows[0]);
+		while (arrow.points.length > 2) {
+			store.mutations.item.delete({item: {type: 'point', id: arrow.points[1]}});
+		}
+
+		// Coordinates for first point (base) are relative to the *callout*
+		const p1 = store.get.point(arrow.points[0]);
+		const h = callout.height;
+		p1.x = callout.width;
+		p1.y = h - (h / (callout.steps.length || 1) / 2);
+
+		// Coordinates for last point (tip) are relative to the *CSI*
+		// TODO: try to position arrow tip centered to inserted part bounding box instead of overall CSI box
+		const step = store.get.step(callout.parent.id);
+		const csi = store.get.csi(step.csiID);
+		const p2 = store.get.point(arrow.points[1]);
+		p2.relativeTo = {type: 'csi', id: csi.id};
+		p2.x = 0;
+		p2.y = csi ? csi.height / 2 : 50;
+	},
+
+	subSteps(step, stepBox) {
+		// TODO: this dupes a lot of logic from page.layout; abstract both to a generic 'grid' layout call
+		const stepCount = step.steps.length;
+		let cols = Math.ceil(Math.sqrt(stepCount));
+		let rows = Math.ceil(stepCount / cols);
+		const layout = step.subStepLayout;
+		if (layout === 'vertical') {
+			[cols, rows] = [rows, cols];
+		}
+		const colSize = Math.floor(stepBox.width / cols);
+		const rowSize = Math.floor(stepBox.height / rows);
+
+		const box = {x: stepBox.x, y: stepBox.y, width: colSize, height: rowSize};
+
+		for (let i = 0; i < stepCount; i++) {
+			if (layout === 'vertical') {
+				box.x = stepBox.x + (colSize * Math.floor(i / rows));
+				box.y = stepBox.y + (rowSize * (i % rows));
+			} else {
+				box.x = stepBox.x + (colSize * (i % cols));
+				box.y = stepBox.y + (rowSize * Math.floor(i / cols));
+			}
+			api.step(store.get.step(step.steps[i]), box);
+		}
+		api.dividers(step, step.subStepLayout, rows, cols, stepBox);
+	},
+
+	templatePageDividers(page) {
+		const template = store.state.template.page;
+		const margin = getMargin(store.state.template.page.innerMargin);
 		const step = store.get.step(page.steps[0]);
 		const csi = store.get.csi(step.csiID);
-		const box = {x: 0, y: 0, width: pageSize.width, height: pageSize.height};
-		store.mutations.step.layout({step, box});
-		step.width = csi.width + 40;
-		step.height = csi.height + 40;
-		step.x = (pageSize.width - step.width) / 2;
-		step.y = (pageSize.height - step.height) / 2;
-		csi.x = csi.y = 20;
-
-		const title = store.get.annotation(page.annotations[0]);
-		api.label(title);
-		title.x = (pageSize.width - title.width) / 2;
-		title.y = (step.y - title.height) / 2;
-
-		const modelInfo = store.get.annotation(page.annotations[1]);
-		api.label(modelInfo);
-		modelInfo.x = (pageSize.width - modelInfo.width) / 2;
-		modelInfo.y = ((step.y - modelInfo.height) / 2) + step.y + step.height;
-		delete page.needsLayout;
+		const x = csi.x + csi.width + (margin * 5);
+		store.mutations.divider.add({
+			parent: page,
+			p1: {x, y: margin},
+			p2: {x, y: template.height - margin}
+		});
 	},
+
+	dividers(target, layoutDirection, rows, cols, box) {
+
+		// Delete any dividers already on the target, then re-add new ones in the right places
+		target.dividers = target.dividers || [];
+		store.mutations.item.deleteChildList({item: target, listType: 'divider'});
+
+		if (target.type === 'templatePage') {
+			api.templatePageDividers(target);
+			return;
+		}
+
+		const x = box.x || 0, y = box.y || 0;
+		const template = store.state.template;
+		const margin = getMargin(template[target.type].innerMargin);
+		const colSize = Math.floor(box.width / cols);
+		const rowSize = Math.floor(box.height / rows);
+
+		if (layoutDirection === 'horizontal') {
+			for (let i = 1; i < rows; i++) {
+				store.mutations.divider.add({
+					parent: target,
+					p1: {x: x + margin, y: y + (rowSize * i)},
+					p2: {x: x + box.width - margin, y: y + (rowSize * i)}
+				});
+			}
+		} else {
+			for (let i = 1; i < cols; i++) {
+				store.mutations.divider.add({
+					parent: target,
+					p1: {x: x + (colSize * i), y: y + margin},
+					p2: {x: x + (colSize * i), y: y + box.height - margin}
+				});
+			}
+		}
+	},
+
 	label(label) {
 		const labelSize = _.measureLabel(label.font, label.text);
 		label.width = labelSize.width;
 		label.height = labelSize.height;
 	},
+
 	mergeSteps(stepsToMerge) {
 		// Starting with one step per page, move adjacent steps to the previous page until the page is full-ish
 		stepsToMerge = stepsToMerge.slice(1);
@@ -425,6 +436,7 @@ const api = {
 			_.removeIndex(stepsToMerge, 0);
 		}
 	},
+
 	adjustBoundingBox: {
 		// csi(item) {
 		// 	const step = store.get.parent(item);
