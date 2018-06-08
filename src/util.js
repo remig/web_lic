@@ -290,6 +290,10 @@ const api = {
 				return 'Rotate Icon';
 			case 'templatepage':
 				return 'Page';
+			case 'even-left':
+				return 'Even Left, Odd Right';
+			case 'even-right':
+				return 'Odd Left, Even Right';
 		}
 		if (s.startsWith('ctrl+')) {
 			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();

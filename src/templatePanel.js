@@ -361,6 +361,33 @@ const pageTemplatePanel = {
 	}
 };
 
+const pageNumberTemplatePanel = {
+	template: '#pageNumberTemplatePanel',
+	data() {
+		return {
+			position: store.state.template.page.numberLabel.position,
+			positions: ['right', 'left', 'even-left', 'even-right']
+		};
+	},
+	components: {
+		fontTemplatePanel: fontTemplatePanel
+	},
+	methods: {
+		init(item, app) {
+			this.templateItem = _.clone(item);
+			this.$refs.fontTemplatePanel.init(item, app);
+		},
+		updatePosition(newPosition) {
+			store.state.template.page.numberLabel.position = this.position = newPosition;
+			store.state.templatePage.needsLayout = true;
+			this.newValues();
+		},
+		newValues() {
+			this.$emit('new-values', 'Page Number');
+		}
+	}
+};
+
 const rotateIconTemplatePanel = {
 	template: '#rotateIconTemplatePanel',
 	components: {
@@ -374,22 +401,26 @@ const rotateIconTemplatePanel = {
 	}
 };
 
+const componentLookup = {
+	templatePage: pageTemplatePanel,
+	csi: csiTemplatePanel,
+	pliItem: rotateTemplatePanel(),
+	pli: pliTemplatePanel,
+	callout: fillAndBorderTemplatePanel('callout'),
+	calloutArrow: borderTemplatePanel('callout.arrow'),
+	submodelImage: fillAndBorderTemplatePanel('submodelImage'),
+	divider: borderTemplatePanel('divider'),
+	rotateIcon: rotateIconTemplatePanel,
+	numberLabel: {
+		templatePage: pageNumberTemplatePanel,
+		default: fontTemplatePanel
+	},
+	quantityLabel: fontTemplatePanel
+};
+
 Vue.component('templatePanel', {
 	template: '#templatePanel',
 	props: ['selectedItem', 'app'],
-	components: {
-		templatePage: pageTemplatePanel,
-		csi: csiTemplatePanel,
-		pliItem: rotateTemplatePanel(),
-		pli: pliTemplatePanel,
-		callout: fillAndBorderTemplatePanel('callout'),
-		calloutArrow: borderTemplatePanel('callout.arrow'),
-		submodelImage: fillAndBorderTemplatePanel('submodelImage'),
-		divider: borderTemplatePanel('divider'),
-		rotateIcon: rotateIconTemplatePanel,
-		numberLabel: fontTemplatePanel,
-		quantityLabel: fontTemplatePanel
-	},
 	data() {
 		return {lastEdit: ''};
 	},
@@ -417,14 +448,23 @@ Vue.component('templatePanel', {
 	},
 	computed: {
 		currentTemplatePanel: function() {
-			const templateName = this.selectedItem ? this.selectedItem.type : null;
-			if (templateName && templateName in this.$options.components) {
+			if (!this.selectedItem) {
+				return null;
+			}
+			const type = this.selectedItem.type;
+			if (type in componentLookup) {
 				Vue.nextTick(() => {
 					if (typeof this.$refs.currentTemplatePanel.init === 'function') {
 						this.$refs.currentTemplatePanel.init(this.selectedItem, this.app);
 					}
 				});
-				return this.selectedItem.type;
+				const parent = store.get.parent(this.selectedItem);
+				if (parent && parent.type in componentLookup[type]) {
+					return componentLookup[type][parent.type];
+				} else if ('default' in componentLookup[type]) {
+					return componentLookup[type].default;
+				}
+				return componentLookup[type];
 			}
 			return null;
 		}
