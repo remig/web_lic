@@ -16,6 +16,9 @@ const api = {
 		}
 		return true;
 	},
+	isEven(n) {
+		return (typeof n === 'number') && isFinite(n) && !(n % 2);
+	},
 	toArray(fakeArray) {
 		return [].slice.apply(fakeArray);
 	},

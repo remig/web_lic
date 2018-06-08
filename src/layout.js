@@ -41,8 +41,33 @@ const api = {
 			return;
 		}
 
-		const pageSize = store.state.template.page;
-		const margin = getMargin(store.state.template.page.innerMargin);
+		const template = store.state.template.page;
+		const pageSize = {width: template.width, height: template.height};
+		const margin = getMargin(template.innerMargin);
+
+		if (page.numberLabelID != null) {
+			const lblSize = _.measureLabel(template.numberLabel.font, page.number);
+			const lbl = store.get.numberLabel(page.numberLabelID);
+			lbl.width = lblSize.width;
+			lbl.height = lblSize.height;
+			lbl.y = pageSize.height - margin;
+
+			let position = template.numberLabel.position;
+			if (position === 'even-left') {
+				position = _.isEven(page.number) ? 'left' : 'right';
+			} else if (position === 'even-right') {
+				position = _.isEven(page.number) ? 'right' : 'left';
+			}
+			if (position === 'left') {
+				lbl.x = margin;
+				lbl.align = 'left';
+			} else {
+				lbl.x = pageSize.width - margin;
+				lbl.align = 'right';
+			}
+			pageSize.height -= lbl.height - (margin / 2);
+		}
+
 		const stepCount = page.steps.length;
 		let cols = Math.ceil(Math.sqrt(stepCount));
 		let rows = Math.ceil(stepCount / cols);
@@ -106,14 +131,6 @@ const api = {
 			alignStepContent(page);
 		}
 
-		if (page.numberLabelID != null) {
-			const lblSize = _.measureLabel(store.state.template.page.numberLabel.font, page.number);
-			const lbl = store.get.numberLabel(page.numberLabelID);
-			lbl.x = pageSize.width - margin;
-			lbl.y = pageSize.height - margin;
-			lbl.width = lblSize.width;
-			lbl.height = lblSize.height;
-		}
 		delete page.needsLayout;
 	},
 
