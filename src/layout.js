@@ -65,7 +65,7 @@ const api = {
 				lbl.x = pageSize.width - margin;
 				lbl.align = 'right';
 			}
-			pageSize.height -= lbl.height - (margin / 2);
+			pageSize.height -= lbl.height + (margin / 2);
 		}
 
 		const stepCount = page.steps.length;
