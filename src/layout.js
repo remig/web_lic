@@ -41,16 +41,24 @@ const api = {
 			return;
 		}
 
+		// TODO: laying out offset by border width is painful.  Instead, calculate a 'innerOffset' (border width),
+		// and apply that in draw, then layout everything as if (0,0) is inside the border
+		// TODO: Do this for all page shapes that have borders (page, PLI, callout, etc)
 		const template = store.state.template.page;
-		const pageSize = {width: template.width, height: template.height};
 		const margin = getMargin(template.innerMargin);
+		const borderWidth = template.border.width;
+		const pageBox = {
+			x: borderWidth, y: borderWidth,
+			width: template.width - borderWidth - borderWidth,
+			height: template.height - borderWidth - borderWidth
+		};
 
 		if (page.numberLabelID != null) {
 			const lblSize = _.measureLabel(template.numberLabel.font, page.number);
 			const lbl = store.get.numberLabel(page.numberLabelID);
 			lbl.width = lblSize.width;
 			lbl.height = lblSize.height;
-			lbl.y = pageSize.height - margin;
+			lbl.y = pageBox.y + pageBox.height - margin;
 
 			let position = template.numberLabel.position;
 			if (position === 'even-left') {
@@ -59,13 +67,13 @@ const api = {
 				position = _.isEven(page.number) ? 'right' : 'left';
 			}
 			if (position === 'left') {
-				lbl.x = margin;
+				lbl.x = pageBox.x + margin;
 				lbl.align = 'left';
 			} else {
-				lbl.x = pageSize.width - margin;
+				lbl.x = pageBox.x + pageBox.width - margin;
 				lbl.align = 'right';
 			}
-			pageSize.height -= lbl.height + (margin / 2);
+			pageBox.height -= lbl.height + (margin / 2);
 		}
 
 		const stepCount = page.steps.length;
@@ -75,25 +83,25 @@ const api = {
 		if (layout.rows != null && layout.cols != null) {
 			cols = layout.cols;
 			rows = layout.rows;
-			layoutDirection = layout.direction || (pageSize.width > pageSize.height ? 'horizontal' : 'vertical');
+			layoutDirection = layout.direction || (pageBox.width > pageBox.height ? 'horizontal' : 'vertical');
 		} else {
 			layoutDirection = layout;
 			if (layout === 'vertical') {
 				[cols, rows] = [rows, cols];
 			}
 		}
-		const colSize = Math.floor(pageSize.width / cols);
-		const rowSize = Math.floor(pageSize.height / rows);
+		const colSize = Math.floor(pageBox.width / cols);
+		const rowSize = Math.floor(pageBox.height / rows);
 
 		const box = {x: 0, y: 0, width: colSize, height: rowSize};
 
 		for (let i = 0; i < stepCount; i++) {
 			if (layoutDirection === 'vertical') {
-				box.x = colSize * Math.floor(i / rows);
-				box.y = rowSize * (i % rows);
+				box.x = pageBox.x + (colSize * Math.floor(i / rows));
+				box.y = pageBox.y + (rowSize * (i % rows));
 			} else {
-				box.x = colSize * (i % cols);
-				box.y = rowSize * Math.floor(i / cols);
+				box.x = pageBox.x + (colSize * (i % cols));
+				box.y = pageBox.y + (rowSize * Math.floor(i / cols));
 			}
 			api.step(store.get.step(page.steps[i]), box);
 		}
@@ -103,20 +111,20 @@ const api = {
 			if (layoutDirection === 'vertical') {
 				const stepsInLastCol = rows - emptySlots;
 				box.width = colSize;
-				box.height = Math.floor(pageSize.height / stepsInLastCol);
-				box.x = (cols - 1) * colSize;
+				box.height = Math.floor(pageBox.height / stepsInLastCol);
+				box.x = pageBox.x + ((cols - 1) * colSize);
 				for (let i = 0; i < stepsInLastCol; i++) {
-					box.y = box.height * i;
+					box.y = pageBox.y + (box.height * i);
 					const stepIndex = ((cols - 1) * rows) + i;
 					api.step(store.get.step(page.steps[stepIndex]), box);
 				}
 			} else {
 				const stepsInLastRow = cols - emptySlots;
-				box.width = Math.floor(pageSize.width / stepsInLastRow);
+				box.width = Math.floor(pageBox.width / stepsInLastRow);
 				box.height = rowSize;
-				box.y = (rows - 1) * rowSize;
+				box.y = pageBox.y + ((rows - 1) * rowSize);
 				for (let i = 0; i < stepsInLastRow; i++) {
-					box.x = box.width * i;
+					box.x = pageBox.x + (box.width * i);
 					const stepIndex = ((rows - 1) * cols) + i;
 					api.step(store.get.step(page.steps[stepIndex]), box);
 				}
@@ -125,7 +133,7 @@ const api = {
 
 		page.layout = layout;
 		page.actualLayout = (rows > 1 || cols > 1) ? {rows, cols, direction: layoutDirection} : 'horizontal';
-		api.dividers(page, layoutDirection, rows, cols, pageSize);
+		api.dividers(page, layoutDirection, rows, cols, pageBox);
 
 		if (store.state.plisVisible) {
 			alignStepContent(page);
@@ -376,16 +384,16 @@ const api = {
 		api.dividers(step, step.subStepLayout, rows, cols, stepBox);
 	},
 
-	templatePageDividers(page) {
+	templatePageDividers(page, box) {
 		const template = store.state.template.page;
-		const margin = getMargin(store.state.template.page.innerMargin);
+		const margin = getMargin(template.innerMargin);
 		const step = store.get.step(page.steps[0]);
 		const csi = store.get.csi(step.csiID);
-		const x = csi.x + csi.width + (margin * 5);
+		const x = box.x + csi.x + csi.width + (margin * 5);
 		store.mutations.divider.add({
 			parent: page,
-			p1: {x, y: margin},
-			p2: {x, y: template.height - margin}
+			p1: {x, y: box.y + margin},
+			p2: {x, y: template.height - box.y - margin}
 		});
 	},
 
@@ -396,7 +404,7 @@ const api = {
 		store.mutations.item.deleteChildList({item: target, listType: 'divider'});
 
 		if (target.type === 'templatePage') {
-			api.templatePageDividers(target);
+			api.templatePageDividers(target, box);
 			return;
 		}
 
