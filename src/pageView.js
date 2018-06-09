@@ -100,11 +100,7 @@ Vue.component('pageCanvasView', {
 				return;
 			}
 			const up = {x: e.offsetX, y: e.offsetY};
-			if (this.mouseDragItem && this.mouseDragItem.moved) {
-				// Mouse drag is complete; add undo event to stack
-				undoStack.commit(null, null, `Move ${_.prettyPrint(this.mouseDragItem.item.type)}`);
-				this.app.redrawUI(false);
-			} else if (_.geom.distance(this.mouseDownPt, up) < 3) {
+			if (_.geom.distance(this.mouseDownPt, up) < 10) {
 				// If simple mouse down + mouse up with very little movement, handle as if 'click' for selection
 				page = (page == null) ? this.currentPageLookup : page;
 				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
@@ -113,6 +109,10 @@ Vue.component('pageCanvasView', {
 				} else {
 					this.app.clearSelected();
 				}
+			} else if (this.mouseDragItem && this.mouseDragItem.moved) {
+				// Mouse drag is complete; add undo event to stack
+				undoStack.commit(null, null, `Move ${_.prettyPrint(this.mouseDragItem.item.type)}`);
+				this.app.redrawUI(false);
 			}
 			this.mouseDownPt = this.mouseDragItem = null;
 		},
