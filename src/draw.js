@@ -24,7 +24,7 @@ const api = {
 
 		const rectStyle = {
 			strokeStyle: template.border.color,
-			lineWidth: Math.floor(template.border.width * 2)
+			lineWidth: Math.floor(template.border.width * 2)  // * 2 because line is centered on page edge, so half of it is clipped
 		};
 		ctx.fillStyle = template.fill.color;
 		ctx.fillRect(0, 0, template.width, template.height);
@@ -45,9 +45,19 @@ const api = {
 			}
 		}
 
+		if (template.border.cornerRadius > template.border.width) {
+			// On extremely rounded page corners, the outside corner radius shows up inside the page.  Fill that in.
+			const s = template.border.cornerRadius / 2;
+			ctx.fillStyle = template.border.color;
+			ctx.fillRect(0, 0, s, s);
+			ctx.fillRect(template.width - s, 0, s, s);
+			ctx.fillRect(template.width - s, template.height - s, s, s);
+			ctx.fillRect(0, template.height - s, s, s);
+		}
+
 		api.roundedRectStyled(
 			ctx, 0, 0, template.width, template.height,
-			template.border.cornerRadius * 2, rectStyle
+			template.border.cornerRadius + template.border.width, rectStyle  // offset corner radius by border width so radius defines inner border radius
 		);
 
 		ctx.translate(Math.floor(page.innerContentOffset.x), Math.floor(page.innerContentOffset.y));
@@ -491,10 +501,10 @@ const api = {
 	},
 
 	roundedRect(ctx, x, y, w, h, r, lineWidth) {
-		// TODO: this looks bad if border line width is thick; make 'r' define inner curve, not the middle of the curve
+		// r += lineWidth / 2;  // r defines the inner curve, but we're drawing from the middle, so offset r accordingly.  Disabled for now because it doesn't look right.
+		({x, y} = pixelOffset({x, y}, lineWidth));
 		w = Math.floor(w);
 		h = Math.floor(h);
-		({x, y} = pixelOffset({x, y}, lineWidth));
 		ctx.beginPath();
 		ctx.arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
 		ctx.arc(x + w - r, y + r, r, 3 * Math.PI / 2, 0);
