@@ -49,7 +49,7 @@ function fillTemplatePanel(templateEntry) {
 			updateValues() {
 				const template = _.get(this.templateEntry, store.state.template).fill;
 				template.color = this.color;
-				this.$emit('new-values', _.prettyPrint(this.templateEntry));
+				this.$emit('new-values', {type: this.templateEntry, noLayout: true});
 			}
 		},
 		computed: {
@@ -86,7 +86,7 @@ function borderTemplatePanel(templateEntry) {
 				template.width = this.width;
 				template.color = this.color;
 				template.cornerRadius = this.cornerRadius;
-				this.$emit('new-values', _.prettyPrint(this.templateEntry));
+				this.$emit('new-values', this.templateEntry);
 			}
 		}
 	};
@@ -170,8 +170,7 @@ const fontTemplatePanel = {
 			const template = store.get.templateForItem(this.templateItem);
 			template.font = this.fontString();
 			template.color = this.color;
-			store.state.templatePage.needsLayout = true;
-			this.$emit('new-values', _.prettyPrint(this.templateItem.type));
+			this.$emit('new-values', this.templateItem.type);
 		},
 		fontString() {
 			return _.fontPartsToFont({
@@ -207,7 +206,7 @@ function fillAndBorderTemplatePanel(templateEntry) {
 		},
 		methods: {
 			newValues() {
-				this.$emit('new-values', _.prettyPrint(templateEntry));
+				this.$emit('new-values', templateEntry);
 			}
 		}
 	};
@@ -248,8 +247,7 @@ function rotateTemplatePanel() {
 						const pli = store.get.parent(this.templateItem);
 						pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
 					}
-					store.state.templatePage.needsLayout = true;
-					this.$emit('new-values', _.prettyPrint(this.templateItem.type));
+					this.$emit('new-values', this.templateItem.type);
 				}
 			}
 		}
@@ -294,14 +292,13 @@ const pliTemplatePanel = {
 	},
 	methods: {
 		newValues() {
-			this.$emit('new-values', {type: 'PLI', layoutAllPages: true});
+			this.$emit('new-values', 'PLI');
 		},
 		updateValues() {
 			const template = store.state.template.pli;
 			if (this.includeSubmodels !== template.includeSubmodels) {
 				template.includeSubmodels = this.includeSubmodels;
-				store.state.templatePage.needsLayout = true;
-				this.$emit('new-values', {type: 'PLI', layoutAllPages: true});
+				this.$emit('new-values', 'PLI');
 			}
 		}
 	}
@@ -330,8 +327,7 @@ const pageTemplatePanel = {
 			this.updateValues();
 		},
 		newValues() {
-			store.state.templatePage.needsLayout = true;
-			this.$emit('new-values', {type: 'Page', layoutAllPages: true});
+			this.$emit('new-values', 'Page');
 		},
 		updateValues() {
 			const template = store.state.template.page;
@@ -345,8 +341,7 @@ const pageTemplatePanel = {
 				}
 				template.width = this.width;
 				template.height = this.height;
-				store.state.templatePage.needsLayout = true;
-				this.$emit('new-values', {type: 'Page', layoutAllPages: true});
+				this.$emit('new-values', 'Page');
 			}
 		}
 	}
@@ -370,11 +365,10 @@ const pageNumberTemplatePanel = {
 		},
 		updatePosition(newPosition) {
 			store.state.template.page.numberLabel.position = this.position = newPosition;
-			store.state.templatePage.needsLayout = true;
 			this.newValues();
 		},
 		newValues() {
-			this.$emit('new-values', {type: 'Page Number', layoutAllPages: true});
+			this.$emit('new-values', 'Page Number');
 		}
 	}
 };
@@ -423,6 +417,9 @@ Vue.component('templatePanel', {
 	methods: {
 		newValues(opts) {
 			this.lastEdit = (typeof opts === 'string') ? {type: opts} : opts;
+			if (!opts.noLayout) {
+				store.state.templatePage.needsLayout = true;
+			}
 			this.app.redrawUI(false);
 		},
 		applyChanges() {
@@ -430,10 +427,10 @@ Vue.component('templatePanel', {
 				if (typeof this.$refs.currentTemplatePanel.apply === 'function') {
 					this.$refs.currentTemplatePanel.apply();
 				} else {
-					if (this.lastEdit.layoutAllPages) {
+					if (!this.lastEdit.noLayout) {
 						store.state.pages.forEach(page => (page.needsLayout = true));
 					}
-					undoStack.commit('', null, `Change ${this.lastEdit.type} Template`);
+					undoStack.commit('', null, `Change ${_.prettyPrint(this.lastEdit.type)} Template`);
 				}
 				this.app.redrawUI(false);
 				this.lastEdit = null;
