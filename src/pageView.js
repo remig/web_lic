@@ -253,17 +253,11 @@ function itemHighlightBox(selItem, pageSize) {
 			box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
 		}
 	}
-	// TODO: Handle wide borders better: x & y should be outside the border, then layout inside minus entire border width
-	let borderWidth = 0;
-	var template = store.get.templateForItem(selItem);
-	if (template && template.border && template.border.width && !selItem.type.toLowerCase().endsWith('page')) {
-		borderWidth = Math.ceil(template.border.width / 2);
-	}
 	return {
-		x: box.x - 4 - borderWidth,
-		y: box.y - 4 - borderWidth,
-		width: box.width + ((4 + borderWidth) * 2),
-		height: box.height + ((4 + borderWidth) * 2)
+		x: box.x - 4,
+		y: box.y - 4,
+		width: 4 + box.width + 4,
+		height: 4 + box.height + 4
 	};
 }
 

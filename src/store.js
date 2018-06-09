@@ -530,6 +530,10 @@ const store = {
 					t = store.get.parent(t);
 				}
 				if (t) {
+					if (t.innerContentOffset) {
+						box.x += t.innerContentOffset.x || 0;
+						box.y += t.innerContentOffset.y || 0;
+					}
 					box.x += t.x || 0;
 					box.y += t.y || 0;
 				}

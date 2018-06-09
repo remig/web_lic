@@ -24,7 +24,7 @@ const api = {
 
 		const rectStyle = {
 			strokeStyle: template.border.color,
-			lineWidth: template.border.width * 2
+			lineWidth: Math.floor(template.border.width * 2)
 		};
 		ctx.fillStyle = template.fill.color;
 		ctx.fillRect(0, 0, template.width, template.height);
@@ -49,6 +49,8 @@ const api = {
 			ctx, 0, 0, template.width, template.height,
 			template.border.cornerRadius * 2, rectStyle
 		);
+
+		ctx.translate(Math.floor(page.innerContentOffset.x), Math.floor(page.innerContentOffset.y));
 
 		page.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 
@@ -130,10 +132,12 @@ const api = {
 			strokeStyle: template.border.color,
 			lineWidth: template.border.width
 		};
-		api.roundedRectStyled(
-			ctx, submodelImage.x, submodelImage.y,
-			submodelImage.width, submodelImage.height,
-			template.border.cornerRadius, rectStyle
+		api.roundedRectItemStyled(ctx, submodelImage, template.border.cornerRadius, rectStyle);
+
+		ctx.save();
+		ctx.translate(
+			Math.floor(submodelImage.innerContentOffset.x),
+			Math.floor(submodelImage.innerContentOffset.y)
 		);
 
 		ctx.save();
@@ -155,6 +159,7 @@ const api = {
 			ctx.fillText('x' + submodelImage.quantity, lbl.x, lbl.y);
 			ctx.restore();
 		}
+		ctx.restore();
 	},
 
 	csi(csi, localModel, ctx, scale = 1, selectedPart) {
@@ -194,11 +199,10 @@ const api = {
 			strokeStyle: template.pli.border.color,
 			lineWidth: template.pli.border.width
 		};
-		api.roundedRectStyled(
-			ctx, pli.x + pli.borderOffset.x, pli.y + pli.borderOffset.y,
-			pli.width, pli.height,
-			template.pli.border.cornerRadius, rectStyle
-		);
+		api.roundedRectItemStyled(ctx, pli, template.pli.border.cornerRadius, rectStyle);
+
+		ctx.save();
+		ctx.translate(Math.floor(pli.innerContentOffset.x), Math.floor(pli.innerContentOffset.y));
 
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
@@ -224,20 +228,23 @@ const api = {
 				pli.y + pliItem.y + quantityLabel.y + quantityLabel.height
 			);
 		});
+		ctx.restore();
 	},
 
 	callout(callout, ctx, scale = 1, selectedPart) {
 		const template = store.state.template.callout;
 		callout = store.get.callout(callout);
 		ctx.save();
-		ctx.translate(Math.floor(callout.x), Math.floor(callout.y));
 
 		const rectStyle = {
 			fillStyle: template.fill.color,
 			strokeStyle: template.border.color,
 			lineWidth: template.border.width
 		};
-		api.roundedRectStyled(ctx, 0, 0, callout.width, callout.height, template.border.cornerRadius, rectStyle);
+		api.roundedRectItemStyled(ctx, callout, template.border.cornerRadius, rectStyle);
+
+		ctx.translate(Math.floor(callout.x), Math.floor(callout.y));
+		ctx.translate(Math.floor(callout.innerContentOffset.x), Math.floor(callout.innerContentOffset.y));
 
 		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 		ctx.restore();
@@ -450,6 +457,21 @@ const api = {
 		ctx.setLineDash([5, 3]);
 		ctx.strokeRect(x, y, w, h);
 		ctx.restore();
+	},
+
+	roundedRectItemStyled(ctx, item, r, style) {
+		let {x, y, width, height} = item;
+		if (item.borderOffset) {
+			x += item.borderOffset.x;
+			y += item.borderOffset.y;
+		}
+		if (item.innerContentOffset) {
+			x += item.innerContentOffset.x / 2;
+			y += item.innerContentOffset.y / 2;
+			width -= item.innerContentOffset.x;
+			height -= item.innerContentOffset.y;
+		}
+		api.roundedRectStyled(ctx, x, y, width, height, r, style);
 	},
 
 	roundedRectStyled(ctx, x, y, w, h, r, style) {

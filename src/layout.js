@@ -47,18 +47,19 @@ const api = {
 		const template = store.state.template.page;
 		const margin = getMargin(template.innerMargin);
 		const borderWidth = template.border.width;
-		const pageBox = {
-			x: borderWidth, y: borderWidth,
+		const pageSize = {
 			width: template.width - borderWidth - borderWidth,
 			height: template.height - borderWidth - borderWidth
 		};
+
+		page.innerContentOffset = {x: borderWidth, y: borderWidth};
 
 		if (page.numberLabelID != null) {
 			const lblSize = _.measureLabel(template.numberLabel.font, page.number);
 			const lbl = store.get.numberLabel(page.numberLabelID);
 			lbl.width = lblSize.width;
 			lbl.height = lblSize.height;
-			lbl.y = pageBox.y + pageBox.height - margin;
+			lbl.y = pageSize.height - margin;
 
 			let position = template.numberLabel.position;
 			if (position === 'even-left') {
@@ -67,13 +68,13 @@ const api = {
 				position = _.isEven(page.number) ? 'right' : 'left';
 			}
 			if (position === 'left') {
-				lbl.x = pageBox.x + margin;
+				lbl.x = margin;
 				lbl.align = 'left';
 			} else {
-				lbl.x = pageBox.x + pageBox.width - margin;
+				lbl.x = pageSize.width - margin;
 				lbl.align = 'right';
 			}
-			pageBox.height -= lbl.height + (margin / 2);
+			pageSize.height -= lbl.height + (margin / 2);
 		}
 
 		const stepCount = page.steps.length;
@@ -83,25 +84,25 @@ const api = {
 		if (layout.rows != null && layout.cols != null) {
 			cols = layout.cols;
 			rows = layout.rows;
-			layoutDirection = layout.direction || (pageBox.width > pageBox.height ? 'horizontal' : 'vertical');
+			layoutDirection = layout.direction || (pageSize.width > pageSize.height ? 'horizontal' : 'vertical');
 		} else {
 			layoutDirection = layout;
 			if (layout === 'vertical') {
 				[cols, rows] = [rows, cols];
 			}
 		}
-		const colSize = Math.floor(pageBox.width / cols);
-		const rowSize = Math.floor(pageBox.height / rows);
+		const colSize = Math.floor(pageSize.width / cols);
+		const rowSize = Math.floor(pageSize.height / rows);
 
 		const box = {x: 0, y: 0, width: colSize, height: rowSize};
 
 		for (let i = 0; i < stepCount; i++) {
 			if (layoutDirection === 'vertical') {
-				box.x = pageBox.x + (colSize * Math.floor(i / rows));
-				box.y = pageBox.y + (rowSize * (i % rows));
+				box.x = colSize * Math.floor(i / rows);
+				box.y = rowSize * (i % rows);
 			} else {
-				box.x = pageBox.x + (colSize * (i % cols));
-				box.y = pageBox.y + (rowSize * Math.floor(i / cols));
+				box.x = colSize * (i % cols);
+				box.y = rowSize * Math.floor(i / cols);
 			}
 			api.step(store.get.step(page.steps[i]), box);
 		}
@@ -111,20 +112,20 @@ const api = {
 			if (layoutDirection === 'vertical') {
 				const stepsInLastCol = rows - emptySlots;
 				box.width = colSize;
-				box.height = Math.floor(pageBox.height / stepsInLastCol);
-				box.x = pageBox.x + ((cols - 1) * colSize);
+				box.height = Math.floor(pageSize.height / stepsInLastCol);
+				box.x = (cols - 1) * colSize;
 				for (let i = 0; i < stepsInLastCol; i++) {
-					box.y = pageBox.y + (box.height * i);
+					box.y = box.height * i;
 					const stepIndex = ((cols - 1) * rows) + i;
 					api.step(store.get.step(page.steps[stepIndex]), box);
 				}
 			} else {
 				const stepsInLastRow = cols - emptySlots;
-				box.width = Math.floor(pageBox.width / stepsInLastRow);
+				box.width = Math.floor(pageSize.width / stepsInLastRow);
 				box.height = rowSize;
-				box.y = pageBox.y + ((rows - 1) * rowSize);
+				box.y = (rows - 1) * rowSize;
 				for (let i = 0; i < stepsInLastRow; i++) {
-					box.x = pageBox.x + (box.width * i);
+					box.x = box.width * i;
 					const stepIndex = ((rows - 1) * cols) + i;
 					api.step(store.get.step(page.steps[stepIndex]), box);
 				}
@@ -133,7 +134,7 @@ const api = {
 
 		page.layout = layout;
 		page.actualLayout = (rows > 1 || cols > 1) ? {rows, cols, direction: layoutDirection} : 'horizontal';
-		api.dividers(page, layoutDirection, rows, cols, pageBox);
+		api.dividers(page, layoutDirection, rows, cols, pageSize);
 
 		if (store.state.plisVisible) {
 			alignStepContent(page);
@@ -217,20 +218,22 @@ const api = {
 		csi.width = csiSize.width;
 		csi.height = csiSize.height;
 
+		const borderWidth = store.state.template.submodelImage.border.width;
+		submodelImage.innerContentOffset = {x: borderWidth, y: borderWidth};
+
 		submodelImage.x = box.x;
 		submodelImage.y = box.y;
-		submodelImage.width = margin + csiSize.width + margin;
-		submodelImage.height = margin + csiSize.height + margin;
+		submodelImage.width = borderWidth + margin + csiSize.width + margin + borderWidth;
+		submodelImage.height = borderWidth + margin + csiSize.height + margin + borderWidth;
 
 		if (submodelImage.quantityLabelID != null) {
 			const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
 			const font = store.state.template.submodelImage.quantityLabel.font;
 			const lblSize = _.measureLabel(font, 'x' + submodelImage.quantity);
 			submodelImage.width += lblSize.width + margin;
-			lbl.x = submodelImage.x + submodelImage.width - margin;
-			lbl.y = submodelImage.y + submodelImage.height - margin;
-			lbl.width = lblSize.width;
-			lbl.height = lblSize.height;
+			lbl.x = submodelImage.width - borderWidth - borderWidth - margin;
+			lbl.y = submodelImage.height - borderWidth - borderWidth - margin;
+			_.copy(lbl, lblSize);
 		}
 	},
 
@@ -253,6 +256,9 @@ const api = {
 				return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
 			});
 		}
+
+		const borderWidth = store.state.template.pli.border.width;
+		pli.innerContentOffset = {x: borderWidth, y: borderWidth};
 
 		pli.borderOffset.x = pli.borderOffset.y = 0;
 		if (_.isEmpty(pliItems)) {
@@ -289,14 +295,15 @@ const api = {
 		}
 
 		pli.x = pli.y = 0;
-		pli.width = left;
-		pli.height = margin + maxHeight + margin;
+		pli.width = borderWidth + left + borderWidth;
+		pli.height = borderWidth + margin + maxHeight + margin + borderWidth;
 	},
 
 	callout(callout, box) {
 		// TODO: add horizontal / vertical layout options to callout
+		const borderWidth = store.state.template.callout.border.width;
 		const margin = getMargin(store.state.template.callout.innerMargin);
-		const calloutBox = {x: box.x, y: box.y, width: 0, height: margin};
+		const calloutBox = {x: 0, y: 0, width: 0, height: margin};
 
 		if (_.isEmpty(callout.steps)) {
 			calloutBox.width = calloutBox.height = emptyCalloutSize;
@@ -310,7 +317,7 @@ const api = {
 			calloutBox.width = margin + widestStep + margin;
 
 			stepSizes.forEach(entry => {
-				if (stepBox.y + entry.height + margin > box.height) {
+				if (borderWidth + stepBox.y + entry.height + margin + borderWidth > box.height) {
 					// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
 					stepBox.y = margin;
 					stepBox.x += widestStep + margin;
@@ -322,7 +329,11 @@ const api = {
 				calloutBox.height = Math.max(calloutBox.height, stepBox.y);
 			});
 		}
-		_.copy(callout, calloutBox);
+
+		callout.innerContentOffset = {x: borderWidth, y: borderWidth};
+		callout.width = borderWidth + calloutBox.width + borderWidth;
+		callout.height = borderWidth + calloutBox.height + borderWidth;
+		callout.x = box.x;
 		callout.y = box.y + ((box.height - callout.height) / 2);  // Center callout vertically
 		api.calloutArrow(callout);
 	},
@@ -389,11 +400,11 @@ const api = {
 		const margin = getMargin(template.innerMargin);
 		const step = store.get.step(page.steps[0]);
 		const csi = store.get.csi(step.csiID);
-		const x = box.x + csi.x + csi.width + (margin * 5);
+		const x = csi.x + csi.width + (margin * 5);
 		store.mutations.divider.add({
 			parent: page,
-			p1: {x, y: box.y + margin},
-			p2: {x, y: template.height - box.y - margin}
+			p1: {x, y: margin},
+			p2: {x, y: box.height - margin}
 		});
 	},
 
@@ -483,12 +494,13 @@ const api = {
 					width: qtyLabel.width, height: qtyLabel.height
 				});
 			});
+			const borderWidth = store.state.template.pli.border.width;
 			const margin = getMargin(store.state.template.pli.innerMargin);
 			const bbox = _.geom.bbox(boxes);
 			pli.borderOffset.x = bbox.x - pli.x - margin;
 			pli.borderOffset.y = bbox.y - pli.y - margin;
-			pli.width = margin + bbox.width + margin;
-			pli.height = margin + bbox.height + margin;
+			pli.width = borderWidth + margin + bbox.width + margin + borderWidth;
+			pli.height = borderWidth + margin + bbox.height + margin + borderWidth;
 		},
 		quantityLabel(item) {
 			if (item.parent.type === 'pliItem') {
