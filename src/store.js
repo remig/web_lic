@@ -784,7 +784,8 @@ const store = {
 				const submodelImage = store.mutations.item.add({item: {
 					type: 'submodelImage', csiID: null, quantityLabelID: null,
 					modelFilename: opts.modelFilename, quantity: opts.quantity || 1,
-					x: null, y: null, width: null, height: null
+					x: null, y: null, width: null, height: null,
+					innerContentOffset: {x: 0, y: 0}
 				}, parent: opts.parent});
 
 				store.mutations.csi.add({parent: submodelImage});
@@ -935,7 +936,7 @@ const store = {
 			},
 			layout(opts) {  // opts: {step, box}
 				const step = store.get.lookupToItem(opts.step);
-				Layout.step.outsideIn(step, opts.box);
+				Layout.step(step, opts.box);
 			},
 			moveToPage(opts) {  // opts: {step, destPage, parentInsertionIndex = 0}
 				const step = store.get.lookupToItem(opts.step);
@@ -1044,6 +1045,7 @@ const store = {
 					type: 'callout',
 					steps: [], calloutArrows: [],
 					x: null, y: null, width: null, height: null,
+					innerContentOffset: {x: 0, y: 0},
 					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
 				}, parent: opts.parent});
 
@@ -1128,6 +1130,7 @@ const store = {
 					type: pageType,
 					steps: [], dividers: [], annotations: [],
 					needsLayout: true, locked: false,
+					innerContentOffset: {x: 0, y: 0},
 					number: opts.pageNumber,
 					numberLabelID: null,
 					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
@@ -1197,6 +1200,7 @@ const store = {
 					type: 'pli',
 					pliItems: [],
 					x: null, y: null, width: null, height: null,
+					innerContentOffset: {x: 0, y: 0},
 					borderOffset: {x: 0, y: 0}
 				}, parent: opts.parent});
 			},
