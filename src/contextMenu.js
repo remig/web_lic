@@ -792,13 +792,13 @@ const contextMenu = {
 						return store.get.prevStep(step) != null;
 					},
 					cb(selectedItem) {
-						const srcStep = {type: 'step', id: selectedItem.stepID};
+						const srcStep = store.get.step(selectedItem.stepID);
 						const destStep = store.get.prevStep(srcStep);
 						undoStack.commit(
 							'part.moveToStep',
 							{partID: selectedItem.id, srcStep, destStep, doLayout: true},
 							'Move Part to Previous Step',
-							[{type: 'csi', id: destStep.csiID}]
+							[{type: 'csi', id: srcStep.csiID}, {type: 'csi', id: destStep.csiID}]
 						);
 					}
 				},
@@ -809,13 +809,13 @@ const contextMenu = {
 						return store.get.nextStep(step) != null;
 					},
 					cb(selectedItem) {
-						const srcStep = {type: 'step', id: selectedItem.stepID};
+						const srcStep = store.get.step(selectedItem.stepID);
 						const destStep = store.get.nextStep(srcStep);
 						undoStack.commit(
 							'part.moveToStep',
 							{partID: selectedItem.id, srcStep, destStep, doLayout: true},
 							'Move Part to Next Step',
-							[{type: 'csi', id: destStep.csiID}]
+							[{type: 'csi', id: srcStep.csiID}, {type: 'csi', id: destStep.csiID}]
 						);
 					}
 				}
