@@ -50,7 +50,7 @@ const app = new Vue({
 			y: null
 		},
 		treeUpdateState: false,  // Not used directly, only used to force the tree to redraw
-		menuUpdateState: false   // Not used directly, only used to force the tree to redraw
+		navUpdateState: false    // Not used directly, only used to force the nav bar to redraw
 	},
 	methods: {
 		importRemoteModel(url) {
@@ -222,7 +222,7 @@ const app = new Vue({
 			// If I understood Vue better, I'd create components that damn well updated themselves properly.
 			this.$refs.pageView.forceUpdate();
 			this.treeUpdateState = !this.treeUpdateState;
-			this.menuUpdateState = !this.menuUpdateState;
+			this.navUpdateState = !this.navUpdateState;
 			if (this.selectedItemLookup && this.selectedItemLookup.id != null) {
 				this.selectedItemLookup.id++;
 				this.selectedItemLookup.id--;
@@ -443,6 +443,8 @@ const app = new Vue({
 
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();
+			this.navUpdateState = !this.navUpdateState;
+			this.$refs.pageView.forceUpdate();
 		});
 
 		LDParse.setProgressCallback(this.updateProgress);
