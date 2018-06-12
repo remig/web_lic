@@ -19,7 +19,6 @@ const contextMenu = {
 					text: 'Redo Layout',
 					cb(selectedItem) {
 						undoStack.commit('page.layout', {page: selectedItem}, this.text);
-						app.redrawUI(true);
 					}
 				},
 				{
@@ -29,9 +28,7 @@ const contextMenu = {
 						return page.layout !== 'vertical';
 					},
 					cb(selectedItem) {
-						const page = selectedItem;
-						undoStack.commit('page.layout', {page, layout: 'vertical'}, this.text);
-						app.redrawUI(true);
+						undoStack.commit('page.layout', {page: selectedItem, layout: 'vertical'}, this.text);
 					}
 				},
 				{
@@ -41,9 +38,7 @@ const contextMenu = {
 						return page.layout !== 'horizontal';
 					},
 					cb(selectedItem) {
-						const page = selectedItem;
-						undoStack.commit('page.layout', {page, layout: 'horizontal'}, this.text);
-						app.redrawUI(true);
+						undoStack.commit('page.layout', {page: selectedItem, layout: 'horizontal'}, this.text);
 					}
 				},
 				{
@@ -64,7 +59,6 @@ const contextMenu = {
 									{page, layout: newValues},
 									'Layout Page by Row and Column'
 								);
-								app.redrawUI(true);
 							});
 							dialog.$on('cancel', () => {
 								store.mutations.page.layout({page, layout: originalLayout});
@@ -94,7 +88,6 @@ const contextMenu = {
 					pageNumber: nextPage.number,
 					insertionIndex: store.state.pages.indexOf(nextPage)
 				}, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -105,7 +98,6 @@ const contextMenu = {
 					pageNumber: prevPage.number + 1,
 					insertionIndex: store.state.pages.indexOf(prevPage) + 1
 				}, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{text: 'separator'},
@@ -126,16 +118,13 @@ const contextMenu = {
 						prevStep = {number: 0};
 					}
 				}
-				const stepNumber = prevStep.number + 1;
-				undoStack.commit(
-					'step.add',
-					{
-						dest, stepNumber, doLayout: true, renumber: true,
-						insertionIndex: store.state.steps.indexOf(prevStep) + 1
-					},
-					this.text
-				);
-				app.redrawUI(true);
+				const opts = {
+					dest,
+					stepNumber: prevStep.number + 1,
+					doLayout: true, renumber: true,
+					insertionIndex: store.state.steps.indexOf(prevStep) + 1
+				};
+				undoStack.commit('step.add', opts, this.text);
 			}
 		},
 		{
@@ -151,7 +140,6 @@ const contextMenu = {
 							parent: selectedItem
 						};
 						undoStack.commit('annotation.add', opts, 'Add Label');
-						app.redrawUI(true);
 					}
 				},
 				{
@@ -173,7 +161,6 @@ const contextMenu = {
 								parent: selectedItem
 							};
 							undoStack.commit('annotation.add', opts, 'Add Image');
-							app.redrawUI(true);
 						});
 					}
 				}
@@ -189,10 +176,7 @@ const contextMenu = {
 				const page = store.get.lookupToItem(selectedItem);
 				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
 				undoStack.commit('page.delete', {page}, 'Delete Page');
-				Vue.nextTick(() => {
-					app.redrawUI(true);
-					app.setCurrentPage(nextPage);
-				});
+				app.setCurrentPage(nextPage);
 			}
 		}
 	],
@@ -213,7 +197,6 @@ const contextMenu = {
 					cb(selectedItem) {
 						const opts = {step: selectedItem, layout: 'vertical', doLayout: true};
 						undoStack.commit('step.setSubStepLayout', opts, this.text);
-						app.redrawUI(true);
 					}
 				},
 				{
@@ -225,7 +208,6 @@ const contextMenu = {
 					cb(selectedItem) {
 						const opts = {step: selectedItem, layout: 'horizontal', doLayout: true};
 						undoStack.commit('step.setSubStepLayout', opts, this.text);
-						app.redrawUI(true);
 					}
 				},
 				{
@@ -247,7 +229,6 @@ const contextMenu = {
 									{page, layout: newValues},
 									'Layout Page by Row and Column'
 								);
-								app.redrawUI(true);
 							});
 							dialog.$on('cancel', () => {
 								store.mutations.page.layout({page, layout: originalLayout});
@@ -276,7 +257,6 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				undoStack.commit('step.addCallout', {step: selectedItem}, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -291,7 +271,6 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				undoStack.commit('step.addSubStep', {step: selectedItem, doLayout: true}, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -310,7 +289,6 @@ const contextMenu = {
 					},
 					cb(selectedItem) {
 						undoStack.commit('step.moveToPreviousPage', {step: selectedItem}, this.text);
-						app.redrawUI(true);
 					}
 				},
 				{
@@ -326,7 +304,6 @@ const contextMenu = {
 					},
 					cb(selectedItem) {
 						undoStack.commit('step.moveToNextPage', {step: selectedItem}, this.text);
-						app.redrawUI(true);
 					}
 				}
 			]
@@ -344,7 +321,6 @@ const contextMenu = {
 						const srcStep = selectedItem;
 						const destStep = store.get.prevStep(selectedItem, true);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
-						app.redrawUI(true);
 					}
 				},
 				{
@@ -356,7 +332,6 @@ const contextMenu = {
 						const srcStep = selectedItem;
 						const destStep = store.get.nextStep(selectedItem, true);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
-						app.redrawUI(true);
 					}
 				}
 			]
@@ -368,7 +343,6 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				undoStack.commit('step.delete', {step: selectedItem, doLayout: true}, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{text: 'separator'},
@@ -383,7 +357,6 @@ const contextMenu = {
 					parentInsertionIndex: dest.steps.indexOf(step.id)
 				};
 				undoStack.commit('step.add', opts, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -397,7 +370,6 @@ const contextMenu = {
 					parentInsertionIndex: dest.steps.indexOf(step.id) + 1
 				};
 				undoStack.commit('step.add', opts, this.text);
-				app.redrawUI(true);
 			}
 		}
 	],
@@ -425,7 +397,6 @@ const contextMenu = {
 						const csi = selectedItem;
 						const opts = {csi, rotation: {x: 0, y: 0, z: 180}, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts, 'Flip Step Image', [csi]);
-						app.redrawUI(true);
 					}
 				},
 				{
@@ -434,7 +405,6 @@ const contextMenu = {
 						const csi = selectedItem;
 						const opts = {csi, rotation: {x: 0, y: 180, z: 0}, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts, 'Rotate Step Image', [csi]);
-						app.redrawUI(true);
 					}
 				},
 				{
@@ -457,7 +427,6 @@ const contextMenu = {
 									'Rotate Step Image',
 									[csi]
 								);
-								app.redrawUI(true);
 							});
 							dialog.$on('cancel', () => {
 								csi.rotation = originalRotation;
@@ -484,7 +453,6 @@ const contextMenu = {
 						const csi = selectedItem;
 						const opts = {csi, rotation: null, addRotateIcon: false, doLayout: true};
 						undoStack.commit('csi.rotate', opts, 'Remove Step Image Rotation', [csi]);
-						app.redrawUI(true);
 					}
 				}
 			]
@@ -517,7 +485,6 @@ const contextMenu = {
 							'Copy CSI Rotations',
 							csiList
 						);
-						app.redrawUI(true);
 					});
 					dialog.$on('cancel', () => {
 						originalRotations.forEach((rotation, csiID) => {
@@ -614,7 +581,6 @@ const contextMenu = {
 									doLayout: store.get.isTitlePage(page)
 								};
 								undoStack.commit('annotation.set', opts, 'Set Label Text');
-								app.redrawUI(true);
 							});
 							dialog.$on('cancel', () => {
 								annotation.text = originalText;
@@ -654,7 +620,6 @@ const contextMenu = {
 			cb(selectedItem) {
 				const annotation = selectedItem;
 				undoStack.commit('annotation.delete', {annotation}, this.text);
-				app.redrawUI(true);
 			}
 		}
 	],
@@ -663,7 +628,6 @@ const contextMenu = {
 			text: 'Add Step',
 			cb(selectedItem) {
 				undoStack.commit('callout.addStep', {callout: selectedItem, doLayout: true}, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -680,7 +644,6 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				undoStack.commit('callout.delete', {callout: selectedItem}, this.text);
-				app.redrawUI(true);
 			}
 		}
 	],
@@ -706,10 +669,7 @@ const contextMenu = {
 				const calloutArrow = store.get.calloutArrow(selectedItem);
 				const newPointIdx = Math.ceil(calloutArrow.points.length / 2);
 				undoStack.commit('calloutArrow.addPoint', {calloutArrow}, this.text);
-				app.redrawUI(true);
-				Vue.nextTick(() => {
-					app.setSelected({type: 'point', id: calloutArrow.points[newPointIdx]});
-				});
+				app.setSelected({type: 'point', id: calloutArrow.points[newPointIdx]});
 			}
 		},
 		{
@@ -747,7 +707,6 @@ const contextMenu = {
 				const opts = {modelFilename: selectedItem.filename, destStep, doLayout: true};
 				undoStack.commit('submodel.convertToCallout', opts, this.text);
 				app.setCurrentPage(store.get.pageForItem(destStep));
-				app.redrawUI(true);
 			}
 		}
 	],
@@ -785,7 +744,6 @@ const contextMenu = {
 					dialog.$off();
 					dialog.$on('ok', () => {
 						undoStack.commit( 'part.displace', {step, ...displacement}, 'Adjust Displaced Part');
-						app.redrawUI(true);
 					});
 					dialog.$on('cancel', () => {
 						displacement.distance = originalDisplacement.distance;
@@ -834,7 +792,6 @@ const contextMenu = {
 							'Move Part to Previous Step',
 							[{type: 'csi', id: destStep.csiID}]
 						);
-						app.redrawUI(true);
 					}
 				},
 				{
@@ -852,7 +809,6 @@ const contextMenu = {
 							'Move Part to Next Step',
 							[{type: 'csi', id: destStep.csiID}]
 						);
-						app.redrawUI(true);
 					}
 				}
 			]
@@ -871,7 +827,6 @@ const contextMenu = {
 					{partID: selectedItem.id, step, callout, doLayout: true},
 					this.text
 				);
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -887,7 +842,6 @@ const contextMenu = {
 					{partID: selectedItem.id, step},
 					this.text
 				);
-				app.redrawUI(true);
 			}
 		}
 	]
@@ -904,7 +858,6 @@ function rotateCalloutTip(direction) {
 	return (selectedItem) => {
 		const calloutArrow = store.get.calloutArrow(selectedItem);
 		undoStack.commit('calloutArrow.rotateTip', {calloutArrow, direction}, 'Rotate Callout Arrow Tip');
-		app.redrawUI();
 	};
 }
 
@@ -933,7 +886,6 @@ function displacePart(direction) {
 			`Displace Part ${_.titleCase(direction || 'None')}`,
 			[{type: 'csi', id: step.csiID}]
 		);
-		app.redrawUI();
 	};
 }
 

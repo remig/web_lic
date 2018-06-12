@@ -432,7 +432,6 @@ Vue.component('templatePanel', {
 					}
 					undoStack.commit('', null, `Change ${_.prettyPrint(this.lastEdit.type)} Template`);
 				}
-				this.app.redrawUI(false);
 				this.lastEdit = null;
 			}
 		}

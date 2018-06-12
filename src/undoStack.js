@@ -96,17 +96,17 @@ const api = {
 	},
 
 	undoText() {
-		return api.isUndoAvailable() ? state.stack[state.index].undoText : '';
+		return `Undo ${api.isUndoAvailable() ? state.stack[state.index].undoText : ''}`;
 	},
 
 	redoText() {
-		return api.isRedoAvailable() ? state.stack[state.index + 1].undoText : '';
+		return `Redo ${api.isRedoAvailable() ? state.stack[state.index + 1].undoText : ''}`;
 	}
 };
 
 function performUndoRedoAction(newIndex) {
 	const prevIndex = state.index;
-	setIndex(state, newIndex);
+	state.index = newIndex;
 	const stackContent = state.stack[state.index];
 	const newState = _.clone(stackContent.state);
 	store.replaceState(newState);
@@ -129,6 +129,9 @@ function performUndoRedoAction(newIndex) {
 			}
 		}
 	});
+	if (state.onChangeCB) {
+		state.onChangeCB();
+	}
 }
 
 function setIndex(stack, newIndex) {

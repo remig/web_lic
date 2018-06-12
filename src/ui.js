@@ -49,8 +49,8 @@ const app = new Vue({
 			x: null,
 			y: null
 		},
-		treeUpdateState: false,  // Not used directly, only used to force the tree to redraw
-		navUpdateState: false    // Not used directly, only used to force the nav bar to redraw
+		treeUpdateState: 0,  // Not used directly, only used to force the tree to redraw
+		navUpdateState: 0    // Not used directly, only used to force the nav bar to redraw
 	},
 	methods: {
 		importRemoteModel(url) {
@@ -221,8 +221,8 @@ const app = new Vue({
 		forceUIUpdate() {
 			// If I understood Vue better, I'd create components that damn well updated themselves properly.
 			this.$refs.pageView.forceUpdate();
-			this.treeUpdateState = !this.treeUpdateState;
-			this.navUpdateState = !this.navUpdateState;
+			this.treeUpdateState = (this.treeUpdateState + 1) % 10;  // TODO: considering add refs for the nav tree & menu, then calling $ref.forceUpdate(), like pageView
+			this.navUpdateState = (this.navUpdateState + 1) % 10;
 			if (this.selectedItemLookup && this.selectedItemLookup.id != null) {
 				this.selectedItemLookup.id++;
 				this.selectedItemLookup.id--;
@@ -345,7 +345,6 @@ const app = new Vue({
 
 				const undoText = `Move ${_.prettyPrint(selItem.type)}`;
 				undoStack.commit('item.reposition', {item: item, dx, dy}, undoText);
-				this.redrawUI();
 			} else {
 				// Check if key is a menu shortcut
 				const menu = this.navBarContent;
@@ -443,8 +442,7 @@ const app = new Vue({
 
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();
-			this.navUpdateState = !this.navUpdateState;
-			this.$refs.pageView.forceUpdate();
+			this.redrawUI();
 		});
 
 		LDParse.setProgressCallback(this.updateProgress);

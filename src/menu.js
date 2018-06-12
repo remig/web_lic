@@ -150,7 +150,6 @@ const menu = [
 					text: 'Reset',
 					cb() {
 						undoStack.commit('templatePage.reset', null, 'Reset Template');
-						app.redrawUI(true);
 					}
 				}
 			]
@@ -166,27 +165,17 @@ const menu = [
 	{name: 'Edit', children: [
 		{
 			id: 'undo',
-			text: () => 'Undo ' + undoStack.undoText(),
+			text: undoStack.undoText,
 			shortcut: 'ctrl+z',
 			enabled: undoStack.isUndoAvailable,
-			cb() {
-				if (undoStack.isUndoAvailable()) {
-					undoStack.undo();
-					app.redrawUI(true);
-				}
-			}
+			cb: undoStack.undo
 		},
 		{
 			id: 'redo',
-			text: () => 'Redo ' + undoStack.redoText(),
+			text: undoStack.redoText,
 			shortcut: 'ctrl+y',
 			enabled: undoStack.isRedoAvailable,
-			cb() {
-				if (undoStack.isRedoAvailable()) {
-					undoStack.redo();
-					app.redrawUI(true);
-				}
-			}
+			cb: undoStack.redo
 		},
 		{text: 'separator'},
 		{
@@ -195,7 +184,6 @@ const menu = [
 			cb() {
 				undoStack.commit('addTitlePage', null, this.text);
 				app.setCurrentPage({type: 'titlePage', id: 0});
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -204,7 +192,6 @@ const menu = [
 			cb() {
 				app.setCurrentPage({type: 'page', id: 0});
 				undoStack.commit('removeTitlePage', null, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -212,7 +199,6 @@ const menu = [
 			shown: () => enableIfModel() && !store.state.plisVisible,
 			cb() {
 				undoStack.commit('pli.toggleVisibility', {visible: true}, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -220,7 +206,6 @@ const menu = [
 			shown: () => enableIfModel() && store.state.plisVisible,
 			cb() {
 				undoStack.commit('pli.toggleVisibility', {visible: false}, this.text);
-				app.redrawUI(true);
 			}
 		},
 		{text: 'Snap To (NYI)', enabled: () => false, cb() {}},
