@@ -6,15 +6,27 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Web Lic!</title>
 	<link rel="icon" href="favicon.ico" type="image/x-icon">
+
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
 	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/89/three.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.6/vue.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.3.5/split.min.js"></script>
+<!--
+	<script type="text/javascript" src="lib/three-89.js"></script>
+	<script type="text/javascript" src="lib/vue-2.2.6.js"></script>
+	<script type="text/javascript" src="lib/jspdf-1.3.4.js"></script>
+	<script type="text/javascript" src="lib/jszip-3.1.3.js"></script>
+	<script type="text/javascript" src="lib/FileSaver-1.3.2.js"></script>
+	<script type="text/javascript" src="lib/split.js"></script>
+-->
 
 	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
@@ -35,7 +47,10 @@
 			</div>
 		</div>
 
-		<nav-menu :menu-entry-list="navBarContent" :filename="{name: filename, isDirty}" :version="version" :key="menuUpdateState"></nav-menu>
+		<nav-menu
+			:menu-entry-list="navBarContent" :filename="{name: filename, isDirty}"
+			:version="version" :key="navUpdateState"
+		></nav-menu>
 
 		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
 
@@ -44,14 +59,28 @@
 			</div>
 
 			<div id="rightPane" class="split split-horizontal">
-				<page-canvas-view ref="pageView" :app="this" :selected-item="selectedItemLookup" :current-page-lookup="currentPageLookup"></page-canvas-view>
-				<template-panel id="templatePanel" :app="this" :selected-item="selectedItemLookup" v-if="currentPageLookup && currentPageLookup.type === 'templatePage'"></template-panel>
+				<page-view
+					ref="pageView"
+					:app="this"
+					:selected-item="selectedItemLookup"
+					:current-page-lookup="currentPageLookup"
+				></page-view>
+				<template-panel
+					v-if="currentPageLookup && currentPageLookup.type === 'templatePage'"
+					id="templatePanel"
+					:app="this"
+					:selected-item="selectedItemLookup"
+				></template-panel>
 			</div>
 
 		</div>
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
 		<div id="contextMenu" class="dropdown" tabindex="-1" @blur="closeContextMenu" @click="closeContextMenu">
-			<menu-list :menu-entries="contextMenu" :selected-item="selectedItemLookup" ref="contextMenuComponent"></menu-list>
+			<menu-list
+				:menu-entries="contextMenu"
+				:selected-item="selectedItemLookup"
+				ref="contextMenuComponent"
+			></menu-list>
 		</div>
 
 		<component :is="currentDialog" ref="currentDialog"></component>
@@ -69,32 +98,67 @@
 
 	<!-- Component Templates -->
 
-	<script type="text/x-template" id="pageCanvasView">
+	<script type="text/x-template" id="pageView">
 		<div id="rightSubPane" :class="[{singleEntry: !isScrollingView}]" @scroll="handleScroll()">
 			<div v-if="isScrollingView" :style="{width: pageSize.width + 5 + 'px'}" class="pageCanvasContainer">
-				<canvas
-					v-for="(page, idx) in pageList"
-					:id="'pageCanvas' + page.id"
-					class="pageCanvas multipleEntries"
-					:style="{marginTop: (idx === 0) ? pageCenterOffset : '', marginBottom: (idx === pageList.length - 1) ? pageCenterOffset : ''}"
-					:width="pageSize.width" :height="pageSize.height"
+				<div
+					v-for="page in pageList"
 					@mousedown.stop="mouseDown($event, page)"
 					@mousemove.stop="mouseMove($event, page)"
 					@mouseup.stop="mouseUp($event, page)"
 					@click.stop
-				></canvas>
+				>
+					<page-canvas-view
+						:ref="'canvas' + page.id"
+						:page="page"
+						:is-scrolling-view="true"
+						:width="pageSize.width"
+						:height="pageSize.height"
+					>
+					</page-canvas-view>
+				</div>
 			</div>
 			<div v-else :style="{width: pageSize.width + 5 + 'px', height: pageSize.height + 5 + 'px'}">
-				<canvas
-					id="pageCanvas"
-					class="pageCanvas"
-					:width="pageSize.width" :height="pageSize.height"
+				<div
 					@mousedown.stop="mouseDown($event)"
 					@mousemove.stop="mouseMove($event)"
 					@mouseup.stop="mouseUp($event)"
 					@click.stop
-				></canvas>
+				>
+					<page-canvas-view
+						ref="canvas"
+						:page="currentPageLookup"
+						:is-scrolling-view="false"
+						:width="pageSize.width"
+						:height="pageSize.height"
+						:foobar="pageViewUpdateState"
+					></page-canvas-view>
+				</div>
 			</div>
+		</div>
+	</script>
+
+	<script type="text/x-template" id="pageCanvasView">
+		<div class="pageCanvasContainer">
+			<canvas
+				:id="'pageCanvas' + (page == null ? '' : page.id)"
+				:class="'pageCanvas' + (page == null ? '' : ' multipleEntries')"
+				:style="canvasStyle"
+				:width="width" :height="height"
+			></canvas>
+			<template v-if="page && page.type === 'page'">
+				<i
+					:class="['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}]"
+					:style="switchStyle"
+				></i>
+				<el-switch
+					v-model="locked"
+					v-on:input="setPageLocked"
+					class="pageLockSwitch"
+					:style="switchStyle"
+					:width="20"
+				></el-switch>
+			</template>
 		</div>
 	</script>
 
@@ -140,7 +204,7 @@
 
 	<script type="text/x-template" id="treeParentRowTemplate">
 		<div :id="`treeParent_${target.type}_${target.id}`">
-			<i :class="['treeIcon', {treeIconClosed: !expanded}]" @click.stop.prevent="arrowClick" />
+			<i :class="['treeIcon', 'fas', 'fa-lg', {'fa-caret-down': expanded, 'fa-caret-right': !expanded}]" @click.stop.prevent="arrowClick" />
 			<treeRow :currentItem="currentItem" :target="target" :selectionCallback="treeData.selectionCallback" />
 			<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">
 				<li v-if="target.numberLabelID != null">

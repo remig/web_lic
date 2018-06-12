@@ -281,12 +281,7 @@ const app = new Vue({
 			}
 		},
 		pageCoordsToCanvasCoords(point) {
-			const canvas = document.getElementById('pageCanvas');
-			const box = canvas.getBoundingClientRect();
-			return {
-				x: Math.floor(point.x - box.x),
-				y: Math.floor(point.y - box.y)
-			};
+			return this.$refs.pageView.pageCoordsToCanvasCoords(point);
 		},
 		closeContextMenu() {
 			this.$refs.contextMenuComponent.hide();

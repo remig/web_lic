@@ -1123,7 +1123,7 @@ const store = {
 				const page = store.mutations.item.add({item: {
 					type: pageType,
 					steps: [], dividers: [], annotations: [],
-					needsLayout: true,
+					needsLayout: true, locked: false,
 					number: opts.pageNumber,
 					numberLabelID: null,
 					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
@@ -1156,6 +1156,12 @@ const store = {
 				}
 				store.mutations.item.delete({item: page});
 				store.mutations.page.renumber();
+			},
+			setLocked(opts) {  // opts: {page, locked}
+				const page = store.get.lookupToItem(opts.page);
+				if (page) {
+					page.locked = opts.locked;
+				}
 			},
 			renumber() {
 				store.mutations.renumber(store.state.pages);

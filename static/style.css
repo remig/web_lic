@@ -223,14 +223,9 @@ div#container {
 
 .treeIcon {
 	display: inline-block;
-	width: 15px;
-	height: 15px;
-	background-image: url(icons.png);
-	background-position: -38px -8px;
-}
-
-.treeIconClosed {
-	background-position: -6px -10px;
+	width: 10px;
+	font-size: 1.25em;
+	vertical-align: 1px;
 }
 
 .treeText {
@@ -284,6 +279,10 @@ ul {
 	align-items: center;
 }
 
+.pageCanvasContainer {
+	position: relative;
+}
+
 .pageCanvas {
     background-color: #fff;
     box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
@@ -291,6 +290,37 @@ ul {
 
 .pageCanvas.multipleEntries {
 	margin: 15px 0;
+}
+
+.pageLockIcon {
+	position: absolute;
+	margin-left: 13px;
+	font-size: 1.1em;
+	bottom: 58px;
+}
+
+.pageLockSwitch {
+	position: absolute;
+	margin-left: 10px;
+	bottom: 25px;
+}
+
+/* Rotate Element's switch from horizontal to vertical */
+.pageLockSwitch > .el-switch__core {
+	width: 20px;
+	height: 40px;
+	transition: unset;
+}
+
+.pageLockSwitch > .el-switch__core:after {
+	top: 100%;
+	margin-top: -17px;
+	transition: unset;
+}
+
+.pageLockSwitch.is-checked > .el-switch__core:after {
+	top: 1px;
+	margin-top: 0px;
 }
 
 #statusBar {

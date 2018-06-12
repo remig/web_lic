@@ -7,8 +7,63 @@ const store = require('./store');
 const undoStack = require('./undoStack');
 
 Vue.component('pageCanvasView', {
-	props: ['app', 'selectedItem', 'currentPageLookup'],
 	template: '#pageCanvasView',
+	props: ['page', 'width', 'height', 'isScrollingView'],
+	data() {
+		return {
+			locked: false
+		};
+	},
+	methods: {
+		setPageLocked(newValue) {
+			const opts = {page: this.page, locked: newValue};
+			undoStack.commit('page.setLocked', opts, 'Lock Page');
+		},
+		setSelfLocked() {
+			const page = store.get.page(this.page);
+			this.locked = page ? page.locked : false;
+		},
+		getPageOffset() {
+			const pageHeight = store.state.template.page.height;
+			const container = document.getElementById('rightSubPane');
+			return (container.offsetHeight - pageHeight) / 2;
+		}
+	},
+	computed: {
+		canvasStyle() {
+			if (this.isScrollingView) {
+				const page = store.get.page(this.page);
+				if (store.get.isFirstPage(page)) {
+					return {marginTop: this.getPageOffset() + 'px'};
+				} else if (store.get.isLastPage(page)) {
+					return {marginBottom: this.getPageOffset() + 'px'};
+				}
+			}
+			return null;
+		},
+		switchStyle() {
+			if (this.isScrollingView) {
+				const page = store.get.page(this.page);
+				if (store.get.isLastPage(page)) {
+					return {marginBottom: this.getPageOffset() - 15 + 'px'};
+				}
+			}
+			return null;
+		}
+	},
+	watch: {
+		page() {  // Necessary for single page view to register 'locked' correctly on page change
+			this.setSelfLocked();
+		}
+	},
+	beforeMount() {  // Necessary for scrolling view to register 'locked' correctly on view change
+		this.setSelfLocked();
+	}
+});
+
+Vue.component('pageView', {
+	template: '#pageView',
+	props: ['app', 'selectedItem', 'currentPageLookup'],
 	data() {
 		return {
 			pageSize: {
@@ -45,24 +100,28 @@ Vue.component('pageCanvasView', {
 	},
 	methods: {
 		forceUpdate() {
-			let needsRedraw = false;
 			const pageSize = store.state.template.page;
 			if ((this.pageSize.width !== pageSize.width) || (this.pageSize.height !== pageSize.height)) {
 				this.pageSize.width = store.state.template.page.width;
 				this.pageSize.height = store.state.template.page.height;
-				needsRedraw = true;
 			}
 			const latestPageCount = store.get.pageCount(true);
 			if (this.pageCount !== latestPageCount) {
 				this.pageCount = latestPageCount;
 				store.mutations.page.setDirty({includeTitlePage: true});
-				needsRedraw = true;
 			}
-			if (needsRedraw) {
-				Vue.nextTick(() => {
-					this.drawCurrentPage();
-				});
-			}
+			_.forEach(this.$refs, (k, component) => {
+				if (component) {
+					if (Array.isArray(component)) {
+						component.forEach(c => c && c.setSelfLocked());
+					} else {
+						component.setSelfLocked();
+					}
+				}
+			});
+			Vue.nextTick(() => {
+				this.drawCurrentPage();
+			});
 		},
 		mouseDown(e) {
 			if (e.button !== 0) {
@@ -100,7 +159,7 @@ Vue.component('pageCanvasView', {
 				return;
 			}
 			const up = {x: e.offsetX, y: e.offsetY};
-			if (_.geom.distance(this.mouseDownPt, up) < 10) {
+			if (this.mouseDownPt && _.geom.distance(this.mouseDownPt, up) < 10) {
 				// If simple mouse down + mouse up with very little movement, handle as if 'click' for selection
 				page = (page == null) ? this.currentPageLookup : page;
 				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
@@ -112,7 +171,6 @@ Vue.component('pageCanvasView', {
 			} else if (this.mouseDragItem && this.mouseDragItem.moved) {
 				// Mouse drag is complete; add undo event to stack
 				undoStack.commit(null, null, `Move ${_.prettyPrint(this.mouseDragItem.item.type)}`);
-				this.app.redrawUI(false);
 			}
 			this.mouseDownPt = this.mouseDragItem = null;
 		},
@@ -135,7 +193,7 @@ Vue.component('pageCanvasView', {
 				if (pageCanvas) {
 					const container = document.getElementById('rightSubPane');
 					const dy = (container.offsetHeight - pageCanvas.offsetHeight) / 2;
-					container.scrollTop = pageCanvas.offsetTop - dy;
+					container.scrollTop = pageCanvas.parentElement.offsetTop - dy;
 				}
 			}
 		},
@@ -201,8 +259,18 @@ Vue.component('pageCanvasView', {
 			let id = 'pageCanvas';
 			if (this.isScrollingView) {
 				id += (page.type === 'titlePage') ? 'titlePage' : page.id;
+			} else if (this.currentPageLookup) {
+				id += this.currentPageLookup.id;
 			}
 			return document.getElementById(id);
+		},
+		pageCoordsToCanvasCoords(point) {
+			const canvas = this.getCanvasForPage(this.currentPageLookup);
+			const box = canvas.getBoundingClientRect();
+			return {
+				x: Math.floor(point.x - box.x),
+				y: Math.floor(point.y - box.y)
+			};
 		}
 	},
 	computed: {
