@@ -14,6 +14,7 @@ const contextMenu = {
 		{
 			// TODO: concatenate parent -> child text so it comes out 'Layout Vertical' and not 'Vertical'
 			text: 'Layout',
+			hideOnLock: true,
 			children: [
 				{
 					text: 'Redo Layout',
@@ -104,6 +105,7 @@ const contextMenu = {
 		{text: 'Hide Step Separators (NYI)', cb: () => {}},
 		{
 			text: 'Add Blank Step',
+			hideOnLock: true,
 			cb(selectedItem) {
 				const dest = store.get.page(selectedItem.id);
 				let prevStep = store.get.step(_.last(dest.steps));
@@ -184,6 +186,7 @@ const contextMenu = {
 	step: [
 		{
 			text: 'Layout',
+			hideOnLock: true,
 			shown(selectedItem) {
 				const step = store.get.lookupToItem(selectedItem);
 				return step.steps.length > 0;
@@ -276,6 +279,7 @@ const contextMenu = {
 		},
 		{
 			text: 'Move Step to',
+			hideOnLock: true,
 			children: [
 				{
 					text: 'Previous Page',
@@ -312,6 +316,7 @@ const contextMenu = {
 		{
 			// TODO: If step being merged contains a submodel, must reorder all steps in that submodel too
 			text: 'Merge Step with...',
+			hideOnLock: true,
 			children: [
 				{
 					text: 'Previous Step',
@@ -341,6 +346,7 @@ const contextMenu = {
 		},
 		{
 			text: 'Delete Empty Step',
+			hideOnLock: true,
 			shown(selectedItem) {
 				return _.isEmpty(store.get.step(selectedItem).parts);
 			},
@@ -352,6 +358,7 @@ const contextMenu = {
 		{text: 'separator'},
 		{
 			text: 'Prepend Blank Step',
+			hideOnLock: true,
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
@@ -367,6 +374,7 @@ const contextMenu = {
 		},
 		{
 			text: 'Append Blank Step',
+			hideOnLock: true,
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
@@ -897,31 +905,59 @@ function displacePart(direction) {
 	};
 }
 
-module.exports = function ContextMenu(entry, localApp) {
-
-	function shown(menu) {
-		return menu.shown ? menu.shown(entry) : true;
+function filterMenu(menu, pageIsLocked, selectedItem) {
+	// Filter out invisible menu entries here so that if menu ends up empty, we don't draw anything in the UI
+	// If item's page is locked, filter out menu entries that only work on unlocked pages
+	// Removing some entries might leave extraneous separators; remove them too
+	for (let i = 0; i < menu.length; i++) {
+		const entry = menu[i];
+		let deleteIndex = false;
+		if (entry.text === 'separator') {
+			if (i === 0 || i === menu.length - 1 || (menu[i + 1] || {}).text === 'separator') {
+				deleteIndex = true;
+			}
+		} else if (entry.hideOnLock && pageIsLocked) {
+			deleteIndex = true;
+		} else if (entry.shown && !entry.shown(selectedItem)) {
+			deleteIndex = true;
+		} else if (entry.children) {
+			filterMenu(entry.children, pageIsLocked, selectedItem);
+			if (!entry.children.length) {
+				deleteIndex = true;
+			}
+		}
+		if (deleteIndex) {
+			_.removeIndex(menu, i);
+			i = -1;
+		}
 	}
+}
+
+module.exports = function ContextMenu(selectedItem, localApp) {
 
 	app = localApp;
-	let menu = contextMenu[entry.type];
-	menu = (typeof menu === 'function') ? menu(entry) : menu;
 
-	// Filter out invisible menu entries here so that if menu ends up empty, we don't draw anything in the UI
-	menu = (menu || []).filter(shown);
-	menu = menu.map(menuEntry => {
+	let menu = contextMenu[selectedItem.type];
+	menu = (typeof menu === 'function') ? menu(selectedItem) : menu;
+	const pageIsLocked = store.get.pageForItem(selectedItem).locked;
+
+	menu = menu.map(menuEntry => {  // Super cheap clone of menu, so we don't destroy the original
 		if (menuEntry.children) {
 			let children = menuEntry.children;
-			children = (typeof children === 'function') ? children(entry) : children;
+			children = (typeof children === 'function') ? children(selectedItem) : children;
 			return {
 				text: menuEntry.text,
-				children: children.filter(shown)
+				hideOnLock: menuEntry.hideOnLock,
+				children
 			};
 		}
 		return menuEntry;
 	});
+
+	filterMenu(menu, pageIsLocked, selectedItem);
+
 	if (menu) {
-		menu.forEach(m => (m.type = entry.type));  // Copy entry type to each meny entry; saves typing them all out everywhere above
+		menu.forEach(menuEntry => (menuEntry.type = selectedItem.type));  // Copy item type to each meny entry; saves typing them all out everywhere above
 		return menu;
 	}
 };

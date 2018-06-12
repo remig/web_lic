@@ -1175,7 +1175,9 @@ const store = {
 			},
 			layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
 				const page = store.get.lookupToItem(opts.page);
-				Layout.page(page, opts.layout || page.layout);
+				if (!page.locked) {
+					Layout.page(page, opts.layout || page.layout);
+				}
 			},
 			setDirty(opts) {  // opts: {includeTitlePage}
 				store.state.pages.forEach(p => (p.needsDrawing = true));
