@@ -293,10 +293,17 @@ ul {
 }
 
 .pageLockIcon {
+	z-index: 1;
 	position: absolute;
-	margin-left: 13px;
-	font-size: 1.1em;
-	bottom: 58px;
+	margin-left: 15px;
+	font-size: 0.75em;
+	bottom: 19px;
+	color: #888;
+	pointer-events: none;
+}
+
+.pageLockIcon.fa-lock {
+	bottom: 40px;
 }
 
 .pageLockSwitch {
