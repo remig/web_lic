@@ -122,6 +122,7 @@ const contextMenu = {
 					dest,
 					stepNumber: prevStep.number + 1,
 					doLayout: true, renumber: true,
+					model: _.clone(prevStep.model),
 					insertionIndex: store.state.steps.indexOf(prevStep) + 1
 				};
 				undoStack.commit('step.add', opts, this.text);
@@ -321,6 +322,7 @@ const contextMenu = {
 						const srcStep = selectedItem;
 						const destStep = store.get.prevStep(selectedItem, true);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
+						app.clearSelected();
 					}
 				},
 				{
@@ -332,6 +334,7 @@ const contextMenu = {
 						const srcStep = selectedItem;
 						const destStep = store.get.nextStep(selectedItem, true);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
+						app.clearSelected();
 					}
 				}
 			]
@@ -343,6 +346,7 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				undoStack.commit('step.delete', {step: selectedItem, doLayout: true}, this.text);
+				app.clearSelected();
 			}
 		},
 		{text: 'separator'},
@@ -352,7 +356,9 @@ const contextMenu = {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
 				const opts = {
-					dest, stepNumber: step.number, doLayout: true, renumber: true,
+					dest, stepNumber: step.number,
+					doLayout: true, renumber: true,
+					model: _.clone(step.model),
 					insertionIndex: store.state.steps.indexOf(step),
 					parentInsertionIndex: dest.steps.indexOf(step.id)
 				};
@@ -365,7 +371,9 @@ const contextMenu = {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
 				const opts = {
-					dest, stepNumber: step.number + 1, doLayout: true, renumber: true,
+					dest, stepNumber: step.number + 1,
+					doLayout: true, renumber: true,
+					model: _.clone(step.model),
 					insertionIndex: store.state.steps.indexOf(step) + 1,
 					parentInsertionIndex: dest.steps.indexOf(step.id) + 1
 				};

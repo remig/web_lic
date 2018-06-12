@@ -412,6 +412,9 @@ const store = {
 			return null;
 		},
 		pageForItem(item) {
+			if (item && item.type === 'part') {
+				item = store.get.step(item.stepID);
+			}
 			item = store.get.lookupToItem(item);
 			while (item && item.type !== 'page' && item.type !== 'titlePage' && item.type !== 'templatePage') {
 				item = store.get.parent(item);
@@ -858,7 +861,7 @@ const store = {
 			}
 		},
 		step: {
-			add(opts) {  // opts: {dest, doLayout = false, stepNumber = null, renumber = false, insertionIndex = -1, parentInsertionIndex = -1}
+			add(opts) {  // opts: {dest, doLayout = false, model = null, stepNumber = null, renumber = false, insertionIndex = -1, parentInsertionIndex = -1}
 
 				const dest = store.get.lookupToItem(opts.dest);
 				const step = store.mutations.item.add({
@@ -867,7 +870,7 @@ const store = {
 						number: opts.stepNumber, numberLabelID: null,
 						parts: [], callouts: [], steps: [], dividers: [], submodelImages: [],
 						csiID: null, pliID: null, rotateIconID: null,
-						model: {filename: null, parentStepID: null},
+						model: opts.model || {filename: null, parentStepID: null},
 						x: null, y: null, width: null, height: null, subStepLayout: 'vertical'
 					},
 					parent: dest,
@@ -997,6 +1000,7 @@ const store = {
 					newParent: newStep
 				});
 				newStep.parts = _.clone(step.parts);
+				newStep.model = _.clone(step.model);
 				if (opts.doLayout) {
 					store.mutations.page.layout({page: store.get.pageForItem(step)});
 				}
