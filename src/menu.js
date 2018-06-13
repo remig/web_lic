@@ -7,6 +7,7 @@ import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
 import Storage from './storage';
+import LocaleManager from './translate';
 
 let app;
 
@@ -156,6 +157,20 @@ const menu = [
 			]
 		},
 		{text: 'separator'},
+		{
+			text: 'navbar.file.set_language.root',
+			children() {
+				return LocaleManager.LanguageList.map(language => {
+					return {
+						text: language.language,
+						cb() {
+							LocaleManager.setLocale(language.code);
+							app.redrawUI();
+						}
+					};
+				});
+			}
+		},
 		{
 			text: 'navbar.file.clear_cache.root',
 			children: [

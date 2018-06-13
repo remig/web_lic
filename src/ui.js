@@ -454,11 +454,7 @@ const app = new Vue({
 			this.redrawUI();
 		});
 
-		if (LocaleManager.getLocale() == null) {
-			LocaleManager.pickLanguage(this, this.openLocalLicFile, this.redrawUI);  // TODO: Find better way of calling 'redrawUI' from arbitrary places
-		} else {
-			this.openLocalLicFile();
-		}
+		LocaleManager.pickLanguage(this, this.openLocalLicFile, this.redrawUI);  // TODO: Find better way of calling 'redrawUI' from arbitrary places
 	}
 });
 

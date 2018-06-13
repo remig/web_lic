@@ -15,6 +15,9 @@
 				"load_builtin": "Load Built-in (NYI)",
 				"reset": "Reset"
 			},
+			"set_language": {
+				"root": "Set Language"
+			},
 			"clear_cache": {
 				"root": "Clear Cache",
 				"model": "Current Instruction Book",
