@@ -10,27 +10,32 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
-	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
-	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/89/three.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.6/vue.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.3.5/split.min.js"></script>
-<!--
-	<script type="text/javascript" src="lib/three-89.js"></script>
-	<script type="text/javascript" src="lib/vue-2.2.6.js"></script>
-	<script type="text/javascript" src="lib/jspdf-1.3.4.js"></script>
-	<script type="text/javascript" src="lib/jszip-3.1.3.js"></script>
-	<script type="text/javascript" src="lib/FileSaver-1.3.2.js"></script>
-	<script type="text/javascript" src="lib/split.js"></script>
--->
+	<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/89/three.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.6/vue.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.3.5/split.min.js"></script>
 	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 	<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
+
+<!--
+	<link rel="stylesheet" href="lib/element-ui_theme-chalk-2.4.1.css">
+
+	<script src="lib/three-89.js"></script>
+	<script src="lib/vue-2.2.6.js"></script>
+	<script src="lib/jspdf-1.3.4.js"></script>
+	<script src="lib/jszip-3.1.3.js"></script>
+	<script src="lib/FileSaver-1.3.2.js"></script>
+	<script src="lib/split.js"></script>
+	<script src="lib/element-ui-2.4.1.js"></script>
+	<script src="lib/element-ui_local-en-2.4.1.js"></script>
+-->
 
 	<link rel="stylesheet" href="static/style.css">
 
@@ -100,7 +105,11 @@
 
 	<script type="text/x-template" id="pageView">
 		<div id="rightSubPane" :class="[{singleEntry: !isScrollingView}]" @scroll="handleScroll()">
-			<div v-if="isScrollingView" :style="{width: pageSize.width + 5 + 'px'}" class="pageCanvasContainer">
+			<div
+				v-if="isScrollingView"
+				:style="{width: pageSize.width + 5 + 'px'}"
+				class="pageCanvasContainer"
+			>
 				<div
 					v-for="page in pageList"
 					@mousedown.stop="mouseDown($event, page)"
@@ -131,7 +140,6 @@
 						:is-scrolling-view="false"
 						:width="pageSize.width"
 						:height="pageSize.height"
-						:foobar="pageViewUpdateState"
 					></page-canvas-view>
 				</div>
 			</div>
@@ -165,31 +173,78 @@
 	<script type="text/x-template" id="navMenuTemplate">
 		<nav class="navbar navbar-default">
 			<ul class="nav navbar-nav">
-				<li v-for="menu in menuEntryList" :id="menu.id || menu.name | sanitizeMenuID" class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{menu.name}} <span class="caret"></span></a>
+				<li
+					v-for="menu in menuEntryList"
+					:id="menu.id || menu.name | sanitizeMenuID"
+					class="dropdown"
+				>
+					<a
+						href="#"
+						class="dropdown-toggle"
+						data-toggle="dropdown"
+						role="button"
+						aria-haspopup="true"
+						aria-expanded="false"
+					>
+						{{menu.name}}
+						<span class="caret"></span>
+					</a>
 					<menu-list :menu-entries="menu.children" selected-item=""></menu-list>
 				</li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				<template v-if="filename && filename.name">
-					<li><span id="filename" class="navbar-text">{{filename.name + (filename.isDirty ? ' *' : '')}}</span></li>
-					<li><span class="navbar-text">|</span></li>
+					<li>
+						<span id="filename" class="navbar-text">
+							{{filename.name + (filename.isDirty ? ' *' : '')}}
+						</span>
+					</li>
+					<li>
+						<span class="navbar-text">
+							|
+						</span>
+					</li>
 				</template>
-				<li><a href="http://bugeyedmonkeys.com" target="_blank">Web Lic {{version}}</a></li>
+				<li>
+					<a href="http://bugeyedmonkeys.com" target="_blank">
+						Web Lic {{version}}
+					</a>
+				</li>
 			</ul>
 		</nav>
 	</script>
 
 	<script type="text/x-template" id="menuTemplate">
 		<ul class="dropdown-menu">
-			<li v-for="entry in menuEntries" :id="entry.id || entry.text | sanitizeMenuID" v-if="isVisible(entry)"
-					:class="{divider: entry.text == 'separator', 'dropdown-submenu': entry.children, disabled: entry.enabled ? !entry.enabled() : false}">
-				<a v-if="entry.text !== 'separator'" @click="triggerMenu(entry, $event)" :class="['clickable', {'shortcut-parent': entry.shortcut}]" data-toggle="dropdown">
-					<span class="menu-text">{{resolveProperty(entry.text)}}</span>
-					<span class="menu-text shortcut small" v-if="entry.shortcut">{{entry.shortcut | prettyPrint}}</span>
+			<li
+				v-for="entry in menuEntries"
+				v-if="isVisible(entry)"
+				:id="entry.id || entry.text | sanitizeMenuID"
+				:class="{divider: entry.text == 'separator', 'dropdown-submenu': entry.children, disabled: entry.enabled ? !entry.enabled(selectedItem) : false}"
+			>
+				<a
+					v-if="entry.text !== 'separator'"
+					@click="triggerMenu(entry, $event)"
+					:class="['clickable', {'shortcut-parent': entry.shortcut}]" data-toggle="dropdown"
+				>
+					<span
+						class="menu-text"
+					>
+						{{resolveProperty(entry.text)}}
+					</span>
+					<span
+						v-if="entry.shortcut"
+						class="menu-text shortcut small"
+					>
+						{{entry.shortcut | prettyPrint}}
+					</span>
 				</a>
 				<ul v-if="entry.children" class="dropdown-menu">
-					<li v-for="child in resolveProperty(entry.children)" v-if="isVisible(child)">
+					<li
+						v-for="child in resolveProperty(entry.children)"
+						v-if="isVisible(child)"
+						:class="{divider: child.text == 'separator', disabled: child.enabled ? !child.enabled(selectedItem) : false}"
+					>
 						<a @click="triggerMenu(child, $event)" class="clickable">{{child.text}}</a>
 					</li>
 				</ul>
@@ -199,49 +254,97 @@
 
 	<!-- Nav Tree Components -->
 	<script type="text/x-template" id="treeRowTemplate">
-		<span :id="`treeRow_${target.type}_${target.id}`" :class="['clickable', 'treeText', {selected: selected}]" @click.stop.prevent="itemClick">{{text}}</span>
+		<span
+			:id="`treeRow_${target.type}_${target.id}`"
+			:class="['clickable', 'treeText', {selected: selected}]"
+			@click.stop.prevent="itemClick"
+		>{{text}}</span>
 	</script>
 
 	<script type="text/x-template" id="treeParentRowTemplate">
 		<div :id="`treeParent_${target.type}_${target.id}`">
-			<i :class="['treeIcon', 'fas', 'fa-lg', {'fa-caret-down': expanded, 'fa-caret-right': !expanded}]" @click.stop.prevent="arrowClick" />
-			<treeRow :currentItem="currentItem" :target="target" :selectionCallback="treeData.selectionCallback" />
+			<i
+				:class="['treeIcon', 'fas', 'fa-lg', {'fa-caret-down': expanded, 'fa-caret-right': !expanded}]"
+				@click.stop.prevent="arrowClick"
+			/>
+			<treeRow
+				:currentItem="currentItem"
+				:target="target"
+				:selectionCallback="treeData.selectionCallback"
+			/>
 			<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">
 				<li v-if="target.numberLabelID != null">
-					<treeRow :currentItem="currentItem" :target="treeData.store.get.numberLabel(target.numberLabelID)" :selectionCallback="treeData.selectionCallback" />
+					<treeRow
+						:currentItem="currentItem"
+						:target="treeData.store.get.numberLabel(target.numberLabelID)"
+						:selectionCallback="treeData.selectionCallback"
+					/>
 				</li>
 				<template v-if="target.annotations != null">
 					<li v-for="annotationID in target.annotations">
-						<treeRow :currentItem="currentItem" :target="treeData.store.get.annotation(annotationID)" :selectionCallback="treeData.selectionCallback" />
+						<treeRow
+							:currentItem="currentItem"
+							:target="treeData.store.get.annotation(annotationID)"
+							:selectionCallback="treeData.selectionCallback"
+						/>
 					</li>
 				</template>
 				<template v-if="target.steps != null">
-					<li v-for="step in this.target.steps.map(id => treeData.store.get.step(id))" class="unindent">
+					<li
+						v-for="step in this.target.steps.map(id => treeData.store.get.step(id))"
+						class="unindent"
+					>
 						<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="step" />
 					</li>
 				</template>
 				<template v-if="target.submodelImages != null">
-					<li v-for="submodelImage in target.submodelImages.map(id => treeData.store.get.submodelImage(id))">
-						<treeRow :currentItem="currentItem" :target="submodelImage" :selectionCallback="treeData.selectionCallback" />
+					<li
+						v-for="submodelImage in target.submodelImages.map(id => treeData.store.get.submodelImage(id))"
+					>
+						<treeRow
+							:currentItem="currentItem"
+							:target="submodelImage"
+							:selectionCallback="treeData.selectionCallback"
+						/>
 					</li>
 				</template>
 				<li v-if="target.csiID != null">
-					<treeRow :currentItem="currentItem" :target="treeData.store.get.csi(target.csiID)" :selectionCallback="treeData.selectionCallback" />
+					<treeRow
+						:currentItem="currentItem"
+						:target="treeData.store.get.csi(target.csiID)"
+						:selectionCallback="treeData.selectionCallback"
+					/>
 				</li>
 				<li v-if="target.pliID != null && treeData.store.state.plisVisible" class="unindent">
-					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.pli(target.pliID)" />
+					<treeParentRow
+						:tree-data="treeData"
+						:currentItem="currentItem"
+						:target="treeData.store.get.pli(target.pliID)"
+					/>
 				</li>
 				<template v-if="target.pliItems != null">
 					<li v-for="pliItem in target.pliItems.map(id => treeData.store.get.pliItem(id))">
-						<treeRow :currentItem="currentItem" :target="pliItem" :selectionCallback="treeData.selectionCallback" />
+						<treeRow
+							:currentItem="currentItem"
+							:target="pliItem"
+							:selectionCallback="treeData.selectionCallback"
+						/>
 					</li>
 				</template>
 				<li v-if="target.quantityLabelID != null">
-					<treeRow :currentItem="currentItem" :target="treeData.store.get.quantityLabel(target.quantityLabelID)" :selectionCallback="treeData.selectionCallback" />
+					<treeRow
+						:currentItem="currentItem"
+						:target="treeData.store.get.quantityLabel(target.quantityLabelID)"
+						:selectionCallback="treeData.selectionCallback"
+					/>
 				</li>
 				<template v-if="target.callouts != null">
 					<li v-for="calloutID in target.callouts" class="unindent">
-						<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.callout(calloutID)" />
+						<treeParentRow
+							:tree-data="treeData"
+							:currentItem="currentItem"
+							:target="treeData.store.get.callout(calloutID)"
+						/>
 					</li>
 				</template>
 			</ul>
@@ -252,14 +355,31 @@
 		<div id="tree">
 			<ul>
 				<li v-if="treeData.store.get.templatePage() != null">
-					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.templatePage()" />
+					<treeParentRow
+						:tree-data="treeData"
+						:currentItem="currentItem"
+						:target="treeData.store.get.templatePage()"
+					/>
 				</li>
 				<li v-if="treeData.store.get.titlePage() != null">
-					<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="treeData.store.get.titlePage()" />
+					<treeParentRow
+						:tree-data="treeData"
+						:currentItem="currentItem"
+						:target="treeData.store.get.titlePage()"
+					/>
 				</li>
 				<li v-for="node in treeData.store.get.topLevelTreeNodes()">
-					<treeParentRow v-if="node.type === 'page'" :tree-data="treeData" :currentItem="currentItem" :target="node" />
-					<treeRow v-else :currentItem="currentItem" :target="node" :selectionCallback="treeData.selectionCallback" />
+					<treeParentRow
+						v-if="node.type === 'page'"
+						:tree-data="treeData"
+						:currentItem="currentItem"
+						:target="node"
+					/>
+					<treeRow
+						v-else :currentItem="currentItem"
+						:target="node"
+						:selectionCallback="treeData.selectionCallback"
+					/>
 				</li>
 			</ul>
 		</div>
@@ -267,12 +387,23 @@
 
 	<!-- Dialog Components -->
 	<script type="text/x-template" id="baseDialogTemplate">
-		<div id="dialogContainer" class="modal mini-modal" tabindex="-1" role="dialog" :style="{left: position.x + 'px', top: position.y + 'px'}">
+		<div
+			id="dialogContainer"
+			class="modal mini-modal"
+			tabindex="-1"
+			role="dialog"
+			:style="{left: position.x + 'px', top: position.y + 'px'}"
+		>
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
 						<slot name="header">
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<button
+								type="button"
+								class="close"
+								data-dismiss="modal"
+								aria-label="Close"
+							><span aria-hidden="true">&times;</span></button>
 							<h4 class="modal-title">{{title}}</h4>
 						</slot>
 					</div>
@@ -282,8 +413,22 @@
 					<div class="modal-footer">
 						<slot name="footer">
 							<slot name="buttons"></slot>
-							<button v-if="cancelButtonText" id="cancelDialogButton" type="button" class="btn btn-default" data-dismiss="modal" v-on:click="cancel">{{cancelButtonText}}</button>
-							<button v-if="okButtonText" id="okDialogButton" type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="ok">{{okButtonText}}</button>
+							<button
+								v-if="cancelButtonText"
+								id="cancelDialogButton"
+								type="button"
+								class="btn btn-default"
+								data-dismiss="modal"
+								v-on:click="cancel"
+							>{{cancelButtonText}}</button>
+							<button
+								v-if="okButtonText"
+								id="okDialogButton"
+								type="button"
+								class="btn btn-primary"
+								data-dismiss="modal"
+								v-on:click="ok"
+							>{{okButtonText}}</button>
 						</slot>
 					</div>
 				</div>
@@ -298,26 +443,53 @@
 					<div class="form-group">
 						<label class="col-sm-3 control-label" for="stepsPerPage">Steps per Page</label>
 						<div class="col-sm-2">
-							<input v-model.number="stepsPerPage" type="number" class="form-control" id="stepsPerPage" :disabled="useMaxSteps" min="1"/>
+							<input
+								v-model.number="stepsPerPage"
+								type="number"
+								class="form-control"
+								id="stepsPerPage"
+								:disabled="useMaxSteps"
+								min="1"
+							/>
 						</div>
 						<div class="col-sm-6">
 							<label class="checkbox">
-								<input v-model="useMaxSteps" id="useMaxStepsCheckbox" type="checkbox" value="" />
+								<input
+									v-model="useMaxSteps"
+									id="useMaxStepsCheckbox"
+									type="checkbox"
+									value=""
+								/>
 								As many as can fit nicely (slow)
 							</label>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="checkbox-inline">
-							<input v-model="includeTitlePage" id="includeTitlePageCheckbox" type="checkbox" value="" />
+							<input
+								v-model="includeTitlePage"
+								id="includeTitlePageCheckbox"
+								type="checkbox"
+								value=""
+							/>
 							Include Title Page
 						</label>
 						<label class="checkbox-inline">
-							<input v-model="includePartListPage" id="includePartListPageCheckbox" type="checkbox" value="" />
+							<input
+								v-model="includePartListPage"
+								id="includePartListPageCheckbox"
+								type="checkbox"
+								value=""
+							/>
 							Include Part List Page (NYI)
 						</label>
 						<label class="checkbox-inline">
-							<input v-model="includePLIs" id="includePLIsCheckbox" type="checkbox" value="" />
+							<input
+								v-model="includePLIs"
+								id="includePLIsCheckbox"
+								type="checkbox"
+								value=""
+							/>
 							Include PLIs in each Step
 						</label>
 					</div>
@@ -331,21 +503,67 @@
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
-						<label class="col-sm-3 control-label" for="inputPartDistance">Part Distance</label>
+						<label
+							class="col-sm-3 control-label"
+							for="inputPartDistance"
+						>
+							Part Distance
+						</label>
 						<div class="col-sm-2">
-							<input v-model.number="partDistance" v-on:input="updateValues" type="number" class="form-control" id="inputPartDistance"/>
+							<input
+								v-model.number="partDistance"
+								v-on:input="updateValues"
+								type="number"
+								class="form-control"
+								id="inputPartDistance"
+							/>
 						</div>
-						<label class="col-sm-3 control-label" for="inputArrowDistance">Arrow Distance</label>
+						<label
+							class="col-sm-3 control-label"
+							for="inputArrowDistance"
+						>
+							Arrow Distance
+						</label>
 						<div class="col-sm-2">
-							<input v-model.number="arrowOffset" v-on:input="updateValues" type="number" class="form-control" id="inputArrowDistance"/>
+							<input
+								v-model.number="arrowOffset"
+								v-on:input="updateValues"
+								type="number"
+								class="form-control"
+								id="inputArrowDistance"
+							/>
 						</div>
-						<label class="col-sm-3 control-label" for="inputArrowLength">Arrow Length</label>
+						<label
+							class="col-sm-3 control-label"
+							for="inputArrowLength"
+						>
+							Arrow Length
+						</label>
 						<div class="col-sm-2">
-							<input v-model.number="arrowLength" v-on:input="updateValues" type="number" min="0" class="form-control" id="inputArrowLength"/>
+							<input
+								v-model.number="arrowLength"
+								v-on:input="updateValues"
+								type="number"
+								min="0"
+								class="form-control"
+								id="inputArrowLength"
+							/>
 						</div>
-						<label class="col-sm-3 control-label" for="inputArrowRotation">Arrow Rotation</label>
+						<label
+							class="col-sm-3 control-label"
+							for="inputArrowRotation"
+						>
+							Arrow Rotation
+						</label>
 						<div class="col-sm-2">
-							<input v-model.number="arrowRotation" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" id="inputArrowRotation"/>
+							<input
+								v-model.number="arrowRotation"
+								v-on:input="updateValues"
+								type="number"
+								min="-360" max="360"
+								class="form-control"
+								id="inputArrowRotation"
+							/>
 						</div>
 					</div>
 				</form>
@@ -358,22 +576,58 @@
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
-						<label class="col-sm-2 control-label" for="rowsInLayout">Rows</label>
+						<label
+							class="col-sm-2 control-label"
+							for="rowsInLayout"
+						>
+							Rows
+						</label>
 						<div class="col-sm-2">
-							<input v-model.number="rows" v-on:input="updateValues" type="number" class="form-control" id="rowsInLayout"/>
+							<input
+								v-model.number="rows"
+								v-on:input="updateValues"
+								type="number"
+								class="form-control"
+								id="rowsInLayout"
+							/>
 						</div>
-						<label class="col-sm-2 control-label" for="colsInLayout">Columns</label>
+						<label
+							class="col-sm-2 control-label"
+							for="colsInLayout"
+						>
+							Columns
+						</label>
 						<div class="col-sm-2">
-							<input v-model.number="cols" v-on:input="updateValues" type="number" class="form-control" id="colsInLayout"/>
+							<input
+								v-model.number="cols"
+								v-on:input="updateValues"
+								type="number"
+								class="form-control"
+								id="colsInLayout"
+							/>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-sm-4 radio-inline">
-							<input v-model="direction" v-on:change="updateValues" type="radio" name="inlineRadioOptions" id="directionHorizontal" value="horizontal">
+							<input
+								v-model="direction"
+								v-on:change="updateValues"
+								type="radio"
+								name="inlineRadioOptions"
+								id="directionHorizontal"
+								value="horizontal"
+							>
 							Horizontal
 						</label>
 						<label class="col-sm-4 radio-inline">
-							<input v-model="direction" v-on:change="updateValues" type="radio" name="inlineRadioOptions" id="directionVertical" value="vertical">
+							<input
+								v-model="direction"
+								v-on:change="updateValues"
+								type="radio"
+								name="inlineRadioOptions"
+								id="directionVertical"
+								value="vertical"
+							>
 							Vertical
 						</label>
 					</div>
@@ -389,20 +643,46 @@
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="x">X</label>
 						<div class="col-sm-2">
-							<input v-model.number="rotation.x" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" id="x"/>
+							<input
+								v-model.number="rotation.x"
+								v-on:input="updateValues"
+								type="number"
+								min="-360" max="360"
+								class="form-control"
+								id="x"
+							/>
 						</div>
 						<label class="col-sm-2 control-label" for="y">Y</label>
 						<div class="col-sm-2">
-							<input v-model.number="rotation.y" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" id="y"/>
+							<input
+								v-model.number="rotation.y"
+								v-on:input="updateValues"
+								type="number"
+								min="-360" max="360"
+								class="form-control"
+								id="y"
+							/>
 						</div>
 						<label class="col-sm-2 control-label" for="z">Z</label>
 						<div class="col-sm-2">
-							<input v-model.number="rotation.z" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" id="z"/>
+							<input
+								v-model.number="rotation.z"
+								v-on:input="updateValues"
+								type="number"
+								min="-360" max="360"
+								class="form-control"
+								id="z"
+							/>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="checkbox-inline">
-							<input v-model="addRotateIcon" id="includeRotationIconCheckbox" type="checkbox" value="" />
+							<input
+								v-model="addRotateIcon"
+								id="includeRotationIconCheckbox"
+								type="checkbox"
+								value=""
+							/>
 							Add Rotation Icon
 						</label>
 					</div>
@@ -416,9 +696,21 @@
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
-						<label class="col-sm-5 control-label" for="nextXSteps">Copy Rotation to Next Steps</label>
+						<label
+							class="col-sm-5 control-label"
+							for="nextXSteps"
+						>
+							Copy Rotation to Next Steps
+						</label>
 						<div class="col-sm-2">
-							<input v-model.number="nextXSteps" v-on:input="updateValues" type="number" min="0" class="form-control" id="nextXSteps"/>
+							<input
+								v-model.number="nextXSteps"
+								v-on:input="updateValues"
+								type="number"
+								min="0"
+								class="form-control"
+								id="nextXSteps"
+							/>
 						</div>
 					</div>
 				</form>
@@ -431,9 +723,21 @@
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
-						<label class="col-sm-2 control-label" for="stringInput">{{labelText}}</label>
+						<label
+							class="col-sm-2 control-label"
+							for="stringInput"
+						>
+							{{labelText}}
+						</label>
 						<div class="col-sm-10">
-							<input v-model="string" v-on:input="updateValues" type="text" class="form-control" id="stringInput" :placeholder="string" />
+							<input
+								v-model="string"
+								v-on:input="updateValues"
+								type="text"
+								class="form-control"
+								id="stringInput"
+								:placeholder="string"
+							/>
 						</div>
 					</div>
 				</form>
@@ -446,7 +750,10 @@
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
-						<el-color-picker v-model="color" v-on:input="updateValues"></el-color-picker>
+						<el-color-picker
+							v-model="color"
+							v-on:input="updateValues"
+						></el-color-picker>
 					</div>
 				</form>
 			</div>
@@ -458,9 +765,20 @@
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
-						<label class="col-sm-4 control-label" for="fontNameInput">Enter the name of a font on your system</label>
+						<label
+							class="col-sm-4 control-label"
+							for="fontNameInput"
+						>
+							Enter the name of a font on your system
+						</label>
 						<div class="col-sm-8">
-							<input v-model="fontName" v-on:input="updateValues" type="text" class="form-control" id="fontNameInput" />
+							<input
+								v-model="fontName"
+								v-on:input="updateValues"
+								type="text"
+								class="form-control"
+								id="fontNameInput"
+							/>
 						</div>
 					</div>
 				</form>
@@ -477,8 +795,19 @@
 			<div class="panel-body">
 				<form class="form-horizontal">
 					<div class="form-group">
-						<label for="fillColorInput" class="control-label col-sm-5">Color</label>
-						<el-color-picker v-model="color" v-on:active-change="updateColor" v-on:change="updateValues" show-alpha  id="fillColorInput"></el-color-picker>
+						<label
+							for="fillColorInput"
+							class="control-label col-sm-5"
+						>
+							Color
+						</label>
+						<el-color-picker
+							v-model="color"
+							v-on:active-change="updateColor"
+							v-on:change="updateValues"
+							show-alpha
+							id="fillColorInput"
+						></el-color-picker>
 					</div>
 					<div class="form-group" v-if="gradient != null">
 						<label for="gradientInput" class="control-label col-sm-5">Gradient</label>
@@ -488,10 +817,28 @@
 					<div class="form-group" v-if="imageFilename != null">
 						<label for="imageInput" class="control-label col-sm-5">
 							Image
-							<el-button type="text" class="template-close" v-if="imageFilename" icon="el-icon-close" v-on:click="removeImage" size="small"></el-button>
+							<el-button
+								type="text"
+								class="template-close"
+								v-if="imageFilename"
+								icon="el-icon-close"
+								v-on:click="removeImage"
+								size="small"
+							></el-button>
 						</label>
-						<el-button v-if="imageFilename" icon="el-icon-picture-outline" v-on:click="pickImage" class="tight">{{truncatedImageName}}</el-button>
-						<el-button v-else icon="el-icon-picture-outline" v-on:click="pickImage"></el-button>
+						<el-button
+							v-if="imageFilename"
+							icon="el-icon-picture-outline"
+							v-on:click="pickImage"
+							class="tight"
+						>
+							{{truncatedImageName}}
+						</el-button>
+						<el-button
+							v-else
+							icon="el-icon-picture-outline"
+							v-on:click="pickImage"
+						></el-button>
 					</div>
 				</form>
 			</div>
@@ -504,19 +851,43 @@
 			<div class="panel-body">
 				<form class="form-horizontal">
 					<div class="form-group">
-						<label for="borderColorInput" class="control-label col-sm-7">Color</label>
-						<el-color-picker v-model="color" v-on:active-change="updateColor" v-on:change="updateValues" show-alpha></el-color-picker>
+						<label
+							for="borderColorInput"
+							class="control-label col-sm-7"
+						>
+							Color
+						</label>
+						<el-color-picker
+							v-model="color"
+							v-on:active-change="updateColor"
+							v-on:change="updateValues"
+							show-alpha
+						></el-color-picker>
 					</div>
 					<div class="form-group">
 						<label for="lineWidth" class="control-label col-sm-7">Line Width</label>
 						<div class="col-sm-5">
-							<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="lineWidth"/>
+							<input
+								v-model.number="width"
+								v-on:input="updateValues"
+								type="number"
+								min="0"
+								class="form-control"
+								id="lineWidth"
+							/>
 						</div>
 					</div>
 					<div class="form-group" v-if="cornerRadius != null">
 						<label for="cornerRadius" class="control-label col-sm-7">Corner Radius</label>
 						<div class="col-sm-5">
-							<input v-model.number="cornerRadius" v-on:input="updateValues" type="number" min="0" class="form-control" id="cornerRadius"/>
+							<input
+								v-model.number="cornerRadius"
+								v-on:input="updateValues"
+								type="number"
+								min="0"
+								class="form-control"
+								id="cornerRadius"
+							/>
 						</div>
 					</div>
 				</form>
@@ -542,27 +913,60 @@
 							<div class="col-sm-10">
 								<el-select v-model="family" @change="updateFontName" id="font">
 									<el-option-group v-for="group in familyNames" :key="group.label">
-										<el-option v-for="font in group.options" :key="font" :value="font">{{font}}</el-option>
+										<el-option
+											v-for="font in group.options"
+											:key="font"
+											:value="font"
+										>
+											{{font}}
+										</el-option>
 									</el-option-group>
 								</el-select>
 							</div>
 						</div>
 						<div class="form-group">
 							<div class="col-sm-12">
-								<button v-on:click.stop.prevent="toggleProp('bold')" class="btn btn-secondary btn-primary"><strong>B</strong></button>
-								<button v-on:click.stop.prevent="toggleProp('italic')" class="btn btn-secondary"><em>I</em></button>
-								<button v-on:click.stop.prevent="toggleProp('underline')" class="btn btn-secondary"><u>U</u></button>
+								<button
+									v-on:click.stop.prevent="toggleProp('bold')"
+									class="btn btn-secondary btn-primary"
+								>
+									<strong>B</strong>
+								</button>
+								<button
+									v-on:click.stop.prevent="toggleProp('italic')"
+									class="btn btn-secondary"
+								>
+									<em>I</em>
+								</button>
+								<button
+									v-on:click.stop.prevent="toggleProp('underline')"
+									class="btn btn-secondary"
+								>
+									<u>U</u>
+								</button>
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="fontSize" class="control-label col-sm-4">Size</label>
 							<div class="col-sm-5">
-								<input v-model.number="size" v-on:input="updateValues" type="number" min="0" class="form-control" id="fontSize" />
+								<input
+									v-model.number="size"
+									v-on:input="updateValues"
+									type="number"
+									min="0"
+									class="form-control"
+									id="fontSize"
+								/>
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="borderColorInput" class="control-label col-sm-4">Color</label>
-							<el-color-picker v-model="color" v-on:active-change="updateColor" v-on:change="updateValues" show-alpha></el-color-picker>
+							<el-color-picker
+								v-model="color"
+								v-on:active-change="updateColor"
+								v-on:change="updateValues"
+								show-alpha
+							></el-color-picker>
 						</div>
 					</form>
 				</div>
@@ -580,20 +984,39 @@
 					<form class="form-horizontal">
 						<div class="checkbox">
 							<label for="maintainAspectRatio">
-								<input v-model="maintainAspectRatio" v-on:click="changeAspectRatio" type="checkbox" id="maintainAspectRatio" />
+								<input
+									v-model="maintainAspectRatio"
+									v-on:click="changeAspectRatio"
+									type="checkbox"
+									id="maintainAspectRatio"
+								/>
 								Maintain Aspect Ratio ({{aspectRatio.toFixed(2)}})
 							</label>
 						</div>
 						<div class="form-group paddingT10">
 							<label for="pageWidth" class="control-label col-sm-5">Width (px)</label>
 							<div class="col-sm-5">
-								<input v-model.number="width" v-on:input="updateValues" type="number" min="0" class="form-control" id="pageWidth" />
+								<input
+									v-model.number="width"
+									v-on:input="updateValues"
+									type="number"
+									min="0"
+									class="form-control"
+									id="pageWidth"
+								/>
 							</div>
 						</div>
 						<div class="form-group marginB05">
 							<label for="pageHeight" class="control-label col-sm-5">Height (px)</label>
 							<div class="col-sm-5">
-								<input v-model.number="height" v-on:input="updateValues" type="number" min="0" class="form-control col-sm-10" id="pageHeight" />
+								<input
+									v-model.number="height"
+									v-on:input="updateValues"
+									type="number"
+									min="0"
+									class="form-control col-sm-10"
+									id="pageHeight"
+								/>
 							</div>
 						</div>
 					</form>
@@ -612,15 +1035,28 @@
 					<form class="form-horizontal">
 						<div class="form-group">
 							<div class="col-sm-10">
-								<el-select :value="position | prettyPrint" @change="updatePosition" id="pageNumberPosition">
-									<el-option v-for="position in positions" :key="position" :value="position">{{position | prettyPrint}}</el-option>
+								<el-select
+									:value="position | prettyPrint"
+									@change="updatePosition"
+									id="pageNumberPosition"
+								>
+									<el-option
+										v-for="position in positions"
+										:key="position"
+										:value="position"
+									>
+										{{position | prettyPrint}}
+									</el-option>
 								</el-select>
 							</div>
 						</div>
 					</form>
 				</div>
 			</div>
-			<font-template-panel v-on:new-values="newValues" ref="fontTemplatePanel"></font-template-panel>
+			<font-template-panel
+				v-on:new-values="newValues"
+				ref="fontTemplatePanel"
+			></font-template-panel>
 		</div>
 	</script>
 
@@ -631,7 +1067,12 @@
 					<form class="form-horizontal">
 						<div class="checkbox">
 							<label for="includeSubmodels">
-								<input v-model="includeSubmodels" v-on:click="updateValues" type="checkbox" id="includeSubmodels" />
+								<input
+									v-model="includeSubmodels"
+									v-on:click="updateValues"
+									type="checkbox"
+									id="includeSubmodels"
+								/>
 								Include Submodels in PLI
 							</label>
 						</div>
@@ -651,19 +1092,40 @@
 					<div class="form-group">
 						<label for="xRotation" class="control-label col-sm-2">X</label>
 						<div class="col-sm-5">
-							<input id="xRotation" v-model.number="x" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" />
+							<input
+								id="xRotation"
+								v-model.number="x"
+								v-on:input="updateValues"
+								type="number"
+								min="-360" max="360"
+								class="form-control"
+							/>
 						</div>
 					</div>
 					<div class="form-group">
 						<label for="yRotation" class="control-label col-sm-2">Y</label>
 						<div class="col-sm-5">
-							<input id="yRotation" v-model.number="y" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" />
+							<input
+								id="yRotation"
+								v-model.number="y"
+								v-on:input="updateValues"
+								type="number"
+								min="-360" max="360"
+								class="form-control"
+							/>
 						</div>
 					</div>
 					<div class="form-group">
 						<label for="zRotation" class="control-label col-sm-2">Z</label>
 						<div class="col-sm-5">
-							<input id="zRotation" v-model.number="z" v-on:input="updateValues" type="number" min="-360" max="360" class="form-control" />
+							<input
+								id="zRotation"
+								v-model.number="z"
+								v-on:input="updateValues"
+								type="number"
+								min="-360" max="360"
+								class="form-control"
+							/>
 						</div>
 					</div>
 				</form>
@@ -673,17 +1135,30 @@
 
 	<script type="text/x-template" id="csiTemplatePanel">
 		<div>
-			<rotate-template-panel v-on:new-values="newValues" ref="rotateTemplatePanel"></rotate-template-panel>
-			<fill-template-panel title="Displacement Arrow Color" v-on:new-values="newArrowStyle"></fill-template-panel>
+			<rotate-template-panel
+				v-on:new-values="newValues"
+				ref="rotateTemplatePanel"
+			></rotate-template-panel>
+			<fill-template-panel
+				title="Displacement Arrow Color"
+				v-on:new-values="newArrowStyle"
+			></fill-template-panel>
 			<!-- <border-template-panel title="Displacement Arrow Border" v-on:new-values="newArrowStyle"></border-template-panel> -->
 		</div>
 	</script>
 
 	<script type="text/x-template" id="rotateIconTemplatePanel">
 		<div>
-			<fill-template-panel v-on:new-values="newValues"></fill-template-panel>
-			<border-template-panel v-on:new-values="newValues"></border-template-panel>
-			<border-template-panel v-on:new-values="newValues" title="Arrow" templateEntry="rotateIcon.arrow"></border-template-panel>
+			<fill-template-panel
+				v-on:new-values="newValues"
+			></fill-template-panel>
+			<border-template-panel
+				v-on:new-values="newValues"
+			></border-template-panel>
+			<border-template-panel
+				v-on:new-values="newValues"
+				title="Arrow" templateEntry="rotateIcon.arrow"
+			></border-template-panel>
 		</div>
 	</script>
 
@@ -691,12 +1166,16 @@
 		<div @click.stop="" class="container">
 			<h4>{{selectedItem ? selectedItem.type : 'Select a Page Item' | prettyPrint}}</h4>
 			<div class="panel-group">
-				<component :is="currentTemplatePanel" ref="currentTemplatePanel" v-on:new-values="newValues"></component>
+				<component
+					:is="currentTemplatePanel"
+					ref="currentTemplatePanel"
+					v-on:new-values="newValues"
+				></component>
 			</div>
 		</div>
 	</script>
 
-	<script type="text/javascript" src="dist/bundle.js"></script>
+	<script src="dist/bundle.js"></script>
 
 </body>
 </html>
