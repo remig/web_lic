@@ -141,6 +141,22 @@ div#container {
 	padding: 0;
 }
 
+.el-dialog {
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.el-dialog__body {
+	padding: 20px;
+}
+
+.dialog-fade-enter-active {
+	animation: unset;
+}
+
+.dialog-fade-leave-active {
+	animation: unset;
+}
+
 /* Splitter stuff */
 .gutter.gutter-horizontal {
 	cursor: ew-resize;

@@ -34,7 +34,7 @@ const api = {
 			localStorage.setItem(keys.customFonts, JSON.stringify(fonts));
 		}
 	},
-	// TODO: Should update status bar when stuff is cleared.  Should update status bare more in general.
+	// TODO: Should update status bar when stuff is cleared.  Should update status bar more in general.
 	clear: {
 		model() {
 			localStorage.removeItem(keys.model);

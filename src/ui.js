@@ -8,6 +8,7 @@ import LDParse from './LDParse';
 import Menu from './menu';
 import ContextMenu from './contextMenu';
 import Storage from './storage';
+import LocaleManager from './translate';
 import packageInfo from '../package.json';
 import './tree';
 import './pageView';
@@ -30,6 +31,13 @@ Vue.filter('sanitizeMenuID', id => {
 });
 
 Vue.filter('prettyPrint', _.prettyPrint);
+
+Vue.filter('tr', str => {
+	if (str && str.startsWith('navbar.')) {
+		return LocaleManager.translate(str);
+	}
+	return str;
+});
 
 const app = new Vue({
 	el: '#container',
@@ -130,6 +138,12 @@ const app = new Vue({
 				this.forceUIUpdate();
 				this.drawCurrentPage();
 			});
+		},
+		openLocalLicFile() {
+			const localModel = Storage.get.model();
+			if (localModel) {
+				this.openLicFile(localModel);
+			}
 		},
 		save() {
 			store.save('file');
@@ -434,15 +448,16 @@ const app = new Vue({
 			gutterSize: 5, snapOffset: 0
 		});
 
+		LDParse.setProgressCallback(this.updateProgress);
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();
 			this.redrawUI();
 		});
 
-		LDParse.setProgressCallback(this.updateProgress);
-		var localModel = Storage.get.model();
-		if (localModel) {
-			this.openLicFile(localModel);
+		if (LocaleManager.getLocale() == null) {
+			LocaleManager.pickLanguage(this, this.openLocalLicFile, this.redrawUI);  // TODO: Find better way of calling 'redrawUI' from arbitrary places
+		} else {
+			this.openLocalLicFile();
 		}
 	}
 });

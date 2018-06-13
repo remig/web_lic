@@ -186,7 +186,7 @@
 						aria-haspopup="true"
 						aria-expanded="false"
 					>
-						{{menu.name}}
+						{{menu.text | tr}}
 						<span class="caret"></span>
 					</a>
 					<menu-list :menu-entries="menu.children" selected-item=""></menu-list>
@@ -230,7 +230,7 @@
 					<span
 						class="menu-text"
 					>
-						{{resolveProperty(entry.text)}}
+						{{resolveProperty(entry.text) | tr}}
 					</span>
 					<span
 						v-if="entry.shortcut"
@@ -245,7 +245,9 @@
 						v-if="isVisible(child)"
 						:class="{divider: child.text == 'separator', disabled: child.enabled ? !child.enabled(selectedItem) : false}"
 					>
-						<a @click="triggerMenu(child, $event)" class="clickable">{{child.text}}</a>
+						<a @click="triggerMenu(child, $event)" class="clickable">
+							{{child.text | tr}}
+						</a>
 					</li>
 				</ul>
 			</li>
@@ -716,6 +718,28 @@
 				</form>
 			</div>
 		</baseDialog>
+	</script>
+
+	<script type="text/x-template" id="localeChooserDialogTemplate">
+		<el-dialog
+			title="Pick a Language"
+			width="400px"
+			:modal="false"
+			:show-close="false"
+			:visible="visible"
+		>
+			<el-select v-model="chosenLocaleCode" @change="changeLanguage">
+				<el-option
+					v-for="item in languageList"
+					:key="item.code"
+					:label="item.language"
+					:value="item.code"
+				></el-option>
+			</el-select>
+			<span slot="footer" class="dialog-footer">
+				<el-button type="primary" @click="ok()">Ok</el-button>
+			</span>
+		</el-dialog>
 	</script>
 
 	<script type="text/x-template" id="stringTemplate">
