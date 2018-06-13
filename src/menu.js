@@ -2,6 +2,7 @@
 'use strict';
 
 import _ from './util';
+import {translate as tr} from './translate';
 import InstructionExporter from './export';
 import store from './store';
 import undoStack from './undoStack';
@@ -72,35 +73,35 @@ function enableIfModel() {
 }
 
 const menu = [
-	{name: 'File', children: [
+	{name: tr('navbar.file.root'), children: [
 		{
-			text: 'Open Lic File...',
+			text: tr('navbar.file.open_lic'),
 			id: 'open',
 			cb() {
 				openFileHandler('.lic', 'text', app.openLicFile);
 			}
 		},
-		{text: 'Open Recent (NYI)', enabled: () => false, cb: () => {}},
+		{text: tr('navbar.file.open_lic_recent'), enabled: () => false, cb: () => {}},
 		{
-			text: 'Close',
+			text: tr('navbar.file.close'),
 			enabled: enableIfModel,
 			cb: 'closeModel'
 		},
 		{
-			text: 'Save',
+			text: tr('navbar.file.save'),
 			shortcut: 'ctrl+s',
 			enabled: enableIfModel,
 			cb: 'save'
 		},
 		{text: 'separator'},
 		{
-			text: 'Import Custom Model...',
+			text: tr('navbar.file.import_model'),
 			cb() {
 				openFileHandler('.ldr, .mpd', 'text', app.importLocalModel);
 			}
 		},
 		{
-			text: 'Import Built-in Model...',
+			text: tr('navbar.file.import_builtin_model'),
 			children: [
 				{
 					text: 'Trivial Model',
@@ -130,24 +131,24 @@ const menu = [
 		},
 		{text: 'separator'},
 		{
-			text: 'Template',
+			text: tr('navbar.file.template.root'),
 			enabled: enableIfModel,
 			children: [
 				{
-					text: 'Save',
+					text: tr('navbar.file.template.save'),
 					cb() {
 						store.save('file', 'template', '\t');
 					}
 				},
 				{
-					text: 'Load',
+					text: tr('navbar.file.template.load'),
 					cb() {
 						openFileHandler('.lit', 'text', app.importTemplate);
 					}
 				},
-				{text: 'Load Built-in (NYI)', enabled: false, cb() {}},
+				{text: tr('navbar.file.template.load_builtin'), enabled: false, cb() {}},
 				{
-					text: 'Reset',
+					text: tr('navbar.file.template.reset'),
 					cb() {
 						undoStack.commit('templatePage.reset', null, 'Reset Template');
 					}
@@ -156,13 +157,13 @@ const menu = [
 		},
 		{text: 'separator'},
 		{
-			text: 'Clear Local Cache',
+			text: tr('navbar.file.clear_cache'),
 			cb() {
 				window.localStorage.clear();
 			}
 		}
 	]},
-	{name: 'Edit', children: [
+	{name: tr('navbar.edit.root'), children: [
 		{
 			id: 'undo',
 			text: undoStack.undoText,
@@ -179,7 +180,7 @@ const menu = [
 		},
 		{text: 'separator'},
 		{
-			text: 'Add Title Page',
+			text: tr('navbar.edit.title_page.add'),
 			shown: () => enableIfModel() && store.get.titlePage() == null,
 			cb() {
 				undoStack.commit('addTitlePage', null, this.text);
@@ -187,7 +188,7 @@ const menu = [
 			}
 		},
 		{
-			text: 'Remove Title Page',
+			text: tr('navbar.edit.title_page.remove'),
 			shown: () => enableIfModel() && store.get.titlePage() != null,
 			cb() {
 				app.setCurrentPage({type: 'page', id: 0});
@@ -195,42 +196,42 @@ const menu = [
 			}
 		},
 		{
-			text: 'Show PLIs',
+			text: tr('navbar.edit.pli.show'),
 			shown: () => enableIfModel() && !store.state.plisVisible,
 			cb() {
 				undoStack.commit('pli.toggleVisibility', {visible: true}, this.text);
 			}
 		},
 		{
-			text: 'Hide PLIs',
+			text: tr('navbar.edit.pli.hide'),
 			shown: () => enableIfModel() && store.state.plisVisible,
 			cb() {
 				undoStack.commit('pli.toggleVisibility', {visible: false}, this.text);
 			}
 		},
-		{text: 'Snap To (NYI)', enabled: () => false, cb() {}},
-		{text: 'Brick Colors... (NYI)', enabled: () => false, cb() {}}
+		{text: tr('navbar.edit.snap'), enabled: () => false, cb() {}},
+		{text: tr('navbar.edit.brick_colors'), enabled: () => false, cb() {}}
 	]},
-	{name: 'View', children: [
+	{name: tr('navbar.view.root'), children: [
 		{
-			text: 'Show Pages',
+			text: tr('navbar.view.show_pages.root'),
 			enabled: enableIfModel,
 			children: [
 				{
-					text: 'One Page',
+					text: tr('navbar.view.show_pages.one'),
 					cb: () => app.setPageView({facingPage: false, scroll: false})
 				},
 				{
-					text: 'Two Facing Pages (NYI)',
+					text: tr('navbar.view.show_pages.two'),
 					enabled: false,
 					cb: () => app.setPageView({facingPage: true, scroll: false})
 				},
 				{
-					text: 'One Page Scrolling View',
+					text: tr('navbar.view.show_pages.one_scroll'),
 					cb: () => app.setPageView({facingPage: false, scroll: true})
 				},
 				{
-					text: 'Two Pages Scrolling View (NYI)',
+					text: tr('navbar.view.show_pages.two_scroll'),
 					enabled: false,
 					cb: () => app.setPageView({facingPage: true, scroll: true})
 				}
@@ -246,16 +247,16 @@ const menu = [
 		{text: 'Add Vertical Guide', enabled: () => false, cb() {}},
 		{text: 'Remove Guides', enabled: () => false, cb() {}}
 	]},
-	{name: 'Export', children: [
+	{name: tr('navbar.export.root'), children: [
 		{
-			text: 'Generate PDF',
+			text: tr('navbar.export.pdf'),
 			enabled: enableIfModel,
 			cb() {
 				InstructionExporter.generatePDF(app, store);
 			}
 		},
 		{
-			text: 'Generate PNG Images',
+			text: tr('navbar.export.png'),
 			enabled: enableIfModel,
 			cb() {
 				InstructionExporter.generatePNGZip(app, store);

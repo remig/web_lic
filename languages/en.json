@@ -1,0 +1,49 @@
+{
+	"navbar": {
+		"file": {
+			"root": "File",
+			"open_lic": "Open Lic File...",
+			"open_lic_recent": "Open Recent (NYI)",
+			"close": "Close",
+			"save": "Save",
+			"import_model": "Import Custom Model...",
+			"import_builtin_model": "Import Built-in Model...",
+			"template": {
+				"root": "Template",
+				"save": "Save",
+				"load": "Load",
+				"load_builtin": "Load Built-in (NYI)",
+				"reset": "Reset"
+			},
+			"clear_cache": "Clear Local Cache"
+		},
+		"edit": {
+			"root": "Edit",
+			"title_page": {
+				"add": "Add Title Page",
+				"remove": "Remove Title Page"
+			},
+			"pli": {
+				"show": "Show PLIs",
+				"hide": "Hide PLIs"
+			},
+			"snap": "Snap To (NYI)",
+			"brick_colors": " Brick Colors... (NYI)"
+		},
+		"view": {
+			"root": "View",
+			"show_pages": {
+				"root": "Show Pages",
+				"one": "One Page",
+				"two" : "Two Facing Pages (NYI)",
+				"one_scroll": "One Page Scrolling View",
+				"two_scroll": "Two Pages Scrolling View (NYI)"
+			}
+		},
+		"export": {
+			"root": "Export",
+			"pdf": "Generate PDF",
+			"png": "Generate PNG Images"
+		}
+	}
+}
