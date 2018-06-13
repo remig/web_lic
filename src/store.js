@@ -222,7 +222,8 @@ const store = {
 			}
 			return page.id === _.last(store.state.pages).id;
 		},
-		nextPage(page) {
+		nextPage(item) {
+			const page = store.get.pageForItem(item);
 			if (!page || store.get.isLastPage(page)) {
 				return null;
 			} else if (store.get.isTemplatePage(page)) {
@@ -236,7 +237,8 @@ const store = {
 			}
 			return store.state.pages[idx + 1];
 		},
-		prevPage(page, includeTitlePage) {
+		prevPage(item, includeTitlePage) {
+			const page = store.get.pageForItem(item);
 			if (!page || store.get.isTemplatePage(page)) {
 				return null;
 			} else if (store.get.isTitlePage(page)) {
@@ -949,18 +951,16 @@ const store = {
 				store.mutations.page.layout({page: destPage});
 			},
 			moveToPreviousPage(opts) {  // opts: {step}
-				const step = store.get.lookupToItem(opts.step);
-				const destPage = store.get.prevPage(step.parent, false);
+				const destPage = store.get.prevPage(opts.step, false);
 				if (destPage) {
 					const parentInsertionIndex = destPage.steps.length;
-					store.mutations.step.moveToPage({step, destPage, parentInsertionIndex});
+					store.mutations.step.moveToPage({step: opts.step, destPage, parentInsertionIndex});
 				}
 			},
 			moveToNextPage(opts) {  // opts: {step}
-				const step = store.get.lookupToItem(opts.step);
-				const destPage = store.get.nextPage(step.parent);
+				const destPage = store.get.nextPage(opts.step);
 				if (destPage) {
-					store.mutations.step.moveToPage({step, destPage, parentInsertionIndex: 0});
+					store.mutations.step.moveToPage({step: opts.step, destPage, parentInsertionIndex: 0});
 				}
 			},
 			mergeWithStep(opts) {  // opts: {srcStep, destStep}

@@ -34,7 +34,7 @@ Vue.component('menu-list', {
 		isVisible(entry) {
 			if (this.selectedItem == null) {
 				return false;
-			} else if (entry.type && entry.type !== this.selectedItem.type) {
+			} else if (entry.selectedItem && entry.selectedItem.type !== this.selectedItem.type) {
 				return false;
 			} else if (entry.shown) {
 				return entry.shown(this.selectedItem);
