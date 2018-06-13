@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('./util');
-const LDParse = require('./LDParse');
-const store = require('./store');
+import _ from './util';
+import LDParse from './LDParse';
+import store from './store';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
@@ -588,4 +588,4 @@ function isStepTooSmall(step) {
 	return false;
 }
 
-module.exports = api;
+export default api;

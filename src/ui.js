@@ -1,20 +1,19 @@
 /* global Vue: false, Split: false, ELEMENT: false*/
 'use strict';
 
-const _ = require('./util');
-const store = require('./store');
-const undoStack = require('./undoStack');
-const LDParse = require('./LDParse');
-const Menu = require('./menu');
-const ContextMenu = require('./contextMenu');
-require('./tree');
-require('./pageView');
-require('./dialog');
-require('./templatePanel');
+import _ from './util';
+import store from './store';
+import undoStack from './undoStack';
+import LDParse from './LDParse';
+import Menu from './menu';
+import ContextMenu from './contextMenu';
+import packageInfo from '../package.json';
+import './tree';
+import './pageView';
+import './dialog';
+import './templatePanel';
 
 ELEMENT.locale(ELEMENT.lang.en);
-
-const version = require('../package.json').version;
 
 Vue.config.performance = false;
 
@@ -109,7 +108,6 @@ const app = new Vue({
 						Vue.nextTick(this.drawCurrentPage);
 					});
 				});
-
 			});
 		},
 		openLicFile(content) {
@@ -403,7 +401,7 @@ const app = new Vue({
 			return Menu(this);
 		},
 		version() {
-			return version.slice(0, version.lastIndexOf('.'));  // major.minor is enough for public consumption
+			return packageInfo.version.slice(0, packageInfo.version.lastIndexOf('.'));  // major.minor is enough for public consumption
 		}
 	},
 	mounted() {
@@ -448,7 +446,7 @@ const app = new Vue({
 	}
 });
 
-window.__Web_lic_testScope = {  // store a global reference to these for easier testing
+window.__lic = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
 	_, app, store, undoStack, LDParse
 };

@@ -1,7 +1,7 @@
 /* global jsPDF: false, JSZip: false, saveAs: false */
 'use strict';
 
-const _ = require('./util');
+import _ from './util';
 
 function exportInstructions(app, store, exportType, drawPageCallback, doneCallback) {
 
@@ -103,4 +103,4 @@ const api = {
 	}
 };
 
-module.exports = api;
+export default api;

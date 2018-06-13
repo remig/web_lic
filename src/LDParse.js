@@ -378,4 +378,4 @@ async function loadPart(fn, content, progressCallback) {
 	return part;
 }
 
-module.exports = api;
+export default api;

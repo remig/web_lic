@@ -1,13 +1,7 @@
+/* global THREE: false */
 'use strict';
 
-const LDParse = require('./LDParse');
-
-let THREE;
-if (typeof window !== 'undefined' && window.THREE) {
-	THREE = window.THREE;
-} else if (typeof require !== 'undefined') {
-	THREE = require('../lib/three');
-}
+import LDParse from './LDParse';
 
 const rad = THREE.Math.degToRad;
 let renderer, camera;
@@ -611,4 +605,4 @@ function addPartToScene(scene, part, config) {
 	return addModelToScene(scene, model, [0], config);
 }
 
-module.exports = api;
+export default api;

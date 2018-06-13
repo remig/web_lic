@@ -1,10 +1,10 @@
 /* global Vue: false */
 'use strict';
 
-const _ = require('./util');
-const store = require('./store');
-const undoStack = require('./undoStack');
-const openFileHandler = require('./fileUploader');
+import _ from './util';
+import store from './store';
+import undoStack from './undoStack';
+import openFileHandler from './fileUploader';
 
 function fillTemplatePanel(templateEntry) {
 	return {

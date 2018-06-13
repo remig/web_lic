@@ -1,7 +1,7 @@
 /* global Vue: false, $: false */
 'use strict';
 
-const _ = require('./util');
+import _ from './util';
 
 Vue.component('baseDialog', {
 	template: '#baseDialogTemplate',

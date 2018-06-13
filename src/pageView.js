@@ -1,10 +1,10 @@
 /* global Vue: false */
 'use strict';
 
-const _ = require('./util');
-const Draw = require('./draw');
-const store = require('./store');
-const undoStack = require('./undoStack');
+import _ from './util';
+import Draw from './draw';
+import store from './store';
+import undoStack from './undoStack';
 
 Vue.component('pageCanvasView', {
 	template: '#pageCanvasView',

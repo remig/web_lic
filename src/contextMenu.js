@@ -1,11 +1,11 @@
 /* global Vue: false */
 'use strict';
 
-const _ = require('./util');
-const LDParse = require('./LDParse');
-const store = require('./store');
-const undoStack = require('./undoStack');
-const openFileHandler = require('./fileUploader');
+import _ from './util';
+import LDParse from './LDParse';
+import store from './store';
+import undoStack from './undoStack';
+import openFileHandler from './fileUploader';
 
 let app;
 
@@ -933,7 +933,7 @@ function filterMenu(menu, pageIsLocked, selectedItem) {
 	}
 }
 
-module.exports = function ContextMenu(selectedItem, localApp) {
+export default function ContextMenu(selectedItem, localApp) {
 
 	app = localApp;
 
@@ -960,4 +960,4 @@ module.exports = function ContextMenu(selectedItem, localApp) {
 		menu.forEach(menuEntry => (menuEntry.type = selectedItem.type));  // Copy item type to each meny entry; saves typing them all out everywhere above
 		return menu;
 	}
-};
+}

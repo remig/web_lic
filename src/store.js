@@ -1,13 +1,11 @@
 /* global saveAs: false */
 'use strict';
 
-const _ = require('./util');
-const LDParse = require('./LDParse');
-const LDRender = require('./LDRender');
-const defaultTemplate = require('./template.js');
-
-// Load this later, to avoid circular import issues (layout.js is just code that belongs in store moved to a dedicated file)
-let Layout;  // eslint-disable-line prefer-const
+import _ from './util';
+import LDParse from './LDParse';
+import LDRender from './LDRender';
+import defaultTemplate from './template';
+import Layout from './layout';
 
 const emptyState = {
 	template: _.clone(defaultTemplate),
@@ -1489,6 +1487,4 @@ for (let el in store.state) {
 	}
 }
 
-module.exports = store;
-
-Layout = require('./Layout');
+export default store;

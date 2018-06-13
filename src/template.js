@@ -148,4 +148,4 @@ template.modelData = {
 	model, part1, part2
 };
 
-module.exports = template;
+export default template;

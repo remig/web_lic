@@ -1,11 +1,11 @@
 /* global Vue: false, $: false */
 'use strict';
 
-const _ = require('./util');
-const InstructionExporter = require('./export');
-const store = require('./store');
-const undoStack = require('./undoStack');
-const openFileHandler = require('./fileUploader');
+import _ from './util';
+import InstructionExporter from './export';
+import store from './store';
+import undoStack from './undoStack';
+import openFileHandler from './fileUploader';
 
 let app;
 
@@ -264,7 +264,7 @@ const menu = [
 	]}
 ];
 
-module.exports = function Menu(localApp) {
+export default function Menu(localApp) {
 	app = localApp;
 	return menu;
-};
+}

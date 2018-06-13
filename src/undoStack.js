@@ -1,7 +1,7 @@
 'use strict';
 
-const _ = require('./util');
-const store = require('./store');
+import _ from './util';
+import store from './store';
 
 // stack is an array of state; undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone.
 // index points to the currently visible state in the UI.
@@ -141,4 +141,4 @@ function setIndex(stack, newIndex) {
 	}
 }
 
-module.exports = api;
+export default api;

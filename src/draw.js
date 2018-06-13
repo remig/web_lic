@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('./util');
-const store = require('./store');
-const LDParse = require('./LDParse');
+import _ from './util';
+import store from './store';
+import LDParse from './LDParse';
 
 const api = {
 
@@ -524,4 +524,4 @@ function pixelOffset({x, y}, lineWidth) {
 	return {x, y};
 }
 
-module.exports = api;
+export default api;

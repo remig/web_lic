@@ -1,7 +1,7 @@
 'use strict';
 
 // fileType: 'text' or 'dataURL'
-module.exports = function openChooser(acceptFileTypes, fileType, callback) {
+export default function openChooser(acceptFileTypes, fileType, callback) {
 	var input = document.getElementById('openFileChooser');
 	input.onchange = function(e) {
 		const reader = new FileReader();
@@ -19,4 +19,4 @@ module.exports = function openChooser(acceptFileTypes, fileType, callback) {
 	};
 	input.setAttribute('accept', acceptFileTypes);
 	input.click();
-};
+}

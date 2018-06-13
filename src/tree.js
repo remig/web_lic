@@ -1,8 +1,8 @@
 /* global Vue: false */
 'use strict';
 
-const _ = require('./util');
-const LDParse = require('./LDParse');
+import _ from './util';
+import LDParse from './LDParse';
 
 Vue.component('treeRow', {
 	props: ['currentItem', 'target', 'selectionCallback'],
