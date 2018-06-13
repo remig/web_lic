@@ -233,6 +233,7 @@ function rotateTemplatePanel() {
 			apply() {
 				store.state[this.templateItem.type + 's'].forEach(item => (item.isDirty = true));
 				store.state.pages.forEach(page => (page.needsLayout = true));
+				store.state.templatePage.needsLayout = true;
 				const text = `Change ${_.prettyPrint(this.templateItem.type)} Template`;
 				undoStack.commit('', null, text, [this.templateItem.type]);
 			},
@@ -275,7 +276,7 @@ const csiTemplatePanel = {
 			this.$emit('new-values', 'CSI');
 		},
 		newValues() {
-			this.$emit('new-values', 'CSI');
+			this.$emit('new-values', {type: 'CSI', noLayout: true});
 		}
 	}
 };
@@ -299,7 +300,7 @@ const pliTemplatePanel = {
 			const template = store.state.template.pli;
 			if (this.includeSubmodels !== template.includeSubmodels) {
 				template.includeSubmodels = this.includeSubmodels;
-				this.$emit('new-values', 'PLI');
+				this.$emit('new-values', {type: 'PLI', noLayout: true});
 			}
 		}
 	}

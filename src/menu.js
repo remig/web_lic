@@ -151,7 +151,7 @@ const menu = [
 				{
 					text: 'navbar.file.template.reset',
 					cb() {
-						undoStack.commit('templatePage.reset', null, 'Reset Template');
+						undoStack.commit('templatePage.reset', null, 'Reset Template', ['csi', 'pliItem']);
 					}
 				}
 			]

@@ -1298,6 +1298,9 @@ const store = {
 			reset() {
 				store.state.template = _.clone(defaultTemplate);
 				store.state.templatePage.needsLayout = true;
+				store.state.pages.forEach(page => (page.needsLayout = true));
+				store.state.csis.forEach(item => (item.isDirty = true));
+				store.state.pliItems.forEach(item => (item.isDirty = true));
 			},
 			setPageSize(opts) {  // opts: {width, height}
 				store.state.template.page.width = opts.width;
