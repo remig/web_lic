@@ -5,6 +5,7 @@ import _ from './util';
 import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
+import Storage from './storage';
 
 function fillTemplatePanel(templateEntry) {
 	return {
@@ -94,7 +95,7 @@ function borderTemplatePanel(templateEntry) {
 
 // TODO: consider moving all font UI / state management to dedicated font.js or something.
 const familyNames = ['Helvetica', 'Times New Roman'];
-const customFamilyNames = JSON.parse(window.localStorage.getItem('lic_custom_fonts')) || [];
+const customFamilyNames = Storage.get.customFonts();
 
 function getFamilyNames() {
 	if (customFamilyNames.length) {
@@ -189,7 +190,7 @@ const fontTemplatePanel = {
 				];
 				if (!names.includes(familyLower)) {
 					customFamilyNames.push(family);
-					window.localStorage.setItem('lic_custom_fonts', JSON.stringify(customFamilyNames));
+					Storage.save.customFonts(customFamilyNames);
 				}
 			}
 			this.familyNames = getFamilyNames();

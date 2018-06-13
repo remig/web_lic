@@ -15,7 +15,12 @@
 				"load_builtin": "Load Built-in (NYI)",
 				"reset": "Reset"
 			},
-			"clear_cache": "Clear Local Cache"
+			"clear_cache": {
+				"root": "Clear Cache",
+				"model": "Current Instruction Book",
+				"ui": "UI Settings",
+				"everything": "Everything"
+			}
 		},
 		"edit": {
 			"root": "Edit",

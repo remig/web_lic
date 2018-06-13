@@ -7,6 +7,7 @@ import undoStack from './undoStack';
 import LDParse from './LDParse';
 import Menu from './menu';
 import ContextMenu from './contextMenu';
+import Storage from './storage';
 import packageInfo from '../package.json';
 import './tree';
 import './pageView';
@@ -95,7 +96,7 @@ const app = new Vue({
 						if (layoutChoices.includeTitlePage) {
 							store.mutations.addTitlePage();  // Add title page after adding regular pages so title page summary label comes out correct
 						}
-						store.save('localStorage');
+						store.save('local');
 
 						const firstPage = store.get.titlePage() || store.get.firstPage();
 						this.currentPageLookup = store.get.itemToLookup(firstPage);
@@ -120,7 +121,7 @@ const app = new Vue({
 			this.filename = store.model.filename;
 			const firstPage = store.get.titlePage() || store.get.firstPage();
 			this.currentPageLookup = store.get.itemToLookup(firstPage);
-			store.save('localStorage');
+			store.save('local');
 			undoStack.saveBaseState();
 			this.clearSelected();
 			const time = _.formatTime(start, Date.now());
@@ -439,9 +440,9 @@ const app = new Vue({
 		});
 
 		LDParse.setProgressCallback(this.updateProgress);
-		var localState = localStorage.getItem('lic_state');
-		if (localState) {
-			this.openLicFile(localState);
+		var localModel = Storage.get.model();
+		if (localModel) {
+			this.openLicFile(localModel);
 		}
 	}
 });

@@ -6,6 +6,7 @@ import LDParse from './LDParse';
 import LDRender from './LDRender';
 import defaultTemplate from './template';
 import Layout from './layout';
+import Storage from './storage';
 
 const emptyState = {
 	template: _.clone(defaultTemplate),
@@ -53,7 +54,7 @@ const store = {
 		LDRender.setPartDictionary(content.partDictionary);
 		store.replaceState(content.state);
 	},
-	save(mode, target = 'state', jsonIndent) {  // mode is either 'file' or 'localStorage', target is either 'state' or 'template'
+	save(mode, target = 'state', jsonIndent) {  // mode is either 'file' or 'local', target is either 'state' or 'template'
 		let content;
 		if (target === 'template') {
 			content = {template: store.state.template};
@@ -69,9 +70,9 @@ const store = {
 		if (mode === 'file') {
 			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
 			saveAs(blob, store.get.modelFilenameBase((target === 'template') ? '.lit' : '.lic'));
-		} else if (mode === 'localStorage' && target !== 'template') {
-			console.log('Updating localStorage');  // eslint-disable-line no-console
-			window.localStorage.setItem('lic_state', content);
+		} else if (mode === 'local' && target !== 'template') {
+			console.log('Updating local storage');  // eslint-disable-line no-console
+			Storage.save.model(content);
 		}
 	},
 	render: (function() {

@@ -7,6 +7,7 @@ import InstructionExporter from './export';
 import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
+import Storage from './storage';
 
 let app;
 
@@ -157,10 +158,21 @@ const menu = [
 		},
 		{text: 'separator'},
 		{
-			text: tr('navbar.file.clear_cache'),
-			cb() {
-				window.localStorage.clear();
-			}
+			text: tr('navbar.file.clear_cache.root'),
+			children: [
+				{
+					text: tr('navbar.file.clear_cache.model'),
+					cb: Storage.clear.model
+				},
+				{
+					text: tr('navbar.file.clear_cache.ui'),
+					cb: Storage.clear.uiDefaults
+				},
+				{
+					text: tr('navbar.file.clear_cache.everything'),
+					cb: Storage.clear.everything
+				}
+			]
 		}
 	]},
 	{name: tr('navbar.edit.root'), children: [
