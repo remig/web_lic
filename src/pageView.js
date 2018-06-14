@@ -9,29 +9,13 @@ import undoStack from './undoStack';
 Vue.component('pageView', {
 	render(createElement) {
 
-		let pageOffset, pageIDsToDraw, marginTop, marginBottom, marginLeft;
+		let pageOffset, pageIDsToDraw;
 		const pageWidth = this.pageSize.width, pageHeight = this.pageSize.height;
 		const scrolling = this.isScrollingView, facing = this.isFacingView;
 
-		if (scrolling) {
-			pageOffset = this.getPageOffset() + 'px';
-			pageIDsToDraw = store.state.pages.map(page => page.id);
-			if (store.state.titlePage) {
-				pageIDsToDraw.unshift('titlePage');
-			}
-		} else if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
-			pageIDsToDraw = ['templatePage'];
-		} else if (this.currentPageLookup && this.currentPageLookup.type === 'titlePage') {
-			pageIDsToDraw = facing ? [null, 'titlePage'] : ['titlePage'];
-		} else if (facing) {
-			pageIDsToDraw = this.getAdjacentPages(this.currentPageLookup).map(page => (page || {}).id);
-		} else {
-			pageIDsToDraw = [(this.currentPageLookup || {}).id];
-		}
+		function renderOnePage(idx, pageID, locked) {
 
-		const containerList = [];
-		pageIDsToDraw.forEach((pageID, idx) => {
-
+			let marginTop, marginBottom, marginLeft;
 			if (scrolling) {
 				// Pad the first & last pages so they show up in the center of the screen when scrolled all the way
 				marginTop = (idx === 0) ? pageOffset : null;
@@ -59,7 +43,6 @@ Vue.component('pageView', {
 
 			let lockIcon, lockSwitch;
 			if (pageID != null && pageID !== 'templatePage' && pageID !== 'titlePage') {
-				const locked = this.pageLockStatus[pageID];
 				lockIcon = createElement(
 					'i',
 					{
@@ -74,16 +57,38 @@ Vue.component('pageView', {
 						class: 'pageLockSwitch',
 						style: {marginBottom},
 						domProps: {value: locked},
-						on: {input: this.setPageLocked(pageID)}
+						on: {input: setPageLocked(pageID)}
 					}
 				);
 			}
 
-			containerList.push(createElement(
+			return createElement(
 				'div',
 				{style: {position: 'relative', display: facing ? 'inline' : null}},
 				[canvas, lockIcon, lockSwitch]
-			));
+			);
+		}
+
+		if (scrolling) {
+			pageOffset = getPageOffset() + 'px';
+			pageIDsToDraw = store.state.pages.map(page => page.id);
+			if (store.state.titlePage) {
+				pageIDsToDraw.unshift('titlePage');
+			}
+		} else if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
+			pageIDsToDraw = ['templatePage'];
+		} else if (this.currentPageLookup && this.currentPageLookup.type === 'titlePage') {
+			pageIDsToDraw = facing ? [null, 'titlePage'] : ['titlePage'];
+		} else if (facing) {
+			pageIDsToDraw = getAdjacentPages(this.currentPageLookup).map(page => (page || {}).id);
+		} else {
+			pageIDsToDraw = [(this.currentPageLookup || {}).id];
+		}
+
+		const containerList = [];
+		pageIDsToDraw.forEach((pageID, idx) => {
+			const locked = this.pageLockStatus[pageID];
+			containerList.push(renderOnePage(idx, pageID, locked));
 		});
 
 		const width = facing ? pageWidth + pageWidth + 70 + 'px' : pageWidth + 'px';
@@ -202,7 +207,7 @@ Vue.component('pageView', {
 			const up = {x: e.offsetX, y: e.offsetY};
 			if (this.mouseDownPt && _.geom.distance(this.mouseDownPt, up) < 10 && e.target.nodeName === 'CANVAS') {
 				// If simple mouse down + mouse up with very little movement, handle as if 'click' for selection
-				const page = this.getPageForCanvas(e.target);
+				const page = getPageForCanvas(e.target);
 				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
 				if (target) {
 					this.app.setSelected(target);
@@ -261,16 +266,7 @@ Vue.component('pageView', {
 			}
 		},
 		drawAdjacentPages(page) {
-			this.getAdjacentPages(page).forEach(page => this.drawPage(page));
-		},
-		getAdjacentPages(page) {
-			page = store.get.lookupToItem(page);
-			if (page.type === 'titlePage') {
-				return [null, page];
-			} else if (_.isEven(page.number)) {
-				return [page, store.get.nextPage(page)];
-			}
-			return [store.get.prevPage(page, false, false), page];
+			getAdjacentPages(page).forEach(page => this.drawPage(page));
 		},
 		drawNearbyPages(page) {
 			page = store.get.lookupToItem(page);
@@ -316,27 +312,6 @@ Vue.component('pageView', {
 				}
 			}
 		},
-		setPageLocked(pageID) {
-			if (pageID == null) {
-				return function() {};
-			}
-			return function(locked) {
-				const opts = {page: {type: 'page', id: pageID}, locked};
-				undoStack.commit('page.setLocked', opts, locked ? 'Lock Page' : 'Unlock Page');
-			};
-		},
-		getPageOffset() {
-			const pageHeight = store.state.template.page.height;
-			const container = document.getElementById('rightSubPane');
-			return container ? (container.offsetHeight - pageHeight) / 2 : 0;
-		},
-		getPageForCanvas(canvas) {
-			const pageID = canvas.id.replace('pageCanvas', '');
-			if (pageID.endsWith('Page')) {
-				return store.get.page({id: 0, type: pageID});
-			}
-			return store.get.page(parseInt(pageID, 10));
-		},
 		getCanvasForPage(page) {
 			let id = 'pageCanvas';
 			if (page) {
@@ -370,6 +345,40 @@ Vue.component('pageView', {
 		}
 	}
 });
+
+function getAdjacentPages(page) {
+	page = store.get.lookupToItem(page);
+	if (page.type === 'titlePage') {
+		return [null, page];
+	} else if (_.isEven(page.number)) {
+		return [page, store.get.nextPage(page)];
+	}
+	return [store.get.prevPage(page, false, false), page];
+}
+
+function setPageLocked(pageID) {
+	if (pageID == null) {
+		return function() {};
+	}
+	return function(locked) {
+		const opts = {page: {type: 'page', id: pageID}, locked};
+		undoStack.commit('page.setLocked', opts, locked ? 'Lock Page' : 'Unlock Page');
+	};
+}
+
+function getPageOffset() {
+	const pageHeight = store.state.template.page.height;
+	const container = document.getElementById('rightSubPane');
+	return container ? (container.offsetHeight - pageHeight) / 2 : 0;
+}
+
+function getPageForCanvas(canvas) {
+	const pageID = canvas.id.replace('pageCanvas', '');
+	if (pageID.endsWith('Page')) {
+		return store.get.page({id: 0, type: pageID});
+	}
+	return store.get.page(parseInt(pageID, 10));
+}
 
 function itemHighlightBox(selItem, pageSize) {
 	selItem = store.get.lookupToItem(selItem);
