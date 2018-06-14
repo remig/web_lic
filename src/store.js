@@ -1185,7 +1185,7 @@ const store = {
 				}
 			},
 			renumber() {
-				store.mutations.renumber(store.state.pages);
+				store.mutations.renumber(store.state.pages, store.state.titlePage ? 2 : 1);
 			},
 			layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
 				const page = store.get.lookupToItem(opts.page);
@@ -1330,12 +1330,12 @@ const store = {
 				});
 			}
 		},
-		renumber(itemList) {
+		renumber(itemList, start = 1) {
 			let prevNumber;
 			itemList.forEach(el => {
 				if (el && el.number != null) {
-					if (prevNumber == null && el.number > 1) {
-						el.number = 1;
+					if (prevNumber == null) {
+						el.number = start;
 					} else if (prevNumber != null && prevNumber !== el.number - 1) {
 						el.number = prevNumber + 1;
 					}
@@ -1351,6 +1351,8 @@ const store = {
 		addTitlePage() {
 
 			const page = store.state.titlePage = store.mutations.page.add({pageType: 'titlePage'});
+			page.number = 1;
+			store.mutations.page.renumber();
 
 			const step = store.mutations.step.add({dest: page});
 			step.model.filename = store.model.filename;
@@ -1384,6 +1386,7 @@ const store = {
 			store.mutations.item.deleteChildList({item, listType: 'annotation'});
 			store.mutations.item.deleteChildList({item, listType: 'step'});
 			store.state.titlePage = null;
+			store.mutations.page.renumber();
 		},
 		addInitialPages(opts) {  // opts: {modelFilename,  lastStepNumber}
 
