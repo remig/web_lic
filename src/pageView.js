@@ -124,7 +124,7 @@ Vue.component('pageView', {
 			});
 		},
 		mouseDown(e) {
-			if (e.button !== 0) {
+			if (e.button !== 0 || e.target.nodeName !== 'CANVAS') {
 				return;
 			}
 			// Record mouse down pos so we can check if mouse up is close enough to down to trigger a 'click' for selection
@@ -138,7 +138,7 @@ Vue.component('pageView', {
 			}
 		},
 		mouseMove(e) {
-			if (!this.mouseDragItem) {
+			if (!this.mouseDragItem || e.target.nodeName !== 'CANVAS') {
 				return;
 			}
 			const dx = Math.floor(e.offsetX - this.mouseDragItem.x);
@@ -154,14 +154,14 @@ Vue.component('pageView', {
 			this.mouseDragItem.moved = true;
 			this.app.drawCurrentPage();
 		},
-		mouseUp(e, page) {
+		mouseUp(e) {
 			if (e.button !== 0) {
 				return;
 			}
 			const up = {x: e.offsetX, y: e.offsetY};
-			if (this.mouseDownPt && _.geom.distance(this.mouseDownPt, up) < 10) {
+			if (this.mouseDownPt && _.geom.distance(this.mouseDownPt, up) < 10 && e.target.nodeName === 'CANVAS') {
 				// If simple mouse down + mouse up with very little movement, handle as if 'click' for selection
-				page = (page == null) ? this.currentPageLookup : page;
+				const page = this.getPageForCanvas(e.target);
 				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
 				if (target) {
 					this.app.setSelected(target);
@@ -171,6 +171,8 @@ Vue.component('pageView', {
 			} else if (this.mouseDragItem && this.mouseDragItem.moved) {
 				// Mouse drag is complete; add undo event to stack
 				undoStack.commit(null, null, `Move ${_.prettyPrint(this.mouseDragItem.item.type)}`);
+			} else if (e.target.nodeName !== 'CANVAS') {
+				this.app.clearSelected();
 			}
 			this.mouseDownPt = this.mouseDragItem = null;
 		},
@@ -254,6 +256,10 @@ Vue.component('pageView', {
 					Draw.highlight(canvas, box.x, box.y, box.width, box.height);
 				}
 			}
+		},
+		getPageForCanvas(canvas) {
+			const pageID = parseInt(canvas.id.replace('pageCanvas', ''), 10);
+			return store.get.page(pageID);
 		},
 		getCanvasForPage(page) {
 			let id = 'pageCanvas';

@@ -104,19 +104,21 @@
 	<!-- Component Templates -->
 
 	<script type="text/x-template" id="pageView">
-		<div id="rightSubPane" :class="[{singleEntry: !isScrollingView}]" @scroll="handleScroll()">
+		<div
+			id="rightSubPane"
+			:class="[{singleEntry: !isScrollingView}]"
+			@scroll="handleScroll()"
+			@mousedown.stop="mouseDown($event)"
+			@mousemove.stop="mouseMove($event)"
+			@mouseup.stop="mouseUp($event)"
+			@click.stop
+		>
 			<div
 				v-if="isScrollingView"
 				:style="{width: pageSize.width + 5 + 'px'}"
 				class="pageCanvasContainer"
 			>
-				<div
-					v-for="page in pageList"
-					@mousedown.stop="mouseDown($event, page)"
-					@mousemove.stop="mouseMove($event, page)"
-					@mouseup.stop="mouseUp($event, page)"
-					@click.stop
-				>
+				<div v-for="page in pageList">
 					<page-canvas-view
 						:ref="'canvas' + page.id"
 						:page="page"
@@ -128,20 +130,13 @@
 				</div>
 			</div>
 			<div v-else :style="{width: pageSize.width + 5 + 'px', height: pageSize.height + 5 + 'px'}">
-				<div
-					@mousedown.stop="mouseDown($event)"
-					@mousemove.stop="mouseMove($event)"
-					@mouseup.stop="mouseUp($event)"
-					@click.stop
-				>
-					<page-canvas-view
-						ref="canvas"
-						:page="currentPageLookup"
-						:is-scrolling-view="false"
-						:width="pageSize.width"
-						:height="pageSize.height"
-					></page-canvas-view>
-				</div>
+				<page-canvas-view
+					ref="canvas"
+					:page="currentPageLookup"
+					:is-scrolling-view="false"
+					:width="pageSize.width"
+					:height="pageSize.height"
+				></page-canvas-view>
 			</div>
 		</div>
 	</script>
