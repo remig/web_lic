@@ -9,12 +9,22 @@ import undoStack from './undoStack';
 Vue.component('pageView', {
 	render(createElement) {
 
-		let pageOffset, pageIDsToDraw, marginTop, marginBottom;
+		let pageOffset, pageIDsToDraw, marginTop, marginBottom, marginLeft;
 		const pageWidth = this.pageSize.width, pageHeight = this.pageSize.height;
-		const isScrolling = this.isScrollingView;
-		if (isScrolling) {
+		const scrolling = this.isScrollingView, facing = this.isFacingView;
+
+		if (scrolling) {
 			pageOffset = this.getPageOffset() + 'px';
 			pageIDsToDraw = store.state.pages.map(page => page.id);
+			if (store.state.titlePage) {
+				pageIDsToDraw.unshift('titlePage');
+			}
+		} else if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
+			pageIDsToDraw = ['templatePage'];
+		} else if (this.currentPageLookup && this.currentPageLookup.type === 'titlePage') {
+			pageIDsToDraw = facing ? [null, 'titlePage'] : ['titlePage'];
+		} else if (facing) {
+			pageIDsToDraw = this.getAdjacentPages(this.currentPageLookup).map(page => (page || {}).id);
 		} else {
 			pageIDsToDraw = [(this.currentPageLookup || {}).id];
 		}
@@ -22,10 +32,13 @@ Vue.component('pageView', {
 		const containerList = [];
 		pageIDsToDraw.forEach((pageID, idx) => {
 
-			if (isScrolling) {
+			if (scrolling) {
 				// Pad the first & last pages so they show up in the center of the screen when scrolled all the way
 				marginTop = (idx === 0) ? pageOffset : null;
 				marginBottom = (idx === pageIDsToDraw.length - 1) ? pageOffset : null;
+			}
+			if (facing && !_.isEven(idx)) {
+				marginLeft = '40px';
 			}
 
 			const canvas = createElement(
@@ -36,13 +49,16 @@ Vue.component('pageView', {
 						width: pageWidth,
 						height: pageHeight
 					},
-					class: ['pageCanvas', {multipleEntries: isScrolling}],
-					style: {marginTop, marginBottom}
+					class: ['pageCanvas', {multipleEntries: scrolling}],
+					style: {
+						marginTop, marginBottom, marginLeft,
+						visibility: (pageID == null) ? 'hidden' : null
+					}
 				}
 			);
 
 			let lockIcon, lockSwitch;
-			if (!this.currentPageLookup || this.currentPageLookup.type !== 'templatePage') {
+			if (pageID != null && pageID !== 'templatePage' && pageID !== 'titlePage') {
 				const locked = this.pageLockStatus[pageID];
 				lockIcon = createElement(
 					'i',
@@ -65,24 +81,23 @@ Vue.component('pageView', {
 
 			containerList.push(createElement(
 				'div',
-				{style: 'position: relative;'},
+				{style: {position: 'relative', display: facing ? 'inline' : null}},
 				[canvas, lockIcon, lockSwitch]
 			));
 		});
+
+		const width = facing ? pageWidth + pageWidth + 70 + 'px' : pageWidth + 'px';
+		const height = scrolling ? null : pageHeight + 'px';
 		const subRoot = createElement(
 			'div',
-			{
-				style: {
-					width: pageWidth + 'px',
-					height: isScrolling ? null : pageHeight + 'px'
-				}
-			},
+			{style: {width, height}},
 			containerList
 		);
+
 		return createElement(
 			'div',
 			{
-				class: {singleEntry: !this.isScrollingView},
+				class: {singleEntry: !scrolling},
 				attrs: {id: 'rightSubPane'},
 				on: {
 					mousedown: this.mouseDown,
@@ -155,9 +170,9 @@ Vue.component('pageView', {
 			}
 			// Record mouse down pos so we can check if mouse up is close enough to down to trigger a 'click' for selection
 			this.mouseDownPt = {x: e.offsetX, y: e.offsetY};
-			if (this.app.selectedItemLookup) {
-				const item = store.get.lookupToItem(this.app.selectedItemLookup);
-				if (this.app.isMoveable(this.app.selectedItemLookup) && inBox(e.offsetX, e.offsetY, item)) {
+			if (this.selectedItem) {
+				const item = store.get.lookupToItem(this.selectedItem);
+				if (store.get.isMoveable(this.selectedItem) && inBox(e.offsetX, e.offsetY, item)) {
 					// If mouse down is inside a selected item, store item & down pos in case mouse move follows, to support dragging items
 					this.mouseDragItem = {item, x: e.offsetX, y: e.offsetY};
 				}
@@ -178,7 +193,7 @@ Vue.component('pageView', {
 			this.mouseDragItem.x = e.offsetX;
 			this.mouseDragItem.y = e.offsetY;
 			this.mouseDragItem.moved = true;
-			this.app.drawCurrentPage();
+			this.drawCurrentPage();
 		},
 		mouseUp(e) {
 			if (e.button !== 0) {
@@ -233,11 +248,29 @@ Vue.component('pageView', {
 		},
 		drawCurrentPage() {
 			if (this.currentPageLookup) {
-				this.drawPage(this.currentPageLookup);
-				if (this.scroll) {
-					this.drawNearbyPages(this.currentPageLookup);
+				if (this.currentPageLookup.type === 'templatePage') {
+					this.drawPage(this.currentPageLookup);
+				} else if (this.facingPage) {
+					this.drawAdjacentPages(this.currentPageLookup);
+				} else {
+					this.drawPage(this.currentPageLookup);
+					if (this.scroll ) {
+						this.drawNearbyPages(this.currentPageLookup);
+					}
 				}
 			}
+		},
+		drawAdjacentPages(page) {
+			this.getAdjacentPages(page).forEach(page => this.drawPage(page));
+		},
+		getAdjacentPages(page) {
+			page = store.get.lookupToItem(page);
+			if (page.type === 'titlePage') {
+				return [null, page];
+			} else if (_.isEven(page.number)) {
+				return [page, store.get.nextPage(page)];
+			}
+			return [store.get.prevPage(page, false, false), page];
 		},
 		drawNearbyPages(page) {
 			page = store.get.lookupToItem(page);
@@ -270,7 +303,7 @@ Vue.component('pageView', {
 				canvas = this.getCanvasForPage(page);
 			}
 			if (canvas == null) {
-				return;  // Can't find a canvas for this page - ignore draw call.  Happens when we're transitioning between view modes.
+				return;  // Can't find a canvas for this page - ignore draw call.  Happens when we're transitioning between view modes
 			}
 			const selectedPart = (this.selectedItem && this.selectedItem.type === 'part') ? this.selectedItem : null;
 			Draw.page(page, canvas, scale, selectedPart);
@@ -298,13 +331,20 @@ Vue.component('pageView', {
 			return container ? (container.offsetHeight - pageHeight) / 2 : 0;
 		},
 		getPageForCanvas(canvas) {
-			const pageID = parseInt(canvas.id.replace('pageCanvas', ''), 10);
-			return store.get.page(pageID);
+			const pageID = canvas.id.replace('pageCanvas', '');
+			if (pageID.endsWith('Page')) {
+				return store.get.page({id: 0, type: pageID});
+			}
+			return store.get.page(parseInt(pageID, 10));
 		},
 		getCanvasForPage(page) {
 			let id = 'pageCanvas';
-			if (this.isScrollingView) {
-				id += (page.type === 'titlePage') ? 'titlePage' : page.id;
+			if (page) {
+				if (page.type === 'titlePage' || page.type === 'templatePage') {
+					id += page.type;
+				} else {
+					id += page.id;
+				}
 			} else if (this.currentPageLookup) {
 				id += this.currentPageLookup.id;
 			}
@@ -320,11 +360,13 @@ Vue.component('pageView', {
 		}
 	},
 	computed: {
+		isFacingView() {
+			return this.facingPage
+				&& (this.currentPageLookup == null || this.currentPageLookup.type !== 'templatePage');
+		},
 		isScrollingView() {
-			if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
-				return false;
-			}
-			return this.scroll && this.pageCount > 1;
+			return this.scroll && this.pageCount > 1
+				&& (this.currentPageLookup == null || this.currentPageLookup.type !== 'templatePage');
 		}
 	}
 });

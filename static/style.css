@@ -287,7 +287,9 @@ ul {
 	flex: 1 1 auto;
 	display: flex;
 	justify-content: center;
+	overflow-x: auto;
 	overflow-y: auto;
+	white-space: nowrap;
 	line-height: 0;
 }
 
@@ -307,7 +309,7 @@ ul {
 .pageLockIcon {
 	z-index: 1;
 	position: absolute;
-	margin-left: 15px;
+	margin-left: 12px;
 	font-size: 0.75em;
 	bottom: 4px;
 	color: #888;
@@ -320,7 +322,7 @@ ul {
 
 .pageLockSwitch {
 	position: absolute;
-	margin-left: 10px;
+	margin-left: 7px;
 	bottom: 10px;
 }
 
@@ -335,6 +337,11 @@ ul {
 	top: 100%;
 	margin-top: -17px;
 	transition: unset;
+}
+
+.pageLockSwitch.is-checked > .el-switch__core {
+	border-color: #84b5e8;
+	background-color: #84b5e8;
 }
 
 .pageLockSwitch.is-checked > .el-switch__core:after {
