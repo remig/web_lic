@@ -64,7 +64,7 @@ const api = {
 
 		page.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
 
-		api.dividers(page.dividers || [], ctx);
+		api.dividers(page.dividers, ctx);
 
 		if (page.numberLabelID != null) {
 			ctx.save();
@@ -100,11 +100,11 @@ const api = {
 			api.csi(step.csiID, localModel, ctx, scale, selectedPart);
 		}
 
-		(step.submodelImages || []).forEach(submodelImageID => {
+		step.submodelImages.forEach(submodelImageID => {
 			api.submodelImage(submodelImageID, ctx, scale);
 		});
 
-		(step.callouts || []).forEach(calloutID => {
+		step.callouts.forEach(calloutID => {
 			api.callout(calloutID, ctx, scale, selectedPart);
 		});
 
@@ -127,7 +127,7 @@ const api = {
 			api.rotateIcon(step.rotateIconID, ctx);
 		}
 
-		api.dividers(step.dividers || [], ctx);
+		api.dividers(step.dividers, ctx);
 
 		ctx.restore();
 	},
@@ -262,7 +262,7 @@ const api = {
 		ctx.strokeStyle = template.arrow.border.color;
 		ctx.fillStyle = template.arrow.border.color;
 		ctx.lineWidth = template.arrow.border.width;
-		(callout.calloutArrows || []).forEach(arrowID => {
+		callout.calloutArrows.forEach(arrowID => {
 			api.calloutArrow(arrowID, ctx);
 		});
 	},

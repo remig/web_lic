@@ -646,6 +646,7 @@ const contextMenu = {
 		}
 	],
 	callout: [
+		// TODO: add 'Position' option: top, right, bottom, left, which will set default callout position and arrow direction
 		{
 			text: 'Add Step',
 			cb(selectedItem) {

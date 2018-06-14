@@ -147,11 +147,15 @@ const api = {
 		pageMargin = (pageMargin == null) ? getMargin(store.state.template.page.innerMargin) : pageMargin;
 		const margin = getMargin(store.state.template.step.innerMargin);
 
-		// Position step in parent coordinates
-		step.x = box.x + pageMargin;
-		step.y = box.y + pageMargin;
-		step.width = box.width - pageMargin - pageMargin;
-		step.height = box.height - pageMargin - pageMargin;
+		if (box == null) {
+			box = {};  // If no box is provided, assume step is already sized and positioned correctly, and only layout step children
+		} else {
+			// Position step in parent coordinates
+			step.x = box.x + pageMargin;
+			step.y = box.y + pageMargin;
+			step.width = box.width - pageMargin - pageMargin;
+			step.height = box.height - pageMargin - pageMargin;
+		}
 
 		// transform box to step coordinates
 		box = _.clone(box);
@@ -159,7 +163,7 @@ const api = {
 		box.width = step.width;
 		box.height = step.height;
 
-		(step.submodelImages || []).forEach(submodelImageID => {
+		step.submodelImages.forEach(submodelImageID => {
 			const submodelImage = store.get.submodelImage(submodelImageID);
 			if (submodelImage) {
 				api.submodelImage(submodelImage, box);
@@ -184,7 +188,7 @@ const api = {
 			_.geom.moveBoxEdge(box, 'top', lbl.height + margin);
 		}
 
-		(step.callouts || []).forEach(calloutID => {
+		step.callouts.forEach(calloutID => {
 			const callout = store.get.callout(calloutID);
 			api.callout(callout, box);
 			_.geom.moveBoxEdge(box, 'left', callout.width + margin);
@@ -195,6 +199,12 @@ const api = {
 		} else if (step.csiID != null) {
 			api.csi(store.get.csi(step.csiID), box);
 		}
+
+		// Layout callout arrows after CSI because arrow tip position depends on CSI layout
+		step.callouts.forEach(calloutID => {
+			const callout = store.get.callout(calloutID);
+			api.calloutArrow(callout);
+		});
 
 		if (step.rotateIconID != null && step.csiID != null) {
 			const csi = store.get.csi(step.csiID);
@@ -335,7 +345,6 @@ const api = {
 		callout.height = borderWidth + calloutBox.height + borderWidth;
 		callout.x = box.x;
 		callout.y = box.y + ((box.height - callout.height) / 2);  // Center callout vertically
-		api.calloutArrow(callout);
 	},
 
 	calloutArrow(callout) {
@@ -570,7 +579,7 @@ function isStepTooSmall(step) {
 	const pli = store.state.plisVisible ? store.get.pli(step.pliID) : null;
 	const pliHeight = pli ? pli.height : 0;
 	const submodelSpace = {width: 0, height: 0};
-	(step.submodelImages || []).forEach(submodelImageID => {
+	step.submodelImages.forEach(submodelImageID => {
 		const submodelImage = store.get.submodelImage(submodelImageID);
 		submodelSpace.width = Math.max(submodelImage.width * 1.05, submodelSpace.width);
 		submodelSpace.height += submodelImage.height;
