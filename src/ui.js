@@ -261,18 +261,6 @@ const app = new Vue({
 			this.dirtyState.lastSaveIndex = 0;
 			this.forceUIUpdate();
 		},
-		isMoveable: (() => {
-			const moveableItems = [
-				'step', 'csi', 'pli', 'pliItem', 'quantityLabel', 'numberLabel', 'annotation',
-				'submodelImage', 'callout', 'point', 'rotateIcon'
-			];
-			return item => {
-				if (store.get.isTemplatePage(store.get.pageForItem(item))) {
-					return false;
-				}
-				return moveableItems.includes(item.type);
-			};
-		})(),
 		rightClick(e) {
 			this.lastRightClickPos.x = e.clientX;
 			this.lastRightClickPos.y = e.clientY;
@@ -305,11 +293,11 @@ const app = new Vue({
 					this.setCurrentPage(nextPage);
 				}
 			} else if (e.key === 'PageUp') {
-				const prevPage = store.get.prevPage(this.currentPageLookup, true);
+				const prevPage = store.get.prevPage(this.currentPageLookup, true, true);
 				if (prevPage) {
 					this.setCurrentPage(prevPage);
 				}
-			} else if (selItem && e.key.startsWith('Arrow') && this.isMoveable(selItem)) {
+			} else if (selItem && e.key.startsWith('Arrow') && store.get.isMoveable(selItem)) {
 				let dx = 0, dy = 0, dv = 1;
 				dv *= e.shiftKey ? 5 : 1;
 				dv *= e.ctrlKey ? 20 : 1;

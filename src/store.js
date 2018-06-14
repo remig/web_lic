@@ -238,15 +238,18 @@ const store = {
 			}
 			return store.state.pages[idx + 1];
 		},
-		prevPage(item, includeTitlePage) {
+		prevPage(item, includeTitlePage, includeTemplatePage) {
 			const page = store.get.pageForItem(item);
 			if (!page || store.get.isTemplatePage(page)) {
 				return null;
 			} else if (store.get.isTitlePage(page)) {
-				return store.get.templatePage();
+				return includeTemplatePage ? store.get.templatePage() : null;
 			} else if (store.get.isFirstPage(page)) {
-				return includeTitlePage ?
-					(store.get.titlePage() || store.get.templatePage()) : store.get.templatePage();
+				if (includeTitlePage && store.state.titlePage) {
+					return store.get.titlePage();
+				} else if (includeTemplatePage) {
+					return store.get.templatePage();
+				}
 			}
 			const idx = store.state.pages.findIndex(el => el.id === page.id);
 			if (idx < 0) {
@@ -389,6 +392,18 @@ const store = {
 			box.y += step.y;
 			return box;
 		},
+		isMoveable: (() => {
+			const moveableItems = [
+				'step', 'csi', 'pli', 'pliItem', 'quantityLabel', 'numberLabel', 'annotation',
+				'submodelImage', 'callout', 'point', 'rotateIcon'
+			];
+			return function(item) {
+				if (store.get.isTemplatePage(store.get.pageForItem(item))) {
+					return false;
+				}
+				return moveableItems.includes(item.type);
+			};
+		})(),
 		prev(item, itemList) {  // Get the previous item in the specified item's list, based on item.number and matching parent types
 			item = store.get.lookupToItem(item);
 			itemList = itemList || store.state[item.type + 's'];
@@ -952,7 +967,7 @@ const store = {
 				store.mutations.page.layout({page: destPage});
 			},
 			moveToPreviousPage(opts) {  // opts: {step}
-				const destPage = store.get.prevPage(opts.step, false);
+				const destPage = store.get.prevPage(opts.step, false, false);
 				if (destPage) {
 					const parentInsertionIndex = destPage.steps.length;
 					store.mutations.step.moveToPage({step: opts.step, destPage, parentInsertionIndex});

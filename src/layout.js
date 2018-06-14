@@ -466,7 +466,7 @@ const api = {
 
 			const step = stepsToMerge[0];
 			const originalPage = store.get.pageForItem(step);
-			const prevPage = store.get.prevPage(originalPage, false);
+			const prevPage = store.get.prevPage(originalPage, false, false);
 
 			store.mutations.step.moveToPreviousPage({step});
 
