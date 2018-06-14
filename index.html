@@ -57,7 +57,7 @@
 			:version="version" :key="navUpdateState"
 		></nav-menu>
 
-		<div class="mainBody" @click="globalClick($event)" @contextmenu.stop.prevent="rightClick($event)">
+		<div class="mainBody" @contextmenu.stop.prevent="rightClick($event)">
 
 			<div id="leftPane" class="split split-horizontal">
 				<tree :tree-data="treeData" :current-item="selectedItemLookup"></tree>
@@ -102,68 +102,6 @@
 	</div>
 
 	<!-- Component Templates -->
-
-	<script type="text/x-template" id="pageView">
-		<div
-			id="rightSubPane"
-			:class="[{singleEntry: !isScrollingView}]"
-			@scroll="handleScroll()"
-			@mousedown.stop="mouseDown($event)"
-			@mousemove.stop="mouseMove($event)"
-			@mouseup.stop="mouseUp($event)"
-			@click.stop
-		>
-			<div
-				v-if="isScrollingView"
-				:style="{width: pageSize.width + 5 + 'px'}"
-				class="pageCanvasContainer"
-			>
-				<div v-for="page in pageList">
-					<page-canvas-view
-						:ref="'canvas' + page.id"
-						:page="page"
-						:is-scrolling-view="true"
-						:width="pageSize.width"
-						:height="pageSize.height"
-					>
-					</page-canvas-view>
-				</div>
-			</div>
-			<div v-else :style="{width: pageSize.width + 5 + 'px', height: pageSize.height + 5 + 'px'}">
-				<page-canvas-view
-					ref="canvas"
-					:page="currentPageLookup"
-					:is-scrolling-view="false"
-					:width="pageSize.width"
-					:height="pageSize.height"
-				></page-canvas-view>
-			</div>
-		</div>
-	</script>
-
-	<script type="text/x-template" id="pageCanvasView">
-		<div class="pageCanvasContainer">
-			<canvas
-				:id="'pageCanvas' + (page == null ? '' : page.id)"
-				:class="'pageCanvas' + (page == null ? '' : ' multipleEntries')"
-				:style="canvasStyle"
-				:width="width" :height="height"
-			></canvas>
-			<template v-if="page && page.type === 'page'">
-				<i
-					:class="['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}]"
-					:style="switchStyle"
-				></i>
-				<el-switch
-					v-model="locked"
-					v-on:input="setPageLocked"
-					class="pageLockSwitch"
-					:style="switchStyle"
-					:width="20"
-				></el-switch>
-			</template>
-		</div>
-	</script>
 
 	<script type="text/x-template" id="navMenuTemplate">
 		<nav class="navbar navbar-default">

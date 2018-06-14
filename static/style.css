@@ -295,17 +295,13 @@ ul {
 	align-items: center;
 }
 
-.pageCanvasContainer {
-	position: relative;
-}
-
 .pageCanvas {
     background-color: #fff;
     box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
 }
 
 .pageCanvas.multipleEntries {
-	margin: 15px 0;
+	margin-top: 30px;
 }
 
 .pageLockIcon {
@@ -313,19 +309,19 @@ ul {
 	position: absolute;
 	margin-left: 15px;
 	font-size: 0.75em;
-	bottom: 19px;
+	bottom: 4px;
 	color: #888;
 	pointer-events: none;
 }
 
 .pageLockIcon.fa-lock {
-	bottom: 40px;
+	bottom: 25px;
 }
 
 .pageLockSwitch {
 	position: absolute;
 	margin-left: 10px;
-	bottom: 25px;
+	bottom: 10px;
 }
 
 /* Rotate Element's switch from horizontal to vertical */

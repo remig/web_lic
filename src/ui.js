@@ -273,9 +273,6 @@ const app = new Vue({
 				return moveableItems.includes(item.type);
 			};
 		})(),
-		globalClick() {
-			this.clearSelected();
-		},
 		rightClick(e) {
 			this.lastRightClickPos.x = e.clientX;
 			this.lastRightClickPos.y = e.clientY;
@@ -451,6 +448,7 @@ const app = new Vue({
 		LDParse.setProgressCallback(this.updateProgress);
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();
+			store.mutations.page.setDirty({includeTitlePage: true});
 			this.redrawUI();
 		});
 

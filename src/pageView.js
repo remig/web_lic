@@ -6,63 +6,94 @@ import Draw from './draw';
 import store from './store';
 import undoStack from './undoStack';
 
-Vue.component('pageCanvasView', {
-	template: '#pageCanvasView',
-	props: ['page', 'width', 'height', 'isScrollingView'],
-	data() {
-		return {
-			locked: false
-		};
-	},
-	methods: {
-		setPageLocked(newValue) {
-			const opts = {page: this.page, locked: newValue};
-			undoStack.commit('page.setLocked', opts, 'Lock Page');
-		},
-		setSelfLocked() {
-			const page = store.get.page(this.page);
-			this.locked = page ? page.locked : false;
-		},
-		getPageOffset() {
-			const pageHeight = store.state.template.page.height;
-			const container = document.getElementById('rightSubPane');
-			return (container.offsetHeight - pageHeight) / 2;
-		}
-	},
-	computed: {
-		canvasStyle() {
-			if (this.isScrollingView) {
-				const page = store.get.page(this.page);
-				if (store.get.isFirstPage(page)) {
-					return {marginTop: this.getPageOffset() + 'px'};
-				} else if (store.get.isLastPage(page)) {
-					return {marginBottom: this.getPageOffset() + 'px'};
-				}
-			}
-			return null;
-		},
-		switchStyle() {
-			if (this.isScrollingView) {
-				const page = store.get.page(this.page);
-				if (store.get.isLastPage(page)) {
-					return {marginBottom: this.getPageOffset() - 15 + 'px'};
-				}
-			}
-			return null;
-		}
-	},
-	watch: {
-		page() {  // Necessary for single page view to register 'locked' correctly on page change
-			this.setSelfLocked();
-		}
-	},
-	beforeMount() {  // Necessary for scrolling view to register 'locked' correctly on view change
-		this.setSelfLocked();
-	}
-});
-
 Vue.component('pageView', {
-	template: '#pageView',
+	render(createElement) {
+
+		let pageOffset, pageIDsToDraw, marginTop, marginBottom;
+		const pageWidth = this.pageSize.width, pageHeight = this.pageSize.height;
+		const isScrolling = this.isScrollingView;
+		if (isScrolling) {
+			pageOffset = this.getPageOffset() + 'px';
+			pageIDsToDraw = store.state.pages.map(page => page.id);
+		} else {
+			pageIDsToDraw = [(this.currentPageLookup || {}).id];
+		}
+
+		const containerList = [];
+		pageIDsToDraw.forEach((pageID, idx) => {
+
+			if (isScrolling) {
+				// Pad the first & last pages so they show up in the center of the screen when scrolled all the way
+				marginTop = (idx === 0) ? pageOffset : null;
+				marginBottom = (idx === pageIDsToDraw.length - 1) ? pageOffset : null;
+			}
+
+			const canvas = createElement(
+				'canvas',
+				{
+					attrs: {
+						id: 'pageCanvas' + pageID,
+						width: pageWidth,
+						height: pageHeight
+					},
+					class: ['pageCanvas', {multipleEntries: isScrolling}],
+					style: {marginTop, marginBottom}
+				}
+			);
+
+			let lockIcon, lockSwitch;
+			if (!this.currentPageLookup || this.currentPageLookup.type !== 'templatePage') {
+				const locked = this.pageLockStatus[pageID];
+				lockIcon = createElement(
+					'i',
+					{
+						class: ['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}],
+						style: {marginBottom}
+					}
+				);
+				lockSwitch = createElement(
+					'el-switch',
+					{
+						props: {width: 20},
+						class: 'pageLockSwitch',
+						style: {marginBottom},
+						domProps: {value: locked},
+						on: {input: this.setPageLocked(pageID)}
+					}
+				);
+			}
+
+			containerList.push(createElement(
+				'div',
+				{style: 'position: relative;'},
+				[canvas, lockIcon, lockSwitch]
+			));
+		});
+		const subRoot = createElement(
+			'div',
+			{
+				style: {
+					width: pageWidth + 'px',
+					height: isScrolling ? null : pageHeight + 'px'
+				}
+			},
+			containerList
+		);
+		return createElement(
+			'div',
+			{
+				class: {singleEntry: !this.isScrollingView},
+				attrs: {id: 'rightSubPane'},
+				on: {
+					mousedown: this.mouseDown,
+					mousemove: this.mouseMove,
+					mouseup: this.mouseUp,
+					scroll: this.handleScroll
+				}
+			},
+			[subRoot]
+		);
+	},
 	props: ['app', 'selectedItem', 'currentPageLookup'],
 	data() {
 		return {
@@ -71,6 +102,7 @@ Vue.component('pageView', {
 				height: store.state.template.page.height
 			},
 			pageCount: 0,
+			pageLockStatus: [],
 			facingPage: false,
 			scroll: false
 		};
@@ -110,15 +142,9 @@ Vue.component('pageView', {
 				this.pageCount = latestPageCount;
 				store.mutations.page.setDirty({includeTitlePage: true});
 			}
-			_.forEach(this.$refs, (k, component) => {
-				if (component) {
-					if (Array.isArray(component)) {
-						component.forEach(c => c && c.setSelfLocked());
-					} else {
-						component.setSelfLocked();
-					}
-				}
-			});
+
+			this.pageLockStatus = store.state.pages.map(page => page.locked);
+
 			Vue.nextTick(() => {
 				this.drawCurrentPage();
 			});
@@ -257,6 +283,20 @@ Vue.component('pageView', {
 				}
 			}
 		},
+		setPageLocked(pageID) {
+			if (pageID == null) {
+				return function() {};
+			}
+			return function(locked) {
+				const opts = {page: {type: 'page', id: pageID}, locked};
+				undoStack.commit('page.setLocked', opts, locked ? 'Lock Page' : 'Unlock Page');
+			};
+		},
+		getPageOffset() {
+			const pageHeight = store.state.template.page.height;
+			const container = document.getElementById('rightSubPane');
+			return container ? (container.offsetHeight - pageHeight) / 2 : 0;
+		},
 		getPageForCanvas(canvas) {
 			const pageID = parseInt(canvas.id.replace('pageCanvas', ''), 10);
 			return store.get.page(pageID);
@@ -280,24 +320,11 @@ Vue.component('pageView', {
 		}
 	},
 	computed: {
-		pageList() {
-			const pageList = store.state.pages.map(page => ({id: page.id, type: 'page'}));
-			if (store.get.titlePage()) {
-				pageList.unshift({id: 'titlePage', type: 'titlePage'});
-			}
-			pageList.pageCount = this.pageCount;
-			return pageList;
-		},
 		isScrollingView() {
 			if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
 				return false;
 			}
 			return this.scroll && this.pageCount > 1;
-		},
-		pageCenterOffset() {
-			const pageHeight = store.state.template.page.height;
-			const container = document.getElementById('rightSubPane');
-			return ((container.offsetHeight - pageHeight) / 2) + 'px';
 		}
 	}
 });
