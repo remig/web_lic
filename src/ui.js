@@ -293,15 +293,9 @@ const app = new Vue({
 			this.closeContextMenu();
 			const selItem = this.selectedItemLookup;
 			if (e.key === 'PageDown') {
-				const nextPage = store.get.nextPage(this.currentPageLookup);
-				if (nextPage) {
-					this.setSelected(nextPage);
-				}
+				this.$refs.pageView.pageDown();
 			} else if (e.key === 'PageUp') {
-				const prevPage = store.get.prevPage(this.currentPageLookup, true, true);
-				if (prevPage) {
-					this.setSelected(prevPage);
-				}
+				this.$refs.pageView.pageUp();
 			} else if (selItem && e.key.startsWith('Arrow') && store.get.isMoveable(selItem)) {
 				let dx = 0, dy = 0, dv = 1;
 				dv *= e.shiftKey ? 5 : 1;

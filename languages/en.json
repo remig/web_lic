@@ -45,7 +45,7 @@
 				"one": "One Page",
 				"two" : "Two Facing Pages",
 				"one_scroll": "One Page Scrolling View",
-				"two_scroll": "Two Pages Scrolling View (NYI)"
+				"two_scroll": "Two Pages Scrolling View"
 			}
 		},
 		"export": {

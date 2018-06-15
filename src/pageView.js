@@ -69,14 +69,17 @@ Vue.component('pageView', {
 			);
 		}
 
-		if (scrolling) {
+		if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
+			pageIDsToDraw = ['templatePage'];
+		} else if (scrolling) {
 			pageOffset = getPageOffset() + 'px';
 			pageIDsToDraw = store.state.pages.map(page => page.id);
 			if (store.state.titlePage) {
 				pageIDsToDraw.unshift('titlePage');
 			}
-		} else if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
-			pageIDsToDraw = ['templatePage'];
+			if (facing) {
+				pageIDsToDraw.unshift(null);
+			}
 		} else if (this.currentPageLookup && this.currentPageLookup.type === 'titlePage') {
 			pageIDsToDraw = facing ? [null, 'titlePage'] : ['titlePage'];
 		} else if (facing) {
@@ -85,10 +88,23 @@ Vue.component('pageView', {
 			pageIDsToDraw = [(this.currentPageLookup || {}).id];
 		}
 
+		let prevPagePair;
 		const containerList = [];
 		pageIDsToDraw.forEach((pageID, idx) => {
 			const locked = this.pageLockStatus[pageID];
-			containerList.push(renderOnePage(idx, pageID, locked));
+			const page = renderOnePage(idx, pageID, locked);
+			if (facing && scrolling) {
+				if (idx === pageIDsToDraw.length - 1) {
+					containerList.push(createElement('div', [page]));
+				} else if (prevPagePair) {
+					containerList.push(createElement('div', [prevPagePair, page]));
+					prevPagePair = null;
+				} else {
+					prevPagePair = page;
+				}
+			} else {
+				containerList.push(page);
+			}
 		});
 
 		const width = facing ? pageWidth + pageWidth + 70 + 'px' : pageWidth + 'px';
@@ -222,14 +238,54 @@ Vue.component('pageView', {
 			}
 			this.mouseDownPt = this.mouseDragItem = null;
 		},
+		pageUp() {
+			let prevPage = store.get.prevPage(this.currentPageLookup, true, true);
+			if (this.isFacingView) {
+				const page = store.get.page(this.currentPageLookup);
+				if (!_.isEven(page.number)) {
+					const prevPrevPage = store.get.prevPage(prevPage, true, true);
+					if (prevPrevPage) {
+						prevPage = prevPrevPage;
+					}
+				}
+			}
+			if (prevPage) {
+				this.app.clearSelected();
+				this.app.setCurrentPage(prevPage);
+			}
+		},
+		pageDown() {
+			let nextPage = store.get.nextPage(this.currentPageLookup);
+			if (this.isFacingView) {
+				const page = store.get.page(this.currentPageLookup);
+				if (_.isEven(page.number)) {
+					const nextNextPage = store.get.nextPage(nextPage);
+					if (nextNextPage) {
+						nextPage = nextNextPage;
+					}
+				}
+			}
+			if (nextPage) {
+				this.app.clearSelected();
+				this.app.setCurrentPage(nextPage);
+			}
+		},
 		handleScroll() {
+			if (!this.isScrollingView) {
+				return;
+			}
 			const container = document.getElementById('rightSubPane');
 			const topOffset = container.querySelector('canvas').offsetTop;
 			const pageHeight = store.state.template.page.height + 30;
 			let pageIndex = Math.ceil((container.scrollTop - topOffset) / pageHeight);
+			if (this.isFacingView) {
+				pageIndex *= 2;
+			}
 			pageIndex -= store.get.titlePage() ? 1 : 0;
 			const page = (pageIndex < 0) ? store.get.titlePage() : store.state.pages[pageIndex];
-			this.drawNearbyPages(page);
+			if (page) {
+				this.drawNearbyPages(page);
+			}
 		},
 		scrollToPage(page) {
 			if (!this.isScrollingView) {
@@ -241,7 +297,11 @@ Vue.component('pageView', {
 				if (pageCanvas) {
 					const container = document.getElementById('rightSubPane');
 					const dy = (container.offsetHeight - pageCanvas.offsetHeight) / 2;
-					container.scrollTop = pageCanvas.parentElement.offsetTop - dy;
+					if (this.isFacingView) {
+						container.scrollTop = pageCanvas.parentElement.parentElement.offsetTop - dy;
+					} else {
+						container.scrollTop = pageCanvas.parentElement.offsetTop - dy;
+					}
 				}
 			}
 		},
@@ -255,13 +315,12 @@ Vue.component('pageView', {
 			if (this.currentPageLookup) {
 				if (this.currentPageLookup.type === 'templatePage') {
 					this.drawPage(this.currentPageLookup);
-				} else if (this.facingPage) {
+				} else if (this.isScrollingView) {
+					this.drawNearbyPages(this.currentPageLookup);
+				} else if (this.isFacingView) {
 					this.drawAdjacentPages(this.currentPageLookup);
 				} else {
 					this.drawPage(this.currentPageLookup);
-					if (this.scroll ) {
-						this.drawNearbyPages(this.currentPageLookup);
-					}
 				}
 			}
 		},
@@ -270,6 +329,8 @@ Vue.component('pageView', {
 		},
 		drawNearbyPages(page) {
 			page = store.get.lookupToItem(page);
+			this.drawPage(page);  // Always redraw main page, regardless of needsDrawing state
+
 			let currentPageIdx;
 			if (page.type === 'titlePage') {
 				currentPageIdx = 0;
@@ -279,11 +340,12 @@ Vue.component('pageView', {
 			if (currentPageIdx < 0) {
 				return;
 			}
-			const firstPage = Math.max(0, currentPageIdx - 2);
-			for (let i = firstPage; i < firstPage + 5; i++) {
-				page = store.state.pages[i];
-				if (page && page.needsDrawing) {
-					this.drawPage(page);
+			const pageCountToDraw = this.isFacingView ? 10 : 4;
+			const firstPage = Math.max(0, currentPageIdx - Math.floor(pageCountToDraw / 2));
+			for (let i = firstPage; i < firstPage + pageCountToDraw; i++) {
+				const nearbyPage = store.state.pages[i];
+				if (nearbyPage && nearbyPage.needsDrawing && nearbyPage !== page) {
+					this.drawPage(nearbyPage);
 				}
 			}
 			if (currentPageIdx < 3 && store.state.titlePage && store.state.titlePage.needsDrawing) {
