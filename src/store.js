@@ -632,6 +632,7 @@ const store = {
 				});
 			}
 		},
+		// TODO: include parts in the nav Tree
 		part: {
 			displace(opts) { // opts: {partID, step, direction, distance = 60, arrowOffset = 0, arrowLength = 35, arrowRotation = 0}.  If direction == null, remove displacement
 				const step = store.get.lookupToItem(opts.step);
@@ -1352,7 +1353,7 @@ const store = {
 
 			const page = store.state.titlePage = store.mutations.page.add({pageType: 'titlePage'});
 			page.number = 1;
-			store.mutations.page.renumber();
+			store.mutations.page.renumber();  // TODO: this doesn't update the page numbers in the tree
 
 			const step = store.mutations.step.add({dest: page});
 			step.model.filename = store.model.filename;

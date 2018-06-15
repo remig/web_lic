@@ -394,7 +394,8 @@ const contextMenu = {
 				};
 				undoStack.commit('step.add', opts, this.text);
 			}
-		}
+		},
+		{text: 'Add Rotate Icon (NYI)', enabled() { return false; }}
 	],
 	numberLabel(selectedItem) {
 		const parent = store.get.parent(selectedItem);
@@ -647,12 +648,20 @@ const contextMenu = {
 		}
 	],
 	callout: [
-		// TODO: add 'Position' option: top, right, bottom, left, which will set default callout position and arrow direction
 		{
 			text: 'Add Step',
 			cb(selectedItem) {
 				undoStack.commit('callout.addStep', {callout: selectedItem, doLayout: true}, this.text);
 			}
+		},
+		{
+			text: 'Position (NYI)',
+			children: [
+				{text: 'Top (NYI)', enabled() { return false; }},
+				{text: 'Right (NYI)', enabled() { return false; }},
+				{text: 'Bottom (NYI)', enabled() { return false; }},
+				{text: 'Left (NYI)', enabled() { return false; }}
+			]
 		},
 		{
 			text: 'Delete Empty Callout',
@@ -868,6 +877,21 @@ const contextMenu = {
 					this.text
 				);
 			}
+		},
+		{
+			text: 'Remove from PLI (NYI)',
+			enabled() { return false;},
+			cb() {}
+		},
+		{
+			text: 'Change Part (NYI)',
+			children: [
+				{text: 'Change Color (NYI)', enabled: () => false},
+				{text: 'Change to Different Part (NYI)', enabled: () => false},
+				{text: 'Change Position and Rotation (NYI)', enabled: () => false},
+				{text: 'Duplicate (NYI)', enabled: () => false},
+				{text: 'Delete (NYI)', enabled: () => false}
+			]
 		}
 	]
 };

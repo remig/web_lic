@@ -308,6 +308,7 @@ const pliTemplatePanel = {
 
 // TODO: add default page layout UI
 // TODO: should add UI to choose whether to redo layout or just extend canvas
+// TODO: need to re-layout title page too, on some operations like page resize
 const pageTemplatePanel = {
 	template: '#pageTemplatePanel',
 	data() {
