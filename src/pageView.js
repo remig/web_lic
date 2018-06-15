@@ -9,21 +9,11 @@ import undoStack from './undoStack';
 Vue.component('pageView', {
 	render(createElement) {
 
-		let pageOffset, pageIDsToDraw;
+		let pageIDsToDraw;
 		const pageWidth = this.pageSize.width, pageHeight = this.pageSize.height;
 		const scrolling = this.isScrollingView, facing = this.isFacingView;
 
 		function renderOnePage(idx, pageID, locked) {
-
-			let marginTop, marginBottom, marginLeft;
-			if (scrolling) {
-				// Pad the first & last pages so they show up in the center of the screen when scrolled all the way
-				marginTop = (idx === 0) ? pageOffset : null;
-				marginBottom = (idx === pageIDsToDraw.length - 1) ? pageOffset : null;
-			}
-			if (facing && !_.isEven(idx)) {
-				marginLeft = '40px';
-			}
 
 			const canvas = createElement(
 				'canvas',
@@ -33,9 +23,14 @@ Vue.component('pageView', {
 						width: pageWidth,
 						height: pageHeight
 					},
-					class: ['pageCanvas', {multipleEntries: scrolling}],
+					class: [
+						'pageCanvas',
+						{
+							multipleEntries: scrolling,
+							oddNumberedPage: facing && !_.isEven(idx)
+						}
+					],
 					style: {
-						marginTop, marginBottom, marginLeft,
 						visibility: (pageID == null) ? 'hidden' : null
 					}
 				}
@@ -45,17 +40,13 @@ Vue.component('pageView', {
 			if (pageID != null && pageID !== 'templatePage' && pageID !== 'titlePage') {
 				lockIcon = createElement(
 					'i',
-					{
-						class: ['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}],
-						style: {marginBottom}
-					}
+					{class: ['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}]}
 				);
 				lockSwitch = createElement(
 					'el-switch',
 					{
 						props: {width: 20},
 						class: 'pageLockSwitch',
-						style: {marginBottom},
 						domProps: {value: locked},
 						on: {input: setPageLocked(pageID)}
 					}
@@ -72,7 +63,6 @@ Vue.component('pageView', {
 		if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
 			pageIDsToDraw = ['templatePage'];
 		} else if (scrolling) {
-			pageOffset = getPageOffset() + 'px';
 			pageIDsToDraw = store.state.pages.map(page => page.id);
 			if (store.state.titlePage) {
 				pageIDsToDraw.unshift('titlePage');
@@ -94,11 +84,11 @@ Vue.component('pageView', {
 			const locked = this.pageLockStatus[pageID];
 			const page = renderOnePage(idx, pageID, locked);
 			if (facing && scrolling) {
-				if (idx === pageIDsToDraw.length - 1) {
-					containerList.push(createElement('div', [page]));
-				} else if (prevPagePair) {
+				if (prevPagePair) {
 					containerList.push(createElement('div', [prevPagePair, page]));
 					prevPagePair = null;
+				} else if (idx === pageIDsToDraw.length - 1) {
+					containerList.push(createElement('div', [page]));
 				} else {
 					prevPagePair = page;
 				}
@@ -107,11 +97,21 @@ Vue.component('pageView', {
 			}
 		});
 
-		const width = facing ? pageWidth + pageWidth + 70 + 'px' : pageWidth + 'px';
-		const height = scrolling ? null : pageHeight + 'px';
+		if (scrolling) {
+			// Pad the first & last pages so they show up in the center of the screen when scrolled all the way
+			const style = {style: {height: getPageOffset() - 30 + 'px'}};
+			containerList.unshift(createElement('div', style));
+			containerList.push(createElement('div', style));
+		}
+
 		const subRoot = createElement(
 			'div',
-			{style: {width, height}},
+			{
+				style: {
+					width: facing ? pageWidth + pageWidth + 70 + 'px' : pageWidth + 'px',
+					height: scrolling ? null : pageHeight + 'px'
+				}
+			},
 			containerList
 		);
 

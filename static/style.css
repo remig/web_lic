@@ -297,6 +297,10 @@ ul {
 	align-items: center;
 }
 
+.oddNumberedPage {
+	margin-left: 40px;
+}
+
 .pageCanvas {
     background-color: #fff;
     box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
