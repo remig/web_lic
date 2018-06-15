@@ -210,6 +210,7 @@ const menu = [
 			shown: () => enableIfModel() && store.get.titlePage() == null,
 			cb() {
 				undoStack.commit('addTitlePage', null, this.text);
+				app.clearSelected();
 				app.setCurrentPage({type: 'titlePage', id: 0});
 			}
 		},
@@ -217,6 +218,7 @@ const menu = [
 			text: 'navbar.edit.title_page.remove',
 			shown: () => enableIfModel() && store.get.titlePage() != null,
 			cb() {
+				app.clearSelected();
 				app.setCurrentPage({type: 'page', id: 0});
 				undoStack.commit('removeTitlePage', null, this.text);
 			}

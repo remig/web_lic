@@ -168,12 +168,13 @@ const app = new Vue({
 				this.$refs.pageView.clearPageCanvas();
 			});
 		},
-		setCurrentPage(page) {
+		setCurrentPage(page, redraw = true) {
 			if (!_.itemEq(page, this.currentPageLookup.type)) {
-				this.clearSelected();
 				this.currentPageLookup = store.get.itemToLookup(page);
 			}
-			Vue.nextTick(this.drawCurrentPage);
+			if (redraw) {
+				Vue.nextTick(this.drawCurrentPage);
+			}
 		},
 		setSelected(target) {
 			if (_.itemEq(target, this.selectedItemLookup)) {
@@ -189,10 +190,14 @@ const app = new Vue({
 				}
 				this.selectedItemLookup = target;
 			} else {
-				this.clearSelected();
+
+				if (this.selectedItemLookup) {
+					const currentPage = store.get.pageForItem(this.selectedItemLookup);
+					this.drawPage(currentPage);
+				}
 				const targetPage = store.get.pageForItem(target);
 				if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
-					this.setCurrentPage(targetPage);
+					this.setCurrentPage(targetPage, false);
 				}
 				this.selectedItemLookup = store.get.itemToLookup(target);
 			}
@@ -290,12 +295,12 @@ const app = new Vue({
 			if (e.key === 'PageDown') {
 				const nextPage = store.get.nextPage(this.currentPageLookup);
 				if (nextPage) {
-					this.setCurrentPage(nextPage);
+					this.setSelected(nextPage);
 				}
 			} else if (e.key === 'PageUp') {
 				const prevPage = store.get.prevPage(this.currentPageLookup, true, true);
 				if (prevPage) {
-					this.setCurrentPage(prevPage);
+					this.setSelected(prevPage);
 				}
 			} else if (selItem && e.key.startsWith('Arrow') && store.get.isMoveable(selItem)) {
 				let dx = 0, dy = 0, dv = 1;

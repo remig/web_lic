@@ -179,6 +179,7 @@ const contextMenu = {
 				const page = store.get.lookupToItem(selectedItem);
 				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
 				undoStack.commit('page.delete', {page}, 'Delete Page');
+				app.clearSelected();
 				app.setCurrentPage(nextPage);
 			}
 		}
@@ -729,6 +730,7 @@ const contextMenu = {
 				const destStep = {type: 'step', id: step.model.parentStepID};
 				const opts = {modelFilename: selectedItem.filename, destStep, doLayout: true};
 				undoStack.commit('submodel.convertToCallout', opts, this.text);
+				app.clearSelected();
 				app.setCurrentPage(store.get.pageForItem(destStep));
 			}
 		}
