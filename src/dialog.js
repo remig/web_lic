@@ -126,3 +126,40 @@ Vue.component('fontNameDialog', {
 		}
 	}
 });
+
+const elDialogs = {
+	numberChooser: {
+		// TODO: Element's inputNumber is broken; it doesn't emit input events and doesn't filter non-numeric keys.
+		// Need to implement my own better looking number input, with nice scroll buttons.
+		title: '',
+		value: 0,
+		bodyText: '',
+		min: 0,
+		max: 100,
+		step: 1
+	}
+};
+
+_.forEach(elDialogs, (name, data) => {
+	Vue.component(name + 'Dialog', {
+		template: `#${name}DialogTemplate`,
+		data: function() {
+			data = _.clone(data);
+			data.visible = false;
+			return data;
+		},
+		methods: {
+			updateValues() {
+				this.$emit('update', {...this.$data});
+			},
+			ok() {
+				this.visible = false;
+				this.$emit('ok', {...this.$data});
+			},
+			cancel() {
+				this.visible = false;
+				this.$emit('cancel');
+			}
+		}
+	});
+});
