@@ -547,7 +547,42 @@ const contextMenu = {
 				app.redrawUI(true);
 			}
 		},
-		{text: 'Scale CSI (NYI)', cb: () => {}},
+		{
+			text: 'Scale CSI',
+			cb(selectedItem) {
+				const csi = store.get.csi(selectedItem.id);
+				const originalScale = _.clone(csi.scale);
+				app.currentDialog = 'numberChooserDialog';
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$off();
+					dialog.$on('update', newValues => {
+						csi.scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
+						csi.isDirty = true;
+						app.redrawUI(true);
+					});
+					dialog.$on('ok', newValues => {
+						undoStack.commit(
+							'csi.scale',
+							{csi, scale: newValues.value, doLayout: true},
+							'Scale Step Image',
+							[csi]
+						);
+					});
+					dialog.$on('cancel', () => {
+						csi.scale = originalScale;
+						csi.isDirty = true;
+						app.redrawUI(true);
+					});
+					dialog.visible = true;
+					dialog.title = 'Scale CSI';
+					dialog.min = 0;
+					dialog.max = 5;
+					dialog.step = 0.5;
+					dialog.value = 1;
+				});
+			}
+		},
 		{text: 'separator'},
 		{
 			text: 'Select Part',

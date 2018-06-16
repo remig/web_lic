@@ -50,8 +50,10 @@
 		},
 		"export": {
 			"root": "Export",
-			"pdf": "Generate PDF",
-			"png": "Generate PNG Images"
+			"pdf": "PDF",
+			"hi_res_pdf": "Hi-Res PDF... (NYI)",
+			"png": "PNG Images",
+			"hi_res_png": "Hi-Res PNG Images..."
 		}
 	}
 }

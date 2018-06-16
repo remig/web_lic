@@ -284,10 +284,46 @@ const menu = [
 			}
 		},
 		{
+			text: 'navbar.export.hi_res_pdf',  // TODO: just need UI to let user define what 'hi-res' PDF means
+			enabled: function() {return false;},  // enableIfModel,
+			cb() {
+				InstructionExporter.generatePDF(app, store);
+			}
+		},
+		{
 			text: 'navbar.export.png',
 			enabled: enableIfModel,
 			cb() {
 				InstructionExporter.generatePNGZip(app, store);
+			}
+		},
+		{
+			text: 'navbar.export.hi_res_png',
+			enabled: enableIfModel,
+			cb() {
+
+				const originalScale = 1;  // TODO: store this in UI prefs
+				const pageSize = store.state.template.page;
+				function sizeText(scale) {
+					const w = pageSize.width * scale, h = pageSize.height * scale;
+					return `Images will be <strong>${w} x ${h}</strong> pixels`;
+				}
+				app.currentDialog = 'numberChooserDialog';
+
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$off();
+					dialog.$on('update', newValues => {
+						dialog.bodyText = sizeText(newValues.value);
+					});
+					dialog.$on('ok', newValues => {
+						InstructionExporter.generatePNGZip(app, store, newValues.value);
+					});
+					dialog.visible = true;
+					dialog.title = 'Scale Images by';
+					dialog.bodyText = sizeText(originalScale);
+					dialog.value = 1;
+				});
 			}
 		}
 	]}
