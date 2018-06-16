@@ -98,6 +98,7 @@ const template = {
 			}
 		},
 		step: {
+			innerMargin: 0.02,
 			numberLabel: {
 				font: 'bold 18pt Helvetica',
 				color: 'black'

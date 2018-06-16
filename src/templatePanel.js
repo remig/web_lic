@@ -112,6 +112,7 @@ function getFamilyNames() {
 }
 
 // TODO: support underlining fonts in general
+// TODO: font styling buttons (bold, italic, underline) need to toggle
 const fontTemplatePanel = {
 	template: '#fontTemplatePanel',
 	data() {

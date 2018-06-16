@@ -13,6 +13,7 @@ const emptyState = {
 	templatePage: null,
 	titlePage: null,
 	plisVisible: true,
+	pliItemTransforms: {},
 	pages: [],
 	dividers: [],
 	steps: [],
