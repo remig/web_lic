@@ -193,7 +193,7 @@ const app = new Vue({
 
 				if (this.selectedItemLookup) {
 					const currentPage = store.get.pageForItem(this.selectedItemLookup);
-					this.drawPage(currentPage);
+					this.$refs.pageView.drawPage(currentPage);  // TODO: What is this call for?  Is it still necessary?
 				}
 				const targetPage = store.get.pageForItem(target);
 				if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
@@ -379,10 +379,6 @@ const app = new Vue({
 					this.$refs.pageView.drawCurrentPage();
 				});
 			}
-		},
-		drawPage(page, canvas, scale = 1) {
-			// TODO: this is only called from PDF export.  Find a cleaner way.
-			this.$refs.pageView.drawPage(page, canvas, scale);
 		}
 	},
 	computed: {

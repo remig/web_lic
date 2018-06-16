@@ -364,7 +364,7 @@ Vue.component('pageView', {
 				return;  // Can't find a canvas for this page - ignore draw call.  Happens when we're transitioning between view modes
 			}
 			const selectedPart = (this.selectedItem && this.selectedItem.type === 'part') ? this.selectedItem : null;
-			Draw.page(page, canvas, scale, selectedPart);
+			Draw.page(page, canvas, {scale, selectedPart});
 			delete page.needsDrawing;
 			if (this.currentPageLookup && _.itemEq(page, this.currentPageLookup)) {
 				const itemPage = store.get.pageForItem(this.selectedItem);

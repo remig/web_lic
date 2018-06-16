@@ -6,8 +6,9 @@ import LDParse from './LDParse';
 
 const api = {
 
-	page(page, canvas, scale = 1, selectedPart) {
+	page(page, canvas, config) {  // config: {scale, selectedPart, noCache}
 
+		const scale = config.scale || 1;
 		if (page.needsLayout) {
 			store.mutations.page.layout({page});
 		}
@@ -38,7 +39,7 @@ const api = {
 				image.onload = () => {
 					// TODO: this gets called multiple times on initial page load
 					store.cache.set('page', 'backgroundImage', image);
-					api.page(page, canvas, scale, selectedPart);
+					api.page(page, canvas, config);
 				};
 				image.src = template.fill.image.src;
 				return;
@@ -62,7 +63,7 @@ const api = {
 
 		ctx.translate(Math.floor(page.innerContentOffset.x), Math.floor(page.innerContentOffset.y));
 
-		page.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
+		page.steps.forEach(id => api.step({type: 'step', id}, ctx, config));
 
 		api.dividers(page.dividers, ctx);
 
@@ -86,7 +87,7 @@ const api = {
 	},
 
 	// TODO: Add support for a quantity label to a step. Useful on the last step of a submodel build many times.
-	step(step, ctx, scale = 1, selectedPart) {
+	step(step, ctx, config) {
 
 		step = store.get.step(step);
 		const localModel = LDParse.model.get.part(step.model.filename);
@@ -95,21 +96,21 @@ const api = {
 		ctx.translate(Math.floor(step.x), Math.floor(step.y));
 
 		if (step.csi == null && step.steps.length) {
-			step.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
+			step.steps.forEach(id => api.step({type: 'step', id}, ctx, config));
 		} else if (step.csiID != null) {
-			api.csi(step.csiID, localModel, ctx, scale, selectedPart);
+			api.csi(step.csiID, localModel, ctx, config);
 		}
 
 		step.submodelImages.forEach(submodelImageID => {
-			api.submodelImage(submodelImageID, ctx, scale);
+			api.submodelImage(submodelImageID, ctx, config);
 		});
 
 		step.callouts.forEach(calloutID => {
-			api.callout(calloutID, ctx, scale, selectedPart);
+			api.callout(calloutID, ctx, config);
 		});
 
 		if (step.pliID != null && store.state.plisVisible) {
-			api.pli(step.pliID, localModel, ctx, scale);
+			api.pli(step.pliID, localModel, ctx, config);
 		}
 
 		if (step.numberLabelID != null) {
@@ -132,7 +133,7 @@ const api = {
 		ctx.restore();
 	},
 
-	submodelImage(submodelImage, ctx, scale = 1) {
+	submodelImage(submodelImage, ctx, {scale, noCache}) {
 		submodelImage = store.get.submodelImage(submodelImage);
 		const template = store.state.template.submodelImage;
 		const csi = store.get.csi(submodelImage.csiID);
@@ -153,7 +154,7 @@ const api = {
 		ctx.save();
 		ctx.scale(1 / scale, 1 / scale);
 		const part = LDParse.model.get.part(submodelImage.modelFilename);
-		const siCanvas = store.render.pli(part, csi, scale).container;
+		const siCanvas = store.render.pli(part, csi, scale, noCache).container;
 		const x = Math.floor((submodelImage.x + csi.x) * scale);
 		const y = Math.floor((submodelImage.y + csi.y) * scale);
 		ctx.drawImage(siCanvas, x, y);
@@ -172,7 +173,7 @@ const api = {
 		ctx.restore();
 	},
 
-	csi(csi, localModel, ctx, scale = 1, selectedPart) {
+	csi(csi, localModel, ctx, {scale, selectedPart, noCache}) {
 		csi = store.get.csi(csi);
 		const step = store.get.parent(csi);
 
@@ -181,7 +182,8 @@ const api = {
 		const haveSelectedParts = selectedPart && selectedPart.stepID === step.id;
 		const selectedPartIDs = haveSelectedParts ? [selectedPart.id] : null;
 		const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
-		const res = store.render[renderer](localModel, step, csi, selectedPartIDs, scale);
+		const csiScale = csi.scale * scale;
+		const res = store.render[renderer](localModel, step, csi, selectedPartIDs, csiScale, noCache);
 		if (res) {
 			const x = Math.floor((csi.x - res.dx) * scale);
 			const y = Math.floor((csi.y - res.dy) * scale);
@@ -190,7 +192,7 @@ const api = {
 		ctx.restore();
 	},
 
-	pli(pli, localModel, ctx, scale = 1) {
+	pli(pli, localModel, ctx, {scale, noCache}) {
 		const template = store.state.template;
 		pli = store.get.pli(pli);
 
@@ -220,7 +222,7 @@ const api = {
 		pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const part = localModel.parts[pliItem.partNumbers[0]];
-			const pliCanvas = store.render.pli(part, pliItem, scale).container;
+			const pliCanvas = store.render.pli(part, pliItem, scale, noCache).container;
 			const x = Math.floor(pliItem.x * scale);
 			const y = Math.floor(pliItem.y * scale);
 			ctx.drawImage(pliCanvas, x, y);
@@ -241,7 +243,7 @@ const api = {
 		ctx.restore();
 	},
 
-	callout(callout, ctx, scale = 1, selectedPart) {
+	callout(callout, ctx, config) {
 		const template = store.state.template.callout;
 		callout = store.get.callout(callout);
 		ctx.save();
@@ -256,7 +258,7 @@ const api = {
 		ctx.translate(Math.floor(callout.x), Math.floor(callout.y));
 		ctx.translate(Math.floor(callout.innerContentOffset.x), Math.floor(callout.innerContentOffset.y));
 
-		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, scale, selectedPart));
+		callout.steps.forEach(id => api.step({type: 'step', id}, ctx, config));
 		ctx.restore();
 
 		ctx.strokeStyle = template.arrow.border.color;

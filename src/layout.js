@@ -251,7 +251,7 @@ const api = {
 		// Draw CSI centered in box
 		const step = store.get.parent(csi);
 		const localModel = LDParse.model.get.part(step.model.filename);
-		const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
+		const csiSize = store.render.csi(localModel, step, csi, null, csi.scale || 1) || {width: 0, height: 0};
 		csi.x = box.x + ((box.width - csiSize.width) / 2);
 		csi.y = box.y + ((box.height - csiSize.height) / 2);
 		csi.width = csiSize.width;

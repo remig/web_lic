@@ -19,6 +19,9 @@ const api = {
 	isEven(n) {
 		return (typeof n === 'number') && isFinite(n) && !(n % 2);
 	},
+	bound(value, min, max) {
+		return Math.max(min, Math.min(max, value));
+	},
 	toArray(fakeArray) {
 		return [].slice.apply(fakeArray);
 	},

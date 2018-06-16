@@ -95,10 +95,10 @@ const store = {
 		}
 
 		return {
-			csi(localModel, step, csi, selectedPartIDs, scale = 1) {
+			csi(localModel, step, csi, selectedPartIDs, scale = 1, noCache) {
 				const domID = `CSI_${step.csiID}`;
-				let container = document.getElementById(domID);
-				if (csi.isDirty || container == null) {
+				let container = document.getElementById(noCache ? 'generateImagesCanvas' : domID);
+				if (csi.isDirty || container == null || noCache) {
 					container = container || getCanvas(domID);
 					if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
 						LDRender.renderModel(localModel, container, 1000 * scale, {resizeContainer: true});
@@ -134,11 +134,11 @@ const store = {
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
 				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
 			},
-			pli(part, item, scale = 1) {
+			pli(part, item, scale = 1, noCache) {
 				const domID = `PLI_${part.filename}_${part.colorCode}`;
-				let container = document.getElementById(domID);
-				if ((item && item.isDirty) || container == null) {
-					container = getCanvas(domID);
+				let container = document.getElementById(noCache ? 'generateImagesCanvas' : domID);
+				if ((item && item.isDirty) || container == null || noCache) {
+					container = getCanvas(domID, noCache);
 					const config = {
 						resizeContainer: true,
 						rotation: getRotation(item)
@@ -773,7 +773,7 @@ const store = {
 			add(opts) { // opts: {parent}
 				return store.mutations.item.add({item: {
 					type: 'csi',
-					rotation: null,
+					rotation: null, scale: 1,
 					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
 			},
@@ -788,12 +788,23 @@ const store = {
 					store.mutations.page.layout({page: store.get.pageForItem(csi)});
 				}
 			},
+			scale(opts) { // opts: {csi, scale, doLayout = false}
+				const csi = store.get.lookupToItem(opts.csi);
+				csi.scale = _.bound(opts.scale, 0.001, 5);
+				csi.isDirty = true;
+				if (opts.doLayout) {
+					store.mutations.page.layout({page: store.get.pageForItem(csi)});
+				}
+			},
 			resetSize(opts) {  // opts: {csi}
 				const csi = store.get.lookupToItem(opts.csi, 'csi');
 				if (csi) {
 					csi.width = csi.height = null;
 					csi.isDirty = true;
 				}
+			},
+			markAllDirty() {
+				store.state.csis.forEach(csi => (csi.isDirty = true));
 			}
 		},
 		submodelImage: {
@@ -1259,6 +1270,9 @@ const store = {
 				const pliItem = store.get.lookupToItem(opts.pliItem);
 				store.mutations.item.delete({item: {type: 'quantityLabel', id: pliItem.quantityLabelID}});
 				store.mutations.item.delete({item: pliItem});
+			},
+			markAllDirty() {
+				store.state.pliItems.forEach(item => (item.isDirty = true));
 			}
 		},
 		templatePage: {
@@ -1315,8 +1329,8 @@ const store = {
 				store.state.template = _.clone(defaultTemplate);
 				store.state.templatePage.needsLayout = true;
 				store.state.pages.forEach(page => (page.needsLayout = true));
-				store.state.csis.forEach(item => (item.isDirty = true));
-				store.state.pliItems.forEach(item => (item.isDirty = true));
+				store.mutations.csi.markAllDirty();
+				store.mutations.pliItem.markAllDirty();
 			},
 			setPageSize(opts) {  // opts: {width, height}
 				store.state.template.page.width = opts.width;

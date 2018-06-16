@@ -2,10 +2,10 @@
 'use strict';
 
 import _ from './util';
+import Draw from './draw';
 
-function exportInstructions(app, store, exportType, drawPageCallback, doneCallback) {
+function exportInstructions(app, store, exportType, scale, drawPageCallback, doneCallback) {
 
-	const scale = 1;  // TODO: create UI to set this to support hi-res export
 	app.busyText = `Generating ${exportType}`;
 
 	async function exportPage(page, canvas) {
@@ -17,7 +17,7 @@ function exportInstructions(app, store, exportType, drawPageCallback, doneCallba
 			if (page.needsLayout) {
 				store.mutations.page.layout({page});
 			}
-			app.drawPage(page, canvas, scale);
+			Draw.page(page, canvas, {scale, noCache: true});
 
 			drawPageCallback(page, canvas);
 
@@ -34,7 +34,7 @@ function exportInstructions(app, store, exportType, drawPageCallback, doneCallba
 
 	window.setTimeout(() => {
 		const start = Date.now();
-		const canvas = document.getElementById('generateImagesCanvas');
+		const canvas = document.getElementById('exportImagesCanvas');
 		canvas.width = store.state.template.page.width * scale;
 		canvas.height = store.state.template.page.height * scale;
 
@@ -52,7 +52,7 @@ function exportInstructions(app, store, exportType, drawPageCallback, doneCallba
 
 const api = {
 
-	generatePDF: function(app, store) {
+	generatePDF: function(app, store, scale = 1) {
 
 		const r = 0.75;  // = 72 / 96
 		const pageSize = {
@@ -78,9 +78,9 @@ const api = {
 			finishedCallback();
 		}
 
-		exportInstructions(app, store, 'PDF', drawPage, done);
+		exportInstructions(app, store, 'PDF', scale, drawPage, done);
 	},
-	generatePNGZip: function(app, store) {
+	generatePNGZip: function(app, store, scale = 1) {
 
 		const fn = store.get.modelFilenameBase();
 		const zip = new JSZip();
@@ -99,7 +99,7 @@ const api = {
 				.then(finishedCallback);
 		}
 
-		exportInstructions(app, store, 'PNG Zip', drawPage, done);
+		exportInstructions(app, store, 'PNG Zip', scale, drawPage, done);
 	}
 };
 
