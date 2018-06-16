@@ -3,6 +3,7 @@
 
 import Storage from './storage';
 import LanguageList from '../languages/languages.json';
+import MessageFormat from 'messageformat';
 
 LanguageList.sort((a, b) => {
 	if (a.language < b.language) {
@@ -13,9 +14,13 @@ LanguageList.sort((a, b) => {
 	return 0;
 });
 
+const messageFormat = new MessageFormat('en');
 const loadedLanguages = {};  // key: locale code, value: language
 let currentLocale = Storage.get.locale();
 
+// TODO: when loading a language, flatten the hierarchy so it doesn't have to be traversed constantly.  eg: {navbar: {file: {root: 'foo'}}} => {'navbar.file.root': 'foo'}
+// And pre-compile any _@mf format strings into lookup functions
+// And do all of this at build time, not runtime...
 loadedLanguages.en = require('../languages/en.json');  // Always load English; fall back on this if a different language is missing a key
 
 if (currentLocale && currentLocale !== 'en') {
@@ -23,15 +28,40 @@ if (currentLocale && currentLocale !== 'en') {
 	loadedLanguages[currentLocale] = require(`../languages/${currentLocale}.json`);
 }
 
-function translate(key) {
-	let value = loadedLanguages[currentLocale] || loadedLanguages.en;
-	try {
-		key.split('.').forEach(v => (value = value[v]));  // keys missing in chosen language will throw a TypeError; catch that and fall back to English, which has all keys.
-	} catch (e) {
-		value = loadedLanguages.en;
-		key.split('.').forEach(v => (value = value[v]));
+function __tr(key, args, locale) {
+	let lookup = loadedLanguages[locale];
+	const keys = key.split('.');
+	for (let i = 0; i < keys.length; i++) {
+		const v = keys[i];
+		if (v.endsWith('_@mf')) {
+			return messageFormat.compile(lookup[v])(args);
+		}
+		lookup = lookup[v];
 	}
-	return value;
+	return lookup;
+}
+
+function translate(key, args) {
+	let res;
+	if (currentLocale && currentLocale !== 'en') {
+		try {
+			res = __tr(key, args, currentLocale);
+		} catch (e) {
+			console.log('Locale ${currentLocale} missing translation key: ${key}');  // eslint-disable-line no-console
+			res = null;
+		}
+	}
+	if (res == null) {  // If anything goes wrong with the non-english lookup, fallback to english
+		try {
+			res = __tr(key, args, 'en');
+		} catch (e) {
+			throw 'Invalid key lookup: ' + key;
+		}
+	}
+	if (res == null) {
+		throw 'Invalid key lookup: ' + key;
+	}
+	return res;
 }
 
 function getLocale() {

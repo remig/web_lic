@@ -55,5 +55,11 @@
 			"png": "PNG Images",
 			"hi_res_png": "Hi-Res PNG Images..."
 		}
+	},
+	"dialog": {
+		"scale_images": {
+			"title": "Scale Images by",
+			"image_size_@mf": "Images will be <strong>{width} x {height}</strong> pixels"
+		}
 	}
 }

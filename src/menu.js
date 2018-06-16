@@ -10,6 +10,7 @@ import Storage from './storage';
 import LocaleManager from './translate';
 
 let app;
+const tr = LocaleManager.translate;
 
 Vue.component('menu-list', {
 	props: ['menuEntries', 'selectedItem'],
@@ -284,8 +285,8 @@ const menu = [
 			}
 		},
 		{
-			text: 'navbar.export.hi_res_pdf',  // TODO: just need UI to let user define what 'hi-res' PDF means
-			enabled: function() {return false;},  // enableIfModel,
+			text: 'navbar.export.hi_res_pdf',  // TODO: need UI to let user define what 'hi-res' PDF means
+			enabled: function() {return false;},
 			cb() {
 				InstructionExporter.generatePDF(app, store);
 			}
@@ -305,8 +306,8 @@ const menu = [
 				const originalScale = 1;  // TODO: store this in UI prefs
 				const pageSize = store.state.template.page;
 				function sizeText(scale) {
-					const w = pageSize.width * scale, h = pageSize.height * scale;
-					return `Images will be <strong>${w} x ${h}</strong> pixels`;
+					const size = {width: pageSize.width * scale, height: pageSize.height * scale};
+					return tr('dialog.scale_images.image_size_@mf', size);
 				}
 				app.currentDialog = 'numberChooserDialog';
 
@@ -320,7 +321,7 @@ const menu = [
 						InstructionExporter.generatePNGZip(app, store, newValues.value);
 					});
 					dialog.visible = true;
-					dialog.title = 'Scale Images by';
+					dialog.title = tr('dialog.scale_images.title');
 					dialog.bodyText = sizeText(originalScale);
 					dialog.value = 1;
 				});
