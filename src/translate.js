@@ -47,7 +47,7 @@ function setLocale(locale) {
 }
 
 function pickLanguage(app, cb, cb2) {
-	if (currentLocale != null) {
+	if (currentLocale != null || LanguageList.length < 2) {
 		cb();
 		return;
 	}
