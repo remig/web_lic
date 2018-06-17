@@ -108,6 +108,11 @@ div#container {
 	margin: 0;
 }
 
+.form-control {
+	box-shadow: unset;
+	webkit-box-shadow: unset;
+}
+
 /*
 .modal-backdrop.in {
 	opacity: 0;
@@ -149,12 +154,27 @@ div#container {
 	padding: 20px;
 }
 
+.el-input__inner {
+	height: 34px;
+	border: 1px solid #ccc;
+}
+
 .dialog-fade-enter-active {
 	animation: unset;
 }
 
 .dialog-fade-leave-active {
 	animation: unset;
+}
+
+.pdfExportDialog input {
+	display: inline;
+	width: 95px;
+	margin: 0 5px;
+}
+
+.pdfExportDialog .el-form-item:last-child {
+	margin-bottom: unset;
 }
 
 /* Splitter stuff */

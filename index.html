@@ -653,6 +653,56 @@
 		</baseDialog>
 	</script>
 
+	<script type="text/x-template" id="pdfExportDialogTemplate">
+		<el-dialog
+			class="pdfExportDialog"
+			title="Export Hi-Res PDF"
+			width="525px"
+			:modal="false"
+			:show-close="false"
+			:visible="visible"
+		>
+			<el-form label-width="140px">
+				<el-form-item label="Physical Page Size">
+					<input
+						:value="pageSize.width"
+						@input="updateWidth($event.target.value)"
+						min="0" max="10000"
+						type="number"
+						class="form-control"
+					></input>
+					<span>x</span>
+					<input
+						:value="pageSize.height"
+						@input="updateHeight($event.target.value)"
+						min="0" max="10000"
+						type="number"
+						class="form-control"
+					></input>
+					<el-select :value="units" @change="updateUnits">
+						<el-option key="point" label="point" value="point" />
+						<el-option key="mm" label="mm" value="mm" />
+						<el-option key="cm" label="cm" value="cm" />
+						<el-option key="in" label="in" value="in" />
+					</el-select>
+				</el-form-item>
+				<el-form-item label="Image Resolution">
+					<input
+						v-model.number="dpi"
+						min="0" max="1000"
+						type="number"
+						class="form-control"
+					></input>
+					<span>DPI</span>
+				</el-form-item>
+			</el-form>
+			<span slot="footer" class="dialog-footer">
+				<el-button @click="cancel">Cancel</el-button>
+				<el-button type="primary" @click="ok()">Ok</el-button>
+			</span>
+		</el-dialog>
+	</script>
+
 	<script type="text/x-template" id="localeChooserDialogTemplate">
 		<el-dialog
 			title="Pick a Language"

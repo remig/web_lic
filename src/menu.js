@@ -285,10 +285,23 @@ const menu = [
 			}
 		},
 		{
-			text: 'navbar.export.hi_res_pdf',  // TODO: need UI to let user define what 'hi-res' PDF means
-			enabled: function() {return false;},
+			text: 'navbar.export.hi_res_pdf',
+			enabled: enableIfModel,
 			cb() {
-				InstructionExporter.generatePDF(app, store);
+
+				// TODO: store user's choices as UI defaults, and retrieve them and populate dialog with them
+				const pageSize = store.state.template.page;
+				app.currentDialog = 'pdfExportDialog';
+
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$off();
+					dialog.$on('ok', newValues => {
+						InstructionExporter.generatePDF(app, store, newValues);
+					});
+					dialog.dpi = 96;
+					dialog.show(pageSize);
+				});
 			}
 		},
 		{
@@ -306,7 +319,10 @@ const menu = [
 				const originalScale = 1;  // TODO: store this in UI prefs
 				const pageSize = store.state.template.page;
 				function sizeText(scale) {
-					const size = {width: pageSize.width * scale, height: pageSize.height * scale};
+					const size = {
+						width: Math.floor(pageSize.width * scale),
+						height: Math.floor(pageSize.height * scale)
+					};
 					return tr('dialog.scale_images.image_size_@mf', size);
 				}
 				app.currentDialog = 'numberChooserDialog';

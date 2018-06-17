@@ -22,6 +22,13 @@ const api = {
 	bound(value, min, max) {
 		return Math.max(min, Math.min(max, value));
 	},
+	round(value, precision = 0) {
+		precision = 10 ** precision;
+		if (precision < 1) {
+			return Math.round(value);
+		}
+		return Math.round(value * precision) / precision;
+	},
 	toArray(fakeArray) {
 		return [].slice.apply(fakeArray);
 	},

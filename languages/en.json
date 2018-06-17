@@ -51,7 +51,7 @@
 		"export": {
 			"root": "Export",
 			"pdf": "PDF",
-			"hi_res_pdf": "Hi-Res PDF... (NYI)",
+			"hi_res_pdf": "Hi-Res PDF...",
 			"png": "PNG Images",
 			"hi_res_png": "Hi-Res PNG Images..."
 		}

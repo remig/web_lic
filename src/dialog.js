@@ -127,6 +127,70 @@ Vue.component('fontNameDialog', {
 	}
 });
 
+Vue.component('pdfExportDialog', {
+	template: '#pdfExportDialogTemplate',
+	data: function() {
+		return {
+			visible: false,
+			dpi: 0,
+			aspectRatio: 0,
+			units: 'point',
+			pageSize: {width: 0, height: 0},  // stored in this.units
+			unitConversions: {  // this conversion factor * pixel count = units
+				point: 0.75,
+				in: 0.75 / 72,
+				mm: 0.75 / 72 * 25.4,
+				cm: 0.75 / 72 * 2.54
+			}
+		};
+	},
+	methods: {
+		show(pageSizeInPixels) {
+			this.aspectRatio = pageSizeInPixels.width / pageSizeInPixels.height;
+			this.pageSize.width = this.pixelsToUnits(pageSizeInPixels.width);
+			this.pageSize.height = this.pixelsToUnits(pageSizeInPixels.height);
+			this.visible = true;
+		},
+		updateWidth(newWidth) {
+			this.pageSize.width = _.round(parseFloat(newWidth), 2);
+			this.pageSize.height = _.round(this.pageSize.width / this.aspectRatio, 2);
+		},
+		updateHeight(newHeight) {
+			this.pageSize.height = _.round(parseFloat(newHeight), 2);
+			this.pageSize.width = _.round(this.pageSize.height * this.aspectRatio, 2);
+		},
+		updateUnits(newUnits) {
+			const widthInPixels = this.unitsToPixels(this.pageSize.width, this.units);
+			this.pageSize.width = _.round(this.pixelsToUnits(widthInPixels, newUnits), 2);
+			const heightInPixels = this.unitsToPixels(this.pageSize.height, this.units);
+			this.pageSize.height = _.round(this.pixelsToUnits(heightInPixels, newUnits));
+			this.units = newUnits;
+		},
+		pixelsToUnits(pixelCount, units) {
+			units = units || this.units;
+			return pixelCount * this.unitConversions[units];
+		},
+		unitsToPixels(unitCount, units) {
+			units = units || this.units;
+			return unitCount / this.unitConversions[units];
+		},
+		ok() {
+			this.visible = false;
+			this.$emit('ok', {
+				dpi: this.dpi,
+				units: this.units,
+				pageSize: {
+					width: this.pageSize.width,
+					height: this.pageSize.height
+				}
+			});
+		},
+		cancel() {
+			this.visible = false;
+		}
+	}
+});
+
 const elDialogs = {
 	numberChooser: {
 		// TODO: Element's inputNumber is broken; it doesn't emit input events and doesn't filter non-numeric keys.
