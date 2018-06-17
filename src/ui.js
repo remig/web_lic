@@ -126,7 +126,9 @@ const app = new Vue({
 			});
 		},
 		openLicFile(content) {
-			content = JSON.parse(content);
+			if (typeof content === 'string') {
+				content = JSON.parse(content);
+			}
 			const start = Date.now();
 			if (store.model) {
 				this.closeModel();
@@ -447,5 +449,5 @@ const app = new Vue({
 
 window.__lic = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
-	_, app, store, undoStack, LDParse
+	_, app, store, undoStack, LDParse, Storage
 };

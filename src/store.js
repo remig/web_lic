@@ -13,7 +13,6 @@ const emptyState = {
 	templatePage: null,
 	titlePage: null,
 	plisVisible: true,
-	pliItemTransforms: {},
 	pages: [],
 	dividers: [],
 	steps: [],
@@ -67,8 +66,8 @@ const store = {
 				state: store.state
 			};
 		}
-		content = JSON.stringify(content, null, jsonIndent);
 		if (mode === 'file') {
+			content = JSON.stringify(content, null, jsonIndent);
 			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
 			saveAs(blob, store.get.modelFilenameBase((target === 'template') ? '.lit' : '.lic'));
 		} else if (mode === 'local' && target !== 'template') {
