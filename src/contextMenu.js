@@ -579,7 +579,8 @@ const contextMenu = {
 					dialog.min = 0;
 					dialog.max = 5;
 					dialog.step = 0.5;
-					dialog.value = 1;
+					dialog.bodyText = '';
+					dialog.value = csi.scale;
 				});
 			}
 		},
