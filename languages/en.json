@@ -1,4 +1,6 @@
 {
+	"ok": "Ok",
+	"cancel": "Cancel",
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -60,6 +62,13 @@
 		"scale_images": {
 			"title": "Scale Images by",
 			"image_size_@mf": "Images will be <strong>{width} x {height}</strong> pixels"
+		},
+		"export_hi_res_pdf": {
+			"title": "Export Hi-Res PDF",
+			"page_size": "Physical Page Size",
+			"by": "x",
+			"image_res": "Image Resolution",
+			"dpi": "DPI"
 		}
 	}
 }

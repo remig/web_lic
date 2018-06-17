@@ -119,7 +119,7 @@
 						aria-haspopup="true"
 						aria-expanded="false"
 					>
-						{{menu.text | tr}}
+						{{tr(menu.text)}}
 						<span class="caret"></span>
 					</a>
 					<menu-list :menu-entries="menu.children" selected-item=""></menu-list>
@@ -163,7 +163,7 @@
 					<span
 						class="menu-text"
 					>
-						{{resolveProperty(entry.text) | tr}}
+						{{tr(resolveProperty(entry.text))}}
 					</span>
 					<span
 						v-if="entry.shortcut"
@@ -179,7 +179,7 @@
 						:class="{divider: child.text == 'separator', disabled: child.enabled ? !child.enabled(selectedItem) : false}"
 					>
 						<a @click="triggerMenu(child, $event)" class="clickable">
-							{{child.text | tr}}
+							{{tr(child.text)}}
 						</a>
 					</li>
 				</ul>
@@ -656,14 +656,14 @@
 	<script type="text/x-template" id="pdfExportDialogTemplate">
 		<el-dialog
 			class="pdfExportDialog"
-			title="Export Hi-Res PDF"
+			:title="tr('dialog.export_hi_res_pdf.title')"
 			width="525px"
 			:modal="false"
 			:show-close="false"
 			:visible="visible"
 		>
 			<el-form label-width="140px">
-				<el-form-item label="Physical Page Size">
+				<el-form-item :label="tr('dialog.export_hi_res_pdf.page_size')">
 					<input
 						:value="pageSize.width"
 						@input="updateWidth($event.target.value)"
@@ -671,7 +671,7 @@
 						type="number"
 						class="form-control"
 					></input>
-					<span>x</span>
+					<span>{{tr("dialog.export_hi_res_pdf.by")}}</span>
 					<input
 						:value="pageSize.height"
 						@input="updateHeight($event.target.value)"
@@ -686,19 +686,19 @@
 						<el-option key="in" label="in" value="in" />
 					</el-select>
 				</el-form-item>
-				<el-form-item label="Image Resolution">
+				<el-form-item :label="tr('dialog.export_hi_res_pdf.image_res')">
 					<input
 						v-model.number="dpi"
 						min="0" max="1000"
 						type="number"
 						class="form-control"
 					></input>
-					<span>DPI</span>
+					<span>{{tr("dialog.export_hi_res_pdf.dpi")}}</span>
 				</el-form-item>
 			</el-form>
 			<span slot="footer" class="dialog-footer">
-				<el-button @click="cancel">Cancel</el-button>
-				<el-button type="primary" @click="ok()">Ok</el-button>
+				<el-button @click="cancel">{{tr("cancel")}}</el-button>
+				<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
 			</span>
 		</el-dialog>
 	</script>

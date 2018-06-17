@@ -32,11 +32,17 @@ Vue.filter('sanitizeMenuID', id => {
 
 Vue.filter('prettyPrint', _.prettyPrint);
 
-Vue.filter('tr', str => {
-	if (str && str.startsWith('navbar.')) {
-		return LocaleManager.translate(str);
+Vue.use({  // This adds a 'tr' method to every component, which makes translating strings in template HTML easier
+	install(Vue) {
+		Vue.prototype.tr = function(str, args) {
+			try {
+				return LocaleManager.translate(str, args);
+			} catch (e) {  // eslint-disable-line no-empty
+				// TODO: Intentionally empty; once all strings are out of the HTML / components and into the translation files, remove this try catch
+			}
+			return str;
+		};
 	}
-	return str;
 });
 
 const app = new Vue({
