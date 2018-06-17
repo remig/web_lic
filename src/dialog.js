@@ -3,6 +3,7 @@
 
 import _ from './util';
 
+// TODO: set focus to correct UI widget when showing each dialog
 Vue.component('baseDialog', {
 	template: '#baseDialogTemplate',
 	data: function() {
