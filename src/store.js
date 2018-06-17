@@ -48,10 +48,10 @@ const store = {
 		store.cache.reset();
 	},
 	load(content) {
-		store.model = content.model;
 		LDParse.setPartDictionary(content.partDictionary);
 		LDParse.setColorTable(content.colorTable);
 		LDRender.setPartDictionary(content.partDictionary);
+		store.model = LDParse.partDictionary[content.modelFilename];
 		store.replaceState(content.state);
 	},
 	save(mode, target = 'state', jsonIndent) {  // mode is either 'file' or 'local', target is either 'state' or 'template'
@@ -62,7 +62,7 @@ const store = {
 			content = {
 				partDictionary: LDParse.partDictionary,
 				colorTable: LDParse.colorTable,
-				model: store.model,
+				modelFilename: store.model.filename,
 				state: store.state
 			};
 		}

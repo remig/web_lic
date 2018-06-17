@@ -149,7 +149,7 @@ const app = new Vue({
 		},
 		openLocalLicFile() {
 			const localModel = Storage.get.model();
-			if (localModel) {
+			if (!_.isEmpty(localModel)) {
 				this.openLicFile(localModel);
 			}
 		},
