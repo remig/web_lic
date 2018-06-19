@@ -286,7 +286,8 @@ const api = {
 		for (let i = 0; i < pliItems.length; i++) {
 
 			const pliItem = store.get.pliItem(pliItems[i]);
-			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem);
+			const pliScale = store.get.pliItemTransform(pliItem).scale || 1;
+			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem, pliScale);
 			pliItem.x = left;
 			pliItem.y = margin;
 			pliItem.width = pliSize.width;

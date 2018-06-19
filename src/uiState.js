@@ -17,7 +17,8 @@ const uiState = {
 			}
 		}
 	},
-	splitter: 20
+	splitter: 20,
+	pliTransforms: {}
 };
 
 export default uiState;

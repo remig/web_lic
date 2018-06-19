@@ -609,8 +609,60 @@ const contextMenu = {
 	],
 	pli: [],
 	pliItem: [
-		{text: 'Rotate PLI Part (NYI)', cb: () => {}},
-		{text: 'Scale PLI Part (NYI)', cb: () => {}}
+		{
+			text: 'Rotate Part List Image',
+			cb(selectedItem) {
+
+			}
+		},
+		{
+			text: 'Scale Part List Image',
+			cb(selectedItem) {
+				const pliItem = store.get.pliItem(selectedItem.id);
+				const filename = pliItem.filename;
+				const pliTransforms = store.uiState.pliTransforms;
+				const originalTransform = _.clone(pliTransforms[filename]);
+				pliTransforms[filename] = pliTransforms[filename] || {};
+				app.currentDialog = 'numberChooserDialog';
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$off();
+					dialog.$on('update', newValues => {
+						pliTransforms[filename].scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
+						pliItem.isDirty = true;
+						const page = store.get.pageForItem(pliItem);
+						page.needsLayout = true;
+						app.redrawUI(true);
+					});
+					dialog.$on('ok', newValues => {
+						const value = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
+						const path = `/${filename}/scale`;
+						const action = {
+							root: store.uiState.pliTransforms,
+							redo: [{op: 'replace', path, value: value}],
+							undo: [{op: 'replace', path, value: (originalTransform || {}).scale || null}]
+						};
+						undoStack.commitDelta(action, 'Change PLI Item Rotation', [pliItem]);
+					});
+					dialog.$on('cancel', () => {
+						if (originalTransform == null) {
+							delete pliTransforms[filename];
+						} else {
+							pliTransforms[filename] = originalTransform;
+						}
+						pliItem.isDirty = true;
+						app.redrawUI(true);
+					});
+					dialog.visible = true;
+					dialog.title = 'Scale Part List Image';
+					dialog.min = 0;
+					dialog.max = 5;
+					dialog.step = null;
+					dialog.bodyText = '';
+					dialog.value = (originalTransform || {}).scale || 1;
+				});
+			}
+		}
 	],
 	quantityLabel: [],
 	annotation: [
