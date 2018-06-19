@@ -98,13 +98,13 @@ const app = new Vue({
 
 						// TODO: laying out multiple steps per page can be slow.  Show a progress bar for this.
 						// TODO: Add option to start new page for each submodel
-						store.mutations.pli.toggleVisibility({visible: layoutChoices.includePLIs});
+						store.mutations.pli.toggleVisibility({visible: layoutChoices.include.pli});
 						store.mutations.addInitialPages();
 						store.mutations.addInitialSubmodelImages();
 						if (layoutChoices.useMaxSteps) {
 							store.mutations.mergeInitialPages();
 						}
-						if (layoutChoices.includeTitlePage) {
+						if (layoutChoices.include.titlePage) {
 							store.mutations.addTitlePage();  // Add title page after adding regular pages so title page summary label comes out correct
 						}
 						store.save('local');

@@ -1,6 +1,7 @@
 'use strict';
 
 import _ from './util';
+import uiDefaultState from './uiState';
 
 const keys = {
 	model: 'lic_model',
@@ -14,12 +15,7 @@ const api = {
 	get: {},
 	save: {},
 	replace: {},
-	clear: {
-		// TODO: Should update status bar when stuff is cleared.  Should update status bar more in general.
-		everything() {
-			localStorage.clear();
-		}
-	}
+	clear: {}  // TODO: Should update status bar when stuff is cleared.  Should update status bar more in general.
 };
 
 // Add default implementations of 'get', 'save' and 'clear' for each key
@@ -46,5 +42,14 @@ _.forEach(keys, (k, v) => {
 		api.replace[k](target);
 	};
 });
+
+api.clear.ui = function() {
+	api.replace.ui(uiDefaultState);
+};
+
+api.clear.everything = function() {
+	localStorage.clear();
+	api.replace.ui(uiDefaultState);  // Still need default UI state
+};
 
 export default api;
