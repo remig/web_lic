@@ -1,6 +1,7 @@
 /* global Vue: false */
 'use strict';
 
+import store from './store';
 import Storage from './storage';
 import LanguageList from '../languages/languages.json';
 import MessageFormat from 'messageformat';
@@ -69,8 +70,7 @@ function getLocale() {
 }
 
 function setLocale(locale) {
-	currentLocale = locale;
-	Storage.save.ui({locale});
+	store.uiState.locale = currentLocale = locale;
 	if (!(loadedLanguages.hasOwnProperty(locale))) {
 		loadedLanguages[locale] = require(`../languages/${locale}.json`);
 	}

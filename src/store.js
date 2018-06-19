@@ -33,6 +33,7 @@ const store = {
 
 	// The currently loaded LDraw model, as returned from LDParse
 	model: null,  // Not in state because it is saved separately, and not affected by undo / redo
+	uiState: null,  // Store state of various ui widgets / pli transform / etc.  Not in state itself because it's loaded & handled separately from any model.
 	setModel(model) {
 		store.model = model;
 		LDRender.setPartDictionary(LDParse.partDictionary);

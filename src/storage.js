@@ -1,14 +1,13 @@
 'use strict';
 
 import _ from './util';
+import store from './store';
 import uiDefaultState from './uiState';
 
 const keys = {
 	model: 'lic_model',
 	ui: 'ui_defaults',
-	locale: 'locale',
-	customFonts: 'custom_fonts',
-	pliTransforms: 'pli_transforms'
+	customFonts: 'custom_fonts'
 };
 
 const api = {
@@ -45,11 +44,12 @@ _.forEach(keys, (k, v) => {
 
 api.clear.ui = function() {
 	api.replace.ui(uiDefaultState);
+	store.uiState = _.clone(uiDefaultState);
 };
 
 api.clear.everything = function() {
 	localStorage.clear();
-	api.replace.ui(uiDefaultState);  // Still need default UI state
+	api.clear.ui();
 };
 
 export default api;

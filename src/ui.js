@@ -89,7 +89,7 @@ const app = new Vue({
 				this.currentDialog = 'importModelDialog';
 
 				Vue.nextTick(() => {
-					const dialogDefaults = Storage.get.ui().dialog.importModel;
+					const dialogDefaults = store.uiState.dialog.importModel;
 					const dialog = app.$refs.currentDialog;
 					_.copy(dialog, dialogDefaults);
 					dialog.show({x: 400, y: 150});
@@ -419,9 +419,10 @@ const app = new Vue({
 		});
 
 		window.addEventListener('beforeunload', e => {
+
 			const splitStyle = document.getElementById('leftPane').style;
-			const splitPct = parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]);
-			Storage.save.ui({splitter: splitPct});
+			store.uiState.splitter = parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]);
+			Storage.replace.ui(store.uiState);
 
 			if (this && this.isDirty) {
 				const msg = 'You have unsaved changes. Leave anyway?';
@@ -438,10 +439,13 @@ const app = new Vue({
 			this.redrawUI();
 		});
 
-		const uiDefaults = Storage.get.ui();
+		// Load UI state from storage just once & keep a copy in store for fast lookup everywhere
+		let uiDefaults = Storage.get.ui();
 		if (_.isEmpty(uiDefaults)) {
 			Storage.replace.ui(uiDefaultState);
+			uiDefaults = _.clone(uiDefaultState);
 		}
+		store.uiState = uiDefaults;
 
 		// Enable splitter between tree and page view
 		const split = Storage.get.ui().splitter;
