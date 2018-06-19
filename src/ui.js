@@ -419,6 +419,10 @@ const app = new Vue({
 		});
 
 		window.addEventListener('beforeunload', e => {
+			const splitStyle = document.getElementById('leftPane').style;
+			const splitPct = parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]);
+			Storage.save.ui({splitter: splitPct});
+
 			if (this && this.isDirty) {
 				const msg = 'You have unsaved changes. Leave anyway?';
 				e.returnValue = msg;
@@ -427,22 +431,26 @@ const app = new Vue({
 			return null;
 		});
 
+		LDParse.setProgressCallback(this.updateProgress);
+		undoStack.onChange(() => {
+			this.dirtyState.undoIndex = undoStack.getIndex();
+			store.mutations.page.setDirty({includeTitlePage: true});
+			this.redrawUI();
+		});
+
 		const uiDefaults = Storage.get.ui();
 		if (_.isEmpty(uiDefaults)) {
 			Storage.replace.ui(uiDefaultState);
 		}
 
 		// Enable splitter between tree and page view
+		const split = Storage.get.ui().splitter;
 		Split(['#leftPane', '#rightPane'], {
-			sizes: [20, 80], minSize: [100, store.state.template.page.width + 10], direction: 'horizontal',
-			gutterSize: 5, snapOffset: 0
-		});
-
-		LDParse.setProgressCallback(this.updateProgress);
-		undoStack.onChange(() => {
-			this.dirtyState.undoIndex = undoStack.getIndex();
-			store.mutations.page.setDirty({includeTitlePage: true});
-			this.redrawUI();
+			sizes: [split, 100 - split],
+			minSize: [100, store.state.template.page.width + 10],
+			direction: 'horizontal',
+			gutterSize: 5,
+			snapOffset: 0
 		});
 
 		LocaleManager.pickLanguage(this, this.openLocalLicFile, this.redrawUI);  // TODO: Find better way of calling 'redrawUI' from arbitrary places

@@ -16,7 +16,8 @@ const uiState = {
 				pli: true
 			}
 		}
-	}
+	},
+	splitter: 20
 };
 
 export default uiState;
