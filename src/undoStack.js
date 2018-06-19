@@ -1,3 +1,4 @@
+/* global jsonpatch: false */
 'use strict';
 
 import _ from './util';
@@ -36,23 +37,27 @@ const api = {
 			// If there's undo actions after the 'current' action, delete them
 			state.stack.splice(state.index + 1);
 		}
-		// TODO: state can be really big; consider detecting just some guaranteed minimal
-		// delta between the current state and new state, and push only that.
-		state.stack.push({
-			state: _.clone(store.state),
-			undoText,
-			clearCacheTargets
-		});
+
+		// TODO: state can be really big; consider switching store.mutations to JSON-patch
+		state.stack.push({state: _.clone(store.state), undoText, clearCacheTargets});
 		setIndex(state, state.index + 1);
 
-		// Save the current state to local storage if we haven't saved it in the last 30 seconds
-		// Need 'typeof setTimeout' check to not crash in unit tests
-		if (typeof setTimeout === 'function' && state.localStorageTimer == null) {
-			store.save('local');
-			state.localStorageTimer = setTimeout(() => {
-				state.localStorageTimer = null;
-			}, 30 * 1000);
+		setStateTimer();
+	},
+
+	commitDelta(action, undoText, clearCacheTargets) {
+
+		jsonpatch.applyPatch(action.root, action.redo);  // Perform the actual action
+
+		if (state.index < state.stack.length - 1) {
+			// If there's undo actions after the 'current' action, delete them
+			state.stack.splice(state.index + 1);
 		}
+
+		state.stack.push({action, undoText, clearCacheTargets});
+		setIndex(state, state.index + 1);
+
+		setStateTimer();
 	},
 
 	// Copy the store's current state into the undoStack's initial base state
@@ -64,13 +69,21 @@ const api = {
 	// TODO: Need automatic way of navigating to and redrawing whatever was most affected by undo / redo action
 	undo() {
 		if (api.isUndoAvailable()) {
-			performUndoRedoAction(state.index - 1);
+			if (state.stack[state.index].hasOwnProperty('action')) {
+				performUndoRedoDelta('undo', state.index, state.index - 1);
+			} else {
+				performUndoRedoAction(state.index - 1);
+			}
 		}
 	},
 
 	redo() {
 		if (api.isRedoAvailable()) {
-			performUndoRedoAction(state.index + 1);
+			if (state.stack[state.index + 1].hasOwnProperty('action')) {
+				performUndoRedoDelta('redo', state.index + 1, state.index + 1);
+			} else {
+				performUndoRedoAction(state.index + 1);
+			}
 		}
 	},
 
@@ -104,19 +117,38 @@ const api = {
 	}
 };
 
-function performUndoRedoAction(newIndex) {
-	const prevIndex = state.index;
+function performUndoRedoDelta(undoOrRedo, index, newIndex) {
+	const action = state.stack[index].action;
+	jsonpatch.applyPatch(action.root, action[undoOrRedo]);
+
+	clearCacheTargets(state.index, newIndex);
 	state.index = newIndex;
-	const stackContent = state.stack[state.index];
+
+	if (state.onChangeCB) {
+		state.onChangeCB();
+	}
+}
+
+function performUndoRedoAction(newIndex) {
+	const stackContent = state.stack[newIndex];
 	const newState = _.clone(stackContent.state);
 	store.replaceState(newState);
 
-	const clearCacheTargets = [];
-	if (state.stack[prevIndex] && state.stack[prevIndex].clearCacheTargets) {
-		clearCacheTargets.push(...state.stack[prevIndex].clearCacheTargets);
+	clearCacheTargets(state.index, newIndex);
+	state.index = newIndex;
+
+	if (state.onChangeCB) {
+		state.onChangeCB();
 	}
-	if (state.stack[state.index] && state.stack[state.index].clearCacheTargets) {
-		clearCacheTargets.push(...state.stack[state.index].clearCacheTargets);
+}
+
+function clearCacheTargets(prevIndex, newIndex) {
+	const clearCacheTargets = [], stack = state.stack;
+	if (stack[prevIndex] && stack[prevIndex].clearCacheTargets) {
+		clearCacheTargets.push(...stack[prevIndex].clearCacheTargets);
+	}
+	if (stack[newIndex] && stack[newIndex].clearCacheTargets) {
+		clearCacheTargets.push(...stack[newIndex].clearCacheTargets);
 	}
 	clearCacheTargets.forEach(item => {
 		if (typeof item === 'string') {
@@ -129,15 +161,23 @@ function performUndoRedoAction(newIndex) {
 			}
 		}
 	});
-	if (state.onChangeCB) {
-		state.onChangeCB();
-	}
 }
 
 function setIndex(stack, newIndex) {
 	stack.index = newIndex;
 	if (stack.onChangeCB) {
 		stack.onChangeCB();
+	}
+}
+
+function setStateTimer() {
+	// Save the current state to local storage if we haven't saved it in the last 30 seconds
+	// Need 'typeof setTimeout' check to not crash in unit tests
+	if (typeof setTimeout === 'function' && state.localStorageTimer == null) {
+		store.save('local');
+		state.localStorageTimer = setTimeout(() => {
+			state.localStorageTimer = null;
+		}, 30 * 1000);
 	}
 }
 
