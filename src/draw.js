@@ -3,6 +3,7 @@
 import _ from './util';
 import store from './store';
 import LDParse from './LDParse';
+import {uiState} from './uiState';
 
 const api = {
 
@@ -222,7 +223,7 @@ const api = {
 		pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const part = localModel.parts[pliItem.partNumbers[0]];
-			const pliScale = (store.get.pliItemTransform(pliItem).scale || 1) * scale;
+			const pliScale = ((uiState.pliTransforms[pliItem.filename] || {}).scale || 1) * scale;
 			const pliCanvas = store.render.pli(part, pliItem, pliScale, noCache).container;
 			const x = Math.floor(pliItem.x * scale);
 			const y = Math.floor(pliItem.y * scale);

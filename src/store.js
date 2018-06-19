@@ -33,7 +33,6 @@ const store = {
 
 	// The currently loaded LDraw model, as returned from LDParse
 	model: null,  // Not in state because it is saved separately, and not affected by undo / redo
-	uiState: null,  // Store state of various ui widgets / pli transform / etc.  Not in state itself because it's loaded & handled separately from any model.
 	setModel(model) {
 		store.model = model;
 		LDRender.setPartDictionary(LDParse.partDictionary);
@@ -96,10 +95,10 @@ const store = {
 		}
 
 		return {
-			csi(localModel, step, csi, selectedPartIDs, scale = 1, noCache) {
+			csi(localModel, step, csi, selectedPartIDs, scale = 1, bypassCache) {
 				const domID = `CSI_${step.csiID}`;
-				let container = document.getElementById(noCache ? 'generateImagesCanvas' : domID);
-				if (csi.isDirty || container == null || noCache) {
+				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : domID);
+				if (csi.isDirty || container == null || bypassCache) {
 					container = container || getCanvas(domID);
 					if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
 						LDRender.renderModel(localModel, container, 1000 * scale, {resizeContainer: true});
@@ -135,11 +134,11 @@ const store = {
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
 				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
 			},
-			pli(part, item, scale = 1, noCache) {
+			pli(part, item, scale = 1, bypassCache) {
 				const domID = `PLI_${part.filename}_${part.colorCode}`;
-				let container = document.getElementById(noCache ? 'generateImagesCanvas' : domID);
-				if ((item && item.isDirty) || container == null || noCache) {
-					container = getCanvas(domID, noCache);
+				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : domID);
+				if ((item && item.isDirty) || container == null || bypassCache) {
+					container = getCanvas(domID, bypassCache);
 					const config = {
 						resizeContainer: true,
 						rotation: getRotation(item)

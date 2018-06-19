@@ -1,6 +1,8 @@
 'use strict';
 
-const uiState = {
+import _ from './util';
+
+export const defaultUIState = {
 	locale: null,
 	dialog: {
 		importModel: {
@@ -21,4 +23,8 @@ const uiState = {
 	pliTransforms: {}
 };
 
-export default uiState;
+export let uiState = _.clone(defaultUIState);
+
+export function setState(newState) {
+	uiState = _.clone(newState);
+}

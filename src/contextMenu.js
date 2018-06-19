@@ -6,6 +6,7 @@ import LDParse from './LDParse';
 import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
+import {uiState} from './uiState';
 
 let app;
 
@@ -489,6 +490,8 @@ const contextMenu = {
 				return rotation && (rotation.x || rotation.y || rotation.z);
 			},
 			cb(selectedItem) {
+				// TODO: rewrite this to use simple number picker dialog
+				// TODO: this doesn't adjust page layouts after applying changes.  Need to check all affected pages.
 				const csi = store.get.csi(selectedItem.id);
 				const rotation = _.clone(csi.rotation);
 				const step = store.get.step(csi.parent.id);
@@ -620,7 +623,7 @@ const contextMenu = {
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				const pliTransforms = store.uiState.pliTransforms;
+				const pliTransforms = uiState.pliTransforms;
 				const originalTransform = _.clone(pliTransforms[filename]);
 				pliTransforms[filename] = pliTransforms[filename] || {};
 				app.currentDialog = 'numberChooserDialog';
@@ -638,7 +641,7 @@ const contextMenu = {
 						const value = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
 						const path = `/${filename}/scale`;
 						const action = {
-							root: store.uiState.pliTransforms,
+							root: uiState.pliTransforms,
 							redo: [{op: 'replace', path, value: value}],
 							undo: [{op: 'replace', path, value: (originalTransform || {}).scale || null}]
 						};

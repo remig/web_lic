@@ -3,7 +3,7 @@
 
 import _ from './util';
 import store from './store';
-import uiDefaultState from './uiState';
+import * as uiStateModule from './uiState';
 import undoStack from './undoStack';
 import LDParse from './LDParse';
 import Menu from './menu';
@@ -89,7 +89,7 @@ const app = new Vue({
 				this.currentDialog = 'importModelDialog';
 
 				Vue.nextTick(() => {
-					const dialogDefaults = store.uiState.dialog.importModel;
+					const dialogDefaults = uiStateModule.uiState.dialog.importModel;
 					const dialog = app.$refs.currentDialog;
 					_.copy(dialog, dialogDefaults);
 					dialog.show({x: 400, y: 150});
@@ -421,8 +421,8 @@ const app = new Vue({
 		window.addEventListener('beforeunload', e => {
 
 			const splitStyle = document.getElementById('leftPane').style;
-			store.uiState.splitter = parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]);
-			Storage.replace.ui(store.uiState);
+			uiStateModule.uiState.splitter = parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]);
+			Storage.replace.ui(uiStateModule.uiState);
 
 			if (this && this.isDirty) {
 				const msg = 'You have unsaved changes. Leave anyway?';
@@ -439,13 +439,8 @@ const app = new Vue({
 			this.redrawUI();
 		});
 
-		// Load UI state from storage just once & keep a copy in store for fast lookup everywhere
-		let uiDefaults = Storage.get.ui();
-		if (_.isEmpty(uiDefaults)) {
-			Storage.replace.ui(uiDefaultState);
-			uiDefaults = _.clone(uiDefaultState);
-		}
-		store.uiState = uiDefaults;
+		// Load UI state from storage just once here & keep a copy for fast lookup everywhere
+		uiStateModule.setState(Storage.get.ui());
 
 		// Enable splitter between tree and page view
 		const split = Storage.get.ui().splitter;
@@ -463,5 +458,5 @@ const app = new Vue({
 
 window.__lic = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
-	_, app, store, undoStack, LDParse, Storage
+	_, app, store, undoStack, LDParse, Storage, uiState: uiStateModule.uiState
 };

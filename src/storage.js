@@ -1,8 +1,7 @@
 'use strict';
 
 import _ from './util';
-import store from './store';
-import uiDefaultState from './uiState';
+import {setState, defaultUIState} from './uiState';
 
 const keys = {
 	model: 'lic_model',
@@ -43,8 +42,8 @@ _.forEach(keys, (k, v) => {
 });
 
 api.clear.ui = function() {
-	api.replace.ui(uiDefaultState);
-	store.uiState = _.clone(uiDefaultState);
+	api.replace.ui(defaultUIState);
+	setState(defaultUIState);
 };
 
 api.clear.everything = function() {
