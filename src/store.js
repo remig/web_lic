@@ -72,7 +72,7 @@ const store = {
 			saveAs(blob, store.get.modelFilenameBase((target === 'template') ? '.lit' : '.lic'));
 		} else if (mode === 'local' && target !== 'template') {
 			console.log('Updating local storage');  // eslint-disable-line no-console
-			Storage.save.model(content);
+			Storage.replace.model(content);
 		}
 	},
 	render: (function() {

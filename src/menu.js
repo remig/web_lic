@@ -181,7 +181,7 @@ const menu = [
 				},
 				{
 					text: 'navbar.file.clear_cache.ui',
-					cb: Storage.clear.uiDefaults
+					cb: Storage.clear.ui
 				},
 				{
 					text: 'navbar.file.clear_cache.everything',

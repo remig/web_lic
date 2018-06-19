@@ -191,7 +191,7 @@ const fontTemplatePanel = {
 				];
 				if (!names.includes(familyLower)) {
 					customFamilyNames.push(family);
-					Storage.save.customFonts(customFamilyNames);
+					Storage.replace.customFonts(customFamilyNames);
 				}
 			}
 			this.familyNames = getFamilyNames();

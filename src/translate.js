@@ -16,7 +16,7 @@ LanguageList.sort((a, b) => {
 
 const messageFormat = new MessageFormat('en');
 const loadedLanguages = {};  // key: locale code, value: language
-let currentLocale = Storage.get.locale().locale;
+let currentLocale = Storage.get.ui().locale;
 
 // TODO: when loading a language, flatten the hierarchy so it doesn't have to be traversed constantly.  eg: {navbar: {file: {root: 'foo'}}} => {'navbar.file.root': 'foo'}
 // And pre-compile any _@mf format strings into lookup functions
@@ -70,7 +70,7 @@ function getLocale() {
 
 function setLocale(locale) {
 	currentLocale = locale;
-	Storage.save.locale({locale});
+	Storage.save.ui({locale});
 	if (!(loadedLanguages.hasOwnProperty(locale))) {
 		loadedLanguages[locale] = require(`../languages/${locale}.json`);
 	}

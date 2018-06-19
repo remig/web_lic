@@ -4,7 +4,7 @@ import _ from './util';
 
 const keys = {
 	model: 'lic_model',
-	uiDefaults: 'ui_defaults',
+	ui: 'ui_defaults',
 	locale: 'locale',
 	customFonts: 'custom_fonts',
 	pliTransforms: 'pli_transforms'
@@ -13,6 +13,7 @@ const keys = {
 const api = {
 	get: {},
 	save: {},
+	replace: {},
 	clear: {
 		// TODO: Should update status bar when stuff is cleared.  Should update status bar more in general.
 		everything() {
@@ -26,16 +27,23 @@ _.forEach(keys, (k, v) => {
 	api.get[k] = function() {
 		var res = localStorage.getItem(v);
 		if (res == null) {  // If key is totally null, save and return an empty object instead
-			return api.save[k]({});
+			return api.replace[k]({});
 		}
 		return JSON.parse(res);
 	};
-	api.save[k] = function(json) {
+	api.replace[k] = function(json) {  // Replace entire object in cache with passed in object
 		localStorage.setItem(v, JSON.stringify(json));
 		return json;
 	};
 	api.clear[k] = function() {
 		localStorage.removeItem(v);
+	};
+	api.save[k] = function(json) {  //  Set only the properties in json in the cached object
+		const target = api.get[k](v);
+		_.forEach(json, (k, v) => {
+			target[k] = v;
+		});
+		api.replace[k](target);
 	};
 });
 
