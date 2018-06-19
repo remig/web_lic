@@ -2,6 +2,7 @@
 'use strict';
 
 import _ from './util';
+import uiDefaultState from './uiState';
 
 // TODO: set focus to correct UI widget when showing each dialog
 Vue.component('baseDialog', {
@@ -46,14 +47,7 @@ const baseDialogPropagator = {
 };
 
 const dialogs = {
-	importModel: {
-		hasSteps: false,
-		stepsPerPage: 1,
-		useMaxSteps: false,
-		includeTitlePage: false,
-		includePartListPage: false,
-		includePLIs: false
-	},
+	importModel: uiDefaultState.dialog.importModel,
 	pageSize: {
 		maintainAspectRatio: true,
 		width: 900,

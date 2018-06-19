@@ -3,6 +3,7 @@
 
 import _ from './util';
 import store from './store';
+import uiDefaultState from './uiState';
 import undoStack from './undoStack';
 import LDParse from './LDParse';
 import Menu from './menu';
@@ -88,13 +89,9 @@ const app = new Vue({
 				this.currentDialog = 'importModelDialog';
 
 				Vue.nextTick(() => {
+					const dialogDefaults = Storage.get.ui().dialog.importModel;
 					const dialog = app.$refs.currentDialog;
-					dialog.hasSteps = true;
-					dialog.stepsPerPage = 1;
-					dialog.useMaxSteps = true;
-					dialog.includeTitlePage = false;
-					dialog.includePartListPage = false;
-					dialog.includePLIs = true;
+					_.copy(dialog, dialogDefaults);
 					dialog.show({x: 400, y: 150});
 					dialog.$off();
 					dialog.$on('ok', layoutChoices => {
@@ -429,6 +426,11 @@ const app = new Vue({
 			}
 			return null;
 		});
+
+		const uiDefaults = Storage.get.ui();
+		if (_.isEmpty(uiDefaults)) {
+			Storage.replace.ui(uiDefaultState);
+		}
 
 		// Enable splitter between tree and page view
 		Split(['#leftPane', '#rightPane'], {
