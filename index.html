@@ -21,6 +21,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.3.5/split.min.js"></script>
+	<script src="https://unpkg.com/fast-json-patch@2.0.6/dist/fast-json-patch.js"></script>
 	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 	<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
 
@@ -402,7 +403,7 @@
 					<div class="form-group">
 						<label class="checkbox-inline">
 							<input
-								v-model="includeTitlePage"
+								v-model="include.titlePage"
 								id="includeTitlePageCheckbox"
 								type="checkbox"
 								value=""
@@ -411,7 +412,7 @@
 						</label>
 						<label class="checkbox-inline">
 							<input
-								v-model="includePartListPage"
+								v-model="include.partListPage"
 								id="includePartListPageCheckbox"
 								type="checkbox"
 								value=""
@@ -420,7 +421,7 @@
 						</label>
 						<label class="checkbox-inline">
 							<input
-								v-model="includePLIs"
+								v-model="include.pli"
 								id="includePLIsCheckbox"
 								type="checkbox"
 								value=""
@@ -720,7 +721,7 @@
 				></el-option>
 			</el-select>
 			<span slot="footer" class="dialog-footer">
-				<el-button type="primary" @click="ok()">Ok</el-button>
+				<el-button type="primary" @click="ok()">{{tr('ok')}}</el-button>
 			</span>
 		</el-dialog>
 	</script>
@@ -744,8 +745,8 @@
 			/>
 			<div v-if="bodyText" style="margin-top: 15px" v-html="bodyText"></div>
 			<span slot="footer" class="dialog-footer">
-				<el-button @click="cancel">Cancel</el-button>
-				<el-button type="primary" @click="ok">Ok</el-button>
+				<el-button @click="cancel">{{tr("cancel")}}</el-button>
+				<el-button type="primary" @click="ok">{{tr("ok")}}</el-button>
 			</span>
 		</el-dialog>
 	</script>
