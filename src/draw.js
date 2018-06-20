@@ -488,7 +488,12 @@ const api = {
 
 		ctx.save();
 		ctx.lineWidth = grid.line.width;
-		ctx.strokeStyle = grid.line.color;
+		if (grid.line.color === 'auto') {
+			const pageColor = store.state.template.page.fill.color;
+			ctx.strokeStyle = _.color.opposite(pageColor);
+		} else {
+			ctx.strokeStyle = grid.line.color;
+		}
 		if (!_.isEmpty(grid.line.dash)) {
 			ctx.setLineDash(grid.line.dash);
 		}

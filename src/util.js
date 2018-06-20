@@ -313,6 +313,40 @@ const api = {
 		}
 		return api.titleCase(s);
 	},
+	color: {
+		toRGB(color) {
+			// Browser quirk: set an element's color to any color string at all, then getComputedStyle.color will
+			// return that same color as rgb() or rgba().  Greatly reduces the number of color strings to parse.
+			var parent = document.getElementById('offscreenCache');
+			parent.setAttribute('style', 'color: black;');  // Set parent to black so that any invalid colors set on child will inherit this color
+
+			var div = document.getElementById('openFileChooser');
+			div.setAttribute('style', 'color: ' + color);
+
+			let rgb = window.getComputedStyle(div).color;
+			rgb = rgb.match(/[a-z]+\((.*)\)/i)[1].split(',').map(parseFloat);
+
+			const res = {r: rgb[0], g: rgb[1], b: rgb[2]};
+			if (rgb.length > 3) {
+				res.a = rgb[3];
+			}
+			res.toString = function() {
+				return (this.a == null)
+					? `rgb(${this.r}, ${this.g}, ${this.b})`
+					: `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+			};
+			return res;
+		},
+		luma(color) {
+			color = api.color.toRGB(color);
+			return (0.2126 * Math.pow(color.r / 255, 2.2))
+				+ (0.7151 * Math.pow(color.g / 255, 2.2))
+				+ (0.0721 * Math.pow(color.b / 255, 2.2));
+		},
+		opposite(color) {
+			return (api.color.luma(color) < 0.18) ? 'white' : 'black';
+		}
+	},
 	isBorderVisible(border) {
 		if (!border || !border.width || border.width < 1 || !border.color || typeof border.color !== 'string') {
 			return false;

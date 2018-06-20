@@ -28,7 +28,7 @@ export const defaultUIState = {
 		},
 		line: {
 			width: 3,
-			color: 'red',
+			color: 'auto',
 			dash: []
 		}
 	},
