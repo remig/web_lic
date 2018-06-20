@@ -232,7 +232,7 @@ Vue.component('pageView', {
 				}
 			} else if (this.mouseDragItem && this.mouseDragItem.moved) {
 				// Mouse drag is complete; add undo event to stack
-				undoStack.commit(null, null, `Move ${_.prettyPrint(this.mouseDragItem.item.type)}`);
+				undoStack.commit('', null, `Move ${_.prettyPrint(this.mouseDragItem.item.type)}`);
 			} else if (e.target.nodeName !== 'CANVAS') {
 				this.app.clearSelected();
 			}

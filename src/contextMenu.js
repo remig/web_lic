@@ -614,7 +614,7 @@ const contextMenu = {
 	pliItem: [
 		{
 			text: 'Rotate Part List Image',
-			cb(selectedItem) {
+			cb() {
 
 			}
 		},
@@ -625,6 +625,7 @@ const contextMenu = {
 				const filename = pliItem.filename;
 				const pliTransforms = uiState.pliTransforms;
 				const originalTransform = _.clone(pliTransforms[filename]);
+				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};
 				app.currentDialog = 'numberChooserDialog';
 				Vue.nextTick(() => {
@@ -633,20 +634,22 @@ const contextMenu = {
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
 						store.mutations.pliItem.markAllDirty(pliItem.filename);
-						const page = store.get.pageForItem(pliItem);
 						page.needsLayout = true;
 						app.redrawUI(true);
 					});
 					dialog.$on('ok', newValues => {
 						const value = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
 						const path = `/${filename}/scale`;
-						const action = {
-							root: uiState.pliTransforms,
-							redo: [{op: 'replace', path, value: value}],
-							undo: [{op: 'replace', path, value: (originalTransform || {}).scale || null}]
+						const change = {
+							mutations: ['page.layout'],
+							action: {
+								root: uiState.pliTransforms,
+								redo: [{op: 'replace', path, value: value}],
+								undo: [{op: 'replace', path, value: (originalTransform || {}).scale || null}]
+							}
 						};
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === pliItem.filename);
-						undoStack.commitDelta(action, 'Change PLI Item Rotation', dirtyItems);
+						undoStack.commit(change, {page}, 'Change PLI Item Scale', dirtyItems);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -869,7 +872,7 @@ const contextMenu = {
 					const dialog = app.$refs.currentDialog;
 					dialog.$off();
 					dialog.$on('ok', () => {
-						undoStack.commit( 'part.displace', {step, ...displacement}, 'Adjust Displaced Part');
+						undoStack.commit('part.displace', {step, ...displacement}, 'Adjust Displaced Part');
 					});
 					dialog.$on('cancel', () => {
 						displacement.distance = originalDisplacement.distance;

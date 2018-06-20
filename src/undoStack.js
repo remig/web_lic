@@ -23,38 +23,56 @@ const api = {
 	},
 
 	// Perform a new state mutation action then push it to the undo / redo stack
+	// change is either a string matching an entry in store.mutations,
+	// or an object with {undo, redo} JSON patch operations,
+	// or an object with properties {mutations, action}.
+	// 'mutations' is an array of strings matching store.mutation entries.
+	// 'action' is a {undo, redo} JSON patch operation.
 	// clearCacheTargets is an array of either:
 	//  - items or {id, type} selectionItems that will get their 'isDirty' flag set when an undo / reo
 	//  - a item type string like 'csi', which resets all items of that type
-	commit(mutationName, opts, undoText, clearCacheTargets) {
+	commit(change, opts, undoText, clearCacheTargets) {
 
-		const mutation = _.get(mutationName, store.mutations);
-		if (mutation) {
-			mutation(opts);  // Perform the actual action
+		if (typeof change === 'string') {
+			change = {
+				mutations: [change]
+			};
+		} else if (change.hasOwnProperty('undo') && change.hasOwnProperty('redo')) {
+			change = {
+				action: change
+			};
+		}
+
+		(change.mutations || []).forEach(mutation => {
+			mutation = _.get(mutation, store.mutations);
+			if (mutation) {
+				mutation(opts);  // Perform the actual state mutation
+			}
+		});
+
+		if (change.action) {
+			jsonpatch.applyPatch(change.action.root, change.action.redo);  // Perform the actual action
 		}
 
 		if (state.index < state.stack.length - 1) {
 			// If there's undo actions after the 'current' action, delete them
 			state.stack.splice(state.index + 1);
+		}
+
+		let newState;
+		if (_.isEmpty(change.mutations)) {
+			newState = state.stack[state.stack.length - 1].state;  // If we have no new state, reuse previous stack state entry
+		} else {
+			newState = _.clone(store.state);
 		}
 
 		// TODO: state can be really big; consider switching store.mutations to JSON-patch
-		state.stack.push({state: _.clone(store.state), undoText, clearCacheTargets});
-		setIndex(state, state.index + 1);
-
-		setStateTimer();
-	},
-
-	commitDelta(action, undoText, clearCacheTargets) {
-
-		jsonpatch.applyPatch(action.root, action.redo);  // Perform the actual action
-
-		if (state.index < state.stack.length - 1) {
-			// If there's undo actions after the 'current' action, delete them
-			state.stack.splice(state.index + 1);
-		}
-
-		state.stack.push({action, undoText, clearCacheTargets});
+		state.stack.push({
+			state: newState,
+			action: change.action,
+			undoText,
+			clearCacheTargets
+		});
 		setIndex(state, state.index + 1);
 
 		setStateTimer();
@@ -69,21 +87,13 @@ const api = {
 	// TODO: Need automatic way of navigating to and redrawing whatever was most affected by undo / redo action
 	undo() {
 		if (api.isUndoAvailable()) {
-			if (state.stack[state.index].hasOwnProperty('action')) {
-				performUndoRedoDelta('undo', state.index, state.index - 1);
-			} else {
-				performUndoRedoAction(state.index - 1);
-			}
+			performUndoRedoAction('undo', state.index - 1);
 		}
 	},
 
 	redo() {
 		if (api.isRedoAvailable()) {
-			if (state.stack[state.index + 1].hasOwnProperty('action')) {
-				performUndoRedoDelta('redo', state.index + 1, state.index + 1);
-			} else {
-				performUndoRedoAction(state.index + 1);
-			}
+			performUndoRedoAction('redo', state.index + 1);
 		}
 	},
 
@@ -117,22 +127,16 @@ const api = {
 	}
 };
 
-function performUndoRedoDelta(undoOrRedo, index, newIndex) {
-	const action = state.stack[index].action;
-	jsonpatch.applyPatch(action.root, action[undoOrRedo]);
+function performUndoRedoAction(undoOrRedo, newIndex) {
 
-	clearCacheTargets(state.index, newIndex);
-	state.index = newIndex;
-
-	if (state.onChangeCB) {
-		state.onChangeCB();
-	}
-}
-
-function performUndoRedoAction(newIndex) {
-	const stackContent = state.stack[newIndex];
-	const newState = _.clone(stackContent.state);
+	const newStack = state.stack[newIndex];
+	const newState = _.clone(newStack.state);
 	store.replaceState(newState);
+
+	const actionStack = (undoOrRedo === 'undo') ? state.stack[state.index] : newStack;
+	if (actionStack.action) {
+		jsonpatch.applyPatch(actionStack.action.root, actionStack.action[undoOrRedo]);
+	}
 
 	clearCacheTargets(state.index, newIndex);
 	state.index = newIndex;

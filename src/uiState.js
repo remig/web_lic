@@ -20,7 +20,7 @@ export const defaultUIState = {
 		}
 	},
 	splitter: 20,
-	pliTransforms: {}
+	pliTransforms: {}  // TODO: if scale goes back to 1, don't store it delete it.  Likewise with rotations x|y|z = 0.
 };
 
 export let uiState = _.clone(defaultUIState);

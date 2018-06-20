@@ -100,6 +100,21 @@ const api = {
 					return p.isSubModel ? p : null;
 				}).filter(p => p != null);
 			}
+		},
+		// These set functions will *not* perform the desired action directly
+		// Instead, they return an object with two arrays of JSON-patch operations;
+		// one performs perform the action, the other will undo the action.
+		set: {
+			partColor(opts) {  // opts: {filename, partID, color}
+
+				const color = api.partDictionary[opts.filename].parts[opts.partID].colorCode;
+				const path = `/${opts.filename}/parts/${opts.partID}/colorCode`;
+				return {
+					root: api.partDictionary,
+					redo: [{op: 'replace', path, value: opts.color}],
+					undo: [{op: 'replace', path, value: color}]
+				};
+			}
 		}
 	}
 };
