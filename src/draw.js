@@ -62,6 +62,10 @@ const api = {
 			template.border.cornerRadius + template.border.width, rectStyle  // offset corner radius by border width so radius defines inner border radius
 		);
 
+		if (uiState.grid.enabled) {
+			api.grid(ctx, template.width, template.height);
+		}
+
 		ctx.translate(Math.floor(page.innerContentOffset.x), Math.floor(page.innerContentOffset.y));
 
 		page.steps.forEach(id => api.step({type: 'step', id}, ctx, config));
@@ -471,6 +475,44 @@ const api = {
 		ctx.setLineDash([5, 3]);
 		ctx.strokeRect(x, y, w, h);
 		ctx.restore();
+	},
+
+	grid(ctx, width, height) {
+
+		const grid = uiState.grid;
+		let gridPath = store.cache.get('uiState', 'gridPath');
+		if (gridPath == null) {
+			gridPath = api.buildGrid(grid, width, height);
+			store.cache.set('uiState', 'gridPath', gridPath);
+		}
+
+		ctx.save();
+		ctx.lineWidth = grid.line.width;
+		ctx.strokeStyle = grid.line.color;
+		if (!_.isEmpty(grid.line.dash)) {
+			ctx.setLineDash(grid.line.dash);
+		}
+		ctx.stroke(gridPath);
+		ctx.restore();
+	},
+
+	buildGrid(grid, width, height) {
+		const gridSize = Math.floor(grid.spacing);
+		const po = (grid.line.width % 2) ? 0.5 : 0;
+		const path = new Path2D();
+		let x = grid.offset.left, y = grid.offset.top;
+
+		while (x < width) {  // vertical lines
+			path.moveTo(x + po, 0);
+			path.lineTo(x + po, height);
+			x += gridSize;
+		}
+		while (y < height) {  // horizontal lines
+			path.moveTo(0, y + po);
+			path.lineTo(width, y + po);
+			y += gridSize;
+		}
+		return path;
 	},
 
 	roundedRectItemStyled(ctx, item, r, style) {

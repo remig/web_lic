@@ -8,6 +8,7 @@ import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
 import Storage from './storage';
 import LocaleManager from './translate';
+import {uiState} from './uiState';
 
 let app;
 const tr = LocaleManager.translate;
@@ -72,6 +73,21 @@ Vue.component('nav-menu', {
 
 function enableIfModel() {
 	return store != null && store.model != null;
+}
+
+
+function toggleGrid(newState) {
+	return function() {
+		const path = '/enabled';
+		const change = {
+			action: {
+				root: uiState.grid,
+				redo: [{op: 'replace', path, value: newState}],
+				undo: [{op: 'replace', path, value: !newState}]
+			}
+		};
+		undoStack.commit(change, null, 'Show Grid');
+	};
 }
 
 const menu = [
@@ -266,15 +282,47 @@ const menu = [
 				}
 			]
 		},
-		{text: 'separator'},
-		{text: 'Zoom 100%', enabled: () => false, cb() {}},
-		{text: 'Zoom To Fit', enabled: () => false, cb() {}},
-		{text: 'Zoom In', enabled: () => false, cb() {}},
-		{text: 'Zoom Out', enabled: () => false, cb() {}},
-		{text: 'separator'},
-		{text: 'Add Horizontal Guide', enabled: () => false, cb() {}},
-		{text: 'Add Vertical Guide', enabled: () => false, cb() {}},
-		{text: 'Remove Guides', enabled: () => false, cb() {}}
+		{
+			text: 'navbar.view.zoom.root',
+			children: [
+				{text: '100%', enabled: () => false, cb() {}},
+				{text: 'To Fit', enabled: () => false, cb() {}},
+				{text: 'In', enabled: () => false, cb() {}},
+				{text: 'Out', enabled: () => false, cb() {}}
+			]
+		},
+		{
+			text: 'Grid',
+			children: [
+				{
+					text: 'Show',
+					shown() {
+						return !uiState.grid.enabled;
+					},
+					cb: toggleGrid(true)
+				},
+				{
+					text: 'Hide',
+					shown() {
+						return uiState.grid.enabled;
+					},
+					cb: toggleGrid(false)
+				},
+				{
+					text: 'Customize',
+					cb() {
+					}
+				}
+			]
+		},
+		{
+			text: 'Guides (NYI)',
+			children: [
+				{text: 'Add Horizontal Guide', enabled: () => false, cb() {}},
+				{text: 'Add Vertical Guide', enabled: () => false, cb() {}},
+				{text: 'Remove Guides', enabled: () => false, cb() {}}
+			]
+		}
 	]},
 	{text: 'navbar.export.root', children: [
 		{

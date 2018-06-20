@@ -19,6 +19,19 @@ export const defaultUIState = {
 			}
 		}
 	},
+	grid: {
+		enabled: false,
+		spacing: 100,
+		offset: {
+			top: 50,
+			left: 50
+		},
+		line: {
+			width: 3,
+			color: 'red',
+			dash: []
+		}
+	},
 	splitter: 20,
 	pliTransforms: {}  // TODO: if scale goes back to 1, don't store it delete it.  Likewise with rotations x|y|z = 0.
 };
