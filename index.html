@@ -34,6 +34,7 @@
 	<script src="lib/jszip-3.1.3.js"></script>
 	<script src="lib/FileSaver-1.3.2.js"></script>
 	<script src="lib/split.js"></script>
+	<script src="lib/fast-json-patch-2.0.6.js"></script>
 	<script src="lib/element-ui-2.4.1.js"></script>
 	<script src="lib/element-ui_local-en-2.4.1.js"></script>
 -->
@@ -573,7 +574,7 @@
 	</script>
 
 	<script type="text/x-template" id="rotateCSITemplate">
-		<baseDialog title="Rotate CSI">
+		<baseDialog :title="title">
 			<div slot="body" class="container-fluid">
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
@@ -611,7 +612,7 @@
 							/>
 						</div>
 					</div>
-					<div class="form-group">
+					<div v-if="showRotateIconCheckbox" class="form-group">
 						<label class="checkbox-inline">
 							<input
 								v-model="addRotateIcon"

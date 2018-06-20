@@ -463,6 +463,7 @@ const contextMenu = {
 								csi.isDirty = true;
 								app.redrawUI(true);
 							});
+							dialog.title = 'Rotate CSI';
 							dialog.rotation = csi.rotation;
 							dialog.show({x: 400, y: 150});
 						});
@@ -614,8 +615,52 @@ const contextMenu = {
 	pliItem: [
 		{
 			text: 'Rotate Part List Image',
-			cb() {
+			cb(selectedItem) {
+				const pliItem = store.get.pliItem(selectedItem.id);
+				const filename = pliItem.filename;
+				const pliTransforms = uiState.pliTransforms;
+				const originalTransform = _.clone(pliTransforms[filename]);
+				const page = store.get.pageForItem(pliItem);
+				pliTransforms[filename] = pliTransforms[filename] || {};
 
+				app.currentDialog = 'rotateCSIDialog';
+				app.clearSelected();
+
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$off();
+					dialog.$on('update', newValues => {
+						pliTransforms[filename].rotation = {...newValues.rotation};
+						store.mutations.pliItem.markAllDirty(filename);
+						app.redrawUI(true);
+					});
+					dialog.$on('ok', newValues => {
+						const path = `/${filename}/rotation`;
+						const change = {
+							mutations: ['page.layout'],
+							action: {
+								root: pliTransforms,
+								redo: [{op: 'replace', path, value: {...newValues.rotation}}],
+								undo: [{op: 'replace', path, value: (originalTransform || {}).rotation || null}]
+							}
+						};
+						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
+						undoStack.commit(change, {page}, 'Rotate Part List Image', dirtyItems);
+					});
+					dialog.$on('cancel', () => {
+						if (originalTransform == null) {
+							delete pliTransforms[filename];
+						} else {
+							pliTransforms[filename] = originalTransform;
+						}
+						store.mutations.pliItem.markAllDirty(filename);
+						app.redrawUI(true);
+					});
+					dialog.title = 'Rotate Part List Image';
+					dialog.showRotateIconCheckbox = false;
+					dialog.rotation = (originalTransform || {}).rotation || {x: 0, y: 0, z: 0};
+					dialog.show({x: 400, y: 150});
+				});
 			}
 		},
 		{
@@ -633,8 +678,7 @@ const contextMenu = {
 					dialog.$off();
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
-						store.mutations.pliItem.markAllDirty(pliItem.filename);
-						page.needsLayout = true;
+						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
 					dialog.$on('ok', newValues => {
@@ -643,13 +687,13 @@ const contextMenu = {
 						const change = {
 							mutations: ['page.layout'],
 							action: {
-								root: uiState.pliTransforms,
-								redo: [{op: 'replace', path, value: value}],
+								root: pliTransforms,
+								redo: [{op: 'replace', path, value}],
 								undo: [{op: 'replace', path, value: (originalTransform || {}).scale || null}]
 							}
 						};
-						const dirtyItems = store.state.pliItems.filter(item => item.filename === pliItem.filename);
-						undoStack.commit(change, {page}, 'Change PLI Item Scale', dirtyItems);
+						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
+						undoStack.commit(change, {page}, 'Scale Part List Image', dirtyItems);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -657,7 +701,7 @@ const contextMenu = {
 						} else {
 							pliTransforms[filename] = originalTransform;
 						}
-						store.mutations.pliItem.markAllDirty(pliItem.filename);
+						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
 					dialog.visible = true;

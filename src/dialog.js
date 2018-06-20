@@ -65,9 +65,11 @@ const dialogs = {
 		direction: 'vertical'
 	},
 	rotateCSI: {
+		title: '',
 		rotation: {
 			x: 0, y: 0, z: 0
 		},
+		showRotateIconCheckbox: true,
 		addRotateIcon: true
 	},
 	copyRotation: {
