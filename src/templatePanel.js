@@ -232,7 +232,7 @@ function rotateTemplatePanel() {
 				this.templateItem = _.clone(item);
 			},
 			apply() {
-				store.state[this.templateItem.type + 's'].forEach(item => (item.isDirty = true));
+				store.mutations[this.templateItem.type].markAllDirty();
 				store.state.pages.forEach(page => (page.needsLayout = true));
 				store.state.templatePage.needsLayout = true;
 				const text = `Change ${_.prettyPrint(this.templateItem.type)} Template`;

@@ -632,7 +632,7 @@ const contextMenu = {
 					dialog.$off();
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
-						pliItem.isDirty = true;
+						store.mutations.pliItem.markAllDirty(pliItem.filename);
 						const page = store.get.pageForItem(pliItem);
 						page.needsLayout = true;
 						app.redrawUI(true);
@@ -645,7 +645,8 @@ const contextMenu = {
 							redo: [{op: 'replace', path, value: value}],
 							undo: [{op: 'replace', path, value: (originalTransform || {}).scale || null}]
 						};
-						undoStack.commitDelta(action, 'Change PLI Item Rotation', [pliItem]);
+						const dirtyItems = store.state.pliItems.filter(item => item.filename === pliItem.filename);
+						undoStack.commitDelta(action, 'Change PLI Item Rotation', dirtyItems);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -653,7 +654,7 @@ const contextMenu = {
 						} else {
 							pliTransforms[filename] = originalTransform;
 						}
-						pliItem.isDirty = true;
+						store.mutations.pliItem.markAllDirty(pliItem.filename);
 						app.redrawUI(true);
 					});
 					dialog.visible = true;

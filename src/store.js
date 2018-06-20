@@ -138,12 +138,13 @@ const store = {
 				const domID = `PLI_${part.filename}_${part.colorCode}`;
 				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : domID);
 				if ((item && item.isDirty) || container == null || bypassCache) {
-					container = getCanvas(domID, bypassCache);
+					container = container || getCanvas(domID, bypassCache);
 					const config = {
 						resizeContainer: true,
 						rotation: getRotation(item)
 					};
 					LDRender.renderPart(part, container, 1000 * scale, config);
+					delete item.isDirty;
 				}
 				return {width: container.width, height: container.height, container};
 			}
@@ -1271,8 +1272,10 @@ const store = {
 				store.mutations.item.delete({item: {type: 'quantityLabel', id: pliItem.quantityLabelID}});
 				store.mutations.item.delete({item: pliItem});
 			},
-			markAllDirty() {
-				store.state.pliItems.forEach(item => (item.isDirty = true));
+			markAllDirty(filename) {
+				let list = store.state.pliItems;
+				list = filename ? list.filter(item => item.filename === filename) : list;
+				list.forEach(item => (item.isDirty = true));
 			}
 		},
 		templatePage: {
