@@ -9,6 +9,7 @@ import openFileHandler from './fileUploader';
 import Storage from './storage';
 import LocaleManager from './translate';
 import {uiState} from './uiState';
+import gridDialog from './dialogs/grid_dialog.vue';
 
 let app;
 const tr = LocaleManager.translate;
@@ -310,6 +311,10 @@ const menu = [
 				{
 					text: 'Customize',
 					cb() {
+						app.currentDialog = gridDialog;
+						Vue.nextTick(() => {
+							app.$refs.currentDialog.show(app);
+						});
 					}
 				}
 			]

@@ -27,7 +27,7 @@ export const defaultUIState = {
 			left: 50
 		},
 		line: {
-			width: 3,
+			width: 1,
 			color: 'auto',
 			dash: []
 		}

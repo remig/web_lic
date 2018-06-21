@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
+const {VueLoaderPlugin} = require('vue-loader');
 
 module.exports = {
 	entry: './src/ui.js',
@@ -9,7 +10,26 @@ module.exports = {
 		path: path.resolve(__dirname, 'dist')
 	},
 	mode: 'production',
+	module: {
+		rules: [
+			{
+				test: /\.vue$/,
+				loader: 'vue-loader',
+				options: {
+					hotReload: false
+				}
+			},
+			{
+				test: /\.css$/,
+				use: [
+					'vue-style-loader',
+					'css-loader'
+				]
+			}
+		]
+	},
 	plugins: [
+		new VueLoaderPlugin(),
 		new UglifyJSPlugin({
 			sourceMap: false
 		}),

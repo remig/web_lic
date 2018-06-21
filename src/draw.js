@@ -502,7 +502,7 @@ const api = {
 	},
 
 	buildGrid(grid, width, height) {
-		const gridSize = Math.floor(grid.spacing);
+		const gridSize = Math.max(1, Math.floor(grid.spacing));
 		const po = (grid.line.width % 2) ? 0.5 : 0;
 		const path = new Path2D();
 		let x = grid.offset.left, y = grid.offset.top;

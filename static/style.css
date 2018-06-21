@@ -121,12 +121,7 @@ div#container {
 
 /* Overwrite Vue Element stuff */
 
-.el-color-picker {
-	display: block;
-	height: 34px;
-}
-
-.el-color-picker__trigger {
+.el-color-picker__trigger, .el-color-picker__mask {
 	border-color: #ccc;
 	width: 34px;
 	height: 34px;
@@ -146,8 +141,18 @@ div#container {
 	padding: 0;
 }
 
+.el-checkbox__inner, .el-checkbox__inner::after {
+	transition: unset;
+}
+
 .el-dialog {
+	border: 1px solid rgba(0, 0, 0, 0.4);
+	border-radius: 6px;
 	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.el-dialog .el-form-item:last-child {
+	margin-bottom: unset;
 }
 
 .el-dialog__body {
@@ -171,10 +176,6 @@ div#container {
 	display: inline;
 	width: 95px;
 	margin: 0 5px;
-}
-
-.pdfExportDialog .el-form-item:last-child {
-	margin-bottom: unset;
 }
 
 /* Splitter stuff */
