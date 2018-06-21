@@ -78,12 +78,11 @@ function enableIfModel() {
 
 function toggleGrid(newState) {
 	return function() {
-		const path = '/enabled';
+		const root = uiState.grid, path = '/enabled';
 		const change = {
 			action: {
-				root: uiState.grid,
-				redo: [{op: 'replace', path, value: newState}],
-				undo: [{op: 'replace', path, value: !newState}]
+				redo: [{root, op: 'replace', path, value: newState}],
+				undo: [{root, op: 'replace', path, value: !newState}]
 			}
 		};
 		undoStack.commit(change, null, 'Show Grid');
@@ -336,7 +335,6 @@ const menu = [
 			text: 'navbar.export.hi_res_pdf',
 			enabled: enableIfModel,
 			cb() {
-
 				// TODO: store user's choices as UI defaults, and retrieve them and populate dialog with them
 				const pageSize = store.state.template.page;
 				app.currentDialog = 'pdfExportDialog';

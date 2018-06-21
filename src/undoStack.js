@@ -51,7 +51,9 @@ const api = {
 		});
 
 		if (change.action) {
-			jsonpatch.applyPatch(change.action.root, change.action.redo);  // Perform the actual action
+			change.action.redo.forEach(action => {
+				jsonpatch.applyOperation(action.root, action);
+			});
 		}
 
 		if (state.index < state.stack.length - 1) {
@@ -135,7 +137,9 @@ function performUndoRedoAction(undoOrRedo, newIndex) {
 
 	const actionStack = (undoOrRedo === 'undo') ? state.stack[state.index] : newStack;
 	if (actionStack.action) {
-		jsonpatch.applyPatch(actionStack.action.root, actionStack.action[undoOrRedo]);
+		actionStack.action[undoOrRedo].forEach(action => {
+			jsonpatch.applyOperation(action.root, action);
+		});
 	}
 
 	clearCacheTargets(state.index, newIndex);

@@ -635,13 +635,12 @@ const contextMenu = {
 						app.redrawUI(true);
 					});
 					dialog.$on('ok', newValues => {
-						const path = `/${filename}/rotation`;
+						const path = `/${filename}/rotation`, root = pliTransforms;
 						const change = {
 							mutations: ['page.layout'],
 							action: {
-								root: pliTransforms,
-								redo: [{op: 'replace', path, value: {...newValues.rotation}}],
-								undo: [{op: 'replace', path, value: (originalTransform || {}).rotation || null}]
+								redo: [{root, op: 'replace', path, value: {...newValues.rotation}}],
+								undo: [{root, op: 'replace', path, value: (originalTransform || {}).rotation || null}]
 							}
 						};
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
@@ -683,13 +682,12 @@ const contextMenu = {
 					});
 					dialog.$on('ok', newValues => {
 						const value = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
-						const path = `/${filename}/scale`;
+						const path = `/${filename}/scale`, root = pliTransforms;
 						const change = {
 							mutations: ['page.layout'],
 							action: {
-								root: pliTransforms,
-								redo: [{op: 'replace', path, value}],
-								undo: [{op: 'replace', path, value: (originalTransform || {}).scale || null}]
+								redo: [{root, op: 'replace', path, value}],
+								undo: [{root, op: 'replace', path, value: (originalTransform || {}).scale || null}]
 							}
 						};
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);

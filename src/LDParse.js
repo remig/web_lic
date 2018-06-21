@@ -110,9 +110,8 @@ const api = {
 				const color = api.partDictionary[opts.filename].parts[opts.partID].colorCode;
 				const path = `/${opts.filename}/parts/${opts.partID}/colorCode`;
 				return {
-					root: api.partDictionary,
-					redo: [{op: 'replace', path, value: opts.color}],
-					undo: [{op: 'replace', path, value: color}]
+					redo: [{root: api.partDictionary, op: 'replace', path, value: opts.color}],
+					undo: [{root: api.partDictionary, op: 'replace', path, value: color}]
 				};
 			}
 		}
