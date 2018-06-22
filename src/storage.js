@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from './util';
-import {setState, defaultUIState} from './uiState';
+import uiState from './uiState';
 
 const keys = {
 	model: 'lic_model',
@@ -42,8 +42,8 @@ _.forEach(keys, (k, v) => {
 });
 
 api.clear.ui = function() {
-	api.replace.ui(defaultUIState);
-	setState(defaultUIState);
+	api.replace.ui(uiState.getDefaultState());  // Don't leave local storage UI state empty; copy default UI state back to local storage.
+	uiState.resetUIState();
 };
 
 api.clear.everything = function() {

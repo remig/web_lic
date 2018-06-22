@@ -3,7 +3,7 @@
 
 import _ from './util';
 import store from './store';
-import * as uiStateModule from './uiState';
+import uiState from './uiState';
 import undoStack from './undoStack';
 import LDParse from './LDParse';
 import Menu from './menu';
@@ -11,6 +11,7 @@ import ContextMenu from './contextMenu';
 import Storage from './storage';
 import LocaleManager from './translate';
 import packageInfo from '../package.json';
+import Guide from './components/guide.vue';
 import './tree';
 import './pageView';
 import './dialog';
@@ -45,6 +46,8 @@ Vue.use({  // This adds a 'tr' method to every component, which makes translatin
 		};
 	}
 });
+
+Vue.component('guide', Guide);
 
 const app = new Vue({
 	el: '#container',
@@ -89,7 +92,7 @@ const app = new Vue({
 				this.currentDialog = 'importModelDialog';
 
 				Vue.nextTick(() => {
-					const dialogDefaults = uiStateModule.uiState.dialog.importModel;
+					const dialogDefaults = uiState.get('dialog.importModel');
 					const dialog = app.$refs.currentDialog;
 					_.copy(dialog, dialogDefaults);
 					dialog.show({x: 400, y: 150});
@@ -421,8 +424,8 @@ const app = new Vue({
 		window.addEventListener('beforeunload', e => {
 
 			const splitStyle = document.getElementById('leftPane').style;
-			uiStateModule.uiState.splitter = parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]);
-			Storage.replace.ui(uiStateModule.uiState);
+			uiState.set('splitter', parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]));
+			Storage.replace.ui(uiState.getCurrentState());
 
 			if (this && this.isDirty) {
 				const msg = 'You have unsaved changes. Leave anyway?';
@@ -440,7 +443,7 @@ const app = new Vue({
 		});
 
 		// Load UI state from storage just once here & keep a copy for fast lookup everywhere
-		uiStateModule.setState(Storage.get.ui());
+		uiState.setUIState(Storage.get.ui());
 
 		// Enable splitter between tree and page view
 		const split = Storage.get.ui().splitter;
@@ -458,5 +461,5 @@ const app = new Vue({
 
 window.__lic = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
-	_, app, store, undoStack, LDParse, Storage, uiState: uiStateModule.uiState
+	_, app, store, undoStack, LDParse, Storage, uiState
 };

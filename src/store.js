@@ -7,7 +7,7 @@ import LDRender from './LDRender';
 import defaultTemplate from './template';
 import Layout from './layout';
 import Storage from './storage';
-import {uiState} from './uiState';
+import uiState from './uiState';
 
 const emptyState = {
 	template: _.clone(defaultTemplate),
@@ -92,8 +92,8 @@ const store = {
 				return (rot.x === 0 && rot.y === 0 && rot.z === 0) ? null : rot;
 			}
 			if (item.filename) {
-				const transform = uiState.pliTransforms[item.filename];
-				if (transform && transform.rotation) {
+				const transform = uiState.getPLITransform(item.filename);
+				if (transform.rotation) {
 					return transform.rotation;
 				}
 			}

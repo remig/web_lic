@@ -3,7 +3,7 @@
 import _ from './util';
 import LDParse from './LDParse';
 import store from './store';
-import {uiState} from './uiState';
+import uiState from './uiState';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
@@ -287,7 +287,7 @@ const api = {
 		for (let i = 0; i < pliItems.length; i++) {
 
 			const pliItem = store.get.pliItem(pliItems[i]);
-			const pliScale = (uiState.pliTransforms[pliItem.filename] || {}).scale || 1;
+			const pliScale = uiState.getPLITransform(pliItem.filename).scale || 1;
 			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem, pliScale);
 			pliItem.x = left;
 			pliItem.y = margin;

@@ -86,7 +86,7 @@
 import _ from '../util';
 import store from '../store';
 import undoStack from '../undoStack';
-import {uiState} from '../uiState';
+import uiState from '../uiState';
 
 export default {
 	data: function() {
@@ -94,17 +94,18 @@ export default {
 			visible: false,
 			useAutoColor: true,
 			lineColor: '',
-			newState: uiState.grid
+			newState: uiState.get('grid')
 		};
 	},
 	methods: {
 		show(app) {
-			const color = uiState.grid.line.color;
+			const grid = uiState.get('grid');
+			const color = grid.line.color;
 			this.visible = true;
 			this.useAutoColor = (color === 'auto');
 			this.lineColor = (color === 'auto') ? 'rgb(0, 0, 0)' : _.color.toRGB(color).toString();
-			this.newState = _.clone(uiState.grid);
-			this.originalState = uiState.grid;
+			this.newState = _.clone(grid);
+			this.originalState = grid;
 			this.app = app;  // TODO: need easy, global way to signal to the app stuff like 'redraw page' and 'redraw UI'
 		},
 		update() {
@@ -113,7 +114,7 @@ export default {
 			} else {
 				this.newState.line.color = this.lineColor;
 			}
-			uiState.grid = _.clone(this.newState);
+			uiState.set('grid', _.clone(this.newState));
 			store.cache.set('uiState', 'gridPath', null);
 			this.app.drawCurrentPage();
 		},
@@ -124,13 +125,14 @@ export default {
 		ok() {
 			this.visible = false;
 			const storeOp = {root: store.cache.stateCache, op: 'replace', path: '/uiState/gridPath', value: null};
+			const root = uiState.getCurrentState(), op = 'replace', path = '/grid';
 			const change = {
 				redo: [
-					{root: uiState, op: 'replace', path: '/grid', value: _.clone(this.newState)},
+					{root, op, path, value: _.clone(this.newState)},
 					storeOp
 				],
 				undo: [
-					{root: uiState, op: 'replace', path: '/grid', value: this.originalState},
+					{root, op, path, value: this.originalState},
 					storeOp
 				]
 			};
@@ -138,7 +140,7 @@ export default {
 		},
 		cancel() {
 			this.visible = false;
-			uiState.grid = this.originalState;
+			uiState.set('grid', this.originalState);
 			store.cache.set('uiState', 'gridPath', null);
 			this.app.drawCurrentPage();
 		}

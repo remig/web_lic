@@ -48,6 +48,21 @@
 				"two" : "Two Facing Pages",
 				"one_scroll": "One Page Scrolling View",
 				"two_scroll": "Two Pages Scrolling View"
+			},
+			"zoom": {
+				"root": "Zoom (NYI)"
+			},
+			"grid": {
+				"root": "Grid",
+				"show": "Show",
+				"hide": "Hide",
+				"customize": "Customize"
+			},
+			"guides": {
+				"root": "Guides",
+				"add_horizontal": "Add Horizontal Guide",
+				"add_vertical": "Add Vertical Guide",
+				"remove": "Remove Guides"
 			}
 		},
 		"export": {
@@ -59,6 +74,19 @@
 		}
 	},
 	"dialog": {
+		"grid": {
+			"title": "Change Grid",
+			"enabled": "Enabled",
+			"spacing": "Grid Spacing",
+			"offset": "Start Grid at",
+			"offset_top": "Top",
+			"offset_left": "Left",
+			"line_style": "Line Style",
+			"color": "Color",
+			"auto_color": "auto",
+			"width": "Width",
+			"dash": "Dash"
+		},
 		"scale_images": {
 			"title": "Scale Images by",
 			"image_size_@mf": "Images will be <strong>{width} x {height}</strong> pixels"
@@ -69,6 +97,11 @@
 			"by": "x",
 			"image_res": "Image Resolution",
 			"dpi": "DPI"
+		},
+		"locale_chooser": {
+			"title": "Pick a Language"
 		}
+	},
+	"templatePanel": {
 	}
 }

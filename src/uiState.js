@@ -2,7 +2,7 @@
 
 import _ from './util';
 
-export const defaultUIState = {
+const defaultState = {
 	locale: null,
 	dialog: {
 		importModel: {
@@ -33,11 +33,48 @@ export const defaultUIState = {
 		}
 	},
 	splitter: 20,
+	guides: [],
 	pliTransforms: {}  // TODO: if scale goes back to 1, don't store it delete it.  Likewise with rotations x|y|z = 0.
 };
 
-export let uiState = _.clone(defaultUIState);
+let currentState = _.clone(defaultState);
 
-export function setState(newState) {
-	uiState = _.clone(newState);
-}
+const api = {
+	get(key) {
+		return _.get(key, currentState);
+	},
+	set(key, prop) {
+		currentState[key] = prop;  // TODO: this only works for root keys; 'foo.bar' doesn't work yet
+	},
+	getCurrentState() {
+		return currentState;
+	},
+	getDefaultState() {
+		return _.clone(defaultState);  // Return clone so we don't accidentally modify it; default state is immutable
+	},
+	getPLITransform(filename) {
+		return currentState.pliTransforms[filename] || {};
+	},
+	resetUIState() {
+		currentState = _.clone(defaultState);
+	},
+	setUIState(newState) {
+		currentState = _.clone(newState);
+	},
+	mutations: {  // TODO: Move more ui state mutations here (pliTransforms in context menu, grid & guide bits in menu, etc
+		guides: {
+			setPosition(guideID, newPosition) {
+				const originalPosition = currentState.guides[guideID].position;
+				const path = `/${guideID}/position`, root = currentState.guides;
+				return {
+					action: {
+						redo: [{root, op: 'replace', path, value: newPosition}],
+						undo: [{root, op: 'replace', path, value: originalPosition}]
+					}
+				};
+			}
+		}
+	}
+};
+
+export default api;

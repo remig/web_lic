@@ -8,7 +8,7 @@ import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
 import Storage from './storage';
 import LocaleManager from './translate';
-import {uiState} from './uiState';
+import uiState from './uiState';
 import gridDialog from './dialogs/grid_dialog.vue';
 
 let app;
@@ -79,15 +79,42 @@ function enableIfModel() {
 
 function toggleGrid(newState) {
 	return function() {
-		const root = uiState.grid, path = '/enabled';
+		const root = uiState.get('grid'), op = 'replace', path = '/enabled';
 		const change = {
 			action: {
-				redo: [{root, op: 'replace', path, value: newState}],
-				undo: [{root, op: 'replace', path, value: !newState}]
+				redo: [{root, op, path, value: newState}],
+				undo: [{root, op, path, value: !newState}]
 			}
 		};
 		undoStack.commit(change, null, 'Show Grid');
 	};
+}
+
+function addGuide(orientation) {
+	return function() {
+		const root = uiState.get('guides');
+		const pageSize = store.state.template.page;
+		const position = Math.floor((orientation === 'vertical') ? (pageSize.width / 2) : (pageSize.height / 2));
+		const change = {
+			action: {
+				redo: [{root, op: 'add', path: '/-', value: {orientation, position}}],
+				undo: [{root, op: 'remove', path: `/${root.length}`}]
+			}
+		};
+		undoStack.commit(change, null, 'Add Guide');
+	};
+}
+
+function removeGuides() {
+	const root = uiState.getCurrentState(), op = 'replace', path = '/guides';
+	const originalGuides = _.clone(root.guides);
+	const change = {
+		action: {
+			redo: [{root, op, path, value: []}],
+			undo: [{root, op, path, value: originalGuides}]
+		}
+	};
+	undoStack.commit(change, null, 'Remove Guides');
 }
 
 const menu = [
@@ -193,15 +220,28 @@ const menu = [
 			children: [
 				{
 					text: 'navbar.file.clear_cache.model',
-					cb: Storage.clear.model
+					cb() {
+						app.closeModel();
+						Storage.clear.model();
+						app.redrawUI();
+					}
 				},
 				{
 					text: 'navbar.file.clear_cache.ui',
-					cb: Storage.clear.ui
+					cb() {
+						uiState.resetUIState();
+						Storage.clear.ui();
+						app.redrawUI();
+					}
 				},
 				{
 					text: 'navbar.file.clear_cache.everything',
-					cb: Storage.clear.everything
+					cb() {
+						app.closeModel();
+						uiState.resetUIState();
+						Storage.clear.everything();
+						app.redrawUI();
+					}
 				}
 			]
 		}
@@ -284,6 +324,7 @@ const menu = [
 		},
 		{
 			text: 'navbar.view.zoom.root',
+			enabled: enableIfModel,
 			children: [
 				{text: '100%', enabled: () => false, cb() {}},
 				{text: 'To Fit', enabled: () => false, cb() {}},
@@ -292,24 +333,25 @@ const menu = [
 			]
 		},
 		{
-			text: 'Grid',
+			text: 'navbar.view.grid.root',
+			enabled: enableIfModel,
 			children: [
 				{
-					text: 'Show',
+					text: 'navbar.view.grid.show',
 					shown() {
-						return !uiState.grid.enabled;
+						return !uiState.get('grid').enabled;
 					},
 					cb: toggleGrid(true)
 				},
 				{
-					text: 'Hide',
+					text: 'navbar.view.grid.hide',
 					shown() {
-						return uiState.grid.enabled;
+						return uiState.get('grid').enabled;
 					},
 					cb: toggleGrid(false)
 				},
 				{
-					text: 'Customize',
+					text: 'navbar.view.grid.customize',
 					cb() {
 						app.currentDialog = gridDialog;
 						Vue.nextTick(() => {
@@ -320,11 +362,21 @@ const menu = [
 			]
 		},
 		{
-			text: 'Guides (NYI)',
+			text: 'navbar.view.guides.root',
+			enabled: enableIfModel,
 			children: [
-				{text: 'Add Horizontal Guide', enabled: () => false, cb() {}},
-				{text: 'Add Vertical Guide', enabled: () => false, cb() {}},
-				{text: 'Remove Guides', enabled: () => false, cb() {}}
+				{
+					text: 'navbar.view.guides.add_horizontal',
+					cb: addGuide('horizontal')
+				},
+				{
+					text: 'navbar.view.guides.add_vertical',
+					cb: addGuide('vertical')
+				},
+				{
+					text: 'navbar.view.guides.remove',
+					cb: removeGuides
+				}
 			]
 		}
 	]},

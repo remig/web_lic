@@ -322,13 +322,24 @@ ul {
 	margin-left: 40px;
 }
 
+.multipleEntries {
+	margin-top: 30px;
+}
+
+.pageContainer {
+	position: relative;
+	display: inline-block;
+}
+
 .pageCanvas {
     background-color: #fff;
     box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
 }
 
-.pageCanvas.multipleEntries {
-	margin-top: 30px;
+.pageGuideContainer {
+	position: absolute;
+	left: 0px;
+	top: 0px;
 }
 
 .pageLockIcon {

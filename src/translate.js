@@ -1,7 +1,7 @@
 /* global Vue: false */
 'use strict';
 
-import {uiState} from './uiState';
+import uiState from './uiState';
 import LanguageList from '../languages/languages.json';
 import MessageFormat from 'messageformat';
 
@@ -42,7 +42,7 @@ function translate(key, args) {
 		try {
 			res = __tr(key, args, currentLocale);
 		} catch (e) {
-			console.log('Locale ${currentLocale} missing translation key: ${key}');  // eslint-disable-line no-console
+			console.log(`Locale ${currentLocale} missing translation key: ${key}`);  // eslint-disable-line no-console
 			res = null;
 		}
 	}
@@ -64,30 +64,34 @@ function getLocale() {
 }
 
 function setLocale(locale) {
-	uiState.locale = currentLocale = locale;
+	currentLocale = locale;
+	uiState.set('locale', locale);
 	if (!(loadedLanguages.hasOwnProperty(locale))) {
 		loadedLanguages[locale] = require(`../languages/${locale}.json`);
 	}
 }
 
-function pickLanguage(app, cb, cb2) {
+function pickLanguage(app, onOk, onLanguageChange) {
 
-	currentLocale = uiState.locale;
+	currentLocale = uiState.get('locale');
 	if (currentLocale && currentLocale !== 'en') {
 		// TODO: loading languages via require means all languages are included in the compiled bundle.  Swith to ajax and load only what we need.
 		loadedLanguages[currentLocale] = require(`../languages/${currentLocale}.json`);
 	}
 
 	if (currentLocale != null || LanguageList.length < 2) {
-		cb();
+		onOk();
+		if (currentLocale != null) {
+			onLanguageChange();
+		}
 		return;
 	}
 	app.currentDialog = 'localeChooserDialog';
 	Vue.nextTick(() => {
 		const dialog = app.$refs.currentDialog;
 		dialog.visible = true;
-		dialog.onLanguageChange = cb2;
-		dialog.onOK = cb;
+		dialog.onLanguageChange = onLanguageChange;
+		dialog.onOK = onOk;
 	});
 }
 

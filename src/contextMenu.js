@@ -6,7 +6,7 @@ import LDParse from './LDParse';
 import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
-import {uiState} from './uiState';
+import uiState from './uiState';
 
 let app;
 
@@ -618,7 +618,7 @@ const contextMenu = {
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				const pliTransforms = uiState.pliTransforms;
+				const pliTransforms = uiState.get('pliTransforms');
 				const originalTransform = _.clone(pliTransforms[filename]);
 				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};
@@ -667,7 +667,7 @@ const contextMenu = {
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				const pliTransforms = uiState.pliTransforms;
+				const pliTransforms = uiState.get('pliTransforms');
 				const originalTransform = _.clone(pliTransforms[filename]);
 				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};

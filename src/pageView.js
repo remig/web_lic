@@ -5,6 +5,7 @@ import _ from './util';
 import Draw from './draw';
 import store from './store';
 import undoStack from './undoStack';
+import uiState from './uiState';
 
 Vue.component('pageView', {
 	render(createElement) {
@@ -23,20 +24,11 @@ Vue.component('pageView', {
 						width: pageWidth,
 						height: pageHeight
 					},
-					class: [
-						'pageCanvas',
-						{
-							multipleEntries: scrolling,
-							oddNumberedPage: facing && !_.isEven(idx)
-						}
-					],
-					style: {
-						visibility: (pageID == null) ? 'hidden' : null
-					}
+					class: ['pageCanvas']
 				}
 			);
 
-			let lockIcon, lockSwitch;
+			let lockIcon, lockSwitch, guides = [];
 			if (pageID != null && pageID !== 'templatePage' && pageID !== 'titlePage') {
 				lockIcon = createElement(
 					'i',
@@ -51,12 +43,53 @@ Vue.component('pageView', {
 						on: {input: setPageLocked(pageID)}
 					}
 				);
+
+				guides = uiState.get('guides').map((props, guideID) => {
+					const offset = {left: 0, top: 0};
+					return createElement(
+						'guide',
+						{
+							ref: `guide-${guideID}`,
+							props: {
+								pageSize: {width: pageWidth, height: pageHeight},
+								offset,
+								id: guideID,
+								...props
+							}
+						}
+					);
+				});
+
+				if (!_.isEmpty(guides)) {
+					guides = createElement(
+						'div',
+						{class: ['pageGuideContainer']},
+						guides
+					);
+				}
 			}
+
+			const canvasHolder = createElement(
+				'div',
+				{
+					class: [
+						'pageContainer',
+						{
+							multipleEntries: scrolling,
+							oddNumberedPage: facing && !_.isEven(idx)
+						}
+					],
+					style: {
+						visibility: (pageID == null) ? 'hidden' : null
+					}
+				},
+				[canvas, guides]
+			);
 
 			return createElement(
 				'div',
 				{style: {position: 'relative', display: facing ? 'inline' : null}},
-				[canvas, lockIcon, lockSwitch]
+				[canvasHolder, lockIcon, lockSwitch]
 			);
 		}
 
@@ -186,35 +219,50 @@ Vue.component('pageView', {
 			});
 		},
 		mouseDown(e) {
-			if (e.button !== 0 || e.target.nodeName !== 'CANVAS') {
+			if (e.button !== 0 || (e.target.nodeName !== 'CANVAS' && !e.target.className.includes('guide'))) {
 				return;
 			}
+
 			// Record mouse down pos so we can check if mouse up is close enough to down to trigger a 'click' for selection
 			this.mouseDownPt = {x: e.offsetX, y: e.offsetY};
-			if (this.selectedItem) {
+			if (e.target.className.includes('guide')) {
+				this.mouseDragItem = {
+					guide: this.$refs[e.target.dataset.id],
+					x: e.screenX,
+					y: e.screenY
+				};
+			} else if (this.selectedItem) {
 				const item = store.get.lookupToItem(this.selectedItem);
 				if (store.get.isMoveable(this.selectedItem) && inBox(e.offsetX, e.offsetY, item)) {
 					// If mouse down is inside a selected item, store item & down pos in case mouse move follows, to support dragging items
-					this.mouseDragItem = {item, x: e.offsetX, y: e.offsetY};
+					this.mouseDragItem = {item, x: e.screenX, y: e.screenY};
 				}
 			}
 		},
 		mouseMove(e) {
-			if (!this.mouseDragItem || e.target.nodeName !== 'CANVAS') {
+			if (e.buttons !== 1) {
 				return;
 			}
-			const dx = Math.floor(e.offsetX - this.mouseDragItem.x);
-			const dy = Math.floor(e.offsetY - this.mouseDragItem.y);
+			if (!this.mouseDragItem || (e.target.nodeName !== 'CANVAS' && !e.target.className.includes('guide'))) {
+				return;
+			}
+			const dx = Math.floor(e.screenX - this.mouseDragItem.x);
+			const dy = Math.floor(e.screenY - this.mouseDragItem.y);
 			if (dx === 0 && dy === 0) {
 				return;
 			}
-			// TODO: Some items can't be dragged about freely, like callout arrow base points
-			// TODO: Update parent bounding boxes for children like PLI, CSI, etc
-			store.mutations.item.reposition({item: this.mouseDragItem.item, dx, dy});
-			this.mouseDragItem.x = e.offsetX;
-			this.mouseDragItem.y = e.offsetY;
-			this.mouseDragItem.moved = true;
-			this.drawCurrentPage();
+			if (this.mouseDragItem.guide) {
+				// TODO: transient bug: sometimes dragging a guide will put up the 'stop error cursor' and stop all mouse movements...
+				this.mouseDragItem.guide.moveBy(dx, dy);
+			} else {
+				// TODO: Some items can't be dragged about freely, like callout arrow base points
+				// TODO: Update parent bounding boxes for children like PLI, CSI, etc
+				store.mutations.item.reposition({item: this.mouseDragItem.item, dx, dy});
+				this.mouseDragItem.moved = true;
+				this.drawCurrentPage();
+			}
+			this.mouseDragItem.x = e.screenX;
+			this.mouseDragItem.y = e.screenY;
 		},
 		mouseUp(e) {
 			if (e.button !== 0) {
@@ -230,6 +278,8 @@ Vue.component('pageView', {
 				} else {
 					this.app.clearSelected();
 				}
+			} else if (this.mouseDragItem && this.mouseDragItem.guide) {
+				this.mouseDragItem.guide.savePosition();
 			} else if (this.mouseDragItem && this.mouseDragItem.moved) {
 				// Mouse drag is complete; add undo event to stack
 				undoStack.commit('', null, `Move ${_.prettyPrint(this.mouseDragItem.item.type)}`);

@@ -3,7 +3,7 @@
 import _ from './util';
 import store from './store';
 import LDParse from './LDParse';
-import {uiState} from './uiState';
+import uiState from './uiState';
 
 const api = {
 
@@ -62,7 +62,7 @@ const api = {
 			template.border.cornerRadius + template.border.width, rectStyle  // offset corner radius by border width so radius defines inner border radius
 		);
 
-		if (uiState.grid.enabled) {
+		if (uiState.get('grid').enabled) {
 			api.grid(ctx, template.width, template.height);
 		}
 
@@ -227,7 +227,7 @@ const api = {
 		pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const part = localModel.parts[pliItem.partNumbers[0]];
-			const pliScale = ((uiState.pliTransforms[pliItem.filename] || {}).scale || 1) * scale;
+			const pliScale = (uiState.getPLITransform(pliItem.filename).scale || 1) * scale;
 			const pliCanvas = store.render.pli(part, pliItem, pliScale, noCache).container;
 			const x = Math.floor(pliItem.x * scale);
 			const y = Math.floor(pliItem.y * scale);
@@ -479,7 +479,7 @@ const api = {
 
 	grid(ctx, width, height) {
 
-		const grid = uiState.grid;
+		const grid = uiState.get('grid');
 		let gridPath = store.cache.get('uiState', 'gridPath');
 		if (gridPath == null) {
 			gridPath = api.buildGrid(grid, width, height);
