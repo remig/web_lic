@@ -288,6 +288,7 @@ const api = {
 
 		ctx.beginPath();
 		ctx.moveTo(pt.x, pt.y);
+
 		if (arrowPoints.length > 3) {
 			// Custom arrow points
 			arrowPoints.slice(1, -1).forEach(pt => {
@@ -297,32 +298,25 @@ const api = {
 		} else {
 			// Default arrow points - use stair step path
 			const bbox = _.geom.bbox(arrowPoints.slice(0, -1));
-			switch (arrow.direction) {
-				case 'up': {
-					pt.y -= bbox.height / 2;
-					line(pt);
-					pt.x += bbox.width * (pt.x > arrowPoints[1].x ? -1 : 1);
-					break;
-				}
-				case 'right': {
-					pt.x += bbox.width / 2;
-					line(pt);
-					pt.y += bbox.height * (pt.y > arrowPoints[1].y ? -1 : 1);
-					break;
-				}
-				case 'down': {
-					pt.y += bbox.height / 2;
-					line(pt);
-					pt.x += bbox.width * (pt.x > arrowPoints[1].x ? -1 : 1);
-					break;
-				}
-				case 'left': {
-					pt.x -= bbox.width / 2;
-					line(pt);
-					pt.y += bbox.height * (pt.y > arrowPoints[1].y ? -1 : 1);
-					break;
-				}
+
+			if (arrow.direction === 'up') {
+				pt.y -= bbox.height / 2;
+			} else if (arrow.direction === 'right') {
+				pt.x += bbox.width / 2;
+			} else if (arrow.direction === 'down') {
+				pt.y += bbox.height / 2;
+			} else {
+				pt.x -= bbox.width / 2;
 			}
+
+			line(pt);
+
+			if (arrow.direction === 'up' || arrow.direction === 'down') {
+				pt.x = arrowPoints[1].x;
+			} else {
+				pt.y = arrowPoints[1].y;
+			}
+
 			line(pt);
 			line(arrowPoints[1]);
 		}
