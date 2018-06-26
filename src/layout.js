@@ -337,7 +337,7 @@ const api = {
 					stepBox.x += widestStep + margin;
 					calloutBox.width += widestStep + margin;
 				}
-				stepBox.height = entry.height + margin;
+				stepBox.height = entry.height;
 				api.step(entry.step, stepBox, 0);
 				stepBox.y += stepBox.height + margin;
 				calloutBox.height = Math.max(calloutBox.height, stepBox.y);
@@ -369,7 +369,7 @@ const api = {
 		const lastStep = store.get.step(_.last(callout.steps));
 		const p1 = store.get.point(arrow.points[0]);
 		p1.x = callout.borderOffset.x + callout.width;
-		p1.y = lastStep.y + (lastStep.height / 2);
+		p1.y = lastStep ? lastStep.y + (lastStep.height / 2) : callout.height / 2;
 
 		// Coordinates for last point (tip) are relative to the *CSI*
 		// TODO: try to position arrow tip centered to inserted part bounding box instead of overall CSI box
@@ -424,7 +424,6 @@ const api = {
 	dividers(target, layoutDirection, rows, cols, box) {
 
 		// Delete any dividers already on the target, then re-add new ones in the right places
-		target.dividers = target.dividers || [];
 		store.mutations.item.deleteChildList({item: target, listType: 'divider'});
 
 		if (target.type === 'templatePage') {
@@ -558,16 +557,16 @@ function measureStep(step) {
 	const csi = store.get.csi(step.csiID);
 	const localModel = LDParse.model.get.part(step.model.filename);
 	const csiSize = store.render.csi(localModel, step, csi, null, csi.scale);
-	if (!csiSize) {
-		const emptyCSISize = emptyCalloutSize - (margin * 4);
+	if (csiSize == null) {
+		const emptyCSISize = emptyCalloutSize - margin;
 		return {
 			width: Math.max(emptyCSISize, lblSize.width),
 			height: Math.max(emptyCSISize, lblSize.height)
 		};
 	}
 	return {
-		width: lblSize.width + csiSize.width,
-		height: lblSize.height + csiSize.height
+		width: lblSize.width + csiSize.width + margin,
+		height: lblSize.height + csiSize.height + margin
 	};
 }
 

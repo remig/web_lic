@@ -106,8 +106,8 @@ const store = {
 				const domID = `CSI_${step.csiID}`;
 				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : domID);
 				if (csi.isDirty || container == null || bypassCache) {
-					container = container || getCanvas(domID);
 					if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
+						container = container || getCanvas(domID);
 						LDRender.renderModel(localModel, container, 1000 * scale, {resizeContainer: true});
 					} else {
 						const partList = store.get.partList(step);
@@ -122,6 +122,7 @@ const store = {
 							rotation: getRotation(csi),
 							displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
 						};
+						container = container || getCanvas(domID);
 						LDRender.renderModel(localModel, container, 1000 * scale, config);
 					}
 					delete csi.isDirty;
@@ -154,6 +155,15 @@ const store = {
 					delete item.isDirty;
 				}
 				return {width: container.width, height: container.height, container};
+			},
+			removeCanvas(item) {
+				if (item.type === 'step') {
+					const domID = `CSI_${item.csiID}`;
+					const container = document.getElementById(domID);
+					if (container) {
+						container.remove();
+					}
+				}
 			}
 		};
 	})(),
@@ -403,7 +413,7 @@ const store = {
 		isMoveable: (() => {
 			const moveableItems = [
 				'step', 'csi', 'pli', 'pliItem', 'quantityLabel', 'numberLabel', 'annotation',
-				'submodelImage', 'callout', 'point', 'rotateIcon'
+				'submodelImage', 'callout', 'divider', 'point', 'rotateIcon'
 			];
 			return function(item) {
 				if (store.get.isTemplatePage(store.get.pageForItem(item))) {
@@ -632,6 +642,10 @@ const store = {
 			reposition(opts) {  // opts: {item or [items], dx, dy}
 				const items = Array.isArray(opts.item) ? opts.item : [opts.item];
 				items.forEach(item => {
+					if (item.type === 'divider') {  // special case: dividers must move both points
+						store.mutations.divider.reposition(opts);
+						return;
+					}
 					item.x += opts.dx;
 					item.y += opts.dy;
 					if (Layout.adjustBoundingBox[item.type]) {
@@ -946,6 +960,7 @@ const store = {
 				}
 				if (step.csiID != null) {
 					store.mutations.item.delete({item: store.get.csi(step.csiID)});
+					store.render.removeCanvas(step);
 				}
 				if (step.pliID != null) {
 					store.mutations.pli.delete({pli: store.get.pli(step.pliID), deleteItems: true});
@@ -953,6 +968,15 @@ const store = {
 				store.mutations.item.deleteChildList({item: step, listType: 'callout'});
 				store.mutations.item.delete({item: step});
 				store.mutations.step.renumber(step);
+				if (step.parent.type === 'callout') {  // If we delete the 2nd last step from a callout, remove step number from last remaining step
+					const callout = store.get.parent(step);
+					if (callout.steps.length === 1) {
+						const calloutStep = store.get.step(callout.steps[0]);
+						if (calloutStep.numberLabelID != null) {
+							store.mutations.item.delete({item: store.get.numberLabel(calloutStep.numberLabelID)});
+						}
+					}
+				}
 				if (opts.doLayout) {
 					store.mutations.page.layout({page: store.get.pageForItem(step)});
 				}
@@ -1083,6 +1107,8 @@ const store = {
 					borderOffset: {x: 0, y: 0},
 					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
 				}, parent: opts.parent});
+
+				store.mutations.step.add({dest: callout, stepNumber: null});
 
 				store.mutations.calloutArrow.add({parent: callout});
 				return callout;
@@ -1226,6 +1252,13 @@ const store = {
 				return store.mutations.item.add({item: {
 					type: 'divider', p1: opts.p1, p2: opts.p2
 				}, parent: opts.parent});
+			},
+			reposition(opts) { // opts: {item, dx, dy}
+				const divider = store.get.divider(opts.item);
+				divider.p1.x += opts.dx;
+				divider.p2.x += opts.dx;
+				divider.p1.y += opts.dy;
+				divider.p2.y += opts.dy;
 			},
 			delete(opts) {  // opts: {divider}
 				store.mutations.item.delete({item: opts.divider});

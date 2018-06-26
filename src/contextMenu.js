@@ -356,7 +356,11 @@ const contextMenu = {
 			text: 'Delete Empty Step',
 			enabled: enableIfUnlocked,
 			shown(selectedItem) {
-				return _.isEmpty(store.get.step(selectedItem).parts);
+				const step = store.get.step(selectedItem);
+				if (step.parent.type === 'callout' && store.get.parent(step).steps.length < 2) {
+					return false;  // Can't delete first step in a callout
+				}
+				return _.isEmpty(step.parts);
 			},
 			cb(selectedItem) {
 				undoStack.commit('step.delete', {step: selectedItem, doLayout: true}, this.text);
@@ -804,10 +808,10 @@ const contextMenu = {
 			text: 'Delete Empty Callout',
 			shown(selectedItem) {
 				const callout = store.get.callout(selectedItem);
-				if (callout.steps.length < 1) {
-					return true;
-				} else if (callout.steps.length > 1) {
+				if (callout == null || callout.steps.length > 1) {
 					return false;
+				} else if (callout && callout.steps.length < 1) {
+					return true;
 				}
 				const step = store.get.step(callout.steps[0]);
 				return step.parts.length < 1;
@@ -992,11 +996,13 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
-				const callout = {id: step.callouts[0], type: 'callout'};
+				const callout = store.get.callout(step.callouts[0]);
+				const targetStep = store.get.step(_.last(callout.steps));
 				undoStack.commit(
 					'part.addToCallout',
 					{partID: selectedItem.id, step, callout, doLayout: true},
-					this.text
+					this.text,
+					[{type: 'csi', id: targetStep.csiID}]
 				);
 			}
 		},
@@ -1008,6 +1014,7 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
+				app.clearSelected();
 				undoStack.commit(
 					'part.removeFromCallout',
 					{partID: selectedItem.id, step},

@@ -233,7 +233,7 @@ Vue.component('pageView', {
 				};
 			} else if (this.selectedItem) {
 				const item = store.get.lookupToItem(this.selectedItem);
-				if (store.get.isMoveable(this.selectedItem) && inBox(e.offsetX, e.offsetY, item)) {
+				if (item && store.get.isMoveable(item) && inHighlightBox(e.offsetX, e.offsetY, item, this.pageSize)) {
 					// If mouse down is inside a selected item, store item & down pos in case mouse move follows, to support dragging items
 					this.mouseDragItem = {item, x: e.screenX, y: e.screenY};
 				}
@@ -524,6 +524,11 @@ function itemHighlightBox(selItem, pageSize) {
 		width: 4 + box.width + 4,
 		height: 4 + box.height + 4
 	};
+}
+
+function inHighlightBox(x, y, t, pageSize) {
+	const box = itemHighlightBox(t, pageSize);
+	return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
 }
 
 function inBox(x, y, t) {
