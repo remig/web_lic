@@ -89,6 +89,7 @@ import undoStack from '../undoStack';
 import uiState from '../uiState';
 
 export default {
+	// TODO: Add option to draw grid above / below page elements
 	data: function() {
 		return {
 			visible: false,

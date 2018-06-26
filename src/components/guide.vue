@@ -15,6 +15,7 @@ export default {
 	},
 	render(createElement) {
 
+		// TODO: Make guides bigger so they're easier to drag around
 		const isVertical = (this.orientation === 'vertical');
 
 		const style = {};
@@ -36,6 +37,7 @@ export default {
 	},
 	methods: {
 		moveBy(dx, dy) {
+			// TOOD: Improve performance here to cut down guide drag flicker
 			if (this.orientation === 'vertical') {
 				let left = parseFloat(this.$el.style.left) + dx;
 				left = _.bound(left, 0, this.pageSize.width) + 'px';
