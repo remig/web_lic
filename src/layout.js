@@ -220,6 +220,7 @@ const api = {
 	submodelImage(submodelImage, box) {
 
 		// TODO: if submodel image is too big, shrink it
+		// TODO: consider multiple submodels in one step; can only shrink so much, might need to lay out horizontally
 		const csi = store.get.csi(submodelImage.csiID);
 		const part = LDParse.model.get.part(submodelImage.modelFilename);
 		const csiSize = store.render.pli(part, csi);
@@ -317,6 +318,7 @@ const api = {
 		const margin = getMargin(store.state.template.callout.innerMargin);
 		const calloutBox = {x: 0, y: 0, width: 0, height: margin};
 
+		callout.borderOffset.x = callout.borderOffset.y = 0;
 		if (_.isEmpty(callout.steps)) {
 			calloutBox.width = calloutBox.height = emptyCalloutSize;
 		} else {
@@ -328,8 +330,8 @@ const api = {
 			const stepBox = {x: margin, y: margin, width: widestStep, height: null};
 			calloutBox.width = margin + widestStep + margin;
 
-			stepSizes.forEach(entry => {
-				if (borderWidth + stepBox.y + entry.height + margin + borderWidth > box.height) {
+			stepSizes.forEach((entry, idx) => {
+				if (idx > 0 && (borderWidth + stepBox.y + entry.height + margin + borderWidth > box.height)) {
 					// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
 					stepBox.y = margin;
 					stepBox.x += widestStep + margin;
@@ -350,7 +352,6 @@ const api = {
 	},
 
 	calloutArrow(callout) {
-		// TODO: consider adding a full automatic 'stairstep' callout arrow, which maintains orthogonal segments regardless of anchor or tip movement.
 
 		// Delete all but first callout arrow
 		while (callout.calloutArrows.length > 1) {
@@ -364,10 +365,11 @@ const api = {
 		}
 
 		// Coordinates for first point (base) are relative to the *callout*
+		// Position on right edge of callout centered vertically on last step
+		const lastStep = store.get.step(_.last(callout.steps));
 		const p1 = store.get.point(arrow.points[0]);
-		const h = callout.height;
-		p1.x = callout.width;
-		p1.y = h - (h / (callout.steps.length || 1) / 2);
+		p1.x = callout.borderOffset.x + callout.width;
+		p1.y = lastStep.y + (lastStep.height / 2);
 
 		// Coordinates for last point (tip) are relative to the *CSI*
 		// TODO: try to position arrow tip centered to inserted part bounding box instead of overall CSI box
@@ -490,6 +492,16 @@ const api = {
 		// 	if (step.parent.type === 'callout') {
 		// 	}
 		// },
+		item(item, boxes, template) {
+			const borderWidth = template.border.width;
+			const margin = getMargin(template.innerMargin);
+			const bbox = _.geom.bbox(boxes);
+			item.borderOffset.x = bbox.x - item.x - margin;
+			item.borderOffset.y = bbox.y - item.y - margin;
+			item.width = borderWidth + margin + bbox.width + margin + borderWidth;
+			item.height = borderWidth + margin + bbox.height + margin + borderWidth;
+		},
+
 		pliItem(item) {
 			const pli = store.get.parent(item);
 			const boxes = [];
@@ -505,14 +517,26 @@ const api = {
 					width: qtyLabel.width, height: qtyLabel.height
 				});
 			});
-			const borderWidth = store.state.template.pli.border.width;
-			const margin = getMargin(store.state.template.pli.innerMargin);
-			const bbox = _.geom.bbox(boxes);
-			pli.borderOffset.x = bbox.x - pli.x - margin;
-			pli.borderOffset.y = bbox.y - pli.y - margin;
-			pli.width = borderWidth + margin + bbox.width + margin + borderWidth;
-			pli.height = borderWidth + margin + bbox.height + margin + borderWidth;
+			api.adjustBoundingBox.item(pli, boxes, store.state.template.pli);
 		},
+
+		step(item) {
+			if (item.parent.type !== 'callout') {
+				return;
+			}
+			const callout = store.get.parent(item);
+			const boxes = [];
+			callout.steps.forEach(itemID => {
+				const step = store.get.step(itemID);
+				boxes.push({
+					x: callout.x + step.x, y: callout.y + step.y,
+					width: step.width, height: step.height
+				});
+			});
+			api.adjustBoundingBox.item(callout, boxes, store.state.template.callout);
+			api.calloutArrow(callout);
+		},
+
 		quantityLabel(item) {
 			if (item.parent.type === 'pliItem') {
 				api.adjustBoundingBox.pliItem(store.get.parent(item));

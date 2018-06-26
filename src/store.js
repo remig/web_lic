@@ -1080,6 +1080,7 @@ const store = {
 					steps: [], calloutArrows: [],
 					x: null, y: null, width: null, height: null,
 					innerContentOffset: {x: 0, y: 0},
+					borderOffset: {x: 0, y: 0},
 					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
 				}, parent: opts.parent});
 
@@ -1392,6 +1393,7 @@ const store = {
 				parent: page
 			});
 
+			// TODO: This part & page count quickly gets out of sync with the rest of the doc as pages are added / removed
 			const partCount = LDParse.model.get.partCount(store.model);
 			const pageCount = store.get.pageCount();
 			store.mutations.annotation.add({

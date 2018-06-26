@@ -11,6 +11,7 @@ import ContextMenu from './contextMenu';
 import Storage from './storage';
 import LocaleManager from './translate';
 import packageInfo from '../package.json';
+import backwardCompat from './backwardCompat';
 import Guide from './components/guide.vue';
 import './tree';
 import './pageView';
@@ -126,10 +127,13 @@ const app = new Vue({
 			});
 		},
 		openLicFile(content) {
+			const start = Date.now();
 			if (typeof content === 'string') {
 				content = JSON.parse(content);
 			}
-			const start = Date.now();
+
+			backwardCompat.fixLicSaveFile(content);
+
 			if (store.model) {
 				this.closeModel();
 			}
@@ -320,7 +324,6 @@ const app = new Vue({
 				const item = store.get.lookupToItem(selItem);
 				// Special case: the first point in a callout arrow can't move away from the callout itself
 				// TODO: this doesn't prevent arrow base from coming off the rounded corner of a callout
-				// TOOD: consider a similar case of moving a CSI with callout arrows pointing to it: move the arrow tips with the callout?
 				if (item.type === 'point') {
 					const arrow = store.get.calloutArrow(item.parent.id);
 					if (arrow.points.indexOf(item.id) === 0) {
@@ -343,8 +346,10 @@ const app = new Vue({
 					}
 				}
 
-				const undoText = `Move ${_.prettyPrint(selItem.type)}`;
-				undoStack.commit('item.reposition', {item: item, dx, dy}, undoText);
+				if (dx !== 0 || dy !== 0) {
+					const undoText = `Move ${_.prettyPrint(selItem.type)}`;
+					undoStack.commit('item.reposition', {item: item, dx, dy}, undoText);
+				}
 			} else {
 				// Check if key is a menu shortcut
 				const menu = this.navBarContent;
