@@ -53,7 +53,7 @@ function exportInstructions(app, store, exportType, scale, drawPageCallback, don
 function generatePDF(app, store, config) {
 
 	// By default, draw PDF in points so it comes out the exactsame size as the current page, with images at 96 dpi
-	let units = 'pt', scale = 1;
+	let scale = 1;
 	const pageSize = {
 		width: store.state.template.page.width * 0.75,  // 0.75 = 72 / 96
 		height: store.state.template.page.height * 0.75
@@ -65,12 +65,11 @@ function generatePDF(app, store, config) {
 		scale = scale * config.pageSize.width / pageSize.width;  // Adjust scale to fit exactly inside new page size
 		pageSize.width = config.pageSize.width;
 		pageSize.height = config.pageSize.height;
-		units = (config.units === 'point') ? 'pt' : config.units;
 	}
 
 	const doc = new jsPDF(
 		pageSize.width > pageSize.height ? 'landscape' : 'portrait',
-		units,
+		'pt',
 		[pageSize.width, pageSize.height]
 	);
 

@@ -171,14 +171,18 @@ Vue.component('pdfExportDialog', {
 			units = units || this.units;
 			return unitCount / this.unitConversions[units];
 		},
+		unitToPoints(unitCount) {
+			const pixels = this.unitsToPixels(unitCount);
+			return this.pixelsToUnits(pixels, 'point');
+		},
 		ok() {
 			this.visible = false;
 			this.$emit('ok', {
 				dpi: this.dpi,
 				units: this.units,
 				pageSize: {
-					width: this.pageSize.width,
-					height: this.pageSize.height
+					width: this.unitToPoints(this.pageSize.width),
+					height: this.unitToPoints(this.pageSize.height)
 				}
 			});
 		},

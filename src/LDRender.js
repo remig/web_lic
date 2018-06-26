@@ -14,6 +14,7 @@ const api = {
 	// Optional config: {getData, resizeContainer, dx, dy, rotation: {x, y, z}}
 	renderPart(part, containerID, size, config) {
 
+		size = Math.max(Math.floor(size), 1);
 		config = config || {};
 		config.size = size;
 

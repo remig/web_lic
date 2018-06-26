@@ -392,7 +392,7 @@ const menu = [
 			text: 'navbar.export.hi_res_pdf',
 			enabled: enableIfModel,
 			cb() {
-				// TODO: store user's choices as UI defaults, and retrieve them and populate dialog with them
+				const originalProps = uiState.get('dialog.export.pdf');
 				const pageSize = store.state.template.page;
 				app.currentDialog = 'pdfExportDialog';
 
@@ -400,9 +400,13 @@ const menu = [
 					const dialog = app.$refs.currentDialog;
 					dialog.$off();
 					dialog.$on('ok', newValues => {
+						const dialogProps = uiState.get('dialog.export.pdf');
+						dialogProps.dpi = newValues.dpi;
+						dialogProps.units = newValues.units;
 						InstructionExporter.generatePDF(app, store, newValues);
 					});
-					dialog.dpi = 96;
+					dialog.dpi = originalProps.dpi;
+					dialog.units = originalProps.units;
 					dialog.show(pageSize);
 				});
 			}
@@ -419,7 +423,7 @@ const menu = [
 			enabled: enableIfModel,
 			cb() {
 
-				const originalScale = 1;  // TODO: store this in UI prefs
+				const originalScale = uiState.get('dialog.export.images.scale');
 				const pageSize = store.state.template.page;
 				function sizeText(scale) {
 					const size = {
@@ -437,12 +441,13 @@ const menu = [
 						dialog.bodyText = sizeText(newValues.value);
 					});
 					dialog.$on('ok', newValues => {
+						uiState.get('dialog.export.images').scale = newValues.value;
 						InstructionExporter.generatePNGZip(app, store, newValues.value);
 					});
 					dialog.visible = true;
 					dialog.title = tr('dialog.scale_images.title');
 					dialog.bodyText = sizeText(originalScale);
-					dialog.value = 1;
+					dialog.value = originalScale;
 				});
 			}
 		}
