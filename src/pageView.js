@@ -255,8 +255,7 @@ Vue.component('pageView', {
 				// TODO: transient bug: sometimes dragging a guide will put up the 'stop error cursor' and stop all mouse movements...
 				this.mouseDragItem.guide.moveBy(dx, dy);
 			} else {
-				// TODO: Some items can't be dragged about freely, like callout arrow base points
-				// TODO: Update parent bounding boxes for children like PLI, CSI, etc
+				// TODO: Update parent bounding boxes for children like CSI, submodel, etc
 				store.mutations.item.reposition({item: this.mouseDragItem.item, dx, dy});
 				this.mouseDragItem.moved = true;
 				this.drawCurrentPage();
@@ -348,9 +347,9 @@ Vue.component('pageView', {
 					const container = document.getElementById('rightSubPane');
 					const dy = (container.offsetHeight - pageCanvas.offsetHeight) / 2;
 					if (this.isFacingView) {
-						container.scrollTop = pageCanvas.parentElement.parentElement.offsetTop - dy;
+						container.scrollTop = pageCanvas.parentElement.parentElement.parentElement.offsetTop - dy;
 					} else {
-						container.scrollTop = pageCanvas.parentElement.offsetTop - dy;
+						container.scrollTop = pageCanvas.parentElement.parentElement.offsetTop - dy;
 					}
 				}
 			}
@@ -460,7 +459,9 @@ Vue.component('pageView', {
 
 function getAdjacentPages(page) {
 	page = store.get.lookupToItem(page);
-	if (page.type === 'titlePage') {
+	if (!page) {
+		return [];
+	} else if (page.type === 'titlePage') {
 		return [null, page];
 	} else if (_.isEven(page.number)) {
 		return [page, store.get.nextPage(page)];
