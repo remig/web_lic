@@ -25,10 +25,11 @@ const api = {
 		for (let i = 0; i < lineList.length; i++) {
 			const line = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
 			if (line && line[1] === '!COLOUR') {
-				colors[line[4]] = {
+				colors[line[4]] = {  // TODO: handle color modifiers like 'CHROME', 'METAL', 'LUMINANCE', etc
 					name: line[2],
 					color: parseInt(line[6].slice(1), 16),
-					edge: parseInt(line[8].slice(1), 16)
+					edge: parseInt(line[8].slice(1), 16),
+					alpha: line[10] ? parseInt(line[10], 10) : 0
 				};
 			}
 		}

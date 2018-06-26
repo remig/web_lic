@@ -377,6 +377,15 @@ const faceMaterial = new THREE.MeshBasicMaterial({
 	polygonOffsetFactor: 1,
 	polygonOffsetUnits: 1
 });
+const alphaFaceMaterial = new THREE.MeshBasicMaterial({
+	vertexColors: THREE.FaceColors,
+	side: THREE.DoubleSide,
+	opacity: 0.5,
+	transparent: true,
+	polygonOffset: true,
+	polygonOffsetFactor: 1,
+	polygonOffsetUnits: 1
+});
 const selectedFaceMaterial = new THREE.MeshBasicMaterial({
 	vertexColors: THREE.FaceColors,
 	opacity: 0.5,
@@ -540,7 +549,17 @@ function addModelToScene(scene, model, partIDList, config) {
 			matrix.premultiply(partRotation);
 		}
 
-		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;
+		// TODO: drawSelected doesn't draw the part as partially transparent anymore...
+		let faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;
+		const alpha = LDParse.getColor(color, 'alpha');
+		if (alpha) {
+			if (alpha === 128) {  // Optimize most common case; avoid cloning material
+				faceMat = alphaFaceMaterial;
+			} else {
+				faceMat = alphaFaceMaterial.clone();
+				faceMat.opacity = alpha / 256;
+			}
+		}
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMat);
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
