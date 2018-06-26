@@ -1260,6 +1260,16 @@ const store = {
 				divider.p1.y += opts.dy;
 				divider.p2.y += opts.dy;
 			},
+			setLength(opts) { // opts: {divider, newLength}
+				const divider = store.get.divider(opts.divider);
+				const bbox = _.geom.bbox([divider.p1, divider.p2]);
+				const isHorizontal = (bbox.height === 0);
+				if (isHorizontal) {
+					divider.p2.x = divider.p1.x + opts.newLength;
+				} else {
+					divider.p2.y = divider.p1.y + opts.newLength;
+				}
+			},
 			delete(opts) {  // opts: {divider}
 				store.mutations.item.delete({item: opts.divider});
 			}

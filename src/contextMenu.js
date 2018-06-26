@@ -861,7 +861,46 @@ const contextMenu = {
 			})
 		}
 	],
-	divider: [],
+	divider: [
+		{
+			text: 'Resize',
+			cb(selectedItem) {
+				const divider = store.get.divider(selectedItem);
+				const bbox = _.geom.bbox([divider.p1, divider.p2]);
+				const originalSize = (bbox.height === 0) ? bbox.width : bbox.height;  // TODO: store divider orientation in divider itself
+				app.currentDialog = 'numberChooserDialog';
+
+				Vue.nextTick(() => {
+					const dialog = app.$refs.currentDialog;
+					dialog.$off();
+					dialog.$on('update', newValues => {
+						store.mutations.divider.setLength({divider, newLength: newValues.value});
+						app.drawCurrentPage();
+					});
+					dialog.$on('ok', () => {
+						undoStack.commit('', null, 'Set Divider Length');
+					});
+					dialog.$on('cancel', () => {
+						store.mutations.divider.setLength({divider, newLength: originalSize});
+						app.drawCurrentPage();
+					});
+					dialog.visible = true;
+					dialog.title = 'Resize Page Divider';
+					dialog.bodyText = '';
+					dialog.min = 1;
+					dialog.max = 10000;
+					dialog.step = 1;
+					dialog.value = originalSize;
+				});
+			}
+		},
+		{
+			text: 'Remove',
+			cb(selectedItem) {
+				undoStack.commit('divider.delete', {divider: selectedItem}, 'Remove Divider');
+			}
+		}
+	],
 	submodel: [
 		{
 			text: 'Convert to Callout',
