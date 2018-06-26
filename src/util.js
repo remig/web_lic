@@ -116,7 +116,7 @@ const api = {
 			res = {width: Math.ceil(res.width), height: Math.ceil(res.height)};
 			labelSizeCache[font] = labelSizeCache[font] || {};
 			labelSizeCache[font][text] = res;
-			return res;
+			return api.clone(res);  // Always return a clone so we don't accidentally alter the cached values
 		};
 	})(),
 	fontToFontParts: (() => {
