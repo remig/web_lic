@@ -364,6 +364,8 @@ const app = new Vue({
 			this.clearSelected();
 			this.$refs.pageView.facingPage = facingPage;
 			this.$refs.pageView.scroll = scroll;
+			uiState.set('pageView', {facingPage, scroll});
+
 			if (scroll) {
 				store.mutations.page.setDirty({includeTitlePage: true});
 				Vue.nextTick(() => {
@@ -444,6 +446,8 @@ const app = new Vue({
 
 		// Load UI state from storage just once here & keep a copy for fast lookup everywhere
 		uiState.setUIState(Storage.get.ui());
+
+		this.setPageView(uiState.get('pageView'));
 
 		// Enable splitter between tree and page view
 		const split = Storage.get.ui().splitter;

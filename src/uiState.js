@@ -17,8 +17,24 @@ const defaultState = {
 				submodelBreakdown: false,
 				pli: true
 			}
+		},
+		export: {
+			images: {
+				scale: 1
+			},
+			pdf: {
+				// Don't cache physical page size because that should always initially match current pixel page size
+				dpi: 96,
+				units: 'point'  // One of 'point', 'mm', 'cm', 'in'
+			}
 		}
 	},
+	template: null,  // NYI
+	pageView: {
+		facingPage: false,
+		scroll: false
+	},
+	zoom: 1,  // NYI
 	grid: {
 		enabled: false,
 		spacing: 100,
@@ -34,6 +50,10 @@ const defaultState = {
 	},
 	splitter: 20,
 	guides: [],
+	guideStyle: {  // NYI
+		width: 1,
+		color: 'black'
+	},
 	pliTransforms: {}  // TODO: if scale goes back to 1, don't store it delete it.  Likewise with rotations x|y|z = 0.
 };
 
