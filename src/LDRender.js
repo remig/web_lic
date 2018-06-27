@@ -57,12 +57,14 @@ const api = {
 		}
 
 		initialize();
-		const scene = initScene(size);
+		let scene = initScene(size);
 
 		// Render with no parts selected
 		config.includeSelection = false;
 		addModelToScene(scene, part, config.partList, config);
 		const noSelectedPartsBounds = render(scene, size, containerID, config);
+
+		scene = initScene(size);
 
 		// Render again with parts selected
 		config.includeSelection = true;
