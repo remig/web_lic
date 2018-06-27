@@ -77,6 +77,8 @@ const api = {
 		});
 		setIndex(state, state.index + 1);
 
+		performClearCacheTargets(state.index - 1, state.index);
+
 		setStateTimer();
 	},
 
@@ -142,7 +144,7 @@ function performUndoRedoAction(undoOrRedo, newIndex) {
 		});
 	}
 
-	clearCacheTargets(state.index, newIndex);
+	performClearCacheTargets(state.index, newIndex);
 	state.index = newIndex;
 
 	if (state.onChangeCB) {
@@ -150,7 +152,7 @@ function performUndoRedoAction(undoOrRedo, newIndex) {
 	}
 }
 
-function clearCacheTargets(prevIndex, newIndex) {
+function performClearCacheTargets(prevIndex, newIndex) {
 	const clearCacheTargets = [], stack = state.stack;
 	if (stack[prevIndex] && stack[prevIndex].clearCacheTargets) {
 		clearCacheTargets.push(...stack[prevIndex].clearCacheTargets);
