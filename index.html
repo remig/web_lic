@@ -74,7 +74,7 @@
 				></page-view>
 				<template-panel
 					v-if="currentPageLookup && currentPageLookup.type === 'templatePage'"
-					id="templatePanel"
+					id="templatePanelContainer"
 					:app="this"
 					:selected-item="selectedItemLookup"
 				></template-panel>
@@ -1158,6 +1158,19 @@
 								v-on:input="updateValues"
 								type="number"
 								min="-360" max="360"
+								class="form-control"
+							/>
+						</div>
+					</div>
+					<h5>Scale</h5>
+					<div class="form-group">
+						<div class="col-sm-6">
+							<input
+								id="scaleInput"
+								v-model.number="scale"
+								v-on:input="updateValues"
+								type="number"
+								min="0" max="10" step="0.1"
 								class="form-control"
 							/>
 						</div>

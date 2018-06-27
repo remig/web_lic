@@ -4,7 +4,7 @@
 import _ from './util';
 import Draw from './draw';
 
-function exportInstructions(app, store, exportType, scale, drawPageCallback, doneCallback) {
+function exportInstructions(app, store, exportType, hiResScale, drawPageCallback, doneCallback) {
 
 	app.busyText = `Generating ${exportType}`;
 
@@ -17,7 +17,7 @@ function exportInstructions(app, store, exportType, scale, drawPageCallback, don
 			if (page.needsLayout) {
 				store.mutations.page.layout({page});
 			}
-			Draw.page(page, canvas, {scale, noCache: true});
+			Draw.page(page, canvas, {hiResScale, noCache: true});
 
 			drawPageCallback(page, canvas);
 
@@ -35,8 +35,8 @@ function exportInstructions(app, store, exportType, scale, drawPageCallback, don
 	window.setTimeout(() => {
 		const start = Date.now();
 		const canvas = document.getElementById('exportImagesCanvas');
-		canvas.width = store.state.template.page.width * scale;
-		canvas.height = store.state.template.page.height * scale;
+		canvas.width = store.state.template.page.width * hiResScale;
+		canvas.height = store.state.template.page.height * hiResScale;
 
 		const pages = [store.get.titlePage(), ...store.state.pages];
 		app.updateProgress({stepCount: pages.length, text: 'Page 0'});
@@ -53,7 +53,7 @@ function exportInstructions(app, store, exportType, scale, drawPageCallback, don
 function generatePDF(app, store, config) {
 
 	// By default, draw PDF in points so it comes out the exactsame size as the current page, with images at 96 dpi
-	let scale = 1;
+	let hiResScale = 1;
 	const pageSize = {
 		width: store.state.template.page.width * 0.75,  // 0.75 = 72 / 96
 		height: store.state.template.page.height * 0.75
@@ -61,8 +61,8 @@ function generatePDF(app, store, config) {
 
 	if (config) {
 		// If we have a custom page size, scale images to fit into custom page at custom dpi
-		scale = config.dpi / 96;  // Adjust scale to match new DPI
-		scale = scale * config.pageSize.width / pageSize.width;  // Adjust scale to fit exactly inside new page size
+		hiResScale = config.dpi / 96;  // Adjust scale to match new DPI
+		hiResScale = hiResScale * config.pageSize.width / pageSize.width;  // Adjust scale to fit exactly inside new page size
 		pageSize.width = config.pageSize.width;
 		pageSize.height = config.pageSize.height;
 	}
@@ -86,10 +86,10 @@ function generatePDF(app, store, config) {
 		finishedCallback();
 	}
 
-	exportInstructions(app, store, 'PDF', scale, drawPage, done);
+	exportInstructions(app, store, 'PDF', hiResScale, drawPage, done);
 }
 
-function generatePNGZip(app, store, scale = 1) {
+function generatePNGZip(app, store, hiResScale = 1) {
 
 	const fn = store.get.modelFilenameBase();
 	const zip = new JSZip();
@@ -108,7 +108,7 @@ function generatePNGZip(app, store, scale = 1) {
 			.then(finishedCallback);
 	}
 
-	exportInstructions(app, store, 'PNG Zip', scale, drawPage, done);
+	exportInstructions(app, store, 'PNG Zip', hiResScale, drawPage, done);
 }
 
 export default {generatePDF, generatePNGZip};

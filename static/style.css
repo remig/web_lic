@@ -423,7 +423,7 @@ ul {
 }
 
 /* Template Page Panel */
-#templatePanel {
+#templatePanelContainer {
 	min-width: 265px;
 	width: 265px;
 	height: 100%;
@@ -433,7 +433,7 @@ ul {
 	overflow-y: auto;
 }
 
-#templatePanel h4 {
+#templatePanelContainer h4 {
 	text-align: center;
 	font-weight: 600;
 	border-bottom: 1px solid #8d8d8d;

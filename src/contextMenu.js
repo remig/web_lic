@@ -441,7 +441,11 @@ const contextMenu = {
 					cb(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
 						const originalRotation = _.clone(csi.rotation);
-						csi.rotation = csi.rotation || {x: 0, y: 0, z: 0};
+						let initialRotation = originalRotation;
+						if (initialRotation == null) {
+							initialRotation = store.get.templateForItem(selectedItem).rotation;
+						}
+						csi.rotation = initialRotation;
 
 						app.currentDialog = 'rotateCSIDialog';
 						app.clearSelected();
@@ -468,7 +472,7 @@ const contextMenu = {
 								app.redrawUI(true);
 							});
 							dialog.title = 'Rotate CSI';
-							dialog.rotation = csi.rotation;
+							dialog.rotation = _.clone(initialRotation);
 							dialog.show({x: 400, y: 150});
 						});
 					}
@@ -559,7 +563,15 @@ const contextMenu = {
 			text: 'Scale CSI',
 			cb(selectedItem) {
 				const csi = store.get.csi(selectedItem.id);
-				const originalScale = _.clone(csi.scale);
+				const originalScale = csi.scale;
+				let initialScale = originalScale;
+				if (initialScale == null) {
+					if (csi.autoScale != null) {
+						initialScale = csi.autoScale;
+					} else {
+						initialScale = store.get.templateForItem(selectedItem).scale;
+					}
+				}
 				app.currentDialog = 'numberChooserDialog';
 				Vue.nextTick(() => {
 					const dialog = app.$refs.currentDialog;
@@ -585,11 +597,27 @@ const contextMenu = {
 					dialog.visible = true;
 					dialog.title = 'Scale CSI';
 					dialog.min = 0;
-					dialog.max = 5;
-					dialog.step = 0.5;
+					dialog.max = 10;
+					dialog.step = 0.1;
 					dialog.bodyText = '';
-					dialog.value = csi.scale;
+					dialog.value = initialScale;
 				});
+			}
+		},
+		{
+			text: 'Remove Scale',
+			shown(selectedItem) {
+				const csi = store.get.csi(selectedItem.id);
+				return (csi.scale != null);
+			},
+			cb(selectedItem) {
+				const csi = store.get.csi(selectedItem.id);
+				undoStack.commit(
+					'csi.scale',
+					{csi, scale: null, doLayout: true},
+					'Clear Step Image Scale',
+					[csi]
+				);
 			}
 		},
 		{text: 'separator'},
@@ -709,11 +737,35 @@ const contextMenu = {
 					dialog.visible = true;
 					dialog.title = 'Scale Part List Image';
 					dialog.min = 0;
-					dialog.max = 5;
-					dialog.step = null;
+					dialog.max = 10;
+					dialog.step = 0.1;
 					dialog.bodyText = '';
 					dialog.value = (originalTransform || {}).scale || 1;
 				});
+			}
+		},
+		{
+			text: 'Remove Scale',
+			shown(selectedItem) {
+				const pliItem = store.get.pliItem(selectedItem.id);
+				return uiState.getPLITransform(pliItem.filename).scale != null;
+			},
+			cb(selectedItem) {
+				const pliItem = store.get.pliItem(selectedItem.id);
+				const page = store.get.pageForItem(pliItem);
+				const filename = pliItem.filename;
+				const pliTransforms = uiState.get('pliTransforms');
+				const originalScale = pliTransforms[filename].scale;
+				const path = `/${filename}/scale`, root = pliTransforms;
+				const change = {  // TODO: undo always performs mutations before actions.  But we need the opposite.  Change undo to take a single mixed array of mutations + actions, and perform them in order.
+					mutations: ['page.layout'],
+					action: {
+						redo: [{root, op: 'remove', path}],
+						undo: [{root, op: 'add', path, value: originalScale}]
+					}
+				};
+				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
+				undoStack.commit(change, {page}, 'Remove Part List Image Scale', dirtyItems);
 			}
 		}
 	],

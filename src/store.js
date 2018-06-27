@@ -101,8 +101,27 @@ const store = {
 			return (rot && rot.x === 0 && rot.y === 0 && rot.z === 0) ? null : rot;
 		}
 
+		function getScale(item) {
+			let scale;
+			if (item.scale != null) {
+				scale = item.scale;
+			} else if (item.autoScale != null) {
+				scale = item.autoScale;
+			} else if (item.filename) {
+				const transform = uiState.getPLITransform(item.filename);
+				if (transform.scale != null) {
+					scale = transform.scale;
+				}
+			}
+			if (scale == null) {
+				scale = store.get.templateForItem(item).scale;
+			}
+			return (scale === 1) ? null : scale;
+		}
+
 		return {
-			csi(localModel, step, csi, selectedPartIDs, scale = 1, bypassCache) {
+			csi(localModel, step, csi, selectedPartIDs, hiResScale = 1, bypassCache) {
+				const scale = (getScale(csi) || 1) * hiResScale;
 				const domID = `CSI_${step.csiID}`;
 				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : domID);
 				if (csi.isDirty || container == null || bypassCache) {
@@ -129,7 +148,7 @@ const store = {
 				}
 				return {width: container.width, height: container.height, dx: 0, dy: 0, container};
 			},
-			csiWithSelection(localModel, step, csi, selectedPartIDs, scale = 1) {
+			csiWithSelection(localModel, step, csi, selectedPartIDs) {
 				const config = {
 					partList: store.get.partList(step),
 					selectedPartIDs,
@@ -138,11 +157,13 @@ const store = {
 					rotation: getRotation(csi),
 					displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
 				};
+				const scale = getScale(csi) || 1;
 				const container = document.getElementById('generateImagesCanvas');
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
 				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
 			},
-			pli(part, item, scale = 1, bypassCache) {
+			pli(part, item, hiResScale = 1, bypassCache) {
+				const scale = (getScale(item) || 1) * hiResScale;
 				const domID = `PLI_${part.filename}_${part.colorCode}`;
 				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : domID);
 				if ((item && item.isDirty) || container == null || bypassCache) {
@@ -795,7 +816,7 @@ const store = {
 			add(opts) { // opts: {parent}
 				return store.mutations.item.add({item: {
 					type: 'csi',
-					rotation: null, scale: 1,
+					rotation: null, scale: null,
 					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
 			},
@@ -812,7 +833,7 @@ const store = {
 			},
 			scale(opts) { // opts: {csi, scale, doLayout = false}
 				const csi = store.get.lookupToItem(opts.csi);
-				csi.scale = _.bound(opts.scale, 0.001, 5);
+				csi.scale = (opts.scale == null) ? null : _.bound(opts.scale, 0.001, 5);
 				csi.isDirty = true;
 				if (opts.doLayout) {
 					store.mutations.page.layout({page: store.get.pageForItem(csi)});

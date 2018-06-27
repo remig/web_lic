@@ -44,6 +44,7 @@ const template = {
 	},
 	submodelImage: {
 		innerMargin: 0.017,
+		maxHeight: 0.3,  // as a percentage of page height
 		csi: {
 			scale: 1,
 			rotation: {x: 0, y: 0, z: 0}

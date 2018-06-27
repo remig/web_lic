@@ -3,7 +3,6 @@
 import _ from './util';
 import LDParse from './LDParse';
 import store from './store';
-import uiState from './uiState';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
@@ -221,16 +220,29 @@ const api = {
 
 		// TODO: if submodel image is too big, shrink it
 		// TODO: consider multiple submodels in one step; can only shrink so much, might need to lay out horizontally
+		const template = store.state.template.submodelImage;
+
+		const margin = getMargin(store.state.template.submodelImage.innerMargin);
 		const csi = store.get.csi(submodelImage.csiID);
 		const part = LDParse.model.get.part(submodelImage.modelFilename);
-		const csiSize = store.render.pli(part, csi);
-		const margin = getMargin(store.state.template.submodelImage.innerMargin);
+
+		let csiSize;
+		if (csi.scale != null) {  // If user chose a manual scale factor, respect it
+			csiSize = store.render.pli(part, csi, 1, true);
+		} else {
+			csi.autoScale = 1;
+			csiSize = store.render.pli(part, csi, 1, true);
+			if (csiSize.height > box.height * template.maxHeight) {
+				csi.autoScale = (box.height * template.maxHeight) / csiSize.height;
+				csiSize = store.render.pli(part, csi, 1, true);
+			}
+		}
 
 		csi.x = csi.y = margin;
 		csi.width = csiSize.width;
 		csi.height = csiSize.height;
 
-		const borderWidth = store.state.template.submodelImage.border.width;
+		const borderWidth = template.border.width;
 		submodelImage.innerContentOffset = {x: borderWidth, y: borderWidth};
 
 		submodelImage.x = box.x;
@@ -240,7 +252,7 @@ const api = {
 
 		if (submodelImage.quantityLabelID != null) {
 			const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
-			const font = store.state.template.submodelImage.quantityLabel.font;
+			const font = template.quantityLabel.font;
 			const lblSize = _.measureLabel(font, 'x' + submodelImage.quantity);
 			submodelImage.width += lblSize.width + margin;
 			lbl.x = submodelImage.width - borderWidth - borderWidth - margin;
@@ -253,7 +265,7 @@ const api = {
 		// Draw CSI centered in box
 		const step = store.get.parent(csi);
 		const localModel = LDParse.model.get.part(step.model.filename);
-		const csiSize = store.render.csi(localModel, step, csi, null, csi.scale) || {width: 0, height: 0};
+		const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
 		csi.x = box.x + ((box.width - csiSize.width) / 2);
 		csi.y = box.y + ((box.height - csiSize.height) / 2);
 		csi.width = csiSize.width;
@@ -288,8 +300,7 @@ const api = {
 		for (let i = 0; i < pliItems.length; i++) {
 
 			const pliItem = store.get.pliItem(pliItems[i]);
-			const pliScale = uiState.getPLITransform(pliItem.filename).scale || 1;
-			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem, pliScale);
+			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem);
 			pliItem.x = left;
 			pliItem.y = margin;
 			pliItem.width = pliSize.width;
@@ -556,7 +567,7 @@ function measureStep(step) {
 
 	const csi = store.get.csi(step.csiID);
 	const localModel = LDParse.model.get.part(step.model.filename);
-	const csiSize = store.render.csi(localModel, step, csi, null, csi.scale);
+	const csiSize = store.render.csi(localModel, step, csi);
 	if (csiSize == null) {
 		const emptyCSISize = emptyCalloutSize - margin;
 		return {

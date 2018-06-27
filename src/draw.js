@@ -7,17 +7,17 @@ import uiState from './uiState';
 
 const api = {
 
-	page(page, canvas, config) {  // config: {scale, selectedPart, noCache}
+	page(page, canvas, config) {  // config: {hiResScale, selectedPart, noCache}
 
-		const scale = config.scale || 1;
+		const hiResScale = config.hiResScale = config.hiResScale || 1;
 		if (page.needsLayout) {
 			store.mutations.page.layout({page});
 		}
 
 		const ctx = canvas.getContext('2d');
 		ctx.save();
-		if (scale > 1) {
-			ctx.scale(scale, scale);
+		if (hiResScale > 1) {
+			ctx.scale(hiResScale, hiResScale);
 		}
 
 		const template = store.state.template.page;
@@ -138,7 +138,7 @@ const api = {
 		ctx.restore();
 	},
 
-	submodelImage(submodelImage, ctx, {scale, noCache}) {
+	submodelImage(submodelImage, ctx, {hiResScale, noCache}) {
 		submodelImage = store.get.submodelImage(submodelImage);
 		const template = store.state.template.submodelImage;
 		const csi = store.get.csi(submodelImage.csiID);
@@ -157,11 +157,11 @@ const api = {
 		);
 
 		ctx.save();
-		ctx.scale(1 / scale, 1 / scale);
+		ctx.scale(1 / hiResScale, 1 / hiResScale);
 		const part = LDParse.model.get.part(submodelImage.modelFilename);
-		const siCanvas = store.render.pli(part, csi, scale, noCache).container;
-		const x = Math.floor((submodelImage.x + csi.x) * scale);
-		const y = Math.floor((submodelImage.y + csi.y) * scale);
+		const siCanvas = store.render.pli(part, csi, hiResScale, noCache).container;
+		const x = Math.floor((submodelImage.x + csi.x) * hiResScale);
+		const y = Math.floor((submodelImage.y + csi.y) * hiResScale);
 		ctx.drawImage(siCanvas, x, y);
 		ctx.restore();
 
@@ -178,26 +178,25 @@ const api = {
 		ctx.restore();
 	},
 
-	csi(csi, localModel, ctx, {scale, selectedPart, noCache}) {
+	csi(csi, localModel, ctx, {hiResScale, selectedPart, noCache}) {
 		csi = store.get.csi(csi);
 		const step = store.get.parent(csi);
 
 		ctx.save();
-		ctx.scale(1 / scale, 1 / scale);
+		ctx.scale(1 / hiResScale, 1 / hiResScale);
 		const haveSelectedParts = selectedPart && selectedPart.stepID === step.id;
 		const selectedPartIDs = haveSelectedParts ? [selectedPart.id] : null;
 		const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
-		const csiScale = csi.scale * scale;
-		const res = store.render[renderer](localModel, step, csi, selectedPartIDs, csiScale, noCache);
+		const res = store.render[renderer](localModel, step, csi, selectedPartIDs, hiResScale, noCache);
 		if (res) {
-			const x = Math.floor((csi.x - res.dx) * scale);
-			const y = Math.floor((csi.y - res.dy) * scale);
+			const x = Math.floor((csi.x - res.dx) * hiResScale);
+			const y = Math.floor((csi.y - res.dy) * hiResScale);
 			ctx.drawImage(res.container, x, y);  // TODO: profile performance if every x, y, w, h argument is passed in
 		}
 		ctx.restore();
 	},
 
-	pli(pli, localModel, ctx, {scale, noCache}) {
+	pli(pli, localModel, ctx, {hiResScale, noCache}) {
 		const template = store.state.template;
 		pli = store.get.pli(pli);
 
@@ -222,15 +221,14 @@ const api = {
 		ctx.translate(Math.floor(pli.innerContentOffset.x), Math.floor(pli.innerContentOffset.y));
 
 		ctx.save();
-		ctx.scale(1 / scale, 1 / scale);
+		ctx.scale(1 / hiResScale, 1 / hiResScale);
 		ctx.translate(Math.floor(pli.x), Math.floor(pli.y));
 		pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const part = localModel.parts[pliItem.partNumbers[0]];
-			const pliScale = (uiState.getPLITransform(pliItem.filename).scale || 1) * scale;
-			const pliCanvas = store.render.pli(part, pliItem, pliScale, noCache).container;
-			const x = Math.floor(pliItem.x * scale);
-			const y = Math.floor(pliItem.y * scale);
+			const pliCanvas = store.render.pli(part, pliItem, hiResScale, noCache).container;
+			const x = Math.floor(pliItem.x * hiResScale);
+			const y = Math.floor(pliItem.y * hiResScale);
 			ctx.drawImage(pliCanvas, x, y);
 		});
 		ctx.restore();

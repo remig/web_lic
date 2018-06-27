@@ -401,7 +401,7 @@ Vue.component('pageView', {
 				this.drawPage({id: 0, type: 'titlePage'});
 			}
 		},
-		drawPage(page, canvas, scale = 1) {
+		drawPage(page, canvas) {
 			page = store.get.lookupToItem(page);
 			if (page == null) {
 				return;  // This can happen if, say, a page got deleted without updating the current page (like in undo / redo)
@@ -413,7 +413,7 @@ Vue.component('pageView', {
 				return;  // Can't find a canvas for this page - ignore draw call.  Happens when we're transitioning between view modes
 			}
 			const selectedPart = (this.selectedItem && this.selectedItem.type === 'part') ? this.selectedItem : null;
-			Draw.page(page, canvas, {scale, selectedPart});
+			Draw.page(page, canvas, {selectedPart});
 			delete page.needsDrawing;
 			if (this.currentPageLookup && _.itemEq(page, this.currentPageLookup)) {
 				const itemPage = store.get.pageForItem(this.selectedItem);

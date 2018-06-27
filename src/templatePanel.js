@@ -220,15 +220,17 @@ function rotateTemplatePanel() {
 		data() {
 			return {
 				templateItem: null,
-				x: 0, y: 0, z: 0
+				x: 0, y: 0, z: 0,
+				scale: 1
 			};
 		},
 		methods: {
 			init(item) {
-				const rotation = store.get.templateForItem(item).rotation;
-				this.x = rotation.x;
-				this.y = rotation.y;
-				this.z = rotation.z;
+				const transform = store.get.templateForItem(item);
+				this.x = transform.rotation.x;
+				this.y = transform.rotation.y;
+				this.z = transform.rotation.z;
+				this.scale = transform.scale;
 				this.templateItem = _.clone(item);
 			},
 			apply() {
@@ -239,11 +241,14 @@ function rotateTemplatePanel() {
 				undoStack.commit('', null, text, [this.templateItem.type]);
 			},
 			updateValues() {
-				const template = store.get.templateForItem(this.templateItem).rotation;
-				if (template.x !== this.x || template.y !== this.y || template.z !== this.z) {
-					template.x = this.x;
-					template.y = this.y;
-					template.z = this.z;
+				const transform = store.get.templateForItem(this.templateItem);
+				const rotation = transform.rotation;
+				if (rotation.x !== this.x || rotation.y !== this.y || rotation.z !== this.z
+						|| transform.scale !== this.scale) {
+					rotation.x = this.x;
+					rotation.y = this.y;
+					rotation.z = this.z;
+					transform.scale = this.scale;
 					if (this.templateItem.type === 'csi') {
 						store.get.csi(this.templateItem).isDirty = true;
 					} else if (this.templateItem.type === 'pliItem') {
