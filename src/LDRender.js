@@ -11,7 +11,7 @@ const api = {
 
 	// Render the chosen abstract part to the chosen container.
 	// Return a {width, height} object representing the size of the rendering.
-	// Optional config: {getData, resizeContainer, dx, dy, rotation: {x, y, z}}
+	// Optional config: {resizeContainer, dx, dy, rotation: {x, y, z}}
 	renderPart(part, containerID, size, config) {
 
 		size = Math.max(Math.floor(size), 1);
@@ -76,18 +76,6 @@ const api = {
 		};
 	},
 
-	// Like renderModel / renderPart, except it doesn't copy the rendered image to a target
-	// node, it only returns the raw image data as a base64 encoded string
-	renderModelData(part, size, config) {
-		config = config || {};
-		config.getData = true;
-		return api.renderModel(part, null, size, config);
-	},
-	renderPartData(part, size, config) {
-		config = config || {};
-		config.getData = true;
-		return api.renderPart(part, null, size, config);
-	},
 	setPartDictionary(dict) {
 		api.partDictionary = dict;    // Part dictionary {partName : abstractPart} as created by LDParse
 	},
@@ -200,9 +188,8 @@ function cleanup(scene) {
 }
 
 // Render the specified scene in a size x size viewport, then crop it of all whitespace.
-// If containerID refers to an SVG image or HTML5 canvas, copy rendered image there.
 // Return a {width, height} object specifying the final tightly cropped rendered image size.
-function render(scene, size, containerID, config) {
+function render(scene, size, container, config) {
 
 	config = config || {};
 
@@ -222,33 +209,19 @@ function render(scene, size, containerID, config) {
 		return null;
 	}
 
-	const container = (typeof containerID === 'string') ? document.getElementById(containerID) : containerID;
-	if (container instanceof SVGImageElement || (containerID == null && config.getData)) {
-		// Resize image to fit bounds then redraw image inside those bounds
-		canvas.width = bounds.w + 1;
-		canvas.height = bounds.h + 1;
-		ctx.drawImage(renderer.domElement, -bounds.x, -bounds.y);
-		const data2D = canvas.toDataURL('image/png');
-		if (containerID == null && config.getData) {
-			return {width: canvas.width, height: canvas.height, image: data2D};
-		}
-		container.setAttributeNS('http://www.w3.org/1999/xlink', 'href', data2D);
-		container.setAttribute('width', canvas.width);
-		container.setAttribute('height', canvas.height);
-	} else if (container instanceof HTMLCanvasElement) {
-		if (config.resizeContainer) {
-			container.width = bounds.w + 1;
-			container.height = bounds.h + 1;
-		}
-		const ctx2 = container.getContext('2d');
-		ctx2.drawImage(
-			renderer.domElement,
-			bounds.x, bounds.y,
-			bounds.w + 1, bounds.h + 1,
-			config.dx || 0, config.dy || 0,
-			bounds.w + 1, bounds.h + 1
-		);
+	container = (typeof container === 'string') ? document.getElementById(container) : container;
+	if (config.resizeContainer) {
+		container.width = bounds.w + 1;
+		container.height = bounds.h + 1;
 	}
+	const ctx2 = container.getContext('2d');
+	ctx2.drawImage(
+		renderer.domElement,
+		bounds.x, bounds.y,
+		bounds.w + 1, bounds.h + 1,
+		config.dx || 0, config.dy || 0,
+		bounds.w + 1, bounds.h + 1
+	);
 	return {x: bounds.x, y: bounds.y, width: bounds.w, height: bounds.h};
 }
 
