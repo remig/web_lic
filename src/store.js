@@ -1129,7 +1129,7 @@ const store = {
 					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
 				}, parent: opts.parent});
 
-				store.mutations.step.add({dest: callout, stepNumber: null});
+				store.mutations.callout.addStep({callout, doLayout: false});
 
 				store.mutations.calloutArrow.add({parent: callout});
 				return callout;
@@ -1147,7 +1147,7 @@ const store = {
 				if (callout.steps.length > 1) {
 					newStep.model = _.clone(store.get.step(callout.steps[0])).model;
 				} else {
-					newStep.model = _.clone(store.get.step(callout.parent));
+					newStep.model = _.clone(store.get.step(callout.parent)).model;
 				}
 				if (stepNumber === 2) {  // Special case: callouts with one step have no step numbers; turn on step numbers when adding a 2nd step
 					const firstStep = store.get.step(callout.steps[0]);

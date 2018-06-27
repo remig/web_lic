@@ -330,30 +330,26 @@ const api = {
 		const calloutBox = {x: 0, y: 0, width: 0, height: margin};
 
 		callout.borderOffset.x = callout.borderOffset.y = 0;
-		if (_.isEmpty(callout.steps)) {
-			calloutBox.width = calloutBox.height = emptyCalloutSize;
-		} else {
-			const stepSizes = callout.steps.map(stepID => {
-				const step = store.get.step(stepID);
-				return {step, ...measureStep(step)};
-			});
-			const widestStep = Math.max(...stepSizes.map(el => el.width));
-			const stepBox = {x: margin, y: margin, width: widestStep, height: null};
-			calloutBox.width = margin + widestStep + margin;
+		const stepSizes = callout.steps.map(stepID => {
+			const step = store.get.step(stepID);
+			return {step, ...measureStep(step)};
+		});
+		const widestStep = Math.max(...stepSizes.map(el => el.width));
+		const stepBox = {x: margin, y: margin, width: widestStep, height: null};
+		calloutBox.width = margin + widestStep + margin;
 
-			stepSizes.forEach((entry, idx) => {
-				if (idx > 0 && (borderWidth + stepBox.y + entry.height + margin + borderWidth > box.height)) {
-					// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
-					stepBox.y = margin;
-					stepBox.x += widestStep + margin;
-					calloutBox.width += widestStep + margin;
-				}
-				stepBox.height = entry.height;
-				api.step(entry.step, stepBox, 0);
-				stepBox.y += stepBox.height + margin;
-				calloutBox.height = Math.max(calloutBox.height, stepBox.y);
-			});
-		}
+		stepSizes.forEach((entry, idx) => {
+			if (idx > 0 && (borderWidth + stepBox.y + entry.height + margin + borderWidth > box.height)) {
+				// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
+				stepBox.y = margin;
+				stepBox.x += widestStep + margin;
+				calloutBox.width += widestStep + margin;
+			}
+			stepBox.height = entry.height;
+			api.step(entry.step, stepBox, 0);
+			stepBox.y += stepBox.height + margin;
+			calloutBox.height = Math.max(calloutBox.height, stepBox.y);
+		});
 
 		callout.innerContentOffset = {x: borderWidth, y: borderWidth};
 		callout.width = borderWidth + calloutBox.width + borderWidth;
@@ -377,7 +373,7 @@ const api = {
 
 		// Coordinates for first point (base) are relative to the *callout*
 		// Position on right edge of callout centered vertically on last step
-		const lastStep = store.get.step(_.last(callout.steps));
+		const lastStep = callout.steps.length > 1 ? store.get.step(_.last(callout.steps)) : null;
 		const p1 = store.get.point(arrow.points[0]);
 		p1.x = callout.borderOffset.x + callout.width;
 		p1.y = lastStep ? lastStep.y + (lastStep.height / 2) : callout.height / 2;
@@ -567,7 +563,7 @@ function measureStep(step) {
 
 	const csi = store.get.csi(step.csiID);
 	const localModel = LDParse.model.get.part(step.model.filename);
-	const csiSize = store.render.csi(localModel, step, csi);
+	const csiSize = store.render.csi(localModel, step, csi, 1, true);
 	if (csiSize == null) {
 		const emptyCSISize = emptyCalloutSize - margin;
 		return {
