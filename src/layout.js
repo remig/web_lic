@@ -563,7 +563,7 @@ function measureStep(step) {
 
 	const csi = store.get.csi(step.csiID);
 	const localModel = LDParse.model.get.part(step.model.filename);
-	const csiSize = store.render.csi(localModel, step, csi, 1, true);
+	const csiSize = store.render.csi(localModel, step, csi);
 	if (csiSize == null) {
 		const emptyCSISize = emptyCalloutSize - margin;
 		return {

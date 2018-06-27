@@ -122,11 +122,14 @@ const store = {
 		return {
 			csi(localModel, step, csi, selectedPartIDs, hiResScale = 1, bypassCache) {
 				const scale = (getScale(csi) || 1) * hiResScale;
-				const domID = `CSI_${step.csiID}`;
-				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : domID);
+				if (csi.domID == null) {
+					csi.domID = `CSI_${step.csiID}`;
+					csi.isDirty = true;
+				}
+				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : csi.domID);
 				if (csi.isDirty || container == null || bypassCache) {
 					if (step.parts == null) {  // TODO: this only happens for the title page; need better indicator for this 'special' non-step step
-						container = container || getCanvas(domID);
+						container = container || getCanvas(csi.domID);
 						LDRender.renderModel(localModel, container, 1000 * scale, {resizeContainer: true});
 					} else {
 						const partList = store.get.partList(step);
@@ -141,7 +144,7 @@ const store = {
 							rotation: getRotation(csi),
 							displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
 						};
-						container = container || getCanvas(domID);
+						container = container || getCanvas(csi.domID);
 						LDRender.renderModel(localModel, container, 1000 * scale, config);
 					}
 					delete csi.isDirty;
@@ -815,7 +818,7 @@ const store = {
 		csi: {
 			add(opts) { // opts: {parent}
 				return store.mutations.item.add({item: {
-					type: 'csi',
+					type: 'csi', domID: null,
 					rotation: null, scale: null,
 					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
@@ -980,8 +983,8 @@ const store = {
 					store.mutations.item.delete({item: store.get.numberLabel(step.numberLabelID)});
 				}
 				if (step.csiID != null) {
-					store.mutations.item.delete({item: store.get.csi(step.csiID)});
 					store.render.removeCanvas(step);
+					store.mutations.item.delete({item: store.get.csi(step.csiID)});
 				}
 				if (step.pliID != null) {
 					store.mutations.pli.delete({pli: store.get.pli(step.pliID), deleteItems: true});
@@ -1045,7 +1048,6 @@ const store = {
 				}
 			},
 			mergeWithStep(opts) {  // opts: {srcStep, destStep}
-				// TODO: This crashes if step includes callouts
 				const srcStep = store.get.lookupToItem(opts.srcStep);
 				const destStep = store.get.lookupToItem(opts.destStep);
 				if (!srcStep || !destStep) {
