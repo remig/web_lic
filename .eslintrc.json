@@ -59,7 +59,7 @@
         "no-unmodified-loop-condition": "error",
         "no-unused-expressions": "error",
         "no-unused-labels": "error",
-        "no-unused-vars": ["error", {"varsIgnorePattern": "unused", "argsIgnorePattern": "unused"}],
+        "no-unused-vars": "error",
         "no-use-before-define": ["error", { "functions": false}],
         "no-useless-call": "error",
         "no-useless-concat": "error",
