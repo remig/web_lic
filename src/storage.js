@@ -51,4 +51,12 @@ api.clear.everything = function() {
 	api.clear.ui();
 };
 
+api.get.customFonts = function() {
+	var res = localStorage.getItem(keys.customFonts);
+	if (res == null) {  // If key is totally null, save and return an empty array instead
+		return api.replace.customFonts([]);
+	}
+	return JSON.parse(res);
+};
+
 export default api;
