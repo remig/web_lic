@@ -1567,22 +1567,31 @@ const store = {
 				});
 			});
 		},
-		mergeInitialPages() {
-			let stepSet = [], prevModelName;
-			store.state.steps.filter(step => {
-				return step.parent.type === 'page';
-			}).forEach(step => {
-				if (!prevModelName || prevModelName === step.model.filename) {
-					stepSet.push(step);
-				} else {
-					Layout.mergeSteps(stepSet);
-					stepSet = [step];
-				}
-				prevModelName = step.model.filename;
+		async mergeInitialPages(progressCallback) {
+			return new Promise(async function(resolve) {
+				window.setTimeout(async function() {
+					let stepSet = [], prevModelName;
+					const steps = store.state.steps.filter(step => {
+						return step.parent.type === 'page';
+					});
+					progressCallback({stepCount: steps.length, text: 'Step 0'});
+					for (let i = 0; i < steps.length; i++) {
+						const step = steps[i];
+						if (!prevModelName || prevModelName === step.model.filename) {
+							stepSet.push(step);
+						} else {
+							await Layout.mergeSteps(stepSet, progressCallback);
+							stepSet = [step];
+						}
+						prevModelName = step.model.filename;
+					}
+					if (stepSet.length > 1) {
+						await Layout.mergeSteps(stepSet, progressCallback);  // Be sure to merge last set of step in the book
+					}
+					progressCallback({clear: true});
+					resolve();
+				}, 100);
 			});
-			if (stepSet.length > 1) {
-				Layout.mergeSteps(stepSet);  // Be sure to merge last set of step in the book
-			}
 		}
 	}
 };

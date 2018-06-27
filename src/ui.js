@@ -98,15 +98,15 @@ const app = new Vue({
 					_.copy(dialog, dialogDefaults);
 					dialog.show({x: 400, y: 150});
 					dialog.$off();
-					dialog.$on('ok', layoutChoices => {
+					dialog.$on('ok', async layoutChoices => {
 
-						// TODO: laying out multiple steps per page can be slow.  Show a progress bar for this.
 						// TODO: Add option to start new page for each submodel
 						store.mutations.pli.toggleVisibility({visible: layoutChoices.include.pli});
 						store.mutations.addInitialPages();
 						store.mutations.addInitialSubmodelImages();
 						if (layoutChoices.useMaxSteps) {
-							store.mutations.mergeInitialPages();
+							this.busyText = 'Merging Steps';
+							await store.mutations.mergeInitialPages(this.updateProgress);
 						}
 						if (layoutChoices.include.titlePage) {
 							store.mutations.addTitlePage();  // Add title page after adding regular pages so title page summary label comes out correct
@@ -232,6 +232,7 @@ const app = new Vue({
 				} else {
 					if (opts.stepCount) {
 						count = opts.stepCount;
+						progress = 0;
 					}
 					if (opts.clear) {
 						this.busyText = text = '';

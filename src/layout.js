@@ -218,7 +218,6 @@ const api = {
 
 	submodelImage(submodelImage, box) {
 
-		// TODO: if submodel image is too big, shrink it
 		// TODO: consider multiple submodels in one step; can only shrink so much, might need to lay out horizontally
 		const template = store.state.template.submodelImage;
 
@@ -469,26 +468,34 @@ const api = {
 		label.height = labelSize.height;
 	},
 
-	mergeSteps(stepsToMerge) {
+	async mergeSteps(stepsToMerge, progressCallback) {
+
+		async function mergeOneStep() {
+			return new Promise(resolve => window.setTimeout(() => {
+				const step = stepsToMerge[0];
+				const originalPage = store.get.pageForItem(step);
+				const prevPage = store.get.prevPage(originalPage, false, false);
+
+				store.mutations.step.moveToPreviousPage({step});
+
+				const stepsOverlap = prevPage.steps.some(stepID => isStepTooSmall(store.get.step(stepID)));
+				if (stepsOverlap) {
+					// Not enough room; move step back then start filling the next page
+					store.mutations.step.moveToNextPage({step});
+				} else {
+					// Step fits; delete the now-empty page the step moved from
+					store.mutations.page.delete({page: originalPage});
+				}
+				progressCallback(`Step ${stepsToMerge[0].number}`);
+				_.removeIndex(stepsToMerge, 0);
+				resolve();
+			}, 100));
+		}
+
 		// Starting with one step per page, move adjacent steps to the previous page until the page is full-ish
 		stepsToMerge = stepsToMerge.slice(1);
 		while (stepsToMerge.length) {
-
-			const step = stepsToMerge[0];
-			const originalPage = store.get.pageForItem(step);
-			const prevPage = store.get.prevPage(originalPage, false, false);
-
-			store.mutations.step.moveToPreviousPage({step});
-
-			const stepsOverlap = prevPage.steps.some(stepID => isStepTooSmall(store.get.step(stepID)));
-			if (stepsOverlap) {
-				// Not enough room; move step back then start filling the next page
-				store.mutations.step.moveToNextPage({step});
-			} else {
-				// Step fits; delete the now-empty page the step moved from
-				store.mutations.page.delete({page: originalPage});
-			}
-			_.removeIndex(stepsToMerge, 0);
+			await mergeOneStep();
 		}
 	},
 
