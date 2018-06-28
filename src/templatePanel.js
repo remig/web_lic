@@ -4,115 +4,9 @@
 import _ from './util';
 import store from './store';
 import undoStack from './undoStack';
-import Storage from './storage';
 import fillTemplatePanel from './components/controlPanels/fill.vue';
 import borderTemplatePanel from './components/controlPanels/border.vue';
-import DialogManager from './dialog';
-
-// TODO: consider moving all font UI / state management to dedicated font.js or something.
-const familyNames = ['Helvetica', 'Times New Roman'];
-const customFamilyNames = Storage.get.customFonts();
-
-function getFamilyNames() {
-	if (customFamilyNames.length) {
-		return [
-			{label: 'builtInFonts', options: familyNames},
-			{label: 'customFonts', options: customFamilyNames},
-			{label: 'custom', options: ['Custom...']}
-		];
-	}
-	return [
-		{label: 'builtInFonts', options: familyNames},
-		{label: 'customFonts', options: ['Custom...']}
-	];
-}
-
-// TODO: support underlining fonts in general
-// TODO: font styling buttons (bold, italic, underline) need to toggle
-const fontTemplatePanel = {
-	template: '#fontTemplatePanel',
-	data() {
-		return {
-			templateItem: null,
-			family: '',
-			size: 0,
-			bold: false,
-			italic: false,
-			underline: false,
-			color: 'transparent',
-			familyNames: getFamilyNames()
-		};
-	},
-	methods: {
-		init(item) {
-			const template = store.get.templateForItem(item);
-			const fontParts = _.fontToFontParts(template.font);
-			this.templateItem = _.clone(item);
-			this.family = fontParts.fontFamily;
-			this.addCustomFont(fontParts.fontFamily);
-			this.size = parseInt(fontParts.fontSize, 10);
-			this.bold = fontParts.fontWeight === 'bold';
-			this.italic = fontParts.fontStyle === 'italic';
-			this.underline = false;
-			this.color = template.color;
-		},
-		toggleProp(prop) {
-			this[prop] = !this[prop];
-			this.updateValues();
-		},
-		updateFontName() {
-			if (this.family === 'Custom...') {
-				DialogManager.setDialog('fontNameDialog');
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
-					dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
-					dialog.$on('ok', newValues => {
-						this.family = newValues.fontName;
-						this.addCustomFont(newValues.fontName);
-						this.updateValues();
-					});
-					dialog.font = this.fontString();
-					dialog.fontName = '';
-					dialog.show({x: 400, y: 150});
-				});
-			} else {
-				this.updateValues();
-			}
-		},
-		updateColor(newColor) {
-			this.color = (newColor === 'transparent') ? null : newColor;
-			this.updateValues();
-		},
-		updateValues() {
-			const template = store.get.templateForItem(this.templateItem);
-			template.font = this.fontString();
-			template.color = this.color;
-			this.$emit('new-values', this.templateItem.type);
-		},
-		fontString() {
-			return _.fontPartsToFont({
-				fontSize: this.size + 'pt',
-				fontFamily: this.family,
-				fontWeight: this.bold ? 'bold' : null,
-				fontStyle: this.italic ? 'italic' : null
-			});
-		},
-		addCustomFont(family) {
-			if (!_.isEmpty(family)) {
-				const familyLower = family.toLowerCase();
-				const names = [
-					...familyNames.map(f => f.toLowerCase()),
-					...customFamilyNames.map(f => f.toLowerCase())
-				];
-				if (!names.includes(familyLower)) {
-					customFamilyNames.push(family);
-					Storage.replace.customFonts(customFamilyNames);
-				}
-			}
-			this.familyNames = getFamilyNames();
-		}
-	}
-};
+import fontTemplatePanel from './components/controlPanels/font.vue';
 
 function fillAndBorderTemplatePanel(templateEntry) {
 	return {
@@ -287,6 +181,9 @@ const pageTemplatePanel = {
 
 const pageNumberTemplatePanel = {
 	template: '#pageNumberTemplatePanel',
+	provide: {
+		templateEntry: 'page.numberLabel'
+	},
 	data() {
 		return {
 			position: store.state.template.page.numberLabel.position,
@@ -294,13 +191,9 @@ const pageNumberTemplatePanel = {
 		};
 	},
 	components: {
-		fontTemplatePanel: fontTemplatePanel
+		fontTemplatePanel
 	},
 	methods: {
-		init(item) {
-			this.templateItem = _.clone(item);
-			this.$refs.fontTemplatePanel.init(item);
-		},
 		updatePosition(newPosition) {
 			store.state.template.page.numberLabel.position = this.position = newPosition;
 			this.newValues();
@@ -327,11 +220,11 @@ const rotateIconTemplatePanel = {
 	}
 };
 
-function createBorderTemplatePanel(templateEntry, undoText) {
+function createBasicPanel(templateType, templateEntry, undoText) {
 	return {
 		provide: {templateEntry},
 		render(createElement) {
-			return createElement(borderTemplatePanel, {on: {'new-values': this.newValues}});
+			return createElement(templateType, {on: {'new-values': this.newValues}});
 		},
 		methods: {
 			newValues() {
@@ -347,15 +240,21 @@ const componentLookup = {
 	pliItem: rotateTemplatePanel(),
 	pli: pliTemplatePanel,
 	callout: fillAndBorderTemplatePanel('callout'),
-	calloutArrow: createBorderTemplatePanel('callout.arrow', 'Callout Arrow'),
+	calloutArrow: createBasicPanel(borderTemplatePanel, 'callout.arrow', 'Callout Arrow'),
 	submodelImage: fillAndBorderTemplatePanel('submodelImage'),
-	divider: createBorderTemplatePanel('divider', 'Divider'),
+	divider: createBasicPanel(borderTemplatePanel, 'divider', 'Divider'),
 	rotateIcon: rotateIconTemplatePanel,
 	numberLabel: {
 		templatePage: pageNumberTemplatePanel,
-		default: fontTemplatePanel
+		step: {
+			callout: createBasicPanel(fontTemplatePanel, 'callout.step.numberLabel', 'Step Label'),
+			default: createBasicPanel(fontTemplatePanel, 'step.numberLabel', 'Step Label')
+		}
 	},
-	quantityLabel: fontTemplatePanel
+	quantityLabel: {
+		submodelImage: createBasicPanel(fontTemplatePanel, 'submodelImage.quantityLabel', 'Submodel Label'),
+		pliItem: createBasicPanel(fontTemplatePanel, 'pliItem.quantityLabel', 'PLI Label')
+	}
 };
 
 Vue.component('templatePanel', {
@@ -405,10 +304,14 @@ Vue.component('templatePanel', {
 					}
 				});
 				const parent = store.get.parent(this.selectedItem);
+				const grandparent = store.get.parent(parent);
 				if (parent && parent.type in componentLookup[type]) {
+					if (grandparent && grandparent.type in componentLookup[type][parent.type]) {
+						return componentLookup[type][parent.type][grandparent.type];
+					} else if (componentLookup[type][parent.type].default) {
+						return componentLookup[type][parent.type].default;
+					}
 					return componentLookup[type][parent.type];
-				} else if ('default' in componentLookup[type]) {
-					return componentLookup[type].default;
 				}
 				return componentLookup[type];
 			}
@@ -416,6 +319,7 @@ Vue.component('templatePanel', {
 		}
 	},
 	beforeDestroy() {
-		this.applyChanges();  // Catch any changes if user switches from template panel directly to nav tree or new page via keyboard
+		// Catch any changes if user switches from template panel directly to nav tree or new page via keyboard
+		this.applyChanges();
 	}
 });
