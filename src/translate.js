@@ -4,6 +4,7 @@
 import uiState from './uiState';
 import LanguageList from '../languages/languages.json';
 import MessageFormat from 'messageformat';
+import DialogManager from './dialog';
 
 LanguageList.sort((a, b) => {
 	if (a.language < b.language) {
@@ -71,7 +72,7 @@ function setLocale(locale) {
 	}
 }
 
-function pickLanguage(app, onOk, onLanguageChange) {
+function pickLanguage(onOk, onLanguageChange) {
 
 	currentLocale = uiState.get('locale');
 	if (currentLocale && currentLocale !== 'en') {
@@ -86,9 +87,9 @@ function pickLanguage(app, onOk, onLanguageChange) {
 		}
 		return;
 	}
-	app.currentDialog = 'localeChooserDialog';
+	DialogManager.setDialog('localeChooserDialog');
 	Vue.nextTick(() => {
-		const dialog = app.$refs.currentDialog;
+		const dialog = DialogManager.getDialog();
 		dialog.visible = true;
 		dialog.onLanguageChange = onLanguageChange;
 		dialog.onOK = onOk;

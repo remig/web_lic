@@ -10,6 +10,7 @@ import Storage from './storage';
 import LocaleManager from './translate';
 import uiState from './uiState';
 import gridDialog from './dialogs/grid_dialog.vue';
+import DialogManager from './dialog';
 
 let app;
 const tr = LocaleManager.translate;
@@ -353,9 +354,9 @@ const menu = [
 				{
 					text: 'navbar.view.grid.customize',
 					cb() {
-						app.currentDialog = gridDialog;
+						DialogManager.setDialog(gridDialog);
 						Vue.nextTick(() => {
-							app.$refs.currentDialog.show(app);
+							DialogManager.getDialog().show(app);
 						});
 					}
 				}
@@ -394,10 +395,10 @@ const menu = [
 			cb() {
 				const originalProps = uiState.get('dialog.export.pdf');
 				const pageSize = store.state.template.page;
-				app.currentDialog = 'pdfExportDialog';
+				DialogManager.setDialog('pdfExportDialog');
 
 				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					dialog.$off();
 					dialog.$on('ok', newValues => {
 						const dialogProps = uiState.get('dialog.export.pdf');
@@ -432,10 +433,10 @@ const menu = [
 					};
 					return tr('dialog.scale_images.image_size_@mf', size);
 				}
-				app.currentDialog = 'numberChooserDialog';
+				DialogManager.setDialog('numberChooserDialog');
 
 				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					dialog.$off();
 					dialog.$on('update', newValues => {
 						dialog.bodyText = sizeText(newValues.value);

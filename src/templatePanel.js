@@ -7,6 +7,7 @@ import undoStack from './undoStack';
 import Storage from './storage';
 import fillTemplatePanel from './components/controlPanels/fill.vue';
 import borderTemplatePanel from './components/controlPanels/border.vue';
+import DialogManager from './dialog';
 
 // TODO: consider moving all font UI / state management to dedicated font.js or something.
 const familyNames = ['Helvetica', 'Times New Roman'];
@@ -43,7 +44,7 @@ const fontTemplatePanel = {
 		};
 	},
 	methods: {
-		init(item, app) {
+		init(item) {
 			const template = store.get.templateForItem(item);
 			const fontParts = _.fontToFontParts(template.font);
 			this.templateItem = _.clone(item);
@@ -54,7 +55,6 @@ const fontTemplatePanel = {
 			this.italic = fontParts.fontStyle === 'italic';
 			this.underline = false;
 			this.color = template.color;
-			this.app = app;
 		},
 		toggleProp(prop) {
 			this[prop] = !this[prop];
@@ -62,9 +62,9 @@ const fontTemplatePanel = {
 		},
 		updateFontName() {
 			if (this.family === 'Custom...') {
-				this.app.currentDialog = 'fontNameDialog';
+				DialogManager.setDialog('fontNameDialog');
 				Vue.nextTick(() => {
-					const dialog = this.app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
 					dialog.$on('ok', newValues => {
 						this.family = newValues.fontName;
@@ -297,9 +297,9 @@ const pageNumberTemplatePanel = {
 		fontTemplatePanel: fontTemplatePanel
 	},
 	methods: {
-		init(item, app) {
+		init(item) {
 			this.templateItem = _.clone(item);
-			this.$refs.fontTemplatePanel.init(item, app);
+			this.$refs.fontTemplatePanel.init(item);
 		},
 		updatePosition(newPosition) {
 			store.state.template.page.numberLabel.position = this.position = newPosition;
@@ -401,7 +401,7 @@ Vue.component('templatePanel', {
 			if (type in componentLookup) {
 				Vue.nextTick(() => {
 					if (typeof this.$refs.currentTemplatePanel.init === 'function') {
-						this.$refs.currentTemplatePanel.init(this.selectedItem, this.app);
+						this.$refs.currentTemplatePanel.init(this.selectedItem);
 					}
 				});
 				const parent = store.get.parent(this.selectedItem);

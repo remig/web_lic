@@ -13,9 +13,9 @@ import LocaleManager from './translate';
 import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
 import Guide from './components/guide.vue';
+import DialogManager from './dialog';
 import './tree';
 import './pageView';
-import './dialog';
 import './templatePanel';
 
 ELEMENT.locale(ELEMENT.lang.en);
@@ -59,7 +59,6 @@ const app = new Vue({
 		busyText: '',
 		contextMenu: null,
 		filename: null,
-		currentDialog: null,
 		dirtyState: {
 			undoIndex: 0,
 			lastSaveIndex: 0
@@ -90,11 +89,11 @@ const app = new Vue({
 				store.setModel(model);
 				this.filename = store.model.filename;
 
-				this.currentDialog = 'importModelDialog';
+				DialogManager.setDialog('importModelDialog');
 
 				Vue.nextTick(() => {
 					const dialogDefaults = uiState.get('dialog.importModel');
-					const dialog = app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					_.copy(dialog, dialogDefaults);
 					dialog.show({x: 400, y: 150});
 					dialog.$off();
@@ -465,7 +464,7 @@ const app = new Vue({
 			snapOffset: 0
 		});
 
-		LocaleManager.pickLanguage(this, this.openLocalLicFile, this.redrawUI);  // TODO: Find better way of calling 'redrawUI' from arbitrary places
+		LocaleManager.pickLanguage(this.openLocalLicFile, this.redrawUI);  // TODO: Find better way of calling 'redrawUI' from arbitrary places
 	}
 });
 

@@ -7,6 +7,7 @@ import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
 import uiState from './uiState';
+import DialogManager from './dialog';
 
 let app;
 
@@ -49,11 +50,11 @@ const contextMenu = {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.clone(page.layout);
 
-						app.currentDialog = 'pageRowColLayoutDialog';
+						DialogManager.setDialog('pageRowColLayoutDialog');
 						app.clearSelected();
 
 						Vue.nextTick(() => {
-							const dialog = app.$refs.currentDialog;
+							const dialog = DialogManager.getDialog();
 							dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
@@ -223,11 +224,11 @@ const contextMenu = {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.clone(page.layout);
 
-						app.currentDialog = 'pageRowColLayoutDialog';
+						DialogManager.setDialog('pageRowColLayoutDialog');
 						app.clearSelected();
 
 						Vue.nextTick(() => {
-							const dialog = app.$refs.currentDialog;
+							const dialog = DialogManager.getDialog();
 							dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
@@ -447,11 +448,11 @@ const contextMenu = {
 						}
 						csi.rotation = initialRotation;
 
-						app.currentDialog = 'rotateCSIDialog';
+						DialogManager.setDialog('rotateCSIDialog');
 						app.clearSelected();
 
 						Vue.nextTick(() => {
-							const dialog = app.$refs.currentDialog;
+							const dialog = DialogManager.getDialog();
 							dialog.$off();
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
@@ -506,11 +507,11 @@ const contextMenu = {
 				const step = store.get.step(csi.parent.id);
 				const originalRotations = [];
 
-				app.currentDialog = 'copyRotationDialog';
+				DialogManager.setDialog('copyRotationDialog');
 				app.clearSelected();
 
 				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					dialog.$off();
 					dialog.$on('ok', newValues => {
 						const csiList = originalRotations
@@ -572,9 +573,9 @@ const contextMenu = {
 						initialScale = store.get.templateForItem(selectedItem).scale;
 					}
 				}
-				app.currentDialog = 'numberChooserDialog';
+				DialogManager.setDialog('numberChooserDialog');
 				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					dialog.$off();
 					dialog.$on('update', newValues => {
 						csi.scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
@@ -655,11 +656,11 @@ const contextMenu = {
 				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};
 
-				app.currentDialog = 'rotateCSIDialog';
+				DialogManager.setDialog('rotateCSIDialog');
 				app.clearSelected();
 
 				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					dialog.$off();
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].rotation = {...newValues.rotation};
@@ -703,9 +704,10 @@ const contextMenu = {
 				const originalTransform = _.clone(pliTransforms[filename]);
 				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};
-				app.currentDialog = 'numberChooserDialog';
+
+				DialogManager.setDialog('numberChooserDialog');
 				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					dialog.$off();
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
@@ -784,11 +786,11 @@ const contextMenu = {
 						const annotation = store.get.annotation(selectedItem);
 						const originalText = annotation.text;
 
-						app.currentDialog = 'stringDialog';
+						DialogManager.setDialog('stringDialog');
 						app.clearSelected();
 
 						Vue.nextTick(() => {
-							const dialog = app.$refs.currentDialog;
+							const dialog = DialogManager.getDialog();
 							dialog.$off();
 							dialog.$on('ok', newValues => {
 								const page = store.get.pageForItem(annotation);
@@ -920,10 +922,10 @@ const contextMenu = {
 				const divider = store.get.divider(selectedItem);
 				const bbox = _.geom.bbox([divider.p1, divider.p2]);
 				const originalSize = (bbox.height === 0) ? bbox.width : bbox.height;  // TODO: store divider orientation in divider itself
-				app.currentDialog = 'numberChooserDialog';
 
+				DialogManager.setDialog('numberChooserDialog');
 				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					dialog.$off();
 					dialog.$on('update', newValues => {
 						store.mutations.divider.setLength({divider, newLength: newValues.value});
@@ -1002,11 +1004,11 @@ const contextMenu = {
 				const displacement = step.displacedParts.find(p => p.partID === selectedItem.id);
 				const originalDisplacement = _.clone(displacement);
 
-				app.currentDialog = 'partDisplacementDialog';
+				DialogManager.setDialog('partDisplacementDialog');
 				app.clearSelected();
 
 				Vue.nextTick(() => {
-					const dialog = app.$refs.currentDialog;
+					const dialog = DialogManager.getDialog();
 					dialog.$off();
 					dialog.$on('ok', () => {
 						undoStack.commit('part.displace', {step, ...displacement}, 'Adjust Displaced Part');

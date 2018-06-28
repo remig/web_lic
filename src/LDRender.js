@@ -524,7 +524,6 @@ function addModelToScene(scene, model, partIDList, config) {
 			matrix.premultiply(partRotation);
 		}
 
-		// TODO: drawSelected doesn't draw the part as partially transparent anymore...
 		let faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;
 		const alpha = LDParse.getColor(color, 'alpha');
 		if (alpha) {

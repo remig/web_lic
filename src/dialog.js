@@ -228,3 +228,26 @@ _.forEach(elDialogs, (name, data) => {
 		}
 	});
 });
+
+let component;
+
+Vue.component('dialogManager', {
+	data() {
+		return {currentDialog: null};
+	},
+	render(createElement) {
+		return createElement(this.currentDialog, {ref: 'currentDialog', tag: 'component'});
+	},
+	mounted() {
+		component = this;
+	}
+});
+
+export default {
+	getDialog() {
+		return component.$refs.currentDialog;
+	},
+	setDialog(dialogName) {
+		component.currentDialog = dialogName;
+	}
+};
