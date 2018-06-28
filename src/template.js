@@ -8,17 +8,17 @@ const template = {
 		innerMargin: 0.025,
 		numberLabel: {
 			font: 'bold 18pt Helvetica',
-			color: 'black',
+			color: '#000000',
 			position: 'right'  // One of "right', "left", "even-right", "even-left"
 		},
 		fill: {
-			color: 'white',
+			color: '#ffffff',
 			gradient: '',
 			image: ''
 		},
 		border: {
 			width: 0,
-			color: 'black',
+			color: '#000000',
 			cornerRadius: 0
 		}
 	},
@@ -29,7 +29,7 @@ const template = {
 			rotation: {x: 0, y: 0, z: 0},
 			displacementArrow: {
 				fill: {
-					color: 'red'
+					color: '#ff0000'
 				},
 				border: {
 					width: 0,
@@ -39,7 +39,7 @@ const template = {
 		},
 		numberLabel: {
 			font: 'bold 22pt Helvetica',
-			color: 'black'
+			color: '#000000'
 		}
 	},
 	submodelImage: {
@@ -54,12 +54,12 @@ const template = {
 		},
 		border: {
 			width: 2,
-			color: 'black',
+			color: '#000000',
 			cornerRadius: 10
 		},
 		quantityLabel: {
 			font: 'bold 18pt Helvetica',
-			color: 'black'
+			color: '#000000'
 		}
 	},
 	pli: {
@@ -70,7 +70,7 @@ const template = {
 		},
 		border: {
 			width: 2,
-			color: 'black',
+			color: '#000000',
 			cornerRadius: 10
 		}
 	},
@@ -79,7 +79,7 @@ const template = {
 		rotation: {x: 0, y: 0, z: 0},
 		quantityLabel: {
 			font: 'bold 10pt Helvetica',
-			color: 'black'
+			color: '#000000'
 		}
 	},
 	callout: {
@@ -89,27 +89,27 @@ const template = {
 		},
 		border: {
 			width: 2,
-			color: 'black',
+			color: '#000000',
 			cornerRadius: 10
 		},
 		arrow: {
 			border: {
 				width: 2,
-				color: 'black'
+				color: '#000000'
 			}
 		},
 		step: {
 			innerMargin: 0.02,
 			numberLabel: {
 				font: 'bold 18pt Helvetica',
-				color: 'black'
+				color: '#000000'
 			}
 		}
 	},
 	divider: {
 		border: {
 			width: 2,
-			color: 'black'
+			color: '#000000'
 		}
 	},
 	rotateIcon: {
@@ -119,13 +119,13 @@ const template = {
 		},
 		border: {
 			width: 2,
-			color: 'black',
+			color: '#000000',
 			cornerRadius: 10
 		},
 		arrow: {
 			border: {
 				width: 3,
-				color: 'black'
+				color: '#000000'
 			}
 		}
 	}

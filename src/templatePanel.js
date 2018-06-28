@@ -4,63 +4,8 @@
 import _ from './util';
 import store from './store';
 import undoStack from './undoStack';
-import openFileHandler from './fileUploader';
 import Storage from './storage';
-
-function fillTemplatePanel(templateEntry) {
-	return {
-		template: '#fillTemplatePanel',
-		props: {
-			title: {type: String, default: 'Fill'},
-			templateEntry: {type: String, default: templateEntry}
-		},
-		data() {
-			const template = _.get(this.templateEntry, store.state.template).fill;
-			return {
-				color: colorNameToRGB(template.color),
-				gradient: template.gradient,
-				imageFilename: template.image == null ? null : template.image.filename || ''
-			};
-		},
-		methods: {
-			pickImage() {
-				openFileHandler('.png', 'dataURL', (src, filename) => {
-
-					const template = _.get(this.templateEntry, store.state.template).fill;
-					template.image = {filename, src};
-					this.imageFilename = filename;
-
-					const image = new Image();
-					image.onload = () => {
-						store.cache.set('page', 'backgroundImage', image);
-						this.updateValues();
-					};
-					image.src = src;
-				});
-			},
-			removeImage() {
-				const template = _.get(this.templateEntry, store.state.template).fill;
-				this.imageFilename = template.image = '';
-				this.updateValues();
-			},
-			updateColor(newColor) {
-				this.color = (newColor === 'transparent') ? null : newColor;
-				this.updateValues();
-			},
-			updateValues() {
-				const template = _.get(this.templateEntry, store.state.template).fill;
-				template.color = this.color;
-				this.$emit('new-values', {type: this.templateEntry, noLayout: true});
-			}
-		},
-		computed: {
-			truncatedImageName() {
-				const fn = this.imageFilename;
-				return (fn.length > 12) ? fn.substr(0, 8) + '...png' : fn;
-			}
-		}
-	};
-}
+import fillTemplatePanel from './components/controlPanels/fill.vue';
 
 function borderTemplatePanel(templateEntry) {
 	return {
@@ -73,7 +18,7 @@ function borderTemplatePanel(templateEntry) {
 			const template = _.get(this.templateEntry, store.state.template).border;
 			return {
 				width: template.width || 0,
-				color: colorNameToRGB(template.color),
+				color: template.color,
 				cornerRadius: template.cornerRadius
 			};
 		},
@@ -138,7 +83,7 @@ const fontTemplatePanel = {
 			this.bold = fontParts.fontWeight === 'bold';
 			this.italic = fontParts.fontStyle === 'italic';
 			this.underline = false;
-			this.color = colorNameToRGB(template.color);
+			this.color = template.color;
 			this.app = app;
 		},
 		toggleProp(prop) {
@@ -202,8 +147,11 @@ const fontTemplatePanel = {
 function fillAndBorderTemplatePanel(templateEntry) {
 	return {
 		template: '#fillAndBorderTemplatePanel',
+		provide: {
+			templateEntry
+		},
 		components: {
-			fillTemplatePanel: fillTemplatePanel(templateEntry),
+			fillTemplatePanel,
 			borderTemplatePanel: borderTemplatePanel(templateEntry)
 		},
 		methods: {
@@ -264,9 +212,12 @@ function rotateTemplatePanel() {
 
 const csiTemplatePanel = {
 	template: '#csiTemplatePanel',
+	provide: {
+		templateEntry: 'step.csi.displacementArrow'
+	},
 	components: {
 		rotateTemplatePanel: rotateTemplatePanel(),
-		fillTemplatePanel: fillTemplatePanel('step.csi.displacementArrow'),
+		fillTemplatePanel,
 		borderTemplatePanel: borderTemplatePanel('step.csi.displacementArrow')
 	},
 	methods: {
@@ -289,13 +240,16 @@ const csiTemplatePanel = {
 
 const pliTemplatePanel = {
 	template: '#pliTemplatePanel',
+	provide: {
+		templateEntry: 'pli'
+	},
 	data() {
 		return {
 			includeSubmodels: store.state.template.pli.includeSubmodels
 		};
 	},
 	components: {
-		fillTemplatePanel: fillTemplatePanel('pli'),
+		fillTemplatePanel,
 		borderTemplatePanel: borderTemplatePanel('pli')
 	},
 	methods: {
@@ -319,6 +273,9 @@ const pliTemplatePanel = {
 // TODO: explore component 'extends' to make panel / subpanel nesting easier (https://vuejs.org/v2/api/#extends)
 const pageTemplatePanel = {
 	template: '#pageTemplatePanel',
+	provide: {
+		templateEntry: 'page'
+	},
 	data() {
 		const template = store.state.template.page;
 		return {
@@ -329,7 +286,7 @@ const pageTemplatePanel = {
 		};
 	},
 	components: {
-		fillTemplatePanel: fillTemplatePanel('page'),
+		fillTemplatePanel,
 		borderTemplatePanel: borderTemplatePanel('page')
 	},
 	methods: {
@@ -386,8 +343,11 @@ const pageNumberTemplatePanel = {
 
 const rotateIconTemplatePanel = {
 	template: '#rotateIconTemplatePanel',
+	provide: {
+		templateEntry: 'rotateIcon'
+	},
 	components: {
-		fillTemplatePanel: fillTemplatePanel('rotateIcon'),
+		fillTemplatePanel,
 		borderTemplatePanel: borderTemplatePanel('rotateIcon')
 	},
 	methods: {
@@ -434,6 +394,7 @@ Vue.component('templatePanel', {
 			this.app.redrawUI(false);
 		},
 		applyChanges() {
+			// TODO: Make sure something actually changed before pushing to the undo stack.  eg: add then immediately remove an image...
 			if (this.lastEdit) {
 				if (typeof this.$refs.currentTemplatePanel.apply === 'function') {
 					this.$refs.currentTemplatePanel.apply();
@@ -474,16 +435,3 @@ Vue.component('templatePanel', {
 		this.applyChanges();  // Catch any changes if user switches from template panel directly to nav tree or new page via keyboard
 	}
 });
-
-const colorNames = {
-	white: '#ffffff',
-	black: '#000000',
-	red: '#ff0000'
-};
-
-function colorNameToRGB(c) {
-	if (colorNames.hasOwnProperty(c)) {
-		return colorNames[c];
-	}
-	return c;
-}
