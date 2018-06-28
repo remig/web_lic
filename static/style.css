@@ -121,6 +121,10 @@ div#container {
 
 /* Overwrite Vue Element stuff */
 
+.el-checkbox__input.is-checked+.el-checkbox__label {
+	color: #606266;
+}
+
 .el-color-picker__trigger, .el-color-picker__mask {
 	border-color: #ccc;
 	width: 34px;
@@ -130,6 +134,14 @@ div#container {
 .el-button {
 	border-color: #ccc;
 	padding: 9px 20px;
+}
+
+.el-color-dropdown__btns > .el-button--mini {
+	padding: 7px 15px;
+}
+
+.el-color-dropdown__btns > .el-button--text {
+	border-color: transparent;
 }
 
 .el-button.tight {

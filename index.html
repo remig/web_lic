@@ -707,7 +707,7 @@
 
 	<script type="text/x-template" id="localeChooserDialogTemplate">
 		<el-dialog
-			title="Pick a Language"
+			:title="tr('dialog.locale_chooser.title')"
 			width="400px"
 			:modal="false"
 			:show-close="false"
@@ -1016,19 +1016,14 @@
 				<h5>Page Size</h5>
 				<div class="panel-body">
 					<form class="form-horizontal">
-						<div class="checkbox">
-							<label for="maintainAspectRatio">
-								<input
-									v-model="maintainAspectRatio"
-									v-on:click="changeAspectRatio"
-									type="checkbox"
-									id="maintainAspectRatio"
-								/>
-								Maintain Aspect Ratio ({{aspectRatio.toFixed(2)}})
-							</label>
-						</div>
+						<el-checkbox
+							v-model="maintainAspectRatio"
+							@change="changeAspectRatio"
+						>
+							Maintain Aspect Ratio ({{aspectRatio.toFixed(2)}})
+						</el-checkbox>
 						<div class="form-group paddingT10">
-							<label for="pageWidth" class="control-label col-sm-5">Width (px)</label>
+							<label class="control-label col-sm-5">Width (px)</label>
 							<div class="col-sm-5">
 								<input
 									v-model.number="width"
@@ -1036,12 +1031,11 @@
 									type="number"
 									min="0"
 									class="form-control"
-									id="pageWidth"
 								/>
 							</div>
 						</div>
 						<div class="form-group marginB05">
-							<label for="pageHeight" class="control-label col-sm-5">Height (px)</label>
+							<label class="control-label col-sm-5">Height (px)</label>
 							<div class="col-sm-5">
 								<input
 									v-model.number="height"
@@ -1049,7 +1043,6 @@
 									type="number"
 									min="0"
 									class="form-control col-sm-10"
-									id="pageHeight"
 								/>
 							</div>
 						</div>
@@ -1099,17 +1092,12 @@
 			<div class="panel panel-template">
 				<div class="panel-body">
 					<form class="form-horizontal">
-						<div class="checkbox">
-							<label for="includeSubmodels">
-								<input
-									v-model="includeSubmodels"
-									v-on:click="updateValues"
-									type="checkbox"
-									id="includeSubmodels"
-								/>
-								Include Submodels in PLI
-							</label>
-						</div>
+						<el-checkbox
+							v-model="includeSubmodels"
+							v-on:click="updateValues"
+						>
+							Include Submodels in PLI
+						</el-checkbox>
 					</form>
 				</div>
 			</div>
