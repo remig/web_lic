@@ -6,37 +6,7 @@ import store from './store';
 import undoStack from './undoStack';
 import Storage from './storage';
 import fillTemplatePanel from './components/controlPanels/fill.vue';
-
-function borderTemplatePanel(templateEntry) {
-	return {
-		template: '#borderTemplatePanel',
-		props: {
-			title: {type: String, default: 'Border'},
-			templateEntry: {type: String, default: templateEntry}
-		},
-		data() {
-			const template = _.get(this.templateEntry, store.state.template).border;
-			return {
-				width: template.width || 0,
-				color: template.color,
-				cornerRadius: template.cornerRadius
-			};
-		},
-		methods: {
-			updateColor(newColor) {
-				this.color = (newColor === 'transparent') ? null : newColor;
-				this.updateValues();
-			},
-			updateValues() {
-				const template = _.get(this.templateEntry, store.state.template).border;
-				template.width = this.width;
-				template.color = this.color;
-				template.cornerRadius = this.cornerRadius;
-				this.$emit('new-values', this.templateEntry);
-			}
-		}
-	};
-}
+import borderTemplatePanel from './components/controlPanels/border.vue';
 
 // TODO: consider moving all font UI / state management to dedicated font.js or something.
 const familyNames = ['Helvetica', 'Times New Roman'];
@@ -152,7 +122,7 @@ function fillAndBorderTemplatePanel(templateEntry) {
 		},
 		components: {
 			fillTemplatePanel,
-			borderTemplatePanel: borderTemplatePanel(templateEntry)
+			borderTemplatePanel
 		},
 		methods: {
 			newValues() {
@@ -218,7 +188,7 @@ const csiTemplatePanel = {
 	components: {
 		rotateTemplatePanel: rotateTemplatePanel(),
 		fillTemplatePanel,
-		borderTemplatePanel: borderTemplatePanel('step.csi.displacementArrow')
+		borderTemplatePanel
 	},
 	methods: {
 		init(item) {
@@ -250,7 +220,7 @@ const pliTemplatePanel = {
 	},
 	components: {
 		fillTemplatePanel,
-		borderTemplatePanel: borderTemplatePanel('pli')
+		borderTemplatePanel
 	},
 	methods: {
 		newValues() {
@@ -287,7 +257,7 @@ const pageTemplatePanel = {
 	},
 	components: {
 		fillTemplatePanel,
-		borderTemplatePanel: borderTemplatePanel('page')
+		borderTemplatePanel
 	},
 	methods: {
 		changeAspectRatio() {
@@ -348,7 +318,7 @@ const rotateIconTemplatePanel = {
 	},
 	components: {
 		fillTemplatePanel,
-		borderTemplatePanel: borderTemplatePanel('rotateIcon')
+		borderTemplatePanel
 	},
 	methods: {
 		newValues() {
@@ -357,15 +327,29 @@ const rotateIconTemplatePanel = {
 	}
 };
 
+function createBorderTemplatePanel(templateEntry, undoText) {
+	return {
+		provide: {templateEntry},
+		render(createElement) {
+			return createElement(borderTemplatePanel, {on: {'new-values': this.newValues}});
+		},
+		methods: {
+			newValues() {
+				this.$emit('new-values', undoText);
+			}
+		}
+	};
+}
+
 const componentLookup = {
 	templatePage: pageTemplatePanel,
 	csi: csiTemplatePanel,
 	pliItem: rotateTemplatePanel(),
 	pli: pliTemplatePanel,
 	callout: fillAndBorderTemplatePanel('callout'),
-	calloutArrow: borderTemplatePanel('callout.arrow'),
+	calloutArrow: createBorderTemplatePanel('callout.arrow', 'Callout Arrow'),
 	submodelImage: fillAndBorderTemplatePanel('submodelImage'),
-	divider: borderTemplatePanel('divider'),
+	divider: createBorderTemplatePanel('divider', 'Divider'),
 	rotateIcon: rotateIconTemplatePanel,
 	numberLabel: {
 		templatePage: pageNumberTemplatePanel,
