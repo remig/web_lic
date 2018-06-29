@@ -824,64 +824,14 @@
 	<!-- Template Page Components -->
 	<script type="text/x-template" id="fillAndBorderTemplatePanel">
 		<div>
-			<fill-template-panel
+			<fill-panel
 				:template-entry="templateEntry"
 				v-on:new-values="newValues"
-			></fill-template-panel>
-			<border-template-panel
+			></fill-panel>
+			<border-panel
 				:template-entry="templateEntry"
 				v-on:new-values="newValues"
-			></border-template-panel>
-		</div>
-	</script>
-
-	<script type="text/x-template" id="pageTemplatePanel">
-		<div>
-			<div class="panel panel-template">
-				<h5>Page Size</h5>
-				<div class="panel-body">
-					<form class="form-horizontal">
-						<el-checkbox
-							v-model="maintainAspectRatio"
-							@change="changeAspectRatio"
-						>
-							Maintain Aspect Ratio ({{aspectRatio.toFixed(2)}})
-						</el-checkbox>
-						<div class="form-group paddingT10">
-							<label class="control-label col-sm-5">Width (px)</label>
-							<div class="col-sm-5">
-								<input
-									v-model.number="width"
-									v-on:input="updateValues"
-									type="number"
-									min="0"
-									class="form-control"
-								/>
-							</div>
-						</div>
-						<div class="form-group marginB05">
-							<label class="control-label col-sm-5">Height (px)</label>
-							<div class="col-sm-5">
-								<input
-									v-model.number="height"
-									v-on:input="updateValues"
-									type="number"
-									min="0"
-									class="form-control col-sm-10"
-								/>
-							</div>
-						</div>
-					</form>
-				</div>
-			</div>
-			<fill-template-panel
-				template-entry="page"
-				v-on:new-values="newValues"
-			></fill-template-panel>
-			<border-template-panel
-				template-entry="page"
-				v-on:new-values="newValues"
-			></border-template-panel>
+			></border-panel>
 		</div>
 	</script>
 
@@ -911,11 +861,11 @@
 					</form>
 				</div>
 			</div>
-			<font-template-panel
+			<font-panel
 				template-entry="page.numberLabel"
 				v-on:new-values="newValues"
 				ref="fontTemplatePanel"
-			></font-template-panel>
+			></font-panel>
 		</div>
 	</script>
 
@@ -933,47 +883,47 @@
 					</form>
 				</div>
 			</div>
-			<fill-template-panel
+			<fill-panel
 				template-entry="pli"
 				v-on:new-values="newValues"
-			></fill-template-panel>
-			<border-template-panel
+			></fill-panel>
+			<border-panel
 				template-entry="pli"
 				v-on:new-values="newValues"
-			></border-template-panel>
+			></border-panel>
 		</div>
 	</script>
 
 	<script type="text/x-template" id="csiTemplatePanel">
 		<div>
-			<transform-template-panel
+			<transform-panel
 				:template-entry="transformType"
 				v-on:new-values="newValues"
-			></transform-template-panel>
-			<fill-template-panel
+			></transform-panel>
+			<fill-panel
 				template-entry="step.csi.displacementArrow"
 				title="Displacement Arrow Color"
 				v-on:new-values="newArrowStyle"
-			></fill-template-panel>
-			<!-- <border-template-panel title="Displacement Arrow Border" v-on:new-values="newArrowStyle"></border-template-panel> -->
+			></fill-panel>
+			<!-- <border-panel title="Displacement Arrow Border" v-on:new-values="newArrowStyle"></border-panel> -->
 		</div>
 	</script>
 
 	<script type="text/x-template" id="rotateIconTemplatePanel">
 		<div>
-			<fill-template-panel
+			<fill-panel
 				template-entry="rotateIcon"
 				v-on:new-values="newValues"
-			></fill-template-panel>
-			<border-template-panel
+			></fill-panel>
+			<border-panel
 				template-entry="rotateIcon"
 				v-on:new-values="newValues"
-			></border-template-panel>
-			<border-template-panel
+			></border-panel>
+			<border-panel
 				template-entry="rotateIcon.arrow"
 				v-on:new-values="newValues"
 				title="Arrow"
-			></border-template-panel>
+			></border-panel>
 		</div>
 	</script>
 

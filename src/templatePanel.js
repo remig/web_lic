@@ -4,10 +4,11 @@
 import _ from './util';
 import store from './store';
 import undoStack from './undoStack';
-import fillTemplatePanel from './components/controlPanels/fill.vue';
-import borderTemplatePanel from './components/controlPanels/border.vue';
-import fontTemplatePanel from './components/controlPanels/font.vue';
-import transformTemplatePanel from './components/controlPanels/transform.vue';
+import fillPanel from './components/controlPanels/fill.vue';
+import borderPanel from './components/controlPanels/border.vue';
+import fontPanel from './components/controlPanels/font.vue';
+import transformPanel from './components/controlPanels/transform.vue';
+import pageTemplatePanel from './components/controlPanels/page_template.vue';
 
 function applyDirtyAction(entryType) {
 	store.mutations[entryType].markAllDirty();
@@ -24,8 +25,8 @@ function fillAndBorderTemplatePanel(templateEntry) {
 			return {templateEntry};
 		},
 		components: {
-			fillTemplatePanel,
-			borderTemplatePanel
+			fillPanel,
+			borderPanel
 		},
 		methods: {
 			newValues() {
@@ -43,8 +44,8 @@ function csiTemplatePanel(transformType) {
 			return {transformType};
 		},
 		components: {
-			transformTemplatePanel,
-			fillTemplatePanel
+			transformPanel,
+			fillPanel
 		},
 		methods: {
 			apply() {
@@ -66,7 +67,7 @@ const pliItemTemplatePanel = {
 	props: ['selectedItem'],
 	render(createElement) {
 		return createElement(
-			transformTemplatePanel,
+			transformPanel,
 			{
 				props: {templateEntry: 'pliItem'},
 				on: {'new-values': this.newValues}
@@ -93,8 +94,8 @@ const pliTemplatePanel = {
 		};
 	},
 	components: {
-		fillTemplatePanel,
-		borderTemplatePanel
+		fillPanel,
+		borderPanel
 	},
 	methods: {
 		newValues() {
@@ -110,52 +111,6 @@ const pliTemplatePanel = {
 	}
 };
 
-// TODO: add default page layout UI
-// TODO: should add UI to choose whether to redo layout or just extend canvas
-// TODO: need to re-layout title page too, on some operations like page resize
-// TODO: for page size, add preset sizes like 'A4', 'legal', etc.  See here for list of formats & sizes: https://github.com/MrRio/jsPDF/blob/master/jspdf.js
-// TODO: explore component 'extends' to make panel / subpanel nesting easier (https://vuejs.org/v2/api/#extends)
-const pageTemplatePanel = {
-	template: '#pageTemplatePanel',
-	data() {
-		const template = store.state.template.page;
-		return {
-			width: template.width,
-			height: template.height,
-			aspectRatio: template.width / template.height,
-			maintainAspectRatio: true
-		};
-	},
-	components: {
-		fillTemplatePanel,
-		borderTemplatePanel
-	},
-	methods: {
-		changeAspectRatio() {
-			this.height = Math.floor(this.width / this.aspectRatio);
-			this.updateValues();
-		},
-		newValues() {
-			this.$emit('new-values', 'Page');
-		},
-		updateValues() {
-			const template = store.state.template.page;
-			if (this.width !== template.width || this.height !== template.height) {
-				if (this.maintainAspectRatio) {
-					if (this.width !== template.width) {
-						this.height = Math.floor(this.width / this.aspectRatio);
-					} else if (this.height !== template.height) {
-						this.width = Math.floor(this.height * this.aspectRatio);
-					}
-				}
-				template.width = this.width;
-				template.height = this.height;
-				this.$emit('new-values', 'Page');
-			}
-		}
-	}
-};
-
 const pageNumberTemplatePanel = {
 	template: '#pageNumberTemplatePanel',
 	data() {
@@ -165,7 +120,7 @@ const pageNumberTemplatePanel = {
 		};
 	},
 	components: {
-		fontTemplatePanel
+		fontPanel
 	},
 	methods: {
 		updatePosition(newPosition) {
@@ -181,8 +136,8 @@ const pageNumberTemplatePanel = {
 const rotateIconTemplatePanel = {
 	template: '#rotateIconTemplatePanel',
 	components: {
-		fillTemplatePanel,
-		borderTemplatePanel
+		fillPanel,
+		borderPanel
 	},
 	methods: {
 		newValues() {
@@ -219,20 +174,20 @@ const componentLookup = {
 	pliItem: pliItemTemplatePanel,
 	pli: pliTemplatePanel,
 	callout: fillAndBorderTemplatePanel('callout'),
-	calloutArrow: createBasicPanel(borderTemplatePanel, 'callout.arrow', 'Callout Arrow'),
+	calloutArrow: createBasicPanel(borderPanel, 'callout.arrow', 'Callout Arrow'),
 	submodelImage: fillAndBorderTemplatePanel('submodelImage'),
-	divider: createBasicPanel(borderTemplatePanel, 'divider', 'Divider'),
+	divider: createBasicPanel(borderPanel, 'divider', 'Divider'),
 	rotateIcon: rotateIconTemplatePanel,
 	numberLabel: {
 		templatePage: pageNumberTemplatePanel,
 		step: {
-			callout: createBasicPanel(fontTemplatePanel, 'callout.step.numberLabel', 'Step Label'),
-			default: createBasicPanel(fontTemplatePanel, 'step.numberLabel', 'Step Label')
+			callout: createBasicPanel(fontPanel, 'callout.step.numberLabel', 'Step Label'),
+			default: createBasicPanel(fontPanel, 'step.numberLabel', 'Step Label')
 		}
 	},
 	quantityLabel: {
-		submodelImage: createBasicPanel(fontTemplatePanel, 'submodelImage.quantityLabel', 'Submodel Label'),
-		pliItem: createBasicPanel(fontTemplatePanel, 'pliItem.quantityLabel', 'PLI Label')
+		submodelImage: createBasicPanel(fontPanel, 'submodelImage.quantityLabel', 'Submodel Label'),
+		pliItem: createBasicPanel(fontPanel, 'pliItem.quantityLabel', 'PLI Label')
 	}
 };
 
