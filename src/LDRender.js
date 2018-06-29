@@ -182,7 +182,9 @@ function cleanup(scene) {
 			if (node.geometry) {
 				node.geometry.dispose();
 			}
-			if (node.material) {
+			if (Array.isArray(node.material)) {
+				node.material.forEach(m => m.dispose());
+			} else if (node.material) {
 				node.material.dispose();
 			}
 		}
@@ -248,6 +250,7 @@ function getPartGeometry(abstractPart, colorCode) {
 		condlines: []
 	};
 
+	const alphaIdx = !LDParse.getColor(colorCode, 'alpha') ? 0 : 1;
 	const colorObj = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode));
 	const lineColor = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode, 'edge'));
 	for (let i = 0; i < abstractPart.primitives.length; i++) {
@@ -277,14 +280,14 @@ function getPartGeometry(abstractPart, colorCode) {
 		} else {
 
 			const vIdx = geometry.faces.vertices.length;
-			geometry.faces.faces.push(new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, colorObj));
+			geometry.faces.faces.push(new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, colorObj, alphaIdx));
 			geometry.faces.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
 			geometry.faces.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
 			geometry.faces.vertices.push(new THREE.Vector3(p[6], p[7], p[8]));
 
 			if (primitive.shape === 'quad') {
 				geometry.faces.vertices.push(new THREE.Vector3(p[9], p[10], p[11]));
-				const face2 = new THREE.Face3(vIdx, vIdx + 2, vIdx + 3, null, colorObj);
+				const face2 = new THREE.Face3(vIdx, vIdx + 2, vIdx + 3, null, colorObj, alphaIdx);
 				geometry.faces.faces.push(face2);
 			}
 		}
@@ -345,22 +348,24 @@ function getArrowGeometry(length) {
 }
 
 const selectedLineColor = 0xFF0000;
-const faceMaterial = new THREE.MeshBasicMaterial({
-	vertexColors: THREE.FaceColors,
-	side: THREE.DoubleSide,
-	polygonOffset: true,
-	polygonOffsetFactor: 1,
-	polygonOffsetUnits: 1
-});
-const alphaFaceMaterial = new THREE.MeshBasicMaterial({
-	vertexColors: THREE.FaceColors,
-	side: THREE.DoubleSide,
-	opacity: 0.5,
-	transparent: true,
-	polygonOffset: true,
-	polygonOffsetFactor: 1,
-	polygonOffsetUnits: 1
-});
+const faceMaterials = [
+	new THREE.MeshBasicMaterial({
+		vertexColors: THREE.FaceColors,
+		side: THREE.DoubleSide,
+		polygonOffset: true,
+		polygonOffsetFactor: 1,
+		polygonOffsetUnits: 1
+	}),
+	new THREE.MeshBasicMaterial({
+		vertexColors: THREE.FaceColors,
+		side: THREE.DoubleSide,
+		opacity: 0.5,
+		transparent: true,
+		polygonOffset: true,
+		polygonOffsetFactor: 1,
+		polygonOffsetUnits: 1
+	})
+];
 const selectedFaceMaterial = new THREE.MeshBasicMaterial({
 	vertexColors: THREE.FaceColors,
 	opacity: 0.5,
@@ -524,21 +529,12 @@ function addModelToScene(scene, model, partIDList, config) {
 			matrix.premultiply(partRotation);
 		}
 
-		let faceMat = drawSelected ? selectedFaceMaterial : faceMaterial;
-		const alpha = LDParse.getColor(color, 'alpha');
-		if (alpha) {
-			if (alpha === 128) {  // Optimize most common case; avoid cloning material
-				faceMat = alphaFaceMaterial;
-			} else {
-				faceMat = alphaFaceMaterial.clone();
-				faceMat.opacity = alpha / 256;
-			}
-		}
+		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterials;
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMat);
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
 
-		const line = new THREE.LineSegments(partGeometry.lines, faceMaterial);
+		const line = new THREE.LineSegments(partGeometry.lines, faceMaterials[0]);
 		line.applyMatrix(matrix);
 		scene.add(line);
 
@@ -567,7 +563,7 @@ function addModelToScene(scene, model, partIDList, config) {
 			const c2 = project(condline.c2.clone().applyMatrix4(matrix), camera, size);
 
 			if (lineSide(c1, l1, l2) === lineSide(c2, l1, l2)) {
-				scene.add(new THREE.LineSegments(cline, faceMaterial));
+				scene.add(new THREE.LineSegments(cline, faceMaterials[0]));
 			}
 		}
 	}
