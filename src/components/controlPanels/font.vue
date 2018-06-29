@@ -92,7 +92,7 @@ function getFamilyNames() {
 // TODO: support underlining fonts in general
 // TODO: font styling buttons (bold, italic, underline) need to toggle
 export default {
-	inject: ['templateEntry'],
+	props: ['templateEntry'],
 	components: {
 		panelBase
 	},

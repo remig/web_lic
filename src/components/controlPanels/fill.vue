@@ -57,8 +57,8 @@ import openFileHandler from '../../fileUploader';
 import panelBase from './panel_base.vue';
 
 export default {
-	inject: ['templateEntry'],
 	props: {
+		templateEntry: '',
 		title: {type: String, default: 'Fill'}
 	},
 	components: {

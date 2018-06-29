@@ -824,8 +824,14 @@
 	<!-- Template Page Components -->
 	<script type="text/x-template" id="fillAndBorderTemplatePanel">
 		<div>
-			<fill-template-panel v-on:new-values="newValues"></fill-template-panel>
-			<border-template-panel v-on:new-values="newValues"></border-template-panel>
+			<fill-template-panel
+				:template-entry="templateEntry"
+				v-on:new-values="newValues"
+			></fill-template-panel>
+			<border-template-panel
+				:template-entry="templateEntry"
+				v-on:new-values="newValues"
+			></border-template-panel>
 		</div>
 	</script>
 
@@ -868,8 +874,14 @@
 					</form>
 				</div>
 			</div>
-			<fill-template-panel v-on:new-values="newValues"></fill-template-panel>
-			<border-template-panel v-on:new-values="newValues"></border-template-panel>
+			<fill-template-panel
+				template-entry="page"
+				v-on:new-values="newValues"
+			></fill-template-panel>
+			<border-template-panel
+				template-entry="page"
+				v-on:new-values="newValues"
+			></border-template-panel>
 		</div>
 	</script>
 
@@ -900,6 +912,7 @@
 				</div>
 			</div>
 			<font-template-panel
+				template-entry="page.numberLabel"
 				v-on:new-values="newValues"
 				ref="fontTemplatePanel"
 			></font-template-panel>
@@ -920,80 +933,25 @@
 					</form>
 				</div>
 			</div>
-			<fill-template-panel v-on:new-values="newValues"></fill-template-panel>
-			<border-template-panel v-on:new-values="newValues"></border-template-panel>
-		</div>
-	</script>
-
-	<script type="text/x-template" id="rotateTemplatePanel">
-		<div class="panel panel-template">
-			<h5>Rotation</h5>
-			<div class="panel-body">
-				<form class="form-horizontal">
-					<div class="form-group">
-						<label for="xRotation" class="control-label col-sm-2">X</label>
-						<div class="col-sm-5">
-							<input
-								id="xRotation"
-								v-model.number="x"
-								v-on:input="updateValues"
-								type="number"
-								min="-360" max="360"
-								class="form-control"
-							/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="yRotation" class="control-label col-sm-2">Y</label>
-						<div class="col-sm-5">
-							<input
-								id="yRotation"
-								v-model.number="y"
-								v-on:input="updateValues"
-								type="number"
-								min="-360" max="360"
-								class="form-control"
-							/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="zRotation" class="control-label col-sm-2">Z</label>
-						<div class="col-sm-5">
-							<input
-								id="zRotation"
-								v-model.number="z"
-								v-on:input="updateValues"
-								type="number"
-								min="-360" max="360"
-								class="form-control"
-							/>
-						</div>
-					</div>
-					<h5>Scale</h5>
-					<div class="form-group">
-						<div class="col-sm-6">
-							<input
-								id="scaleInput"
-								v-model.number="scale"
-								v-on:input="updateValues"
-								type="number"
-								min="0" max="10" step="0.1"
-								class="form-control"
-							/>
-						</div>
-					</div>
-				</form>
-			</div>
+			<fill-template-panel
+				template-entry="pli"
+				v-on:new-values="newValues"
+			></fill-template-panel>
+			<border-template-panel
+				template-entry="pli"
+				v-on:new-values="newValues"
+			></border-template-panel>
 		</div>
 	</script>
 
 	<script type="text/x-template" id="csiTemplatePanel">
 		<div>
-			<rotate-template-panel
+			<transform-template-panel
+				:template-entry="transformType"
 				v-on:new-values="newValues"
-				ref="rotateTemplatePanel"
-			></rotate-template-panel>
+			></transform-template-panel>
 			<fill-template-panel
+				template-entry="step.csi.displacementArrow"
 				title="Displacement Arrow Color"
 				v-on:new-values="newArrowStyle"
 			></fill-template-panel>
@@ -1004,14 +962,17 @@
 	<script type="text/x-template" id="rotateIconTemplatePanel">
 		<div>
 			<fill-template-panel
+				template-entry="rotateIcon"
 				v-on:new-values="newValues"
 			></fill-template-panel>
 			<border-template-panel
+				template-entry="rotateIcon"
 				v-on:new-values="newValues"
 			></border-template-panel>
 			<border-template-panel
+				template-entry="rotateIcon.arrow"
 				v-on:new-values="newValues"
-				title="Arrow" templateEntry="rotateIcon.arrow"
+				title="Arrow"
 			></border-template-panel>
 		</div>
 	</script>
@@ -1024,6 +985,7 @@
 					:is="currentTemplatePanel"
 					ref="currentTemplatePanel"
 					v-on:new-values="newValues"
+					:selected-item="selectedItem"
 				></component>
 			</div>
 		</div>

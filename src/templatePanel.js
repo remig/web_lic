@@ -7,12 +7,21 @@ import undoStack from './undoStack';
 import fillTemplatePanel from './components/controlPanels/fill.vue';
 import borderTemplatePanel from './components/controlPanels/border.vue';
 import fontTemplatePanel from './components/controlPanels/font.vue';
+import transformTemplatePanel from './components/controlPanels/transform.vue';
+
+function applyDirtyAction(entryType) {
+	store.mutations[entryType].markAllDirty();
+	store.state.pages.forEach(page => (page.needsLayout = true));
+	store.state.templatePage.needsLayout = true;
+	const text = `Change ${_.prettyPrint(entryType)} Template`;
+	undoStack.commit('', null, text, [entryType]);
+}
 
 function fillAndBorderTemplatePanel(templateEntry) {
 	return {
 		template: '#fillAndBorderTemplatePanel',
-		provide: {
-			templateEntry
+		data() {
+			return {templateEntry};
 		},
 		components: {
 			fillTemplatePanel,
@@ -26,87 +35,58 @@ function fillAndBorderTemplatePanel(templateEntry) {
 	};
 }
 
-function rotateTemplatePanel() {
+function csiTemplatePanel(transformType) {
 	return {
-		template: '#rotateTemplatePanel',
+		template: '#csiTemplatePanel',
+		props: ['selectedItem'],
 		data() {
-			return {
-				templateItem: null,
-				x: 0, y: 0, z: 0,
-				scale: 1
-			};
+			return {transformType};
+		},
+		components: {
+			transformTemplatePanel,
+			fillTemplatePanel
 		},
 		methods: {
-			init(item) {
-				const transform = store.get.templateForItem(item);
-				this.x = transform.rotation.x;
-				this.y = transform.rotation.y;
-				this.z = transform.rotation.z;
-				this.scale = transform.scale;
-				this.templateItem = _.clone(item);
-			},
 			apply() {
-				store.mutations[this.templateItem.type].markAllDirty();
-				store.state.pages.forEach(page => (page.needsLayout = true));
-				store.state.templatePage.needsLayout = true;
-				const text = `Change ${_.prettyPrint(this.templateItem.type)} Template`;
-				undoStack.commit('', null, text, [this.templateItem.type]);
+				applyDirtyAction('csi');
 			},
-			updateValues() {
-				const transform = store.get.templateForItem(this.templateItem);
-				const rotation = transform.rotation;
-				if (rotation.x !== this.x || rotation.y !== this.y || rotation.z !== this.z
-						|| transform.scale !== this.scale) {
-					rotation.x = this.x;
-					rotation.y = this.y;
-					rotation.z = this.z;
-					transform.scale = this.scale;
-					if (this.templateItem.type === 'csi') {
-						store.get.csi(this.templateItem).isDirty = true;
-					} else if (this.templateItem.type === 'pliItem') {
-						const pli = store.get.parent(this.templateItem);
-						pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
-					}
-					this.$emit('new-values', this.templateItem.type);
-				}
+			newArrowStyle() {
+				store.get.csi(this.selectedItem).isDirty = true;
+				this.$emit('new-values', 'CSI');
+			},
+			newValues() {
+				store.get.csi(this.selectedItem).isDirty = true;
+				this.$emit('new-values', {type: 'CSI', noLayout: true});
 			}
 		}
 	};
 }
 
-const csiTemplatePanel = {
-	template: '#csiTemplatePanel',
-	provide: {
-		templateEntry: 'step.csi.displacementArrow'
-	},
-	components: {
-		rotateTemplatePanel: rotateTemplatePanel(),
-		fillTemplatePanel,
-		borderTemplatePanel
+const pliItemTemplatePanel = {
+	props: ['selectedItem'],
+	render(createElement) {
+		return createElement(
+			transformTemplatePanel,
+			{
+				props: {templateEntry: 'pliItem'},
+				on: {'new-values': this.newValues}
+			}
+		);
 	},
 	methods: {
-		init(item) {
-			this.templateItem = _.clone(item);
-			this.$refs.rotateTemplatePanel.init(item);
-		},
 		apply() {
-			this.$refs.rotateTemplatePanel.apply();
-		},
-		newArrowStyle() {
-			store.get.csi(this.templateItem).isDirty = true;
-			this.$emit('new-values', 'CSI');
+			applyDirtyAction('pliItem');
 		},
 		newValues() {
-			this.$emit('new-values', {type: 'CSI', noLayout: true});
+			const pli = store.get.parent(this.selectedItem);
+			pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
+			this.$emit('new-values', 'PLIItem');
 		}
 	}
 };
 
 const pliTemplatePanel = {
 	template: '#pliTemplatePanel',
-	provide: {
-		templateEntry: 'pli'
-	},
 	data() {
 		return {
 			includeSubmodels: store.state.template.pli.includeSubmodels
@@ -137,9 +117,6 @@ const pliTemplatePanel = {
 // TODO: explore component 'extends' to make panel / subpanel nesting easier (https://vuejs.org/v2/api/#extends)
 const pageTemplatePanel = {
 	template: '#pageTemplatePanel',
-	provide: {
-		templateEntry: 'page'
-	},
 	data() {
 		const template = store.state.template.page;
 		return {
@@ -181,9 +158,6 @@ const pageTemplatePanel = {
 
 const pageNumberTemplatePanel = {
 	template: '#pageNumberTemplatePanel',
-	provide: {
-		templateEntry: 'page.numberLabel'
-	},
 	data() {
 		return {
 			position: store.state.template.page.numberLabel.position,
@@ -206,9 +180,6 @@ const pageNumberTemplatePanel = {
 
 const rotateIconTemplatePanel = {
 	template: '#rotateIconTemplatePanel',
-	provide: {
-		templateEntry: 'rotateIcon'
-	},
 	components: {
 		fillTemplatePanel,
 		borderTemplatePanel
@@ -222,9 +193,14 @@ const rotateIconTemplatePanel = {
 
 function createBasicPanel(templateType, templateEntry, undoText) {
 	return {
-		provide: {templateEntry},
 		render(createElement) {
-			return createElement(templateType, {on: {'new-values': this.newValues}});
+			return createElement(
+				templateType,
+				{
+					props: {templateEntry},
+					on: {'new-values': this.newValues}
+				}
+			);
 		},
 		methods: {
 			newValues() {
@@ -236,8 +212,11 @@ function createBasicPanel(templateType, templateEntry, undoText) {
 
 const componentLookup = {
 	templatePage: pageTemplatePanel,
-	csi: csiTemplatePanel,
-	pliItem: rotateTemplatePanel(),
+	csi: {
+		step: csiTemplatePanel('step.csi'),
+		submodelImage: csiTemplatePanel('submodelImage.csi')
+	},
+	pliItem: pliItemTemplatePanel,
 	pli: pliTemplatePanel,
 	callout: fillAndBorderTemplatePanel('callout'),
 	calloutArrow: createBasicPanel(borderTemplatePanel, 'callout.arrow', 'Callout Arrow'),

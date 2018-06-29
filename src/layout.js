@@ -226,14 +226,18 @@ const api = {
 		const part = LDParse.model.get.part(submodelImage.modelFilename);
 
 		let csiSize;
+		csi.isDirty = true;  // TODO: is this necessary?
 		if (csi.scale != null) {  // If user chose a manual scale factor, respect it
-			csiSize = store.render.pli(part, csi, 1, true);
+			csiSize = store.render.pli(part, csi);
 		} else {
-			csi.autoScale = 1;
-			csiSize = store.render.pli(part, csi, 1, true);
+			csi.autoScale = template.csi.scale;
+			csiSize = store.render.pli(part, csi);
 			if (csiSize.height > box.height * template.maxHeight) {
-				csi.autoScale = (box.height * template.maxHeight) / csiSize.height;
-				csiSize = store.render.pli(part, csi, 1, true);
+				csi.autoScale *= (box.height * template.maxHeight) / csiSize.height;
+				csi.isDirty = true;  // This is necessary because we just rendered it; need this to force re-render
+				csiSize = store.render.pli(part, csi);
+			} else {
+				csi.autoScale = null;
 			}
 		}
 

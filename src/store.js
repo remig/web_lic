@@ -167,14 +167,17 @@ const store = {
 			},
 			pli(part, item, hiResScale = 1, bypassCache) {
 				const scale = (getScale(item) || 1) * hiResScale;
-				const domID = `PLI_${part.filename}_${part.colorCode}`;
-				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : domID);
+				if (item.domID == null) {
+					item.domID = `PLI_${part.filename}_${part.colorCode}`;
+					item.isDirty = true;
+				}
+				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : item.domID);
 				if ((item && item.isDirty) || container == null || bypassCache) {
-					container = container || getCanvas(domID, bypassCache);
 					const config = {
 						resizeContainer: true,
 						rotation: getRotation(item)
 					};
+					container = container || getCanvas(item.domID, bypassCache);
 					LDRender.renderPart(part, container, 1000 * scale, config);
 					delete item.isDirty;
 				}
@@ -1325,7 +1328,7 @@ const store = {
 		pliItem: {
 			add(opts) { // opts: {parent, filename, colorCode, partNumbers}
 				const pliItem = store.mutations.item.add({item: {
-					type: 'pliItem',
+					type: 'pliItem', domID: null,
 					filename: opts.filename,
 					partNumbers: opts.partNumbers,
 					colorCode: opts.colorCode,
