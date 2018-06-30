@@ -3,7 +3,7 @@
 		<div class="form-group">
 			<label for="font" class="sr-only">Select a font</label>
 			<div class="col-sm-10">
-				<el-select v-model="family" @change="updateFontName" id="font">
+				<el-select id="font" v-model="family" @change="updateFontName">
 					<el-option-group v-for="group in familyNames" :key="group.label">
 						<el-option
 							v-for="font in group.options"
@@ -19,20 +19,20 @@
 		<div class="form-group">
 			<div class="col-sm-12">
 				<button
-					v-on:click.stop.prevent="toggleProp('bold')"
 					class="btn btn-secondary btn-primary"
+					@click.stop.prevent="toggleProp('bold')"
 				>
 					<strong>B</strong>
 				</button>
 				<button
-					v-on:click.stop.prevent="toggleProp('italic')"
 					class="btn btn-secondary"
+					@click.stop.prevent="toggleProp('italic')"
 				>
 					<em>I</em>
 				</button>
 				<button
-					v-on:click.stop.prevent="toggleProp('underline')"
 					class="btn btn-secondary"
+					@click.stop.prevent="toggleProp('underline')"
 				>
 					<u>U</u>
 				</button>
@@ -42,23 +42,23 @@
 			<label for="fontSize" class="control-label col-sm-4">Size</label>
 			<div class="col-sm-5">
 				<input
+					id="fontSize"
 					v-model.number="size"
-					v-on:input="updateValues"
 					type="number"
 					min="0"
 					class="form-control"
-					id="fontSize"
-				/>
+					@input="updateValues"
+				>
 			</div>
 		</div>
 		<div class="form-group">
 			<label for="borderColorInput" class="control-label col-sm-4">Color</label>
 			<el-color-picker
 				v-model="color"
-				v-on:active-change="updateColor"
-				v-on:change="updateValues"
 				show-alpha
-			></el-color-picker>
+				@active-change="updateColor"
+				@change="updateValues"
+			/>
 		</div>
 	</panel-base>
 </template>
@@ -70,7 +70,7 @@ import _ from '../../util';
 import store from '../../store';
 import Storage from '../../storage';
 import DialogManager from '../../dialog';
-import panelBase from './panel_base.vue';
+import PanelBase from './panel_base.vue';
 
 const familyNames = ['Helvetica', 'Times New Roman'];
 const customFamilyNames = Storage.get.customFonts();
@@ -92,10 +92,8 @@ function getFamilyNames() {
 // TODO: support underlining fonts in general
 // TODO: font styling buttons (bold, italic, underline) need to toggle
 export default {
+	components: {PanelBase},
 	props: ['templateEntry'],
-	components: {
-		panelBase
-	},
 	data() {
 		const template = _.get(this.templateEntry, store.state.template);
 		const fontParts = _.fontToFontParts(template.font);

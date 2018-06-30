@@ -3,7 +3,7 @@
 		<h5>{{title}}</h5>
 		<div class="panel-body">
 			<form class="form-horizontal">
-				<slot></slot>
+				<slot />
 			</form>
 		</div>
 	</div>
@@ -12,9 +12,7 @@
 <script>
 
 export default {
-	props: {
-		title: ''
-	}
+	props: ['title']
 };
 
 </script>

@@ -1,5 +1,5 @@
 <template>
-	<panel-base :title="this.title">
+	<panel-base :title="title">
 		<div class="form-group">
 			<label
 				for="fillColorInput"
@@ -8,43 +8,43 @@
 				Color
 			</label>
 			<el-color-picker
-				v-model="color"
-				v-on:active-change="updateColor"
-				v-on:change="updateValues"
-				show-alpha
 				id="fillColorInput"
-			></el-color-picker>
+				v-model="color"
+				show-alpha
+				@active-change="updateColor"
+				@change="updateValues"
+			/>
 		</div>
-		<div class="form-group" v-if="gradient != null">
+		<div v-if="gradient != null" class="form-group">
 			<label for="gradientInput" class="control-label col-sm-5">Gradient</label>
 			<label class="control-label">NYI</label>
 			<!-- <input v-model="gradient" v-on:input="updateValues" type="number" min="0" class="form-control" id="gradientInput"/> -->
 		</div>
-		<div class="form-group" v-if="imageFilename != null">
+		<div v-if="imageFilename != null" class="form-group">
 			<label for="imageInput" class="control-label col-sm-5">
 				Image
 				<el-button
+					v-if="imageFilename"
 					type="text"
 					class="template-close"
-					v-if="imageFilename"
 					icon="el-icon-close"
-					v-on:click="removeImage"
 					size="small"
-				></el-button>
+					@click="removeImage"
+				/>
 			</label>
 			<el-button
 				v-if="imageFilename"
 				icon="el-icon-picture-outline"
-				v-on:click="pickImage"
 				class="tight"
+				@click="pickImage"
 			>
 				{{truncatedImageName}}
 			</el-button>
 			<el-button
 				v-else
 				icon="el-icon-picture-outline"
-				v-on:click="pickImage"
-			></el-button>
+				@click="pickImage"
+			/>
 		</div>
 	</panel-base>
 </template>
@@ -54,15 +54,13 @@
 import _ from '../../util';
 import store from '../../store';
 import openFileHandler from '../../fileUploader';
-import panelBase from './panel_base.vue';
+import PanelBase from './panel_base.vue';
 
 export default {
+	components: {PanelBase},
 	props: {
-		templateEntry: '',
+		templateEntry: {type: String, required: true},
 		title: {type: String, default: 'Fill'}
-	},
-	components: {
-		panelBase
 	},
 	data() {
 		const template = _.get(this.templateEntry, store.state.template).fill;

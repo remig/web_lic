@@ -12,9 +12,8 @@ import _ from '../../util';
 import LDParse from '../../LDParse';
 
 export default {
-	name: 'treeRow',
+	name: 'TreeRow',
 	props: ['currentItem', 'target', 'selectionCallback'],
-	template: '#treeRowTemplate',
 	methods: {
 		itemClick() {
 			this.selectionCallback(this.target);  // Easier and faster than emitting an event across 3 levels of components

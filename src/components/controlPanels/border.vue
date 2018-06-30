@@ -9,35 +9,35 @@
 			</label>
 			<el-color-picker
 				v-model="color"
-				v-on:active-change="updateColor"
-				v-on:change="updateValues"
 				show-alpha
-			></el-color-picker>
+				@active-change="updateColor"
+				@change="updateValues"
+			/>
 		</div>
 		<div class="form-group">
 			<label for="lineWidth" class="control-label col-sm-7">Line Width</label>
 			<div class="col-sm-5">
 				<input
+					id="lineWidth"
 					v-model.number="width"
-					v-on:input="updateValues"
 					type="number"
 					min="0"
 					class="form-control"
-					id="lineWidth"
-				/>
+					@input="updateValues"
+				>
 			</div>
 		</div>
-		<div class="form-group" v-if="cornerRadius != null">
+		<div v-if="cornerRadius != null" class="form-group">
 			<label for="cornerRadius" class="control-label col-sm-7">Corner Radius</label>
 			<div class="col-sm-5">
 				<input
+					id="cornerRadius"
 					v-model.number="cornerRadius"
-					v-on:input="updateValues"
 					type="number"
 					min="0"
 					class="form-control"
-					id="cornerRadius"
-				/>
+					@input="updateValues"
+				>
 			</div>
 		</div>
 	</panel-base>
@@ -47,15 +47,13 @@
 
 import _ from '../../util';
 import store from '../../store';
-import panelBase from './panel_base.vue';
+import PanelBase from './panel_base.vue';
 
 export default {
+	components: {PanelBase},
 	props: {
-		templateEntry: '',
+		templateEntry: {type: String, required: true},
 		title: {type: String, default: 'Border'}
-	},
-	components: {
-		panelBase
 	},
 	data() {
 		const template = _.get(this.templateEntry, store.state.template).border;

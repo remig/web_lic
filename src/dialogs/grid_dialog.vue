@@ -1,11 +1,11 @@
 <template>
 	<el-dialog
-		class="gridDialog"
 		:title="tr('dialog.grid.title')"
-		width="500px"
 		:modal="false"
 		:show-close="false"
 		:visible="visible"
+		class="gridDialog"
+		width="500px"
 	>
 		<el-form label-width="140px">
 			<el-form-item :label="tr('dialog.grid.enabled')">
@@ -14,60 +14,73 @@
 					@change="update"
 				/>
 			</el-form-item>
-			<el-form-item :label="tr('dialog.grid.spacing')" :disabled="newState.enabled">
+			<el-form-item
+				:label="tr('dialog.grid.spacing')"
+				:disabled="newState.enabled"
+			>
 				<input
 					v-model.number="newState.spacing"
-					@input="update"
 					:disabled="!newState.enabled"
-					min="1" max="10000"
+					min="1"
+					max="10000"
 					type="number"
 					class="form-control"
-				/>
+					@input="update"
+				>
 			</el-form-item>
-			<el-form-item :label="tr('dialog.grid.offset')" :disabled="newState.enabled">
+			<el-form-item
+				:label="tr('dialog.grid.offset')"
+				:disabled="newState.enabled"
+			>
 				<span class="gridInlineLabel">{{tr("dialog.grid.offset_top")}}</span>
 				<input
 					v-model.number="newState.offset.top"
-					@input="update"
 					:disabled="!newState.enabled"
-					min="-1000" max="10000"
+					min="-1000"
+					max="10000"
 					type="number"
 					class="form-control"
-				/>
+					@input="update"
+				>
 				<span class="gridInlineLabel2">{{tr("dialog.grid.offset_left")}}</span>
 				<input
 					v-model.number="newState.offset.left"
-					@input="update"
 					:disabled="!newState.enabled"
-					min="-1000" max="10000"
+					min="-1000"
+					max="10000"
 					type="number"
 					class="form-control"
-				/>
+					@input="update"
+				>
 			</el-form-item>
 			<el-form-item :label="tr('dialog.grid.line_style')">
-				<el-form-item :label="tr('dialog.grid.color')" label-width="70px">
+				<el-form-item
+					:label="tr('dialog.grid.color')"
+					label-width="70px"
+				>
 					<el-checkbox
 						v-model="useAutoColor"
-						@change="update"
 						:disabled="!newState.enabled"
 						:label="tr('dialog.grid.auto_color')"
 						class="gridAutoChecbox"
+						@change="update"
 					/>
 					<el-color-picker
 						v-model="lineColor"
-						v-on:active-change="updateColor"
 						:disabled="useAutoColor || !newState.enabled"
+						@active-change="updateColor"
 					/>
 				</el-form-item>
 				<el-form-item :label="tr('dialog.grid.width')" label-width="70px">
 					<input
 						v-model.number="newState.line.width"
-						@input="update"
 						:disabled="!newState.enabled"
-						min="1" max="100"
+						min="1"
+						max="100"
 						type="number"
 						class="form-control"
-					/>
+						@input="update"
+					>
 				</el-form-item>
 				<el-form-item :label="tr('dialog.grid.dash')" label-width="70px">
 					<span class="gridInlineLabel">(NYI)</span>

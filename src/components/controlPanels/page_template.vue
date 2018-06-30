@@ -15,11 +15,11 @@
 						<div class="col-sm-5">
 							<input
 								v-model.number="width"
-								v-on:input="updateValues"
 								type="number"
 								min="0"
 								class="form-control"
-							/>
+								@input="updateValues"
+							>
 						</div>
 					</div>
 					<div class="form-group marginB05">
@@ -27,11 +27,11 @@
 						<div class="col-sm-5">
 							<input
 								v-model.number="height"
-								v-on:input="updateValues"
 								type="number"
 								min="0"
 								class="form-control col-sm-10"
-							/>
+								@input="updateValues"
+							>
 						</div>
 					</div>
 				</form>
@@ -39,20 +39,20 @@
 		</div>
 		<fill-panel
 			template-entry="page"
-			v-on:new-values="newValues"
-		></fill-panel>
+			@new-values="newValues"
+		/>
 		<border-panel
 			template-entry="page"
-			v-on:new-values="newValues"
-		></border-panel>
+			@new-values="newValues"
+		/>
 	</div>
 </template>
 
 <script>
 
 import store from '../../store';
-import fillPanel from './fill.vue';
-import borderPanel from './border.vue';
+import FillPanel from './fill.vue';
+import BorderPanel from './border.vue';
 
 // TODO: add default page layout UI
 // TODO: should add UI to choose whether to redo layout or just extend canvas
@@ -60,6 +60,7 @@ import borderPanel from './border.vue';
 // TODO: for page size, add preset sizes like 'A4', 'legal', etc.  See here for list of formats & sizes: https://github.com/MrRio/jsPDF/blob/master/jspdf.js
 // TODO: explore component 'extends' to make panel / subpanel nesting easier (https://vuejs.org/v2/api/#extends)
 export default {
+	components: {FillPanel, BorderPanel},
 	data() {
 		const template = store.state.template.page;
 		return {
@@ -68,10 +69,6 @@ export default {
 			aspectRatio: template.width / template.height,
 			maintainAspectRatio: true
 		};
-	},
-	components: {
-		fillPanel,
-		borderPanel
 	},
 	methods: {
 		changeAspectRatio() {

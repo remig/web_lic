@@ -6,7 +6,7 @@ import uiState from '../uiState';
 
 export default {
 
-	name: 'guide',
+	name: 'Guide',
 	props: ['position', 'orientation', 'pageSize', 'id'],
 	data() {
 		return {

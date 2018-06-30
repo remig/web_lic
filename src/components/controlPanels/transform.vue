@@ -6,11 +6,12 @@
 				<input
 					id="xRotation"
 					v-model.number="x"
-					v-on:input="updateValues"
 					type="number"
-					min="-360" max="360"
+					min="-360"
+					max="360"
 					class="form-control"
-				/>
+					@input="updateValues"
+				>
 			</div>
 		</div>
 		<div class="form-group">
@@ -19,11 +20,12 @@
 				<input
 					id="yRotation"
 					v-model.number="y"
-					v-on:input="updateValues"
 					type="number"
-					min="-360" max="360"
+					min="-360"
+					max="360"
 					class="form-control"
-				/>
+					@input="updateValues"
+				>
 			</div>
 		</div>
 		<div class="form-group">
@@ -32,11 +34,12 @@
 				<input
 					id="zRotation"
 					v-model.number="z"
-					v-on:input="updateValues"
 					type="number"
-					min="-360" max="360"
+					min="-360"
+					max="360"
 					class="form-control"
-				/>
+					@input="updateValues"
+				>
 			</div>
 		</div>
 		<h5>Scale</h5>
@@ -45,11 +48,13 @@
 				<input
 					id="scaleInput"
 					v-model.number="scale"
-					v-on:input="updateValues"
 					type="number"
-					min="0" max="10" step="0.1"
+					min="0"
+					max="10"
+					step="0.1"
 					class="form-control"
-				/>
+					@input="updateValues"
+				>
 			</div>
 		</div>
 	</panel-base>
@@ -64,8 +69,8 @@ import panelBase from './panel_base.vue';
 // TODO: support underlining fonts in general
 // TODO: font styling buttons (bold, italic, underline) need to toggle
 export default {
-	props: ['templateEntry'],
 	components: {panelBase},
+	props: ['templateEntry'],
 	data() {
 		const template = _.get(this.templateEntry, store.state.template);
 		this.templateItem = _.clone({});

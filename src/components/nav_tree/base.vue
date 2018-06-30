@@ -2,30 +2,34 @@
 	<div id="tree">
 		<ul>
 			<li v-if="treeData.store.get.templatePage() != null">
-				<treeExpandableRow
+				<TreeExpandableRow
 					:tree-data="treeData"
-					:currentItem="currentItem"
+					:current-item="currentItem"
 					:target="treeData.store.get.templatePage()"
 				/>
 			</li>
 			<li v-if="treeData.store.get.titlePage() != null">
-				<treeExpandableRow
+				<TreeExpandableRow
 					:tree-data="treeData"
-					:currentItem="currentItem"
+					:current-item="currentItem"
 					:target="treeData.store.get.titlePage()"
 				/>
 			</li>
-			<li v-for="node in treeData.store.get.topLevelTreeNodes()">
-				<treeExpandableRow
+			<li
+				v-for="(node, idx) in treeData.store.get.topLevelTreeNodes()"
+				:key="`root_${idx}`"
+			>
+				<TreeExpandableRow
 					v-if="node.type === 'page'"
 					:tree-data="treeData"
-					:currentItem="currentItem"
+					:current-item="currentItem"
 					:target="node"
 				/>
-				<treeRow
-					v-else :currentItem="currentItem"
+				<TreeRow
+					v-else
+					:current-item="currentItem"
 					:target="node"
-					:selectionCallback="treeData.selectionCallback"
+					:selection-callback="treeData.selectionCallback"
 				/>
 			</li>
 		</ul>
@@ -34,17 +38,13 @@
 
 <script>
 
-import treeExpandableRow from './expandable_row.vue';
-import treeRow from './row.vue';
+import TreeExpandableRow from './expandable_row.vue';
+import TreeRow from './row.vue';
 
 export default {
-	name: 'navTree',
-	props: ['treeData', 'currentItem'],
-	components: {treeExpandableRow, treeRow}
+	name: 'NavTree',
+	components: {TreeExpandableRow, TreeRow},
+	props: ['treeData', 'currentItem']
 };
 
 </script>
-
-<style>
-
-</style>
