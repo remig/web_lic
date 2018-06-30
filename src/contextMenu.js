@@ -479,7 +479,7 @@ const contextMenu = {
 					}
 				},
 				{
-					text: 'None',
+					text: 'Remove Rotation',
 					shown(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
 						return csi.rotation != null;
@@ -1014,7 +1014,7 @@ const contextMenu = {
 						undoStack.commit('part.displace', {step, ...displacement}, 'Adjust Displaced Part');
 					});
 					dialog.$on('cancel', () => {
-						displacement.distance = originalDisplacement.distance;
+						displacement.partDistance = originalDisplacement.partDistance;
 						displacement.arrowOffset = originalDisplacement.arrowOffset;
 						displacement.arrowLength = originalDisplacement.arrowLength;
 						displacement.arrowRotation = originalDisplacement.arrowRotation;
@@ -1022,14 +1022,14 @@ const contextMenu = {
 						app.redrawUI(true);
 					});
 					dialog.$on('update', newValues => {
-						displacement.distance = newValues.partDistance;
+						displacement.partDistance = newValues.partDistance;
 						displacement.arrowOffset = newValues.arrowOffset;
 						displacement.arrowLength = newValues.arrowLength;
 						displacement.arrowRotation = newValues.arrowRotation;
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
-					dialog.partDistance = displacement.distance;
+					dialog.partDistance = displacement.partDistance;
 					dialog.arrowOffset = displacement.arrowOffset;
 					dialog.arrowLength = displacement.arrowLength;
 					dialog.arrowRotation = displacement.arrowRotation;

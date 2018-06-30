@@ -6,6 +6,17 @@ const api = {
 
 		const state = content.state;
 
+		state.steps.forEach(step => {
+			if (step.displacedParts) {
+				step.displacedParts.forEach(d => {
+					if (d.hasOwnProperty('distance')) {
+						d.partDistance = d.distance;
+						delete d.distance;
+					}
+				});
+			}
+		});
+
 		state.callouts.forEach(callout => {
 			if (!callout.hasOwnProperty('borderOffset')) {
 				callout.borderOffset = {x: 0, y: 0};

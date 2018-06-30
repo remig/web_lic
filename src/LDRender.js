@@ -329,16 +329,17 @@ const arrowDimensions = {
 	}
 };
 
+// Arrow geometry has base at (0, 0, 0), pointing straight down along Y, facing forward along Z
 function getArrowGeometry(length) {
 	const head = arrowDimensions.head, body = arrowDimensions.body;
 	const geom = new THREE.Geometry();
-	geom.vertices.push(new THREE.Vector3(0, 0, 0));
-	geom.vertices.push(new THREE.Vector3(-head.width, -head.length, 0));
-	geom.vertices.push(new THREE.Vector3(-body.width, -head.length + head.insetDepth, 0));
-	geom.vertices.push(new THREE.Vector3(body.width, -head.length + head.insetDepth, 0));
-	geom.vertices.push(new THREE.Vector3(head.width, -head.length, 0));
-	geom.vertices.push(new THREE.Vector3(body.width, -length - head.length, 0));
-	geom.vertices.push(new THREE.Vector3(-body.width, -length - head.length, 0));
+	geom.vertices.push(new THREE.Vector3(0, length, 0));  // 0
+	geom.vertices.push(new THREE.Vector3(-head.width, length - head.length, 0));  // 1
+	geom.vertices.push(new THREE.Vector3(-body.width, length - head.length + head.insetDepth, 0));  // 2
+	geom.vertices.push(new THREE.Vector3( body.width, length - head.length + head.insetDepth, 0));  // 3
+	geom.vertices.push(new THREE.Vector3( head.width, length - head.length, 0));  // 4
+	geom.vertices.push(new THREE.Vector3(body.width, 0, 0));  // 5
+	geom.vertices.push(new THREE.Vector3(-body.width, 0, 0));  // 6
 	geom.faces.push(new THREE.Face3(0, 1, 2));
 	geom.faces.push(new THREE.Face3(0, 2, 3));
 	geom.faces.push(new THREE.Face3(0, 3, 4));
@@ -392,7 +393,7 @@ function lineSide(p, l1, l2) {
 }
 
 function getPartDisplacement(displacement) {
-	const dt = displacement.distance || 60;
+	const dt = displacement.partDistance;
 	switch (displacement.direction) {
 		case 'left':
 			return {x: -dt, y: 0, z: 0};
@@ -410,88 +411,84 @@ function getPartDisplacement(displacement) {
 	}
 }
 
-function positionArrow(arrowMesh, partMesh, partMatrix, direction, offset) {
-
+function getArrowInitialPosition(partMesh) {
 	const partBox = new THREE.Box3().setFromObject(partMesh);
-	let dx = 0, dy = 0;
+	const center = partBox.getCenter();
+	return new THREE.Matrix4().makeTranslation(center.x, center.y, center.z);
+}
+
+function getArrowOffsetPosition(partBox, {direction, arrowOffset = 0}) {
+
+	const max = partBox.max, min = partBox.min;
+	let x = 0, y = 0, z = 0;
 
 	switch (direction) {
 		case 'left':
-			dy = (partBox.max.y - partBox.min.y) / 2;
+			x = ((max.x - min.x) / 2) + arrowOffset;
 			break;
 		case 'right':
-			dx = -(partBox.max.x - partBox.min.x) / 2;
-			dy = (partBox.max.y - partBox.min.y) / 2;
+			x = -((max.x - min.x) / 2) - arrowOffset;
 			break;
 		case 'forward':
-			dy = (partBox.max.y - partBox.min.y) / 2;
+			z = ((max.z - min.z) / 2) + arrowOffset;
 			break;
 		case 'backward':
-			dy = (partBox.max.y - partBox.min.y) / 2;
+			z = -((max.z - min.z) / 2) - arrowOffset;
 			break;
 		case 'down':
-			dy = -7;
+			y = -((max.y - min.y) / 2) - arrowOffset;
 			break;
 		case 'up':
 		default:
-			dy = partBox.max.y - partBox.min.y - 7 - offset;
+			y = ((max.y - min.y) / 2) + arrowOffset - 6;  // -6 because arrow almost always lands on top of a stud, and a stud is about 6 units tall
 			break;
 	}
-
-	const arrowMatrix = LDMatrixToMatrix(partMatrix);
-	arrowMatrix.extractRotation(new THREE.Matrix4());
-	arrowMatrix.multiply(new THREE.Matrix4().makeTranslation(dx, dy, 0));
-	return arrowMatrix;
+	return new THREE.Matrix4().makeTranslation(x, y, z);
 }
 
-function rotateArrow(arrowMesh, direction, initialRotation) {
+function getArrowRotation({direction, arrowRotation = 0}) {
 	let x = 0, y = 0, z = 0;
 	switch (direction) {
 		case 'left':
 			z = -90;
-			x = -45 + initialRotation;
+			x = -45 + arrowRotation;
 			break;
 		case 'right':
 			z = 90;
-			x = -45 + initialRotation;
+			x = -45 + arrowRotation;
 			break;
 		case 'forward':
 			x = 90;
-			y = 45 + initialRotation;
+			y = 45 + arrowRotation;
 			break;
 		case 'backward':
 			x = -90;
-			y = -45 + initialRotation;
+			y = -45 + arrowRotation;
 			break;
 		case 'down':
 			x = 180;
-			y = 45 + initialRotation;
+			y = 45 + arrowRotation;
 			break;
 		case 'up':
 		default:
-			y = -45 + initialRotation;
+			y = -45 + arrowRotation;
 			break;
 	}
 	const rot = new THREE.Euler(rad(x), rad(y), rad(z), 'XYZ');
 	return new THREE.Matrix4().makeRotationFromEuler(rot);
 }
 
-function getArrowMesh(partMesh, partMatrix, partRotation, displacement) {
+function getArrowMesh(partMesh, partBox, partRotation, displacement) {
 
-	const direction = displacement.direction;
-	const offset = displacement.arrowOffset || 0;
-	const rotation = displacement.arrowRotation || 0;
-	const length = (displacement.arrowLength == null)
-		? (displacement.distance || 60) - offset - 25
-		: displacement.arrowLength;
-
-	const arrowMesh = new THREE.Mesh(getArrowGeometry(length), arrowMaterial);
-
-	const arrowMatrix = positionArrow(arrowMesh, partMesh, partMatrix, direction, offset);
+	const arrowGeometry = getArrowGeometry(displacement.arrowLength);
+	const arrowMesh = new THREE.Mesh(arrowGeometry, arrowMaterial);
+	const arrowMatrix = new THREE.Matrix4();
+	arrowMatrix.multiply(getArrowInitialPosition(partMesh));
 	if (partRotation) {
-		arrowMatrix.premultiply(partRotation);
+		arrowMatrix.multiply(partRotation);
 	}
-	arrowMatrix.multiply(rotateArrow(arrowMesh, direction, rotation));
+	arrowMatrix.multiply(getArrowOffsetPosition(partBox, displacement));
+	arrowMatrix.multiply(getArrowRotation(displacement));
 	arrowMesh.applyMatrix(arrowMatrix);
 
 	return arrowMesh;
@@ -531,6 +528,12 @@ function addModelToScene(scene, model, partIDList, config) {
 
 		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterials;
 		const mesh = new THREE.Mesh(partGeometry.faces, faceMat);
+
+		let meshBox;
+		if (displacement) {
+			meshBox = new THREE.Box3().setFromObject(mesh);  // Store copy of untransformed part bounding box, for displacement arrow positioning later
+		}
+
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
 
@@ -542,7 +545,7 @@ function addModelToScene(scene, model, partIDList, config) {
 			if (config.displacementArrowColor) {
 				arrowMaterial.color.set(config.displacementArrowColor);
 			}
-			const arrowMesh = getArrowMesh(mesh, part.matrix, partRotation, displacement);
+			const arrowMesh = getArrowMesh(mesh, meshBox, partRotation, displacement);
 			scene.add(arrowMesh);
 		}
 

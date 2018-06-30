@@ -219,6 +219,7 @@ const api = {
 	submodelImage(submodelImage, box) {
 
 		// TODO: consider multiple submodels in one step; can only shrink so much, might need to lay out horizontally
+		// TODO: Try and make submodel boxes the same size as PLI boxes, if that new 'make PLIs the same size' option is checked
 		const template = store.state.template.submodelImage;
 
 		const margin = getMargin(store.state.template.submodelImage.innerMargin);
@@ -392,6 +393,7 @@ const api = {
 	},
 
 	subSteps(step, stepBox) {
+		// TODO: sub steps should be able to span multiple pages
 		// TODO: this dupes a lot of logic from page.layout; abstract both to a generic 'grid' layout call
 		const stepCount = step.steps.length;
 		let cols = Math.ceil(Math.sqrt(stepCount));

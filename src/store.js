@@ -683,20 +683,21 @@ const store = {
 		},
 		// TODO: include parts in the nav Tree
 		part: {
-			displace(opts) { // opts: {partID, step, direction, distance = 60, arrowOffset = 0, arrowLength = 35, arrowRotation = 0}.  If direction == null, remove displacement
+			displace(opts) { // opts: {partID, step, direction, partDistance = 60, arrowOffset = 0, arrowLength = 60, arrowRotation = 0}.  If direction == null, remove displacement
 				const step = store.get.lookupToItem(opts.step);
 				delete opts.step;
+				const displacementDistance = 60;
 				store.mutations.csi.resetSize({csi: step.csiID});
-				opts.distance = (opts.distance == null) ? 60 : opts.distance;
+				opts.partDistance = (opts.partDistance == null) ? displacementDistance : opts.partDistance;
 				opts.arrowOffset = (opts.arrowOffset == null) ? 0 : opts.arrowOffset;
-				opts.arrowLength = (opts.arrowLength == null) ? 35 : opts.arrowLength;
+				opts.arrowLength = (opts.arrowLength == null) ? displacementDistance : opts.arrowLength;
 				opts.arrowRotation = (opts.arrowRotation == null) ? 0 : opts.arrowRotation;
 				step.displacedParts = step.displacedParts || [];
 				const idx = step.displacedParts.findIndex(p => p.partID === opts.partID);
 				if (opts.direction) {
 					if (idx >= 0) {
 						step.displacedParts[idx].direction = opts.direction;
-						step.displacedParts[idx].distance = opts.distance;
+						step.displacedParts[idx].partDistance = opts.partDistance;
 						step.displacedParts[idx].arrowOffset = opts.arrowOffset;
 						step.displacedParts[idx].arrowLength = opts.arrowLength;
 						step.displacedParts[idx].arrowRotation = opts.arrowRotation;
@@ -1445,6 +1446,7 @@ const store = {
 		},
 		addTitlePage() {
 
+			// TODO: need submodel + bag breakdown page, final 'no step' complete model page and part inventory page
 			const page = store.state.titlePage = store.mutations.page.add({pageType: 'titlePage'});
 			page.number = 1;
 			store.mutations.page.renumber();  // TODO: this doesn't update the page numbers in the tree
