@@ -13,7 +13,7 @@ import LocaleManager from './translate';
 import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
 import DialogManager from './dialog';
-import './tree';
+import NavTree from './components/nav_tree/base.vue';
 import './pageView';
 import './templatePanel';
 
@@ -49,6 +49,7 @@ Vue.use({  // This adds a 'tr' method to every component, which makes translatin
 
 const app = new Vue({
 	el: '#container',
+	components: {NavTree},
 	data: {  // Store any transient UI state data here.  Do *not* store state items here; Vue turns these into observers
 		currentPageLookup: null,
 		selectedItemLookup: null,

@@ -1,10 +1,18 @@
-/* global Vue: false */
-'use strict';
+<template>
+	<span
+		:id="`treeRow_${target.type}_${target.id}`"
+		:class="['clickable', 'treeText', {selected: selected}]"
+		@click.stop.prevent="itemClick"
+	>{{text}}</span>
+</template>
 
-import _ from './util';
-import LDParse from './LDParse';
+<script>
 
-Vue.component('treeRow', {
+import _ from '../../util';
+import LDParse from '../../LDParse';
+
+export default {
+	name: 'treeRow',
 	props: ['currentItem', 'target', 'selectionCallback'],
 	template: '#treeRowTemplate',
 	methods: {
@@ -61,24 +69,10 @@ Vue.component('treeRow', {
 			return _.prettyPrint(t.type);
 		}
 	}
-});
+};
 
-Vue.component('treeParentRow', {
-	props: ['treeData', 'currentItem', 'target'],
-	template: '#treeParentRowTemplate',
-	data() {
-		return {
-			expanded: false
-		};
-	},
-	methods: {
-		arrowClick() {
-			this.expanded = !this.expanded;
-		}
-	}
-});
+</script>
 
-Vue.component('tree', {
-	props: ['treeData', 'currentItem'],
-	template: '#treeTemplate'
-});
+<style>
+
+</style>

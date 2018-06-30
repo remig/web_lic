@@ -62,7 +62,7 @@
 		<div class="mainBody" @contextmenu.stop.prevent="rightClick($event)">
 
 			<div id="leftPane" class="split split-horizontal">
-				<tree :tree-data="treeData" :current-item="selectedItemLookup"></tree>
+				<nav-tree :tree-data="treeData" :current-item="selectedItemLookup"></nav-tree>
 			</div>
 
 			<div id="rightPane" class="split split-horizontal">
@@ -186,139 +186,6 @@
 				</ul>
 			</li>
 		</ul>
-	</script>
-
-	<!-- Nav Tree Components -->
-	<script type="text/x-template" id="treeRowTemplate">
-		<span
-			:id="`treeRow_${target.type}_${target.id}`"
-			:class="['clickable', 'treeText', {selected: selected}]"
-			@click.stop.prevent="itemClick"
-		>{{text}}</span>
-	</script>
-
-	<script type="text/x-template" id="treeParentRowTemplate">
-		<div :id="`treeParent_${target.type}_${target.id}`">
-			<i
-				:class="['treeIcon', 'fas', 'fa-lg', {'fa-caret-down': expanded, 'fa-caret-right': !expanded}]"
-				@click.stop.prevent="arrowClick"
-			/>
-			<treeRow
-				:currentItem="currentItem"
-				:target="target"
-				:selectionCallback="treeData.selectionCallback"
-			/>
-			<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">
-				<li v-if="target.numberLabelID != null">
-					<treeRow
-						:currentItem="currentItem"
-						:target="treeData.store.get.numberLabel(target.numberLabelID)"
-						:selectionCallback="treeData.selectionCallback"
-					/>
-				</li>
-				<template v-if="target.annotations != null">
-					<li v-for="annotationID in target.annotations">
-						<treeRow
-							:currentItem="currentItem"
-							:target="treeData.store.get.annotation(annotationID)"
-							:selectionCallback="treeData.selectionCallback"
-						/>
-					</li>
-				</template>
-				<template v-if="target.steps != null">
-					<li
-						v-for="step in this.target.steps.map(id => treeData.store.get.step(id))"
-						class="unindent"
-					>
-						<treeParentRow :tree-data="treeData" :currentItem="currentItem" :target="step" />
-					</li>
-				</template>
-				<template v-if="target.submodelImages != null">
-					<li
-						v-for="submodelImage in target.submodelImages.map(id => treeData.store.get.submodelImage(id))"
-					>
-						<treeRow
-							:currentItem="currentItem"
-							:target="submodelImage"
-							:selectionCallback="treeData.selectionCallback"
-						/>
-					</li>
-				</template>
-				<li v-if="target.csiID != null">
-					<treeRow
-						:currentItem="currentItem"
-						:target="treeData.store.get.csi(target.csiID)"
-						:selectionCallback="treeData.selectionCallback"
-					/>
-				</li>
-				<li v-if="target.pliID != null && treeData.store.state.plisVisible" class="unindent">
-					<treeParentRow
-						:tree-data="treeData"
-						:currentItem="currentItem"
-						:target="treeData.store.get.pli(target.pliID)"
-					/>
-				</li>
-				<template v-if="target.pliItems != null">
-					<li v-for="pliItem in target.pliItems.map(id => treeData.store.get.pliItem(id))">
-						<treeRow
-							:currentItem="currentItem"
-							:target="pliItem"
-							:selectionCallback="treeData.selectionCallback"
-						/>
-					</li>
-				</template>
-				<li v-if="target.quantityLabelID != null">
-					<treeRow
-						:currentItem="currentItem"
-						:target="treeData.store.get.quantityLabel(target.quantityLabelID)"
-						:selectionCallback="treeData.selectionCallback"
-					/>
-				</li>
-				<template v-if="target.callouts != null">
-					<li v-for="calloutID in target.callouts" class="unindent">
-						<treeParentRow
-							:tree-data="treeData"
-							:currentItem="currentItem"
-							:target="treeData.store.get.callout(calloutID)"
-						/>
-					</li>
-				</template>
-			</ul>
-		</div>
-	</script>
-
-	<script type="text/x-template" id="treeTemplate">
-		<div id="tree">
-			<ul>
-				<li v-if="treeData.store.get.templatePage() != null">
-					<treeParentRow
-						:tree-data="treeData"
-						:currentItem="currentItem"
-						:target="treeData.store.get.templatePage()"
-					/>
-				</li>
-				<li v-if="treeData.store.get.titlePage() != null">
-					<treeParentRow
-						:tree-data="treeData"
-						:currentItem="currentItem"
-						:target="treeData.store.get.titlePage()"
-					/>
-				</li>
-				<li v-for="node in treeData.store.get.topLevelTreeNodes()">
-					<treeParentRow
-						v-if="node.type === 'page'"
-						:tree-data="treeData"
-						:currentItem="currentItem"
-						:target="node"
-					/>
-					<treeRow
-						v-else :currentItem="currentItem"
-						:target="node"
-						:selectionCallback="treeData.selectionCallback"
-					/>
-				</li>
-			</ul>
-		</div>
 	</script>
 
 	<!-- Dialog Components -->
