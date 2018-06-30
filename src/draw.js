@@ -222,13 +222,12 @@ const api = {
 
 		ctx.save();
 		ctx.scale(1 / hiResScale, 1 / hiResScale);
-		ctx.translate(Math.floor(pli.x), Math.floor(pli.y));
 		pliItems.forEach(idx => {
 			const pliItem = store.get.pliItem(idx);
 			const part = localModel.parts[pliItem.partNumbers[0]];
 			const pliCanvas = store.render.pli(part, pliItem, hiResScale, noCache).container;
-			const x = Math.floor(pliItem.x * hiResScale);
-			const y = Math.floor(pliItem.y * hiResScale);
+			const x = Math.floor((pli.x + pliItem.x) * hiResScale);
+			const y = Math.floor((pli.y + pliItem.y) * hiResScale);
 			ctx.drawImage(pliCanvas, x, y);
 		});
 		ctx.restore();
