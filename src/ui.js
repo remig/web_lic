@@ -12,7 +12,6 @@ import Storage from './storage';
 import LocaleManager from './translate';
 import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
-import Guide from './components/guide.vue';
 import DialogManager from './dialog';
 import './tree';
 import './pageView';
@@ -47,8 +46,6 @@ Vue.use({  // This adds a 'tr' method to every component, which makes translatin
 		};
 	}
 });
-
-Vue.component('guide', Guide);
 
 const app = new Vue({
 	el: '#container',

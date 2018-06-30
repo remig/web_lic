@@ -6,6 +6,7 @@ import Draw from './draw';
 import store from './store';
 import undoStack from './undoStack';
 import uiState from './uiState';
+import Guide from './components/guide.vue';
 
 Vue.component('pageView', {
 	render(createElement) {
@@ -47,7 +48,7 @@ Vue.component('pageView', {
 				guides = uiState.get('guides').map((props, guideID) => {
 					const offset = {left: 0, top: 0};
 					return createElement(
-						'guide',
+						Guide,
 						{
 							ref: `guide-${guideID}`,
 							props: {
