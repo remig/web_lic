@@ -10,14 +10,14 @@
 			:selection-callback="treeData.selectionCallback"
 		/>
 		<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">
-			<li v-if="target.numberLabelID != null">
+			<li v-if="target.numberLabelID != null && rowVisibility.numberLabels">
 				<TreeRow
 					:current-item="currentItem"
 					:target="treeData.store.get.numberLabel(target.numberLabelID)"
 					:selection-callback="treeData.selectionCallback"
 				/>
 			</li>
-			<template v-if="target.annotations != null">
+			<template v-if="target.annotations != null && rowVisibility.annotations">
 				<li
 					v-for="annotationID in target.annotations"
 					:key="`annotation_${annotationID}`"
@@ -29,7 +29,7 @@
 					/>
 				</li>
 			</template>
-			<template v-if="target.steps != null">
+			<template v-if="target.steps != null && rowVisibility.steps">
 				<li
 					v-for="step in target.steps.map(id => treeData.store.get.step(id))"
 					:key="`step_${step.id}`"
@@ -37,12 +37,13 @@
 				>
 					<TreeExpandableRow
 						:tree-data="treeData"
+						:row-visibility="rowVisibility"
 						:current-item="currentItem"
 						:target="step"
 					/>
 				</li>
 			</template>
-			<template v-if="target.submodelImages != null">
+			<template v-if="target.submodelImages != null && rowVisibility.submodelImages">
 				<li
 					v-for="submodelImage in target.submodelImages.map(id => treeData.store.get.submodelImage(id))"
 					:key="`submodelImage_${submodelImage.id}`"
@@ -54,7 +55,7 @@
 					/>
 				</li>
 			</template>
-			<li v-if="target.csiID != null">
+			<li v-if="target.csiID != null && rowVisibility.csis">
 				<TreeRow
 					:current-item="currentItem"
 					:target="treeData.store.get.csi(target.csiID)"
@@ -62,16 +63,17 @@
 				/>
 			</li>
 			<li
-				v-if="target.pliID != null && treeData.store.state.plisVisible"
+				v-if="target.pliID != null && treeData.store.state.plisVisible && rowVisibility.plis"
 				class="unindent"
 			>
 				<TreeExpandableRow
 					:tree-data="treeData"
+					:row-visibility="rowVisibility"
 					:current-item="currentItem"
 					:target="treeData.store.get.pli(target.pliID)"
 				/>
 			</li>
-			<template v-if="target.pliItems != null">
+			<template v-if="target.pliItems != null && rowVisibility.pliItems">
 				<li
 					v-for="pliItem in target.pliItems.map(id => treeData.store.get.pliItem(id))"
 					:key="`pliItem_${pliItem.id}`"
@@ -83,14 +85,14 @@
 					/>
 				</li>
 			</template>
-			<li v-if="target.quantityLabelID != null">
+			<li v-if="target.quantityLabelID != null && rowVisibility.quantityLabels">
 				<TreeRow
 					:current-item="currentItem"
 					:target="treeData.store.get.quantityLabel(target.quantityLabelID)"
 					:selection-callback="treeData.selectionCallback"
 				/>
 			</li>
-			<template v-if="target.callouts != null">
+			<template v-if="target.callouts != null && rowVisibility.callouts">
 				<li
 					v-for="calloutID in target.callouts"
 					:key="`callout_${calloutID}`"
@@ -98,6 +100,7 @@
 				>
 					<TreeExpandableRow
 						:tree-data="treeData"
+						:row-visibility="rowVisibility"
 						:current-item="currentItem"
 						:target="treeData.store.get.callout(calloutID)"
 					/>
@@ -114,20 +117,37 @@ import TreeRow from './row.vue';
 export default {
 	name: 'TreeExpandableRow',
 	components: {TreeRow},
-	props: ['treeData', 'currentItem', 'target'],
+	props: ['treeData', 'currentItem', 'target', 'rowVisibility'],
 	data() {
 		return {
 			expanded: false
 		};
 	},
 	methods: {
+		expandChildren(currentLevel, expandLevel) {
+			if (currentLevel > expandLevel) {
+				return;
+			}
+			this.$children.forEach(c => {
+				if (c.hasOwnProperty('expanded')) {
+					c.expanded = true;
+					c.expandChildren(currentLevel + 1, expandLevel);
+				}
+			});
+		},
+		collapseChildren(currentLevel, collapseLevel) {
+			this.$children.forEach(c => {
+				if (c.hasOwnProperty('expanded')) {
+					if (currentLevel >= collapseLevel) {
+						c.expanded = false;
+					}
+					c.collapseChildren(currentLevel + 1, collapseLevel);
+				}
+			});
+		},
 		arrowClick() {
 			this.expanded = !this.expanded;
 		}
 	}
 };
 </script>
-
-<style>
-
-</style>

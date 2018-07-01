@@ -255,38 +255,6 @@ div#container {
 	100% { transform: rotate(360deg); }
 }
 
-/* Nav Tree */
-#tree {
-	padding: 10px 5px;
-}
-
-.indent {
-	margin-left: 40px;
-	list-style-type: none;
-}
-
-.unindent {
-	position: relative;
-	left: -20px;
-}
-
-.treeIcon {
-	display: inline-block;
-	width: 10px;
-	font-size: 1.25em;
-	vertical-align: 1px;
-}
-
-.treeText {
-	font: 9pt Helvetica;
-	white-space:nowrap;
-	overflow: hidden;
-	position: relative;
-	bottom: 4px;
-	width: 100%;
-	border: 1px dashed #fff;
-}
-
 .clickable.selected {
 	border: 1px dashed #2eb9ce;
 }
