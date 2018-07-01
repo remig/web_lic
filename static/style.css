@@ -344,8 +344,8 @@ ul {
 }
 
 .pageCanvas {
-    background-color: #fff;
-    box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgAQMAAABJtOi3AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMjHxIGmVAAAABlBMVEX09PT///+farO/AAAAFElEQVQI12NgYPj/n4GKBHVNYwAA7b0/wfSyzYsAAAAASUVORK5CYII=');
+	box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
 }
 
 .pageGuideContainer {

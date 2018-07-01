@@ -345,20 +345,23 @@ const api = {
 		},
 		opposite(color) {
 			return (api.color.luma(color) < 0.18) ? 'white' : 'black';
+		},
+		isVisible(color) {
+			if (!color || typeof color !== 'string') {
+				return false;
+			}
+			color = api.color.toRGB(color);
+			if (color.hasOwnProperty('a') && color.a === 0) {
+				return false;
+			}
+			return true;
 		}
 	},
 	isBorderVisible(border) {
 		if (!border || !border.width || border.width < 1 || !border.color || typeof border.color !== 'string') {
 			return false;
 		}
-		// TODO: this color visibility check is totally naive
-		const color = border.color.toLowerCase();
-		if (color === 'transparent') {
-			return false;
-		} else if (color.startsWith('rgba') && (color.endsWith(',0)') || color.endsWith(', 0)'))) {
-			return false;
-		}
-		return true;
+		return api.color.isVisible(border.color);
 	}
 };
 

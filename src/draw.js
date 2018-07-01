@@ -21,15 +21,17 @@ const api = {
 		}
 
 		const template = store.state.template.page;
-		ctx.fillStyle = 'white';  // Erase any previous content.  Saves having to worry about clearing the canvas before redraws.
-		ctx.fillRect(0, 0, template.width, template.height);
+		ctx.clearRect(0, 0, template.width, template.height);
 
 		const rectStyle = {
 			strokeStyle: template.border.color,
 			lineWidth: Math.floor(template.border.width * 2)  // * 2 because line is centered on page edge, so half of it is clipped
 		};
-		ctx.fillStyle = template.fill.color;
-		ctx.fillRect(0, 0, template.width, template.height);
+
+		if (template.fill.color) {
+			ctx.fillStyle = template.fill.color;
+			ctx.fillRect(0, 0, template.width, template.height);
+		}
 
 		if (template.fill.image) {
 			const cachedImage = store.cache.get('page', 'backgroundImage');
@@ -274,12 +276,15 @@ const api = {
 
 	calloutArrow(arrow, ctx) {
 		arrow = store.get.calloutArrow(arrow);
-		const template = store.state.template.callout.arrow;
+		const border = store.state.template.callout.arrow.border;
+		if (!_.isBorderVisible(border)) {
+			return;
+		}
 		const arrowPoints = store.get.calloutArrowToPoints(arrow);
-		const pt = pixelOffset(arrowPoints[0], template.border.width);
+		const pt = pixelOffset(arrowPoints[0], border.width);
 
 		function line(pt) {
-			pt = pixelOffset(pt, template.border.width);
+			pt = pixelOffset(pt, border.width);
 			ctx.lineTo(pt.x, pt.y);
 		}
 
@@ -289,7 +294,7 @@ const api = {
 		if (arrowPoints.length > 3) {
 			// Custom arrow points
 			arrowPoints.slice(1, -1).forEach(pt => {
-				pt = pixelOffset(pt, template.border.width);
+				pt = pixelOffset(pt, border.width);
 				ctx.lineTo(pt.x, pt.y);
 			});
 		} else {
@@ -318,10 +323,9 @@ const api = {
 			line(arrowPoints[1]);
 		}
 		ctx.stroke();
-		ctx.fillStyle = template.color;
-		const tip = pixelOffset(_.last(arrowPoints), template.border.width);
+		ctx.fillStyle = border.color;
+		const tip = pixelOffset(_.last(arrowPoints), border.width);
 		// TODO: consider arrow line width when drawing arrow, so it grows along with line width
-		// TODO: line width 0 should not draw anything
 		api.arrowHead(ctx, tip.x, tip.y, arrow.direction);
 		ctx.fill();
 	},
@@ -355,23 +359,25 @@ const api = {
 			ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
 		}
 
-		ctx.fillStyle = ctx.strokeStyle = template.arrow.border.color;
-		ctx.lineWidth = template.arrow.border.width;
-		ctx.save();
-		ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
-		ctx.scale(scale.width, scale.height);
-		ctx.beginPath();
-		ctx.arc(50, 38, 39, _.radians(29), _.radians(130));
-		ctx.stroke();
+		if (_.isBorderVisible(template.arrow.border)) {
+			ctx.fillStyle = ctx.strokeStyle = template.arrow.border.color;
+			ctx.lineWidth = template.arrow.border.width;
+			ctx.save();
+			ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
+			ctx.scale(scale.width, scale.height);
+			ctx.beginPath();
+			ctx.arc(50, 38, 39, _.radians(29), _.radians(130));
+			ctx.stroke();
 
-		ctx.beginPath();
-		ctx.arc(50, 56, 39, _.radians(180 + 29), _.radians(180 + 130));
-		ctx.stroke();
+			ctx.beginPath();
+			ctx.arc(50, 56, 39, _.radians(180 + 29), _.radians(180 + 130));
+			ctx.stroke();
 
-		api.arrowHead(ctx, 15, 57, 135, [1, 0.7]);
-		ctx.fill();
-		api.arrowHead(ctx, 86, 38, -45, [1, 0.7]);
-		ctx.fill();
+			api.arrowHead(ctx, 15, 57, 135, [1, 0.7]);
+			ctx.fill();
+			api.arrowHead(ctx, 86, 38, -45, [1, 0.7]);
+			ctx.fill();
+		}
 		ctx.restore();
 	},
 
@@ -445,6 +451,9 @@ const api = {
 
 	dividers(dividerList, ctx) {
 		const template = store.state.template.divider.border;
+		if (!_.isBorderVisible(template)) {
+			return;
+		}
 		ctx.strokeStyle = template.color;
 		ctx.lineWidth = template.width;
 		dividerList.forEach(id => {
@@ -528,7 +537,7 @@ const api = {
 
 	roundedRectStyled(ctx, x, y, w, h, r, style) {
 		ctx.save();
-		if (style.fillStyle) {
+		if (_.color.isVisible(style.fillStyle)) {
 			ctx.fillStyle = style.fillStyle;
 			api.roundedRect(ctx, x, y, w, h, r, style.lineWidth);
 			ctx.fill();
