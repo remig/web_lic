@@ -1211,6 +1211,10 @@ export default function ContextMenu(selectedItem, localApp) {
 	let menu = contextMenu[selectedItem.type];
 	menu = (typeof menu === 'function') ? menu(selectedItem) : menu;
 
+	if (!Array.isArray(menu)) {
+		return;
+	}
+
 	menu = menu.map(menuEntry => {  // Super cheap clone of menu, so we don't destroy the original
 		if (menuEntry.children) {
 			const res = {};
