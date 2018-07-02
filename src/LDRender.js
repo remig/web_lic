@@ -330,7 +330,7 @@ const arrowDimensions = {
 };
 
 // Arrow geometry has base at (0, 0, 0), pointing straight down along Y, facing forward along Z
-function getArrowGeometry(length) {
+function getArrowGeometry(length = 60) {
 	const head = arrowDimensions.head, body = arrowDimensions.body;
 	const geom = new THREE.Geometry();
 	geom.vertices.push(new THREE.Vector3(0, length, 0));  // 0
@@ -392,22 +392,21 @@ function lineSide(p, l1, l2) {
 	return (res > 0) ? 1 : -1;
 }
 
-function getPartDisplacement(displacement) {
-	const dt = displacement.partDistance;
-	switch (displacement.direction) {
+function getPartDisplacement({direction, partDistance = 60}) {
+	switch (direction) {
 		case 'left':
-			return {x: -dt, y: 0, z: 0};
+			return {x: -partDistance, y: 0, z: 0};
 		case 'right':
-			return {x: dt, y: 0, z: 0};
+			return {x: partDistance, y: 0, z: 0};
 		case 'forward':
-			return {x: 0, y: 0, z: -dt};
+			return {x: 0, y: 0, z: -partDistance};
 		case 'backward':
-			return {x: 0, y: 0, z: dt};
+			return {x: 0, y: 0, z: partDistance};
 		case 'down':
-			return {x: 0, y: dt, z: 0};
+			return {x: 0, y: partDistance, z: 0};
 		case 'up':
 		default:
-			return {x: 0, y: -dt, z: 0};
+			return {x: 0, y: -partDistance, z: 0};
 	}
 }
 
