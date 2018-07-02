@@ -2,8 +2,8 @@
 'use strict';
 
 import _ from './util';
-import store from './store';
 import uiState from './uiState';
+import store from './store';
 import undoStack from './undoStack';
 import LDParse from './LDParse';
 import Menu from './menu';
@@ -363,7 +363,6 @@ const app = new Vue({
 			}
 		},
 		setPageView({facingPage = false, scroll = false}) {
-			// TODO: Store this in something new like localCache.UISettings
 			this.clearSelected();
 			this.$refs.pageView.facingPage = facingPage;
 			this.$refs.pageView.scroll = scroll;
@@ -430,6 +429,9 @@ const app = new Vue({
 
 			const splitStyle = document.getElementById('leftPane').style;
 			uiState.set('splitter', parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]));
+
+			this.$refs.navTree.saveState();
+
 			Storage.replace.ui(uiState.getCurrentState());
 
 			if (this && this.isDirty) {
@@ -446,11 +448,6 @@ const app = new Vue({
 			store.mutations.page.setDirty({includeTitlePage: true});
 			this.redrawUI();
 		});
-
-		// Load UI state from storage just once here & keep a copy for fast lookup everywhere
-		uiState.setUIState(Storage.get.ui());
-
-		this.setPageView(uiState.get('pageView'));
 
 		// Enable splitter between tree and page view
 		const split = Storage.get.ui().splitter;

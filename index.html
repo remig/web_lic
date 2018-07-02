@@ -26,6 +26,9 @@
 	<script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
 
 <!--
+	<script src="lib/jquery-3.3.1.js"></script>
+	<script src="lib/bootstrap-3.3.7.js"></script>
+
 	<link rel="stylesheet" href="lib/element-ui_theme-chalk-2.4.1.css">
 
 	<script src="lib/three-89.js"></script>
@@ -62,7 +65,7 @@
 		<div class="mainBody" @contextmenu.stop.prevent="rightClick($event)">
 
 			<div id="leftPane" class="split split-horizontal">
-				<nav-tree :tree-data="treeData" :current-item="selectedItemLookup"></nav-tree>
+				<nav-tree ref="navTree" :tree-data="treeData" :current-item="selectedItemLookup"></nav-tree>
 			</div>
 
 			<div id="rightPane" class="split split-horizontal">
@@ -82,7 +85,13 @@
 
 		</div>
 		<!-- need tabindex, onblur and onclick to hide menu if click on top nav bar or inside menu itself -->
-		<div id="contextMenu" class="dropdown" tabindex="-1" @blur="closeContextMenu" @click="closeContextMenu">
+		<div
+			id="contextMenu"
+			class="dropdown"
+			tabindex="-1"
+			@blur="closeContextMenu"
+			@click="closeContextMenu"
+		>
 			<menu-list
 				:menu-entries="contextMenu"
 				:selected-item="selectedItemLookup"

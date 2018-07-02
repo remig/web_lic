@@ -1,6 +1,7 @@
 'use strict';
 
 import _ from './util';
+import Storage from './storage';
 
 const defaultState = {
 	locale: null,
@@ -30,6 +31,15 @@ const defaultState = {
 		}
 	},
 	template: null,  // NYI
+	navTree: {
+		expandedLevel: 0,
+		checkedItems: {
+			all: true, page_step_part: false, group_parts: false,
+			steps: true, submodelImages: true, submodelCSI: true, csis: true, parts: true,
+			plis: true, pliItems: true, callouts: true, calloutArrows: true,
+			annotations: true, numberLabels: true, quantityLabels: true
+		}
+	},
 	pageView: {
 		facingPage: false,
 		scroll: false
@@ -81,7 +91,7 @@ const api = {
 	setUIState(newState) {
 		currentState = _.clone(newState);
 	},
-	mutations: {  // TODO: Move more ui state mutations here (pliTransforms in context menu, grid & guide bits in menu, etc
+	mutations: {  // TODO: Move more ui state mutations here (pliTransforms in context menu, grid & guide bits in menu, etc)
 		guides: {
 			setPosition(guideID, newPosition) {
 				const originalPosition = currentState.guides[guideID].position;
@@ -96,5 +106,8 @@ const api = {
 		}
 	}
 };
+
+// Load UI state from storage just once here. uiState module itself will keep a copy for fast lookup everywhere
+api.setUIState(Storage.get.ui());
 
 export default api;

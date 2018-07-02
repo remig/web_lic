@@ -74,11 +74,25 @@
 
 <script>
 
-
+import uiState from '../../uiState';
 import TreeExpandableRow from './expandable_row.vue';
 import TreeRow from './row.vue';
 
-const elements = [
+let navTreeState = uiState.get('navTree');
+if (navTreeState == null) {  // temp backwards compatibility fixup
+	navTreeState = {
+		expandedLevel: 0,
+		checkedItems: {
+			all: true, page_step_part: false, group_parts: false,
+			steps: true, submodelImages: true, submodelCSI: true, csis: true, parts: true,
+			plis: true, pliItems: true, callouts: true, calloutArrows: true,
+			annotations: true, numberLabels: true, quantityLabels: true
+		}
+	};
+	uiState.set('navTree', navTreeState);
+}
+
+const treeElementList = [
 	{name: 'All', value: 'all', checked: false},
 	{name: 'Pages, Steps, Parts', value: 'page_step_part', checked: false},
 	{name: 'divider'},
@@ -95,8 +109,10 @@ const elements = [
 	{name: 'Number Labels', value: 'numberLabels', checked: false, child: true},
 	{name: 'Quantity Labels', value: 'quantityLabels', checked: false, child: true},
 	{name: 'divider'},
-	{name: 'Group Parts By Type (NYI)', value: '', checked: false}
+	{name: 'Group Parts By Type (NYI)', value: 'group_parts', checked: false}
 ];
+
+treeElementList.forEach(el => (el.checked = navTreeState.checkedItems[el.value]));
 
 export default {
 	name: 'NavTree',
@@ -104,8 +120,9 @@ export default {
 	props: ['treeData', 'currentItem'],
 	data() {
 		return {
-			expandedLevel: 0,
-			checkedElements: elements
+			checkedElements: treeElementList,
+			expandedLevel: navTreeState.expandedLevel,
+			expandLeveInitialized: false
 		};
 	},
 	methods: {
@@ -166,13 +183,27 @@ export default {
 				}
 			});
 			this.expandedLevel -= 1;
+		},
+		saveState() {
+			navTreeState.expandedLevel = this.expandedLevel;
+			this.checkedElements.forEach(el => (navTreeState.checkedItems[el.value] = el.checked));
 		}
 	},
 	computed: {
 		rowVisibility() {
 			const res = {};
-			elements.filter(el => el.child).forEach(el => (res[el.value] = el.checked));
+			treeElementList.filter(el => el.child).forEach(el => (res[el.value] = el.checked));
 			return res;
+		}
+	},
+	updated() {
+		if (!this.expandLeveInitialized) {
+			const expandedLevel = this.expandedLevel;
+			this.expandedLevel = 0;
+			for (let i = 0; i < expandedLevel; i++) {
+				this.expand();
+			}
+			this.expandLeveInitialized = true;
 		}
 	}
 };

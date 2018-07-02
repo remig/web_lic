@@ -173,8 +173,8 @@ Vue.component('pageView', {
 			},
 			pageCount: 0,
 			pageLockStatus: [],
-			facingPage: false,
-			scroll: false
+			facingPage: uiState.get('pageView.facingPage'),
+			scroll: uiState.get('pageView.scroll')
 		};
 	},
 	watch: {
