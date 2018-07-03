@@ -165,7 +165,7 @@ function createBasicPanel(templateType, templateEntry, undoText) {
 	};
 }
 
-const componentLookup = {
+const templatePageComponentLookup = {
 	templatePage: pageTemplatePanel,
 	csi: {
 		step: csiTemplatePanel('step.csi'),
@@ -189,6 +189,9 @@ const componentLookup = {
 		submodelImage: createBasicPanel(fontPanel, 'submodelImage.quantityLabel', 'Submodel Label'),
 		pliItem: createBasicPanel(fontPanel, 'pliItem.quantityLabel', 'PLI Label')
 	}
+};
+
+const pageComponentLookup = {
 };
 
 Vue.component('templatePanel', {
@@ -229,6 +232,13 @@ Vue.component('templatePanel', {
 		currentTemplatePanel: function() {
 			if (!this.selectedItem) {
 				return null;
+			}
+			let componentLookup;
+			const page = store.get.pageForItem(this.selectedItem);
+			if (store.get.isTemplatePage(page)) {
+				componentLookup = templatePageComponentLookup;
+			} else {
+				componentLookup = pageComponentLookup;
 			}
 			const type = this.selectedItem.type;
 			if (type in componentLookup) {
