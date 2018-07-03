@@ -11,6 +11,47 @@ import DialogManager from './dialog';
 
 let app;
 
+const annotationMenu = {
+	text: 'Add Annotation',
+	children: [
+		{
+			text: 'Label',
+			cb(selectedItem) {
+				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
+				const opts = {
+					annotationType: 'label',
+					properties: {text: 'New Label', ...clickPos},
+					relativeTo: selectedItem,
+					parent: store.get.pageForItem(selectedItem)
+				};
+				undoStack.commit('annotation.add', opts, 'Add Label');
+			}
+		},
+		{
+			text: 'Line (NYI)',
+			cb() {}
+		},
+		{
+			text: 'Circle (NYI)',
+			cb() {}
+		},
+		{
+			text: 'Image',
+			cb(selectedItem) {
+				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
+				openFileHandler('.png', 'dataURL', src => {
+					const opts = {
+						annotationType: 'image',
+						properties: {src, ...clickPos},
+						parent: selectedItem
+					};
+					undoStack.commit('annotation.add', opts, 'Add Image');
+				});
+			}
+		}
+	]
+};
+
 const contextMenu = {
 	page: [
 		{
@@ -132,45 +173,7 @@ const contextMenu = {
 				undoStack.commit('step.add', opts, this.text);
 			}
 		},
-		{
-			text: 'Add Annotation',
-			children: [
-				{
-					text: 'Label',
-					cb(selectedItem) {
-						const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
-						const opts = {
-							annotationType: 'label',
-							properties: {text: 'New Label', ...clickPos},
-							parent: selectedItem
-						};
-						undoStack.commit('annotation.add', opts, 'Add Label');
-					}
-				},
-				{
-					text: 'Line (NYI)',
-					cb() {}
-				},
-				{
-					text: 'Circle (NYI)',
-					cb() {}
-				},
-				{
-					text: 'Image',
-					cb(selectedItem) {
-						const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
-						openFileHandler('.png', 'dataURL', src => {
-							const opts = {
-								annotationType: 'image',
-								properties: {src, ...clickPos},
-								parent: selectedItem
-							};
-							undoStack.commit('annotation.add', opts, 'Add Image');
-						});
-					}
-				}
-			]
-		},
+		annotationMenu,
 		{
 			text: 'Delete This Blank Page',
 			shown(selectedItem) {
@@ -401,7 +404,9 @@ const contextMenu = {
 				undoStack.commit('step.add', opts, this.text);
 			}
 		},
-		{text: 'Add Rotate Icon (NYI)', enabled() { return false; }}
+		{text: 'separator'},
+		{text: 'Add Rotate Icon (NYI)', enabled() { return false; }},
+		annotationMenu
 	],
 	numberLabel(selectedItem) {
 		const parent = store.get.parent(selectedItem);
@@ -642,7 +647,8 @@ const contextMenu = {
 				});
 			}
 		},
-		{text: 'Add New Part (NYI)', cb: () => {}}
+		{text: 'Add New Part (NYI)', cb: () => {}},
+		annotationMenu
 	],
 	pli: [],
 	pliItem: [
@@ -1212,7 +1218,7 @@ export default function ContextMenu(selectedItem, localApp) {
 	menu = (typeof menu === 'function') ? menu(selectedItem) : menu;
 
 	if (!Array.isArray(menu)) {
-		return;
+		return null;
 	}
 
 	menu = menu.map(menuEntry => {  // Super cheap clone of menu, so we don't destroy the original

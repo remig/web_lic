@@ -423,23 +423,27 @@ const api = {
 	})(),
 
 	annotation(annotation, ctx) {
+		const relativeTo = store.get.lookupToItem(annotation.relativeTo);
+		const offset = store.get.positionOnPage(relativeTo);
+		const x = Math.floor(annotation.x + offset.x);
+		const y = Math.floor(annotation.y + offset.y);
 		switch (annotation.annotationType) {
 			case 'label': {
 				ctx.fillStyle = annotation.color || 'black';
 				ctx.font = annotation.font || 'bold 20pt Helvetica';
-				ctx.fillText(annotation.text, annotation.x, annotation.y + annotation.height);
+				ctx.fillText(annotation.text, x, y + annotation.height);
 				break;
 			}
 			case 'image': {
 				const cachedImage = store.cache.get(annotation, 'rawImage');
 				if (cachedImage) {
-					ctx.drawImage(cachedImage, Math.floor(annotation.x), Math.floor(annotation.y));
+					ctx.drawImage(cachedImage, x, y);
 				} else {
 					const image = new Image();
 					image.onload = function() {
 						annotation.width = this.width;
 						annotation.height = this.height;
-						ctx.drawImage(image, Math.floor(annotation.x), Math.floor(annotation.y));
+						ctx.drawImage(image, x, y);
 						store.cache.set(annotation, 'rawImage', image);
 					};
 					image.src = annotation.src;

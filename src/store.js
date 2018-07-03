@@ -591,6 +591,20 @@ const store = {
 			}
 			return {type: item.type, id: item.id};
 		},
+		positionOnPage(item) {
+			let x = 0, y = 0;
+			item = store.get.lookupToItem(item);
+			while (item) {
+				x += item.x || 0;
+				y += item.y || 0;
+				if (item.relativeTo) {
+					item = store.get.lookupToItem(item.relativeTo);
+				} else {
+					item = store.get.parent(item);
+				}
+			}
+			return {x, y};
+		},
 		targetBox(t) {
 			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
 			if (t.borderOffset) {
@@ -912,13 +926,19 @@ const store = {
 			}
 		},
 		annotation: {
-			add(opts) {  // opts: {annotationType, properties, parent}
+			add(opts) {  // opts: {annotationType, properties, relativeTo, parent}
 
 				const annotation = store.mutations.item.add({item: {
 					type: 'annotation',
 					annotationType: opts.annotationType,
+					relativeTo: opts.relativeTo,
 					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
+
+				const relativeTo = store.get.lookupToItem(opts.relativeTo);
+				const offset = store.get.positionOnPage(relativeTo);
+				opts.properties.x -= offset.x;
+				opts.properties.y -= offset.y;
 
 				opts.properties = opts.properties || {};
 				_.copy(annotation, opts.properties);
