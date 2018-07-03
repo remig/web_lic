@@ -433,17 +433,10 @@ const store = {
 					y: point.y + callout.y
 				};
 			});
-
 			let tip = _.last(arrow.points);
 			tip = store.get.point(tip);
 			tip = {x: tip.x + csi.x, y: tip.y + csi.y};
-
-			const base = _.clone(tip);
-			const direction = arrow.direction;
-			base.x += (direction === 'right') ? -24 : (direction === 'left') ? 24 : 0;  // TODO: abstract callout arrow dimension... somewhere...
-			base.y += (direction === 'down') ? -24 : (direction === 'up') ? 24 : 0;
-
-			return [...points, base, tip];
+			return [...points, tip];
 		},
 		calloutArrowBoundingBox(arrow) {
 			const callout = store.get.parent(arrow);

@@ -282,6 +282,7 @@ const api = {
 		}
 		const arrowPoints = store.get.calloutArrowToPoints(arrow);
 		const pt = pixelOffset(arrowPoints[0], border.width);
+		const direction = arrow.direction;
 
 		function line(pt) {
 			pt = pixelOffset(pt, border.width);
@@ -291,18 +292,18 @@ const api = {
 		ctx.beginPath();
 		ctx.moveTo(pt.x, pt.y);
 
-		if (arrowPoints.length > 3) {
+		if (arrowPoints.length > 2) {
 			// Custom arrow points
-			arrowPoints.slice(1, -1).forEach(line);
+			arrowPoints.slice(1).forEach(line);
 		} else {
 			// Default arrow points - use stair step path
-			const bbox = _.geom.bbox(arrowPoints.slice(0, -1));
+			const bbox = _.geom.bbox(arrowPoints);
 
-			if (arrow.direction === 'up') {
+			if (direction === 'up') {
 				pt.y -= bbox.height / 2;
-			} else if (arrow.direction === 'right') {
+			} else if (direction === 'right') {
 				pt.x += bbox.width / 2;
-			} else if (arrow.direction === 'down') {
+			} else if (direction === 'down') {
 				pt.y += bbox.height / 2;
 			} else {
 				pt.x -= bbox.width / 2;
@@ -310,7 +311,7 @@ const api = {
 
 			line(pt);
 
-			if (arrow.direction === 'up' || arrow.direction === 'down') {
+			if (direction === 'up' || direction === 'down') {
 				pt.x = arrowPoints[1].x;
 			} else {
 				pt.y = arrowPoints[1].y;
@@ -323,7 +324,7 @@ const api = {
 		ctx.fillStyle = border.color;
 		const tip = pixelOffset(_.last(arrowPoints), border.width);
 		// TODO: consider arrow line width when drawing arrow, so it grows along with line width
-		api.arrowHead(ctx, tip.x, tip.y, arrow.direction);
+		api.arrowHead(ctx, tip.x, tip.y, direction);
 		ctx.fill();
 	},
 
@@ -370,9 +371,9 @@ const api = {
 			ctx.arc(50, 56, 39, _.radians(180 + 29), _.radians(180 + 130));
 			ctx.stroke();
 
-			api.arrowHead(ctx, 15, 57, 135, [1, 0.7]);
+			api.arrowHead(ctx, 24, 67, 135, [1, 0.7]);
 			ctx.fill();
-			api.arrowHead(ctx, 86, 38, -45, [1, 0.7]);
+			api.arrowHead(ctx, 75, 27, -45, [1, 0.7]);
 			ctx.fill();
 		}
 		ctx.restore();
@@ -392,10 +393,10 @@ const api = {
 			}
 		};
 
-		return function(ctx, tipX, tipY, rotation, scale) {
+		return function(ctx, baseX, baseY, rotation, scale) {
 			const head = arrowDimensions.head, bodyWidth = 1.25;
 			ctx.save();
-			ctx.translate(tipX, tipY);
+			ctx.translate(baseX, baseY);
 			if (rotation in presetAngles) {
 				ctx.rotate(_.radians(presetAngles[rotation]));
 			} else if (typeof rotation === 'number') {
@@ -410,10 +411,11 @@ const api = {
 			}
 			ctx.beginPath();
 			ctx.moveTo(0, 0);
-			ctx.lineTo(-head.width, -head.length);
-			ctx.lineTo(-bodyWidth, -head.length + head.insetDepth);
-			ctx.lineTo(bodyWidth, -head.length + head.insetDepth);
-			ctx.lineTo(head.width, -head.length);
+			ctx.lineTo(bodyWidth, 0);
+			ctx.lineTo(head.width, -head.insetDepth);
+			ctx.lineTo(0, head.length - head.insetDepth);
+			ctx.lineTo(-head.width, -head.insetDepth);
+			ctx.lineTo(-bodyWidth, 0);
 			ctx.closePath();
 			ctx.restore();
 		};
@@ -441,10 +443,8 @@ const api = {
 				ctx.stroke();
 				ctx.fillStyle = 'black';//border.color;
 				const direction = annotation.direction;
-				let {x: tipX, y: tipY} = store.get.point(_.last(annotation.points));
-				tipX += (direction === 'right') ? 24 : (direction === 'left') ? -24 : 0;
-				tipY += (direction === 'down') ? 24 : (direction === 'up') ? -24 : 0;
-				api.arrowHead(ctx, tipX + offset.x, tipY + offset.y, direction);
+				const tip = store.get.point(_.last(annotation.points));
+				api.arrowHead(ctx, tip.x + offset.x, tip.y + offset.y, direction);
 				ctx.fill();
 				break;
 			}

@@ -371,6 +371,7 @@ const api = {
 
 		// Delete all but first & last point in first arrow
 		const arrow = store.get.calloutArrow(callout.calloutArrows[0]);
+		arrow.direction = 'right';
 		while (arrow.points.length > 2) {
 			store.mutations.item.delete({item: {type: 'point', id: arrow.points[1]}});
 		}
@@ -379,6 +380,7 @@ const api = {
 		// Position on right edge of callout centered vertically on last step
 		const lastStep = callout.steps.length > 1 ? store.get.step(_.last(callout.steps)) : null;
 		const p1 = store.get.point(arrow.points[0]);
+		p1.relativeTo = {type: 'callout', id: callout.id};
 		p1.x = callout.borderOffset.x + callout.width;
 		p1.y = lastStep ? lastStep.y + (lastStep.height / 2) : callout.height / 2;
 
@@ -388,7 +390,7 @@ const api = {
 		const csi = store.get.csi(step.csiID);
 		const p2 = store.get.point(arrow.points[1]);
 		p2.relativeTo = {type: 'csi', id: csi.id};
-		p2.x = 0;
+		p2.x = -30;  // p2 is arrow's base; move it to the left to make space for the arrow head
 		p2.y = csi ? csi.height / 2 : 50;
 	},
 

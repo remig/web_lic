@@ -982,6 +982,13 @@ const contextMenu = {
 			}
 		}
 	],
+	point: [
+		{
+			text: 'Delete (NYI)',
+			cb(selectedItem) {
+			}
+		}
+	],
 	submodel: [
 		{
 			text: 'Convert to Callout',
