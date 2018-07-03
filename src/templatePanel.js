@@ -105,7 +105,7 @@ const pliTemplatePanel = {
 			const template = store.state.template.pli;
 			if (this.includeSubmodels !== template.includeSubmodels) {
 				template.includeSubmodels = this.includeSubmodels;
-				this.$emit('new-values', {type: 'PLI', noLayout: true});
+				this.$emit('new-values', {type: 'PLI'});
 			}
 		}
 	}
@@ -232,11 +232,6 @@ Vue.component('templatePanel', {
 			}
 			const type = this.selectedItem.type;
 			if (type in componentLookup) {
-				Vue.nextTick(() => {
-					if (typeof this.$refs.currentTemplatePanel.init === 'function') {
-						this.$refs.currentTemplatePanel.init(this.selectedItem);
-					}
-				});
 				const parent = store.get.parent(this.selectedItem);
 				const grandparent = store.get.parent(parent);
 				if (parent && parent.type in componentLookup[type]) {
