@@ -293,10 +293,7 @@ const api = {
 
 		if (arrowPoints.length > 3) {
 			// Custom arrow points
-			arrowPoints.slice(1, -1).forEach(pt => {
-				pt = pixelOffset(pt, border.width);
-				ctx.lineTo(pt.x, pt.y);
-			});
+			arrowPoints.slice(1, -1).forEach(line);
 		} else {
 			// Default arrow points - use stair step path
 			const bbox = _.geom.bbox(arrowPoints.slice(0, -1));
@@ -432,6 +429,23 @@ const api = {
 				ctx.fillStyle = annotation.color || 'black';
 				ctx.font = annotation.font || 'bold 20pt Helvetica';
 				ctx.fillText(annotation.text, x, y + annotation.height);
+				break;
+			}
+			case 'arrow': {
+				// Last point is *base* of arrow head, not tip
+				ctx.beginPath();
+				annotation.points.forEach((pt, idx) => {
+					pt = store.get.point(pt);
+					ctx[(idx === 0) ? 'moveTo' : 'lineTo'](pt.x + offset.x, pt.y + offset.y);
+				});
+				ctx.stroke();
+				ctx.fillStyle = 'black';//border.color;
+				const direction = annotation.direction;
+				let {x: tipX, y: tipY} = store.get.point(_.last(annotation.points));
+				tipX += (direction === 'right') ? 24 : (direction === 'left') ? -24 : 0;
+				tipY += (direction === 'down') ? 24 : (direction === 'up') ? -24 : 0;
+				api.arrowHead(ctx, tipX + offset.x, tipY + offset.y, direction);
+				ctx.fill();
 				break;
 			}
 			case 'image': {

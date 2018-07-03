@@ -253,7 +253,7 @@ const api = {
 		}
 		return JSON.parse(JSON.stringify(obj));
 	},
-	copy(to, from) {
+	copy(to = {}, from = {}) {
 		api.forEach(from, (k, v) => {
 			to[k] = v;
 		});

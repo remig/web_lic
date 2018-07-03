@@ -605,7 +605,24 @@ const store = {
 			}
 			return {x, y};
 		},
+		targetBoxFromPoints(t) {
+			const parent = t.relativeTo ? store.get.lookupToItem(t.relativeTo) : store.get.parent(t);
+			const baseOffset = store.get.positionOnPage(parent);
+			const points = t.points.map(pointID => {
+				const point = store.get.point(pointID);
+				const offset = point.relativeTo ? store.get.positionOnPage(point.relativeTo) : baseOffset;
+				return {
+					x: point.x + offset.x,
+					y: point.y + offset.y
+				};
+			});
+			return _.geom.expandBox(_.geom.bbox(points), 8, 8);
+		},
 		targetBox(t) {
+			if (t.points) {
+				return store.get.targetBoxFromPoints(t);
+			}
+
 			const box = {x: t.x, y: t.y, width: t.width, height: t.height};
 			if (t.borderOffset) {
 				box.x += t.borderOffset.x;
@@ -704,13 +721,19 @@ const store = {
 				const items = Array.isArray(opts.item) ? opts.item : [opts.item];
 				items.forEach(item => {
 					if (item.type === 'divider') {  // special case: dividers must move both points
-						store.mutations.divider.reposition(opts);
-						return;
-					}
-					item.x += opts.dx;
-					item.y += opts.dy;
-					if (Layout.adjustBoundingBox[item.type]) {
-						Layout.adjustBoundingBox[item.type](item);
+						store.mutations.divider.reposition(opts);  // TODO: change 'p1' & 'p2' in divider to proper points, then don't need this special case
+					} else if (item.points) {
+						item.points.forEach(pt => {
+							pt = store.get.point(pt);
+							pt.x += opts.dx;
+							pt.y += opts.dy;
+						});
+					} else {
+						item.x += opts.dx;
+						item.y += opts.dy;
+						if (Layout.adjustBoundingBox[item.type]) {
+							Layout.adjustBoundingBox[item.type](item);
+						}
 					}
 				});
 			}
@@ -926,22 +949,20 @@ const store = {
 			}
 		},
 		annotation: {
-			add(opts) {  // opts: {annotationType, properties, relativeTo, parent}
+			add(opts) {  // opts: {annotationType, properties, relativeTo, parent, x, y}
 
 				const annotation = store.mutations.item.add({item: {
 					type: 'annotation',
 					annotationType: opts.annotationType,
-					relativeTo: opts.relativeTo,
-					x: null, y: null, width: null, height: null
+					relativeTo: opts.relativeTo
 				}, parent: opts.parent});
+
+				_.copy(annotation, opts.properties);
 
 				const relativeTo = store.get.lookupToItem(opts.relativeTo);
 				const offset = store.get.positionOnPage(relativeTo);
-				opts.properties.x -= offset.x;
-				opts.properties.y -= offset.y;
-
-				opts.properties = opts.properties || {};
-				_.copy(annotation, opts.properties);
+				opts.x -= offset.x;
+				opts.y -= offset.y;
 
 				// Guarantee some nice defaults
 				if (annotation.annotationType === 'label') {
@@ -950,9 +971,24 @@ const store = {
 					annotation.color = annotation.color || 'black';
 					annotation.align = 'left';
 					annotation.valign = 'top';
+					annotation.x = opts.x;
+					annotation.y = opts.y;
 					if (opts.properties.text) {
 						Layout.label(annotation);
 					}
+				} else if (annotation.annotationType === 'arrow') {
+					annotation.points = [];
+					store.mutations.item.add({item: {
+						type: 'point', x: opts.x, y: opts.y
+					}, parent: annotation});
+
+					store.mutations.item.add({item: {
+						type: 'point', x: opts.x + 100, y: opts.y
+					}, parent: annotation});
+				} else {
+					// image annotation width & height set by image load logic during first draw
+					annotation.x = opts.x;
+					annotation.y = opts.y;
 				}
 				return annotation;
 			},

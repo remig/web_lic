@@ -20,9 +20,10 @@ const annotationMenu = {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const opts = {
 					annotationType: 'label',
-					properties: {text: 'New Label', ...clickPos},
+					properties: {text: 'New Label'},
 					relativeTo: selectedItem,
-					parent: store.get.pageForItem(selectedItem)
+					parent: store.get.pageForItem(selectedItem),
+					...clickPos
 				};
 				undoStack.commit('annotation.add', opts, 'Add Label');
 			}
@@ -36,14 +37,30 @@ const annotationMenu = {
 			cb() {}
 		},
 		{
+			text: 'Arrow',
+			cb(selectedItem) {
+				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
+				const opts = {
+					annotationType: 'arrow',
+					properties: {direction: 'right'},
+					relativeTo: selectedItem,
+					parent: store.get.pageForItem(selectedItem),
+					...clickPos
+				};
+				undoStack.commit('annotation.add', opts, 'Add Arrow');
+			}
+		},
+		{
 			text: 'Image',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				openFileHandler('.png', 'dataURL', src => {
 					const opts = {
 						annotationType: 'image',
-						properties: {src, ...clickPos},
-						parent: selectedItem
+						properties: {src},
+						relativeTo: selectedItem,
+						parent: store.get.pageForItem(selectedItem),
+						...clickPos
 					};
 					undoStack.commit('annotation.add', opts, 'Add Image');
 				});
@@ -778,76 +795,80 @@ const contextMenu = {
 		}
 	],
 	quantityLabel: [],
-	annotation: [
-		{
-			text: 'Set',
-			children: [
-				{
-					text: 'Text...',
-					shown(selectedItem) {
-						const annotation = store.get.annotation(selectedItem);
-						return annotation && annotation.annotationType === 'label';
-					},
-					cb(selectedItem) {
-						const annotation = store.get.annotation(selectedItem);
-						const originalText = annotation.text;
-
-						DialogManager.setDialog('stringDialog');
-						app.clearSelected();
-
-						Vue.nextTick(() => {
-							const dialog = DialogManager.getDialog();
-							dialog.$off();
-							dialog.$on('ok', newValues => {
-								const page = store.get.pageForItem(annotation);
-								const opts = {
-									annotation,
-									newProperties: {text: newValues.string},
-									doLayout: store.get.isTitlePage(page)
-								};
-								undoStack.commit('annotation.set', opts, 'Set Label Text');
-							});
-							dialog.$on('cancel', () => {
-								annotation.text = originalText;
-								app.redrawUI(true);
-							});
-							dialog.$on('update', newValues => {
-								annotation.text = newValues.string;
-								app.redrawUI(true);
-							});
-							dialog.title = 'Set Label Text';
-							dialog.labelText = 'New Text';
-							dialog.string = annotation.text;
-							dialog.show({x: 400, y: 150});
-						});
-					}
-				},
-				{
-					text: 'Font (NYI)',
-					shown(selectedItem) {
-						const annotation = store.get.annotation(selectedItem);
-						return annotation && annotation.annotationType !== 'image';
-					},
-					cb() {}
-				},
-				{
-					text: 'Color (NYI)',
-					shown(selectedItem) {
-						const annotation = store.get.annotation(selectedItem);
-						return annotation && annotation.annotationType !== 'image';
-					},
-					cb() {}
-				}
-			]
-		},
-		{
+	annotation(selectedItem) {
+		const deleteMenu = {
 			text: 'Delete',
 			cb(selectedItem) {
 				const annotation = selectedItem;
 				undoStack.commit('annotation.delete', {annotation}, this.text);
+				app.clearSelected();
 			}
+		};
+
+		const setText = {
+			text: 'Text...',
+			shown(selectedItem) {
+				const annotation = store.get.annotation(selectedItem);
+				return annotation && annotation.annotationType === 'label';
+			},
+			cb(selectedItem) {
+				const annotation = store.get.annotation(selectedItem);
+				const originalText = annotation.text;
+
+				DialogManager.setDialog('stringDialog');
+				app.clearSelected();
+
+				Vue.nextTick(() => {
+					const dialog = DialogManager.getDialog();
+					dialog.$off();
+					dialog.$on('ok', newValues => {
+						const page = store.get.pageForItem(annotation);
+						const opts = {
+							annotation,
+							newProperties: {text: newValues.string},
+							doLayout: store.get.isTitlePage(page)
+						};
+						undoStack.commit('annotation.set', opts, 'Set Label Text');
+					});
+					dialog.$on('cancel', () => {
+						annotation.text = originalText;
+						app.redrawUI(true);
+					});
+					dialog.$on('update', newValues => {
+						annotation.text = newValues.string;
+						app.redrawUI(true);
+					});
+					dialog.title = 'Set Label Text';
+					dialog.labelText = 'New Text';
+					dialog.string = annotation.text;
+					dialog.show({x: 400, y: 150});
+				});
+			}
+		};
+
+		const setFont = {
+			text: 'Font (NYI)',
+			cb() {}
+		};
+
+		const setColor = {
+			text: 'Color (NYI)',
+			cb() {}
+		};
+
+		const annotation = store.get.annotation(selectedItem);
+		switch (annotation.annotationType) {
+			case 'label':
+				return [{text: 'Set', children: [setText, setFont, setColor]}, deleteMenu];
+			case 'arrow':
+				// TODO: make store.calloutArrow.addPoint work for annotation arrows too
+				return [contextMenu.calloutArrow[0], contextMenu.calloutArrow[3], deleteMenu];
+				//return [...contextMenu.calloutArrow, deleteMenu];
+			case 'image':
+				return [deleteMenu];
 		}
-	],
+		return null;
+	},
 	callout: [
 		{
 			text: 'Add Step',
@@ -915,7 +936,7 @@ const contextMenu = {
 			children: ['up', 'right', 'down', 'left'].map(direction => {
 				return {
 					text: _.titleCase(direction),
-					shown: calloutTipRotationVisible(direction),
+					shown: arrowTipRotationVisible(direction),
 					cb: rotateCalloutTip(direction)
 				};
 			})
@@ -1139,17 +1160,17 @@ const contextMenu = {
 	]
 };
 
-function calloutTipRotationVisible(direction) {
+function arrowTipRotationVisible(direction) {
 	return (selectedItem) => {
-		const calloutArrow = store.get.calloutArrow(selectedItem);
-		return calloutArrow.direction !== direction;
+		const arrow = store.get.lookupToItem(selectedItem);
+		return arrow.direction !== direction;
 	};
 }
 
-function rotateCalloutTip(direction) {
+function rotateCalloutTip(direction) {  // TODO this (and the store mutation) are named for callout arrows, but work with regular annotation arrows too.  Rename them.
 	return (selectedItem) => {
 		const calloutArrow = store.get.calloutArrow(selectedItem);
-		undoStack.commit('calloutArrow.rotateTip', {calloutArrow, direction}, 'Rotate Callout Arrow Tip');
+		undoStack.commit('calloutArrow.rotateTip', {calloutArrow, direction}, 'Rotate Arrow Tip');
 	};
 }
 
@@ -1206,6 +1227,7 @@ function filterMenu(menu, selectedItem) {
 	}
 }
 
+// TODO: should just grey out / disable menu entries that don't work because page is locked. I think. Then eventually show a tooltip explaining why they're greyed out.
 function enableIfUnlocked(selectedItem) {
 	return !(store.get.pageForItem(selectedItem) || {}).locked;
 }

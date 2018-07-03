@@ -23,6 +23,12 @@ const api = {
 			}
 		});
 
+		state.annotations.forEach(annotation => {
+			if (!annotation.relativeTo) {
+				annotation.relativeTo = annotation.parent;
+			}
+		});
+
 		if (state.template.submodelImage.maxHeight == null) {
 			state.template.submodelImage.maxHeight = 0.3;
 		}
