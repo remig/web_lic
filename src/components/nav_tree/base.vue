@@ -34,38 +34,38 @@
 			<el-button icon="fas fa-expand-arrows-alt" @click="expand" />
 		</div>
 		<ul>
-			<li v-if="treeData.store.get.templatePage() != null">
+			<li v-if="store.get.templatePage() != null">
 				<TreeExpandableRow
-					:tree-data="treeData"
 					:row-visibility="rowVisibility"
 					:current-item="currentItem"
-					:target="treeData.store.get.templatePage()"
+					:target="store.get.templatePage()"
+					@select-item="$emit('select-item', arguments[0])"
 				/>
 			</li>
-			<li v-if="treeData.store.get.titlePage() != null">
+			<li v-if="store.get.titlePage() != null">
 				<TreeExpandableRow
-					:tree-data="treeData"
 					:row-visibility="rowVisibility"
 					:current-item="currentItem"
-					:target="treeData.store.get.titlePage()"
+					:target="store.get.titlePage()"
+					@select-item="$emit('select-item', arguments[0])"
 				/>
 			</li>
 			<li
-				v-for="(node, idx) in treeData.store.get.topLevelTreeNodes()"
+				v-for="(node, idx) in store.get.topLevelTreeNodes()"
 				:key="`root_${idx}`"
 			>
 				<TreeExpandableRow
 					v-if="node.type === 'page'"
-					:tree-data="treeData"
 					:row-visibility="rowVisibility"
 					:current-item="currentItem"
 					:target="node"
+					@select-item="$emit('select-item', arguments[0])"
 				/>
 				<TreeRow
 					v-else
 					:current-item="currentItem"
 					:target="node"
-					:selection-callback="treeData.selectionCallback"
+					@select-item="$emit('select-item', arguments[0])"
 				/>
 			</li>
 		</ul>
@@ -73,8 +73,10 @@
 </template>
 
 <script>
+/* global Vue: false */
 
 import uiState from '../../uiState';
+import store from '../../store';
 import TreeExpandableRow from './expandable_row.vue';
 import TreeRow from './row.vue';
 
@@ -86,7 +88,7 @@ if (navTreeState == null) {  // temp backwards compatibility fixup
 			all: true, page_step_part: false, group_parts: false,
 			steps: true, submodelImages: true, submodelCSI: true, csis: true, parts: true,
 			plis: true, pliItems: true, callouts: true, calloutArrows: true,
-			annotations: true, numberLabels: true, quantityLabels: true
+			annotations: true, numberLabels: true, quantityLabels: true, dividers: true
 		}
 	};
 	uiState.set('navTree', navTreeState);
@@ -94,7 +96,7 @@ if (navTreeState == null) {  // temp backwards compatibility fixup
 
 const treeElementList = [
 	{name: 'All', value: 'all', checked: false},
-	{name: 'Pages, Steps, Parts', value: 'page_step_part', checked: false},
+	{name: 'Pages, Steps, CSIs, Parts', value: 'page_step_part', checked: false},
 	{name: 'divider'},
 	{name: 'Steps', value: 'steps', checked: false, child: true},
 	{name: 'Submodel Images', value: 'submodelImages', checked: false, child: true},
@@ -108,17 +110,20 @@ const treeElementList = [
 	{name: 'Annotations', value: 'annotations', checked: false, child: true},
 	{name: 'Number Labels', value: 'numberLabels', checked: false, child: true},
 	{name: 'Quantity Labels', value: 'quantityLabels', checked: false, child: true},
+	{name: 'Dividers', value: 'dividers', checked: false, child: true},
 	{name: 'divider'},
 	{name: 'Group Parts By Type (NYI)', value: 'group_parts', checked: false}
 ];
 
 treeElementList.forEach(el => (el.checked = navTreeState.checkedItems[el.value]));
 
+// TODO: need to scroll nav tree up / down whenever selected item changes, to ensure it's always in view
 export default {
 	name: 'NavTree',
 	components: {TreeExpandableRow, TreeRow},
-	props: ['treeData', 'currentItem'],
+	props: ['currentItem'],
 	data() {
+		this.store = store;
 		return {
 			checkedElements: treeElementList,
 			expandedLevel: navTreeState.expandedLevel,
@@ -126,6 +131,14 @@ export default {
 		};
 	},
 	methods: {
+		forceUpdate() {
+			this.$forceUpdate();
+			this.$children.forEach(c => {
+				if (typeof c.forceUpdate === 'function') {
+					c.forceUpdate();
+				}
+			});
+		},
 		checkItem(item) {
 			if (!item) {
 				return;
@@ -137,6 +150,9 @@ export default {
 				this[item.checked ? 'checkPageStepParts' : 'checkAll']();
 			// } else if (item.name === 'Group Parts By Type') {
 			}
+			Vue.nextTick(() => {
+				this.forceUpdate();
+			});
 		},
 		checkAll() {
 			this.checkedElements.forEach(el => {
@@ -149,7 +165,9 @@ export default {
 		},
 		checkPageStepParts() {
 			this.checkedElements.forEach(el => {
-				if (el.value === 'steps' || el.value === 'parts' || el.value === 'page_step_part') {
+				if (el.value === 'steps' || el.value === 'csis'
+					|| el.value === 'parts' || el.value === 'page_step_part'
+				) {
 					el.checked = true;
 				} else if (el.hasOwnProperty('child') || el.value === 'all') {
 					el.checked = false;
@@ -244,13 +262,13 @@ export default {
 }
 
 .indent {
-	margin-left: 40px;
+	margin-left: 35px;
 	list-style-type: none;
 }
 
 .unindent {
 	position: relative;
-	left: -20px;
+	left: -16px;
 }
 
 .treeIcon {

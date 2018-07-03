@@ -1,20 +1,21 @@
 <template>
 	<div :id="`treeParent_${target.type}_${target.id}`">
 		<i
+			v-if="$children.length > 1"
 			:class="['treeIcon', 'fas', 'fa-lg', {'fa-caret-down': expanded, 'fa-caret-right': !expanded}]"
 			@click.stop.prevent="arrowClick"
 		/>
 		<TreeRow
 			:current-item="currentItem"
 			:target="target"
-			:selection-callback="treeData.selectionCallback"
+			@select-item="$emit('select-item', arguments[0])"
 		/>
 		<ul :class="['treeChildren', 'indent', {hidden: !expanded}]">
 			<li v-if="target.numberLabelID != null && rowVisibility.numberLabels">
 				<TreeRow
 					:current-item="currentItem"
-					:target="treeData.store.get.numberLabel(target.numberLabelID)"
-					:selection-callback="treeData.selectionCallback"
+					:target="store.get.numberLabel(target.numberLabelID)"
+					@select-item="$emit('select-item', arguments[0])"
 				/>
 			</li>
 			<template v-if="target.annotations != null && rowVisibility.annotations">
@@ -24,72 +25,102 @@
 				>
 					<TreeRow
 						:current-item="currentItem"
-						:target="treeData.store.get.annotation(annotationID)"
-						:selection-callback="treeData.selectionCallback"
+						:target="store.get.annotation(annotationID)"
+						@select-item="$emit('select-item', arguments[0])"
+					/>
+				</li>
+			</template>
+			<template v-if="target.dividers != null && rowVisibility.dividers">
+				<li
+					v-for="dividerID in target.dividers"
+					:key="`divider_${dividerID}`"
+				>
+					<TreeRow
+						:current-item="currentItem"
+						:target="store.get.divider(dividerID)"
+						@select-item="$emit('select-item', arguments[0])"
 					/>
 				</li>
 			</template>
 			<template v-if="target.steps != null && rowVisibility.steps">
 				<li
-					v-for="step in target.steps.map(id => treeData.store.get.step(id))"
+					v-for="step in target.steps.map(id => store.get.step(id))"
 					:key="`step_${step.id}`"
 					class="unindent"
 				>
 					<TreeExpandableRow
-						:tree-data="treeData"
 						:row-visibility="rowVisibility"
 						:current-item="currentItem"
 						:target="step"
+						@select-item="$emit('select-item', arguments[0])"
 					/>
 				</li>
 			</template>
 			<template v-if="target.submodelImages != null && rowVisibility.submodelImages">
 				<li
-					v-for="submodelImage in target.submodelImages.map(id => treeData.store.get.submodelImage(id))"
+					v-for="submodelImage in target.submodelImages.map(id => store.get.submodelImage(id))"
 					:key="`submodelImage_${submodelImage.id}`"
+					class="unindent"
 				>
-					<TreeRow
+					<TreeExpandableRow
+						:row-visibility="rowVisibility"
 						:current-item="currentItem"
 						:target="submodelImage"
-						:selection-callback="treeData.selectionCallback"
+						@select-item="$emit('select-item', arguments[0])"
 					/>
 				</li>
 			</template>
-			<li v-if="target.csiID != null && rowVisibility.csis">
-				<TreeRow
-					:current-item="currentItem"
-					:target="treeData.store.get.csi(target.csiID)"
-					:selection-callback="treeData.selectionCallback"
-				/>
-			</li>
 			<li
-				v-if="target.pliID != null && treeData.store.state.plisVisible && rowVisibility.plis"
+				v-if="target.csiID != null && rowVisibility.csis"
 				class="unindent"
 			>
 				<TreeExpandableRow
-					:tree-data="treeData"
 					:row-visibility="rowVisibility"
 					:current-item="currentItem"
-					:target="treeData.store.get.pli(target.pliID)"
+					:target="store.get.csi(target.csiID)"
+					@select-item="$emit('select-item', arguments[0])"
+				>
+					<template v-if="target.parts && rowVisibility.parts">
+						<li v-for="partID in target.parts" :key="`part_${partID}_${target.id}`">
+							<TreeRow
+								:current-item="currentItem"
+								:target="{type: 'part', id: partID, stepID: target.id}"
+								@select-item="$emit('select-item', arguments[0])"
+							/>
+						</li>
+					</template>
+				</TreeExpandableRow>
+			</li>
+			<li
+				v-if="target.pliID != null && store.state.plisVisible && rowVisibility.plis"
+				class="unindent"
+			>
+				<!-- TODO: if pli is empty, don't include it in the tree -->
+				<TreeExpandableRow
+					:row-visibility="rowVisibility"
+					:current-item="currentItem"
+					:target="store.get.pli(target.pliID)"
+					@select-item="$emit('select-item', arguments[0])"
 				/>
 			</li>
 			<template v-if="target.pliItems != null && rowVisibility.pliItems">
 				<li
-					v-for="pliItem in target.pliItems.map(id => treeData.store.get.pliItem(id))"
+					v-for="pliItem in target.pliItems.map(id => store.get.pliItem(id))"
 					:key="`pliItem_${pliItem.id}`"
 				>
-					<TreeRow
+					<TreeExpandableRow
+						:row-visibility="rowVisibility"
 						:current-item="currentItem"
 						:target="pliItem"
-						:selection-callback="treeData.selectionCallback"
+						@select-item="$emit('select-item', arguments[0])"
 					/>
 				</li>
 			</template>
 			<li v-if="target.quantityLabelID != null && rowVisibility.quantityLabels">
 				<TreeRow
 					:current-item="currentItem"
-					:target="treeData.store.get.quantityLabel(target.quantityLabelID)"
-					:selection-callback="treeData.selectionCallback"
+					:target="store.get.quantityLabel(target.quantityLabelID)"
+					@select-item="$emit('select-item', arguments[0])"
 				/>
 			</li>
 			<template v-if="target.callouts != null && rowVisibility.callouts">
@@ -99,13 +130,28 @@
 					class="unindent"
 				>
 					<TreeExpandableRow
-						:tree-data="treeData"
 						:row-visibility="rowVisibility"
 						:current-item="currentItem"
-						:target="treeData.store.get.callout(calloutID)"
+						:target="store.get.callout(calloutID)"
+						@select-item="$emit('select-item', arguments[0])"
 					/>
 				</li>
 			</template>
+			<template v-if="target.calloutArrows != null && rowVisibility.calloutArrows">
+				<li
+					v-for="calloutArrowID in target.calloutArrows"
+					:key="`calloutArrow_${calloutArrowID}`"
+					class="unindent"
+				>
+					<TreeExpandableRow
+						:row-visibility="rowVisibility"
+						:current-item="currentItem"
+						:target="store.get.calloutArrow(calloutArrowID)"
+						@select-item="$emit('select-item', arguments[0])"
+					/>
+				</li>
+			</template>
+			<slot />
 		</ul>
 	</div>
 </template>
@@ -113,17 +159,25 @@
 <script>
 
 import TreeRow from './row.vue';
+import store from '../../store';
 
 export default {
 	name: 'TreeExpandableRow',
 	components: {TreeRow},
-	props: ['treeData', 'currentItem', 'target', 'rowVisibility'],
+	props: ['currentItem', 'target', 'rowVisibility'],
 	data() {
-		return {
-			expanded: false
-		};
+		this.store = store;
+		return {expanded: false};
 	},
 	methods: {
+		forceUpdate() {
+			this.$forceUpdate();
+			this.$children.forEach(c => {
+				if (typeof c.forceUpdate === 'function') {
+					c.forceUpdate();
+				}
+			});
+		},
 		expandChildren(currentLevel, expandLevel) {
 			if (currentLevel > expandLevel) {
 				return;

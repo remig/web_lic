@@ -3,22 +3,18 @@
 		:id="`treeRow_${target.type}_${target.id}`"
 		:class="['clickable', 'treeText', {selected: selected}]"
 		@click.stop.prevent="itemClick"
-	>{{text}}</span>
+	>{{text()}}</span>
 </template>
 
 <script>
 
 import _ from '../../util';
 import LDParse from '../../LDParse';
+import store from '../../store';
 
 export default {
 	name: 'TreeRow',
-	props: ['currentItem', 'target', 'selectionCallback'],
-	methods: {
-		itemClick() {
-			this.selectionCallback(this.target);  // Easier and faster than emitting an event across 3 levels of components
-		}
-	},
+	props: ['currentItem', 'target'],
 	watch: {
 		currentItem(newItem) {
 			// When an arbitrary item gets selected, make sure all of its ancestors in the tree are expanded
@@ -31,9 +27,9 @@ export default {
 			}
 		}
 	},
-	computed: {
-		selected() {
-			return _.itemEq(this.currentItem, this.target);
+	methods: {
+		itemClick() {
+			this.$emit('select-item', this.target);
 		},
 		text() {
 			const t = this.target;
@@ -55,20 +51,41 @@ export default {
 						return t.text;
 				}
 			} else if (t.type === 'pliItem') {
-				const part = LDParse.partDictionary[t.filename];
-				if (!part || !part.name) {
-					return 'Unknown Part';
-				} else if (part.isSubModel) {
-					return part.name.replace(/\.(mpd|ldr)/ig, '');
+				return `${nicePartName(t.filename)} - ${niceColorName(t.colorCode)}`;
+			} else if (t.type === 'part') {
+				const step = store.get.step(t.stepID);
+				const part = LDParse.model.get.partFromID(t.id, step.model.filename);
+				const partName = nicePartName(part.filename);
+				const partColor = niceColorName(part.colorCode);
+				if (partColor) {
+					return `${partName} - ${partColor}`;
 				}
-				const partName = part.name.replace(' x ', 'x');
-				const partColor = LDParse.colorTable[t.colorCode].name.replace('_', ' ');
-				return partName + ' - ' + partColor;
+				return `${partName}`;
 			}
 			return _.prettyPrint(t.type);
 		}
+	},
+	computed: {
+		selected() {
+			return _.itemEq(this.currentItem, this.target);
+		}
 	}
 };
+
+function nicePartName(filename) {
+	const part = LDParse.partDictionary[filename];
+	if (!part || !part.name) {
+		return 'Unknown Part';
+	} else if (part.isSubModel) {
+		return part.name.replace(/\.(mpd|ldr)/ig, '');
+	}
+	return part.name.replace(' x ', 'x');
+}
+
+function niceColorName(colorCode) {
+	const color = LDParse.colorTable[colorCode];
+	return color ? color.name.replace('_', ' ') : '';
+}
 
 </script>
 

@@ -58,14 +58,19 @@
 		</div>
 
 		<nav-menu
-			:menu-entry-list="navBarContent" :filename="{name: filename, isDirty}"
+			:menu-entry-list="navBarContent"
+			:filename="{name: filename, isDirty}"
 			:version="version" :key="navUpdateState"
 		></nav-menu>
 
 		<div class="mainBody" @contextmenu.stop.prevent="rightClick($event)">
 
 			<div id="leftPane" class="split split-horizontal">
-				<nav-tree ref="navTree" :tree-data="treeData" :current-item="selectedItemLookup"></nav-tree>
+				<nav-tree
+					ref="navTree"
+					:current-item="selectedItemLookup"
+					@select-item="setSelected"
+				></nav-tree>
 			</div>
 
 			<div id="rightPane" class="split split-horizontal">
@@ -752,7 +757,7 @@
 					<form class="form-horizontal">
 						<el-checkbox
 							v-model="includeSubmodels"
-							v-on:click="updateValues"
+							@change="updateValues"
 						>
 							Include Submodels in PLI
 						</el-checkbox>

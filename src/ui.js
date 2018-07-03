@@ -65,7 +65,6 @@ const app = new Vue({
 			x: null,
 			y: null
 		},
-		treeUpdateState: 0,  // Not used directly, only used to force the tree to redraw
 		navUpdateState: 0    // Not used directly, only used to force the nav bar to redraw
 	},
 	methods: {
@@ -189,27 +188,16 @@ const app = new Vue({
 			if (_.itemEq(target, this.selectedItemLookup)) {
 				return;
 			}
-			if (target.type === 'part') {
-				this.selectedItemLookup = target;
-				this.drawCurrentPage();
-			} else if (target.type === 'submodel') {
-				const targetPage = store.get.pageForItem({type: 'step', id: target.stepID});
-				if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
-					this.setCurrentPage(targetPage);
-				}
-				this.selectedItemLookup = target;
+			let targetPage;
+			if (target.type === 'submodel') {
+				targetPage = store.get.pageForItem({type: 'step', id: target.stepID});
 			} else {
-
-				if (this.selectedItemLookup) {
-					const currentPage = store.get.pageForItem(this.selectedItemLookup);
-					this.$refs.pageView.drawPage(currentPage);  // TODO: What is this call for?  Is it still necessary?
-				}
-				const targetPage = store.get.pageForItem(target);
-				if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
-					this.setCurrentPage(targetPage, false);
-				}
-				this.selectedItemLookup = store.get.itemToLookup(target);
+				targetPage = store.get.pageForItem(target);
 			}
+			if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
+				this.setCurrentPage(targetPage, false);
+			}
+			this.selectedItemLookup = store.get.itemToLookup(target);
 		},
 		clearSelected() {
 			const selItem = this.selectedItemLookup;
@@ -249,8 +237,8 @@ const app = new Vue({
 		forceUIUpdate() {
 			// If I understood Vue better, I'd create components that damn well updated themselves properly.
 			this.$refs.pageView.forceUpdate();
-			this.treeUpdateState = (this.treeUpdateState + 1) % 10;  // TODO: considering add refs for the nav tree & menu, then calling $ref.forceUpdate(), like pageView
-			this.navUpdateState = (this.navUpdateState + 1) % 10;
+			this.$refs.navTree.forceUpdate();
+			this.navUpdateState = (this.navUpdateState + 1) % 10;  // TODO: add ref for the menu, then call $ref.forceUpdate()
 			if (this.selectedItemLookup && this.selectedItemLookup.id != null) {
 				this.selectedItemLookup.id++;
 				this.selectedItemLookup.id--;
@@ -394,13 +382,6 @@ const app = new Vue({
 		}
 	},
 	computed: {
-		treeData() {
-			return {
-				store,
-				selectionCallback: this.setSelected.bind(this),
-				treeUpdateState: this.treeUpdateState  // Reactive property used to trigger tree update
-			};
-		},
 		isDirty() {
 			return this.dirtyState.undoIndex !== this.dirtyState.lastSaveIndex;
 		},

@@ -37,7 +37,7 @@ const defaultState = {
 			all: true, page_step_part: false, group_parts: false,
 			steps: true, submodelImages: true, submodelCSI: true, csis: true, parts: true,
 			plis: true, pliItems: true, callouts: true, calloutArrows: true,
-			annotations: true, numberLabels: true, quantityLabels: true
+			annotations: true, numberLabels: true, quantityLabels: true, dividers: true
 		}
 	},
 	pageView: {

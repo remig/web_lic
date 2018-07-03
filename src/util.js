@@ -79,7 +79,7 @@ const api = {
 		return true;
 	},
 	itemEq(a, b) {
-		return a && b && a.id === b.id && a.type === b.type;
+		return a && b && a.id === b.id && a.type === b.type && a.stepID === b.stepID;
 	},
 	get(prop, obj = {}, defaultValue) {
 		prop = (prop + '').split('.');
@@ -297,6 +297,8 @@ const api = {
 				return 'PLI Item';
 			case 'quantitylabel':
 				return 'Quantity Label';
+			case 'calloutarrow':
+				return 'Callout Arrow';
 			case 'numberlabel':
 				return 'Number Label';
 			case 'rotateicon':
