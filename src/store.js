@@ -371,6 +371,24 @@ const store = {
 			}
 			return nextStep;
 		},
+		partsInStep(step) {
+			step = store.get.lookupToItem(step);
+			return step.parts.map(partID => {
+				return LDParse.model.get.partFromID(partID, step.model.filename);
+			});
+		},
+		abstractPartsInStep(step) {
+			step = store.get.lookupToItem(step);
+			const parts = store.get.partsInStep(step);
+			return parts.map(part => {
+				return LDParse.model.get.part(part.filename);
+			});
+		},
+		stepHasSubmodel(step) {
+			step = store.get.lookupToItem(step);
+			const parts = store.get.abstractPartsInStep(step);
+			return parts.some(part => part.isSubModel);
+		},
 		partList(step) {  // Return a list of part IDs for every part in this (and previous) step.
 			step = store.get.lookupToItem(step);
 			if (step.parts == null) {
@@ -564,6 +582,8 @@ const store = {
 		itemToLookup(item) {  // Create a {type, id} lookup object from the specified item
 			if (!item || item.type == null) {
 				return null;
+			} else if (item.type === 'part' || item.type === 'submodel') {
+				return item;
 			} else if (store.state.hasOwnProperty(item.type)) {
 				return {type: item.type, id: item.id || 0};
 			} else if (!store.state.hasOwnProperty(item.type + 's')) {
