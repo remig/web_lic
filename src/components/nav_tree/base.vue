@@ -32,28 +32,12 @@
 			<el-button icon="fas fa-expand-arrows-alt" @click="expand" />
 		</div>
 		<ul>
-			<li v-if="store.get.templatePage() != null">
-				<TreeExpandableRow
-					:row-visibility="rowVisibility"
-					:current-item="currentItem"
-					:target="store.get.templatePage()"
-					@select-item="$emit('select-item', arguments[0])"
-				/>
-			</li>
-			<li v-if="store.get.titlePage() != null">
-				<TreeExpandableRow
-					:row-visibility="rowVisibility"
-					:current-item="currentItem"
-					:target="store.get.titlePage()"
-					@select-item="$emit('select-item', arguments[0])"
-				/>
-			</li>
 			<li
 				v-for="(node, idx) in store.get.topLevelTreeNodes()"
 				:key="`root_${idx}`"
 			>
 				<TreeExpandableRow
-					v-if="node.type === 'page'"
+					v-if="node.type.toLowerCase().endsWith('page')"
 					:row-visibility="rowVisibility"
 					:current-item="currentItem"
 					:target="node"
@@ -63,14 +47,6 @@
 					v-else
 					:current-item="currentItem"
 					:target="node"
-					@select-item="$emit('select-item', arguments[0])"
-				/>
-			</li>
-			<li v-if="store.get.inventoryPage() != null">
-				<TreeExpandableRow
-					:row-visibility="rowVisibility"
-					:current-item="currentItem"
-					:target="store.get.inventoryPage()"
 					@select-item="$emit('select-item', arguments[0])"
 				/>
 			</li>

@@ -513,10 +513,7 @@ const store = {
 			return submodels;
 		},
 		topLevelTreeNodes() {  // Return list of pages & submodels to be drawn in the nav tree
-			const nodes = [];
-			for (let i = 0; i < store.state.pages.length; i++) {
-				nodes.push(store.state.pages[i]);
-			}
+			const nodes = store.get.pageList();
 			store.get.submodels().forEach(submodel => {
 				const page = store.get.pageForItem({id: submodel.stepID, type: 'step'});
 				const pageIndex = nodes.indexOf(page);
@@ -524,7 +521,7 @@ const store = {
 				submodel.id = nodes.length;
 				_.insert(nodes, submodel, pageIndex);
 			});
-			return nodes;
+			return nodes.filter(el => el);
 		},
 		nextItemID(item) {  // Get the next unused ID in this item's list
 			if (item && item.type) {
