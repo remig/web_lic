@@ -187,7 +187,7 @@ function setStateTimer() {
 		store.save('local');
 		state.localStorageTimer = setTimeout(() => {
 			state.localStorageTimer = null;
-		}, 30 * 1000);
+		}, 30);
 	}
 }
 

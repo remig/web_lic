@@ -9,10 +9,8 @@
 				placement="bottom-start"
 				@command="checkItem"
 			>
-				<span class="el-dropdown-link">
-					Show
-				</span>
-				<el-dropdown-menu slot="dropdown">
+				<span class="el-dropdown-link">Show</span>
+				<el-dropdown-menu slot="dropdown" class="treeShowHideDropdown">
 					<template v-for="(el, idx) in checkedElements">
 						<el-dropdown-item
 							v-if="el.name === 'divider'"
@@ -251,14 +249,20 @@ export default {
 .treeButtons .el-dropdown {
 	float: right;
 	height: 24px;
-	padding: 2px 5px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
 	font-size: 10pt;
+	padding: 2px 5px;
 }
 
 .treeButtons .el-button+.el-button {
 	margin-left: unset;
+}
+
+.treeShowHideDropdown {
+	min-width: 190px;
+}
+
+.treeShowHideDropdown i {
+	padding-top: 5px;
 }
 
 .indent {
@@ -286,16 +290,6 @@ export default {
 	bottom: 4px;
 	width: 100%;
 	border: 1px dashed #fff;
-}
-
-.el-dropdown-menu i {
-	float: right;
-	margin-left: 12px;
-	padding-top: 5px;
-}
-
-ul.el-dropdown-menu {
-	min-width: 190px;
 }
 
 </style>

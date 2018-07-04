@@ -181,6 +181,16 @@ div#container {
 	padding: 20px;
 }
 
+.el-dropdown {
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.el-dropdown-menu i {
+	float: right;
+	margin-left: 12px;
+}
+
 .el-input__inner {
 	height: 34px;
 	border: 1px solid #ccc;

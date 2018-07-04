@@ -74,6 +74,18 @@
 		}
 	},
 	"dialog": {
+		"import_model": {
+			"title": "Import Model",
+			"steps_per_page": "Steps per Page",
+			"use_max_steps": "As many as can fit nicely",
+			"include": {
+				"root": "Include...",
+				"titlePage": "Title Page",
+				"submodelBreakdown": "Sub Model / Part Bag Breakdown (NYI)",
+				"pli": "PLIs in each Step",
+				"partListPage": "Part List Page (NYI)"
+			}
+		},
 		"grid": {
 			"title": "Change Grid",
 			"enabled": "Enabled",

@@ -14,9 +14,9 @@ const defaultState = {
 			addStepsForSubmodels: true,
 			include: {
 				titlePage: false,
-				partListPage: false,
 				submodelBreakdown: false,
-				pli: true
+				pli: true,
+				partListPage: false
 			}
 		},
 		export: {

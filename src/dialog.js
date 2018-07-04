@@ -46,11 +46,6 @@ const baseDialogPropagator = {
 };
 
 const dialogs = {
-	pageSize: {
-		maintainAspectRatio: true,
-		width: 900,
-		height: 700
-	},
 	partDisplacement: {
 		partDistance: 60,
 		arrowOffset: 0,
