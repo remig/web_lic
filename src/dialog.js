@@ -77,14 +77,6 @@ const dialogs = {
 		title: '',
 		labelText: '',
 		string: ''
-	},
-	color: {
-		color: ''
-	},
-	border: {
-		width: 0,
-		color: '',
-		cornerRadius: 0
 	}
 };
 
@@ -101,25 +93,6 @@ _.forEach(dialogs, (name, data) => {
 			}
 		}
 	});
-});
-
-Vue.component('fontNameDialog', {
-	template: '#fontNameTemplate',
-	mixins: [baseDialogPropagator],
-	data: function() {
-		return {
-			font: '',
-			fontName: ''
-		};
-	},
-	methods: {
-		updateValues() {
-			const fontParts = _.fontToFontParts(this.font);
-			fontParts.fontFamily = this.fontName;
-			this.font = _.fontPartsToFont(fontParts);
-			this.$emit('update', {fontName: this.fontName});
-		}
-	}
 });
 
 const elDialogs = {

@@ -3,7 +3,12 @@
 		<div class="form-group">
 			<label for="font" class="sr-only">Select a font</label>
 			<div class="col-sm-10">
-				<el-select id="font" v-model="family" @change="updateFontName">
+				<el-select
+					id="font"
+					v-model="family"
+					@visible-change="cacheFontName"
+					@change="updateFontName"
+				>
 					<el-option-group v-for="group in familyNames" :key="group.label">
 						<el-option
 							v-for="font in group.options"
@@ -70,6 +75,7 @@ import _ from '../../util';
 import store from '../../store';
 import Storage from '../../storage';
 import DialogManager from '../../dialog';
+import fontNameDialog from '../../dialogs/font_name.vue';
 import PanelBase from './panel_base.vue';
 
 const familyNames = ['Helvetica', 'Times New Roman'];
@@ -113,19 +119,27 @@ export default {
 			this[prop] = !this[prop];
 			this.updateValues();
 		},
+		cacheFontName(show) {
+			if (show) {
+				this._lastFontFamily = this.family;
+			}
+		},
 		updateFontName() {
 			if (this.family === 'Custom...') {
-				DialogManager.setDialog('fontNameDialog');
+				DialogManager.setDialog(fontNameDialog);
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$on('ok', newValues => {
-						this.family = newValues.fontName;
-						this.addCustomFont(newValues.fontName);
+					dialog.$on('ok', fontName => {
+						this.family = fontName;
+						this.addCustomFont(fontName);
 						this.updateValues();
+					});
+					dialog.$on('cancel', () => {
+						this.family = this._lastFontFamily;
 					});
 					dialog.font = this.fontString();
 					dialog.fontName = '';
-					dialog.show({x: 400, y: 150});
+					dialog.visible = true;
 				});
 			} else {
 				this.updateValues();
