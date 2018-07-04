@@ -237,8 +237,10 @@ const api = {
 		if (store.get.stepHasSubmodel(step)) {
 			const tagName = `submodel_arrow_step_${step.id}`;
 			let annotation = store.state.annotations.filter(a => a.tagName === tagName)[0];
-			if (store.state.template.pli.includeSubmodels && annotation) {
-				store.mutations.annotation.delete({annotation});
+			if (store.state.template.pli.includeSubmodels) {
+				if (annotation) {
+					store.mutations.annotation.delete({annotation});
+				}
 			} else {
 				if (annotation == null) {
 					annotation = store.mutations.annotation.add({
