@@ -373,7 +373,7 @@ const store = {
 		},
 		partsInStep(step) {
 			step = store.get.lookupToItem(step);
-			return step.parts.map(partID => {
+			return (step.parts || []).map(partID => {
 				return LDParse.model.get.partFromID(partID, step.model.filename);
 			});
 		},
@@ -715,7 +715,6 @@ const store = {
 				});
 			}
 		},
-		// TODO: include parts in the nav Tree
 		part: {
 			displace(opts) { // opts: {partID, step, direction, partDistance = 60, arrowOffset = 0, arrowLength = 60, arrowRotation = 0}.  If direction == null, remove displacement
 				const step = store.get.lookupToItem(opts.step);
