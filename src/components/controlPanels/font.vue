@@ -118,7 +118,6 @@ export default {
 				DialogManager.setDialog('fontNameDialog');
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
 					dialog.$on('ok', newValues => {
 						this.family = newValues.fontName;
 						this.addCustomFont(newValues.fontName);

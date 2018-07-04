@@ -92,7 +92,6 @@ const app = new Vue({
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
 					dialog.visible = true;
-					dialog.$off();
 					dialog.$on('ok', async layoutChoices => {
 
 						// TODO: Add option to start new page for each submodel

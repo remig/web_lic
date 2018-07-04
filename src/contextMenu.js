@@ -113,7 +113,6 @@ const contextMenu = {
 
 						Vue.nextTick(() => {
 							const dialog = DialogManager.getDialog();
-							dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'page.layout',
@@ -249,7 +248,6 @@ const contextMenu = {
 
 						Vue.nextTick(() => {
 							const dialog = DialogManager.getDialog();
-							dialog.$off();  // TODO: initialize these event listeners just once... somewhere, somehow.  This code smells.
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'page.layout',
@@ -475,7 +473,6 @@ const contextMenu = {
 
 						Vue.nextTick(() => {
 							const dialog = DialogManager.getDialog();
-							dialog.$off();
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'csi.rotate',
@@ -534,7 +531,6 @@ const contextMenu = {
 
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();
 					dialog.$on('ok', newValues => {
 						const csiList = originalRotations
 							.map((rotation, id) => ({type: 'csi', id})).filter(el => el);
@@ -598,7 +594,6 @@ const contextMenu = {
 				DialogManager.setDialog('numberChooserDialog');
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();
 					dialog.$on('update', newValues => {
 						csi.scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
 						csi.isDirty = true;
@@ -684,7 +679,6 @@ const contextMenu = {
 
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].rotation = {...newValues.rotation};
 						store.mutations.pliItem.markAllDirty(filename);
@@ -731,7 +725,6 @@ const contextMenu = {
 				DialogManager.setDialog('numberChooserDialog');
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
 						store.mutations.pliItem.markAllDirty(filename);
@@ -820,7 +813,6 @@ const contextMenu = {
 
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();
 					dialog.$on('ok', newValues => {
 						const page = store.get.pageForItem(annotation);
 						const opts = {
@@ -951,7 +943,6 @@ const contextMenu = {
 				DialogManager.setDialog('numberChooserDialog');
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();
 					dialog.$on('update', newValues => {
 						store.mutations.divider.setLength({divider, newLength: newValues.value});
 						app.drawCurrentPage();
@@ -1052,7 +1043,6 @@ const contextMenu = {
 
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();
 					dialog.$on('ok', () => {
 						undoStack.commit('part.displace', {step, ...displacement}, 'Adjust Displaced Part');
 					});
