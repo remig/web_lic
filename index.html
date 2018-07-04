@@ -549,34 +549,6 @@
 		</baseDialog>
 	</script>
 
-	<script type="text/x-template" id="fontNameTemplate">
-		<baseDialog title="Custom Font">
-			<div slot="body" class="container-fluid">
-				<form class="form-horizontal" role="form">
-					<div class="form-group">
-						<label
-							class="col-sm-4 control-label"
-							for="fontNameInput"
-						>
-							Enter the name of a font on your system
-						</label>
-						<div class="col-sm-8">
-							<input
-								v-model="fontName"
-								v-on:input="updateValues"
-								type="text"
-								class="form-control"
-								id="fontNameInput"
-							/>
-						</div>
-					</div>
-				</form>
-				<div>Sample Text:</div>
-				<div :style="{font: font}">abc ABC 0 1 2 3 4 5 6 7 8 9</div>
-			</div>
-		</baseDialog>
-	</script>
-
 	<!-- Template Page Components -->
 	<script type="text/x-template" id="fillAndBorderTemplatePanel">
 		<div>
