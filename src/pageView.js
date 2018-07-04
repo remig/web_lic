@@ -9,19 +9,32 @@ import uiState from './uiState';
 import Guide from './components/guide.vue';
 
 Vue.component('pageView', {
+	props: ['app', 'selectedItem', 'currentPageLookup'],
+	data() {
+		return {
+			pageSize: {
+				width: store.state.template.page.width,
+				height: store.state.template.page.height
+			},
+			pageCount: 0,
+			pageLockStatus: [],
+			facingPage: uiState.get('pageView.facingPage'),
+			scroll: uiState.get('pageView.scroll')
+		};
+	},
 	render(createElement) {
 
 		let pageIDsToDraw;
 		const pageWidth = this.pageSize.width, pageHeight = this.pageSize.height;
 		const scrolling = this.isScrollingView, facing = this.isFacingView;
 
-		function renderOnePage(idx, pageID, locked) {
+		function renderOnePage(idx, pageLookup, locked) {
 
 			const canvas = createElement(
 				'canvas',
 				{
 					attrs: {
-						id: 'pageCanvas' + pageID,
+						id: getCanvasID(pageLookup),
 						width: pageWidth,
 						height: pageHeight
 					},
@@ -30,7 +43,7 @@ Vue.component('pageView', {
 			);
 
 			let lockIcon, lockSwitch, guides = [];
-			if (pageID != null && pageID !== 'templatePage' && pageID !== 'titlePage') {
+			if (pageLookup && pageLookup.type === 'page') {
 				lockIcon = createElement(
 					'i',
 					{class: ['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}]}
@@ -41,9 +54,12 @@ Vue.component('pageView', {
 						props: {width: 20},
 						class: 'pageLockSwitch',
 						domProps: {value: locked},
-						on: {input: setPageLocked(pageID)}
+						on: {input: setPageLocked(pageLookup.id)}
 					}
 				);
+
+			}
+			if (pageLookup && pageLookup.type !== 'templatePage') {
 
 				guides = uiState.get('guides').map((props, guideID) => {
 					const offset = {left: 0, top: 0};
@@ -81,7 +97,7 @@ Vue.component('pageView', {
 						}
 					],
 					style: {
-						visibility: (pageID == null) ? 'hidden' : null
+						visibility: (pageLookup == null) ? 'hidden' : null
 					}
 				},
 				[canvas, guides]
@@ -95,28 +111,25 @@ Vue.component('pageView', {
 		}
 
 		if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
-			pageIDsToDraw = ['templatePage'];
+			pageIDsToDraw = [this.currentPageLookup];
 		} else if (scrolling) {
-			pageIDsToDraw = store.state.pages.map(page => page.id);
-			if (store.state.titlePage) {
-				pageIDsToDraw.unshift('titlePage');
-			}
+			pageIDsToDraw = store.get.pageList().map(p => ({type: p.type, id: p.id}));
+			pageIDsToDraw.shift();  // Don't include template page
 			if (facing) {
 				pageIDsToDraw.unshift(null);
 			}
-		} else if (this.currentPageLookup && this.currentPageLookup.type === 'titlePage') {
-			pageIDsToDraw = facing ? [null, 'titlePage'] : ['titlePage'];
 		} else if (facing) {
-			pageIDsToDraw = getAdjacentPages(this.currentPageLookup).map(page => (page || {}).id);
+			pageIDsToDraw = getPairedPages(this.currentPageLookup)
+				.map(p => (p ? {type: p.type, id: p.id} : null));
 		} else {
-			pageIDsToDraw = [(this.currentPageLookup || {}).id];
+			pageIDsToDraw = [this.currentPageLookup];
 		}
 
 		let prevPagePair;
 		const containerList = [];
-		pageIDsToDraw.forEach((pageID, idx) => {
-			const locked = this.pageLockStatus[pageID];
-			const page = renderOnePage(idx, pageID, locked);
+		pageIDsToDraw.forEach((pageLookup, idx) => {
+			const locked = pageLookup ? this.pageLockStatus[pageLookup.id] : false;
+			const page = renderOnePage(idx, pageLookup, locked);
 			if (facing && scrolling) {
 				if (prevPagePair) {
 					containerList.push(createElement('div', [prevPagePair, page]));
@@ -164,19 +177,6 @@ Vue.component('pageView', {
 			[subRoot]
 		);
 	},
-	props: ['app', 'selectedItem', 'currentPageLookup'],
-	data() {
-		return {
-			pageSize: {
-				width: store.state.template.page.width,
-				height: store.state.template.page.height
-			},
-			pageCount: 0,
-			pageLockStatus: [],
-			facingPage: uiState.get('pageView.facingPage'),
-			scroll: uiState.get('pageView.scroll')
-		};
-	},
 	watch: {
 		selectedItem(newItem, prevItem) {
 			const prevPage = store.get.pageForItem(prevItem);
@@ -193,7 +193,7 @@ Vue.component('pageView', {
 			Vue.nextTick(() => {
 				if (this.scroll && prevPage && prevPage.type === 'templatePage') {
 					// When switching from template's single-page view to scrolling multi-page view, need to reset all pages, as they're blank
-					store.mutations.page.setDirty({includeTitlePage: true});
+					store.mutations.page.setDirty();
 				}
 				this.drawCurrentPage();
 				this.scrollToPage(newPage);
@@ -210,7 +210,7 @@ Vue.component('pageView', {
 			const latestPageCount = store.get.pageCount(true);
 			if (this.pageCount !== latestPageCount) {
 				this.pageCount = latestPageCount;
-				store.mutations.page.setDirty({includeTitlePage: true});
+				store.mutations.page.setDirty();
 			}
 
 			this.pageLockStatus = [];
@@ -328,14 +328,14 @@ Vue.component('pageView', {
 			const container = document.getElementById('rightSubPane');
 			const topOffset = container.querySelector('canvas').offsetTop;
 			const pageHeight = store.state.template.page.height + 30;
-			let pageIndex = Math.ceil((container.scrollTop - topOffset) / pageHeight);
+			let pageIndex = Math.ceil((container.scrollTop - topOffset) / pageHeight) + 1;
 			if (this.isFacingView) {
 				pageIndex *= 2;
 			}
-			pageIndex -= store.get.titlePage() ? 1 : 0;
-			const page = (pageIndex < 0) ? store.get.titlePage() : store.state.pages[pageIndex];
+			const pageList = store.get.pageList();
+			const page = pageList[pageIndex];
 			if (page) {
-				this.drawNearbyPages(page);
+				this.drawNearbyPages(page, pageList);
 			}
 		},
 		scrollToPage(page) {
@@ -344,7 +344,7 @@ Vue.component('pageView', {
 			}
 			page = store.get.lookupToItem(page);
 			if (page) {
-				const pageCanvas = this.getCanvasForPage(page);
+				const pageCanvas = getCanvasForPage(page);
 				if (pageCanvas) {
 					const container = document.getElementById('rightSubPane');
 					const dy = (container.offsetHeight - pageCanvas.offsetHeight) / 2;
@@ -376,31 +376,24 @@ Vue.component('pageView', {
 			}
 		},
 		drawAdjacentPages(page) {
-			getAdjacentPages(page).forEach(page => this.drawPage(page));
+			getPairedPages(page).forEach(page => this.drawPage(page));
 		},
-		drawNearbyPages(page) {
+		drawNearbyPages(page, pageList) {  // pageList is optional; saves genearting the list again if caller has it
 			page = store.get.lookupToItem(page);
 			this.drawPage(page);  // Always redraw main page, regardless of needsDrawing state
 
-			let currentPageIdx;
-			if (page.type === 'titlePage') {
-				currentPageIdx = 0;
-			} else {
-				currentPageIdx = store.state.pages.findIndex(el => el.id === page.id);
-			}
+			pageList = pageList || store.get.pageList();
+			const currentPageIdx = pageList.indexOf(page);
 			if (currentPageIdx < 0) {
 				return;
 			}
-			const pageCountToDraw = this.isFacingView ? 10 : 4;
+			const pageCountToDraw = this.isFacingView ? 10 : 5;
 			const firstPage = Math.max(0, currentPageIdx - Math.floor(pageCountToDraw / 2));
 			for (let i = firstPage; i < firstPage + pageCountToDraw; i++) {
-				const nearbyPage = store.state.pages[i];
+				const nearbyPage = pageList[i];
 				if (nearbyPage && nearbyPage.needsDrawing && nearbyPage !== page) {
 					this.drawPage(nearbyPage);
 				}
-			}
-			if (currentPageIdx < 3 && store.state.titlePage && store.state.titlePage.needsDrawing) {
-				this.drawPage({id: 0, type: 'titlePage'});
 			}
 		},
 		drawPage(page, canvas) {
@@ -409,7 +402,7 @@ Vue.component('pageView', {
 				return;  // This can happen if, say, a page got deleted without updating the current page (like in undo / redo)
 			}
 			if (canvas == null) {
-				canvas = this.getCanvasForPage(page);
+				canvas = getCanvasForPage(page);
 			}
 			if (canvas == null) {
 				return;  // Can't find a canvas for this page - ignore draw call.  Happens when we're transitioning between view modes
@@ -425,21 +418,8 @@ Vue.component('pageView', {
 				}
 			}
 		},
-		getCanvasForPage(page) {
-			let id = 'pageCanvas';
-			if (page) {
-				if (page.type === 'titlePage' || page.type === 'templatePage') {
-					id += page.type;
-				} else {
-					id += page.id;
-				}
-			} else if (this.currentPageLookup) {
-				id += this.currentPageLookup.id;
-			}
-			return document.getElementById(id);
-		},
 		pageCoordsToCanvasCoords(point) {
-			const canvas = this.getCanvasForPage(this.currentPageLookup);
+			const canvas = getCanvasForPage(this.currentPageLookup);
 			const box = canvas.getBoundingClientRect();
 			return {
 				x: Math.floor(point.x - box.x),
@@ -459,7 +439,7 @@ Vue.component('pageView', {
 	}
 });
 
-function getAdjacentPages(page) {
+function getPairedPages(page) {
 	page = store.get.lookupToItem(page);
 	if (!page) {
 		return [];
@@ -468,7 +448,7 @@ function getAdjacentPages(page) {
 	} else if (_.isEven(page.number)) {
 		return [page, store.get.nextPage(page)];
 	}
-	return [store.get.prevBasicPage(page), page];
+	return [store.get.prevPage(page), page];
 }
 
 function setPageLocked(pageID) {
@@ -487,12 +467,17 @@ function getPageOffset() {
 	return container ? (container.offsetHeight - pageHeight) / 2 : 0;
 }
 
+function getCanvasID(page) {
+	return page ? `pageCanvas_${page.type}_${page.id}` : '';
+}
+
 function getPageForCanvas(canvas) {
-	const pageID = canvas.id.replace('pageCanvas', '');
-	if (pageID.endsWith('Page')) {
-		return store.get.page({id: 0, type: pageID});
-	}
-	return store.get.page(parseInt(pageID, 10));
+	const [, type, id] = canvas.id.split('_');
+	return store.get.lookupToItem({type, id: parseInt(id, 10)});
+}
+
+function getCanvasForPage(page) {
+	return document.getElementById(getCanvasID(page));
 }
 
 function itemHighlightBox(selItem, pageSize) {
@@ -506,7 +491,7 @@ function itemHighlightBox(selItem, pageSize) {
 		store.mutations.page.layout({page});
 	}
 	let box;
-	if (type === 'page' || type === 'titlePage' || type === 'templatePage') {
+	if (type && type.toLowerCase().endsWith('page')) {
 		box = {x: 6, y: 6, width: pageSize.width - 10, height: pageSize.height - 10};
 	} else if (type === 'divider') {
 		let pointBox = _.geom.bbox([selItem.p1, selItem.p2]);

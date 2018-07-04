@@ -1326,10 +1326,13 @@ const store = {
 					Layout.page(page, opts.layout || page.layout);
 				}
 			},
-			setDirty(opts) {  // opts: {includeTitlePage}
+			setDirty() {
 				store.state.pages.forEach(p => (p.needsDrawing = true));
-				if (opts && opts.includeTitlePage && store.state.titlePage) {
+				if (store.state.titlePage) {
 					store.state.titlePage.needsDrawing = true;
+				}
+				if (store.state.inventoryPage) {
+					store.state.inventoryPage.needsDrawing = true;
 				}
 			}
 		},

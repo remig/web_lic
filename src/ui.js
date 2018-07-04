@@ -103,7 +103,11 @@ const app = new Vue({
 							await store.mutations.mergeInitialPages(this.updateProgress);
 						}
 						if (layoutChoices.include.titlePage) {
-							store.mutations.addTitlePage();  // Add title page after adding regular pages so title page summary label comes out correct
+							// Add title page after adding regular pages so title page labels comes out correct
+							store.mutations.addTitlePage();
+						}
+						if (layoutChoices.include.partListPage) {
+							store.mutations.inventoryPage.add();
 						}
 						store.save('local');
 
@@ -355,7 +359,7 @@ const app = new Vue({
 			uiState.set('pageView', {facingPage, scroll});
 
 			if (scroll) {
-				store.mutations.page.setDirty({includeTitlePage: true});
+				store.mutations.page.setDirty();
 				Vue.nextTick(() => {
 					this.$refs.pageView.drawCurrentPage();
 					this.$refs.pageView.scrollToPage(this.currentPageLookup);
@@ -424,7 +428,7 @@ const app = new Vue({
 		LDParse.setProgressCallback(this.updateProgress);
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();
-			store.mutations.page.setDirty({includeTitlePage: true});
+			store.mutations.page.setDirty();
 			this.redrawUI();
 		});
 
