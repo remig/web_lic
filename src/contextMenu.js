@@ -18,12 +18,12 @@ const annotationMenu = {
 			text: 'Label',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
+				const pos = store.get.pageCoordsToItemCoords(selectedItem, clickPos);
 				const opts = {
 					annotationType: 'label',
 					properties: {text: 'New Label'},
-					relativeTo: selectedItem,
-					parent: store.get.pageForItem(selectedItem),
-					...clickPos
+					parent: selectedItem,
+					...pos
 				};
 				undoStack.commit('annotation.add', opts, 'Add Label');
 			}
@@ -40,12 +40,12 @@ const annotationMenu = {
 			text: 'Arrow',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
+				const pos = store.get.pageCoordsToItemCoords(selectedItem, clickPos);
 				const opts = {
 					annotationType: 'arrow',
 					properties: {direction: 'right'},
-					relativeTo: selectedItem,
-					parent: store.get.pageForItem(selectedItem),
-					...clickPos
+					parent: selectedItem,
+					...pos
 				};
 				undoStack.commit('annotation.add', opts, 'Add Arrow');
 			}
@@ -54,13 +54,13 @@ const annotationMenu = {
 			text: 'Image',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
+				const pos = store.get.pageCoordsToItemCoords(selectedItem, clickPos);
 				openFileHandler('.png', 'dataURL', src => {
 					const opts = {
 						annotationType: 'image',
 						properties: {src},
-						relativeTo: selectedItem,
-						parent: store.get.pageForItem(selectedItem),
-						...clickPos
+						parent: selectedItem,
+						...pos
 					};
 					undoStack.commit('annotation.add', opts, 'Add Image');
 				});
@@ -391,7 +391,7 @@ const contextMenu = {
 		{text: 'separator'},
 		{
 			text: 'Prepend Blank Step',
-			enabled: enableIfUnlocked,
+			enabled: enableIfUnlocked,  // TODO: this should be disabled if previous step is in a different submodel
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
@@ -800,7 +800,7 @@ const contextMenu = {
 			text: 'Delete',
 			cb(selectedItem) {
 				const annotation = selectedItem;
-				undoStack.commit('annotation.delete', {annotation}, this.text);
+				undoStack.commit('annotation.delete', {annotation}, 'Delete Annotation');
 				app.clearSelected();
 			}
 		};

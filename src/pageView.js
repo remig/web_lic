@@ -213,7 +213,8 @@ Vue.component('pageView', {
 				store.mutations.page.setDirty({includeTitlePage: true});
 			}
 
-			this.pageLockStatus = store.state.pages.map(page => page.locked);
+			this.pageLockStatus = [];
+			store.state.pages.forEach(page => (this.pageLockStatus[page.id] = page.locked));
 
 			Vue.nextTick(() => {
 				this.drawCurrentPage();
@@ -553,6 +554,12 @@ function findClickTargetInStep(step, mx, my) {
 		}
 	}
 	const csi = store.get.csi(step.csiID);
+	for (let i = 0; i < csi.annotations.length; i++) {
+		const a = store.get.annotation(csi.annotations[i]);
+		if (inBox(mx, my, a)) {
+			return a;
+		}
+	}
 	if (step.csiID != null && inBox(mx, my, csi)) {
 		return csi;
 	}
@@ -621,6 +628,12 @@ function findClickTargetInStep(step, mx, my) {
 			}
 		}
 	}
+	for (let i = 0; i < step.annotations.length; i++) {
+		const a = store.get.annotation(step.annotations[i]);
+		if (inBox(mx, my, a)) {
+			return a;
+		}
+	}
 	if (inBox(mx, my, step)) {
 		return step;
 	}
@@ -638,12 +651,10 @@ function findClickTargetInPage(page, mx, my) {
 			return lbl;
 		}
 	}
-	if (page.annotations != null) {
-		for (let i = 0; i < page.annotations.length; i++) {
-			const a = store.get.annotation(page.annotations[i]);
-			if (inBox(mx, my, a)) {
-				return a;
-			}
+	for (let i = 0; i < page.annotations.length; i++) {
+		const a = store.get.annotation(page.annotations[i]);
+		if (inBox(mx, my, a)) {
+			return a;
 		}
 	}
 	for (let i = 0; i < page.dividers.length; i++) {

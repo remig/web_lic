@@ -136,7 +136,7 @@ const api = {
 		page.actualLayout = (rows > 1 || cols > 1) ? {rows, cols, direction: layoutDirection} : 'horizontal';
 		api.dividers(page, layoutDirection, rows, cols, pageSize);
 
-		if (store.state.plisVisible) {
+		if (0 && store.state.plisVisible) {
 			alignStepContent(page);
 		}
 
@@ -213,6 +213,33 @@ const api = {
 			icon.height = icon.width * rotateIconAspectRatio;
 			icon.x = csi.x - icon.width - margin;
 			icon.y = csi.y - icon.height;
+		}
+
+		if (store.get.stepHasSubmodel(step)) {
+			const tagName = `submodel_arrow_step_${step.id}`;
+			let annotation = store.state.annotations.filter(a => a.tagName === tagName)[0];
+			if (store.state.template.pli.includeSubmodels && annotation) {
+				store.mutations.annotation.delete({annotation});
+			} else {
+				if (annotation == null) {
+					annotation = store.mutations.annotation.add({
+						annotationType: 'arrow',
+						properties: {direction: 'right', tagName},
+						parent: step,
+						x: 0, y: 0
+					});
+				}
+				annotation.direction = 'right';
+				const csi = store.get.csi(step.csiID);
+				const p1 = store.get.point(annotation.points[0]);
+				p1.relativeTo = {type: 'page', id: step.parent.id};
+				p1.x = 0;
+				p1.y = store.get.positionOnPage({x: 0, y: csi.height / 2, relativeTo: csi}).y;
+				const p2 = store.get.point(annotation.points[1]);
+				p2.relativeTo = {type: 'csi', id: step.csiID};
+				p2.x = -_.geom.arrow.head.length - 10;
+				p2.y = csi.height / 2;
+			}
 		}
 	},
 
@@ -390,7 +417,7 @@ const api = {
 		const csi = store.get.csi(step.csiID);
 		const p2 = store.get.point(arrow.points[1]);
 		p2.relativeTo = {type: 'csi', id: csi.id};
-		p2.x = -30;  // p2 is arrow's base; move it to the left to make space for the arrow head
+		p2.x = -_.geom.arrow.head.length;  // p2 is arrow's base; move it to the left to make space for the arrow head
 		p2.y = csi ? csi.height / 2 : 50;
 	},
 
@@ -598,6 +625,7 @@ function getMargin(margin) {
 }
 
 // TODO: should push callouts down too
+// TODO: this is buggy: it's duplicating a lot of step layout logic, but badly.  Like, it doesn't push content down below step numbers.
 function alignStepContent(page) {
 	const margin = getMargin(store.state.template.step.innerMargin);
 	const steps = page.steps.map(stepID => store.get.step(stepID));

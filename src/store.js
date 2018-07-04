@@ -584,9 +584,18 @@ const store = {
 			}
 			return {type: item.type, id: item.id};
 		},
+		pageCoordsToItemCoords(item, {x, y}) {  // x & y are in page coordinates; transform to item coordinates
+			item = store.get.lookupToItem(item);
+			while (item) {
+				x -= item.x || 0;
+				y -= item.y || 0;
+				item = store.get.parent(item);
+			}
+			return {x, y};
+		},
 		positionOnPage(item) {
 			let x = 0, y = 0;
-			item = store.get.lookupToItem(item);
+			item = store.get.lookupToItem(item) || item;
 			while (item) {
 				x += item.x || 0;
 				y += item.y || 0;
@@ -872,7 +881,7 @@ const store = {
 		csi: {
 			add(opts) { // opts: {parent}
 				return store.mutations.item.add({item: {
-					type: 'csi', domID: null,
+					type: 'csi', domID: null, annotations: [],
 					rotation: null, scale: null,
 					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
@@ -946,16 +955,10 @@ const store = {
 
 				const annotation = store.mutations.item.add({item: {
 					type: 'annotation',
-					annotationType: opts.annotationType,
-					relativeTo: opts.relativeTo
+					annotationType: opts.annotationType
 				}, parent: opts.parent});
 
 				_.copy(annotation, opts.properties);
-
-				const relativeTo = store.get.lookupToItem(opts.relativeTo);
-				const offset = store.get.positionOnPage(relativeTo);
-				opts.x -= offset.x;
-				opts.y -= offset.y;
 
 				// Guarantee some nice defaults
 				if (annotation.annotationType === 'label') {
@@ -1016,7 +1019,7 @@ const store = {
 					item: {
 						type: 'step',
 						number: opts.stepNumber, numberLabelID: null,
-						parts: [], callouts: [], steps: [], dividers: [], submodelImages: [],
+						parts: [], callouts: [], steps: [], dividers: [], submodelImages: [], annotations: [],
 						csiID: null, pliID: null, rotateIconID: null,
 						model: opts.model || {filename: null, parentStepID: null},
 						x: null, y: null, width: null, height: null, subStepLayout: 'vertical'
@@ -1318,6 +1321,8 @@ const store = {
 				if (page.numberLabelID != null) {
 					store.mutations.item.delete({item: store.get.numberLabel(page.numberLabelID)});
 				}
+				store.mutations.item.deleteChildList({item: page, listType: 'divider'});
+				store.mutations.item.deleteChildList({item: page, listType: 'annotation'});
 				store.mutations.item.delete({item: page});
 				store.mutations.page.renumber();
 			},

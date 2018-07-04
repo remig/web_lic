@@ -85,11 +85,9 @@ const api = {
 			ctx.restore();
 		}
 
-		if (page.annotations != null) {
-			page.annotations.forEach(id => {
-				api.annotation(store.get.annotation(id), ctx);
-			});
-		}
+		page.annotations.forEach(id => {
+			api.annotation(store.get.annotation(id), ctx);
+		});
 		ctx.restore();
 	},
 
@@ -137,6 +135,9 @@ const api = {
 
 		api.dividers(step.dividers, ctx);
 
+		step.annotations.forEach(id => {
+			api.annotation(store.get.annotation(id), ctx);
+		});
 		ctx.restore();
 	},
 
@@ -186,15 +187,20 @@ const api = {
 
 		ctx.save();
 		ctx.scale(1 / hiResScale, 1 / hiResScale);
+		ctx.translate(Math.floor(csi.x), Math.floor(csi.y));
 		const haveSelectedParts = selectedPart && selectedPart.stepID === step.id;
 		const selectedPartIDs = haveSelectedParts ? [selectedPart.id] : null;
 		const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
 		const res = store.render[renderer](localModel, step, csi, selectedPartIDs, hiResScale, noCache);
 		if (res) {
-			const x = Math.floor((csi.x - res.dx) * hiResScale);
-			const y = Math.floor((csi.y - res.dy) * hiResScale);
+			const x = Math.floor((-res.dx) * hiResScale);
+			const y = Math.floor((-res.dy) * hiResScale);
 			ctx.drawImage(res.container, x, y);  // TODO: profile performance if every x, y, w, h argument is passed in
 		}
+
+		csi.annotations.forEach(id => {
+			api.annotation(store.get.annotation(id), ctx);
+		});
 		ctx.restore();
 	},
 
@@ -382,16 +388,7 @@ const api = {
 	arrowHead: (() => {
 
 		const presetAngles = {up: 180, left: 90, right: -90};
-		const arrowDimensions = {
-			head: {
-				length: 30,
-				width: 7,
-				insetDepth: 3
-			},
-			body: {
-				width: 1.25
-			}
-		};
+		const arrowDimensions = _.geom.arrow;
 
 		return function(ctx, baseX, baseY, rotation, scale) {
 			const head = arrowDimensions.head, bodyWidth = 1.25;
@@ -422,10 +419,41 @@ const api = {
 	})(),
 
 	annotation(annotation, ctx) {
-		const relativeTo = store.get.lookupToItem(annotation.relativeTo);
-		const offset = store.get.positionOnPage(relativeTo);
-		const x = Math.floor(annotation.x + offset.x);
-		const y = Math.floor(annotation.y + offset.y);
+		function transformPoint(pt, annotation) {
+			if (!pt.relativeTo) {
+				return pt;
+			}
+			// We're in an arbitrarily transformed coordinate space, defined by annotation's parent.
+			// relativeTo is either before or after parent in the transform stack.
+			// We need to transform back / forward to pt's relativeTo coordinate space.
+			let {x, y} = pt;
+			let relativeTo = store.get.lookupToItem(pt.relativeTo);
+			let parent = store.get.parent(annotation);
+			let found = false;
+			// Start from relativeTo, and walk back the transform; if we hit parent, apply that transform.
+			while (relativeTo && relativeTo !== parent) {
+				x += relativeTo.x || 0;
+				y += relativeTo.y || 0;
+				relativeTo = store.get.parent(relativeTo);
+				if (relativeTo === parent) {
+					found = true;
+				}
+			}
+			if (found) {
+				return {x, y};
+			}
+			// If not, start from parent and walk back the transform until we hit relativeTo.
+			({x, y} = pt);
+			relativeTo = store.get.lookupToItem(pt.relativeTo);
+			while (parent && parent !== relativeTo) {
+				x -= parent.x || 0;
+				y -= parent.y || 0;
+				parent = store.get.parent(parent);
+			}
+			return {x, y};
+		}
+		const x = Math.floor(annotation.x);
+		const y = Math.floor(annotation.y);
 		switch (annotation.annotationType) {
 			case 'label': {
 				ctx.fillStyle = annotation.color || 'black';
@@ -434,17 +462,15 @@ const api = {
 				break;
 			}
 			case 'arrow': {
-				// Last point is *base* of arrow head, not tip
 				ctx.beginPath();
 				annotation.points.forEach((pt, idx) => {
-					pt = store.get.point(pt);
-					ctx[(idx === 0) ? 'moveTo' : 'lineTo'](pt.x + offset.x, pt.y + offset.y);
+					pt = transformPoint(store.get.point(pt), annotation);
+					ctx[(idx === 0) ? 'moveTo' : 'lineTo'](pt.x, pt.y);
 				});
 				ctx.stroke();
 				ctx.fillStyle = 'black';//border.color;
-				const direction = annotation.direction;
-				const tip = store.get.point(_.last(annotation.points));
-				api.arrowHead(ctx, tip.x + offset.x, tip.y + offset.y, direction);
+				const tip = transformPoint(store.get.point(_.last(annotation.points)), annotation);
+				api.arrowHead(ctx, tip.x, tip.y, annotation.direction);
 				ctx.fill();
 				break;
 			}

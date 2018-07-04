@@ -7,6 +7,9 @@ const api = {
 		const state = content.state;
 
 		state.steps.forEach(step => {
+			if (step.annotations == null) {
+				step.annotations = [];
+			}
 			if (step.displacedParts) {
 				step.displacedParts.forEach(d => {
 					if (d.hasOwnProperty('distance')) {
@@ -14,6 +17,12 @@ const api = {
 						delete d.distance;
 					}
 				});
+			}
+		});
+
+		state.csis.forEach(csi => {
+			if (csi.annotations == null) {
+				csi.annotations = [];
 			}
 		});
 
