@@ -9,15 +9,17 @@ import openFileHandler from './fileUploader';
 import Storage from './storage';
 import LocaleManager from './translate';
 import uiState from './uiState';
-import gridDialog from './dialogs/grid_dialog.vue';
+
 import DialogManager from './dialog';
+import gridDialog from './dialogs/grid_dialog.vue';
+import pdfExportDialog from './dialogs/export_pdf.vue';
 
 let app;
 const tr = LocaleManager.translate;
 
 Vue.component('menu-list', {
-	props: ['menuEntries', 'selectedItem'],
 	template: '#menuTemplate',
+	props: ['menuEntries', 'selectedItem'],
 	methods: {
 		resolveProperty(p) {
 			return (typeof p === 'function') ? p(this.selectedItem) : p;
@@ -69,8 +71,8 @@ Vue.component('menu-list', {
 });
 
 Vue.component('nav-menu', {
-	props: ['menuEntryList', 'filename', 'version'],
-	template: '#navMenuTemplate'
+	template: '#navMenuTemplate',
+	props: ['menuEntryList', 'filename', 'version']
 });
 
 function enableIfModel() {
@@ -393,22 +395,13 @@ const menu = [
 			text: 'navbar.export.hi_res_pdf',
 			enabled: enableIfModel,
 			cb() {
-				const originalProps = uiState.get('dialog.export.pdf');
-				const pageSize = store.state.template.page;
-				DialogManager.setDialog('pdfExportDialog');
-
+				DialogManager.setDialog(pdfExportDialog);
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();
 					dialog.$on('ok', newValues => {
-						const dialogProps = uiState.get('dialog.export.pdf');
-						dialogProps.dpi = newValues.dpi;
-						dialogProps.units = newValues.units;
 						InstructionExporter.generatePDF(app, store, newValues);
 					});
-					dialog.dpi = originalProps.dpi;
-					dialog.units = originalProps.units;
-					dialog.show(pageSize);
+					dialog.show(store.state.template.page);
 				});
 			}
 		},
@@ -437,7 +430,6 @@ const menu = [
 
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$off();
 					dialog.$on('update', newValues => {
 						dialog.bodyText = sizeText(newValues.value);
 					});
