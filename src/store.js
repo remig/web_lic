@@ -418,36 +418,6 @@ const store = {
 			const part = LDParse.model.get.partFromID(pliItem.partNumbers[0], step.model.filename);
 			return LDParse.model.isSubmodel(part.filename);
 		},
-		calloutArrowToPoints(arrow) {
-			// Return list of points in arrow, all relative to *step*.
-			// Last arrow point is the very arrowhead tip, but arrow line should end at at arrowhead base.
-			// Last arrow point is also relative to CSI.
-			const callout = store.get.parent(arrow);
-			const step = store.get.parent(callout);
-			const csi = store.get.csi(step.csiID);
-
-			const points = arrow.points.slice(0, -1).map(pointID => {
-				const point = store.get.point(pointID);
-				return {
-					x: point.x + callout.x,
-					y: point.y + callout.y
-				};
-			});
-			let tip = _.last(arrow.points);
-			tip = store.get.point(tip);
-			tip = {x: tip.x + csi.x, y: tip.y + csi.y};
-			return [...points, tip];
-		},
-		calloutArrowBoundingBox(arrow) {
-			const callout = store.get.parent(arrow);
-			const step = store.get.parent(callout);
-			const points = store.get.calloutArrowToPoints(arrow);
-			let box = _.geom.bbox(points);
-			box = _.geom.expandBox(box, 8, 8);
-			box.x += step.x;
-			box.y += step.y;
-			return box;
-		},
 		isMoveable: (() => {
 			const moveableItems = [
 				'step', 'csi', 'pli', 'pliItem', 'quantityLabel', 'numberLabel', 'annotation',
@@ -584,39 +554,44 @@ const store = {
 			}
 			return {type: item.type, id: item.id};
 		},
-		pageCoordsToItemCoords(item, {x, y}) {  // x & y are in page coordinates; transform to item coordinates
-			item = store.get.lookupToItem(item);
-			while (item) {
-				x -= item.x || 0;
-				y -= item.y || 0;
-				item = store.get.parent(item);
-			}
-			return {x, y};
-		},
-		positionOnPage(item) {
-			let x = 0, y = 0;
-			item = store.get.lookupToItem(item) || item;
-			while (item) {
-				x += item.x || 0;
-				y += item.y || 0;
-				if (item.relativeTo) {
-					item = store.get.lookupToItem(item.relativeTo);
-				} else {
+		coords: {
+			pageToItem({x, y}, item) {  // x & y are in page coordinates; transform to item coordinates
+				item = store.get.lookupToItem(item);
+				while (item) {
+					x -= item.x || 0;
+					y -= item.y || 0;
 					item = store.get.parent(item);
 				}
+				return {x, y};
+			},
+			itemToPage(item) {  // Find item's position on the page
+				let x = 0, y = 0;
+				item = store.get.lookupToItem(item);
+				while (item) {
+					x += item.x || 0;
+					y += item.y || 0;
+					item = store.get.parent(item);
+				}
+				return {x, y};
+			},
+			pointToPage(x, y, relativeTo) {
+				if (typeof x === 'object' && y == null) {
+					y = x.y;
+					relativeTo = x.relativeTo;
+					x = x.x;
+				}
+				const offset = store.get.coords.itemToPage(relativeTo);
+				return {
+					x: x + offset.x,
+					y: y + offset.y
+				};
 			}
-			return {x, y};
 		},
 		targetBoxFromPoints(t) {
-			const parent = t.relativeTo ? store.get.lookupToItem(t.relativeTo) : store.get.parent(t);
-			const baseOffset = store.get.positionOnPage(parent);
+			const parent = store.get.parent(t);
 			const points = t.points.map(pointID => {
-				const point = store.get.point(pointID);
-				const offset = point.relativeTo ? store.get.positionOnPage(point.relativeTo) : baseOffset;
-				return {
-					x: point.x + offset.x,
-					y: point.y + offset.y
-				};
+				const pt = store.get.point(pointID);
+				return store.get.coords.pointToPage(pt.x, pt.y, pt.relativeTo || parent);
 			});
 			return _.geom.expandBox(_.geom.bbox(points), 8, 8);
 		},
@@ -951,7 +926,7 @@ const store = {
 			}
 		},
 		annotation: {
-			add(opts) {  // opts: {annotationType, properties, relativeTo, parent, x, y}
+			add(opts) {  // opts: {annotationType, properties, parent, x, y}
 
 				const annotation = store.mutations.item.add({item: {
 					type: 'annotation',
@@ -1000,7 +975,11 @@ const store = {
 				}
 			},
 			delete(opts) {  // opts: {annotation}
-				store.mutations.item.delete({item: opts.annotation});
+				const item = store.get.lookupToItem(opts.annotation);
+				if (item.hasOwnProperty('points')) {
+					store.mutations.item.deleteChildList({item, listType: 'point'});
+				}
+				store.mutations.item.delete({item});
 			}
 		},
 		rotateIcon: {
@@ -1262,18 +1241,16 @@ const store = {
 				store.mutations.item.deleteChildList({item, listType: 'point'});
 				store.mutations.item.delete({item});
 			},
-			addPoint(opts) { // opts: {calloutArrow, doLayout}
-				const arrow = store.get.calloutArrow(opts.calloutArrow);
-				const callout = store.get.parent(arrow);
+			addPoint(opts) { // opts: {arrow, doLayout}
+				const arrow = store.get.lookupToItem(opts.arrow);
 				const parentInsertionIndex = Math.ceil(arrow.points.length / 2);
-				const arrowPoints = store.get.calloutArrowToPoints(arrow);
-				const p1 = arrowPoints[parentInsertionIndex - 1];
-				const p2 = arrowPoints[parentInsertionIndex];
-				const midpoint = _.geom.midpoint(p1, p2);
-				midpoint.x -= callout.x;
-				midpoint.y -= callout.y;
+				const p1 = store.get.point(arrow.points[parentInsertionIndex - 1]);
+				const p2 = store.get.point(arrow.points[parentInsertionIndex]);
+				const conv = store.get.coords.pointToPage;
+				let midpoint = _.geom.midpoint(conv(p1), conv(p2));
+				midpoint = store.get.coords.pageToItem(midpoint, p1.relativeTo);
 				store.mutations.item.add({
-					item: {type: 'point', ...midpoint},
+					item: {type: 'point', relativeTo: p1.relativeTo, ...midpoint},
 					parent: arrow,
 					parentInsertionIndex
 				});

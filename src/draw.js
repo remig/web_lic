@@ -286,52 +286,15 @@ const api = {
 		if (!_.isBorderVisible(border)) {
 			return;
 		}
-		const arrowPoints = store.get.calloutArrowToPoints(arrow);
-		const pt = pixelOffset(arrowPoints[0], border.width);
-		const direction = arrow.direction;
-
-		function line(pt) {
-			pt = pixelOffset(pt, border.width);
-			ctx.lineTo(pt.x, pt.y);
-		}
-
-		ctx.beginPath();
-		ctx.moveTo(pt.x, pt.y);
-
-		if (arrowPoints.length > 2) {
-			// Custom arrow points
-			arrowPoints.slice(1).forEach(line);
-		} else {
-			// Default arrow points - use stair step path
-			const bbox = _.geom.bbox(arrowPoints);
-
-			if (direction === 'up') {
-				pt.y -= bbox.height / 2;
-			} else if (direction === 'right') {
-				pt.x += bbox.width / 2;
-			} else if (direction === 'down') {
-				pt.y += bbox.height / 2;
-			} else {
-				pt.x -= bbox.width / 2;
-			}
-
-			line(pt);
-
-			if (direction === 'up' || direction === 'down') {
-				pt.x = arrowPoints[1].x;
-			} else {
-				pt.y = arrowPoints[1].y;
-			}
-
-			line(pt);
-			line(arrowPoints[1]);
-		}
-		ctx.stroke();
-		ctx.fillStyle = border.color;
-		const tip = pixelOffset(_.last(arrowPoints), border.width);
-		// TODO: consider arrow line width when drawing arrow, so it grows along with line width
-		api.arrowHead(ctx, tip.x, tip.y, direction);
-		ctx.fill();
+		api.annotation({
+			id: arrow.id,
+			type: arrow.type,
+			annotationType: (arrow.points.length > 2) ? 'arrow' : 'stairStepArrow',
+			parent: store.get.parent(arrow.parent),
+			border,
+			points: arrow.points,
+			direction: arrow.direction
+		}, ctx);
 	},
 
 	rotateIcon(icon, ctx) {
@@ -418,10 +381,11 @@ const api = {
 		};
 	})(),
 
-	annotation(annotation, ctx) {
-		function transformPoint(pt, annotation) {
+	annotation: (() => {
+
+		function transformPoint(pt, annotation, borderWidth) {
 			if (!pt.relativeTo) {
-				return pt;
+				return pixelOffset(pt, borderWidth);
 			}
 			// We're in an arbitrarily transformed coordinate space, defined by annotation's parent.
 			// relativeTo is either before or after parent in the transform stack.
@@ -429,6 +393,9 @@ const api = {
 			let {x, y} = pt;
 			let relativeTo = store.get.lookupToItem(pt.relativeTo);
 			let parent = store.get.parent(annotation);
+			if (parent === relativeTo) {
+				return pixelOffset(pt, borderWidth);
+			}
 			let found = false;
 			// Start from relativeTo, and walk back the transform; if we hit parent, apply that transform.
 			while (relativeTo && relativeTo !== parent) {
@@ -439,42 +406,89 @@ const api = {
 					found = true;
 				}
 			}
-			if (found) {
-				return {x, y};
+			if (!found) {
+				// If not, start from parent and walk back the transform until we hit relativeTo.
+				({x, y} = pt);
+				relativeTo = store.get.lookupToItem(pt.relativeTo);
+				while (parent && parent !== relativeTo) {
+					x -= parent.x || 0;
+					y -= parent.y || 0;
+					parent = store.get.parent(parent);
+				}
 			}
-			// If not, start from parent and walk back the transform until we hit relativeTo.
-			({x, y} = pt);
-			relativeTo = store.get.lookupToItem(pt.relativeTo);
-			while (parent && parent !== relativeTo) {
-				x -= parent.x || 0;
-				y -= parent.y || 0;
-				parent = store.get.parent(parent);
-			}
-			return {x, y};
+			return pixelOffset({x, y}, borderWidth);
 		}
-		const x = Math.floor(annotation.x);
-		const y = Math.floor(annotation.y);
-		switch (annotation.annotationType) {
-			case 'label': {
+
+		const drawLookup = {
+
+			label(annotation, ctx) {
+				const x = Math.floor(annotation.x);
+				const y = Math.floor(annotation.y);
 				ctx.fillStyle = annotation.color || 'black';
 				ctx.font = annotation.font || 'bold 20pt Helvetica';
 				ctx.fillText(annotation.text, x, y + annotation.height);
-				break;
-			}
-			case 'arrow': {
+			},
+
+			arrow(annotation, ctx) {
+				const border = annotation.border || {color: 'black', width: 1};
+				ctx.strokeStyle = border.color || 'black';
+				ctx.fillStyle = border.color || 'black';
+				ctx.lineWidth = border.width;
 				ctx.beginPath();
 				annotation.points.forEach((pt, idx) => {
-					pt = transformPoint(store.get.point(pt), annotation);
+					pt = store.get.point(pt) || pt;
+					pt = transformPoint(pt, annotation, border.width);
 					ctx[(idx === 0) ? 'moveTo' : 'lineTo'](pt.x, pt.y);
 				});
 				ctx.stroke();
-				ctx.fillStyle = 'black';//border.color;
-				const tip = transformPoint(store.get.point(_.last(annotation.points)), annotation);
+				let lastPt = _.last(annotation.points);
+				lastPt = store.get.point(lastPt) || lastPt;
+				const tip = transformPoint(lastPt, annotation, border.width);
 				api.arrowHead(ctx, tip.x, tip.y, annotation.direction);
 				ctx.fill();
-				break;
-			}
-			case 'image': {
+			},
+
+			stairStepArrow(annotation, ctx) {
+				const direction = annotation.direction;
+				annotation.annotationType = 'arrow';
+				let points = annotation.points.map(pt => {
+					pt = store.get.point(pt);
+					return transformPoint(pt, annotation, annotation.border.width);
+				});
+				if (points[0].x === points[1].x || points[0].y === points[1].y) {
+					api.annotation(annotation, ctx);
+					return;
+				}
+				const bbox = _.geom.bbox(points);
+
+				points = [points[0], _.clone(points[0]), _.clone(points[0]), points[1]];
+
+				let midX = points[0].x, midY = points[0].y;
+				if (direction === 'up') {
+					midY -= bbox.height / 2;
+				} else if (direction === 'right') {
+					midX += bbox.width / 2;
+				} else if (direction === 'down') {
+					midY += bbox.height / 2;
+				} else {
+					midX -= bbox.width / 2;
+				}
+
+				points[1].x = points[2].x = midX;
+				points[1].y = points[2].y = midY;
+
+				if (direction === 'up' || direction === 'down') {
+					points[2].x = points[3].x;
+				} else {
+					points[2].y = points[3].y;
+				}
+				annotation.points = points;
+				api.annotation(annotation, ctx);
+			},
+
+			image(ctx, annotation) {
+				const x = Math.floor(annotation.x);
+				const y = Math.floor(annotation.y);
 				const cachedImage = store.cache.get(annotation, 'rawImage');
 				if (cachedImage) {
 					ctx.drawImage(cachedImage, x, y);
@@ -488,11 +502,13 @@ const api = {
 					};
 					image.src = annotation.src;
 				}
-				break;
 			}
-		}
-	},
+		};
 
+		return function(annotation, ctx) {
+			drawLookup[annotation.annotationType](annotation, ctx);
+		};
+	})(),
 	dividers(dividerList, ctx) {
 		const template = store.state.template.divider.border;
 		if (!_.isBorderVisible(template)) {

@@ -508,8 +508,6 @@ function itemHighlightBox(selItem, pageSize) {
 	let box;
 	if (type === 'page' || type === 'titlePage' || type === 'templatePage') {
 		box = {x: 6, y: 6, width: pageSize.width - 10, height: pageSize.height - 10};
-	} else if (type === 'calloutArrow') {
-		box = store.get.calloutArrowBoundingBox(selItem);
 	} else if (type === 'divider') {
 		let pointBox = _.geom.bbox([selItem.p1, selItem.p2]);
 		pointBox = _.geom.expandBox(pointBox, 8, 8);
@@ -621,8 +619,7 @@ function findClickTargetInStep(step, mx, my) {
 			}
 			for (let k = 0; k < callout.calloutArrows.length; k++) {
 				const arrow = store.get.calloutArrow(callout.calloutArrows[k]);
-				const arrowBox = store.get.calloutArrowBoundingBox(arrow);
-				if (inBox(mx, my, arrowBox)) {
+				if (inBox(mx, my, arrow)) {
 					return arrow;
 				}
 			}

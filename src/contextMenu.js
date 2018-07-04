@@ -18,7 +18,7 @@ const annotationMenu = {
 			text: 'Label',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
-				const pos = store.get.pageCoordsToItemCoords(selectedItem, clickPos);
+				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				const opts = {
 					annotationType: 'label',
 					properties: {text: 'New Label'},
@@ -40,10 +40,10 @@ const annotationMenu = {
 			text: 'Arrow',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
-				const pos = store.get.pageCoordsToItemCoords(selectedItem, clickPos);
+				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				const opts = {
 					annotationType: 'arrow',
-					properties: {direction: 'right'},
+					properties: {direction: 'right', border: {color: 'black', width: 2}},
 					parent: selectedItem,
 					...pos
 				};
@@ -54,7 +54,7 @@ const annotationMenu = {
 			text: 'Image',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
-				const pos = store.get.pageCoordsToItemCoords(selectedItem, clickPos);
+				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				openFileHandler('.png', 'dataURL', src => {
 					const opts = {
 						annotationType: 'image',
@@ -861,9 +861,7 @@ const contextMenu = {
 			case 'label':
 				return [{text: 'Set', children: [setText, setFont, setColor]}, deleteMenu];
 			case 'arrow':
-				// TODO: make store.calloutArrow.addPoint work for annotation arrows too
-				return [contextMenu.calloutArrow[0], contextMenu.calloutArrow[3], deleteMenu];
-				//return [...contextMenu.calloutArrow, deleteMenu];
+				return [...contextMenu.calloutArrow, deleteMenu];
 			case 'image':
 				return [deleteMenu];
 		}
@@ -921,10 +919,10 @@ const contextMenu = {
 		{
 			text: 'Add Point',
 			cb(selectedItem) {
-				const calloutArrow = store.get.calloutArrow(selectedItem);
-				const newPointIdx = Math.ceil(calloutArrow.points.length / 2);
-				undoStack.commit('calloutArrow.addPoint', {calloutArrow}, this.text);
-				app.setSelected({type: 'point', id: calloutArrow.points[newPointIdx]});
+				const arrow = store.get.calloutArrow(selectedItem);
+				const newPointIdx = Math.ceil(arrow.points.length / 2);
+				undoStack.commit('calloutArrow.addPoint', {arrow}, this.text);
+				app.setSelected({type: 'point', id: arrow.points[newPointIdx]});
 			}
 		},
 		{
@@ -979,13 +977,24 @@ const contextMenu = {
 			text: 'Remove',
 			cb(selectedItem) {
 				undoStack.commit('divider.delete', {divider: selectedItem}, 'Remove Divider');
+				app.clearSelected();
 			}
 		}
 	],
 	point: [
 		{
-			text: 'Delete (NYI)',
+			text: 'Delete',
+			shown(selectedItem) {
+				const point = store.get.point(selectedItem);
+				if (point.parent.type === 'calloutArrow') {
+					const pts = store.get.parent(point).points;
+					return pts[0] !== point.id && pts[pts.length - 1] !== point.id;
+				}
+				return true;
+			},
 			cb(selectedItem) {
+				undoStack.commit('item.delete', {item: selectedItem}, 'Delete Point');
+				app.clearSelected();
 			}
 		}
 	],
