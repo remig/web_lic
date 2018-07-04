@@ -253,68 +253,6 @@
 		</div>
 	</script>
 
-	<script type="text/x-template" id="importModelTemplate">
-		<baseDialog title="Import Model" cancelButtonText="">
-			<div slot="body" class="container-fluid">
-				<form class="form-horizontal" role="form">
-					<div class="form-group">
-						<label class="col-sm-3 control-label" for="stepsPerPage">Steps per Page</label>
-						<div class="col-sm-2">
-							<input
-								v-model.number="stepsPerPage"
-								type="number"
-								class="form-control"
-								id="stepsPerPage"
-								:disabled="useMaxSteps"
-								min="1"
-							/>
-						</div>
-						<div class="col-sm-6">
-							<label class="checkbox">
-								<input
-									v-model="useMaxSteps"
-									id="useMaxStepsCheckbox"
-									type="checkbox"
-									value=""
-								/>
-								As many as can fit nicely (slow)
-							</label>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="checkbox-inline">
-							<input
-								v-model="include.titlePage"
-								id="includeTitlePageCheckbox"
-								type="checkbox"
-								value=""
-							/>
-							Include Title Page
-						</label>
-						<label class="checkbox-inline">
-							<input
-								v-model="include.partListPage"
-								id="includePartListPageCheckbox"
-								type="checkbox"
-								value=""
-							/>
-							Include Part List Page (NYI)
-						</label>
-						<label class="checkbox-inline">
-							<input
-								v-model="include.pli"
-								id="includePLIsCheckbox"
-								type="checkbox"
-								value=""
-							/>
-							Include PLIs in each Step
-						</label>
-					</div>
-				</form>
-			</div>
-		</baseDialog>
-	</script>
-
 	<script type="text/x-template" id="partDisplacementTemplate">
 		<baseDialog title="Displace Part" okButtonText="Apply">
 			<div slot="body" class="container-fluid">

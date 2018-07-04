@@ -2,21 +2,20 @@
 'use strict';
 
 import _ from './util';
-import uiState from './uiState';
 
 // TODO: set focus to correct UI widget when showing each dialog
 Vue.component('baseDialog', {
 	template: '#baseDialogTemplate',
+	props: {
+		title: '',
+		okButtonText: {type: String, default: 'Ok'},
+		cancelButtonText: {type: String, default: 'Cancel'}
+	},
 	data: function() {
 		return {
 			visible: false,
 			position: {x: 0, y: 0}
 		};
-	},
-	props: {
-		title: '',
-		okButtonText: {type: String, default: 'Ok'},
-		cancelButtonText: {type: String, default: 'Cancel'}
 	},
 	methods: {
 		show() {
@@ -47,7 +46,6 @@ const baseDialogPropagator = {
 };
 
 const dialogs = {
-	importModel: _.clone(uiState.get('dialog.importModel')),  // TODO: some model import UI not saved / restored
 	pageSize: {
 		maintainAspectRatio: true,
 		width: 900,
@@ -195,7 +193,7 @@ Vue.component('pdfExportDialog', {
 const elDialogs = {
 	numberChooser: {
 		// TODO: Element's inputNumber is broken; it doesn't emit input events and doesn't filter non-numeric keys.
-		// Need to implement my own better looking number input, with nice scroll buttons.
+		// TODO: Need to implement my own better looking number input, with nice scroll buttons.
 		title: '',
 		value: 0,
 		bodyText: '',

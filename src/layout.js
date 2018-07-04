@@ -41,9 +41,6 @@ const api = {
 			return;
 		}
 
-		// TODO: laying out offset by border width is painful.  Instead, calculate a 'innerOffset' (border width),
-		// and apply that in draw, then layout everything as if (0,0) is inside the border
-		// TODO: Do this for all page shapes that have borders (page, PLI, callout, etc)
 		const template = store.state.template.page;
 		const margin = getMargin(template.innerMargin);
 		const borderWidth = template.border.width;

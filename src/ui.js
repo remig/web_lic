@@ -13,6 +13,7 @@ import LocaleManager from './translate';
 import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
 import DialogManager from './dialog';
+import importModelDialog from './dialogs/import_model.vue';
 import NavTree from './components/nav_tree/base.vue';
 import './pageView';
 import './templatePanel';
@@ -86,13 +87,11 @@ const app = new Vue({
 				store.setModel(model);
 				this.filename = store.model.filename;
 
-				DialogManager.setDialog('importModelDialog');
+				DialogManager.setDialog(importModelDialog);
 
 				Vue.nextTick(() => {
-					const dialogDefaults = uiState.get('dialog.importModel');
 					const dialog = DialogManager.getDialog();
-					_.copy(dialog, dialogDefaults);
-					dialog.show({x: 400, y: 150});
+					dialog.visible = true;
 					dialog.$off();
 					dialog.$on('ok', async layoutChoices => {
 

@@ -158,9 +158,19 @@ div#container {
 }
 
 .el-dialog {
-	border: 1px solid rgba(0, 0, 0, 0.4);
+	border: 1px solid #333;
 	border-radius: 6px;
 	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.el-dialog__header {
+	padding: 20px 20px 15px;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.el-dialog__footer {
+	padding: 15px 20px 20px;
+	border-top: 1px solid #e5e5e5;
 }
 
 .el-dialog .el-form-item:last-child {
