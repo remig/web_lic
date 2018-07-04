@@ -89,7 +89,7 @@ function toggleGrid(newState) {
 				undo: [{root, op, path, value: !newState}]
 			}
 		};
-		undoStack.commit(change, null, 'Show Grid');
+		undoStack.commit(change, null, tr('navbar.view.grid.show_hide_undo'));
 	};
 }
 
@@ -104,7 +104,7 @@ function addGuide(orientation) {
 				undo: [{root, op: 'remove', path: `/${root.length}`}]
 			}
 		};
-		undoStack.commit(change, null, 'Add Guide');
+		undoStack.commit(change, null, tr('navbar.view.guides.add_undo'));
 	};
 }
 
@@ -117,7 +117,7 @@ function removeGuides() {
 			undo: [{root, op, path, value: originalGuides}]
 		}
 	};
-	undoStack.commit(change, null, 'Remove Guides');
+	undoStack.commit(change, null, tr('navbar.view.guides.remove_undo'));
 }
 
 const menu = [
@@ -198,7 +198,8 @@ const menu = [
 				{
 					text: 'navbar.file.template.reset',
 					cb() {
-						undoStack.commit('templatePage.reset', null, 'Reset Template', ['csi', 'pliItem']);
+						const text = tr('navbar.file.template.reset_undo');
+						undoStack.commit('templatePage.reset', null, text, ['csi', 'pliItem']);
 					}
 				}
 			]
@@ -269,7 +270,7 @@ const menu = [
 			text: 'navbar.edit.title_page.add',
 			shown: () => enableIfModel() && store.get.titlePage() == null,
 			cb() {
-				undoStack.commit('addTitlePage', null, this.text);
+				undoStack.commit('addTitlePage', null, tr(this.text));
 				app.clearSelected();
 				app.setCurrentPage({type: 'titlePage', id: 0});
 			}
@@ -280,21 +281,21 @@ const menu = [
 			cb() {
 				app.clearSelected();
 				app.setCurrentPage({type: 'page', id: 0});
-				undoStack.commit('removeTitlePage', null, this.text);
+				undoStack.commit('removeTitlePage', null, tr(this.text));
 			}
 		},
 		{
 			text: 'navbar.edit.pli.show',
 			shown: () => enableIfModel() && !store.state.plisVisible,
 			cb() {
-				undoStack.commit('pli.toggleVisibility', {visible: true}, this.text);
+				undoStack.commit('pli.toggleVisibility', {visible: true}, tr(this.text));
 			}
 		},
 		{
 			text: 'navbar.edit.pli.hide',
 			shown: () => enableIfModel() && store.state.plisVisible,
 			cb() {
-				undoStack.commit('pli.toggleVisibility', {visible: false}, this.text);
+				undoStack.commit('pli.toggleVisibility', {visible: false}, tr(this.text));
 			}
 		},
 		{text: 'navbar.edit.snap', enabled: () => false, cb() {}},
@@ -349,7 +350,7 @@ const menu = [
 				{
 					text: 'navbar.view.grid.hide',
 					shown() {
-						return uiState.get('grid').enabled;
+						return uiState.get('grid.enabled');
 					},
 					cb: toggleGrid(false)
 				},

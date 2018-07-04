@@ -15,7 +15,8 @@
 				"save": "Save",
 				"load": "Load",
 				"load_builtin": "Load Built-in (NYI)",
-				"reset": "Reset"
+				"reset": "Reset",
+				"reset_undo": "Reset Template"
 			},
 			"set_language": {
 				"root": "Set Language"
@@ -56,13 +57,16 @@
 				"root": "Grid",
 				"show": "Show",
 				"hide": "Hide",
+				"show_hide_undo": "Show Grid",
 				"customize": "Customize"
 			},
 			"guides": {
 				"root": "Guides",
 				"add_horizontal": "Add Horizontal Guide",
 				"add_vertical": "Add Vertical Guide",
-				"remove": "Remove Guides"
+				"add_undo": "Add Guide",
+				"remove": "Remove Guides",
+				"remove_undo": "Remove Guides"
 			}
 		},
 		"export": {
