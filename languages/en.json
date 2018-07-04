@@ -38,6 +38,10 @@
 				"show": "Show PLIs",
 				"hide": "Hide PLIs"
 			},
+			"inventory_page": {
+				"add": "Add Part List Page",
+				"remove": "Remove Part List Page"
+			},
 			"snap": "Snap To (NYI)",
 			"brick_colors": " Brick Colors... (NYI)"
 		},

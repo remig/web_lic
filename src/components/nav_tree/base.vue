@@ -66,6 +66,14 @@
 					@select-item="$emit('select-item', arguments[0])"
 				/>
 			</li>
+			<li v-if="store.get.inventoryPage() != null">
+				<TreeExpandableRow
+					:row-visibility="rowVisibility"
+					:current-item="currentItem"
+					:target="store.get.inventoryPage()"
+					@select-item="$emit('select-item', arguments[0])"
+				/>
+			</li>
 		</ul>
 	</div>
 </template>

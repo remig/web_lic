@@ -37,8 +37,6 @@ export default {
 				return '';
 			} else if (t.type === 'templatePage') {
 				return 'Template';
-			} else if (t.type === 'titlePage') {
-				return 'Title Page';
 			} else if (t.type === 'page') {
 				return 'Page ' + (t.number || '');
 			} else if (t.type === 'step') {

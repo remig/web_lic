@@ -298,6 +298,24 @@ const menu = [
 				undoStack.commit('pli.toggleVisibility', {visible: false}, tr(this.text));
 			}
 		},
+		{
+			text: 'navbar.edit.inventory_page.add',
+			shown: () => enableIfModel() && store.get.inventoryPage() == null,
+			cb() {
+				undoStack.commit('inventoryPage.add', null, tr(this.text));
+				app.clearSelected();
+				app.setCurrentPage({type: 'inventoryPage', id: 0});
+			}
+		},
+		{
+			text: 'navbar.edit.inventory_page.remove',
+			shown: () => enableIfModel() && store.get.inventoryPage() != null,
+			cb() {
+				app.clearSelected();
+				app.setCurrentPage(store.get.lastPage());
+				undoStack.commit('inventoryPage.remove', null, tr(this.text));
+			}
+		},
 		{text: 'navbar.edit.snap', enabled: () => false, cb() {}},
 		{text: 'navbar.edit.brick_colors', enabled: () => false, cb() {}}
 	]},

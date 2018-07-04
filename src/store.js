@@ -13,6 +13,7 @@ const emptyState = {
 	template: _.clone(defaultTemplate),
 	templatePage: null,
 	titlePage: null,
+	inventoryPage: null,
 	plisVisible: true,
 	pages: [],
 	dividers: [],
@@ -343,6 +344,9 @@ const store = {
 		lastPage() {
 			return _.last(store.state.pages);
 		},
+		inventoryPage() {
+			return store.state.inventoryPage;
+		},
 		prevStep(step, limitToSubmodel) {
 			step = store.get.lookupToItem(step);
 			let itemList;
@@ -458,7 +462,7 @@ const store = {
 				item = store.get.step(item.stepID);
 			}
 			item = store.get.lookupToItem(item);
-			while (item && item.type !== 'page' && item.type !== 'titlePage' && item.type !== 'templatePage') {
+			while (item && item.type && !item.type.toLowerCase().endsWith('page')) {
 				item = store.get.parent(item);
 			}
 			return item;
@@ -1476,6 +1480,20 @@ const store = {
 				});
 			}
 		},
+		inventoryPage: {
+			add() {
+				const pageNumber = store.get.lastPage().number + 1;
+				const opts = {pageType: 'inventoryPage', pageNumber};
+				const page = store.state.inventoryPage = store.mutations.page.add(opts);
+			},
+			remove() {
+				const item = store.get.inventoryPage();
+				if (item == null) {
+					return;
+				}
+				store.state.inventoryPage = null;
+			}
+		},
 		renumber(itemList, start = 1) {
 			let prevNumber;
 			itemList.forEach(el => {
@@ -1496,7 +1514,7 @@ const store = {
 		},
 		addTitlePage() {
 
-			// TODO: need submodel + bag breakdown page, final 'no step' complete model page and part inventory page
+			// TODO: need submodel + bag breakdown page and final 'no step' complete model page
 			const page = store.state.titlePage = store.mutations.page.add({pageType: 'titlePage'});
 			page.number = 1;
 			store.mutations.page.renumber();  // TODO: this doesn't update the page numbers in the tree

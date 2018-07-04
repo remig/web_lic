@@ -315,6 +315,10 @@ const api = {
 				return 'Rotate Icon';
 			case 'templatepage':
 				return 'Page';
+			case 'titlepage':
+				return 'Title Page';
+			case 'inventorypage':
+				return 'Part List Page';
 			case 'even-left':
 				return 'Even Left, Odd Right';
 			case 'even-right':

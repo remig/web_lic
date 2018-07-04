@@ -34,10 +34,19 @@ const api = {
 		delete page.needsLayout;
 	},
 
+	inventoryPage(page) {
+		if (page.numberLabelID != null) {
+			api.pageNumber(page);
+		}
+	},
+
 	page(page, layout = 'horizontal') {
 
 		if (page.type === 'titlePage') {
 			api.titlePage(page);
+			return;
+		} else if (page.type === 'inventoryPage') {
+			api.inventoryPage(page);
 			return;
 		}
 
@@ -52,25 +61,8 @@ const api = {
 		page.innerContentOffset = {x: borderWidth, y: borderWidth};
 
 		if (page.numberLabelID != null) {
-			const lblSize = _.measureLabel(template.numberLabel.font, page.number);
+			api.pageNumber(page);
 			const lbl = store.get.numberLabel(page.numberLabelID);
-			lbl.width = lblSize.width;
-			lbl.height = lblSize.height;
-			lbl.y = pageSize.height - margin;
-
-			let position = template.numberLabel.position;
-			if (position === 'even-left') {
-				position = _.isEven(page.number) ? 'left' : 'right';
-			} else if (position === 'even-right') {
-				position = _.isEven(page.number) ? 'right' : 'left';
-			}
-			if (position === 'left') {
-				lbl.x = margin;
-				lbl.align = 'left';
-			} else {
-				lbl.x = pageSize.width - margin;
-				lbl.align = 'right';
-			}
 			pageSize.height -= lbl.height + (margin / 2);
 		}
 
@@ -138,6 +130,36 @@ const api = {
 		}
 
 		delete page.needsLayout;
+	},
+
+	pageNumber(page) {
+		const template = store.state.template.page;
+		const margin = getMargin(template.innerMargin);
+		const borderWidth = template.border.width;
+		const pageSize = {
+			width: template.width - borderWidth - borderWidth,
+			height: template.height - borderWidth - borderWidth
+		};
+
+		const lblSize = _.measureLabel(template.numberLabel.font, page.number);
+		const lbl = store.get.numberLabel(page.numberLabelID);
+		lbl.width = lblSize.width;
+		lbl.height = lblSize.height;
+		lbl.y = pageSize.height - margin;
+
+		let position = template.numberLabel.position;
+		if (position === 'even-left') {
+			position = _.isEven(page.number) ? 'left' : 'right';
+		} else if (position === 'even-right') {
+			position = _.isEven(page.number) ? 'right' : 'left';
+		}
+		if (position === 'left') {
+			lbl.x = margin;
+			lbl.align = 'left';
+		} else {
+			lbl.x = pageSize.width - margin;
+			lbl.align = 'right';
+		}
 	},
 
 	step(step, box, pageMargin) {  // Starting with a pre-defined box, layout everything in this step inside it
