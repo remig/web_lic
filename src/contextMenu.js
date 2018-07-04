@@ -935,7 +935,7 @@ const contextMenu = {
 				return {
 					text: _.titleCase(direction),
 					shown: arrowTipRotationVisible(direction),
-					cb: rotateCalloutTip(direction)
+					cb: rotateArrowTip(direction)
 				};
 			})
 		}
@@ -1183,10 +1183,10 @@ function arrowTipRotationVisible(direction) {
 	};
 }
 
-function rotateCalloutTip(direction) {  // TODO this (and the store mutation) are named for callout arrows, but work with regular annotation arrows too.  Rename them.
+function rotateArrowTip(direction) {
 	return (selectedItem) => {
-		const calloutArrow = store.get.calloutArrow(selectedItem);
-		undoStack.commit('calloutArrow.rotateTip', {calloutArrow, direction}, 'Rotate Arrow Tip');
+		const arrow = store.get.lookupToItem(selectedItem);
+		undoStack.commit('calloutArrow.rotateTip', {arrow, direction}, 'Rotate Arrow Tip');
 	};
 }
 

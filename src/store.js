@@ -1255,8 +1255,8 @@ const store = {
 					parentInsertionIndex
 				});
 			},
-			rotateTip(opts) {  // opts: {calloutArrow, direction}
-				store.get.calloutArrow(opts.calloutArrow).direction = opts.direction;
+			rotateTip(opts) {  // opts: {arrow, direction}
+				store.get.lookupToItem(opts.arrow).direction = opts.direction;
 			}
 		},
 		page: {
