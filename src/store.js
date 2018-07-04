@@ -255,53 +255,61 @@ const store = {
 		isTitlePage(page) {
 			return (page || {}).type === 'titlePage';
 		},
+		isFirstBasicPage(page) {
+			return page && (page.id === store.state.pages[0].id);
+		},
 		isFirstPage(page) {
 			if (!page || page.id == null) {
 				return false;
+			} else if (page.type === 'templatePage') {
+				return true;
 			}
-			return page.id === store.state.pages[0].id;
+			return store.get.isFirstBasicPage(page);
+		},
+		isLastBasicPage(page) {
+			return page && (page.id === _.last(store.state.pages).id);
 		},
 		isLastPage(page) {
 			if (!page || page.id == null || page.type === 'templatePage') {
 				return false;
 			} else if (page.type === 'titlePage') {
 				return store.state.pages.length < 1;
+			} else if (page.type === 'inventoryPage') {
+				return true;
 			}
-			return page.id === _.last(store.state.pages).id;
+			return store.get.isLastBasicPage(page);
+		},
+		isInventoryPage(page) {
+			return (page || {}).type === 'inventoryPage';
+		},
+		pageList() {
+			const s = store.state;
+			return [
+				s.templatePage,
+				s.titlePage,
+				...s.pages,
+				s.inventoryPage
+			].filter(el => el);
+		},
+		nextBasicPage(item) {
+			const nextPage = store.get.nextPage(item);
+			return (!nextPage || nextPage.type !== 'page') ? null : nextPage;
 		},
 		nextPage(item) {
 			const page = store.get.pageForItem(item);
-			if (!page || store.get.isLastPage(page)) {
-				return null;
-			} else if (store.get.isTemplatePage(page)) {
-				return store.get.titlePage() || store.state.pages[0];
-			} else if (store.get.isTitlePage(page)) {
-				return store.state.pages[0];
-			}
-			const idx = store.state.pages.findIndex(el => el.id === page.id);
-			if (idx < 0) {
-				return null;
-			}
-			return store.state.pages[idx + 1];
+			const pageList = store.get.pageList();
+			const idx = pageList.indexOf(page);
+			return pageList[idx + 1];
 		},
-		prevPage(item, includeTitlePage, includeTemplatePage) {
+		prevBasicPage(item) {
+			const prevPage = store.get.prevPage(item);
+			return (!prevPage || prevPage.type !== 'page') ? null : prevPage;
+		},
+		prevPage(item) {
 			const page = store.get.pageForItem(item);
-			if (!page || store.get.isTemplatePage(page)) {
-				return null;
-			} else if (store.get.isTitlePage(page)) {
-				return includeTemplatePage ? store.get.templatePage() : null;
-			} else if (store.get.isFirstPage(page)) {
-				if (includeTitlePage && store.state.titlePage) {
-					return store.get.titlePage();
-				} else if (includeTemplatePage) {
-					return store.get.templatePage();
-				}
-			}
-			const idx = store.state.pages.findIndex(el => el.id === page.id);
-			if (idx < 0) {
-				return null;
-			}
-			return store.state.pages[idx - 1];
+			const pageList = store.get.pageList();
+			const idx = pageList.indexOf(page);
+			return pageList[idx - 1];
 		},
 		templatePage() {
 			return store.state.templatePage;
@@ -1093,14 +1101,14 @@ const store = {
 				store.mutations.page.layout({page: destPage});
 			},
 			moveToPreviousPage(opts) {  // opts: {step}
-				const destPage = store.get.prevPage(opts.step, false, false);
+				const destPage = store.get.prevBasicPage(opts.step);
 				if (destPage) {
 					const parentInsertionIndex = destPage.steps.length;
 					store.mutations.step.moveToPage({step: opts.step, destPage, parentInsertionIndex});
 				}
 			},
 			moveToNextPage(opts) {  // opts: {step}
-				const destPage = store.get.nextPage(opts.step);
+				const destPage = store.get.nextBasicPage(opts.step);
 				if (destPage) {
 					store.mutations.step.moveToPage({step: opts.step, destPage, parentInsertionIndex: 0});
 				}

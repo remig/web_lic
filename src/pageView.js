@@ -290,11 +290,11 @@ Vue.component('pageView', {
 			this.mouseDownPt = this.mouseDragItem = null;
 		},
 		pageUp() {
-			let prevPage = store.get.prevPage(this.currentPageLookup, true, true);
+			let prevPage = store.get.prevPage(this.currentPageLookup);
 			if (this.isFacingView) {
 				const page = store.get.page(this.currentPageLookup);
 				if (!_.isEven(page.number)) {
-					const prevPrevPage = store.get.prevPage(prevPage, true, true);
+					const prevPrevPage = store.get.prevPage(prevPage);
 					if (prevPrevPage) {
 						prevPage = prevPrevPage;
 					}
@@ -468,7 +468,7 @@ function getAdjacentPages(page) {
 	} else if (_.isEven(page.number)) {
 		return [page, store.get.nextPage(page)];
 	}
-	return [store.get.prevPage(page, false, false), page];
+	return [store.get.prevBasicPage(page), page];
 }
 
 function setPageLocked(pageID) {

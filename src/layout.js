@@ -530,7 +530,7 @@ const api = {
 			return new Promise(resolve => window.setTimeout(() => {
 				const step = stepsToMerge[0];
 				const originalPage = store.get.pageForItem(step);
-				const prevPage = store.get.prevPage(originalPage, false, false);
+				const prevPage = store.get.prevBasicPage(originalPage);
 
 				store.mutations.step.moveToPreviousPage({step});
 

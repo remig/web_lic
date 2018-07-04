@@ -170,8 +170,8 @@ const contextMenu = {
 				let prevStep = store.get.step(_.last(dest.steps));
 				if (prevStep == null) {
 					let prevPage = dest;
-					while (prevPage && prevPage.type === 'page' && !prevPage.steps.length) {
-						prevPage = store.get.prevPage(prevPage);
+					while (prevPage && !prevPage.steps.length) {
+						prevPage = store.get.prevBasicPage(prevPage);
 					}
 					if (prevPage && prevPage.type === 'page' && prevPage.steps.length) {
 						prevStep = store.get.step(_.last(prevPage.steps));
@@ -198,7 +198,7 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				const page = store.get.lookupToItem(selectedItem);
-				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page, true) : store.get.nextPage(page);
+				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page) : store.get.nextPage(page);
 				undoStack.commit('page.delete', {page}, 'Delete Page');
 				app.clearSelected();
 				app.setCurrentPage(nextPage);
@@ -306,7 +306,7 @@ const contextMenu = {
 					text: 'Previous Page',
 					shown(selectedItem) {
 						const page = store.get.pageForItem(selectedItem);
-						if (store.get.isFirstPage(page) || store.get.isTitlePage(page)) {
+						if (store.get.isFirstBasicPage(page) || store.get.isTitlePage(page)) {
 							return false;  // Previous page doesn't exist
 						} else if (page.steps.indexOf(selectedItem.id) !== 0) {
 							return false;  // Can only move first step on a page to the previous page
@@ -314,7 +314,7 @@ const contextMenu = {
 						return true;
 					},
 					enabled(selectedItem) {
-						return !(store.get.prevPage(selectedItem) || {}).locked;
+						return !(store.get.prevBasicPage(selectedItem) || {}).locked;
 					},
 					cb(selectedItem) {
 						undoStack.commit('step.moveToPreviousPage', {step: selectedItem}, this.text);
@@ -324,15 +324,15 @@ const contextMenu = {
 					text: 'Next Page',
 					shown(selectedItem) {
 						const page = store.get.pageForItem(selectedItem);
-						if (store.get.isLastPage(page)) {
-							return false;  // Previous page doesn't exist
+						if (store.get.isLastBasicPage(page) || store.get.isTitlePage(page)) {
+							return false;  // Next page doesn't exist
 						} else if (page.steps.indexOf(selectedItem.id) !== page.steps.length - 1) {
 							return false;  // Can only move last step on a page to the next page
 						}
 						return true;
 					},
 					enabled(selectedItem) {
-						return !(store.get.nextPage(selectedItem) || {}).locked;
+						return !(store.get.nextBasicPage(selectedItem) || {}).locked;
 					},
 					cb(selectedItem) {
 						undoStack.commit('step.moveToNextPage', {step: selectedItem}, this.text);
