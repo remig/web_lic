@@ -300,20 +300,20 @@ const menu = [
 		},
 		{
 			text: 'navbar.edit.inventory_page.add',
-			shown: () => enableIfModel() && store.get.inventoryPage() == null,
+			shown: () => enableIfModel() && !store.state.inventoryPages.length,
 			cb() {
-				undoStack.commit('inventoryPage.add', null, tr(this.text));
 				app.clearSelected();
+				undoStack.commit('inventoryPage.add', null, tr(this.text));
 				app.setCurrentPage({type: 'inventoryPage', id: 0});
 			}
 		},
 		{
 			text: 'navbar.edit.inventory_page.remove',
-			shown: () => enableIfModel() && store.get.inventoryPage() != null,
+			shown: () => enableIfModel() && store.state.inventoryPages.length,
 			cb() {
 				app.clearSelected();
+				undoStack.commit('inventoryPage.deleteAll', null, tr(this.text));
 				app.setCurrentPage(store.get.lastPage());
-				undoStack.commit('inventoryPage.remove', null, tr(this.text));
 			}
 		},
 		{text: 'navbar.edit.snap', enabled: () => false, cb() {}},

@@ -13,9 +13,9 @@ const emptyState = {
 	template: _.clone(defaultTemplate),
 	templatePage: null,
 	titlePage: null,
-	inventoryPage: null,
 	plisVisible: true,
 	pages: [],
+	inventoryPages: [],
 	dividers: [],
 	steps: [],
 	csis: [],
@@ -288,7 +288,7 @@ const store = {
 				s.templatePage,
 				s.titlePage,
 				...s.pages,
-				s.inventoryPage
+				...s.inventoryPages
 			].filter(el => el);
 		},
 		nextBasicPage(item) {
@@ -351,9 +351,6 @@ const store = {
 		},
 		lastPage() {
 			return _.last(store.state.pages);
-		},
-		inventoryPage() {
-			return store.state.inventoryPage;
 		},
 		prevStep(step, limitToSubmodel) {
 			step = store.get.lookupToItem(step);
@@ -677,14 +674,14 @@ const store = {
 				}
 			},
 			deleteChildList(opts) {  // opts: {item, listType}
-				const item = store.get.lookupToItem(opts.item);
-				const list = _.clone(item[opts.listType + 's'] || []);
 				const itemType = store.mutations[opts.listType] ? opts.listType : 'item';
-				list.forEach(id => {
+				const parent = store.get.lookupToItem(opts.item);
+				const list = parent[opts.listType + 's'] || [];
+				while (list.length) {
 					const arg = {};
-					arg[itemType] = {type: opts.listType, id};
+					arg[itemType] = {type: opts.listType, id: list[0]};
 					store.mutations[itemType].delete(arg);
-				});
+				}
 			},
 			reparent(opts) {  // opts: {item, newParent, parentInsertionIndex = -1}
 				const item = store.get.lookupToItem(opts.item);
@@ -1331,9 +1328,7 @@ const store = {
 				if (store.state.titlePage) {
 					store.state.titlePage.needsDrawing = true;
 				}
-				if (store.state.inventoryPage) {
-					store.state.inventoryPage.needsDrawing = true;
-				}
+				store.state.inventoryPages.forEach(p => (p.needsDrawing = true));
 			}
 		},
 		divider: {
@@ -1492,14 +1487,20 @@ const store = {
 			add() {
 				const pageNumber = store.get.lastPage().number + 1;
 				const opts = {pageType: 'inventoryPage', pageNumber};
-				const page = store.state.inventoryPage = store.mutations.page.add(opts);
+				store.mutations.page.add(opts);
 			},
-			remove() {
-				const item = store.get.inventoryPage();
-				if (item == null) {
-					return;
+			delete(opts) {  // opts: {page}
+				const page = store.get.lookupToItem(opts.page);
+				if (page.numberLabelID != null) {
+					store.mutations.item.delete({item: store.get.numberLabel(page.numberLabelID)});
 				}
-				store.state.inventoryPage = null;
+				store.mutations.item.delete({item: page});
+			},
+			deleteAll() {
+				const pages = store.state.inventoryPages;
+				while (pages.length) {
+					store.mutations.inventoryPage.delete({page: pages[0]});
+				}
 			}
 		},
 		renumber(itemList, start = 1) {

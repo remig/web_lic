@@ -39,6 +39,8 @@ export default {
 				return 'Template';
 			} else if (t.type === 'page') {
 				return 'Page ' + (t.number || '');
+			} else if (t.type === 'inventoryPage') {
+				return 'Inventory Page ' + (t.number || '');
 			} else if (t.type === 'step') {
 				return 'Step ' + (t.number || '');
 			} else if (t.type === 'submodel') {

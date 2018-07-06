@@ -6,6 +6,10 @@ const api = {
 
 		const state = content.state;
 
+		if (state.inventoryPages == null) {
+			state.inventoryPages = [];
+		}
+
 		state.steps.forEach(step => {
 			if (step.annotations == null) {
 				step.annotations = [];
