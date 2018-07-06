@@ -186,16 +186,14 @@ const api = {
 		const localModel = LDParse.model.get.abstractPart(step.model.filename);
 
 		ctx.save();
-		ctx.scale(1 / hiResScale, 1 / hiResScale);
 		ctx.translate(Math.floor(csi.x), Math.floor(csi.y));
+		ctx.scale(1 / hiResScale, 1 / hiResScale);
 		const haveSelectedParts = selectedPart && selectedPart.stepID === step.id;
 		const selectedPartIDs = haveSelectedParts ? [selectedPart.id] : null;
 		const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
 		const res = store.render[renderer](localModel, step, csi, selectedPartIDs, hiResScale, noCache);
 		if (res) {
-			const x = Math.floor((-res.dx) * hiResScale);
-			const y = Math.floor((-res.dy) * hiResScale);
-			ctx.drawImage(res.container, x, y);  // TODO: profile performance if every x, y, w, h argument is passed in
+			ctx.drawImage(res.container, Math.floor(-res.dx), Math.floor(-res.dy));
 		}
 
 		csi.annotations.forEach(id => {
