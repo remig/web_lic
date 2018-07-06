@@ -72,6 +72,8 @@ const api = {
 
 		page.steps.forEach(id => api.step({type: 'step', id}, ctx, config));
 
+		page.pliItems.forEach(id => api.pliItem({type: 'pliItem', id}, ctx, config));
+
 		api.dividers(page.dividers, ctx);
 
 		if (page.numberLabelID != null) {
@@ -227,12 +229,12 @@ const api = {
 		ctx.translate(Math.floor(pli.innerContentOffset.x), Math.floor(pli.innerContentOffset.y));
 		ctx.translate(Math.floor(pli.x), Math.floor(pli.y));
 		pliItems.forEach(idx => {
-			api.pliItem(idx, ctx, {hiResScale, noCache}, template);
+			api.pliItem(idx, ctx, {hiResScale, noCache});
 		});
 		ctx.restore();
 	},
 
-	pliItem(pliItem, ctx, {hiResScale, noCache}, template) {
+	pliItem(pliItem, ctx, {hiResScale, noCache}) {
 		ctx.save();
 		ctx.scale(1 / hiResScale, 1 / hiResScale);
 		pliItem = store.get.pliItem(pliItem);
@@ -244,9 +246,10 @@ const api = {
 		ctx.drawImage(pliCanvas, x, y);
 		ctx.restore();
 
+		const template = store.state.template.pliItem.quantityLabel;
 		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-		ctx.fillStyle = template.pliItem.quantityLabel.color;
-		ctx.font = template.pliItem.quantityLabel.font;
+		ctx.fillStyle = template.color;
+		ctx.font = template.font;
 		ctx.fillText(
 			'x' + pliItem.quantity,
 			pliItem.x + quantityLabel.x,

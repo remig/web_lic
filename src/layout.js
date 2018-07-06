@@ -6,6 +6,7 @@ import store from './store';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
+const qtyLabelOffset = 5;  // TODO: this belongs in the template
 
 const api = {
 
@@ -34,19 +35,91 @@ const api = {
 		delete page.needsLayout;
 	},
 
-	inventoryPage(page) {
+	inventoryPage(page, box) {
 		if (page.numberLabelID != null) {
 			api.pageNumber(page);
 		}
+
+		// Start with a big list of unsorted pli items with no size or position info.
+		const pliItems = page.pliItems.map(store.get.pliItem);
+
+		// Layout each pli; this sets its size info and positions its quantity label.
+		pliItems.forEach(pliItem => {
+			api.pliItem(pliItem);
+		});
+
+		// Sort pli items by color code, then sort within one color code by pli width
+		pliItems.sort(function(a, b) {
+			if (a.colorCode < b.colorCode) {
+				return -1;
+			} else if (a.colorCode > b.colorCode) {
+				return 1;
+			} else if (a.width < b.width) {
+				return -1;
+			} else if (a.width > b.width) {
+				return 1;
+			} else if (a.quantity < b.quantity) {
+				return -1;
+			} else if (a.quantity > b.quantity) {
+				return 1;
+			}
+			return 0;
+		});
+		page.pliItems = pliItems.map(el => el.id);  // Store sorted pliItem IDs back in the page
+
+		const columns = [[]];
+		const margin = (getMargin(store.state.template.page.innerMargin) + qtyLabelOffset) * 1.2;
+		let colWidth = 0, x = margin, y = margin;
+
+		box.width -= margin + margin;
+		box.height -= margin;
+
+		// Start placing items on the page.  First item goes top left, next below that then on
+		// until we hit the bottom of the page.  That's one column.  Track the widest label
+		// placed in that column, then place next item at top of page again, max column width over.
+		pliItems.forEach(pliItem => {
+			if (y + pliItem.height > box.height) {
+				x += colWidth + margin;
+				y = margin;
+				colWidth = 0;
+				columns.push([]);
+			}
+			columns[columns.length - 1].push(pliItem);
+			pliItem.x = x;
+			pliItem.y = y;
+			y += pliItem.height + margin;
+			colWidth = Math.max(colWidth, pliItem.width);
+		});
+
+		// Everything is in nice columns.
+		// Increase space between columns so they evenly fill the page width
+		colWidth = box.width / columns.length;
+		columns.slice(1).forEach((col, idx) => {
+			col.forEach(item => {
+				item.x = (colWidth * (idx + 1)) + margin;
+			});
+		});
+
+		// Increase vertical space between items in the same column so they evenly fill the pag height
+		columns.forEach(col => {
+			if (col.length < 2) {
+				return;
+			}
+			const lastItem = _.last(col);
+			const remainingSpace = box.height - lastItem.y - lastItem.height;
+			const spaceToAdd = Math.max(0, remainingSpace / (col.length - 1));
+			col.forEach((item, idx) => {
+				item.y += spaceToAdd * idx;
+			});
+		});
+
+		delete page.needsLayout;
 	},
 
 	page(page, layout = 'horizontal') {
 
 		if (page.type === 'titlePage') {
 			api.titlePage(page);
-			return;
-		} else if (page.type === 'inventoryPage') {
-			api.inventoryPage(page);
 			return;
 		}
 
@@ -64,6 +137,11 @@ const api = {
 			api.pageNumber(page);
 			const lbl = store.get.numberLabel(page.numberLabelID);
 			pageSize.height -= lbl.height + (margin / 2);
+		}
+
+		if (page.type === 'inventoryPage') {
+			api.inventoryPage(page, pageSize);
+			return;
 		}
 
 		const stepCount = page.steps.length;
@@ -342,7 +420,6 @@ const api = {
 			return;
 		}
 
-		const qtyLabelOffset = 5;
 		const margin = getMargin(store.state.template.pli.innerMargin);
 		let maxHeight = 0, left = margin + qtyLabelOffset;
 
@@ -365,7 +442,6 @@ const api = {
 	},
 
 	pliItem(pliItem) {
-		const qtyLabelOffset = 5;
 		const pliSize = store.render.pli(pliItem.colorCode, pliItem.filename, pliItem);
 		pliItem.x = pliItem.y = 0;
 		pliItem.width = pliSize.width;
@@ -577,6 +653,9 @@ const api = {
 		},
 
 		pliItem(item) {
+			if (item.parent.type !== 'pli') {
+				return;
+			}
 			const pli = store.get.parent(item);
 			const boxes = [];
 			pli.pliItems.forEach(itemID => {

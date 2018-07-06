@@ -633,6 +633,16 @@ function findClickTargetInPage(page, mx, my) {
 			return lbl;
 		}
 	}
+	for (let i = 0; i < page.pliItems.length; i++) {
+		const pliItem = store.get.pliItem(page.pliItems[i]);
+		if (inBox(mx, my, pliItem)) {
+			return pliItem;
+		}
+		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+		if (inBox(mx, my, quantityLabel)) {
+			return quantityLabel;
+		}
+	}
 	for (let i = 0; i < page.annotations.length; i++) {
 		const a = store.get.annotation(page.annotations[i]);
 		if (inBox(mx, my, a)) {

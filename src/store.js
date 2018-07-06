@@ -1262,7 +1262,7 @@ const store = {
 				const pageType = opts.pageType || 'page';
 				const page = store.mutations.item.add({item: {
 					type: pageType,
-					steps: [], dividers: [], annotations: [],
+					steps: [], dividers: [], annotations: [], pliItems: [],
 					needsLayout: true, locked: false,
 					innerContentOffset: {x: 0, y: 0},
 					number: opts.pageNumber,
@@ -1376,12 +1376,13 @@ const store = {
 			}
 		},
 		pliItem: {
-			add(opts) { // opts: {parent, filename, colorCode}
+			add(opts) { // opts: {parent, filename, colorCode, quantity = 1}
 				const pliItem = store.mutations.item.add({item: {
 					type: 'pliItem', domID: null,
 					filename: opts.filename,
 					colorCode: opts.colorCode,
-					quantity: 1, quantityLabelID: null,
+					quantity: (opts.quantity == null) ? 1 : opts.quantity,
+					quantityLabelID: null,
 					x: null, y: null, width: null, height: null
 				}, parent: opts.parent});
 
@@ -1479,13 +1480,38 @@ const store = {
 			add() {
 				const pageNumber = store.get.lastPage().number + 1;
 				const opts = {pageType: 'inventoryPage', pageNumber};
-				store.mutations.page.add(opts);
+				const page = store.mutations.page.add(opts);
+				const itemList = {};  // key: colorCode, value: {filename: quantity}}
+
+				function buildPartList(model) {
+					model.parts.forEach(({filename, colorCode}) => {
+						if (LDParse.model.isSubmodel(filename)) {
+							buildPartList(LDParse.model.get.abstractPart(filename));
+						} else {
+							if (itemList[colorCode] && itemList[colorCode][filename]) {
+								itemList[colorCode][filename]++;
+							} else {
+								itemList[colorCode] = itemList[colorCode] || {};
+								itemList[colorCode][filename] = 1;
+							}
+						}
+					});
+				}
+
+				buildPartList(store.model);
+
+				_.forEach(itemList, (colorCode, partList) => {
+					_.forEach(partList, (filename, quantity) => {
+						store.mutations.pliItem.add({ parent: page, filename, colorCode, quantity});
+					});
+				});
 			},
 			delete(opts) {  // opts: {page}
 				const page = store.get.lookupToItem(opts.page);
 				if (page.numberLabelID != null) {
 					store.mutations.item.delete({item: store.get.numberLabel(page.numberLabelID)});
 				}
+				store.mutations.item.deleteChildList({item: page, listType: 'pliItem'});
 				store.mutations.item.delete({item: page});
 			},
 			deleteAll() {

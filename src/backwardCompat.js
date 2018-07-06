@@ -36,6 +36,10 @@ const api = {
 			}
 		});
 
+		state.pliItems.forEach(pliItem => {
+			delete pliItem.partNumbers;
+		});
+
 		if (state.template.submodelImage.maxHeight == null) {
 			state.template.submodelImage.maxHeight = 0.3;
 		}

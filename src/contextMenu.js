@@ -70,6 +70,14 @@ const annotationMenu = {
 };
 
 const contextMenu = {
+	inventoryPage: [
+		{
+			text: 'Redo Layout',
+			cb(selectedItem) {
+				undoStack.commit('page.layout', {page: selectedItem}, this.text);
+			}
+		}
+	],
 	page: [
 		{
 			// TODO: concatenate parent -> child text so it comes out 'Layout Vertical' and not 'Vertical'

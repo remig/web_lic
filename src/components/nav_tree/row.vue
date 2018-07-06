@@ -52,6 +52,8 @@ export default {
 				}
 			} else if (t.type === 'pliItem') {
 				return `${nicePartName(t.filename)} - ${niceColorName(t.colorCode)}`;
+			} else if (t.type === 'quantityLabel') {
+				return `Quantity Label x${store.get.parent(t).quantity}`;
 			} else if (t.type === 'part') {
 				const step = store.get.step(t.stepID);
 				const part = LDParse.model.get.partFromID(t.id, step.model.filename);
@@ -84,7 +86,7 @@ function nicePartName(filename) {
 
 function niceColorName(colorCode) {
 	const color = LDParse.colorTable[colorCode];
-	return color ? color.name.replace('_', ' ') : '';
+	return color ? color.name.replace(/_/g, ' ') : '';
 }
 
 </script>
