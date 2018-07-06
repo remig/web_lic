@@ -422,10 +422,7 @@ const store = {
 		},
 		pliItemIsSubmodel(pliItem) {
 			pliItem = store.get.lookupToItem(pliItem);
-			const pli = store.get.parent(pliItem);
-			const step = store.get.parent(pli);
-			const part = LDParse.model.get.partFromID(pliItem.partNumbers[0], step.model.filename);
-			return LDParse.model.isSubmodel(part.filename);
+			return LDParse.model.isSubmodel(pliItem.filename);
 		},
 		isMoveable: (() => {
 			const moveableItems = [
@@ -761,29 +758,24 @@ const store = {
 				destStep.parts.sort(_.sort.numeric.ascending);
 
 				if (srcStep.pliID != null && destStep.pliID != null) {
+					const srcPLI = store.get.pli(srcStep.pliID);
+					const srcPLIItem = store.get.matchingPLIItem(srcPLI, partID);
 					const destPLI = store.get.pli(destStep.pliID);
-					const pli = store.get.pli(srcStep.pliID);
-					const pliItems = pli.pliItems.map(i => store.get.pliItem(i));
-					const pliItem = pliItems.filter(i => i.partNumbers.includes(partID))[0];
-
-					const target = store.get.matchingPLIItem(destPLI, partID);
-					if (target) {
-						target.quantity++;
-						target.partNumbers.push(partID);
+					const destPLIItem = store.get.matchingPLIItem(destPLI, partID);
+					if (destPLIItem) {
+						destPLIItem.quantity++;
 					} else {
 						store.mutations.pliItem.add({
 							parent: destPLI,
-							filename: pliItem.filename,
-							partNumbers: [partID],
-							colorCode: pliItem.colorCode
+							filename: srcPLIItem.filename,
+							colorCode: srcPLIItem.colorCode
 						});
 					}
 
-					if (pliItem.quantity === 1) {
-						store.mutations.pliItem.delete({pliItem});
+					if (srcPLIItem.quantity === 1) {
+						store.mutations.pliItem.delete({pliItem: srcPLIItem});
 					} else {
-						pliItem.quantity -= 1;
-						_.remove(pliItem.partNumbers, partID);
+						srcPLIItem.quantity -= 1;
 					}
 				}
 
@@ -1384,11 +1376,10 @@ const store = {
 			}
 		},
 		pliItem: {
-			add(opts) { // opts: {parent, filename, colorCode, partNumbers}
+			add(opts) { // opts: {parent, filename, colorCode}
 				const pliItem = store.mutations.item.add({item: {
 					type: 'pliItem', domID: null,
 					filename: opts.filename,
-					partNumbers: opts.partNumbers,
 					colorCode: opts.colorCode,
 					quantity: 1, quantityLabelID: null,
 					x: null, y: null, width: null, height: null
@@ -1440,10 +1431,11 @@ const store = {
 				});
 
 				const pli = store.get.pli(step.pliID);
-				[modelData.part1, modelData.part2].forEach((p, idx) => {
+				[modelData.part1, modelData.part2].forEach(p => {
 					store.mutations.pliItem.add({
-						parent: pli, partNumbers: [idx],
-						filename: p.filename, colorCode: p.colorCode
+						parent: pli,
+						filename: p.filename,
+						colorCode: p.colorCode
 					});
 				});
 				step.displacedParts = [{partID: 1, direction: 'up'}];
@@ -1626,13 +1618,11 @@ const store = {
 					const target = store.get.matchingPLIItem(pli, partID);
 					if (target) {
 						target.quantity++;
-						target.partNumbers.push(partID);
 					} else {
 						store.mutations.pliItem.add({
 							parent: pli,
 							filename: part.filename,
-							colorCode: part.colorCode,
-							partNumbers: [partID]
+							colorCode: part.colorCode
 						});
 					}
 				});
