@@ -272,7 +272,7 @@ const api = {
 
 		const margin = getMargin(store.state.template.submodelImage.innerMargin);
 		const csi = store.get.csi(submodelImage.csiID);
-		const part = LDParse.model.get.part(submodelImage.modelFilename);
+		const part = LDParse.model.get.abstractPart(submodelImage.modelFilename);
 
 		let csiSize;
 		csi.isDirty = true;  // TODO: is this necessary?
@@ -316,7 +316,7 @@ const api = {
 	csi(csi, box) {
 		// Draw CSI centered in box
 		const step = store.get.parent(csi);
-		const localModel = LDParse.model.get.part(step.model.filename);
+		const localModel = LDParse.model.get.abstractPart(step.model.filename);
 		const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
 		csi.x = box.x + ((box.width - csiSize.width) / 2);
 		csi.y = box.y + ((box.height - csiSize.height) / 2);
@@ -343,7 +343,7 @@ const api = {
 		}
 
 		const step = store.get.step(pli.parent.id);
-		const localModel = LDParse.model.get.part(step.model.filename);
+		const localModel = LDParse.model.get.abstractPart(step.model.filename);
 		const qtyLabelOffset = 5;
 		const margin = getMargin(store.state.template.pli.innerMargin);
 		let maxHeight = 0, left = margin + qtyLabelOffset;
@@ -625,7 +625,7 @@ function measureStep(step) {
 	}
 
 	const csi = store.get.csi(step.csiID);
-	const localModel = LDParse.model.get.part(step.model.filename);
+	const localModel = LDParse.model.get.abstractPart(step.model.filename);
 	const csiSize = store.render.csi(localModel, step, csi);
 	if (csiSize == null) {
 		const emptyCSISize = emptyCalloutSize - margin;

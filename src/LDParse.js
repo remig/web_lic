@@ -88,7 +88,7 @@ const api = {
 					return (p.isSubModel ? p.parts.length : 1) + acc;
 				}, 0);
 			},
-			part(filename) {
+			abstractPart(filename) {
 				return api.partDictionary[filename];
 			},
 			partFromID(partID, filename) {

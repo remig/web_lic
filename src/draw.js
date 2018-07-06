@@ -95,7 +95,7 @@ const api = {
 	step(step, ctx, config) {
 
 		step = store.get.step(step);
-		const localModel = LDParse.model.get.part(step.model.filename);
+		const localModel = LDParse.model.get.abstractPart(step.model.filename);
 
 		ctx.save();
 		ctx.translate(Math.floor(step.x), Math.floor(step.y));
@@ -161,7 +161,7 @@ const api = {
 
 		ctx.save();
 		ctx.scale(1 / hiResScale, 1 / hiResScale);
-		const part = LDParse.model.get.part(submodelImage.modelFilename);
+		const part = LDParse.model.get.abstractPart(submodelImage.modelFilename);
 		const siCanvas = store.render.pli(part, csi, hiResScale, noCache).container;
 		const x = Math.floor((submodelImage.x + csi.x) * hiResScale);
 		const y = Math.floor((submodelImage.y + csi.y) * hiResScale);

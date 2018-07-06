@@ -994,7 +994,7 @@ const contextMenu = {
 			text: 'Convert to Callout',
 			shown(selectedItem) {
 				// Only allow submodel -> callout conversion if submodel contains no submodels
-				const submodel = LDParse.model.get.part(selectedItem.filename);
+				const submodel = LDParse.model.get.abstractPart(selectedItem.filename);
 				for (let i = 0; i < submodel.parts.length; i++) {
 					if (LDParse.model.isSubmodel(submodel.parts[i].filename)) {
 						return false;

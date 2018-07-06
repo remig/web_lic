@@ -390,7 +390,7 @@ const store = {
 			step = store.get.lookupToItem(step);
 			const parts = store.get.partsInStep(step);
 			return parts.map(part => {
-				return LDParse.model.get.part(part.filename);
+				return LDParse.model.get.abstractPart(part.filename);
 			});
 		},
 		stepHasSubmodel(step) {
@@ -1568,7 +1568,7 @@ const store = {
 			opts = opts || {};
 			const lastStepNumber = opts.lastStepNumber || {num: opts.lastStepNumber || 1};  // Object so it can be modified recursively
 			const modelFilename = opts.modelFilename || store.model.filename;
-			const localModel = LDParse.model.get.part(modelFilename);
+			const localModel = LDParse.model.get.abstractPart(modelFilename);
 
 			if (!localModel.steps) {
 				const submodels = LDParse.model.get.submodels(localModel);
