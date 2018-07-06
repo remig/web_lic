@@ -95,7 +95,6 @@ const api = {
 	step(step, ctx, config) {
 
 		step = store.get.step(step);
-		const localModel = LDParse.model.get.abstractPart(step.model.filename);
 
 		ctx.save();
 		ctx.translate(Math.floor(step.x), Math.floor(step.y));
@@ -103,7 +102,7 @@ const api = {
 		if (step.csi == null && step.steps.length) {
 			step.steps.forEach(id => api.step({type: 'step', id}, ctx, config));
 		} else if (step.csiID != null) {
-			api.csi(step.csiID, localModel, ctx, config);
+			api.csi(step.csiID, ctx, config);
 		}
 
 		step.submodelImages.forEach(submodelImageID => {
@@ -115,7 +114,7 @@ const api = {
 		});
 
 		if (step.pliID != null && store.state.plisVisible) {
-			api.pli(step.pliID, localModel, ctx, config);
+			api.pli(step.pliID, ctx, config);
 		}
 
 		if (step.numberLabelID != null) {
@@ -162,7 +161,7 @@ const api = {
 		ctx.save();
 		ctx.scale(1 / hiResScale, 1 / hiResScale);
 		const part = LDParse.model.get.abstractPart(submodelImage.modelFilename);
-		const siCanvas = store.render.pli(part, csi, hiResScale, noCache).container;
+		const siCanvas = store.render.pli(part.colorCode, part.filename, csi, hiResScale, noCache).container;
 		const x = Math.floor((submodelImage.x + csi.x) * hiResScale);
 		const y = Math.floor((submodelImage.y + csi.y) * hiResScale);
 		ctx.drawImage(siCanvas, x, y);
@@ -181,9 +180,10 @@ const api = {
 		ctx.restore();
 	},
 
-	csi(csi, localModel, ctx, {hiResScale, selectedPart, noCache}) {
+	csi(csi, ctx, {hiResScale, selectedPart, noCache}) {
 		csi = store.get.csi(csi);
 		const step = store.get.parent(csi);
+		const localModel = LDParse.model.get.abstractPart(step.model.filename);
 
 		ctx.save();
 		ctx.scale(1 / hiResScale, 1 / hiResScale);
@@ -204,7 +204,7 @@ const api = {
 		ctx.restore();
 	},
 
-	pli(pli, localModel, ctx, {hiResScale, noCache}) {
+	pli(pli, ctx, {hiResScale, noCache}) {
 		const template = store.state.template;
 		pli = store.get.pli(pli);
 
@@ -227,31 +227,33 @@ const api = {
 
 		ctx.save();
 		ctx.translate(Math.floor(pli.innerContentOffset.x), Math.floor(pli.innerContentOffset.y));
+		ctx.translate(Math.floor(pli.x), Math.floor(pli.y));
+		pliItems.forEach(idx => {
+			api.pliItem(idx, ctx, {hiResScale, noCache}, template);
+		});
+		ctx.restore();
+	},
 
+	pliItem(pliItem, ctx, {hiResScale, noCache}, template) {
 		ctx.save();
 		ctx.scale(1 / hiResScale, 1 / hiResScale);
-		pliItems.forEach(idx => {
-			const pliItem = store.get.pliItem(idx);
-			const part = localModel.parts[pliItem.partNumbers[0]];
-			const pliCanvas = store.render.pli(part, pliItem, hiResScale, noCache).container;
-			const x = Math.floor((pli.x + pliItem.x) * hiResScale);
-			const y = Math.floor((pli.y + pliItem.y) * hiResScale);
-			ctx.drawImage(pliCanvas, x, y);
-		});
+		pliItem = store.get.pliItem(pliItem);
+		const pliCanvas = store.render.pli(
+			pliItem.colorCode, pliItem.filename, pliItem, hiResScale, noCache
+		).container;
+		const x = Math.floor(pliItem.x) * hiResScale;
+		const y = Math.floor(pliItem.y) * hiResScale;
+		ctx.drawImage(pliCanvas, x, y);
 		ctx.restore();
 
-		pliItems.forEach(idx => {
-			const pliItem = store.get.pliItem(idx);
-			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-			ctx.fillStyle = template.pliItem.quantityLabel.color;
-			ctx.font = template.pliItem.quantityLabel.font;
-			ctx.fillText(
-				'x' + pliItem.quantity,
-				pli.x + pliItem.x + quantityLabel.x,
-				pli.y + pliItem.y + quantityLabel.y + quantityLabel.height
-			);
-		});
-		ctx.restore();
+		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+		ctx.fillStyle = template.pliItem.quantityLabel.color;
+		ctx.font = template.pliItem.quantityLabel.font;
+		ctx.fillText(
+			'x' + pliItem.quantity,
+			pliItem.x + quantityLabel.x,
+			pliItem.y + quantityLabel.y + quantityLabel.height
+		);
 	},
 
 	callout(callout, ctx, config) {

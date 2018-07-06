@@ -9,10 +9,10 @@ let isInitialized = false;
 
 const api = {
 
-	// Render the chosen abstract part to the chosen container.
+	// Render the chosen part filename with the chosen color code to the chosen container.
 	// Return a {width, height} object representing the size of the rendering.
 	// Optional config: {resizeContainer, dx, dy, rotation: {x, y, z}}
-	renderPart(part, containerID, size, config) {
+	renderPart(colorCode, filename, containerID, size, config) {
 
 		size = Math.max(Math.floor(size), 1);
 		config = config || {};
@@ -21,7 +21,7 @@ const api = {
 		initialize();
 		const scene = initScene(size);
 
-		addPartToScene(scene, part, config);
+		addPartToScene(scene, colorCode, filename, config);
 		const res = render(scene, size, containerID, config);
 		cleanup(scene);
 		return res;
@@ -571,7 +571,7 @@ function addModelToScene(scene, model, partIDList, config) {
 	}
 }
 
-function addPartToScene(scene, part, config) {
+function addPartToScene(scene, colorCode, filename, config) {
 
 	/*
 	const mesh = new THREE.Mesh(partGeometry.faces.clone(), faceMaterial);
@@ -583,9 +583,9 @@ function addPartToScene(scene, part, config) {
 	scene.add(mesh);
 	*/
 
-	part = {
-		colorCode: part.colorCode,
-		filename: part.filename,
+	const part = {
+		colorCode: colorCode,
+		filename: filename,
 		matrix: [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
 	};
 

@@ -277,14 +277,14 @@ const api = {
 		let csiSize;
 		csi.isDirty = true;  // TODO: is this necessary?
 		if (csi.scale != null) {  // If user chose a manual scale factor, respect it
-			csiSize = store.render.pli(part, csi);
+			csiSize = store.render.pli(part.colorCode, part.filename, csi);
 		} else {
 			csi.autoScale = template.csi.scale;
-			csiSize = store.render.pli(part, csi);
+			csiSize = store.render.pli(part.colorCode, part.filename, csi);
 			if (csiSize.height > box.height * template.maxHeight) {
 				csi.autoScale *= (box.height * template.maxHeight) / csiSize.height;
 				csi.isDirty = true;  // This is necessary because we just rendered it; need this to force re-render
-				csiSize = store.render.pli(part, csi);
+				csiSize = store.render.pli(part.colorCode, part.filename, csi);
 			} else {
 				csi.autoScale = null;
 			}
@@ -342,8 +342,6 @@ const api = {
 			return;
 		}
 
-		const step = store.get.step(pli.parent.id);
-		const localModel = LDParse.model.get.abstractPart(step.model.filename);
 		const qtyLabelOffset = 5;
 		const margin = getMargin(store.state.template.pli.innerMargin);
 		let maxHeight = 0, left = margin + qtyLabelOffset;
@@ -352,27 +350,34 @@ const api = {
 		for (let i = 0; i < pliItems.length; i++) {
 
 			const pliItem = store.get.pliItem(pliItems[i]);
-			const pliSize = store.render.pli(localModel.parts[pliItem.partNumbers[0]], pliItem);
+			api.pliItem(pliItem);
 			pliItem.x = left;
 			pliItem.y = margin;
-			pliItem.width = pliSize.width;
-			pliItem.height = pliSize.height;
 
-			const font = store.state.template.pliItem.quantityLabel.font;
-			const lblSize = _.measureLabel(font, 'x' + pliItem.quantity);
+			left += pliItem.width + margin;
 			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-			quantityLabel.x = -qtyLabelOffset;
-			quantityLabel.y = pliSize.height - qtyLabelOffset;
-			quantityLabel.width = lblSize.width;
-			quantityLabel.height = lblSize.height;
-
-			left += pliSize.width + margin;
-			maxHeight = Math.max(maxHeight, pliSize.height - qtyLabelOffset + quantityLabel.height);
+			maxHeight = Math.max(maxHeight, pliItem.height - qtyLabelOffset + quantityLabel.height);
 		}
 
 		pli.x = pli.y = 0;
 		pli.width = borderWidth + left + borderWidth;
 		pli.height = borderWidth + margin + maxHeight + margin + borderWidth;
+	},
+
+	pliItem(pliItem) {
+		const qtyLabelOffset = 5;
+		const pliSize = store.render.pli(pliItem.colorCode, pliItem.filename, pliItem);
+		pliItem.x = pliItem.y = 0;
+		pliItem.width = pliSize.width;
+		pliItem.height = pliSize.height;
+
+		const font = store.state.template.pliItem.quantityLabel.font;
+		const lblSize = _.measureLabel(font, 'x' + pliItem.quantity);
+		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+		quantityLabel.x = -qtyLabelOffset;
+		quantityLabel.y = pliSize.height - qtyLabelOffset;
+		quantityLabel.width = lblSize.width;
+		quantityLabel.height = lblSize.height;
 	},
 
 	callout(callout, box) {

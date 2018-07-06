@@ -166,10 +166,10 @@ const store = {
 				const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
 				return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
 			},
-			pli(part, item, hiResScale = 1, bypassCache) {
+			pli(colorCode, filename, item, hiResScale = 1, bypassCache) {
 				const scale = (getScale(item) || 1) * hiResScale;
 				if (item.domID == null) {
-					item.domID = `PLI_${part.filename}_${part.colorCode}`;
+					item.domID = `PLI_${filename}_${colorCode}`;
 					item.isDirty = true;
 				}
 				let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : item.domID);
@@ -179,7 +179,7 @@ const store = {
 						rotation: getRotation(item)
 					};
 					container = container || getCanvas(item.domID, bypassCache);
-					LDRender.renderPart(part, container, 1000 * scale, config);
+					LDRender.renderPart(colorCode, filename, container, 1000 * scale, config);
 					delete item.isDirty;
 				}
 				return {width: container.width, height: container.height, container};
@@ -899,7 +899,7 @@ const store = {
 		submodelImage: {
 			add(opts) {  // opts: {parent, modelFilename, quantity}
 				const submodelImage = store.mutations.item.add({item: {
-					type: 'submodelImage', csiID: null, quantityLabelID: null,
+					type: 'submodelImage', csiID: null, quantityLabelID: null,  // TODO: submodelImages don't really have a CSI, they have a pliItem with no quantity label.  Fix that
 					modelFilename: opts.modelFilename, quantity: opts.quantity || 1,
 					x: null, y: null, width: null, height: null,
 					innerContentOffset: {x: 0, y: 0}
