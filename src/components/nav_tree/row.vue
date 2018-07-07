@@ -40,7 +40,7 @@ export default {
 			} else if (t.type === 'page') {
 				return 'Page ' + (t.number || '');
 			} else if (t.type === 'inventoryPage') {
-				return 'Inventory Page ' + (t.number || '');
+				return 'Part List Page ' + (t.number || '');
 			} else if (t.type === 'step') {
 				return 'Step ' + (t.number || '');
 			} else if (t.type === 'submodel') {
