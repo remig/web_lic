@@ -94,6 +94,12 @@
 				"partListPage": "Part List Page (NYI)"
 			}
 		},
+		"whats_new": {
+			"title": "What's New",
+			"version": "Version",
+			"features": "New Features",
+			"bug_fixes": "Bug Fixes"
+		},
 		"grid": {
 			"title": "Change Grid",
 			"enabled": "Enabled",

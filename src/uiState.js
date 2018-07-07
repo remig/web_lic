@@ -5,6 +5,7 @@ import Storage from './storage';
 
 const defaultState = {
 	locale: null,
+	lastUsedVersion: null,
 	dialog: {
 		importModel: {
 			stepsPerPage: 1,

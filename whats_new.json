@@ -1,0 +1,20 @@
+[
+	{
+		"version": "0.34.0",
+		"date": "July 1, 2018",
+		"features": [
+			"This new 'What's New' dialog",
+			"Added Part List Pages.  Accessible from the 'Import Model' dialog's 'Include' list or from 'Edit -> Add Part List Pages",
+			"Better 'Import Model' dialog, with new 'Include' dropdown, to better choose desired major page items",
+			"If submodels are not shown in PLI, add an arrow from edge of page to submodel placement in CSI",
+			"Add a right-click menu to Arrow Annotations, to select / add / remove points and rotate arrow tip"
+		],
+		"bug_fixes": [
+			"Correct the position of annotations placed on Steps & CSIs",
+			"Make Arrow Annotations selectable",
+			"Redo page layout when PLI template options change",
+			"Include Lic version info in all saved templates & instruction books",
+			"Delete cached submodels when importing a new model"
+		]
+	}
+]

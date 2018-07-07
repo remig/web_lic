@@ -257,6 +257,26 @@ const api = {
 			}
 		}
 	},
+	version: {
+		parse(v) {
+			v = (v || '').split('.').map(v => parseInt(v, 10));
+			return {major: v[0] || 0, minor: v[1] || 0, revision: v[2] || 0};
+		},
+		nice(v) {
+			v = api.version.parse(v);
+			return `${v.major}.${v.minor}`;
+		},
+		isOldVersion(prev, current) {
+			prev = api.version.parse(prev);
+			current = api.version.parse(current);
+			if (prev.major !== current.major) {
+				return prev.major < current.major;
+			} else if (prev.minor !== current.minor) {
+				return prev.minor < current.minor;
+			}
+			return prev.revision < current.revision;
+		}
+	},
 	clone(obj) {
 		if (obj == null) {
 			return null;  // JSON.parse crashes if obj is undefined

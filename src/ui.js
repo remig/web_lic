@@ -14,6 +14,7 @@ import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
 import DialogManager from './dialog';
 import importModelDialog from './dialogs/import_model.vue';
+import whatsNewDialog from './dialogs/whats_new.vue';
 import NavTree from './components/nav_tree/base.vue';
 import './pageView';
 import './templatePanel';
@@ -391,7 +392,7 @@ const app = new Vue({
 			return Menu(this);
 		},
 		version() {
-			return packageInfo.version.slice(0, packageInfo.version.lastIndexOf('.'));  // major.minor is enough for public consumption
+			return _.version.nice(packageInfo.version);  // major.minor is enough for public consumption
 		}
 	},
 	mounted() {
@@ -412,6 +413,8 @@ const app = new Vue({
 
 			const splitStyle = document.getElementById('leftPane').style;
 			uiState.set('splitter', parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]));
+
+			uiState.set('lastUsedVersion', packageInfo.version);
 
 			this.$refs.navTree.saveState();
 
@@ -441,6 +444,13 @@ const app = new Vue({
 			gutterSize: 5,
 			snapOffset: 0
 		});
+
+		if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
+			DialogManager.setDialog(whatsNewDialog);
+			Vue.nextTick(() => {
+				DialogManager.getDialog().visible = true;
+			});
+		}
 
 		LocaleManager.pickLanguage(this.openLocalLicFile, this.redrawUI);  // TODO: Find better way of calling 'redrawUI' from arbitrary places
 	}
