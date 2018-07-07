@@ -8,6 +8,7 @@ import defaultTemplate from './template';
 import Layout from './layout';
 import Storage from './storage';
 import uiState from './uiState';
+import packageInfo from '../package.json';
 
 const emptyState = {
 	template: _.clone(defaultTemplate),
@@ -32,6 +33,8 @@ const emptyState = {
 };
 
 const store = {
+
+	version: null,  // The version of Lic that created this state
 
 	// The currently loaded LDraw model, as returned from LDParse
 	model: null,  // Not in state because it is saved separately, and not affected by undo / redo
@@ -68,6 +71,7 @@ const store = {
 				state: store.state
 			};
 		}
+		content.version = packageInfo.version;
 		if (mode === 'file') {
 			content = JSON.stringify(content, null, jsonIndent);
 			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
