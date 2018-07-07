@@ -323,8 +323,14 @@ async function loadSubModels(lineList) {
 	}
 	if (models.length) {
 		for (i = 1; i < models.length; i++) {
-			partName = lineList[models[i].start].slice(2).join(' ').toLowerCase();
-			unloadedSubModels[partName] = lineList.slice(models[i].start, models[i].end + 1);
+			const model = models[i];
+			partName = lineList[model.start].slice(2).join(' ').toLowerCase();
+			if (partName in api.partDictionary) {
+				// If we already have a submodel with this name, delete and reload it,
+				// as it came from a previous, likely unrelated, model.
+				delete api.partDictionary[partName];
+			}
+			unloadedSubModels[partName] = lineList.slice(model.start, model.end + 1);
 		}
 		partName = lineList[models[0].start].slice(2).join(' ');
 		const lines = lineList.slice(models[0].start, models[0].end + 1);
