@@ -36,12 +36,25 @@ const api = {
 	},
 
 	inventoryPage(page, box) {
-		if (page.numberLabelID != null) {
-			api.pageNumber(page);
+
+		// If we're laying out the first inventory page, delete all but the first page and redo layout
+		// across entire part list, adding new pages back if necessary
+		let pliItems = page.pliItems;
+		const pages = store.state.inventoryPages;
+		if (page === pages[0]) {
+			// Delete all but first inventory page
+			while (pages.length > 1) {
+				const pageToRemove = _.last(pages);
+				while (pageToRemove.pliItems.length) {
+					const id = pageToRemove.pliItems[0];
+					store.mutations.item.reparent({item: {type: 'pliItem', id}, newParent: page});
+				}
+				store.mutations.inventoryPage.delete({page: pageToRemove});
+			}
 		}
 
 		// Start with a big list of unsorted pli items with no size or position info.
-		const pliItems = page.pliItems.map(store.get.pliItem);
+		pliItems = page.pliItems.map(store.get.pliItem);
 
 		// Layout each pli; this sets its size info and positions its quantity label.
 		pliItems.forEach(pliItem => {
@@ -67,9 +80,9 @@ const api = {
 		});
 		page.pliItems = pliItems.map(el => el.id);  // Store sorted pliItem IDs back in the page
 
-		const columns = [[]];
 		const margin = (getMargin(store.state.template.page.innerMargin) + qtyLabelOffset) * 1.2;
 		let colWidth = 0, x = margin, y = margin;
+		let columns = [[]];
 
 		box.width -= margin + margin;
 		box.height -= margin;
@@ -77,22 +90,37 @@ const api = {
 		// Start placing items on the page.  First item goes top left, next below that then on
 		// until we hit the bottom of the page.  That's one column.  Track the widest label
 		// placed in that column, then place next item at top of page again, max column width over.
-		pliItems.forEach(pliItem => {
-			if (y + pliItem.height > box.height) {
+		// If new column exceeds page width, add a new page and do its layout separately
+		for (let i = 0; i < pliItems.length; i++) {
+			const pliItem = pliItems[i];
+			if (y + pliItem.height > box.height) {  // Check if new item fits below current item
 				x += colWidth + margin;
 				y = margin;
 				colWidth = 0;
 				columns.push([]);
 			}
+			if (x + pliItem.width > box.width) {
+				// New item overflowed over the right edge of the page.  Create a new page and
+				// pass it the remaining parts.
+				const opts = {pageType: 'inventoryPage', pageNumber: page.number + 1};
+				const newPage = store.mutations.page.add(opts);
+				pliItems.slice(i).forEach(item => {
+					store.mutations.item.reparent({item, newParent: newPage});
+				});
+				api.page(newPage);
+				break;
+			}
+
 			columns[columns.length - 1].push(pliItem);
 			pliItem.x = x;
 			pliItem.y = y;
 			y += pliItem.height + margin;
 			colWidth = Math.max(colWidth, pliItem.width);
-		});
+		}
 
 		// Everything is in nice columns.
 		// Increase space between columns so they evenly fill the page width
+		columns = columns.filter(el => el.length);
 		colWidth = box.width / columns.length;
 		columns.slice(1).forEach((col, idx) => {
 			col.forEach(item => {
@@ -107,7 +135,7 @@ const api = {
 			}
 			const lastItem = _.last(col);
 			const remainingSpace = box.height - lastItem.y - lastItem.height;
-			const spaceToAdd = Math.max(0, remainingSpace / (col.length - 1));
+			const spaceToAdd = _.bound(remainingSpace / (col.length - 1), 0, margin);
 			col.forEach((item, idx) => {
 				item.y += spaceToAdd * idx;
 			});
