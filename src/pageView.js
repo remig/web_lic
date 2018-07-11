@@ -523,20 +523,9 @@ function inBox(x, y, t) {
 }
 
 // TODO: abstract the details in here better.  Shouldn't have to add more code here for each simple box container
+// TODO: stepChildren is a good start; need to make stepChildren recursively return all ancestors, and check them all automatically here
 function findClickTargetInStep(step, mx, my) {
 
-	if (step.numberLabelID != null) {
-		const lbl = store.get.numberLabel(step.numberLabelID);
-		if (inBox(mx, my, lbl)) {
-			return lbl;
-		}
-	}
-	if (step.rotateIconID != null) {
-		const icon = store.get.rotateIcon(step.rotateIconID);
-		if (inBox(mx, my, icon)) {
-			return icon;
-		}
-	}
 	const csi = store.get.csi(step.csiID);
 	for (let i = 0; i < csi.annotations.length; i++) {
 		const a = store.get.annotation(csi.annotations[i]);
@@ -611,10 +600,10 @@ function findClickTargetInStep(step, mx, my) {
 			}
 		}
 	}
-	for (let i = 0; i < step.annotations.length; i++) {
-		const a = store.get.annotation(step.annotations[i]);
-		if (inBox(mx, my, a)) {
-			return a;
+	const children = store.get.stepChildren(step);
+	for (let i = 0; i < children.length; i++) {
+		if (inBox(mx, my, children[i])) {
+			return children[i];
 		}
 	}
 	if (inBox(mx, my, step)) {

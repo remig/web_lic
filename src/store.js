@@ -465,6 +465,26 @@ const store = {
 			}
 			return null;
 		},
+		stepChildren(step) {
+			return store.get.children(step, [
+				'annotation', 'callout', 'csi', 'divider', 'numberLabel',
+				'pli', 'rotateIcon', 'step', 'submodelImage'
+			]);
+		},
+		children(item, childTypeList) {
+			item = store.get.lookupToItem(item);
+			const children = [];
+			childTypeList.forEach(childType => {
+				const childList = item[childType + 's'];
+				const childID = item[childType + 'ID'];
+				if (childList && childList.length) {
+					children.push(... childList.map(id => store.get[childType](id)));
+				} else if (childID != null) {
+					children.push(store.get[childType](childID));
+				}
+			});
+			return children;
+		},
 		pageForItem(item) {
 			if (item && item.type === 'part') {
 				item = store.get.step(item.stepID);
@@ -713,8 +733,9 @@ const store = {
 					} else {
 						item.x += opts.dx;
 						item.y += opts.dy;
-						if (Layout.adjustBoundingBox[item.type]) {
-							Layout.adjustBoundingBox[item.type](item);
+						const parentType = item.parent.type;
+						if (Layout.adjustBoundingBox[parentType]) {
+							Layout.adjustBoundingBox[parentType](item.parent);
 						}
 					}
 				});

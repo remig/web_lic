@@ -665,6 +665,9 @@ const api = {
 	},
 
 	adjustBoundingBox: {
+		step(item) {
+			// Make step's bounding box tightly fit its content.  This makes it easier to manually layout content
+		},
 		// csi(item) {
 		// 	const step = store.get.parent(item);
 		// 	if (step.parent.type === 'callout') {
@@ -680,11 +683,8 @@ const api = {
 			item.height = borderWidth + margin + bbox.height + margin + borderWidth;
 		},
 
-		pliItem(item) {
-			if (item.parent.type !== 'pli') {
-				return;
-			}
-			const pli = store.get.parent(item);
+		pli(item) {
+			const pli = store.get.lookupToItem(item);
 			const boxes = [];
 			pli.pliItems.forEach(itemID => {
 				const pliItem = store.get.pliItem(itemID);
@@ -701,11 +701,15 @@ const api = {
 			api.adjustBoundingBox.item(pli, boxes, store.state.template.pli);
 		},
 
-		step(item) {
-			if (item.parent.type !== 'callout') {
-				return;
+		pliItem(item) {
+			const pliItem = store.get.lookupToItem(item);
+			if (pliItem.parent.type === 'pli') {
+				api.adjustBoundingBox.pli(pliItem.parent);
 			}
-			const callout = store.get.parent(item);
+		},
+
+		callout(item) {
+			const callout = store.get.lookupToItem(item);
 			const boxes = [];
 			callout.steps.forEach(itemID => {
 				const step = store.get.step(itemID);
