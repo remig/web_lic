@@ -1,42 +1,33 @@
 <template>
 	<div>
-		<div class="panel panel-template">
-			<h5>Page Size</h5>
-			<div class="panel-body">
-				<form class="form-horizontal">
-					<el-checkbox
-						v-model="maintainAspectRatio"
-						@change="changeAspectRatio"
-					>
-						Maintain Aspect Ratio ({{aspectRatio.toFixed(2)}})
-					</el-checkbox>
-					<div class="form-group paddingT10">
-						<label class="control-label col-sm-5">Width (px)</label>
-						<div class="col-sm-5">
-							<input
-								v-model.number="width"
-								type="number"
-								min="0"
-								class="form-control"
-								@input="updateValues"
-							>
-						</div>
-					</div>
-					<div class="form-group marginB05">
-						<label class="control-label col-sm-5">Height (px)</label>
-						<div class="col-sm-5">
-							<input
-								v-model.number="height"
-								type="number"
-								min="0"
-								class="form-control col-sm-10"
-								@input="updateValues"
-							>
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
+		<panel-base title="Page Size" label-width="100px">
+			<el-form-item label-width="0px">
+				<el-checkbox
+					v-model="maintainAspectRatio"
+					@change="changeAspectRatio"
+				>
+					Maintain Aspect Ratio ({{aspectRatio.toFixed(2)}})
+				</el-checkbox>
+			</el-form-item>
+			<el-form-item label="Width (px)">
+				<input
+					v-model.number="width"
+					type="number"
+					min="0"
+					class="form-control"
+					@input="updateValues"
+				>
+			</el-form-item>
+			<el-form-item label="Height (px)">
+				<input
+					v-model.number="height"
+					type="number"
+					min="0"
+					class="form-control col-sm-10"
+					@input="updateValues"
+				>
+			</el-form-item>
+		</panel-base>
 		<fill-panel
 			template-entry="page"
 			@new-values="newValues"
@@ -53,6 +44,7 @@
 import store from '../../store';
 import FillPanel from './fill.vue';
 import BorderPanel from './border.vue';
+import PanelBase from './panel_base.vue';
 
 // TODO: add default page layout UI
 // TODO: should add UI to choose whether to redo layout or just extend canvas
@@ -60,7 +52,7 @@ import BorderPanel from './border.vue';
 // TODO: for page size, add preset sizes like 'A4', 'legal', etc.  See here for list of formats & sizes: https://github.com/MrRio/jsPDF/blob/master/jspdf.js
 // TODO: explore component 'extends' to make panel / subpanel nesting easier (https://vuejs.org/v2/api/#extends)
 export default {
-	components: {FillPanel, BorderPanel},
+	components: {PanelBase, FillPanel, BorderPanel},
 	data() {
 		const template = store.state.template.page;
 		return {

@@ -136,6 +136,10 @@ div#container {
 	padding: 9px 20px;
 }
 
+.el-button+.el-button {
+	margin-left: unset;
+}
+
 .el-color-dropdown__btns > .el-button--mini {
 	padding: 7px 15px;
 }

@@ -1,43 +1,40 @@
 <template>
-	<panel-base :title="title" class="fillTemplate">
-		<el-form label-position="left" label-width="80px">
-			<el-form-item label="Color">
-				<el-color-picker
-					id="fillColorInput"
-					v-model="color"
-					show-alpha
-					@active-change="updateColor"
-					@change="updateValues"
-				/>
-			</el-form-item>
-			<el-form-item v-if="gradient != null" label="Gradient">
-				<label class="el-form-item__label">NYI</label>
-				<!-- <input v-model="gradient" v-on:input="updateValues" type="number" min="0" class="form-control" id="gradientInput"/> -->
-			</el-form-item>
-			<el-form-item v-if="imageFilename != null" label="Image">
-				<el-button
-					v-if="imageFilename"
-					icon="el-icon-picture-outline"
-					class="tight"
-					@click="pickImage"
-				>
-					{{truncatedImageName}}
-				</el-button>
-				<el-button
-					v-else
-					icon="el-icon-picture-outline"
-					@click="pickImage"
-				/>
-				<el-button
-					v-if="imageFilename"
-					type="text"
-					class="template-close"
-					icon="el-icon-close"
-					size="small"
-					@click="removeImage"
-				/>
-			</el-form-item>
-		</el-form>
+	<panel-base :title="title" class="fillTemplate" label-width="80px">
+		<el-form-item label="Color">
+			<el-color-picker
+				v-model="color"
+				show-alpha
+				@active-change="updateColor"
+				@change="updateValues"
+			/>
+		</el-form-item>
+		<el-form-item v-if="gradient != null" label="Gradient">
+			<label class="el-form-item__label">NYI</label>
+			<!-- <input v-model="gradient" v-on:input="updateValues" type="number" min="0" class="form-control" id="gradientInput"/> -->
+		</el-form-item>
+		<el-form-item v-if="imageFilename != null" label="Image">
+			<el-button
+				v-if="imageFilename"
+				icon="el-icon-picture-outline"
+				class="tight"
+				@click="pickImage"
+			>
+				{{truncatedImageName}}
+			</el-button>
+			<el-button
+				v-else
+				icon="el-icon-picture-outline"
+				@click="pickImage"
+			/>
+			<el-button
+				v-if="imageFilename"
+				type="text"
+				class="template-close"
+				icon="el-icon-close"
+				size="small"
+				@click="removeImage"
+			/>
+		</el-form-item>
 	</panel-base>
 </template>
 
@@ -104,10 +101,6 @@ export default {
 </script>
 
 <style>
-
-.fillTemplate .el-button+.el-button {
-	margin-left: unset;
-}
 
 .el-button.tight {
 	padding: 9px;

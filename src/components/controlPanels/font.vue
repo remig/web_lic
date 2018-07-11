@@ -1,70 +1,60 @@
 <template>
-	<panel-base title="Font">
-		<div class="form-group">
-			<label for="font" class="sr-only">Select a font</label>
-			<div class="col-sm-10">
-				<el-select
-					id="font"
-					v-model="family"
-					@visible-change="cacheFontName"
-					@change="updateFontName"
-				>
-					<el-option-group v-for="group in familyNames" :key="group.label">
-						<el-option
-							v-for="font in group.options"
-							:key="font"
-							:value="font"
-						>
-							{{font}}
-						</el-option>
-					</el-option-group>
-				</el-select>
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="col-sm-12">
-				<button
-					class="btn btn-secondary btn-primary"
-					@click.stop.prevent="toggleProp('bold')"
-				>
-					<strong>B</strong>
-				</button>
-				<button
-					class="btn btn-secondary"
-					@click.stop.prevent="toggleProp('italic')"
-				>
-					<em>I</em>
-				</button>
-				<button
-					class="btn btn-secondary"
-					@click.stop.prevent="toggleProp('underline')"
-				>
-					<u>U</u>
-				</button>
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="fontSize" class="control-label col-sm-4">Size</label>
-			<div class="col-sm-5">
-				<input
-					id="fontSize"
-					v-model.number="size"
-					type="number"
-					min="0"
-					class="form-control"
-					@input="updateValues"
-				>
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="borderColorInput" class="control-label col-sm-4">Color</label>
+	<panel-base title="Font" label-width="70px">
+		<el-form-item label-width="0px">
+			<el-select
+				v-model="family"
+				@visible-change="cacheFontName"
+				@change="updateFontName"
+			>
+				<el-option-group v-for="group in familyNames" :key="group.label">
+					<el-option
+						v-for="font in group.options"
+						:key="font"
+						:value="font"
+					>
+						{{font}}
+					</el-option>
+				</el-option-group>
+			</el-select>
+		</el-form-item>
+		<el-form-item label-width="0px">
+			<el-button
+				type="primary"
+				class="fontStyleButton"
+				@click.stop.prevent="toggleProp('bold')"
+			>
+				<strong>B</strong>
+			</el-button>
+			<el-button
+				class="fontStyleButton"
+				@click.stop.prevent="toggleProp('italic')"
+			>
+				<em>I</em>
+			</el-button>
+			<el-button
+				class="fontStyleButton"
+				@click.stop.prevent="toggleProp('underline')"
+			>
+				<u>U</u>
+			</el-button>
+		</el-form-item>
+		<el-form-item label="Size">
+			<input
+				v-model.number="size"
+				type="number"
+				min="0"
+				class="form-control"
+				@input="updateValues"
+			>
+		</el-form-item>
+		<el-form-item label="Color">
 			<el-color-picker
 				v-model="color"
 				show-alpha
 				@active-change="updateColor"
 				@change="updateValues"
 			/>
-		</div>
+		</el-form-item>
 	</panel-base>
 </template>
 
@@ -181,3 +171,13 @@ export default {
 };
 
 </script>
+
+<style>
+
+.fontStyleButton {
+	width: 34px;
+	height: 34px;
+	padding: 9px 0;
+}
+
+</style>

@@ -237,10 +237,6 @@ export default {
 	padding: 2px 5px;
 }
 
-.treeButtons .el-button+.el-button {
-	margin-left: unset;
-}
-
 .treeShowHideDropdown {
 	min-width: 190px;
 }

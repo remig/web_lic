@@ -1,62 +1,46 @@
 <template>
-	<panel-base title="Rotation">
-		<div class="form-group">
-			<label for="xRotation" class="control-label col-sm-2">X</label>
-			<div class="col-sm-5">
-				<input
-					id="xRotation"
-					v-model.number="x"
-					type="number"
-					min="-360"
-					max="360"
-					class="form-control"
-					@input="updateValues"
-				>
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="yRotation" class="control-label col-sm-2">Y</label>
-			<div class="col-sm-5">
-				<input
-					id="yRotation"
-					v-model.number="y"
-					type="number"
-					min="-360"
-					max="360"
-					class="form-control"
-					@input="updateValues"
-				>
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="zRotation" class="control-label col-sm-2">Z</label>
-			<div class="col-sm-5">
-				<input
-					id="zRotation"
-					v-model.number="z"
-					type="number"
-					min="-360"
-					max="360"
-					class="form-control"
-					@input="updateValues"
-				>
-			</div>
-		</div>
-		<h5>Scale</h5>
-		<div class="form-group">
-			<div class="col-sm-6">
-				<input
-					id="scaleInput"
-					v-model.number="scale"
-					type="number"
-					min="0"
-					max="10"
-					step="0.1"
-					class="form-control"
-					@input="updateValues"
-				>
-			</div>
-		</div>
+	<panel-base title="Transform" label-width="80px">
+		<el-form-item label="Rotate X">
+			<input
+				v-model.number="x"
+				type="number"
+				min="-360"
+				max="360"
+				class="form-control"
+				@input="updateValues"
+			>
+		</el-form-item>
+		<el-form-item label="Y">
+			<input
+				v-model.number="y"
+				type="number"
+				min="-360"
+				max="360"
+				class="form-control"
+				@input="updateValues"
+			>
+		</el-form-item>
+		<el-form-item label="Z">
+			<input
+				v-model.number="z"
+				type="number"
+				min="-360"
+				max="360"
+				class="form-control"
+				@input="updateValues"
+			>
+		</el-form-item>
+		<el-form-item label="Scale">
+			<input
+				v-model.number="scale"
+				type="number"
+				min="0"
+				max="10"
+				step="0.1"
+				class="form-control"
+				@input="updateValues"
+			>
+		</el-form-item>
 	</panel-base>
 </template>
 

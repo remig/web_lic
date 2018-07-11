@@ -1,35 +1,31 @@
 <template>
-	<panel-base :title="title">
-		<el-form label-position="left" label-width="120px">
-			<el-form-item label="Color">
-				<el-color-picker
-					v-model="color"
-					show-alpha
-					@active-change="updateColor"
-					@change="updateValues"
-				/>
-			</el-form-item>
-			<el-form-item label="Line Width">
-				<input
-					id="lineWidth"
-					v-model.number="width"
-					type="number"
-					min="0"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-			<el-form-item v-if="cornerRadius != null" label="Corner Radius">
-				<input
-					id="cornerRadius"
-					v-model.number="cornerRadius"
-					type="number"
-					min="0"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-		</el-form>
+	<panel-base :title="title" label-width="120px">
+		<el-form-item label="Color">
+			<el-color-picker
+				v-model="color"
+				show-alpha
+				@active-change="updateColor"
+				@change="updateValues"
+			/>
+		</el-form-item>
+		<el-form-item label="Line Width">
+			<input
+				v-model.number="width"
+				type="number"
+				min="0"
+				class="form-control"
+				@input="updateValues"
+			>
+		</el-form-item>
+		<el-form-item v-if="cornerRadius != null" label="Corner Radius">
+			<input
+				v-model.number="cornerRadius"
+				type="number"
+				min="0"
+				class="form-control"
+				@input="updateValues"
+			>
+		</el-form-item>
 	</panel-base>
 </template>
 

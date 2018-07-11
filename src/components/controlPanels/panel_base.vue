@@ -2,9 +2,9 @@
 	<div class="panel panel-template">
 		<h5>{{title}}</h5>
 		<div class="panel-body">
-			<form class="form-horizontal">
+			<el-form :label-width="labelWidth" label-position="left">
 				<slot />
-			</form>
+			</el-form>
 		</div>
 	</div>
 </template>
@@ -12,7 +12,15 @@
 <script>
 
 export default {
-	props: ['title']
+	props: ['title', 'labelWidth']
 };
 
 </script>
+
+<style scoped>
+
+.el-form >>> .el-form-item {
+	height: 48px;
+}
+
+</style>
