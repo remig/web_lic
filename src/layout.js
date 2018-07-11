@@ -316,7 +316,15 @@ const api = {
 		step.callouts.forEach(calloutID => {
 			const callout = store.get.callout(calloutID);
 			api.callout(callout, box);
-			_.geom.moveBoxEdge(box, 'left', callout.width + margin);
+			if (callout.position === 'left') {
+				_.geom.moveBoxEdge(box, 'left', callout.width + margin);
+			} else if (callout.position === 'right') {
+				_.geom.moveBoxEdge(box, 'right', -(callout.width + margin));
+			} else if (callout.position === 'top') {
+				_.geom.moveBoxEdge(box, 'top', callout.height + margin);
+			} else if (callout.position === 'bottom') {
+				_.geom.moveBoxEdge(box, 'bottom', -(callout.height + margin));
+			}
 		});
 
 		if (step.csiID == null && step.steps.length) {
@@ -489,45 +497,85 @@ const api = {
 		const borderWidth = store.state.template.callout.border.width;
 		const margin = getMargin(store.state.template.callout.innerMargin);
 		const calloutBox = {x: 0, y: 0, width: 0, height: margin};
+		const pos = callout.position;
+		const isOnSide = (pos === 'left' || pos === 'right');
 
 		callout.borderOffset.x = callout.borderOffset.y = 0;
 		const stepSizes = callout.steps.map(stepID => {
 			const step = store.get.step(stepID);
 			return {step, ...measureStep(step)};
 		});
-		const widestStep = Math.max(...stepSizes.map(el => el.width));
-		const stepBox = {x: margin, y: margin, width: widestStep, height: null};
-		calloutBox.width = margin + widestStep + margin;
 
-		const columns = [[]];
-		stepSizes.forEach((entry, idx) => {
-			if (idx > 0 && (borderWidth + stepBox.y + entry.height + margin + borderWidth > box.height)) {
-				// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
-				columns.push([]);
-				stepBox.y = margin;
-				stepBox.x += widestStep + margin;
-				calloutBox.width += widestStep + margin;
-			}
-			stepBox.height = entry.height;
-			columns[columns.length - 1].push({step: entry.step, box: _.clone(stepBox)});
-			api.step(entry.step, stepBox, 0);
-			stepBox.y += stepBox.height + margin;
-			calloutBox.height = Math.max(calloutBox.height, stepBox.y);
-		});
+		if (callout.layout === 'horizontal') {
+			const maxCalloutWidth = isOnSide ? box.width * 0.75 : box.width;  // TODO: should consider CSI width here
+			const tallestStep = Math.max(...stepSizes.map(el => el.height));
+			const stepBox = {x: margin, y: margin, width: null, height: tallestStep};
+			calloutBox.height = margin + tallestStep + margin;
 
-		// Increase vertical space between each row so all rows align nicely
-		const rows = _.transpose(columns);
-		rows.forEach(row => {
-			row = row.filter(el => el);
-			const maxY = Math.max(...row.map(c => c.box.y));
-			row.forEach(el => (el.step.y = maxY));
-		});
+			const rows = [[]];
+			stepSizes.forEach((entry, idx) => {
+				if (idx > 0 && (borderWidth + stepBox.x + entry.width + margin + borderWidth > maxCalloutWidth)) {
+					// Adding this step to the right of the box will make the box too wide to fit; wrap to next row
+					rows.push([]);
+					stepBox.x = margin;
+					stepBox.y += tallestStep + margin;
+					calloutBox.height += tallestStep + margin;
+				}
+				stepBox.width = entry.width;
+				rows[rows.length - 1].push({step: entry.step, box: _.clone(stepBox)});
+				api.step(entry.step, stepBox, 0);
+				stepBox.x += stepBox.width + margin;
+				calloutBox.width = Math.max(calloutBox.width, stepBox.x);
+			});
+
+			// Increase vertical space between each row so all rows align nicely
+			const cols = _.transpose(rows);
+			cols.forEach(col => {
+				col = col.filter(el => el);
+				const maxX = Math.max(...col.map(c => c.box.x));
+				col.forEach(el => (el.step.x = maxX));
+			});
+		} else {
+			const maxCalloutHeight = isOnSide ? box.height : box.height * 0.5;  // TODO: should consider CSI height here
+			const widestStep = Math.max(...stepSizes.map(el => el.width));
+			const stepBox = {x: margin, y: margin, width: widestStep, height: null};
+			calloutBox.width = margin + widestStep + margin;
+
+			const columns = [[]];
+			stepSizes.forEach((entry, idx) => {
+				if (idx > 0 && (borderWidth + stepBox.y + entry.height + margin + borderWidth > maxCalloutHeight)) {
+					// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
+					columns.push([]);
+					stepBox.y = margin;
+					stepBox.x += widestStep + margin;
+					calloutBox.width += widestStep + margin;
+				}
+				stepBox.height = entry.height;
+				columns[columns.length - 1].push({step: entry.step, box: _.clone(stepBox)});
+				api.step(entry.step, stepBox, 0);
+				stepBox.y += stepBox.height + margin;
+				calloutBox.height = Math.max(calloutBox.height, stepBox.y);
+			});
+
+			// Increase vertical space between each row so all rows align nicely
+			const rows = _.transpose(columns);
+			rows.forEach(row => {
+				row = row.filter(el => el);
+				const maxY = Math.max(...row.map(c => c.box.y));
+				row.forEach(el => (el.step.y = maxY));
+			});
+		}
 
 		callout.innerContentOffset = {x: borderWidth, y: borderWidth};
 		callout.width = borderWidth + calloutBox.width + borderWidth;
 		callout.height = borderWidth + calloutBox.height + borderWidth;
-		callout.x = box.x;
-		callout.y = box.y + ((box.height - callout.height) / 2);  // Center callout vertically
+		if (isOnSide) {
+			callout.x = (pos === 'left') ? box.x : box.x + box.width - callout.width;
+			callout.y = box.y + ((box.height - callout.height) / 2);  // Center callout vertically
+		} else {
+			callout.x = box.x + ((box.width - callout.width) / 2);  // Center callout horizontall
+			callout.y = (pos === 'top') ? box.y : box.y + box.height - callout.height;
+		}
 	},
 
 	calloutArrow(callout) {
@@ -538,28 +586,43 @@ const api = {
 		}
 
 		// Delete all but first & last point in first arrow
+		const calloutPos = callout.position;
+		const isOnSide = (calloutPos === 'left' || calloutPos === 'right');
 		const arrow = store.get.calloutArrow(callout.calloutArrows[0]);
-		arrow.direction = 'right';
+		arrow.direction = {left: 'right', top: 'down', right: 'left', bottom: 'up'}[calloutPos];
 		while (arrow.points.length > 2) {
 			store.mutations.item.delete({item: {type: 'point', id: arrow.points[1]}});
 		}
 
 		// Coordinates for first point (base) are relative to the *callout*
-		// Position on right edge of callout centered vertically on last step
+		// Position on edge of callout centered  on last step
 		const lastStep = callout.steps.length > 1 ? store.get.step(_.last(callout.steps)) : null;
 		const p1 = store.get.point(arrow.points[0]);
 		p1.relativeTo = {type: 'callout', id: callout.id};
-		p1.x = callout.borderOffset.x + callout.width;
-		p1.y = lastStep ? lastStep.y + (lastStep.height / 2) : callout.height / 2;
+
+		if (isOnSide) {
+			p1.x = (calloutPos === 'left') ? callout.borderOffset.x + callout.width : 0;
+			p1.y = lastStep ? lastStep.y + (lastStep.height / 2) : callout.height / 2;
+		} else {
+			p1.x = lastStep ? lastStep.x + (lastStep.width / 2) : callout.width / 2;
+			p1.y = (calloutPos === 'top') ? callout.borderOffset.y + callout.height : 0;
+		}
 
 		// Coordinates for last point (tip) are relative to the *CSI*
 		// TODO: try to position arrow tip centered to inserted part bounding box instead of overall CSI box
 		const step = store.get.step(callout.parent.id);
 		const csi = store.get.csi(step.csiID);
 		const p2 = store.get.point(arrow.points[1]);
+		const arrowSize = _.geom.arrow.head.length;  // p2 is arrow's base; move it to the left to make space for the arrow head
 		p2.relativeTo = {type: 'csi', id: csi.id};
-		p2.x = -_.geom.arrow.head.length;  // p2 is arrow's base; move it to the left to make space for the arrow head
-		p2.y = csi ? csi.height / 2 : 50;
+
+		if (isOnSide) {
+			p2.x = (calloutPos === 'left') ? -arrowSize : csi.width + arrowSize;
+			p2.y = csi ? csi.height / 2 : 50;
+		} else {
+			p2.x = csi ? csi.width / 2 : 50;
+			p2.y = (calloutPos === 'top') ? -arrowSize : csi.height + arrowSize;
+		}
 	},
 
 	subSteps(step, stepBox) {
@@ -676,7 +739,7 @@ const api = {
 	},
 
 	adjustBoundingBox: {
-		step(item) {
+		step() {
 			// Make step's bounding box tightly fit its content.  This makes it easier to manually layout content
 		},
 		// csi(item) {

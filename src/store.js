@@ -1203,7 +1203,8 @@ const store = {
 					x: null, y: null, width: null, height: null,
 					innerContentOffset: {x: 0, y: 0},
 					borderOffset: {x: 0, y: 0},
-					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
+					layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
+					position: 'left'
 				}, parent: opts.parent});
 
 				store.mutations.callout.addStep({callout, doLayout: false});
@@ -1235,6 +1236,14 @@ const store = {
 						x: null, y: null, width: null, height: null
 					}, parent: firstStep});
 				}
+				if (opts.doLayout) {
+					store.mutations.page.layout({page: store.get.pageForItem(callout)});
+				}
+			},
+			layout(opts) { // opts: {callout, layout, position, doLayout}
+				const callout = store.get.lookupToItem(opts.callout);
+				callout.layout = opts.layout || callout.layout;
+				callout.position = opts.position || callout.position;
 				if (opts.doLayout) {
 					store.mutations.page.layout({page: store.get.pageForItem(callout)});
 				}

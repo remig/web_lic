@@ -34,6 +34,9 @@ const api = {
 			if (!callout.hasOwnProperty('borderOffset')) {
 				callout.borderOffset = {x: 0, y: 0};
 			}
+			if (!callout.hasOwnProperty('position')) {
+				callout.position = 'left';
+			}
 		});
 
 		state.pliItems.forEach(pliItem => {

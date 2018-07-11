@@ -869,6 +869,53 @@ const contextMenu = {
 	},
 	callout: [
 		{
+			text: 'Position',
+			children: ['top', 'right', 'bottom', 'left'].map(position => {
+				return {
+					text: _.titleCase(position),
+					shown: (function(position) {
+						return function(selectedItem) {
+							const callout = store.get.lookupToItem(selectedItem);
+							return callout.position !== position;
+						};
+					})(position),
+					cb: (function(position) {
+						return function(selectedItem) {
+							const opts = {callout: selectedItem, position, doLayout: true};
+							undoStack.commit('callout.layout', opts, 'Set Callout Position');
+						};
+					})(position)
+				};
+			})
+		},
+		{
+			text: 'Layout',
+			children: [
+				{
+					text: 'Horizontal',
+					shown(selectedItem) {
+						const callout = store.get.lookupToItem(selectedItem);
+						return callout.layout !== 'horizontal';
+					},
+					cb(selectedItem) {
+						const opts = {callout: selectedItem, layout: 'horizontal', doLayout: true};
+						undoStack.commit('callout.layout', opts, this.text);
+					}
+				},
+				{
+					text: 'Vertical',
+					shown(selectedItem) {
+						const callout = store.get.lookupToItem(selectedItem);
+						return callout.layout !== 'vertical';
+					},
+					cb(selectedItem) {
+						const opts = {callout: selectedItem, layout: 'vertical', doLayout: true};
+						undoStack.commit('callout.layout', opts, this.text);
+					}
+				}
+			]
+		},
+		{
 			text: 'Add Step',
 			cb(selectedItem) {
 				undoStack.commit('callout.addStep', {callout: selectedItem, doLayout: true}, this.text);
@@ -877,10 +924,22 @@ const contextMenu = {
 		{
 			text: 'Position (NYI)',
 			children: [
-				{text: 'Top (NYI)', enabled() { return false; }},
-				{text: 'Right (NYI)', enabled() { return false; }},
-				{text: 'Bottom (NYI)', enabled() { return false; }},
-				{text: 'Left (NYI)', enabled() { return false; }}
+				{
+					text: 'Top',
+					enabled() { return false; }
+				},
+				{
+					text: 'Right',
+					enabled() { return false; }
+				},
+				{
+					text: 'Bottom',
+					enabled() { return false; }
+				},
+				{
+					text: 'Left',
+					enabled() { return false; }
+				}
 			]
 		},
 		{
