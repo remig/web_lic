@@ -1,22 +1,15 @@
 <template>
 	<panel-base :title="title">
-		<div class="form-group">
-			<label
-				for="borderColorInput"
-				class="control-label col-sm-7"
-			>
-				Color
-			</label>
-			<el-color-picker
-				v-model="color"
-				show-alpha
-				@active-change="updateColor"
-				@change="updateValues"
-			/>
-		</div>
-		<div class="form-group">
-			<label for="lineWidth" class="control-label col-sm-7">Line Width</label>
-			<div class="col-sm-5">
+		<el-form label-position="left" label-width="120px">
+			<el-form-item label="Color">
+				<el-color-picker
+					v-model="color"
+					show-alpha
+					@active-change="updateColor"
+					@change="updateValues"
+				/>
+			</el-form-item>
+			<el-form-item label="Line Width">
 				<input
 					id="lineWidth"
 					v-model.number="width"
@@ -25,11 +18,8 @@
 					class="form-control"
 					@input="updateValues"
 				>
-			</div>
-		</div>
-		<div v-if="cornerRadius != null" class="form-group">
-			<label for="cornerRadius" class="control-label col-sm-7">Corner Radius</label>
-			<div class="col-sm-5">
+			</el-form-item>
+			<el-form-item v-if="cornerRadius != null" label="Corner Radius">
 				<input
 					id="cornerRadius"
 					v-model.number="cornerRadius"
@@ -38,8 +28,8 @@
 					class="form-control"
 					@input="updateValues"
 				>
-			</div>
-		</div>
+			</el-form-item>
+		</el-form>
 	</panel-base>
 </template>
 

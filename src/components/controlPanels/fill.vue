@@ -1,28 +1,33 @@
 <template>
-	<panel-base :title="title">
-		<div class="form-group">
-			<label
-				for="fillColorInput"
-				class="control-label col-sm-5"
-			>
-				Color
-			</label>
-			<el-color-picker
-				id="fillColorInput"
-				v-model="color"
-				show-alpha
-				@active-change="updateColor"
-				@change="updateValues"
-			/>
-		</div>
-		<div v-if="gradient != null" class="form-group">
-			<label for="gradientInput" class="control-label col-sm-5">Gradient</label>
-			<label class="control-label">NYI</label>
-			<!-- <input v-model="gradient" v-on:input="updateValues" type="number" min="0" class="form-control" id="gradientInput"/> -->
-		</div>
-		<div v-if="imageFilename != null" class="form-group">
-			<label for="imageInput" class="control-label col-sm-5">
-				Image
+	<panel-base :title="title" class="fillTemplate">
+		<el-form label-position="left" label-width="80px">
+			<el-form-item label="Color">
+				<el-color-picker
+					id="fillColorInput"
+					v-model="color"
+					show-alpha
+					@active-change="updateColor"
+					@change="updateValues"
+				/>
+			</el-form-item>
+			<el-form-item v-if="gradient != null" label="Gradient">
+				<label class="el-form-item__label">NYI</label>
+				<!-- <input v-model="gradient" v-on:input="updateValues" type="number" min="0" class="form-control" id="gradientInput"/> -->
+			</el-form-item>
+			<el-form-item v-if="imageFilename != null" label="Image">
+				<el-button
+					v-if="imageFilename"
+					icon="el-icon-picture-outline"
+					class="tight"
+					@click="pickImage"
+				>
+					{{truncatedImageName}}
+				</el-button>
+				<el-button
+					v-else
+					icon="el-icon-picture-outline"
+					@click="pickImage"
+				/>
 				<el-button
 					v-if="imageFilename"
 					type="text"
@@ -31,21 +36,8 @@
 					size="small"
 					@click="removeImage"
 				/>
-			</label>
-			<el-button
-				v-if="imageFilename"
-				icon="el-icon-picture-outline"
-				class="tight"
-				@click="pickImage"
-			>
-				{{truncatedImageName}}
-			</el-button>
-			<el-button
-				v-else
-				icon="el-icon-picture-outline"
-				@click="pickImage"
-			/>
-		</div>
+			</el-form-item>
+		</el-form>
 	</panel-base>
 </template>
 
@@ -104,9 +96,23 @@ export default {
 	computed: {
 		truncatedImageName() {
 			const fn = this.imageFilename;
-			return (fn.length > 12) ? fn.substr(0, 8) + '...png' : fn;
+			return (fn.length > 12) ? fn.substr(0, 5) + '...png' : fn;
 		}
 	}
 };
 
 </script>
+
+<style>
+
+.fillTemplate .el-button+.el-button {
+	margin-left: unset;
+}
+
+.el-button.tight {
+	padding: 9px;
+	max-width: 110px;
+	overflow: hidden;
+}
+
+</style>

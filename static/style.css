@@ -144,10 +144,6 @@ div#container {
 	border-color: transparent;
 }
 
-.el-button.tight {
-	padding: 9px;
-}
-
 .el-button.template-close {
 	border: none;
 	padding: 0;
@@ -478,6 +474,10 @@ ul {
 
 .panel-template .btn-secondary strong {
 	font-weight: 800;
+}
+
+.panel-template .el-form-item {
+	margin-bottom: 0px;
 }
 
 /* Margin/Padding */
