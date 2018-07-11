@@ -119,7 +119,7 @@ const api = {
 		}
 
 		// Everything is in nice columns.
-		// Increase space between columns so they evenly fill the page width
+		// Increase horizontal space between columns so they evenly fill the page width
 		columns = columns.filter(el => el.length);
 		colWidth = box.width / columns.length;
 		columns.slice(1).forEach((col, idx) => {
@@ -128,7 +128,7 @@ const api = {
 			});
 		});
 
-		// Increase vertical space between items in the same column so they evenly fill the pag height
+		// Increase vertical space between items in the same column so they evenly fill the page height
 		columns.forEach(col => {
 			if (col.length < 2) {
 				return;
@@ -499,17 +499,28 @@ const api = {
 		const stepBox = {x: margin, y: margin, width: widestStep, height: null};
 		calloutBox.width = margin + widestStep + margin;
 
+		const columns = [[]];
 		stepSizes.forEach((entry, idx) => {
 			if (idx > 0 && (borderWidth + stepBox.y + entry.height + margin + borderWidth > box.height)) {
 				// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
+				columns.push([]);
 				stepBox.y = margin;
 				stepBox.x += widestStep + margin;
 				calloutBox.width += widestStep + margin;
 			}
 			stepBox.height = entry.height;
+			columns[columns.length - 1].push({step: entry.step, box: _.clone(stepBox)});
 			api.step(entry.step, stepBox, 0);
 			stepBox.y += stepBox.height + margin;
 			calloutBox.height = Math.max(calloutBox.height, stepBox.y);
+		});
+
+		// Increase vertical space between each row so all rows align nicely
+		const rows = _.transpose(columns);
+		rows.forEach(row => {
+			row = row.filter(el => el);
+			const maxY = Math.max(...row.map(c => c.box.y));
+			row.forEach(el => (el.step.y = maxY));
 		});
 
 		callout.innerContentOffset = {x: borderWidth, y: borderWidth};

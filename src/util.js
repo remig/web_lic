@@ -58,6 +58,17 @@ const api = {
 		}
 		return res;
 	},
+	transpose(array) {
+		const res = [];
+		const maxLength = Math.max(...array.map(el => el.length));
+		for (let i = 0; i < maxLength; i++) {
+			res.push([]);
+			for (let j = 0; j < array.length; j++) {
+				res[i].push((array[j] || [])[i]);
+			}
+		}
+		return res;
+	},
 	count(array, serach) {
 		let count = 0;
 		for (let i = 0; i < array.length; i++) {
