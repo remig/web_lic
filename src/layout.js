@@ -202,7 +202,8 @@ const api = {
 			api.step(store.get.step(page.steps[i]), box);
 		}
 
-		if (stepCount < (rows * cols)) {  // Have fewer steps than fit in the grid; expand steps in last row / col to fill empty cell
+		if (stepCount < (rows * cols)) {
+			// Have fewer steps than fit in the grid; expand steps in last row / col to fill empty cell
 			const emptySlots = (rows * cols) - stepCount;
 			if (layoutDirection === 'vertical') {
 				const stepsInLastCol = rows - emptySlots;
@@ -268,19 +269,18 @@ const api = {
 		}
 	},
 
-	step(step, box, pageMargin) {  // Starting with a pre-defined box, layout everything in this step inside it
+	step(step, box, pageMargin) {
+		// Starting with a pre-defined box, layout everything in this step inside it
+		let template = store.state.template;
+		template = (step.parent.type === 'callout') ? template.callout.step : template.step;
 		pageMargin = (pageMargin == null) ? getMargin(store.state.template.page.innerMargin) : pageMargin;
-		const margin = getMargin(store.state.template.step.innerMargin);
+		const margin = getMargin(template.innerMargin);
 
-		if (box == null) {
-			box = {};  // If no box is provided, assume step is already sized and positioned correctly, and only layout step children
-		} else {
-			// Position step in parent coordinates
-			step.x = box.x + pageMargin;
-			step.y = box.y + pageMargin;
-			step.width = box.width - pageMargin - pageMargin;
-			step.height = box.height - pageMargin - pageMargin;
-		}
+		// Position step in parent coordinates
+		step.x = box.x + pageMargin;
+		step.y = box.y + pageMargin;
+		step.width = box.width - pageMargin - pageMargin;
+		step.height = box.height - pageMargin - pageMargin;
 
 		// transform box to step coordinates
 		box = _.clone(box);
@@ -304,7 +304,7 @@ const api = {
 		}
 
 		if (step.numberLabelID != null) {
-			const lblSize = _.measureLabel(store.state.template.step.numberLabel.font, step.number);
+			const lblSize = _.measureLabel(template.numberLabel.font, step.number);
 			const lbl = store.get.numberLabel(step.numberLabelID);
 			lbl.x = 0;
 			lbl.y = box.y;
@@ -479,7 +479,7 @@ const api = {
 		const lblSize = _.measureLabel(font, 'x' + pliItem.quantity);
 		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 		quantityLabel.x = -qtyLabelOffset;
-		quantityLabel.y = pliSize.height - qtyLabelOffset;
+		quantityLabel.y = pliSize.height;
 		quantityLabel.width = lblSize.width;
 		quantityLabel.height = lblSize.height;
 	},

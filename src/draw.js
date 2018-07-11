@@ -250,10 +250,11 @@ const api = {
 		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 		ctx.fillStyle = template.color;
 		ctx.font = template.font;
+		ctx.textBaseline = quantityLabel.valign || 'top';
 		ctx.fillText(
 			'x' + pliItem.quantity,
 			pliItem.x + quantityLabel.x,
-			pliItem.y + quantityLabel.y + quantityLabel.height
+			pliItem.y + quantityLabel.y
 		);
 	},
 
@@ -429,7 +430,9 @@ const api = {
 				const y = Math.floor(annotation.y);
 				ctx.fillStyle = annotation.color || 'black';
 				ctx.font = annotation.font || 'bold 20pt Helvetica';
-				ctx.fillText(annotation.text, x, y + annotation.height);
+				ctx.align = annotation.align || 'left';
+				ctx.textBaseline = annotation.valign || 'alphabetic';
+				ctx.fillText(annotation.text, x, y);
 			},
 
 			arrow(annotation, ctx) {

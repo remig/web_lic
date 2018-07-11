@@ -440,7 +440,8 @@ const store = {
 				return moveableItems.includes(item.type);
 			};
 		})(),
-		prev(item, itemList) {  // Get the previous item in the specified item's list, based on item.number and matching parent types
+		prev(item, itemList) {
+			// Get the previous item in the specified item's list, based on item.number and matching parent types
 			item = store.get.lookupToItem(item);
 			itemList = itemList || store.state[item.type + 's'];
 			const idx = itemList.findIndex(el => {
@@ -448,7 +449,8 @@ const store = {
 			});
 			return (idx < 0) ? null : itemList[idx];
 		},
-		next(item, itemList) {  // Get the next item in the specified item's list, based on item.number and matching parent types
+		next(item, itemList) {
+			// Get the next item in the specified item's list, based on item.number and matching parent types
 			item = store.get.lookupToItem(item);
 			itemList = itemList || store.state[item.type + 's'];
 			const idx = itemList.findIndex(el => {
@@ -617,10 +619,6 @@ const store = {
 			}
 			if (t.valign === 'bottom') {
 				box.y -= box.height;
-			} else if (t.valign === 'top') {
-				box.y += 5;
-			} else if (t.valign === 'hanging') {
-				box.y -= 5;
 			}
 			while (t) {
 				if (t.relativeTo) {
@@ -1018,7 +1016,7 @@ const store = {
 				if (opts.stepNumber != null) {
 					store.mutations.item.add({item: {
 						type: 'numberLabel',
-						align: 'left', valign: 'hanging',
+						align: 'left', valign: 'top',
 						x: null, y: null, width: null, height: null
 					}, parent: step});
 				}

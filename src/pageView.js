@@ -503,11 +503,12 @@ function itemHighlightBox(selItem, pageSize) {
 			box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
 		}
 	}
+	const pad = 2;
 	return {
-		x: box.x - 4,
-		y: box.y - 4,
-		width: 4 + box.width + 4,
-		height: 4 + box.height + 4
+		x: box.x - pad,
+		y: box.y - pad,
+		width: pad + box.width + pad - 1,
+		height: pad + box.height + pad - 1
 	};
 }
 
