@@ -48,18 +48,14 @@
 
 import _ from '../../util';
 import store from '../../store';
-import panelBase from './panel_base.vue';
+import PanelBase from './panel_base.vue';
 
-// TODO: support underlining fonts in general
-// TODO: font styling buttons (bold, italic, underline) need to toggle
 export default {
-	components: {panelBase},
+	components: {PanelBase},
 	props: ['templateEntry'],
 	data() {
 		const template = _.get(this.templateEntry, store.state.template);
-		this.templateItem = _.clone({});
 		return {
-			templateItem: null,
 			x: template.rotation.x,
 			y: template.rotation.y,
 			z: template.rotation.z,

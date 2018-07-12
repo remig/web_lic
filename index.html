@@ -550,120 +550,16 @@
 	</script>
 
 	<!-- Template Page Components -->
-	<script type="text/x-template" id="fillAndBorderTemplatePanel">
-		<div>
-			<fill-panel
-				:template-entry="templateEntry"
-				v-on:new-values="newValues"
-			></fill-panel>
-			<border-panel
-				:template-entry="templateEntry"
-				v-on:new-values="newValues"
-			></border-panel>
-		</div>
-	</script>
-
-	<script type="text/x-template" id="pageNumberTemplatePanel">
-		<div>
-			<div class="panel panel-template">
-				<h5>Position</h5>
-				<div class="panel-body">
-					<form class="form-horizontal">
-						<div class="form-group">
-							<div class="col-sm-10">
-								<el-select
-									:value="position | prettyPrint"
-									@change="updatePosition"
-									id="pageNumberPosition"
-								>
-									<el-option
-										v-for="position in positions"
-										:key="position"
-										:value="position"
-									>
-										{{position | prettyPrint}}
-									</el-option>
-								</el-select>
-							</div>
-						</div>
-					</form>
-				</div>
-			</div>
-			<font-panel
-				template-entry="page.numberLabel"
-				v-on:new-values="newValues"
-				ref="fontTemplatePanel"
-			></font-panel>
-		</div>
-	</script>
-
-	<script type="text/x-template" id="pliTemplatePanel">
-		<div>
-			<div class="panel panel-template">
-				<div class="panel-body">
-					<form class="form-horizontal">
-						<el-checkbox
-							v-model="includeSubmodels"
-							@change="updateValues"
-						>
-							Include Submodels in PLI
-						</el-checkbox>
-					</form>
-				</div>
-			</div>
-			<fill-panel
-				template-entry="pli"
-				v-on:new-values="newValues"
-			></fill-panel>
-			<border-panel
-				template-entry="pli"
-				v-on:new-values="newValues"
-			></border-panel>
-		</div>
-	</script>
-
-	<script type="text/x-template" id="csiTemplatePanel">
-		<div>
-			<transform-panel
-				:template-entry="transformType"
-				v-on:new-values="newValues"
-			></transform-panel>
-			<fill-panel
-				template-entry="step.csi.displacementArrow"
-				title="Displacement Arrow Color"
-				v-on:new-values="newArrowStyle"
-			></fill-panel>
-			<!-- <border-panel title="Displacement Arrow Border" v-on:new-values="newArrowStyle"></border-panel> -->
-		</div>
-	</script>
-
-	<script type="text/x-template" id="rotateIconTemplatePanel">
-		<div>
-			<fill-panel
-				template-entry="rotateIcon"
-				v-on:new-values="newValues"
-			></fill-panel>
-			<border-panel
-				template-entry="rotateIcon"
-				v-on:new-values="newValues"
-			></border-panel>
-			<border-panel
-				template-entry="rotateIcon.arrow"
-				v-on:new-values="newValues"
-				title="Arrow"
-			></border-panel>
-		</div>
-	</script>
-
 	<script type="text/x-template" id="templatePanel">
 		<div @click.stop="" class="container">
 			<h4>{{selectedItem ? selectedItem.type : 'Select a Page Item' | prettyPrint}}</h4>
 			<div class="panel-group">
 				<component
-					:is="currentTemplatePanel"
 					ref="currentTemplatePanel"
-					v-on:new-values="newValues"
+					:is="currentTemplatePanel"
 					:selected-item="selectedItem"
+					:template-entry="templateEntry"
+					@new-values="newValues"
 				></component>
 			</div>
 		</div>

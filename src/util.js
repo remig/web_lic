@@ -327,6 +327,7 @@ const api = {
 	},
 	prettyPrint(s) {  // Human readable versions of common internal strings
 		s = s + '';
+		s = s.replace(/\./g, ' ');  // Some strings come in as foo.bar; replace extraneous dots with spaces
 		switch (s.toLowerCase()) {
 			case 'submodelimage':
 				return 'Submodel Image';

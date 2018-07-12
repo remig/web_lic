@@ -4,190 +4,39 @@
 import _ from './util';
 import store from './store';
 import undoStack from './undoStack';
-import fillPanel from './components/controlPanels/fill.vue';
 import borderPanel from './components/controlPanels/border.vue';
 import fontPanel from './components/controlPanels/font.vue';
-import transformPanel from './components/controlPanels/transform.vue';
+import fillAndBorderTemplatePanel from './components/controlPanels/fill_border.vue';
 import pageTemplatePanel from './components/controlPanels/page_template.vue';
-
-function applyDirtyAction(entryType) {
-	store.mutations[entryType].markAllDirty();
-	store.state.pages.forEach(page => (page.needsLayout = true));
-	store.state.templatePage.needsLayout = true;
-	const text = `Change ${_.prettyPrint(entryType)} Template`;
-	undoStack.commit('', null, text, [entryType]);
-}
-
-function fillAndBorderTemplatePanel(templateEntry) {
-	return {
-		template: '#fillAndBorderTemplatePanel',
-		data() {
-			return {templateEntry};
-		},
-		components: {
-			fillPanel,
-			borderPanel
-		},
-		methods: {
-			newValues() {
-				this.$emit('new-values', templateEntry);
-			}
-		}
-	};
-}
-
-function csiTemplatePanel(transformType) {
-	return {
-		template: '#csiTemplatePanel',
-		props: ['selectedItem'],
-		data() {
-			return {transformType};
-		},
-		components: {
-			transformPanel,
-			fillPanel
-		},
-		methods: {
-			apply() {
-				applyDirtyAction('csi');
-			},
-			newArrowStyle() {
-				store.get.csi(this.selectedItem).isDirty = true;
-				this.$emit('new-values', 'CSI');
-			},
-			newValues() {
-				store.get.csi(this.selectedItem).isDirty = true;
-				this.$emit('new-values', {type: 'CSI', noLayout: true});
-			}
-		}
-	};
-}
-
-const pliItemTemplatePanel = {
-	props: ['selectedItem'],
-	render(createElement) {
-		return createElement(
-			transformPanel,
-			{
-				props: {templateEntry: 'pliItem'},
-				on: {'new-values': this.newValues}
-			}
-		);
-	},
-	methods: {
-		apply() {
-			applyDirtyAction('pliItem');
-		},
-		newValues() {
-			const pli = store.get.parent(this.selectedItem);
-			pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
-			this.$emit('new-values', 'PLIItem');
-		}
-	}
-};
-
-const pliTemplatePanel = {
-	template: '#pliTemplatePanel',
-	data() {
-		return {
-			includeSubmodels: store.state.template.pli.includeSubmodels
-		};
-	},
-	components: {
-		fillPanel,
-		borderPanel
-	},
-	methods: {
-		newValues() {
-			this.$emit('new-values', 'PLI');
-		},
-		updateValues() {
-			const template = store.state.template.pli;
-			if (this.includeSubmodels !== template.includeSubmodels) {
-				template.includeSubmodels = this.includeSubmodels;
-				this.$emit('new-values', {type: 'PLI'});
-			}
-		}
-	}
-};
-
-const pageNumberTemplatePanel = {
-	template: '#pageNumberTemplatePanel',
-	data() {
-		return {
-			position: store.state.template.page.numberLabel.position,
-			positions: ['right', 'left', 'even-left', 'even-right']
-		};
-	},
-	components: {
-		fontPanel
-	},
-	methods: {
-		updatePosition(newPosition) {
-			store.state.template.page.numberLabel.position = this.position = newPosition;
-			this.newValues();
-		},
-		newValues() {
-			this.$emit('new-values', 'Page Number');
-		}
-	}
-};
-
-const rotateIconTemplatePanel = {
-	template: '#rotateIconTemplatePanel',
-	components: {
-		fillPanel,
-		borderPanel
-	},
-	methods: {
-		newValues() {
-			this.$emit('new-values', 'Rotate Icon');
-		}
-	}
-};
-
-function createBasicPanel(templateType, templateEntry, undoText) {
-	return {
-		render(createElement) {
-			return createElement(
-				templateType,
-				{
-					props: {templateEntry},
-					on: {'new-values': this.newValues}
-				}
-			);
-		},
-		methods: {
-			newValues() {
-				this.$emit('new-values', undoText);
-			}
-		}
-	};
-}
+import csiTemplatePanel from './components/controlPanels/csi_template.vue';
+import pliTemplatePanel from './components/controlPanels/pli_template.vue';
+import pliItemTemplatePanel from './components/controlPanels/pli_item_template.vue';
+import pageNumberTemplatePanel from './components/controlPanels/page_number.vue';
+import rotateIconTemplatePanel from './components/controlPanels/rotate_icon_template.vue';
 
 const templatePageComponentLookup = {
 	templatePage: pageTemplatePanel,
 	csi: {
-		step: csiTemplatePanel('step.csi'),
-		submodelImage: csiTemplatePanel('submodelImage.csi')
+		step: [csiTemplatePanel, 'step.csi'],
+		submodelImage: [csiTemplatePanel, 'submodelImage.csi']
 	},
 	pliItem: pliItemTemplatePanel,
 	pli: pliTemplatePanel,
-	callout: fillAndBorderTemplatePanel('callout'),
-	calloutArrow: createBasicPanel(borderPanel, 'callout.arrow', 'Callout Arrow'),
-	submodelImage: fillAndBorderTemplatePanel('submodelImage'),
-	divider: createBasicPanel(borderPanel, 'divider', 'Divider'),
+	callout: [fillAndBorderTemplatePanel, 'callout'],
+	calloutArrow: [borderPanel, 'callout.arrow'],
+	submodelImage: [fillAndBorderTemplatePanel, 'submodelImage'],
+	divider: [borderPanel, 'divider'],
 	rotateIcon: rotateIconTemplatePanel,
 	numberLabel: {
 		templatePage: pageNumberTemplatePanel,
 		step: {
-			callout: createBasicPanel(fontPanel, 'callout.step.numberLabel', 'Step Label'),
-			default: createBasicPanel(fontPanel, 'step.numberLabel', 'Step Label')
+			callout: [fontPanel, 'callout.step.numberLabel'],
+			default: [fontPanel, 'step.numberLabel']
 		}
 	},
 	quantityLabel: {
-		submodelImage: createBasicPanel(fontPanel, 'submodelImage.quantityLabel', 'Submodel Label'),
-		pliItem: createBasicPanel(fontPanel, 'pliItem.quantityLabel', 'PLI Label')
+		submodelImage: [fontPanel, 'submodelImage.quantityLabel'],
+		pliItem: [fontPanel, 'pliItem.quantityLabel']
 	}
 };
 
@@ -198,7 +47,7 @@ Vue.component('templatePanel', {
 	template: '#templatePanel',
 	props: ['selectedItem', 'app'],
 	data() {
-		return {lastEdit: null};
+		return {lastEdit: null, templateEntry: null};
 	},
 	watch: {
 		selectedItem() {
@@ -226,6 +75,13 @@ Vue.component('templatePanel', {
 				}
 				this.lastEdit = null;
 			}
+		},
+		applyDirtyAction(entryType) {
+			store.mutations[entryType].markAllDirty();
+			store.state.pages.forEach(page => (page.needsLayout = true));
+			store.state.templatePage.needsLayout = true;
+			const text = `Change ${_.prettyPrint(entryType)} Template`;
+			undoStack.commit('', null, text, [entryType]);
 		}
 	},
 	computed: {
@@ -233,7 +89,7 @@ Vue.component('templatePanel', {
 			if (!this.selectedItem) {
 				return null;
 			}
-			let componentLookup;
+			let componentLookup, res;
 			const page = store.get.pageForItem(this.selectedItem);
 			if (store.get.isTemplatePage(page)) {
 				componentLookup = templatePageComponentLookup;
@@ -246,13 +102,20 @@ Vue.component('templatePanel', {
 				const grandparent = store.get.parent(parent);
 				if (parent && parent.type in componentLookup[type]) {
 					if (grandparent && grandparent.type in componentLookup[type][parent.type]) {
-						return componentLookup[type][parent.type][grandparent.type];
+						res = componentLookup[type][parent.type][grandparent.type];
 					} else if (componentLookup[type][parent.type].default) {
-						return componentLookup[type][parent.type].default;
+						res = componentLookup[type][parent.type].default;
+					} else {
+						res = componentLookup[type][parent.type];
 					}
-					return componentLookup[type][parent.type];
+				} else {
+					res = componentLookup[type];
 				}
-				return componentLookup[type];
+				if (Array.isArray(res)) {
+					this.templateEntry = res[1];  // eslint-disable-line vue/no-side-effects-in-computed-properties
+					return res[0];
+				}
+				return res;
 			}
 			return null;
 		}
