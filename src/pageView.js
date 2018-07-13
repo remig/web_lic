@@ -25,8 +25,10 @@ Vue.component('pageView', {
 	render(createElement) {
 
 		let pageIDsToDraw;
-		const pageWidth = this.pageSize.width, pageHeight = this.pageSize.height;
-		const scrolling = this.isScrollingView, facing = this.isFacingView;
+		const pageWidth = this.pageSize.width;
+		const pageHeight = this.pageSize.height;
+		const scrolling = this.isScrollingView;
+		const facing = this.isFacingView;
 
 		function renderOnePage(idx, pageLookup, locked) {
 
@@ -492,8 +494,9 @@ function itemHighlightBox(selItem, pageSize) {
 	}
 	let box;
 	if (type && type.toLowerCase().endsWith('page')) {
-		box = {x: 6, y: 6, width: pageSize.width - 10, height: pageSize.height - 10};
+		box = {x: 5, y: 5, width: pageSize.width - 9, height: pageSize.height - 9};
 	} else if (type === 'divider') {
+		// TODO: when divider is rewritten to just a list of points, get rid of this
 		let pointBox = _.geom.bbox([selItem.p1, selItem.p2]);
 		pointBox = _.geom.expandBox(pointBox, 8, 8);
 		box = store.get.targetBox({...selItem, ...pointBox});

@@ -10,7 +10,8 @@ div#container {
 }
 
 /* TODO: if nav tree is too narrow, menu entries wrap; should put up scroll bar instead */
-/* TODO: Add checkbox to 'selected' menu entries, like the currently selected view entry */
+/* TODO: page layout is broken for facing pages on a small monitor: scroll bar doesn't scroll all the way left */
+/* TODO: grid customization dialog is ugly */
 
 /* Overwrite Bootstrap stuff */
 .navbar {

@@ -17,6 +17,7 @@ import pdfExportDialog from './dialogs/export_pdf.vue';
 let app;
 const tr = LocaleManager.translate;
 
+// TODO: Add checkbox to 'selected' menu entries, like the currently selected view entry
 Vue.component('menu-list', {
 	template: '#menuTemplate',
 	props: ['menuEntries', 'selectedItem'],

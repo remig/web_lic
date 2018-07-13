@@ -14,7 +14,7 @@ import pliItemTemplatePanel from './components/controlPanels/pli_item_template.v
 import pageNumberTemplatePanel from './components/controlPanels/page_number.vue';
 import rotateIconTemplatePanel from './components/controlPanels/rotate_icon_template.vue';
 
-const templatePageComponentLookup = {
+const componentLookup = {
 	templatePage: pageTemplatePanel,
 	csi: {
 		step: [csiTemplatePanel, 'step.csi'],
@@ -38,9 +38,6 @@ const templatePageComponentLookup = {
 		submodelImage: [fontPanel, 'submodelImage.quantityLabel'],
 		pliItem: [fontPanel, 'pliItem.quantityLabel']
 	}
-};
-
-const pageComponentLookup = {
 };
 
 Vue.component('templatePanel', {
@@ -89,13 +86,7 @@ Vue.component('templatePanel', {
 			if (!this.selectedItem) {
 				return null;
 			}
-			let componentLookup, res;
-			const page = store.get.pageForItem(this.selectedItem);
-			if (store.get.isTemplatePage(page)) {
-				componentLookup = templatePageComponentLookup;
-			} else {
-				componentLookup = pageComponentLookup;
-			}
+			let res;
 			const type = this.selectedItem.type;
 			if (type in componentLookup) {
 				const parent = store.get.parent(this.selectedItem);
