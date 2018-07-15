@@ -82,7 +82,7 @@ const api = {
 		if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
 			return false;
 		}
-		for (var i = 0; i < a.length; i++) {
+		for (let i = 0; i < a.length; i++) {
 			if (a[i] !== b[i]) {
 				return false;
 			}
@@ -143,10 +143,10 @@ const api = {
 				fontStyle: '', fontVariant: '', fontWeight: '',
 				fontStretch: '', fontSize: '', fontFamily: []
 			};
-			var haveFontSize = false;
+			let haveFontSize = false;
 			font = (font || '') + '';
 
-			var fontParts = font.split(/ (?=(?:[^'"]|'[^']*'|"[^"]*")*$)/);
+			const fontParts = font.split(/ (?=(?:[^'"]|'[^']*'|"[^"]*")*$)/);
 			fontParts.map(el => {
 				if (!el || typeof el !== 'string') {
 					return;
@@ -362,29 +362,42 @@ const api = {
 		return api.titleCase(s);
 	},
 	color: {
-		toRGB(color) {
-			// Browser quirk: set an element's color to any color string at all, then getComputedStyle.color will
-			// return that same color as rgb() or rgba().  Greatly reduces the number of color strings to parse.
-			var parent = document.getElementById('offscreenCache');
-			parent.setAttribute('style', 'color: black;');  // Set parent to black so that any invalid colors set on child will inherit this color
-
-			var div = document.getElementById('openFileChooser');
-			div.setAttribute('style', 'color: ' + color);
-
-			let rgb = window.getComputedStyle(div).color;
-			rgb = rgb.match(/[a-z]+\((.*)\)/i)[1].split(',').map(parseFloat);
-
-			const res = {r: rgb[0], g: rgb[1], b: rgb[2]};
-			if (rgb.length > 3) {
-				res.a = rgb[3];
-			}
-			res.toString = function() {
-				return (this.a == null)
-					? `rgb(${this.r}, ${this.g}, ${this.b})`
-					: `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+		toRGB: (() => {
+			const rgbLookupCache = {
+				'#000000': [0, 0, 0]
 			};
-			return res;
-		},
+			return function(color) {
+				let rgb;
+				if (rgbLookupCache[color]) {
+					rgb = rgbLookupCache[color];
+				} else {
+					// Browser quirk: set an element's color to any color string at all,
+					// then getComputedStyle.color will return that same color as rgb() or rgba().
+					// Greatly reduces the number of color strings to parse.
+					const parent = document.getElementById('offscreenCache');
+
+					// Set parent to black so that any invalid colors set on child will inherit this color
+					parent.setAttribute('style', 'color: black;');
+
+					const div = document.getElementById('openFileChooser');
+					div.setAttribute('style', 'color: ' + color);
+					rgb = window.getComputedStyle(div).color;
+					rgb = rgb.match(/[a-z]+\((.*)\)/i)[1].split(',').map(parseFloat);
+					rgbLookupCache[color] = rgb;
+				}
+
+				const res = {r: rgb[0], g: rgb[1], b: rgb[2]};
+				if (rgb.length > 3) {
+					res.a = rgb[3];
+				}
+				res.toString = function() {
+					return (this.a == null)
+						? `rgb(${this.r}, ${this.g}, ${this.b})`
+						: `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+				};
+				return res;
+			};
+		})(),
 		luma(color) {
 			color = api.color.toRGB(color);
 			return (0.2126 * Math.pow(color.r / 255, 2.2))
@@ -406,7 +419,9 @@ const api = {
 		}
 	},
 	isBorderVisible(border) {
-		if (!border || !border.width || border.width < 1 || !border.color || typeof border.color !== 'string') {
+		if (!border || !border.width || border.width < 1 ||
+			!border.color || typeof border.color !== 'string'
+		) {
 			return false;
 		}
 		return api.color.isVisible(border.color);
