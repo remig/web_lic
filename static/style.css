@@ -11,7 +11,11 @@ div#container {
 
 /* TODO: if nav tree is too narrow, menu entries wrap; should put up scroll bar instead */
 /* TODO: page layout is broken for facing pages on a small monitor: scroll bar doesn't scroll all the way left */
+/* TODO: scrolling views do not center clicked page on small screens */
 /* TODO: grid customization dialog is ugly */
+/* TODO: If context menu pops up partially off screen, scroll bars are added; they shouldn't be */
+/* TODO: Nav tree top button should *not* scroll */
+/* TODO: When selected item changes, nav tree should auto-scroll so selected item is in view */
 
 /* Overwrite Bootstrap stuff */
 .navbar {
@@ -321,10 +325,6 @@ ul {
 
 .oddNumberedPage {
 	margin-left: 40px;
-}
-
-.multipleEntries {
-	margin-top: 30px;
 }
 
 .pageContainer {

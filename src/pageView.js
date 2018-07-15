@@ -8,6 +8,7 @@ import undoStack from './undoStack';
 import uiState from './uiState';
 import Guide from './components/guide.vue';
 
+const multiPagePadding = 30;
 Vue.component('pageView', {
 	props: ['app', 'selectedItem', 'currentPageLookup'],
 	data() {
@@ -93,12 +94,10 @@ Vue.component('pageView', {
 				{
 					class: [
 						'pageContainer',
-						{
-							multipleEntries: scrolling,
-							oddNumberedPage: facing && !_.isEven(idx)
-						}
+						{oddNumberedPage: facing && !_.isEven(idx)}
 					],
 					style: {
+						marginTop: scrolling ? multiPagePadding + 'px' : null,
 						visibility: (pageLookup == null) ? 'hidden' : null
 					}
 				},
@@ -147,8 +146,8 @@ Vue.component('pageView', {
 		});
 
 		if (scrolling) {
-			// Pad the first & last pages so they show up in the center of the screen when scrolled all the way
-			const style = {style: {height: getPageOffset() - 30 + 'px'}};
+			// Pad first & last pages so they're centered in the screen when scrolled all the way
+			const style = {style: {height: getPageOffset() - multiPagePadding + 'px'}};
 			containerList.unshift(createElement('div', style));
 			containerList.push(createElement('div', style));
 		}
@@ -164,42 +163,33 @@ Vue.component('pageView', {
 			containerList
 		);
 
+		const handlers = {
+			mousedown: this.mouseDown,
+			mousemove: this.mouseMove,
+			mouseup: this.mouseUp
+		};
+		if (scrolling) {
+			handlers.scroll = this.drawVisiblePages;
+		}
+
 		return createElement(
 			'div',
 			{
 				class: {singleEntry: !scrolling},
 				attrs: {id: 'rightSubPane'},
-				on: {
-					mousedown: this.mouseDown,
-					mousemove: this.mouseMove,
-					mouseup: this.mouseUp,
-					scroll: this.handleScroll
-				}
+				on: handlers
 			},
 			[subRoot]
 		);
 	},
 	watch: {
-		selectedItem(newItem, prevItem) {
-			const prevPage = store.get.pageForItem(prevItem);
+		selectedItem(newItem) {
 			const newPage = store.get.pageForItem(newItem);
-			if (prevPage && (!newPage || !_.itemEq(prevPage, newPage))) {
-				this.drawPage(prevPage);
-			}
 			if (newPage) {
-				this.drawPage(newPage);
 				this.scrollToPage(newPage);
+			} else {
+				this.drawVisiblePages();
 			}
-		},
-		currentPageLookup(newPage, prevPage) {
-			Vue.nextTick(() => {
-				if (this.scroll && prevPage && prevPage.type === 'templatePage') {
-					// When switching from template's single-page view to scrolling multi-page view, need to reset all pages, as they're blank
-					store.mutations.page.setDirty();
-				}
-				this.drawCurrentPage();
-				this.scrollToPage(newPage);
-			});
 		}
 	},
 	methods: {
@@ -212,14 +202,13 @@ Vue.component('pageView', {
 			const latestPageCount = store.get.pageCount(true);
 			if (this.pageCount !== latestPageCount) {
 				this.pageCount = latestPageCount;
-				store.mutations.page.setDirty();
 			}
 
 			this.pageLockStatus = [];
 			store.state.pages.forEach(page => (this.pageLockStatus[page.id] = page.locked));
 
 			Vue.nextTick(() => {
-				this.drawCurrentPage();
+				this.drawVisiblePages();
 			});
 		},
 		mouseDown(e) {
@@ -227,7 +216,8 @@ Vue.component('pageView', {
 				return;
 			}
 
-			// Record mouse down pos so we can check if mouse up is close enough to down to trigger a 'click' for selection
+			// Record mouse down pos so we can check if mouse up is close enough to
+			// down to trigger a 'click' for selection
 			this.mouseDownPt = {x: e.offsetX, y: e.offsetY};
 			if (e.target.className.includes('guide')) {
 				this.mouseDragItem = {
@@ -237,8 +227,11 @@ Vue.component('pageView', {
 				};
 			} else if (this.selectedItem) {
 				const item = store.get.lookupToItem(this.selectedItem);
-				if (item && store.get.isMoveable(item) && inHighlightBox(e.offsetX, e.offsetY, item, this.pageSize)) {
-					// If mouse down is inside a selected item, store item & down pos in case mouse move follows, to support dragging items
+				if (item && store.get.isMoveable(item)
+					&& inHighlightBox(e.offsetX, e.offsetY, item, this.pageSize)
+				) {
+					// If mouse down is inside a selected item, store item & down pos in case mouse
+					// move follows, to support dragging items
 					this.mouseDragItem = {item, x: e.screenX, y: e.screenY};
 				}
 			}
@@ -247,7 +240,9 @@ Vue.component('pageView', {
 			if (e.buttons !== 1) {
 				return;
 			}
-			if (!this.mouseDragItem || (e.target.nodeName !== 'CANVAS' && !e.target.className.includes('guide'))) {
+			if (!this.mouseDragItem
+				|| (e.target.nodeName !== 'CANVAS' && !e.target.className.includes('guide'))
+			) {
 				return;
 			}
 			const dx = Math.floor(e.screenX - this.mouseDragItem.x);
@@ -256,13 +251,14 @@ Vue.component('pageView', {
 				return;
 			}
 			if (this.mouseDragItem.guide) {
-				// TODO: transient bug: sometimes dragging a guide will put up the 'stop error cursor' and stop all mouse movements...
+				// TODO: transient bug: sometimes dragging a guide will put up the 'stop error cursor'
+				// and stop all mouse movements...
 				this.mouseDragItem.guide.moveBy(dx, dy);
 			} else {
 				// TODO: Update parent bounding boxes for children like CSI, submodel, etc
 				store.mutations.item.reposition({item: this.mouseDragItem.item, dx, dy});
 				this.mouseDragItem.moved = true;
-				this.drawCurrentPage();
+				this.drawVisiblePages();
 			}
 			this.mouseDragItem.x = e.screenX;
 			this.mouseDragItem.y = e.screenY;
@@ -272,8 +268,10 @@ Vue.component('pageView', {
 				return;
 			}
 			const up = {x: e.offsetX, y: e.offsetY};
-			if (this.mouseDownPt && _.geom.distance(this.mouseDownPt, up) < 10 && e.target.nodeName === 'CANVAS') {
-				// If simple mouse down + mouse up with very little movement, handle as if 'click' for selection
+			if (this.mouseDownPt && _.geom.distance(this.mouseDownPt, up) < 10
+				&& e.target.nodeName === 'CANVAS'
+			) {
+				// If mouse down + mouse up with very little movement, handle as if 'click' for selection
 				const page = getPageForCanvas(e.target);
 				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
 				if (target) {
@@ -323,101 +321,77 @@ Vue.component('pageView', {
 				this.app.setCurrentPage(nextPage);
 			}
 		},
-		handleScroll() {
-			if (!this.isScrollingView) {
-				return;
-			}
-			const container = document.getElementById('rightSubPane');
-			const topOffset = container.querySelector('canvas').offsetTop;
-			const pageHeight = store.state.template.page.height + 30;
-			let pageIndex = Math.ceil((container.scrollTop - topOffset) / pageHeight) + 1;
-			if (this.isFacingView) {
-				pageIndex *= 2;
-			}
-			const pageList = store.get.pageList();
-			const page = pageList[pageIndex];
-			if (page) {
-				this.drawNearbyPages(page, pageList);
-			}
-		},
+		// This will trigger a full visible page redraw
 		scrollToPage(page) {
-			if (!this.isScrollingView) {
-				return;
-			}
-			page = store.get.lookupToItem(page);
-			if (page) {
-				const pageCanvas = getCanvasForPage(page);
-				if (pageCanvas) {
-					const container = document.getElementById('rightSubPane');
-					const dy = (container.offsetHeight - pageCanvas.offsetHeight) / 2;
-					if (this.isFacingView) {
-						container.scrollTop = pageCanvas.parentElement.parentElement.parentElement.offsetTop - dy;
-					} else {
-						container.scrollTop = pageCanvas.parentElement.parentElement.offsetTop - dy;
+			Vue.nextTick(() => {
+				if (!this.isScrollingView) {
+					this.drawVisiblePages();
+					return;
+				}
+				page = store.get.lookupToItem(page);
+				if (page) {
+					const canvas = getCanvasForPage(page);
+					if (canvas) {
+						const container = document.getElementById('rightSubPane');
+						const dy = ((container.offsetHeight - canvas.offsetHeight) / 2) - multiPagePadding;
+						// TODO: this parent element lookup is hideously fragile and hideous
+						let newScroll;
+						if (this.isFacingView) {
+							newScroll = canvas.parentElement.parentElement.parentElement.offsetTop - dy;
+						} else {
+							newScroll = canvas.parentElement.parentElement.offsetTop - dy;
+						}
+						newScroll = Math.max(0, Math.floor(newScroll));
+						if (container.scrollTop === newScroll) {
+							// If scrollTop doesn't change, it doesn't trigger a scroll event
+							this.drawVisiblePages();
+						} else {
+							// This triggers a scroll event, which will redraw visible pages
+							container.scrollTop = newScroll;
+						}
 					}
 				}
-			}
-		},
-		clearPageCanvas() {
-			const canvasList = document.querySelectorAll('canvas[id^="pageCanvas"]');
-			_.toArray(canvasList).forEach(canvas => {
-				canvas.width = canvas.width;
 			});
 		},
-		drawCurrentPage() {
-			if (this.currentPageLookup) {
-				if (this.currentPageLookup.type === 'templatePage') {
-					this.drawPage(this.currentPageLookup);
-				} else if (this.isScrollingView) {
-					this.drawNearbyPages(this.currentPageLookup);
-				} else if (this.isFacingView) {
-					this.drawAdjacentPages(this.currentPageLookup);
-				} else {
-					this.drawPage(this.currentPageLookup);
+		drawVisiblePages() {
+			// TODO: this gets called a lot; try caching some of this in the component or somewhere
+			const container = document.getElementById('rightSubPane');
+			const containerHeight = container.offsetHeight;
+			const containerTop = container.parentElement.offsetTop;
+			document.querySelectorAll('canvas[id^="pageCanvas"]').forEach(canvas => {
+				const box = canvas.getBoundingClientRect();
+				const y = box.y - containerTop;
+				if (y < containerHeight && (y + box.height) > 0) {
+					const page = getPageForCanvas(canvas);
+					this.drawPage(page, canvas);
 				}
-			}
-		},
-		drawAdjacentPages(page) {
-			getPairedPages(page).forEach(page => this.drawPage(page));
-		},
-		drawNearbyPages(page, pageList) {  // pageList is optional; saves genearting the list again if caller has it
-			page = store.get.lookupToItem(page);
-			this.drawPage(page);  // Always redraw main page, regardless of needsDrawing state
-
-			pageList = pageList || store.get.pageList();
-			const currentPageIdx = pageList.indexOf(page);
-			if (currentPageIdx < 0) {
-				return;
-			}
-			const pageCountToDraw = this.isFacingView ? 10 : 5;
-			const firstPage = Math.max(0, currentPageIdx - Math.floor(pageCountToDraw / 2));
-			for (let i = firstPage; i < firstPage + pageCountToDraw; i++) {
-				const nearbyPage = pageList[i];
-				if (nearbyPage && nearbyPage.needsDrawing && nearbyPage !== page) {
-					this.drawPage(nearbyPage);
-				}
-			}
+			});
 		},
 		drawPage(page, canvas) {
 			page = store.get.lookupToItem(page);
 			if (page == null) {
-				return;  // This can happen if, say, a page got deleted without updating the current page (like in undo / redo)
+				// This happens if, say, a page is deleted without updating current page (like in undo / redo)
+				return;
 			}
 			if (canvas == null) {
 				canvas = getCanvasForPage(page);
 			}
 			if (canvas == null) {
-				return;  // Can't find a canvas for this page - ignore draw call.  Happens when we're transitioning between view modes
+				// Can't find canvas for this page; ignore draw.  Happens when changing between view modes
+				return;
 			}
-			const selectedPart = (this.selectedItem && this.selectedItem.type === 'part') ? this.selectedItem : null;
+			const selectedPart = ((this.selectedItem || {}).type === 'part') ? this.selectedItem : null;
 			Draw.page(page, canvas, {selectedPart});
-			delete page.needsDrawing;
-			if (this.currentPageLookup && _.itemEq(page, this.currentPageLookup)) {
-				const itemPage = store.get.pageForItem(this.selectedItem);
-				if (_.itemEq(itemPage, this.currentPageLookup)) {
-					const box = itemHighlightBox(this.selectedItem, this.pageSize);
-					Draw.highlight(canvas, box.x, box.y, box.width, box.height);
-				}
+
+			if (this.selectedItem == null) {
+				return;
+			}
+
+			// Draw highlight box around the selected page item, if any
+			const itemPage = store.get.pageForItem(this.selectedItem);
+			if (_.itemEq(itemPage, page)) {
+				const box = itemHighlightBox(this.selectedItem, this.pageSize);
+				Draw.highlight(canvas, box.x, box.y, box.width, box.height);
 			}
 		},
 		pageCoordsToCanvasCoords(point) {
@@ -450,7 +424,8 @@ function getPairedPages(page) {
 	} else if (_.isEven(page.number)) {
 		return [page, store.get.nextPage(page)];
 	}
-	return [store.get.prevPage(page), page];
+	const prevPage = store.get.prevPage(page);
+	return [prevPage.type === 'templatePage' ? null : prevPage, page];
 }
 
 function setPageLocked(pageID) {
@@ -525,8 +500,9 @@ function inBox(x, y, t) {
 	return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
 }
 
-// TODO: abstract the details in here better.  Shouldn't have to add more code here for each simple box container
-// TODO: stepChildren is a good start; need to make stepChildren recursively return all ancestors, and check them all automatically here
+// TODO: abstract details in here better.  Shouldn't have to add more code here for each simple box container
+// TODO: stepChildren is a good start; need to make stepChildren recursively return all ancestors,
+// and check them all automatically here
 function findClickTargetInStep(step, mx, my) {
 
 	const csi = store.get.csi(step.csiID);

@@ -176,15 +176,12 @@ const app = new Vue({
 			_.emptyNode(document.getElementById('canvasHolder'));
 			Vue.nextTick(() => {
 				this.clearSelected();
-				this.$refs.pageView.clearPageCanvas();
 			});
 		},
-		setCurrentPage(page, redraw = true) {
-			if (!_.itemEq(page, this.currentPageLookup.type)) {
+		setCurrentPage(page) {
+			if (!_.itemEq(page, this.currentPageLookup)) {
 				this.currentPageLookup = store.get.itemToLookup(page);
-			}
-			if (redraw) {
-				Vue.nextTick(this.drawCurrentPage);
+				this.$refs.pageView.scrollToPage(page);
 			}
 		},
 		setSelected(target) {
@@ -198,7 +195,8 @@ const app = new Vue({
 				targetPage = store.get.pageForItem(target);
 			}
 			if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
-				this.setCurrentPage(targetPage, false);
+				// Don't call setCurrentPage() because it redraws, but updating selectedItem also redraws
+				this.currentPageLookup = store.get.itemToLookup(targetPage);
 			}
 			this.selectedItemLookup = store.get.itemToLookup(target);
 		},
@@ -360,14 +358,10 @@ const app = new Vue({
 			uiState.set('pageView', {facingPage, scroll});
 
 			if (scroll) {
-				store.mutations.page.setDirty();
-				Vue.nextTick(() => {
-					this.$refs.pageView.drawCurrentPage();
-					this.$refs.pageView.scrollToPage(this.currentPageLookup);
-				});
+				this.$refs.pageView.scrollToPage(this.currentPageLookup);
 			} else {
 				Vue.nextTick(() => {
-					this.$refs.pageView.drawCurrentPage();
+					this.$refs.pageView.drawVisiblePages();
 				});
 			}
 		},
@@ -379,7 +373,7 @@ const app = new Vue({
 					this.currentPageLookup = store.get.itemToLookup(page);
 				}
 				Vue.nextTick(() => {
-					this.$refs.pageView.drawCurrentPage();
+					this.$refs.pageView.drawVisiblePages();
 				});
 			}
 		}
@@ -431,7 +425,6 @@ const app = new Vue({
 		LDParse.setProgressCallback(this.updateProgress);
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();
-			store.mutations.page.setDirty();
 			this.redrawUI();
 		});
 

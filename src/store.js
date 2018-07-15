@@ -1346,13 +1346,6 @@ const store = {
 				if (!page.locked) {
 					Layout.page(page, opts.layout || page.layout);
 				}
-			},
-			setDirty() {
-				store.state.pages.forEach(p => (p.needsDrawing = true));
-				if (store.state.titlePage) {
-					store.state.titlePage.needsDrawing = true;
-				}
-				store.state.inventoryPages.forEach(p => (p.needsDrawing = true));
 			}
 		},
 		divider: {
