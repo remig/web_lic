@@ -956,6 +956,7 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				undoStack.commit('callout.delete', {callout: selectedItem}, this.text);
+				app.clearSelected();
 			}
 		}
 	],
