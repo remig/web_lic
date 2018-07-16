@@ -25,7 +25,8 @@ const api = {
 
 		const rectStyle = {
 			strokeStyle: template.border.color,
-			lineWidth: Math.floor(template.border.width * 2)  // * 2 because line is centered on page edge, so half of it is clipped
+			// * 2 because line is centered on page edge, so half of it is clipped
+			lineWidth: Math.floor(template.border.width * 2)
 		};
 
 		if (template.fill.color) {
@@ -50,7 +51,7 @@ const api = {
 		}
 
 		if (template.border.cornerRadius > template.border.width) {
-			// On extremely rounded page corners, the outside corner radius shows up inside the page.  Fill that in.
+			// On very rounded page corners, outside corner radius shows up inside the page.  Fill that in.
 			const s = template.border.cornerRadius / 2;
 			ctx.fillStyle = template.border.color;
 			ctx.fillRect(0, 0, s, s);
@@ -60,8 +61,9 @@ const api = {
 		}
 
 		api.roundedRectStyled(
+			// offset corner radius by border width so radius defines inner border radius
 			ctx, 0, 0, template.width, template.height,
-			template.border.cornerRadius + template.border.width, rectStyle  // offset corner radius by border width so radius defines inner border radius
+			template.border.cornerRadius + template.border.width, rectStyle
 		);
 
 		if (uiState.get('grid').enabled) {
@@ -100,7 +102,7 @@ const api = {
 		ctx.restore();
 	},
 
-	// TODO: Add support for a quantity label to a step. Useful on the last step of a submodel build many times.
+	// TODO: Add support for a quantity label to a step. Useful on last step of a submodel built many times.
 	step(step, ctx, config) {
 
 		step = store.get.step(step);
@@ -625,7 +627,8 @@ const api = {
 	},
 
 	roundedRect(ctx, x, y, w, h, r, lineWidth) {
-		// r += lineWidth / 2;  // r defines the inner curve, but we're drawing from the middle, so offset r accordingly.  Disabled for now because it doesn't look right.
+		// r defines the inner curve, but we're drawing from the middle, so offset r accordingly
+		// r += lineWidth / 2;  //Disabled for now because it doesn't look right.
 		({x, y} = pixelOffset({x, y}, lineWidth));
 		w = Math.floor(w);
 		h = Math.floor(h);

@@ -407,7 +407,7 @@ const api = {
 			csiSize = store.render.pli(part.colorCode, part.filename, csi);
 			if (csiSize.height > box.height * template.maxHeight) {
 				csi.autoScale *= (box.height * template.maxHeight) / csiSize.height;
-				csi.isDirty = true;  // This is necessary because we just rendered it; need this to force re-render
+				csi.isDirty = true;  // This is necessary because we just rendered it; this forces re-render
 				csiSize = store.render.pli(part.colorCode, part.filename, csi);
 			} else {
 				csi.autoScale = null;
@@ -517,15 +517,16 @@ const api = {
 		});
 
 		if (callout.layout === 'horizontal') {
-			const maxCalloutWidth = isOnSide ? box.width * 0.75 : box.width;  // TODO: should consider CSI width here
+			const maxCalloutWidth = isOnSide ? box.width * 0.75 : box.width;  // TODO: consider CSI width
 			const tallestStep = Math.max(...stepSizes.map(el => el.height));
 			const stepBox = {x: margin, y: margin, width: null, height: tallestStep};
 			calloutBox.height = margin + tallestStep + margin;
 
 			const rows = [[]];
 			stepSizes.forEach((entry, idx) => {
-				if (idx > 0 && (borderWidth + stepBox.x + entry.width + margin + borderWidth > maxCalloutWidth)) {
-					// Adding this step to the right of the box will make the box too wide to fit; wrap to next row
+				const stepWidth = borderWidth + stepBox.x + entry.width + margin + borderWidth;
+				if (idx > 0 && (stepWidth > maxCalloutWidth)) {
+					// Adding this step to the right will make the box too wide; wrap to next row
 					rows.push([]);
 					stepBox.x = margin;
 					stepBox.y += tallestStep + margin;
@@ -546,15 +547,16 @@ const api = {
 				col.forEach(el => (el.step.x = maxX));
 			});
 		} else {
-			const maxCalloutHeight = isOnSide ? box.height : box.height * 0.5;  // TODO: should consider CSI height here
+			const maxCalloutHeight = isOnSide ? box.height : box.height * 0.5;  // TODO: consider CSI height
 			const widestStep = Math.max(...stepSizes.map(el => el.width));
 			const stepBox = {x: margin, y: margin, width: widestStep, height: null};
 			calloutBox.width = margin + widestStep + margin;
 
 			const columns = [[]];
 			stepSizes.forEach((entry, idx) => {
-				if (idx > 0 && (borderWidth + stepBox.y + entry.height + margin + borderWidth > maxCalloutHeight)) {
-					// Adding this step to the bottom of the box will make the box too tall to fit; wrap to next column
+				const stepWidth = borderWidth + stepBox.y + entry.height + margin + borderWidth;
+				if (idx > 0 && (stepWidth > maxCalloutHeight)) {
+					// Adding this step to the bottom of the box makes the box too tall; wrap to next column
 					columns.push([]);
 					stepBox.y = margin;
 					stepBox.x += widestStep + margin;
@@ -623,7 +625,8 @@ const api = {
 		const step = store.get.step(callout.parent.id);
 		const csi = store.get.csi(step.csiID);
 		const p2 = store.get.point(arrow.points[1]);
-		const arrowSize = _.geom.arrow.head.length;  // p2 is arrow's base; move it to the left to make space for the arrow head
+		// p2 is arrow's base; move it to the left to make space for the arrow head
+		const arrowSize = _.geom.arrow.head.length;
 		p2.relativeTo = {type: 'csi', id: csi.id};
 
 		if (isOnSide) {
@@ -741,7 +744,7 @@ const api = {
 			}, 100));
 		}
 
-		// Starting with one step per page, move adjacent steps to the previous page until the page is full-ish
+		// Starting with one step per page, move adjacent steps to previous page until page is full-ish
 		stepsToMerge = stepsToMerge.slice(1);
 		while (stepsToMerge.length) {
 			await mergeOneStep();
@@ -846,7 +849,7 @@ function getMargin(margin) {
 }
 
 // TODO: should push callouts down too
-// TODO: this is buggy: it's duplicating a lot of step layout logic, but badly.  Like, it doesn't push content down below step numbers.
+// TODO: this is buggy: it duplicates a lot of step layout logic, but badly. Like, it doesn't push content down below step numbers.
 function alignStepContent(page) {
 	const margin = getMargin(store.state.template.step.innerMargin);
 	const steps = page.steps.map(stepID => store.get.step(stepID));

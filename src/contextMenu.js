@@ -107,7 +107,8 @@ const contextMenu = {
 						return page.layout !== 'horizontal';
 					},
 					cb(selectedItem) {
-						undoStack.commit('page.layout', {page: selectedItem, layout: 'horizontal'}, this.text);
+						const opts = {page: selectedItem, layout: 'horizontal'};
+						undoStack.commit('page.layout', opts, this.text);
 					}
 				},
 				{
@@ -206,7 +207,9 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				const page = store.get.lookupToItem(selectedItem);
-				const nextPage = store.get.isLastPage(page) ? store.get.prevPage(page) : store.get.nextPage(page);
+				const nextPage = store.get.isLastPage(page)
+					? store.get.prevPage(page)
+					: store.get.nextPage(page);
 				undoStack.commit('page.delete', {page}, 'Delete Page');
 				app.clearSelected();
 				app.setCurrentPage(nextPage);
@@ -421,7 +424,7 @@ const contextMenu = {
 		{text: 'separator'},
 		{
 			text: 'Prepend Blank Step',
-			enabled: enableIfUnlocked,  // TODO: this should be disabled if previous step is in a different submodel
+			enabled: enableIfUnlocked,  // TODO: disable this if previous step is in a different submodel
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
@@ -477,7 +480,8 @@ const contextMenu = {
 					text: 'Flip Upside Down',
 					cb(selectedItem) {
 						const csi = selectedItem;
-						const opts = {csi, rotation: {x: 0, y: 0, z: 180}, addRotateIcon: true, doLayout: true};
+						const rotation = {x: 0, y: 0, z: 180};
+						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts, 'Flip Step Image', [csi]);
 					}
 				},
@@ -485,7 +489,8 @@ const contextMenu = {
 					text: 'Rotate Front to Back',
 					cb(selectedItem) {
 						const csi = selectedItem;
-						const opts = {csi, rotation: {x: 0, y: 180, z: 0}, addRotateIcon: true, doLayout: true};
+						const rotation = {x: 0, y: 180, z: 0};
+						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts, 'Rotate Step Image', [csi]);
 					}
 				},
@@ -552,7 +557,7 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				// TODO: rewrite this to use simple number picker dialog
-				// TODO: this doesn't adjust page layouts after applying changes.  Need to check all affected pages.
+				// TODO: this doesn't re-layout pages after applying changes. Must check all affected pages.
 				const csi = store.get.csi(selectedItem.id);
 				const rotation = _.clone(csi.rotation);
 				const step = store.get.step(csi.parent.id);
@@ -627,7 +632,7 @@ const contextMenu = {
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
 					dialog.$on('update', newValues => {
-						csi.scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
+						csi.scale = _.bound(newValues.value || 0, 0.001, 5);
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
@@ -718,11 +723,12 @@ const contextMenu = {
 					});
 					dialog.$on('ok', newValues => {
 						const path = `/${filename}/rotation`, root = pliTransforms;
+						const op = 'replace';
 						const change = {
 							mutations: ['page.layout'],
 							action: {
-								redo: [{root, op: 'replace', path, value: {...newValues.rotation}}],
-								undo: [{root, op: 'replace', path, value: (originalTransform || {}).rotation || null}]
+								redo: [{root, op, path, value: {...newValues.rotation}}],
+								undo: [{root, op, path, value: (originalTransform || {}).rotation || null}]
 							}
 						};
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
@@ -758,18 +764,19 @@ const contextMenu = {
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
 					dialog.$on('update', newValues => {
-						pliTransforms[filename].scale = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
+						pliTransforms[filename].scale = _.bound(newValues.value || 0, 0.001, 5);
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
 					dialog.$on('ok', newValues => {
-						const value = _.bound(newValues.value || 0, 0.001, 5);  // Scaling right to zero hits all kinds of divide by zero problems. Scaling beyond 5 runs out of memory fast
+						const value = _.bound(newValues.value || 0, 0.001, 5);
 						const path = `/${filename}/scale`, root = pliTransforms;
+						const op = 'replace';
 						const change = {
 							mutations: ['page.layout'],
 							action: {
-								redo: [{root, op: 'replace', path, value}],
-								undo: [{root, op: 'replace', path, value: (originalTransform || {}).scale || null}]
+								redo: [{root, op, path, value}],
+								undo: [{root, op, path, value: (originalTransform || {}).scale || null}]
 							}
 						};
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
@@ -807,7 +814,9 @@ const contextMenu = {
 				const pliTransforms = uiState.get('pliTransforms');
 				const originalScale = pliTransforms[filename].scale;
 				const path = `/${filename}/scale`, root = pliTransforms;
-				const change = {  // TODO: undo always performs mutations before actions.  But we need the opposite.  Change undo to take a single mixed array of mutations + actions, and perform them in order.
+				const change = {
+				// TODO: undo performs mutations before actions.  But we need the opposite; change undo
+				// to take a single mixed array of mutations + actions, and perform them in order.
 					mutations: ['page.layout'],
 					action: {
 						redo: [{root, op: 'remove', path}],
@@ -1030,7 +1039,8 @@ const contextMenu = {
 			cb(selectedItem) {
 				const divider = store.get.divider(selectedItem);
 				const bbox = _.geom.bbox([divider.p1, divider.p2]);
-				const originalSize = (bbox.height === 0) ? bbox.width : bbox.height;  // TODO: store divider orientation in divider itself
+				// TODO: store divider orientation in divider itself
+				const originalSize = (bbox.height === 0) ? bbox.width : bbox.height;
 
 				DialogManager.setDialog('numberChooserDialog');
 				Vue.nextTick(() => {
@@ -1325,7 +1335,8 @@ function filterMenu(menu, selectedItem) {
 	}
 }
 
-// TODO: should just grey out / disable menu entries that don't work because page is locked. I think. Then eventually show a tooltip explaining why they're greyed out.
+// TODO: should just grey out / disable menu entries that don't work because page is locked. I think.
+// TODO: Then eventually show a tooltip explaining why they're greyed out.
 function enableIfUnlocked(selectedItem) {
 	return !(store.get.pageForItem(selectedItem) || {}).locked;
 }
@@ -1359,7 +1370,8 @@ export default function ContextMenu(selectedItem, localApp) {
 	filterMenu(menu, selectedItem);
 
 	if (menu) {
-		menu.forEach(menuEntry => (menuEntry.selectedItem = selectedItem));  // Copy item type to each meny entry; saves typing them all out everywhere above
+		// Copy item type to each meny entry; saves typing them all out everywhere above
+		menu.forEach(menuEntry => (menuEntry.selectedItem = selectedItem));
 		return menu;
 	}
 }

@@ -36,13 +36,15 @@ Vue.filter('sanitizeMenuID', id => {
 
 Vue.filter('prettyPrint', _.prettyPrint);
 
-Vue.use({  // This adds a 'tr' method to every component, which makes translating strings in template HTML easier
+Vue.use({
+	// Add a 'tr' method to every component, which makes translating strings in template HTML easier
 	install(Vue) {
 		Vue.prototype.tr = function(str, args) {
 			try {
 				return LocaleManager.translate(str, args);
 			} catch (e) {  // eslint-disable-line no-empty
-				// TODO: Intentionally empty; once all strings are out of the HTML / components and into the translation files, remove this try catch
+				// TODO: Intentionally empty; once all strings are out of the HTML / components
+				// and into the translation files, remove this try catch
 			}
 			return str;
 		};
@@ -52,7 +54,9 @@ Vue.use({  // This adds a 'tr' method to every component, which makes translatin
 const app = new Vue({
 	el: '#container',
 	components: {NavTree},
-	data: {  // Store any transient UI state data here.  Do *not* store state items here; Vue turns these into observers
+	data: {
+		// Store transient UI state data here.  Do *not* store state items here; Vue turns these
+		// into observers, which destroys performance for big stores like we have here
 		currentPageLookup: null,
 		selectedItemLookup: null,
 		statusText: '',
@@ -104,7 +108,7 @@ const app = new Vue({
 							await store.mutations.mergeInitialPages(this.updateProgress);
 						}
 						if (layoutChoices.include.titlePage) {
-							// Add title page after adding regular pages so title page labels comes out correct
+							// Add title page after regular pages so title page labels comes out correct
 							store.mutations.addTitlePage();
 						}
 						if (layoutChoices.include.partListPage) {
@@ -199,7 +203,6 @@ const app = new Vue({
 				targetPage = store.get.pageForItem(target);
 			}
 			if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
-				// Don't call setCurrentPage() because it redraws, but updating selectedItem also redraws
 				this.currentPageLookup = store.get.itemToLookup(targetPage);
 			}
 			this.selectedItemLookup = store.get.itemToLookup(target);
@@ -232,7 +235,8 @@ const app = new Vue({
 						text = opts.text;
 					}
 				}
-				// This gets called several times a second, as long-lived processes progress.  Vue's reactivity is too slow and resource intensive to use here.
+				// This gets called several times a second, as long-lived processes progress.
+				// Vue's reactivity is too slow and resource intensive to use here.
 				const bar = document.getElementById('progressbar');
 				const pct = Math.floor(progress / count * 100) || 0;
 				bar.style.width = `${pct}%`;
@@ -240,10 +244,10 @@ const app = new Vue({
 			};
 		})(),
 		forceUIUpdate() {
-			// If I understood Vue better, I'd create components that damn well updated themselves properly.
 			this.$refs.pageView.forceUpdate();
 			this.$refs.navTree.forceUpdate();
-			this.navUpdateState = (this.navUpdateState + 1) % 10;  // TODO: add ref for the menu, then call $ref.forceUpdate()
+			// TODO: add ref for the menu, then call $ref.forceUpdate()
+			this.navUpdateState = (this.navUpdateState + 1) % 10;
 			if (this.selectedItemLookup && this.selectedItemLookup.id != null) {
 				this.selectedItemLookup.id++;
 				this.selectedItemLookup.id--;
@@ -274,7 +278,9 @@ const app = new Vue({
 			this.lastRightClickPos.y = e.clientY;
 			this.contextMenu = null;
 			if (this.selectedItemLookup != null && this.currentPageLookup != null
-					&& this.currentPageLookup.type !== 'templatePage') {  // Template page doesn't have any right click menus
+				// Template page doesn't have any right click menus
+				&& this.currentPageLookup.type !== 'templatePage'
+			) {
 				Vue.nextTick(() => {
 					// Delay menu creation so that earlier menu clear has time to take effect
 					// This is necessary as menu content may change without selected item changing
@@ -372,7 +378,9 @@ const app = new Vue({
 		drawCurrentPage() {
 			if (this.currentPageLookup != null) {
 				let page = store.get.lookupToItem(this.currentPageLookup);
-				if (page == null) {  // This can happen if, say, a page got deleted without updating the current page (like in undo / redo)
+				if (page == null) {
+					// This happens if, say, the current page is deleted without
+					// updating the current page first, like during undo / redo
 					page = store.get.firstPage();
 					this.currentPageLookup = store.get.itemToLookup(page);
 				}
@@ -449,11 +457,12 @@ const app = new Vue({
 			});
 		}
 
-		LocaleManager.pickLanguage(this.openLocalLicFile, this.redrawUI);  // TODO: Find better way of calling 'redrawUI' from arbitrary places
+		// TODO: Find better way of calling 'redrawUI' from arbitrary places
+		LocaleManager.pickLanguage(this.openLocalLicFile, this.redrawUI);
 	}
 });
 
 window.__lic = {  // store a global reference to these for easier testing
-	// TODO: only generate this in the debug build.  Need different production / debug configs for that first...
+	// TODO: only generate this in the debug build.
 	_, app, store, undoStack, LDParse, Storage, uiState
 };
