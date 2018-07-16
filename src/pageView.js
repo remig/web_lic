@@ -8,7 +8,7 @@ import undoStack from './undoStack';
 import uiState from './uiState';
 import Guide from './components/guide.vue';
 
-const multiPagePadding = 30;
+const multiPagePadding = 15;
 Vue.component('pageView', {
 	props: ['app', 'selectedItem', 'currentPageLookup'],
 	data() {
@@ -98,6 +98,7 @@ Vue.component('pageView', {
 					],
 					style: {
 						marginTop: scrolling ? multiPagePadding + 'px' : null,
+						marginBottom: scrolling ? multiPagePadding + 'px' : null,
 						visibility: (pageLookup == null) ? 'hidden' : null
 					}
 				},
@@ -505,15 +506,17 @@ function inBox(x, y, t) {
 // and check them all automatically here
 function findClickTargetInStep(step, mx, my) {
 
-	const csi = store.get.csi(step.csiID);
-	for (let i = 0; i < csi.annotations.length; i++) {
-		const a = store.get.annotation(csi.annotations[i]);
-		if (inBox(mx, my, a)) {
-			return a;
+	if (step.csiID != null) {
+		const csi = store.get.csi(step.csiID);
+		for (let i = 0; i < csi.annotations.length; i++) {
+			const a = store.get.annotation(csi.annotations[i]);
+			if (inBox(mx, my, a)) {
+				return a;
+			}
 		}
-	}
-	if (step.csiID != null && inBox(mx, my, csi)) {
-		return csi;
+		if (step.csiID != null && inBox(mx, my, csi)) {
+			return csi;
+		}
 	}
 	if (step.steps.length) {
 		for (let i = 0; i < step.steps.length; i++) {
