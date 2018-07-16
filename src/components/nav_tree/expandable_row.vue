@@ -56,6 +56,17 @@
 					/>
 				</li>
 			</template>
+			<li
+				v-if="target.stretchedStep && rowVisibility.steps"
+				class="unindent"
+			>
+				<TreeExpandableRow
+					:row-visibility="rowVisibility"
+					:current-item="currentItem"
+					:target="store.get.step(target.stretchedStep.stepID)"
+					@select-item="$emit('select-item', arguments[0])"
+				/>
+			</li>
 			<template v-if="target.submodelImages != null && rowVisibility.submodelImages">
 				<li
 					v-for="submodelImage in target.submodelImages.map(id => store.get.submodelImage(id))"

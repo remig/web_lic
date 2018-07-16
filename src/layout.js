@@ -270,6 +270,16 @@ const api = {
 	},
 
 	step(step, box, pageMargin) {
+
+		if (step.stretchedPages.length) {
+			const pageWidth = store.state.template.page.width;
+			box.width *= (step.stretchedPages.length + 1);
+			step.stretchedPages.forEach((pageID, idx) => {
+				const page = store.get.page(pageID);
+				page.stretchedStep.leftOffset = -(idx + 1) * pageWidth;
+			});
+		}
+
 		// Starting with a pre-defined box, layout everything in this step inside it
 		let template = store.state.template;
 		template = (step.parent.type === 'callout') ? template.callout.step : template.step;

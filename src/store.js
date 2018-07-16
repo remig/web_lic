@@ -465,6 +465,17 @@ const store = {
 			}
 			return null;
 		},
+		isDescendent(item, ancestor) {  // Return true if item is a descendent or equal to ancestor
+			item = store.get.lookupToItem(item);
+			ancestor = store.get.lookupToItem(ancestor);
+			while (item) {
+				if (_.itemEq(item, ancestor)) {
+					return true;
+				}
+				item = store.get.parent(item);
+			}
+			return false;
+		},
 		stepChildren(step) {
 			return store.get.children(step, [
 				'annotation', 'callout', 'csi', 'divider', 'numberLabel',
@@ -1018,7 +1029,8 @@ const store = {
 					item: {
 						type: 'step',
 						number: opts.stepNumber, numberLabelID: null,
-						parts: [], callouts: [], steps: [], dividers: [], submodelImages: [], annotations: [],
+						parts: [], callouts: [], steps: [], dividers: [],
+						submodelImages: [], annotations: [], stretchedPages: [],
 						csiID: null, pliID: null, rotateIconID: null,
 						model: opts.model || {filename: null, parentStepID: null},
 						x: null, y: null, width: null, height: null, subStepLayout: 'vertical'
@@ -1137,6 +1149,16 @@ const store = {
 				const destPage = store.get.pageForItem(destStep);
 				store.mutations.page.layout({page: sourcePage});
 				if (sourcePage.id !== destPage.id) {
+					store.mutations.page.layout({page: destPage});
+				}
+			},
+			stretchToPage(opts) {  // opts: {step, stretchToPage, doLayout}
+				const step = store.get.lookupToItem(opts.step);
+				const destPage = store.get.lookupToItem(opts.stretchToPage);
+				destPage.stretchedStep = {stepID: step.id, leftOffset: 0};
+				step.stretchedPages.push(opts.stretchToPage.id);
+				if (opts.doLayout) {
+					store.mutations.page.layout({page: store.get.pageForItem(step)});
 					store.mutations.page.layout({page: destPage});
 				}
 			},
@@ -1295,7 +1317,7 @@ const store = {
 				const page = store.mutations.item.add({item: {
 					type: pageType,
 					steps: [], dividers: [], annotations: [], pliItems: [],
-					needsLayout: true, locked: false,
+					needsLayout: true, locked: false, stretchedStep: null,
 					innerContentOffset: {x: 0, y: 0},
 					number: opts.pageNumber,
 					numberLabelID: null,

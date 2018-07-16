@@ -11,6 +11,9 @@ const api = {
 		}
 
 		state.steps.forEach(step => {
+			if (step.stretchedPages == null) {
+				step.stretchedPages = [];
+			}
 			if (step.annotations == null) {
 				step.annotations = [];
 			}

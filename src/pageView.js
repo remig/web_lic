@@ -185,6 +185,15 @@ Vue.component('pageView', {
 	},
 	watch: {
 		selectedItem(newItem) {
+			const currentPage = store.get.lookupToItem(this.currentPageLookup);
+			if (currentPage && currentPage.stretchedStep) {
+				// If selected item is in a stretched step on current page, scroll to current page
+				const stretchedStep = {type: 'step', id: currentPage.stretchedStep.stepID};
+				if (store.get.isDescendent(newItem, stretchedStep)) {
+					this.scrollToPage(currentPage);
+					return;
+				}
+			}
 			const newPage = store.get.pageForItem(newItem);
 			if (newPage) {
 				this.scrollToPage(newPage);
@@ -228,8 +237,9 @@ Vue.component('pageView', {
 				};
 			} else if (this.selectedItem) {
 				const item = store.get.lookupToItem(this.selectedItem);
+				const page = getPageForCanvas(e.target);
 				if (item && store.get.isMoveable(item)
-					&& inHighlightBox(e.offsetX, e.offsetY, item, this.pageSize)
+					&& inHighlightBox(e.offsetX, e.offsetY, item, this.pageSize, page)
 				) {
 					// If mouse down is inside a selected item, store item & down pos in case mouse
 					// move follows, to support dragging items
@@ -276,7 +286,7 @@ Vue.component('pageView', {
 				const page = getPageForCanvas(e.target);
 				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
 				if (target) {
-					this.app.setSelected(target);
+					this.app.setSelected(target, page);
 				} else {
 					this.app.clearSelected();
 				}
@@ -389,9 +399,18 @@ Vue.component('pageView', {
 			}
 
 			// Draw highlight box around the selected page item, if any
+			let doHighlight = false;
 			const itemPage = store.get.pageForItem(this.selectedItem);
 			if (_.itemEq(itemPage, page)) {
-				const box = itemHighlightBox(this.selectedItem, this.pageSize);
+				doHighlight = true;
+			} else if (page.stretchedStep && this.selectedItem) {
+				const stretchedStep = store.get.step(page.stretchedStep.stepID);
+				if (store.get.isDescendent(this.selectedItem, stretchedStep)) {
+					doHighlight = true;
+				}
+			}
+			if (doHighlight) {
+				const box = itemHighlightBox(this.selectedItem, this.pageSize, page);
 				Draw.highlight(canvas, box.x, box.y, box.width, box.height);
 			}
 		},
@@ -458,7 +477,7 @@ function getCanvasForPage(page) {
 	return document.getElementById(getCanvasID(page));
 }
 
-function itemHighlightBox(selItem, pageSize) {
+function itemHighlightBox(selItem, pageSize, currentPage) {
 	selItem = store.get.lookupToItem(selItem);
 	if (!selItem || selItem.type === 'part') {
 		return {display: 'none'};
@@ -482,17 +501,24 @@ function itemHighlightBox(selItem, pageSize) {
 			box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
 		}
 	}
+	let dx = 0;
+	if (currentPage && currentPage.stretchedStep) {
+		const stretchedStep = store.get.step(currentPage.stretchedStep.stepID);
+		if (store.get.isDescendent(selItem, stretchedStep)) {
+			dx = currentPage.stretchedStep.leftOffset;
+		}
+	}
 	const pad = 2;
 	return {
-		x: box.x - pad,
+		x: box.x - pad + dx,
 		y: box.y - pad,
 		width: pad + box.width + pad - 1,
 		height: pad + box.height + pad - 1
 	};
 }
 
-function inHighlightBox(x, y, t, pageSize) {
-	const box = itemHighlightBox(t, pageSize);
+function inHighlightBox(x, y, t, pageSize, page) {
+	const box = itemHighlightBox(t, pageSize, page);
 	return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
 }
 
@@ -633,6 +659,14 @@ function findClickTargetInPage(page, mx, my) {
 	for (let i = 0; i < page.steps.length; i++) {
 		const step = store.get.step(page.steps[i]);
 		const innerTarget = findClickTargetInStep(step, mx, my);
+		if (innerTarget) {
+			return innerTarget;
+		}
+	}
+	if (page.stretchedStep) {
+		const step = store.get.step(page.stretchedStep.stepID);
+		const dx = page.stretchedStep.leftOffset;
+		const innerTarget = findClickTargetInStep(step, mx - dx, my);
 		if (innerTarget) {
 			return innerTarget;
 		}

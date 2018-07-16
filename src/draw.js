@@ -72,6 +72,13 @@ const api = {
 
 		page.steps.forEach(id => api.step({type: 'step', id}, ctx, config));
 
+		if (page.stretchedStep) {
+			ctx.save();
+			ctx.translate(Math.floor(page.stretchedStep.leftOffset), 0);
+			api.step({type: 'step', id: page.stretchedStep.stepID}, ctx, config);
+			ctx.restore();
+		}
+
 		page.pliItems.forEach(id => api.pliItem({type: 'pliItem', id}, ctx, config));
 
 		api.dividers(page.dividers, ctx);

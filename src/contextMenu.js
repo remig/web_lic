@@ -307,6 +307,30 @@ const contextMenu = {
 			}
 		},
 		{
+			text: 'Stretch Step to Next Page',
+			enabled(selectedItem) {
+				const step = store.get.lookupToItem(selectedItem);
+				if (step.parent.type !== 'page') {
+					return false;  // Only stretch basic page steps
+				}
+				const page = store.get.pageForItem(selectedItem);
+				const nextPage = store.get.nextBasicPage(page);
+				return nextPage && nextPage.steps.length < 1 && page.steps.length === 1;
+			},
+			cb(selectedItem) {
+				const step = store.get.lookupToItem(selectedItem);
+				let page;
+				if (step.stretchedPages.length) {
+					page = store.get.page(_.last(step.stretchedPages));
+				} else {
+					page = store.get.pageForItem(selectedItem);
+				}
+				const stretchToPage = store.get.nextBasicPage(page);
+				const opts = {step: selectedItem, stretchToPage, doLayout: true};
+				undoStack.commit('step.stretchToPage', opts, 'Stretch Step to Page');
+			}
+		},
+		{
 			text: 'Move Step to',
 			enabled: enableIfUnlocked,
 			children: [

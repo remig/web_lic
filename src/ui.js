@@ -184,12 +184,16 @@ const app = new Vue({
 				this.$refs.pageView.scrollToPage(page);
 			}
 		},
-		setSelected(target) {
-			if (_.itemEq(target, this.selectedItemLookup)) {
+		setSelected(target, page) {
+			if (_.itemEq(target, this.selectedItemLookup)
+				&& (!page || _.itemEq(page, this.currentPageLookup))
+			) {
 				return;
 			}
 			let targetPage;
-			if (target.type === 'submodel') {
+			if (page) {
+				targetPage = page;
+			} else if (target.type === 'submodel') {
 				targetPage = store.get.pageForItem({type: 'step', id: target.stepID});
 			} else {
 				targetPage = store.get.pageForItem(target);
