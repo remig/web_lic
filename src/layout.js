@@ -382,7 +382,7 @@ const api = {
 				p1.y = store.get.coords.pointToPage(0, csi.height / 2, csi).y;
 				const p2 = store.get.point(annotation.points[1]);
 				p2.relativeTo = {type: 'csi', id: step.csiID};
-				p2.x = -_.geom.arrow.head.length - 10;
+				p2.x = -_.geom.arrow().head.length - 10;
 				p2.y = csi.height / 2;
 			}
 		}
@@ -626,7 +626,7 @@ const api = {
 		const csi = store.get.csi(step.csiID);
 		const p2 = store.get.point(arrow.points[1]);
 		// p2 is arrow's base; move it to the left to make space for the arrow head
-		const arrowSize = _.geom.arrow.head.length;
+		const arrowSize = _.geom.arrow().head.length;
 		p2.relativeTo = {type: 'csi', id: csi.id};
 
 		if (isOnSide) {

@@ -1,6 +1,12 @@
+/* global _: false */
 'use strict';
 
-const api = {
+const api = _;
+
+// Add a handful of useful utility functions to lodash
+// TODO: A lot of these duplicate functionality in lodash; remove them
+// TODO: refactor to use '_' instead of 'api' throughout this file
+api.mixin({
 	isEmpty(p) {
 		if (typeof p === 'number') {
 			return false;
@@ -197,8 +203,9 @@ const api = {
 			}
 		}
 	},
-	geom: {
-		bbox(points) {
+	geom: (() => {
+		function geom() {}
+		geom.bbox = function(points) {
 			let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 			for (let i = 0; i < (points || []).length; i++) {
 				const p = points[i];
@@ -217,8 +224,8 @@ const api = {
 				x: minX, y: minY,
 				width: maxX - minX, height: maxY - minY
 			};
-		},
-		expandBox(box, minWidth, minHeight) {
+		};
+		geom.expandBox = function(box, minWidth, minHeight) {
 			box = api.clone(box);
 			if (Math.floor(box.width) < 1) {
 				box.width = minWidth;
@@ -229,8 +236,8 @@ const api = {
 				box.y -= minHeight / 2;
 			}
 			return box;
-		},
-		moveBoxEdge(box, edge, dt) {
+		};
+		geom.moveBoxEdge = function(box, edge, dt) {
 			switch (edge) {
 				case 'top':
 					box.y += dt;
@@ -247,37 +254,41 @@ const api = {
 					box.width -= dt;
 					break;
 			}
-		},
-		distance(p1, p2) {
+		};
+		geom.distance = (p1, p2) => {
 			if (typeof p1 === 'number' && typeof p2 === 'number') {
 				return Math.abs(p1 - p2);
 			}
 			return Math.sqrt(((p1.x - p2.x) ** 2) + ((p1.y - p2.y) ** 2));
-		},
-		midpoint(p1, p2) {
+		};
+		geom.midpoint = (p1, p2) => {
 			return {x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2};
-		},
-		arrow: {
-			head: {
-				length: 30,
-				width: 7,
-				insetDepth: 3
-			},
-			body: {
-				width: 1.25
-			}
-		}
-	},
-	version: {
-		parse(v) {
+		};
+		geom.arrow = () => {
+			return {
+				head: {
+					length: 30,
+					width: 7,
+					insetDepth: 3
+				},
+				body: {
+					width: 1.25
+				}
+			};
+		};
+		return geom;
+	})(),
+	version: (() => {
+		function version() {}
+		version.parse = (v) => {
 			v = (v || '').split('.').map(v => parseInt(v, 10));
 			return {major: v[0] || 0, minor: v[1] || 0, revision: v[2] || 0};
-		},
-		nice(v) {
+		};
+		version.nice = (v) => {
 			v = api.version.parse(v);
 			return `${v.major}.${v.minor}`;
-		},
-		isOldVersion(prev, current) {
+		};
+		version.isOldVersion = (prev, current) => {
 			prev = api.version.parse(prev);
 			current = api.version.parse(current);
 			if (prev.major !== current.major) {
@@ -286,8 +297,9 @@ const api = {
 				return prev.minor < current.minor;
 			}
 			return prev.revision < current.revision;
-		}
-	},
+		};
+		return version;
+	})(),
 	clone(obj) {
 		if (obj == null) {
 			return null;  // JSON.parse crashes if obj is undefined
@@ -302,16 +314,20 @@ const api = {
 	forEach(obj, cb) {
 		Object.entries(obj).forEach(([k, v]) => cb(k, v));
 	},
-	sort: {
-		numeric: {
-			ascending(a, b) {
+	sort: (() => {
+		function sort() {}
+		sort.numeric = () => {
+			function numeric() {}
+			numeric.ascending = (a, b) => {
 				return a - b;
-			},
-			descending(a, b) {
+			};
+			numeric.descending = (a, b) => {
 				return b - a;
-			}
-		}
-	},
+			};
+			return numeric;
+		};
+		return sort;
+	})(),
 	formatTime(start, end) {
 		const t = end - start;
 		if (t >= 1000) {
@@ -361,8 +377,9 @@ const api = {
 		}
 		return api.titleCase(s);
 	},
-	color: {
-		toRGB: (() => {
+	color: (() => {
+		function color() {}
+		color.toRGB = (() => {
 			const rgbLookupCache = {
 				'#000000': [0, 0, 0]
 			};
@@ -397,17 +414,17 @@ const api = {
 				};
 				return res;
 			};
-		})(),
-		luma(color) {
+		})();
+		color.luma = (color) =>{
 			color = api.color.toRGB(color);
 			return (0.2126 * Math.pow(color.r / 255, 2.2))
 				+ (0.7151 * Math.pow(color.g / 255, 2.2))
 				+ (0.0721 * Math.pow(color.b / 255, 2.2));
-		},
-		opposite(color) {
+		};
+		color.opposite = (color) => {
 			return (api.color.luma(color) < 0.18) ? 'white' : 'black';
-		},
-		isVisible(color) {
+		};
+		color.isVisible = (color) => {
 			if (!color || typeof color !== 'string') {
 				return false;
 			}
@@ -416,8 +433,9 @@ const api = {
 				return false;
 			}
 			return true;
-		}
-	},
+		};
+		return color;
+	})(),
 	isBorderVisible(border) {
 		if (!border || !border.width || border.width < 1 ||
 			!border.color || typeof border.color !== 'string'
@@ -426,6 +444,6 @@ const api = {
 		}
 		return api.color.isVisible(border.color);
 	}
-};
+});
 
 export default api;

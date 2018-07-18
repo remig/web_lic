@@ -364,7 +364,7 @@ const api = {
 	arrowHead: (() => {
 
 		const presetAngles = {up: 180, left: 90, right: -90};
-		const arrowDimensions = _.geom.arrow;
+		const arrowDimensions = _.geom.arrow();
 
 		return function(ctx, baseX, baseY, rotation, scale) {
 			const head = arrowDimensions.head, bodyWidth = 1.25;
