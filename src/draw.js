@@ -409,25 +409,21 @@ const api = {
 			if (parent === relativeTo) {
 				return pixelOffset(pt, borderWidth);
 			}
-			let found = false;
-			// Start from relativeTo, and walk back the transform; if we hit parent, apply that transform.
-			while (relativeTo && relativeTo !== parent) {
+			// Start from relativeTo and walk the transform backward; if we hit parent, return that transform
+			while (relativeTo) {
 				x += relativeTo.x || 0;
 				y += relativeTo.y || 0;
 				relativeTo = store.get.parent(relativeTo);
-				if (relativeTo === parent) {
-					found = true;
+				if (parent === relativeTo) {
+					return pixelOffset({x, y}, borderWidth);
 				}
 			}
-			if (!found) {
-				// If not, start from parent and walk back the transform until we hit relativeTo.
-				({x, y} = pt);
-				relativeTo = store.get.lookupToItem(pt.relativeTo);
-				while (parent && parent !== relativeTo) {
-					x -= parent.x || 0;
-					y -= parent.y || 0;
-					parent = store.get.parent(parent);
-				}
+			// Haven't found target, and we've transformed to the page, so start from the parent
+			// and walk the transform forward until we hit the page
+			while (parent) {
+				x -= parent.x || 0;
+				y -= parent.y || 0;
+				parent = store.get.parent(parent);
 			}
 			return pixelOffset({x, y}, borderWidth);
 		}

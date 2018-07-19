@@ -319,25 +319,27 @@ const app = new Vue({
 					dx = dv;
 				}
 				const item = store.get.lookupToItem(selItem);
-				// Special case: the first point in a callout arrow can't move away from the callout itself
-				// TODO: this doesn't prevent arrow base from coming off the rounded corner of a callout
 				if (item.type === 'point') {
-					const arrow = store.get.calloutArrow(item.parent.id);
+					const arrow = store.get.lookupToItem(item.parent);
 					if (arrow.points.indexOf(item.id) === 0) {
-						const callout = store.get.callout(arrow.parent.id);
 						const newPos = {x: item.x + dx, y: item.y + dy};
 						const dt = _.geom.distance;
-						if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-							if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
-								dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
+						if (arrow.type === 'calloutArrow') {
+							// Special case: first point in callout arrow can't move away from callout
+							// TODO: this doesn't prevent arrow base from coming off rounded callout corners
+							const callout = store.get.callout(arrow.parent.id);
+							if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+								if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
+									dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
+								} else {
+									dx = 0;  // Prevent movement from pulling arrow base off callout
+								}
 							} else {
-								dx = 0;  // Prevent movement from pulling arrow base off callout
-							}
-						} else {
-							if (dt(newPos.x, 0) < 2 || dt(newPos.x, callout.width) < 2) {
-								dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
-							} else {
-								dx = 0;  // Prevent movement from pulling arrow base off callout
+								if (dt(newPos.x, 0) < 2 || dt(newPos.x, callout.width) < 2) {
+									dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
+								} else {
+									dx = 0;  // Prevent movement from pulling arrow base off callout
+								}
 							}
 						}
 					}

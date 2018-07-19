@@ -376,16 +376,40 @@ const api = {
 				}
 				annotation.direction = 'right';
 				const csi = store.get.csi(step.csiID);
-				const p1 = store.get.point(annotation.points[0]);
-				p1.relativeTo = {type: 'page', id: step.parent.id};
-				// TODO: this is only true if previous step is on a previous page
-				// TODO: if previous step is on same page, draw a divider between steps with arrow base on divider
-				p1.x = 0;
-				p1.y = store.get.coords.pointToPage(0, csi.height / 2, csi).y;
-				const p2 = store.get.point(annotation.points[1]);
-				p2.relativeTo = {type: 'csi', id: step.csiID};
-				p2.x = -_.geom.arrow().head.length - 10;
-				p2.y = csi.height / 2;
+				const base = store.get.point(annotation.points[0]);
+				const prevStep = store.get.prevStep(step);
+				if (prevStep.parent.id === step.parent.id) {
+					// The Step that places submodel is on same page as the step that completes submodel
+					// Place arrow right of step and add points to make it look like a divider
+					while (annotation.points.length < 4) {
+						store.mutations.calloutArrow.addPoint({arrow: annotation});
+					}
+					base.relativeTo = {type: 'step', id: prevStep.id};
+					base.x = step.width;
+					base.y = 0;
+					const p1 = store.get.point(annotation.points[1]);
+					p1.relativeTo = {type: 'step', id: prevStep.id};
+					p1.x = step.width;
+					p1.y = step.height;
+					const p2 = store.get.point(annotation.points[2]);
+					p2.relativeTo = {type: 'step', id: prevStep.id};
+					p2.x = step.width;
+					p2.y = csi.y + (csi.height / 2);
+				} else {
+					// The Step that places submodel is on the page after the step that completes submodel
+					// Start arrow on extreme left of page, ignoring page margins
+					while (annotation.points.length > 2) {
+						store.mutations.item.delete({item: {type: 'point', id: annotation.points[2]}});
+					}
+					base.relativeTo = {type: 'page', id: step.parent.id};
+					base.y = store.get.coords.pointToPage(0, csi.height / 2, csi).y;
+					base.x = 0;
+				}
+
+				const tip = store.get.point(_.last(annotation.points));
+				tip.relativeTo = {type: 'csi', id: step.csiID};
+				tip.x = -_.geom.arrow().head.length - 10;
+				tip.y = csi.height / 2;
 			}
 		}
 	},
