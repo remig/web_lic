@@ -3,37 +3,41 @@
 import store from '../store';
 
 export default {
-	add(opts) {  // opts: {parent, modelFilename, quantity}
-		// TODO: submodelImages don't have a CSI, they have a pliItem with no quantity label.  Fix that.
-		const submodelImage = store.mutations.item.add({item: {
-			type: 'submodelImage', csiID: null, quantityLabelID: null,
-			modelFilename: opts.modelFilename, quantity: opts.quantity || 1,
-			x: null, y: null, width: null, height: null,
-			innerContentOffset: {x: 0, y: 0}
-		}, parent: opts.parent});
+	convertToCallout(opts) {  // opts: {modelFilename, destStep, doLayout}
+		// Create a new callout in the step that this submodel is added to
+		const destStep = store.get.lookupToItem(opts.destStep);
+		const callout = store.mutations.callout.add({parent: destStep});
 
-		store.mutations.csi.add({parent: submodelImage});
+		// Move each step in the submodel into the new callout
+		const submodelSteps = store.state.steps.filter(step => step.model.filename === opts.modelFilename);
 
-		if (opts.quantity > 1) {
-			store.mutations.item.add({item: {
-				type: 'quantityLabel',
-				align: 'right', valign: 'bottom',
-				x: null, y: null, width: null, height: null
-			}, parent: submodelImage});
+		const pagesToDelete = new Set();
+		submodelSteps.forEach((step, stepIdx) => {
+			if (step.pliID) {
+				store.mutations.pli.delete({
+					pli: {type: 'pli', id: step.pliID},
+					deleteItems: true
+				});
+			}
+			step.submodelImages.forEach(submodelImageID => {
+				store.mutations.submodelImage.delete({
+					submodelImage: {type: 'submodelImage', id: submodelImageID}
+				});
+			});
+			pagesToDelete.add(step.parent.id);
+			store.mutations.item.reparent({item: step, newParent: callout});
+			step.number = stepIdx + 1;
+		});
+
+		for (const pageID of pagesToDelete) {
+			const page = store.get.page(pageID);
+			if (page && !page.steps.length) {
+				store.mutations.page.delete({page});
+			}
 		}
-		return submodelImage;
-	},
-	delete(opts) {  // opts: {submodelImage, doLayout}
-		const submodelImage = store.get.lookupToItem(opts.submodelImage);
-		if (submodelImage.csiID != null) {
-			store.mutations.item.delete({item: store.get.csi(submodelImage.csiID)});
-		}
-		if (submodelImage.quantityLabelID != null) {
-			store.mutations.item.delete({item: {type: 'quantityLabel', id: submodelImage.quantityLabelID}});
-		}
-		store.mutations.item.delete({item: submodelImage});
+		store.mutations.step.renumber();
 		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(submodelImage)});
+			store.mutations.page.layout({page: destStep.parent});
 		}
 	}
 };
