@@ -111,7 +111,7 @@ function addGuide(orientation) {
 
 function removeGuides() {
 	const root = uiState.getCurrentState(), op = 'replace', path = '/guides';
-	const originalGuides = _.clone(root.guides);
+	const originalGuides = _.cloneDeep(root.guides);
 	const change = {
 		action: {
 			redo: [{root, op, path, value: []}],

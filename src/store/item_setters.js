@@ -26,11 +26,11 @@ const api = {
 	},
 	delete(opts) {  // opts: {item}
 		const item = store.get.lookupToItem(opts.item);
-		_.remove(store.state[item.type + 's'], item);
+		_.deleteItem(store.state[item.type + 's'], item);
 		if (item.parent) {
 			const parent = store.get.lookupToItem(item.parent);
 			if (parent.hasOwnProperty(item.type + 's')) {
-				_.remove(parent[item.type + 's'], item.id);
+				_.deleteItem(parent[item.type + 's'], item.id);
 			} else if (parent.hasOwnProperty(item.type + 'ID')) {
 				parent[item.type + 'ID'] = null;
 			}
@@ -53,7 +53,7 @@ const api = {
 		item.parent.id = newParent.id;
 		item.parent.type = newParent.type;
 		if (oldParent.hasOwnProperty(item.type + 's')) {
-			_.remove(oldParent[item.type + 's'], item.id);
+			_.deleteItem(oldParent[item.type + 's'], item.id);
 		} else if (oldParent.hasOwnProperty(item.type + 'ID')) {
 			oldParent[item.type + 'ID'] = null;
 		}

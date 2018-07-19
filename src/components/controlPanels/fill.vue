@@ -52,7 +52,7 @@ export default {
 		title: {type: String, default: 'Fill'}
 	},
 	data() {
-		const template = _.get(this.templateEntry, store.state.template).fill;
+		const template = _.get(store.state.template, this.templateEntry).fill;
 		return {
 			color: template.color,
 			gradient: template.gradient,
@@ -63,7 +63,7 @@ export default {
 		pickImage() {
 			openFileHandler('.png', 'dataURL', (src, filename) => {
 
-				const template = _.get(this.templateEntry, store.state.template).fill;
+				const template = _.get(store.state.template, this.templateEntry).fill;
 				template.image = {filename, src};
 				this.imageFilename = filename;
 
@@ -76,7 +76,7 @@ export default {
 			});
 		},
 		removeImage() {
-			const template = _.get(this.templateEntry, store.state.template).fill;
+			const template = _.get(store.state.template, this.templateEntry).fill;
 			this.imageFilename = template.image = '';
 			this.updateValues();
 		},
@@ -85,7 +85,7 @@ export default {
 			this.updateValues();
 		},
 		updateValues() {
-			const template = _.get(this.templateEntry, store.state.template).fill;
+			const template = _.get(store.state.template, this.templateEntry).fill;
 			template.color = this.color;
 			this.$emit('new-values', {type: this.templateEntry, noLayout: true});
 		}

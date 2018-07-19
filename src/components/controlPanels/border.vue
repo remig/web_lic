@@ -42,7 +42,7 @@ export default {
 		title: {type: String, default: 'Border'}
 	},
 	data() {
-		const template = _.get(this.templateEntry, store.state.template).border;
+		const template = _.get(store.state.template, this.templateEntry).border;
 		return {
 			width: template.width || 0,
 			color: template.color,
@@ -55,7 +55,7 @@ export default {
 			this.updateValues();
 		},
 		updateValues() {
-			const template = _.get(this.templateEntry, store.state.template).border;
+			const template = _.get(store.state.template, this.templateEntry).border;
 			template.width = this.width;
 			template.color = this.color;
 			template.cornerRadius = this.cornerRadius;

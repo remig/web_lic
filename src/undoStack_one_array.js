@@ -41,7 +41,7 @@ const api = {
 
 		changeList.forEach(change => {
 			if (change.hasOwnProperty('mutation')) {
-				const mutation = _.get(change.mutation, store.mutations);
+				const mutation = _.get(store.mutations, change.mutation);
 				if (mutation) {
 					mutation(opts);
 				}
@@ -61,7 +61,7 @@ const api = {
 		if (_.isEmpty(changeList.filter(el => el.hasOwnProperty('mutation')))) {
 			newState = state.stack[state.stack.length - 1].state;  // If we have no new state, reuse previous stack state entry
 		} else {
-			newState = _.clone(store.state);
+			newState = _.cloneDeep(store.state);
 		}
 
 		// TODO: state can be really big; consider switching store.mutations to JSON-patch
@@ -80,7 +80,7 @@ const api = {
 
 	// Copy the store's current state into the undoStack's initial base state
 	saveBaseState() {
-		state.stack = [{state: _.clone(store.state), undoText: null}];
+		state.stack = [{state: _.cloneDeep(store.state), undoText: null}];
 		setIndex(state, 0);
 	},
 
@@ -134,7 +134,7 @@ function isAction(el) {
 function performUndoRedoAction(undoOrRedo, newIndex) {
 
 	const newStack = state.stack[newIndex];
-	const newState = _.clone(newStack.state);
+	const newState = _.cloneDeep(newStack.state);
 	store.replaceState(newState);
 
 	const actionStack = (undoOrRedo === 'undo') ? state.stack[state.index] : newStack;

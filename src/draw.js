@@ -476,7 +476,7 @@ const api = {
 				}
 				const bbox = _.geom.bbox(points);
 
-				points = [points[0], _.clone(points[0]), _.clone(points[0]), points[1]];
+				points = [points[0], _.cloneDeep(points[0]), _.cloneDeep(points[0]), points[1]];
 
 				let midX = points[0].x, midY = points[0].y;
 				if (direction === 'up') {

@@ -135,7 +135,7 @@ const api = {
 			}
 			const lastItem = _.last(col);
 			const remainingSpace = box.height - lastItem.y - lastItem.height;
-			const spaceToAdd = _.bound(remainingSpace / (col.length - 1), 0, margin);
+			const spaceToAdd = _.clamp(remainingSpace / (col.length - 1), 0, margin);
 			col.forEach((item, idx) => {
 				item.y += spaceToAdd * idx;
 			});
@@ -293,7 +293,7 @@ const api = {
 		step.height = box.height - pageMargin - pageMargin;
 
 		// transform box to step coordinates
-		box = _.clone(box);
+		box = _.cloneDeep(box);
 		box.x = box.y = 0;
 		box.width = step.width;
 		box.height = step.height;
@@ -378,6 +378,8 @@ const api = {
 				const csi = store.get.csi(step.csiID);
 				const p1 = store.get.point(annotation.points[0]);
 				p1.relativeTo = {type: 'page', id: step.parent.id};
+				// TODO: this is only true if previous step is on a previous page
+				// TODO: if previous step is on same page, draw a divider between steps with arrow base on divider
 				p1.x = 0;
 				p1.y = store.get.coords.pointToPage(0, csi.height / 2, csi).y;
 				const p2 = store.get.point(annotation.points[1]);
@@ -433,7 +435,7 @@ const api = {
 			submodelImage.width += lblSize.width + margin;
 			lbl.x = submodelImage.width - borderWidth - borderWidth - margin;
 			lbl.y = submodelImage.height - borderWidth - borderWidth - margin;
-			_.copy(lbl, lblSize);
+			_.assign(lbl, lblSize);
 		}
 	},
 
@@ -533,14 +535,14 @@ const api = {
 					calloutBox.height += tallestStep + margin;
 				}
 				stepBox.width = entry.width;
-				rows[rows.length - 1].push({step: entry.step, box: _.clone(stepBox)});
+				rows[rows.length - 1].push({step: entry.step, box: _.cloneDeep(stepBox)});
 				api.step(entry.step, stepBox, 0);
 				stepBox.x += stepBox.width + margin;
 				calloutBox.width = Math.max(calloutBox.width, stepBox.x);
 			});
 
 			// Increase vertical space between each row so all rows align nicely
-			const cols = _.transpose(rows);
+			const cols = _.unzip(rows);
 			cols.forEach(col => {
 				col = col.filter(el => el);
 				const maxX = Math.max(...col.map(c => c.box.x));
@@ -563,14 +565,14 @@ const api = {
 					calloutBox.width += widestStep + margin;
 				}
 				stepBox.height = entry.height;
-				columns[columns.length - 1].push({step: entry.step, box: _.clone(stepBox)});
+				columns[columns.length - 1].push({step: entry.step, box: _.cloneDeep(stepBox)});
 				api.step(entry.step, stepBox, 0);
 				stepBox.y += stepBox.height + margin;
 				calloutBox.height = Math.max(calloutBox.height, stepBox.y);
 			});
 
 			// Increase vertical space between each row so all rows align nicely
-			const rows = _.transpose(columns);
+			const rows = _.unzip(columns);
 			rows.forEach(row => {
 				row = row.filter(el => el);
 				const maxY = Math.max(...row.map(c => c.box.y));
@@ -728,7 +730,7 @@ const api = {
 				const originalPage = store.get.pageForItem(step);
 				const prevPage = store.get.prevBasicPage(originalPage);
 
-				store.mutations.step.moveToPreviousPage({step});
+				store.mutations.step.moveToPreviousPage({step});  // TODO: use moveToPage, since we know what page to move to
 
 				const stepsOverlap = prevPage.steps.some(stepID => isStepTooSmall(store.get.step(stepID)));
 				if (stepsOverlap) {
@@ -739,7 +741,7 @@ const api = {
 					store.mutations.page.delete({page: originalPage});
 				}
 				progressCallback(`Step ${stepsToMerge[0].number}`);
-				_.removeIndex(stepsToMerge, 0);
+				_.pullAt(stepsToMerge, 0);
 				resolve();
 			}, 100));
 		}

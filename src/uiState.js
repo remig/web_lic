@@ -68,11 +68,11 @@ const defaultState = {
 	pliTransforms: {}  // TODO: if scale goes back to 1, don't store it delete it.  Likewise with rotations x|y|z = 0.
 };
 
-let currentState = _.clone(defaultState);
+let currentState = _.cloneDeep(defaultState);
 
 const api = {
 	get(key) {
-		return _.get(key, currentState);
+		return _.get(currentState, key);
 	},
 	set(key, prop) {
 		currentState[key] = prop;  // TODO: this only works for root keys; 'foo.bar' doesn't work yet
@@ -81,16 +81,16 @@ const api = {
 		return currentState;
 	},
 	getDefaultState() {
-		return _.clone(defaultState);  // Return clone so we don't accidentally modify it; default state is immutable
+		return _.cloneDeep(defaultState);  // Return clone so we don't accidentally modify it; default state is immutable
 	},
 	getPLITransform(filename) {
 		return currentState.pliTransforms[filename] || {};
 	},
 	resetUIState() {
-		currentState = _.clone(defaultState);
+		currentState = _.cloneDeep(defaultState);
 	},
 	setUIState(newState) {
-		currentState = _.clone(newState);
+		currentState = _.cloneDeep(newState);
 	},
 	mutations: {  // TODO: Move more ui state mutations here (pliTransforms in context menu, grid & guide bits in menu, etc)
 		guides: {

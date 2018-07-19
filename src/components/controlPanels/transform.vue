@@ -54,7 +54,7 @@ export default {
 	components: {PanelBase},
 	props: ['templateEntry'],
 	data() {
-		const template = _.get(this.templateEntry, store.state.template);
+		const template = _.get(store.state.template, this.templateEntry);
 		return {
 			x: template.rotation.x,
 			y: template.rotation.y,
@@ -64,7 +64,7 @@ export default {
 	},
 	methods: {
 		updateValues() {
-			const transform = _.get(this.templateEntry, store.state.template);
+			const transform = _.get(store.state.template, this.templateEntry);
 			const rotation = transform.rotation;
 			if (rotation.x !== this.x || rotation.y !== this.y || rotation.z !== this.z
 					|| transform.scale !== this.scale) {

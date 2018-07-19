@@ -1,4 +1,4 @@
-/* global Vue: false, Split: false, ELEMENT: false*/
+/* global Vue: false, Split: false, ELEMENT: false */
 'use strict';
 
 import _ from './util';

@@ -126,7 +126,7 @@ export default {
 		if (!srcStep || !destStep) {
 			return;
 		}
-		_.clone(srcStep.parts).forEach(partID => {
+		_.cloneDeep(srcStep.parts).forEach(partID => {
 			store.mutations.part.moveToStep({partID, srcStep, destStep, doLayout: false});
 		});
 		store.mutations.step.delete({step: srcStep});
@@ -164,8 +164,8 @@ export default {
 			item: store.get.csi(step.csiID),
 			newParent: newStep
 		});
-		newStep.parts = _.clone(step.parts);
-		newStep.model = _.clone(step.model);
+		newStep.parts = _.cloneDeep(step.parts);
+		newStep.model = _.cloneDeep(step.model);
 		if (opts.doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(step)});
 		}

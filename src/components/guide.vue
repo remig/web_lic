@@ -40,13 +40,13 @@ export default {
 			// TOOD: Improve performance here to cut down guide drag flicker
 			if (this.orientation === 'vertical') {
 				let left = parseFloat(this.$el.style.left) + dx;
-				left = _.bound(left, 0, this.pageSize.width) + 'px';
+				left = _.clamp(left, 0, this.pageSize.width) + 'px';
 				document.querySelectorAll(`[data-id="guide-${this.id}"]`).forEach(el => {
 					el.style.left = left;
 				});
 			} else {
 				let top = parseFloat(this.$el.style.top) + dy;
-				top = _.bound(top, 0, this.pageSize.height) + 'px';
+				top = _.clamp(top, 0, this.pageSize.height) + 'px';
 				document.querySelectorAll(`[data-id="guide-${this.id}"]`).forEach(el => {
 					el.style.top = top;
 				});

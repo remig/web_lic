@@ -28,8 +28,8 @@ export default {
 
 		buildPartList(store.model);
 
-		_.forEach(itemList, (colorCode, partList) => {
-			_.forEach(partList, (filename, quantity) => {
+		_.forOwn(itemList, (partList, colorCode) => {
+			_.forOwn(partList, (quantity, filename) => {
 				store.mutations.pliItem.add({ parent: page, filename, colorCode, quantity});
 			});
 		});

@@ -17,7 +17,7 @@ const api = {
 };
 
 // Add default implementations of 'get', 'save' and 'clear' for each key
-_.forEach(keys, (k, v) => {
+_.forOwn(keys, (v, k) => {
 	api.get[k] = function() {
 		var res = localStorage.getItem(v);
 		if (res == null) {  // If key is totally null, save and return an empty object instead
@@ -34,7 +34,7 @@ _.forEach(keys, (k, v) => {
 	};
 	api.save[k] = function(json) {  //  Set only the properties in json in the cached object
 		const target = api.get[k](v);
-		_.forEach(json, (k, v) => {
+		_.forOwn(json, (v, k) => {
 			target[k] = v;
 		});
 		api.replace[k](target);

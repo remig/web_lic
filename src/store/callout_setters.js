@@ -32,9 +32,9 @@ export default {
 		const stepNumber = callout.steps.length > 0 ? callout.steps.length + 1 : null;
 		const newStep = store.mutations.step.add({dest: callout, stepNumber});
 		if (callout.steps.length > 1) {
-			newStep.model = _.clone(store.get.step(callout.steps[0])).model;
+			newStep.model = _.cloneDeep(store.get.step(callout.steps[0])).model;
 		} else {
-			newStep.model = _.clone(store.get.step(callout.parent)).model;
+			newStep.model = _.cloneDeep(store.get.step(callout.parent)).model;
 		}
 		if (stepNumber === 2) {
 			// Special case: callouts with one step have no step numbers;

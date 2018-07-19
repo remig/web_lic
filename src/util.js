@@ -7,7 +7,6 @@ _.mixin({
 	isEven(n) {
 		return (typeof n === 'number') && isFinite(n) && !(n % 2);
 	},
-	bound: _.clamp,
 	insert(array, item, idx) {
 		if (idx == null || idx === -1) {
 			array.push(item);
@@ -15,14 +14,12 @@ _.mixin({
 			array.splice(idx, 0, item);
 		}
 	},
-	remove(array, item) {  // rename this to deleteItem, to not conflict with existing _.remove
+	deleteItem(array, item) {
 		const idx = array.indexOf(item);
 		if (idx >= 0) {
 			array.splice(idx, 1);
 		}
 	},
-	removeIndex: _.pullAt,
-	transpose: _.unzip,
 	count(array, serach) {
 		let count = 0;
 		for (let i = 0; i < array.length; i++) {
@@ -35,34 +32,11 @@ _.mixin({
 	itemEq(a, b) {
 		return a && b && a.id === b.id && a.type === b.type && a.stepID === b.stepID;
 	},
-	get(prop, obj = {}, defaultValue) {
-		// _.get works the same but has prop & object reversed
-		prop = (prop + '').split('.');
-		for (let i = 0; i < prop.length; i++) {
-			const p = prop[i];
-			const match = p.match(/(.*)\[(\d*)\]/);
-			if (match && match.length > 2) {
-				obj = obj[match[1]];
-				if (obj && Array.isArray(obj) && obj.length >= match[2]) {
-					obj = obj[match[2]];
-				} else {
-					return defaultValue;
-				}
-			} else {
-				if (obj.hasOwnProperty(p) && obj[p] != null) {
-					obj = obj[p];
-				} else {
-					return defaultValue;
-				}
-			}
-		}
-		return obj;
-	},
 	measureLabel: (() => {
 		const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
 		return function(font, text) {
 			if (labelSizeCache[font] && labelSizeCache[font][text]) {
-				return _.clone(labelSizeCache[font][text]);
+				return _.cloneDeep(labelSizeCache[font][text]);
 			}
 			const container = document.getElementById('fontMeasureContainer');
 			container.style.font = font;
@@ -71,7 +45,7 @@ _.mixin({
 			res = {width: Math.ceil(res.width), height: Math.ceil(res.height)};
 			labelSizeCache[font] = labelSizeCache[font] || {};
 			labelSizeCache[font][text] = res;
-			return _.clone(res);  // Always return a clone so we don't accidentally alter the cached values
+			return _.cloneDeep(res);  // Always return a clone so we don't accidentally alter cached values
 		};
 	})(),
 	fontToFontParts: (() => {
@@ -164,7 +138,7 @@ _.mixin({
 			};
 		};
 		geom.expandBox = function(box, minWidth, minHeight) {
-			box = _.clone(box);
+			box = _.cloneDeep(box);
 			if (Math.floor(box.width) < 1) {
 				box.width = minWidth;
 				box.x -= minWidth / 2;
@@ -238,11 +212,6 @@ _.mixin({
 		};
 		return version;
 	})(),
-	clone: _.cloneDeep,
-	copy: _.assign,
-	forEach(obj, cb) {
-		_.forOwn(obj, (value, key) => cb(key, value));  // key, value arguments are reversed
-	},
 	sort: (() => {
 		function sort() {}
 		sort.numeric = () => {
@@ -264,7 +233,6 @@ _.mixin({
 		}
 		return t + 'ms';
 	},
-	titleCase: _.startCase,
 	prettyPrint(s) {  // Human readable versions of common internal strings
 		s = s + '';
 		s = s.replace(/\./g, ' ');  // Some strings come in as foo.bar; replace extraneous dots with spaces
@@ -299,7 +267,7 @@ _.mixin({
 		if (s.startsWith('ctrl+')) {
 			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();
 		}
-		return _.titleCase(s);
+		return _.startCase(s);
 	},
 	color: (() => {
 		function color() {}

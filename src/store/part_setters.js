@@ -28,7 +28,7 @@ export default {
 				step.displacedParts.push(opts);
 			}
 		} else if (idx >= 0) {
-			_.removeIndex(step.displacedParts, idx);
+			_.pullAt(step.displacedParts, idx);
 		}
 		// TODO: no need to layout entire page; can layout just the step containing the newly displaced part
 		store.mutations.page.layout({page: store.get.pageForItem(step)});
@@ -38,7 +38,7 @@ export default {
 		const partID = opts.partID;
 		const srcStep = store.get.lookupToItem(opts.srcStep);
 		store.mutations.csi.resetSize({csi: srcStep.csiID});
-		_.remove(srcStep.parts, partID);
+		_.deleteItem(srcStep.parts, partID);
 
 		const destStep = store.get.lookupToItem(opts.destStep);
 		store.mutations.csi.resetSize({csi: destStep.csiID});
@@ -84,7 +84,7 @@ export default {
 		} else {
 			destCalloutStep = store.get.step(_.last(callout.steps));
 		}
-		destCalloutStep.model = _.clone(step.model);
+		destCalloutStep.model = _.cloneDeep(step.model);
 		destCalloutStep.parts.push(partID);
 		store.mutations.csi.resetSize({csi: destCalloutStep.csiID});
 		if (opts.doLayout) {
@@ -93,7 +93,7 @@ export default {
 	},
 	removeFromCallout(opts) {  // opts: {partID, step}
 		const step = store.get.lookupToItem(opts.step);
-		_.remove(step.parts, opts.partID);
+		_.deleteItem(step.parts, opts.partID);
 		store.mutations.csi.resetSize({csi: step.csiID});
 		store.mutations.page.layout({page: store.get.pageForItem(step)});
 	}

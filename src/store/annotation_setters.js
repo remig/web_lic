@@ -12,7 +12,7 @@ export default {
 			annotationType: opts.annotationType
 		}, parent: opts.parent});
 
-		_.copy(annotation, opts.properties);
+		_.assign(annotation, opts.properties);
 
 		// Guarantee some nice defaults
 		if (annotation.annotationType === 'label') {

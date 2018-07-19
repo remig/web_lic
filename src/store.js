@@ -26,7 +26,7 @@ import Storage from './storage';
 import packageInfo from '../package.json';
 
 const emptyState = {
-	template: _.clone(defaultTemplate),
+	template: _.cloneDeep(defaultTemplate),
 	templatePage: null,
 	titlePage: null,
 	plisVisible: true,
@@ -59,13 +59,13 @@ const store = {
 	},
 	// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic,
 	//  except static stuff in model, like part geometries
-	state: _.clone(emptyState),
+	state: _.cloneDeep(emptyState),
 	replaceState(state) {
 		store.state = state;
 		store.cache.reset();
 	},
 	resetState() {
-		store.state = _.clone(emptyState);
+		store.state = _.cloneDeep(emptyState);
 		store.cache.reset();
 	},
 	load(content) {
@@ -315,7 +315,7 @@ const store = {
 
 			localModel.steps.forEach(modelStep => {
 
-				const parts = _.clone(modelStep.parts || []);
+				const parts = _.cloneDeep(modelStep.parts || []);
 				const submodelIDs = parts.filter(pID => {
 					return LDParse.model.isSubmodel(localModel.parts[pID].filename);
 				});

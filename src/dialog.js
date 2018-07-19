@@ -75,7 +75,7 @@ const dialogs = {
 	}
 };
 
-_.forEach(dialogs, (name, data) => {
+_.forOwn(dialogs, (data, name) => {
 	Vue.component(name + 'Dialog', {
 		template: `#${name}Template`,
 		mixins: [baseDialogPropagator],
@@ -103,11 +103,11 @@ const elDialogs = {
 	}
 };
 
-_.forEach(elDialogs, (name, data) => {
+_.forOwn(elDialogs, (data, name) => {
 	Vue.component(name + 'Dialog', {
 		template: `#${name}DialogTemplate`,
 		data: function() {
-			data = _.clone(data);
+			data = _.cloneDeep(data);
 			data.visible = false;
 			return data;
 		},

@@ -91,7 +91,7 @@ export default {
 	components: {PanelBase},
 	props: ['templateEntry'],
 	data() {
-		const template = _.get(this.templateEntry, store.state.template);
+		const template = _.get(store.state.template, this.templateEntry);
 		const fontParts = _.fontToFontParts(template.font);
 		this.addCustomFont(fontParts.fontFamily);
 		return {
@@ -140,7 +140,7 @@ export default {
 			this.updateValues();
 		},
 		updateValues() {
-			const template = _.get(this.templateEntry, store.state.template);
+			const template = _.get(store.state.template, this.templateEntry);
 			template.font = this.fontString();
 			template.color = this.color;
 			this.$emit('new-values', this.templateEntry);

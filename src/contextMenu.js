@@ -115,7 +115,7 @@ const contextMenu = {
 					text: 'By Row and Column...',
 					cb(selectedItem) {
 						const page = store.get.page(selectedItem);
-						const originalLayout = _.clone(page.layout);
+						const originalLayout = _.cloneDeep(page.layout);
 
 						DialogManager.setDialog('pageRowColLayoutDialog');
 						app.clearSelected();
@@ -192,7 +192,7 @@ const contextMenu = {
 					dest,
 					stepNumber: prevStep.number + 1,
 					doLayout: true, renumber: true,
-					model: _.clone(prevStep.model),
+					model: _.cloneDeep(prevStep.model),
 					insertionIndex: store.state.steps.indexOf(prevStep) + 1
 				};
 				undoStack.commit('step.add', opts, this.text);
@@ -252,7 +252,7 @@ const contextMenu = {
 					cb(selectedItem) {
 						return;
 						const page = store.get.page(selectedItem);
-						const originalLayout = _.clone(page.layout);
+						const originalLayout = _.cloneDeep(page.layout);
 
 						DialogManager.setDialog('pageRowColLayoutDialog');
 						app.clearSelected();
@@ -431,7 +431,7 @@ const contextMenu = {
 				const opts = {
 					dest, stepNumber: step.number,
 					doLayout: true, renumber: true,
-					model: _.clone(step.model),
+					model: _.cloneDeep(step.model),
 					insertionIndex: store.state.steps.indexOf(step),
 					parentInsertionIndex: dest.steps.indexOf(step.id)
 				};
@@ -447,7 +447,7 @@ const contextMenu = {
 				const opts = {
 					dest, stepNumber: step.number + 1,
 					doLayout: true, renumber: true,
-					model: _.clone(step.model),
+					model: _.cloneDeep(step.model),
 					insertionIndex: store.state.steps.indexOf(step) + 1,
 					parentInsertionIndex: dest.steps.indexOf(step.id) + 1
 				};
@@ -498,7 +498,7 @@ const contextMenu = {
 					text: 'Custom Rotation...',
 					cb(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
-						const originalRotation = _.clone(csi.rotation);
+						const originalRotation = _.cloneDeep(csi.rotation);
 						let initialRotation = originalRotation;
 						if (initialRotation == null) {
 							initialRotation = store.get.templateForItem(selectedItem).rotation;
@@ -513,7 +513,7 @@ const contextMenu = {
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'csi.rotate',
-									{csi, ..._.clone(newValues), doLayout: true},
+									{csi, ..._.cloneDeep(newValues), doLayout: true},
 									'Rotate Step Image',
 									[csi]
 								);
@@ -529,7 +529,7 @@ const contextMenu = {
 								app.redrawUI(true);
 							});
 							dialog.title = 'Rotate CSI';
-							dialog.rotation = _.clone(initialRotation);
+							dialog.rotation = _.cloneDeep(initialRotation);
 							dialog.show({x: 400, y: 150});
 						});
 					}
@@ -559,7 +559,7 @@ const contextMenu = {
 				// TODO: rewrite this to use simple number picker dialog
 				// TODO: this doesn't re-layout pages after applying changes. Must check all affected pages.
 				const csi = store.get.csi(selectedItem.id);
-				const rotation = _.clone(csi.rotation);
+				const rotation = _.cloneDeep(csi.rotation);
 				const step = store.get.step(csi.parent.id);
 				const originalRotations = [];
 
@@ -632,7 +632,7 @@ const contextMenu = {
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
 					dialog.$on('update', newValues => {
-						csi.scale = _.bound(newValues.value || 0, 0.001, 5);
+						csi.scale = _.clamp(newValues.value || 0, 0.001, 5);
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
@@ -707,7 +707,7 @@ const contextMenu = {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				const pliTransforms = uiState.get('pliTransforms');
-				const originalTransform = _.clone(pliTransforms[filename]);
+				const originalTransform = _.cloneDeep(pliTransforms[filename]);
 				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};
 
@@ -756,7 +756,7 @@ const contextMenu = {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				const pliTransforms = uiState.get('pliTransforms');
-				const originalTransform = _.clone(pliTransforms[filename]);
+				const originalTransform = _.cloneDeep(pliTransforms[filename]);
 				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};
 
@@ -764,12 +764,12 @@ const contextMenu = {
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
 					dialog.$on('update', newValues => {
-						pliTransforms[filename].scale = _.bound(newValues.value || 0, 0.001, 5);
+						pliTransforms[filename].scale = _.clamp(newValues.value || 0, 0.001, 5);
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
 					dialog.$on('ok', newValues => {
-						const value = _.bound(newValues.value || 0, 0.001, 5);
+						const value = _.clamp(newValues.value || 0, 0.001, 5);
 						const path = `/${filename}/scale`, root = pliTransforms;
 						const op = 'replace';
 						const change = {
@@ -905,7 +905,7 @@ const contextMenu = {
 			text: 'Position',
 			children: ['top', 'right', 'bottom', 'left'].map(position => {
 				return {
-					text: _.titleCase(position),
+					text: _.startCase(position),
 					shown: (function(position) {
 						return function(selectedItem) {
 							const callout = store.get.lookupToItem(selectedItem);
@@ -1026,7 +1026,7 @@ const contextMenu = {
 			text: 'Rotate Tip...',
 			children: ['up', 'right', 'down', 'left'].map(direction => {
 				return {
-					text: _.titleCase(direction),
+					text: _.startCase(direction),
 					shown: arrowTipRotationVisible(direction),
 					cb: rotateArrowTip(direction)
 				};
@@ -1119,7 +1119,7 @@ const contextMenu = {
 			text: 'Displace Part...',
 			children: ['up', 'down', 'left', 'right', 'forward', 'backward', null].map(direction => {
 				return {
-					text: _.titleCase(direction || 'None'),
+					text: _.startCase(direction || 'None'),
 					shown: showDisplacement(direction),
 					cb: displacePart(direction)
 				};
@@ -1138,7 +1138,7 @@ const contextMenu = {
 				const step = store.get.step(selectedItem.stepID);
 				const csi = store.get.csi(step.csiID);
 				const displacement = step.displacedParts.find(p => p.partID === selectedItem.id);
-				const originalDisplacement = _.clone(displacement);
+				const originalDisplacement = _.cloneDeep(displacement);
 
 				DialogManager.setDialog('partDisplacementDialog');
 				app.clearSelected();
@@ -1304,7 +1304,7 @@ function displacePart(direction) {
 		undoStack.commit(
 			'part.displace',
 			{partID: selectedItem.id, step, direction},
-			`Displace Part ${_.titleCase(direction || 'None')}`,
+			`Displace Part ${_.startCase(direction || 'None')}`,
 			[{type: 'csi', id: step.csiID}]
 		);
 	};
@@ -1329,7 +1329,7 @@ function filterMenu(menu, selectedItem) {
 			}
 		}
 		if (deleteIndex) {
-			_.removeIndex(menu, i);
+			_.pullAt(menu, i);
 			i = -1;
 		}
 	}
@@ -1355,7 +1355,7 @@ export default function ContextMenu(selectedItem, localApp) {
 	menu = menu.map(menuEntry => {  // Super cheap clone of menu, so we don't destroy the original
 		if (menuEntry.children) {
 			const res = {};
-			_.forEach(menuEntry, (k, v) => {
+			_.forOwn(menuEntry, (v, k) => {
 				res[k] = v;
 			});
 			res.children = (typeof menuEntry.children === 'function')

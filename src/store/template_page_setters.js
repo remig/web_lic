@@ -50,14 +50,14 @@ export default {
 		});
 	},
 	set(opts) {  // opts: {entry, value}
-		const entry = _.get(opts.entry, store.state.template);
-		_.copy(entry, opts.value);
+		const entry = _.get(store.state.template, opts.entry);
+		_.assign(entry, opts.value);
 	},
 	load(opts) {  // opts: {template}
 		store.state.template = opts.template;
 	},
 	reset() {
-		store.state.template = _.clone(defaultTemplate);
+		store.state.template = _.cloneDeep(defaultTemplate);
 		store.state.templatePage.needsLayout = true;
 		store.state.pages.forEach(page => (page.needsLayout = true));
 		store.mutations.csi.markAllDirty();
