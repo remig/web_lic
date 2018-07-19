@@ -1,43 +1,13 @@
 /* global _: false */
 'use strict';
 
-const api = _;
-
 // Add a handful of useful utility functions to lodash
 // TODO: A lot of these duplicate functionality in lodash; remove them
-// TODO: refactor to use '_' instead of 'api' throughout this file
-api.mixin({
-	isEmpty(p) {
-		if (typeof p === 'number') {
-			return false;
-		} else if (typeof p === 'boolean') {
-			return !p;
-		} else if (Array.isArray(p) || typeof p === 'string') {
-			return p.length <= 0;
-		}
-		for (const x in p) {
-			if (p.hasOwnProperty(x)) {
-				return false;
-			}
-		}
-		return true;
-	},
+_.mixin({
 	isEven(n) {
 		return (typeof n === 'number') && isFinite(n) && !(n % 2);
 	},
-	bound(value, min, max) {
-		return Math.max(min, Math.min(max, value));
-	},
-	round(value, precision = 0) {
-		precision = 10 ** precision;
-		if (precision < 1) {
-			return Math.round(value);
-		}
-		return Math.round(value * precision) / precision;
-	},
-	toArray(fakeArray) {
-		return [].slice.apply(fakeArray);
-	},
+	bound: _.clamp,
 	insert(array, item, idx) {
 		if (idx == null || idx === -1) {
 			array.push(item);
@@ -45,36 +15,14 @@ api.mixin({
 			array.splice(idx, 0, item);
 		}
 	},
-	remove(array, item) {
+	remove(array, item) {  // rename this to deleteItem, to not conflict with existing _.remove
 		const idx = array.indexOf(item);
 		if (idx >= 0) {
 			array.splice(idx, 1);
 		}
 	},
-	removeIndex(array, idx) {
-		array.splice(idx, 1);
-	},
-	last(array) {
-		return array[array.length - 1];
-	},
-	chunk(array, size = 1) {
-		const res = [];
-		for (let i = 0; i < array.length; i += size) {
-			res.push(array.slice(i, i + size));
-		}
-		return res;
-	},
-	transpose(array) {
-		const res = [];
-		const maxLength = Math.max(...array.map(el => el.length));
-		for (let i = 0; i < maxLength; i++) {
-			res.push([]);
-			for (let j = 0; j < array.length; j++) {
-				res[i].push((array[j] || [])[i]);
-			}
-		}
-		return res;
-	},
+	removeIndex: _.pullAt,
+	transpose: _.unzip,
 	count(array, serach) {
 		let count = 0;
 		for (let i = 0; i < array.length; i++) {
@@ -84,21 +32,11 @@ api.mixin({
 		}
 		return count;
 	},
-	eq(a, b) {
-		if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
-			return false;
-		}
-		for (let i = 0; i < a.length; i++) {
-			if (a[i] !== b[i]) {
-				return false;
-			}
-		}
-		return true;
-	},
 	itemEq(a, b) {
 		return a && b && a.id === b.id && a.type === b.type && a.stepID === b.stepID;
 	},
 	get(prop, obj = {}, defaultValue) {
+		// _.get works the same but has prop & object reversed
 		prop = (prop + '').split('.');
 		for (let i = 0; i < prop.length; i++) {
 			const p = prop[i];
@@ -124,7 +62,7 @@ api.mixin({
 		const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
 		return function(font, text) {
 			if (labelSizeCache[font] && labelSizeCache[font][text]) {
-				return api.clone(labelSizeCache[font][text]);
+				return _.clone(labelSizeCache[font][text]);
 			}
 			const container = document.getElementById('fontMeasureContainer');
 			container.style.font = font;
@@ -133,7 +71,7 @@ api.mixin({
 			res = {width: Math.ceil(res.width), height: Math.ceil(res.height)};
 			labelSizeCache[font] = labelSizeCache[font] || {};
 			labelSizeCache[font][text] = res;
-			return api.clone(res);  // Always return a clone so we don't accidentally alter the cached values
+			return _.clone(res);  // Always return a clone so we don't accidentally alter the cached values
 		};
 	})(),
 	fontToFontParts: (() => {
@@ -226,7 +164,7 @@ api.mixin({
 			};
 		};
 		geom.expandBox = function(box, minWidth, minHeight) {
-			box = api.clone(box);
+			box = _.clone(box);
 			if (Math.floor(box.width) < 1) {
 				box.width = minWidth;
 				box.x -= minWidth / 2;
@@ -285,12 +223,12 @@ api.mixin({
 			return {major: v[0] || 0, minor: v[1] || 0, revision: v[2] || 0};
 		};
 		version.nice = (v) => {
-			v = api.version.parse(v);
+			v = _.version.parse(v);
 			return `${v.major}.${v.minor}`;
 		};
 		version.isOldVersion = (prev, current) => {
-			prev = api.version.parse(prev);
-			current = api.version.parse(current);
+			prev = _.version.parse(prev);
+			current = _.version.parse(current);
 			if (prev.major !== current.major) {
 				return prev.major < current.major;
 			} else if (prev.minor !== current.minor) {
@@ -300,19 +238,10 @@ api.mixin({
 		};
 		return version;
 	})(),
-	clone(obj) {
-		if (obj == null) {
-			return null;  // JSON.parse crashes if obj is undefined
-		}
-		return JSON.parse(JSON.stringify(obj));
-	},
-	copy(to = {}, from = {}) {
-		api.forEach(from, (k, v) => {
-			to[k] = v;
-		});
-	},
+	clone: _.cloneDeep,
+	copy: _.assign,
 	forEach(obj, cb) {
-		Object.entries(obj).forEach(([k, v]) => cb(k, v));
+		_.forOwn(obj, (value, key) => cb(key, value));  // key, value arguments are reversed
 	},
 	sort: (() => {
 		function sort() {}
@@ -335,12 +264,7 @@ api.mixin({
 		}
 		return t + 'ms';
 	},
-	titleCase(s) {
-		return s.replace(/([^\W_]+[^\s-]*) */g, function(el) {
-			// Use Title Case for generic strings
-			return el.charAt(0).toUpperCase() + el.substr(1).toLowerCase();
-		});
-	},
+	titleCase: _.startCase,
 	prettyPrint(s) {  // Human readable versions of common internal strings
 		s = s + '';
 		s = s.replace(/\./g, ' ');  // Some strings come in as foo.bar; replace extraneous dots with spaces
@@ -375,7 +299,7 @@ api.mixin({
 		if (s.startsWith('ctrl+')) {
 			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();
 		}
-		return api.titleCase(s);
+		return _.titleCase(s);
 	},
 	color: (() => {
 		function color() {}
@@ -416,19 +340,19 @@ api.mixin({
 			};
 		})();
 		color.luma = (color) =>{
-			color = api.color.toRGB(color);
+			color = _.color.toRGB(color);
 			return (0.2126 * Math.pow(color.r / 255, 2.2))
 				+ (0.7151 * Math.pow(color.g / 255, 2.2))
 				+ (0.0721 * Math.pow(color.b / 255, 2.2));
 		};
 		color.opposite = (color) => {
-			return (api.color.luma(color) < 0.18) ? 'white' : 'black';
+			return (_.color.luma(color) < 0.18) ? 'white' : 'black';
 		};
 		color.isVisible = (color) => {
 			if (!color || typeof color !== 'string') {
 				return false;
 			}
-			color = api.color.toRGB(color);
+			color = _.color.toRGB(color);
 			if (color.hasOwnProperty('a') && color.a === 0) {
 				return false;
 			}
@@ -442,8 +366,8 @@ api.mixin({
 		) {
 			return false;
 		}
-		return api.color.isVisible(border.color);
+		return _.color.isVisible(border.color);
 	}
 });
 
-export default api;
+export default _;
