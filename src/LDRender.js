@@ -279,15 +279,20 @@ function getPartGeometry(abstractPart, colorCode) {
 			});
 		} else {
 
+			let color = colorObj;
+			if (primitive.colorCode >= 0) {
+				color = new THREE.Color(LDParse.getColor(primitive.colorCode));
+			}
+
 			const vIdx = geometry.faces.vertices.length;
-			geometry.faces.faces.push(new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, colorObj, alphaIdx));
+			geometry.faces.faces.push(new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, color, alphaIdx));
 			geometry.faces.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
 			geometry.faces.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
 			geometry.faces.vertices.push(new THREE.Vector3(p[6], p[7], p[8]));
 
 			if (primitive.shape === 'quad') {
 				geometry.faces.vertices.push(new THREE.Vector3(p[9], p[10], p[11]));
-				const face2 = new THREE.Face3(vIdx, vIdx + 2, vIdx + 3, null, colorObj, alphaIdx);
+				const face2 = new THREE.Face3(vIdx, vIdx + 2, vIdx + 3, null, color, alphaIdx);
 				geometry.faces.faces.push(face2);
 			}
 		}
