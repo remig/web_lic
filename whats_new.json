@@ -1,5 +1,19 @@
 [
 	{
+		"version": "0.35.0",
+		"date": "July 20, 2018",
+		"features": [
+			"Stretch a single Step across multiple pages",
+			"Set horizontal or vertical layout on Callouts",
+			"Set Callout position relative to CSI (top, right, bottom, left)",
+			"Add nice divider and arrow between the last step in a submodel and the step the submodel is placed on, when the two steps fall on the same page"
+		],
+		"bug_fixes": [
+			"Better bounding boxes around labels",
+			"Fix pattern drawing on parts with fixed color values"
+		]
+	},
+	{
 		"version": "0.34.0",
 		"date": "July 1, 2018",
 		"features": [
