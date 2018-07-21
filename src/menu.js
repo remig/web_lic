@@ -97,8 +97,8 @@ function toggleGrid(newState) {
 function addGuide(orientation) {
 	return function() {
 		const root = uiState.get('guides');
-		const pageSize = store.state.template.page;
-		const position = Math.floor((orientation === 'vertical') ? (pageSize.width / 2) : (pageSize.height / 2));
+		const {width, height} = store.state.template.page;
+		const position = Math.floor((orientation === 'vertical') ? (width / 2) : (height / 2));
 		const change = {
 			action: {
 				redo: [{root, op: 'add', path: '/-', value: {orientation, position}}],

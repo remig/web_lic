@@ -23,11 +23,12 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 
 			app.updateProgress(`Page ${page.number || 0}`);
 			resolve();
-		}, 100));  // 100ms delay is needed to give the browser enough time to redraw itself and update the progress bar.  Sucks.
+		// Need 100ms delay to give browser time to redraw itself and update the progress bar.  Sucks.
+		}, 100));
 	}
 
 	async function exportPages(pages, canvas) {
-		for (var i = 0; i < pages.length; i++) {
+		for (let i = 0; i < pages.length; i++) {
 			await exportPage(pages[i], canvas);
 		}
 	}
@@ -52,7 +53,7 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 
 function generatePDF(app, store, config) {
 
-	// By default, draw PDF in points so it comes out the exactsame size as the current page, with images at 96 dpi
+	// draw PDF in points so it comes out the exactsame size as the current page, with images at 96 dpi
 	let hiResScale = 1;
 	const pageSize = {
 		width: store.state.template.page.width * 0.75,  // 0.75 = 72 / 96
@@ -62,7 +63,8 @@ function generatePDF(app, store, config) {
 	if (config) {
 		// If we have a custom page size, scale images to fit into custom page at custom dpi
 		hiResScale = config.dpi / 96;  // Adjust scale to match new DPI
-		hiResScale = hiResScale * config.pageSize.width / pageSize.width;  // Adjust scale to fit exactly inside new page size
+		// Adjust scale to fit exactly inside new page size
+		hiResScale = hiResScale * config.pageSize.width / pageSize.width;
 		pageSize.width = config.pageSize.width;
 		pageSize.height = config.pageSize.height;
 	}

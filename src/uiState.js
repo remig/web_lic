@@ -25,7 +25,7 @@ const defaultState = {
 				scale: 1
 			},
 			pdf: {
-				// Don't cache physical page size because that should always initially match current pixel page size
+				// Don't cache physical page size because it should initially match current pixel page size
 				dpi: 96,
 				units: 'point'  // One of 'point', 'mm', 'cm', 'in'
 			}
@@ -65,7 +65,7 @@ const defaultState = {
 		width: 1,
 		color: 'black'
 	},
-	pliTransforms: {}  // TODO: if scale goes back to 1, don't store it delete it.  Likewise with rotations x|y|z = 0.
+	pliTransforms: {}  // TODO: If scale set back to 1, delete it, don't store it. Same for rotations x|y|z=0
 };
 
 let currentState = _.cloneDeep(defaultState);
@@ -81,7 +81,8 @@ const api = {
 		return currentState;
 	},
 	getDefaultState() {
-		return _.cloneDeep(defaultState);  // Return clone so we don't accidentally modify it; default state is immutable
+		// Return clone so we don't accidentally modify it; default state is immutable
+		return _.cloneDeep(defaultState);
 	},
 	getPLITransform(filename) {
 		return currentState.pliTransforms[filename] || {};
@@ -92,7 +93,8 @@ const api = {
 	setUIState(newState) {
 		currentState = _.cloneDeep(newState);
 	},
-	mutations: {  // TODO: Move more ui state mutations here (pliTransforms in context menu, grid & guide bits in menu, etc)
+	mutations: {
+		// TODO: Move more ui state mutations here (context menu pliTransforms, menu grid & guide bits, etc)
 		guides: {
 			setPosition(guideID, newPosition) {
 				const originalPosition = currentState.guides[guideID].position;
@@ -108,7 +110,7 @@ const api = {
 	}
 };
 
-// Load UI state from storage just once here. uiState module itself will keep a copy for fast lookup everywhere
+// Load UI state from storage just once here. uiState module itself keeps a copy for fast lookup everywhere
 api.setUIState(Storage.get.ui());
 
 export default api;

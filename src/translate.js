@@ -19,10 +19,13 @@ const messageFormat = new MessageFormat('en');
 const loadedLanguages = {};  // key: locale code, value: language
 let currentLocale;
 
-// TODO: when loading a language, flatten the hierarchy so it doesn't have to be traversed constantly.  eg: {navbar: {file: {root: 'foo'}}} => {'navbar.file.root': 'foo'}
+// TODO: when loading a language, flatten the hierarchy so it doesn't have to be traversed constantly.
+// eg: {navbar: {file: {root: 'foo'}}} => {'navbar.file.root': 'foo'}
 // And pre-compile any _@mf format strings into lookup functions
 // And do all of this at build time, not runtime...
-loadedLanguages.en = require('../languages/en.json');  // Always load English; fall back on this if a different language is missing a key
+
+// Always load English; fall back on this if a different language is missing a key
+loadedLanguages.en = require('../languages/en.json');
 
 function __tr(key, args, locale) {
 	let lookup = loadedLanguages[locale];
@@ -43,7 +46,7 @@ function translate(key, args) {
 		try {
 			res = __tr(key, args, currentLocale);
 		} catch (e) {
-			console.log(`Locale ${currentLocale} missing translation key: ${key}`);  // eslint-disable-line no-console
+			console.log(`Locale ${currentLocale} missing translation key: ${key}`);  // eslint-disable-line no-console, max-len
 			res = null;
 		}
 	}
@@ -76,7 +79,8 @@ function pickLanguage(onOk, onLanguageChange) {
 
 	currentLocale = uiState.get('locale');
 	if (currentLocale && currentLocale !== 'en') {
-		// TODO: loading languages via require means all languages are included in the compiled bundle.  Swith to ajax and load only what we need.
+		// TODO: loading languages via require means all languages are included in the compiled bundle,
+		// so need to switch to ajax and load only what we need
 		loadedLanguages[currentLocale] = require(`../languages/${currentLocale}.json`);
 	}
 

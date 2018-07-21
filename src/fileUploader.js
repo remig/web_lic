@@ -2,7 +2,7 @@
 
 // fileType: 'text' or 'dataURL'
 export default function openChooser(acceptFileTypes, fileType, callback) {
-	var input = document.getElementById('openFileChooser');
+	const input = document.getElementById('openFileChooser');
 	input.onchange = function(e) {
 		const reader = new FileReader();
 		reader.onload = (filename => {

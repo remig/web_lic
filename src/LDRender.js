@@ -139,7 +139,7 @@ function contextBoundingBox(data, w, h) {
 function initialize() {
 
 	if (api.partDictionary == null) {
-		throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a part.';
+		throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a part.';  // eslint-disable-line max-len
 	} else if (isInitialized) {
 		return;
 	}
@@ -167,7 +167,8 @@ function initScene(size) {
 	const scene = new THREE.Scene();
 	scene.add(new THREE.AmbientLight(0x404040));
 
-	// These three calls must be made before addModelToScene(), to correctly project points to screen (for conditional line rendering)
+	// These three calls must be made before addModelToScene(), to correctly project
+	// points to screen (for conditional line rendering)
 	renderer.setSize(size, size);
 	camera.updateMatrixWorld();
 	camera.updateProjectionMatrix();
@@ -199,7 +200,7 @@ function render(scene, size, container, config) {
 
 	renderer.render(scene, camera);
 
-	// Create a new 2D canvas so we can convert the full 3D canvas into a 2D canvas, and retrieve its image data
+	// Create a new 2D canvas to convert the full 3D canvas into a 2D canvas, and retrieve its image data
 	// TODO: create this canvas just once way offscreen
 	const canvas = document.createElement('canvas');
 	canvas.width = canvas.height = size;
@@ -393,7 +394,7 @@ function project(vec, camera, size) {
 }
 
 function lineSide(p, l1, l2) {
-	var res = ((p.x - l1.x) * (l2.y - l1.y)) - ((p.y - l1.y) * (l2.x - l1.x));
+	const res = ((p.x - l1.x) * (l2.y - l1.y)) - ((p.y - l1.y) * (l2.x - l1.x));
 	return (res > 0) ? 1 : -1;
 }
 
@@ -444,7 +445,8 @@ function getArrowOffsetPosition(partBox, {direction, arrowOffset = 0}) {
 			break;
 		case 'up':
 		default:
-			y = ((max.y - min.y) / 2) + arrowOffset - 6;  // -6 because arrow almost always lands on top of a stud, and a stud is about 6 units tall
+			// -6 because arrow almost always lands on top of a stud, and a stud is about 6 units tall
+			y = ((max.y - min.y) / 2) + arrowOffset - 6;
 			break;
 	}
 	return new THREE.Matrix4().makeTranslation(x, y, z);
@@ -535,7 +537,8 @@ function addModelToScene(scene, model, partIDList, config) {
 
 		let meshBox;
 		if (displacement) {
-			meshBox = new THREE.Box3().setFromObject(mesh);  // Store copy of untransformed part bounding box, for displacement arrow positioning later
+			// Store copy of untransformed part bounding box, for displacement arrow positioning later
+			meshBox = new THREE.Box3().setFromObject(mesh);
 		}
 
 		mesh.applyMatrix(matrix);

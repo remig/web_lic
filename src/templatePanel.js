@@ -60,7 +60,8 @@ Vue.component('templatePanel', {
 			this.app.redrawUI(false);
 		},
 		applyChanges() {
-			// TODO: Make sure something actually changed before pushing to the undo stack.  eg: add then immediately remove an image...
+			// TODO: Make sure something actually changed before pushing to the undo stack
+			// eg: add then immediately remove an image...
 			if (this.lastEdit) {
 				if (typeof this.$refs.currentTemplatePanel.apply === 'function') {
 					this.$refs.currentTemplatePanel.apply();
@@ -103,7 +104,7 @@ Vue.component('templatePanel', {
 					res = componentLookup[type];
 				}
 				if (Array.isArray(res)) {
-					this.templateEntry = res[1];  // eslint-disable-line vue/no-side-effects-in-computed-properties
+					this.templateEntry = res[1];  // eslint-disable-line vue/no-side-effects-in-computed-properties, max-len
 					return res[0];
 				}
 				return res;
@@ -112,7 +113,7 @@ Vue.component('templatePanel', {
 		}
 	},
 	beforeDestroy() {
-		// Catch any changes if user switches from template panel directly to nav tree or new page via keyboard
+		// Catch changes if user switches from template panel directly to nav tree or new page via keyboard
 		this.applyChanges();
 	}
 });

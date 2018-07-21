@@ -179,7 +179,8 @@ const api = {
 		if (layout.rows != null && layout.cols != null) {
 			cols = layout.cols;
 			rows = layout.rows;
-			layoutDirection = layout.direction || (pageSize.width > pageSize.height ? 'horizontal' : 'vertical');
+			layoutDirection = layout.direction
+				|| (pageSize.width > pageSize.height ? 'horizontal' : 'vertical');
 		} else {
 			layoutDirection = layout;
 			if (layout === 'vertical') {
@@ -416,8 +417,8 @@ const api = {
 
 	submodelImage(submodelImage, box) {
 
-		// TODO: consider multiple submodels in one step; can only shrink so much, might need to lay out horizontally
-		// TODO: Try and make submodel boxes the same size as PLI boxes, if that new 'make PLIs the same size' option is checked
+		// TODO: can only shrink multiple submodels in one step so much, might need to lay out horizontally
+		// TODO: make submodel boxes the same size as PLI boxes if new 'make PLIs same size' option is checked
 		const template = store.state.template.submodelImage;
 
 		const margin = getMargin(store.state.template.submodelImage.innerMargin);
@@ -495,7 +496,8 @@ const api = {
 		const margin = getMargin(store.state.template.pli.innerMargin);
 		let maxHeight = 0, left = margin + qtyLabelOffset;
 
-		//pliItems.sort((a, b) => ((attr(b, 'width') * attr(b, 'height')) - (attr(a, 'width') * attr(a, 'height'))))
+		// aw = attr(a, 'width'), ah = attr(a, 'height')
+		//pliItems.sort((a, b) => ((aw(b) * ah(b)) - (aw(a) * a(a))))
 		for (let i = 0; i < pliItems.length; i++) {
 
 			const pliItem = store.get.pliItem(pliItems[i]);
@@ -754,7 +756,8 @@ const api = {
 				const originalPage = store.get.pageForItem(step);
 				const prevPage = store.get.prevBasicPage(originalPage);
 
-				store.mutations.step.moveToPreviousPage({step});  // TODO: use moveToPage, since we know what page to move to
+				// TODO: use moveToPage, since we know what page to move to
+				store.mutations.step.moveToPreviousPage({step});
 
 				const stepsOverlap = prevPage.steps.some(stepID => isStepTooSmall(store.get.step(stepID)));
 				if (stepsOverlap) {
@@ -779,7 +782,7 @@ const api = {
 
 	adjustBoundingBox: {
 		step() {
-			// Make step's bounding box tightly fit its content.  This makes it easier to manually layout content
+			// Make step's  box tightly fit its content.  This makes it easier to manually layout content
 		},
 		// csi(item) {
 		// 	const step = store.get.parent(item);
@@ -875,17 +878,22 @@ function getMargin(margin) {
 }
 
 // TODO: should push callouts down too
-// TODO: this is buggy: it duplicates a lot of step layout logic, but badly. Like, it doesn't push content down below step numbers.
+// TODO: this duplicates a lot of step layout logic, badly. eg: it doesn't push content below step numbers
 function alignStepContent(page) {
 	const margin = getMargin(store.state.template.step.innerMargin);
 	const steps = page.steps.map(stepID => store.get.step(stepID));
-	if (steps.length < 2 || typeof page.actualLayout !== 'object' || page.actualLayout.direction !== 'horizontal') {
+	if (steps.length < 2 || typeof page.actualLayout !== 'object'
+		|| page.actualLayout.direction !== 'horizontal'
+	) {
 		return;  // only align step content across horizontally laid out pages with multiple steps
 	}
 	const stepsByRow = _.chunk(steps, page.actualLayout.cols);
 	stepsByRow.forEach(stepList => {
-		stepList = stepList.filter(el => !el.submodelImages.length);  // Don't adjust steps with submodel images here
-		const tallestPLIHeight = Math.max(...stepList.map(step => (store.get.pli(step.pliID) || {}).height || 0));
+		// Don't adjust steps with submodel images here
+		stepList = stepList.filter(el => !el.submodelImages.length);
+		const tallestPLIHeight = Math.max(
+			...stepList.map(step => (store.get.pli(step.pliID) || {}).height || 0)
+		);
 		stepList.forEach(step => {
 			const csi = store.get.csi(step.csiID);
 			if (csi) {

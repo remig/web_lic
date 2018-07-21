@@ -4,10 +4,12 @@
 import _ from './util';
 import store from './store';
 
-// stack is an array of state; undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone.
+// stack is an array of state
+// undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone
 // index points to the currently visible state in the UI.
-// TODO: don't let this grow unbound - support max undo stack size.  Need performance metrics here, for decent max stack size.
-// TODO: check if previous undo stack entry has same text as newest one; if so, merge them (if allowed & sensical)
+// TODO: don't let this grow unbound. Support max undo stack size.
+// TODO: Need performance metrics for decent max stack size.
+// TODO: check if previous undo stack entry has same text as newest one; if so, merge them (if sensical)
 
 const state = {
 	stack: [],
@@ -63,7 +65,8 @@ const api = {
 
 		let newState;
 		if (_.isEmpty(change.mutations)) {
-			newState = state.stack[state.stack.length - 1].state;  // If we have no new state, reuse previous stack state entry
+			// If we have no new state, reuse previous stack state entry
+			newState = state.stack[state.stack.length - 1].state;
 		} else {
 			newState = _.cloneDeep(store.state);
 		}
@@ -88,7 +91,7 @@ const api = {
 		setIndex(state, 0);
 	},
 
-	// TODO: Need automatic way of navigating to and redrawing whatever was most affected by undo / redo action
+	// TODO: Need automatic way to navigate to and redraw whatever was most affected by undo / redo action
 	undo() {
 		if (api.isUndoAvailable()) {
 			performUndoRedoAction('undo', state.index - 1);
@@ -164,7 +167,9 @@ function performClearCacheTargets(prevIndex, newIndex) {
 		if (typeof item === 'string') {
 			store.state[item + 's'].forEach(item => (item.isDirty = true));
 		} else {
-			item = {type: item.type, id: item.id};  // Some cache items were cloned from previous states; ensure we pull only the actual item from the current state
+			// Some cache items were cloned from previous states;
+			// ensure we pull only the actual item from the current state
+			item = {type: item.type, id: item.id};
 			item = store.get.lookupToItem(item);
 			if (item) {
 				item.isDirty = true;
