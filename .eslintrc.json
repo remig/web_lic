@@ -1,10 +1,7 @@
 {
 	"parserOptions": {
-		"ecmaVersion": 8,
-		"sourceType": "module",
-		"ecmaFeatures": {
-			"experimentalObjectRestSpread": true
-		}
+		"ecmaVersion": 9,
+		"sourceType": "module"
 	},
     "env": {
         "commonjs": true,
@@ -32,8 +29,8 @@
         "max-len": ["error", 110],
         "no-alert": "error",
         "no-caller": "error",
-        "no-console": "error",
-        "no-debugger": "error",
+        "no-console": "warn",
+        "no-debugger": "warn",
         "no-floating-decimal": "error",
         "no-global-assign": "error",
         "no-implicit-globals": "error",

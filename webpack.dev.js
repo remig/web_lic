@@ -25,6 +25,15 @@ module.exports = {
 					'vue-style-loader',
 					'css-loader'
 				]
+			},
+			{
+				test: /\.js$/,
+				exclude: /node_modules/,
+				loader: 'eslint-loader',
+				options: {
+					failOnWarning: false,
+					failOnError:  true
+				}
 			}
 		]
 	},

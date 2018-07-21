@@ -250,7 +250,6 @@ const contextMenu = {
 				{
 					text: 'By Row and Column... (NYI)',
 					cb(selectedItem) {
-						return;
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.cloneDeep(page.layout);
 

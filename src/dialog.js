@@ -92,7 +92,7 @@ _.forOwn(dialogs, (data, name) => {
 
 const elDialogs = {
 	numberChooser: {
-		// TODO: Element's inputNumber is broken; it doesn't emit input events and doesn't filter non-numeric keys.
+		// TODO: Element inputNumber is broken; doesn't emit input events and doesn't filter non-numeric keys
 		// TODO: Need to implement my own better looking number input, with nice scroll buttons.
 		title: '',
 		value: 0,

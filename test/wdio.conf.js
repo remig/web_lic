@@ -20,6 +20,7 @@ exports.config = {
 		maxInstances: 1,
 		browserName: 'chrome',
 		chromeOptions: {
+			args: ['--headless' '--disable-gpu' '--window-size=1280,800'],
 			prefs: {
 				'download.default_directory': downloadPath
 			}
