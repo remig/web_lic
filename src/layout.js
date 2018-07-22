@@ -555,6 +555,7 @@ const api = {
 				const stepWidth = borderWidth + stepBox.x + entry.width + margin + borderWidth;
 				if (idx > 0 && (stepWidth > maxCalloutWidth)) {
 					// Adding this step to the right will make the box too wide; wrap to next row
+					// TODO: this often puts 3 steps on one row and the 4th on a new row.  Looks bad.
 					rows.push([]);
 					stepBox.x = margin;
 					stepBox.y += tallestStep + margin;

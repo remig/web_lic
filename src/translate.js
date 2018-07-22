@@ -15,6 +15,7 @@ LanguageList.sort((a, b) => {
 	return 0;
 });
 
+// TODO: messageFormat is huge; get rid of it.  Way over-complicated for what we need here.
 const messageFormat = new MessageFormat('en');
 const loadedLanguages = {};  // key: locale code, value: language
 let currentLocale;
