@@ -10,6 +10,11 @@ const keys = {
 };
 
 const api = {
+	initialize(defaultState) {
+		if (localStorage.length === 0 || localStorage.getItem(keys.ui) == null) {
+			localStorage.setItem(keys.ui, JSON.stringify(defaultState));
+		}
+	},
 	get: {},
 	save: {},
 	replace: {},
@@ -19,11 +24,7 @@ const api = {
 // Add default implementations of 'get', 'save' and 'clear' for each key
 _.forOwn(keys, (v, k) => {
 	api.get[k] = function() {
-		const res = localStorage.getItem(v);
-		if (res == null) {  // If key is totally null, save and return an empty object instead
-			return api.replace[k]({});
-		}
-		return JSON.parse(res);
+		return JSON.parse(localStorage.getItem(v));
 	};
 	api.replace[k] = function(json) {  // Replace entire object in cache with passed in object
 		localStorage.setItem(v, JSON.stringify(json));

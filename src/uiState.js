@@ -68,6 +68,8 @@ const defaultState = {
 	pliTransforms: {}  // TODO: If scale set back to 1, delete it, don't store it. Same for rotations x|y|z=0
 };
 
+Storage.initialize(defaultState);
+
 let currentState = _.cloneDeep(defaultState);
 
 const api = {
