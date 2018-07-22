@@ -81,7 +81,7 @@ export default {
 
 .whatsNewDialog .el-dialog__body {
 	padding-top: 10px;
-	max-height: 700px;
+	max-height: 40vh;
 	overflow-y: auto;
 }
 
