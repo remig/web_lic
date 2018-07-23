@@ -8,6 +8,7 @@ import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
 import uiState from './uiState';
 import DialogManager from './dialog';
+import styleDialog from './dialogs/style.vue';
 
 let app;
 
@@ -838,60 +839,34 @@ const contextMenu = {
 			}
 		};
 
-		const setText = {
-			text: 'Text...',
+		const setStyleMenu = {
+			text: 'Style...',
 			shown(selectedItem) {
 				const annotation = store.get.annotation(selectedItem);
 				return annotation && annotation.annotationType === 'label';
 			},
 			cb(selectedItem) {
 				const annotation = store.get.annotation(selectedItem);
-				const originalText = annotation.text;
-
-				DialogManager.setDialog('stringDialog');
-				app.clearSelected();
-
+				DialogManager.setDialog(styleDialog);
 				Vue.nextTick(() => {
 					const dialog = DialogManager.getDialog();
-					dialog.$on('ok', newValues => {
-						const page = store.get.pageForItem(annotation);
-						const opts = {
-							annotation,
-							newProperties: {text: newValues.string},
-							doLayout: store.get.isTitlePage(page)
-						};
-						undoStack.commit('annotation.set', opts, 'Set Label Text');
+					dialog.$on('ok', newProperties => {
+						const opts = {annotation, newProperties};
+						undoStack.commit('annotation.set', opts, 'Change Annotation');
 					});
-					dialog.$on('cancel', () => {
-						annotation.text = originalText;
-						app.redrawUI(true);
-					});
-					dialog.$on('update', newValues => {
-						annotation.text = newValues.string;
-						app.redrawUI(true);
-					});
-					dialog.title = 'Set Label Text';
-					dialog.labelText = 'New Text';
-					dialog.string = annotation.text;
-					dialog.show({x: 400, y: 150});
+					dialog.title = 'Style Annotation';
+					dialog.text = annotation.text;
+					dialog.color = annotation.color;
+					dialog.font = annotation.font;
+					dialog.show();
 				});
 			}
-		};
-
-		const setFont = {
-			text: 'Font (NYI)',
-			cb() {}
-		};
-
-		const setColor = {
-			text: 'Color (NYI)',
-			cb() {}
 		};
 
 		const annotation = store.get.annotation(selectedItem);
 		switch (annotation.annotationType) {
 			case 'label':
-				return [{text: 'Set', children: [setText, setFont, setColor]}, deleteMenu];
+				return [setStyleMenu, deleteMenu];
 			case 'arrow':
 				return [...contextMenu.calloutArrow, deleteMenu];
 			case 'image':

@@ -1,6 +1,10 @@
 {
 	"ok": "Ok",
 	"cancel": "Cancel",
+	"font": "Font",
+	"font_size": "Font Size",
+	"color": "Color",
+	"size": "Size",
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -112,6 +116,10 @@
 			"auto_color": "auto",
 			"width": "Width",
 			"dash": "Dash"
+		},
+		"style": {
+			"title": "Style",
+			"label_text": "Label Text"
 		},
 		"scale_images": {
 			"title": "Scale Images by",

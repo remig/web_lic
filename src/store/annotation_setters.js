@@ -42,15 +42,14 @@ export default {
 		}
 		return annotation;
 	},
-	set(opts) {  // opts: {annotation, newProperties, doLayout}
+	set(opts) {  // opts: {annotation, newProperties}
 		const annotation = store.get.lookupToItem(opts.annotation);
 		const props = opts.newProperties || {};
-		if (props.text && annotation.annotationType === 'label') {
-			annotation.text = props.text;
+		if (annotation.annotationType === 'label') {
+			annotation.text = (props.text == null) ? annotation.text : props.text;
+			annotation.color = (props.color == null) ? annotation.color : props.color;
+			annotation.font = (props.font == null) ? annotation.font : props.font;
 			Layout.label(annotation);
-		}
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(annotation)});
 		}
 	},
 	delete(opts) {  // opts: {annotation}
