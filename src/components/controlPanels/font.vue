@@ -112,7 +112,7 @@ export default {
 					dialog.$on('cancel', () => {
 						this.family = this._lastFontFamily;
 					});
-					dialog.font = this.fontString();
+					dialog.font = _.fontString(this);
 					dialog.fontName = '';
 					dialog.visible = true;
 				});
@@ -126,17 +126,9 @@ export default {
 		},
 		updateValues() {
 			const template = _.get(store.state.template, this.templateEntry);
-			template.font = this.fontString();
+			template.font = _.fontString(this);
 			template.color = this.color;
 			this.$emit('new-values', this.templateEntry);
-		},
-		fontString() {
-			return _.fontPartsToFont({
-				fontSize: this.size + 'pt',
-				fontFamily: this.family,
-				fontWeight: this.bold ? 'bold' : null,
-				fontStyle: this.italic ? 'italic' : null
-			});
 		}
 	}
 };

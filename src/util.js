@@ -102,6 +102,14 @@ _.mixin({
 			fontStyle, fontVariant, fontWeight, fontStretch, fontSize, fontFamily.trim()
 		].filter(el => el !== '').join(' ').trim();
 	},
+	fontString({size, family, bold, italic}) {
+		return _.fontPartsToFont({
+			fontSize: size + 'pt',
+			fontFamily: family,
+			fontWeight: bold ? 'bold' : null,
+			fontStyle: italic ? 'italic' : null
+		});
+	},
 	degrees(radians) {
 		return radians * 180 / Math.PI;
 	},
