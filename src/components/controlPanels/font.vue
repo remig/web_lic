@@ -63,27 +63,12 @@
 
 import _ from '../../util';
 import store from '../../store';
-import Storage from '../../storage';
 import DialogManager from '../../dialog';
 import fontNameDialog from '../../dialogs/font_name.vue';
 import PanelBase from './panel_base.vue';
 
-const familyNames = ['Helvetica', 'Times New Roman'];
-const customFamilyNames = Storage.get.customFonts();
-
-function getFamilyNames() {
-	if (customFamilyNames.length) {
-		return [
-			{label: 'builtInFonts', options: familyNames},
-			{label: 'customFonts', options: customFamilyNames},
-			{label: 'custom', options: ['Custom...']}
-		];
-	}
-	return [
-		{label: 'builtInFonts', options: familyNames},
-		{label: 'customFonts', options: ['Custom...']}
-	];
-}
+const getFamilyNames = fontNameDialog.methods.getFamilyNames;
+const addCustomFont = fontNameDialog.methods.addCustomFont;
 
 // TODO: support underlining fonts in general
 // TODO: font styling buttons (bold, italic, underline) need to toggle
@@ -93,7 +78,7 @@ export default {
 	data() {
 		const template = _.get(store.state.template, this.templateEntry);
 		const fontParts = _.fontToFontParts(template.font);
-		this.addCustomFont(fontParts.fontFamily);
+		addCustomFont(fontParts.fontFamily);
 		return {
 			family: fontParts.fontFamily,
 			size: parseInt(fontParts.fontSize, 10),
@@ -121,7 +106,7 @@ export default {
 					const dialog = DialogManager.getDialog();
 					dialog.$on('ok', fontName => {
 						this.family = fontName;
-						this.addCustomFont(fontName);
+						this.familyNames = getFamilyNames();
 						this.updateValues();
 					});
 					dialog.$on('cancel', () => {
@@ -152,20 +137,6 @@ export default {
 				fontWeight: this.bold ? 'bold' : null,
 				fontStyle: this.italic ? 'italic' : null
 			});
-		},
-		addCustomFont(family) {
-			if (!_.isEmpty(family)) {
-				const familyLower = family.toLowerCase();
-				const names = [
-					...familyNames.map(f => f.toLowerCase()),
-					...customFamilyNames.map(f => f.toLowerCase())
-				];
-				if (!names.includes(familyLower)) {
-					customFamilyNames.push(family);
-					Storage.replace.customFonts(customFamilyNames);
-				}
-			}
-			this.familyNames = getFamilyNames();
 		}
 	}
 };

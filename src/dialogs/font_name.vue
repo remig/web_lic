@@ -29,6 +29,10 @@
 <script>
 
 import _ from '../util';
+import Storage from '../storage';
+
+const familyNames = ['Helvetica', 'Times New Roman'];
+const customFamilyNames = Storage.get.customFonts();
 
 export default {
 	data: function() {
@@ -51,6 +55,32 @@ export default {
 		cancel() {
 			this.visible = false;
 			this.$emit('cancel');
+		},
+		getFamilyNames() {
+			if (customFamilyNames.length) {
+				return [
+					{label: 'builtInFonts', options: familyNames},
+					{label: 'customFonts', options: customFamilyNames},
+					{label: 'custom', options: ['Custom...']}
+				];
+			}
+			return [
+				{label: 'builtInFonts', options: familyNames},
+				{label: 'customFonts', options: ['Custom...']}
+			];
+		},
+		addCustomFont(family) {
+			if (!_.isEmpty(family)) {
+				const familyLower = family.toLowerCase();
+				const names = [
+					...familyNames.map(f => f.toLowerCase()),
+					...customFamilyNames.map(f => f.toLowerCase())
+				];
+				if (!names.includes(familyLower)) {
+					customFamilyNames.push(family);
+					Storage.replace.customFonts(customFamilyNames);
+				}
+			}
 		}
 	}
 };
