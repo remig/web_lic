@@ -142,13 +142,3 @@ export default {
 };
 
 </script>
-
-<style>
-
-.fontStyleButton {
-	width: 34px;
-	height: 34px;
-	padding: 9px 0;
-}
-
-</style>

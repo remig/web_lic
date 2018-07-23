@@ -363,6 +363,12 @@ ul {
 	bottom: 10px;
 }
 
+.fontStyleButton {
+	width: 34px;
+	height: 34px;
+	padding: 9px 0;
+}
+
 /* Rotate Element's switch from horizontal to vertical */
 .pageLockSwitch > .el-switch__core {
 	width: 20px;
