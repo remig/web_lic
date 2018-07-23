@@ -120,7 +120,7 @@ export default {
 			this.lineColor = (color === 'auto') ? 'rgb(0, 0, 0)' : _.color.toRGB(color).toString();
 			this.newState = _.cloneDeep(grid);
 			this.originalState = grid;
-			this.app = app;  // TODO: need easy, global way to signal to the app stuff like 'redraw page' and 'redraw UI'
+			this.app = app;  // TODO: need easy way to signal app stuff like 'redraw page' or 'redraw UI'
 		},
 		update() {
 			if (this.useAutoColor) {
@@ -138,7 +138,12 @@ export default {
 		},
 		ok() {
 			this.visible = false;
-			const storeOp = {root: store.cache.stateCache, op: 'replace', path: '/uiState/gridPath', value: null};
+			const storeOp = {
+				root: store.cache.stateCache,
+				op: 'replace',
+				path: '/uiState/gridPath',
+				value: null
+			};
 			const root = uiState.getCurrentState(), op = 'replace', path = '/grid';
 			const change = {
 				redo: [

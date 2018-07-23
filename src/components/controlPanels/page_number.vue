@@ -29,11 +29,6 @@ import store from '../../store';
 import PanelBase from './panel_base.vue';
 import FontPanel from './font.vue';
 
-// TODO: add default page layout UI
-// TODO: should add UI to choose whether to redo layout or just extend canvas
-// TODO: need to re-layout title page too, on some operations like page resize
-// TODO: for page size, add preset sizes like 'A4', 'legal', etc.  See here for list of formats & sizes: https://github.com/MrRio/jsPDF/blob/master/jspdf.js
-// TODO: explore component 'extends' to make panel / subpanel nesting easier (https://vuejs.org/v2/api/#extends)
 export default {
 	components: {PanelBase, FontPanel},
 	data() {

@@ -9,7 +9,7 @@
 			title="Displacement Arrow Color"
 			@new-values="newArrowStyle"
 		/>
-		<!-- <border-panel title="Displacement Arrow Border" v-on:new-values="newArrowStyle"></border-panel> -->
+		<!--<border-panel title="Displacement Arrow Border" v-on:new-values="newArrowStyle"></border-panel>-->
 	</div>
 </template>
 

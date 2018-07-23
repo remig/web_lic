@@ -405,6 +405,9 @@ const app = new Vue({
 	},
 	mounted() {
 
+		// TODO: show template page always, even when no model loaded.
+		// TODO: this lets you import a model with the desired template already in place.
+		// TODO: show some kind of 'getting started' content when model not yet loaded.
 		document.body.addEventListener('keyup', e => {
 			this.globalKeyPress(e);
 		});

@@ -10,7 +10,6 @@
 		</el-form-item>
 		<el-form-item v-if="gradient != null" label="Gradient">
 			<label class="el-form-item__label">NYI</label>
-			<!-- <input v-model="gradient" v-on:input="updateValues" type="number" min="0" class="form-control" id="gradientInput"/> -->
 		</el-form-item>
 		<el-form-item v-if="imageFilename != null" label="Image">
 			<el-button
