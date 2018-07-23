@@ -7,7 +7,7 @@ import uiState from './uiState';
 
 const api = {
 
-	page(page, canvas, config) {  // config: {hiResScale, selectedPart, noCache}
+	page(page, canvas, config = {}) {  // config: {hiResScale, selectedPart, noCache}
 
 		const hiResScale = config.hiResScale = config.hiResScale || 1;
 		if (page.needsLayout) {
@@ -497,19 +497,21 @@ const api = {
 				api.annotation(annotation, ctx);
 			},
 
-			image(ctx, annotation) {
+			image(annotation, ctx) {
 				const x = Math.floor(annotation.x);
 				const y = Math.floor(annotation.y);
 				const cachedImage = store.cache.get(annotation, 'rawImage');
-				if (cachedImage) {
+				if (cachedImage && cachedImage !== 'pending') {
 					ctx.drawImage(cachedImage, x, y);
-				} else {
+				} else if (cachedImage == null) {
+					store.cache.set(annotation, 'rawImage', 'pending');  // Avoid caching multiple times
 					const image = new Image();
 					image.onload = function() {
 						annotation.width = this.width;
 						annotation.height = this.height;
-						ctx.drawImage(image, x, y);
 						store.cache.set(annotation, 'rawImage', image);
+						const page = store.get.pageForItem(annotation);
+						api.page(page, ctx.canvas);
 					};
 					image.src = annotation.src;
 				}

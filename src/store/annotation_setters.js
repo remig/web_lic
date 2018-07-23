@@ -58,6 +58,7 @@ export default {
 		if (item.hasOwnProperty('points')) {
 			store.mutations.item.deleteChildList({item, listType: 'point'});
 		}
+		store.cache.clear(item);  // Clear cached images, if any
 		store.mutations.item.delete({item});
 	}
 };

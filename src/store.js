@@ -124,6 +124,14 @@ const store = {
 				cache[item][key] = newValue;
 			}
 		},
+		clear(item) {
+			const cache = store.cache.stateCache;
+			if (item && item.type && item.id != null && cache[item.type]) {
+				delete cache[item.type][item.id];
+			} else if (typeof item === 'string') {
+				delete cache[item];
+			}
+		},
 		reset() {
 			store.cache.stateCache = {};
 		}
