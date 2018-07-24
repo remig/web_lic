@@ -1,9 +1,9 @@
 /* global Vue: false */
 'use strict';
 
+import _ from './util';
 import uiState from './uiState';
 import LanguageList from '../languages/languages.json';
-import MessageFormat from 'messageformat';
 import DialogManager from './dialog';
 
 LanguageList.sort((a, b) => {
@@ -15,8 +15,6 @@ LanguageList.sort((a, b) => {
 	return 0;
 });
 
-// TODO: messageFormat is huge; get rid of it.  Way over-complicated for what we need here.
-const messageFormat = new MessageFormat('en');
 const loadedLanguages = {};  // key: locale code, value: language
 let currentLocale;
 
@@ -34,7 +32,7 @@ function __tr(key, args, locale) {
 	for (let i = 0; i < keys.length; i++) {
 		const v = keys[i];
 		if (v.endsWith('_@mf')) {
-			return messageFormat.compile(lookup[v])(args);
+			return _.template(lookup[v])(args);
 		}
 		lookup = lookup[v];
 	}
