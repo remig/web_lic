@@ -21,11 +21,14 @@ export default {
 		store.mutations.calloutArrow.add({parent: callout});
 		return callout;
 	},
-	delete(opts) {  // opts: {callout}
+	delete(opts) {  // opts: {callout, doLayout}
 		const item = store.get.lookupToItem(opts.callout);
 		store.mutations.item.deleteChildList({item, listType: 'calloutArrow'});
 		store.mutations.item.deleteChildList({item, listType: 'step'});
 		store.mutations.item.delete({item});
+		if (opts.doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(item)});
+		}
 	},
 	addStep(opts) {  // opts: {callout, doLayout = false}
 		const callout = store.get.lookupToItem(opts.callout);

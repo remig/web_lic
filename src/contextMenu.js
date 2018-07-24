@@ -962,8 +962,8 @@ const contextMenu = {
 				return step.parts.length < 1;
 			},
 			cb(selectedItem) {
-				undoStack.commit('callout.delete', {callout: selectedItem}, this.text);
 				app.clearSelected();
+				undoStack.commit('callout.delete', {callout: selectedItem, doLayout: true}, this.text);
 			}
 		}
 	],
