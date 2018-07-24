@@ -305,6 +305,19 @@ const app = new Vue({
 				this.$refs.pageView.pageDown();
 			} else if (e.key === 'PageUp') {
 				this.$refs.pageView.pageUp();
+			} else if (e.key === 'Delete' && selItem
+				&& store.mutations[selItem.type] && store.mutations[selItem.type].delete
+			) {
+				const opts = {doLayout: true};
+				opts[selItem.type] = selItem;
+				const undoText = `Delete ${_.prettyPrint(selItem.type)}`;
+				try {
+					this.clearSelected();
+					undoStack.commit(`${selItem.type}.delete`, opts, undoText);
+				} catch (e) {  // eslint-disable-line no-empty
+					// TODO: Intentionally empty; need to change each store.mutation.foo.delete that
+					// throws an error if delete can't happen to just returning instead.
+				}
 			} else if (selItem && e.key.startsWith('Arrow') && store.get.isMoveable(selItem)) {
 				let dx = 0, dy = 0, dv = 1;
 				dv *= e.shiftKey ? 5 : 1;
