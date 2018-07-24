@@ -123,8 +123,10 @@ Vue.component('pageView', {
 		} else if (facing) {
 			pageIDsToDraw = getPairedPages(this.currentPageLookup)
 				.map(p => (p ? {type: p.type, id: p.id} : null));
-		} else {
+		} else if (this.currentPageLookup) {
 			pageIDsToDraw = [this.currentPageLookup];
+		} else {
+			return null;  // No pages, nothing to render
 		}
 
 		let prevPagePair;
