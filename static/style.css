@@ -16,6 +16,8 @@ div#container {
 /* TODO: If context menu pops up partially off screen, scroll bars are added; they shouldn't be */
 /* TODO: Nav tree top button should *not* scroll */
 /* TODO: When selected item changes, nav tree should auto-scroll so selected item is in view */
+/* TODO: Why is there an extra 6px under each el-color-picker?
+/* TODO: brick color picker refuses to have variable width columns */
 
 /* Overwrite Bootstrap stuff */
 .navbar {

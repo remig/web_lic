@@ -32,6 +32,7 @@
         "no-console": "warn",
         "no-debugger": "warn",
         "no-empty": "warn",
+        "no-extra-semi": "warn",
         "no-floating-decimal": "error",
         "no-global-assign": "error",
         "no-implicit-globals": "error",
