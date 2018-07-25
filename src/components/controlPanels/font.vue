@@ -59,7 +59,6 @@
 </template>
 
 <script>
-/* global Vue: false */
 
 import _ from '../../util';
 import store from '../../store';
@@ -101,9 +100,7 @@ export default {
 		},
 		updateFontName() {
 			if (this.family === 'Custom...') {
-				DialogManager.setDialog(fontNameDialog);
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager(fontNameDialog, dialog => {
 					dialog.$on('ok', fontName => {
 						this.family = fontName;
 						this.familyNames = getFamilyNames();

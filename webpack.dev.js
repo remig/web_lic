@@ -5,7 +5,9 @@ module.exports = {
 	entry: './src/ui.js',
 	output: {
 		filename: 'bundle.js',
-		path: path.resolve(__dirname, 'dist')
+		chunkFilename: '[name].bundle.js',
+		path: path.resolve(__dirname, 'dist'),
+		publicPath: 'dist/'
 	},
 	mode: 'development',
 	devtool: 'source-map',
@@ -28,7 +30,7 @@ module.exports = {
 			},
 			{
 				test: /\.(js|vue)$/,
-				exclude: /node_modules/,
+				exclude: [/node_modules/, /dialog\.js/],
 				loader: 'eslint-loader',
 				options: {
 					failOnWarning: false,

@@ -90,9 +90,7 @@ function pickLanguage(onOk, onLanguageChange) {
 		}
 		return;
 	}
-	DialogManager.setDialog('localeChooserDialog');
-	Vue.nextTick(() => {
-		const dialog = DialogManager.getDialog();
+	DialogManager('localeChooserDialog', dialog => {
 		dialog.visible = true;
 		dialog.onLanguageChange = onLanguageChange;
 		dialog.onOK = onOk;

@@ -44,6 +44,9 @@ export default {
 		};
 	},
 	methods: {
+		show() {
+			this.visible = true;
+		},
 		checkIncludeItem(item) {
 			this.newState.include[item] = !this.newState.include[item];
 		},

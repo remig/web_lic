@@ -13,8 +13,6 @@ import LocaleManager from './translate';
 import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
 import DialogManager from './dialog';
-import importModelDialog from './dialogs/import_model.vue';
-import whatsNewDialog from './dialogs/whats_new.vue';
 import NavTree from './components/nav_tree/base.vue';
 import './pageView';
 import './templatePanel';
@@ -92,10 +90,7 @@ const app = new Vue({
 				store.setModel(model);
 				this.filename = store.model.filename;
 
-				DialogManager.setDialog(importModelDialog);
-
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('importModelDialog', dialog => {
 					dialog.visible = true;
 					dialog.$on('ok', async layoutChoices => {
 
@@ -469,9 +464,8 @@ const app = new Vue({
 		});
 
 		if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
-			DialogManager.setDialog(whatsNewDialog);
-			Vue.nextTick(() => {
-				DialogManager.getDialog().visible = true;
+			DialogManager('whatsNewDialog', dialog => {
+				dialog.show();
 			});
 		}
 

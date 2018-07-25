@@ -9,10 +9,7 @@ import openFileHandler from './fileUploader';
 import Storage from './storage';
 import LocaleManager from './translate';
 import uiState from './uiState';
-
 import DialogManager from './dialog';
-import gridDialog from './dialogs/grid_dialog.vue';
-import pdfExportDialog from './dialogs/export_pdf.vue';
 
 let app;
 const tr = LocaleManager.translate;
@@ -376,9 +373,8 @@ const menu = [
 				{
 					text: 'navbar.view.grid.customize',
 					cb() {
-						DialogManager.setDialog(gridDialog);
-						Vue.nextTick(() => {
-							DialogManager.getDialog().show(app);
+						DialogManager('gridDialog', dialog => {
+							dialog.show(app);
 						});
 					}
 				}
@@ -415,9 +411,7 @@ const menu = [
 			text: 'navbar.export.hi_res_pdf',
 			enabled: enableIfModel,
 			cb() {
-				DialogManager.setDialog(pdfExportDialog);
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('pdfExportDialog', dialog => {
 					dialog.$on('ok', newValues => {
 						InstructionExporter.generatePDF(app, store, newValues);
 					});
@@ -446,10 +440,7 @@ const menu = [
 					};
 					return tr('dialog.scale_images.image_size_@mf', size);
 				}
-				DialogManager.setDialog('numberChooserDialog');
-
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('update', newValues => {
 						dialog.bodyText = sizeText(newValues.value);
 					});

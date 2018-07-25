@@ -1,4 +1,3 @@
-/* global Vue: false */
 'use strict';
 
 import _ from './util';
@@ -8,7 +7,6 @@ import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
 import uiState from './uiState';
 import DialogManager from './dialog';
-import styleDialog from './dialogs/style.vue';
 
 let app;
 
@@ -113,16 +111,17 @@ const contextMenu = {
 					}
 				},
 				{
+					// TODO: allow either 'row' or 'col' to be 'auto': as many as necessary
+					// TODO: don't allow insufficient row / col layouts that hide steps
 					text: 'By Row and Column...',
 					cb(selectedItem) {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.cloneDeep(page.layout);
 
-						DialogManager.setDialog('pageRowColLayoutDialog');
 						app.clearSelected();
+						app.redrawUI(true);
 
-						Vue.nextTick(() => {
-							const dialog = DialogManager.getDialog();
+						DialogManager('pageRowColLayoutDialog', dialog => {
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'page.layout',
@@ -143,8 +142,6 @@ const contextMenu = {
 							dialog.direction = originalLayout.direction || 'vertical';
 							dialog.show({x: 400, y: 150});
 						});
-
-						app.redrawUI(true);
 					}
 				}
 			]
@@ -254,11 +251,10 @@ const contextMenu = {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.cloneDeep(page.layout);
 
-						DialogManager.setDialog('pageRowColLayoutDialog');
 						app.clearSelected();
+						app.redrawUI(true);
 
-						Vue.nextTick(() => {
-							const dialog = DialogManager.getDialog();
+						DialogManager('pageRowColLayoutDialog', dialog => {
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'page.layout',
@@ -279,8 +275,6 @@ const contextMenu = {
 							dialog.direction = originalLayout.direction || 'vertical';
 							dialog.show({x: 400, y: 150});
 						});
-
-						app.redrawUI(true);
 					}
 				}
 			]
@@ -505,11 +499,8 @@ const contextMenu = {
 						}
 						csi.rotation = initialRotation;
 
-						DialogManager.setDialog('rotateCSIDialog');
 						app.clearSelected();
-
-						Vue.nextTick(() => {
-							const dialog = DialogManager.getDialog();
+						DialogManager('rotateCSIDialog', dialog => {
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'csi.rotate',
@@ -563,11 +554,10 @@ const contextMenu = {
 				const step = store.get.step(csi.parent.id);
 				const originalRotations = [];
 
-				DialogManager.setDialog('copyRotationDialog');
 				app.clearSelected();
+				app.redrawUI(true);
 
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('copyRotationDialog', dialog => {
 					dialog.$on('ok', newValues => {
 						const csiList = originalRotations
 							.map((rotation, id) => ({type: 'csi', id})).filter(el => el);
@@ -611,8 +601,6 @@ const contextMenu = {
 					dialog.nextXSteps = 0;
 					dialog.show({x: 400, y: 150});
 				});
-
-				app.redrawUI(true);
 			}
 		},
 		{
@@ -628,9 +616,7 @@ const contextMenu = {
 						initialScale = store.get.templateForItem(selectedItem).scale;
 					}
 				}
-				DialogManager.setDialog('numberChooserDialog');
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('update', newValues => {
 						csi.scale = _.clamp(newValues.value || 0, 0.001, 5);
 						csi.isDirty = true;
@@ -711,11 +697,8 @@ const contextMenu = {
 				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};
 
-				DialogManager.setDialog('rotateCSIDialog');
 				app.clearSelected();
-
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('rotateCSIDialog', dialog => {
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].rotation = {...newValues.rotation};
 						store.mutations.pliItem.markAllDirty(filename);
@@ -760,9 +743,7 @@ const contextMenu = {
 				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};
 
-				DialogManager.setDialog('numberChooserDialog');
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].scale = _.clamp(newValues.value || 0, 0.001, 5);
 						store.mutations.pliItem.markAllDirty(filename);
@@ -847,9 +828,7 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				const annotation = store.get.annotation(selectedItem);
-				DialogManager.setDialog(styleDialog);
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('styleDialog', dialog => {
 					dialog.$on('ok', newProperties => {
 						const opts = {annotation, newProperties};
 						undoStack.commit('annotation.set', opts, 'Change Annotation');
@@ -1016,9 +995,7 @@ const contextMenu = {
 				// TODO: store divider orientation in divider itself
 				const originalSize = (bbox.height === 0) ? bbox.width : bbox.height;
 
-				DialogManager.setDialog('numberChooserDialog');
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('update', newValues => {
 						store.mutations.divider.setLength({divider, newLength: newValues.value});
 						app.drawCurrentPage();
@@ -1114,11 +1091,8 @@ const contextMenu = {
 				const displacement = step.displacedParts.find(p => p.partID === selectedItem.id);
 				const originalDisplacement = _.cloneDeep(displacement);
 
-				DialogManager.setDialog('partDisplacementDialog');
 				app.clearSelected();
-
-				Vue.nextTick(() => {
-					const dialog = DialogManager.getDialog();
+				DialogManager('partDisplacementDialog', dialog => {
 					dialog.$on('ok', () => {
 						undoStack.commit('part.displace', {step, ...displacement}, 'Adjust Displaced Part');
 					});
