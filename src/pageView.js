@@ -217,11 +217,13 @@ Vue.component('pageView', {
 			}
 
 			this.pageLockStatus = [];
-			store.state.pages.forEach(page => (this.pageLockStatus[page.id] = page.locked));
+			if (latestPageCount > 0) {
+				store.state.pages.forEach(page => (this.pageLockStatus[page.id] = page.locked));
 
-			Vue.nextTick(() => {
-				this.drawVisiblePages();
-			});
+				Vue.nextTick(() => {
+					this.drawVisiblePages();
+				});
+			}
 		},
 		mouseDown(e) {
 			if (e.button !== 0 || (e.target.nodeName !== 'CANVAS' && !e.target.className.includes('guide'))) {
