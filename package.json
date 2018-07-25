@@ -1,12 +1,15 @@
 {
 	"name": "web_lic",
-	"version": "0.35.0",
+	"version": "0.36.0",
 	"description": "Create an instruction book from a 3D model",
 	"main": "src/ui.js",
 	"scripts": {
 		"build": "webpack --config webpack.dev.js",
 		"build_prod": "webpack --config webpack.prod.js",
-		"test": "./node_modules/.bin/wdio ./test/wdio.conf.js"
+		"test": "./node_modules/.bin/wdio ./test/wdio.conf.js",
+		"deploy": "python deploy.py",
+		"stats": "webpack --config webpack.prod.js --profile --json > stats.json",
+		"profile": "webpack-bundle-analyzer stats.json"
 	},
 	"keywords": [],
 	"author": "Remi Gagne",
@@ -33,6 +36,7 @@
 		"wdio-spec-reporter": "0.1.4",
 		"webdriverio": "4.12.0",
 		"webpack": "4.1.1",
+		"webpack-bundle-analyzer": "2.13.1",
 		"webpack-cli": "2.0.12"
 	},
 	"dependencies": {

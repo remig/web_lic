@@ -1,5 +1,21 @@
 [
 	{
+		"version": "0.36.0",
+		"date": "July 24, 2018",
+		"features": [
+			"Change the colors used for each LDraw color and edge with 'Edit -> Brick Colors...'",
+			"New 'Style' right-click option for label annotations",
+			"The 'delete' key will now delete selected page items that can be deleted (divider lines, annotations, empty callouts, steps, pages, etc)"
+		],
+		"bug_fixes": [
+			"Don't crash when loading a model for the very first time",
+			"Remove extraneous whitespace to the right of the page when visiting the site for the very first time",
+			"Don't crash when creating an image annotation",
+			"Correctly postion image annotations when they're relative to something that's not in the top left corner of the page",
+			"Fully delete image annotations, so that re-adding them later doesn't crash"
+		]
+	},
+	{
 		"version": "0.35.0",
 		"date": "July 20, 2018",
 		"features": [
