@@ -1,3 +1,5 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
 <template>
 	<div id="tree">
 		<div class="treeButtons">

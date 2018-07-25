@@ -1,3 +1,5 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
 <script>
 
 import store from '../../store';

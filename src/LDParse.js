@@ -1,3 +1,5 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
 const api = {
 
 	LDrawPath: '../ldraw/',  // Path to load LDraw parts via HTTP. Either absolute or relative to current page

@@ -1,3 +1,5 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
 'use strict';
 
 import _ from './util';
@@ -57,7 +59,6 @@ const api = {
 				v.color = '#' + (v.color).toString(16).padStart(6, '0');
 				v.edge = '#' + (v.edge).toString(16).padStart(6, '0');
 			});
-			debugger;
 		}
 	}
 };

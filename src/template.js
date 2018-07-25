@@ -1,3 +1,5 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
 'use strict';
 
 // All margins are decimal percentages of max(pageWidth, pageHeight)

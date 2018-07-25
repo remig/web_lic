@@ -1,3 +1,5 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
 <template>
 	<div :id="`treeParent_${target.type}_${target.id}`">
 		<i

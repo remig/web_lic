@@ -1,3 +1,5 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
 <template>
 	<el-dialog
 		:title="tr('dialog.export_hi_res_pdf.title')"

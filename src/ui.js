@@ -1,3 +1,5 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
 /* global Vue: false, Split: false, ELEMENT: false */
 'use strict';
 
