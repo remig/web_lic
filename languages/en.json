@@ -5,6 +5,7 @@
 	"font_size": "Font Size",
 	"color": "Color",
 	"size": "Size",
+	"reset": "Reset",
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -47,7 +48,7 @@
 				"remove": "Remove Part List Pages"
 			},
 			"snap": "Snap To (NYI)",
-			"brick_colors": " Brick Colors... (NYI)"
+			"brick_colors": " Brick Colors..."
 		},
 		"view": {
 			"root": "View",
@@ -134,6 +135,10 @@
 		},
 		"locale_chooser": {
 			"title": "Pick a Language"
+		},
+		"brick_colors": {
+			"title": "Brick Colors",
+			"action": "Change Brick Colors"
 		}
 	},
 	"templatePanel": {

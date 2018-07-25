@@ -315,7 +315,14 @@ const menu = [
 			}
 		},
 		{text: 'navbar.edit.snap', enabled: () => false, cb() {}},
-		{text: 'navbar.edit.brick_colors', enabled: () => false, cb() {}}
+		{
+			text: 'navbar.edit.brick_colors',
+			cb() {
+				DialogManager('brickColorDialog', dialog => {
+					dialog.show();
+				});
+			}
+		}
 	]},
 	{text: 'navbar.view.root', children: [
 		{

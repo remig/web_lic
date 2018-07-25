@@ -132,6 +132,10 @@ let component;
 
 Vue.component('dialogManager', {
 	components: {
+		brickColorDialog: () => import(
+			/* webpackChunkName: "brickColorDialog" */
+			'./dialogs/brick_colors.vue'
+		),
 		gridDialog: () => import(
 			/* webpackChunkName: "gridDialog" */
 			'./dialogs/grid_dialog.vue'

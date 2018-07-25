@@ -27,8 +27,8 @@ const api = {
 			if (line && line[1] === '!COLOUR') {
 				colors[line[4]] = {  // TODO: handle color modifiers like 'CHROME', 'METAL', 'LUMINANCE', etc
 					name: line[2],
-					color: parseInt(line[6].slice(1), 16),
-					edge: parseInt(line[8].slice(1), 16),
+					color: line[6],
+					edge: line[8],
 					alpha: line[10] ? parseInt(line[10], 10) : 0
 				};
 			}
