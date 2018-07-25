@@ -1,5 +1,7 @@
 'use strict';
 
+import _ from './util';
+
 const api = {
 
 	fixLicSaveFile(content) {
@@ -48,6 +50,14 @@ const api = {
 
 		if (state.template.submodelImage.maxHeight == null) {
 			state.template.submodelImage.maxHeight = 0.3;
+		}
+
+		if (typeof content.colorTable[0].color === 'number') {
+			_.forOwn(content.colorTable, v => {
+				v.color = '#' + (v.color).toString(16).padStart(6, '0');
+				v.edge = '#' + (v.edge).toString(16).padStart(6, '0');
+			});
+			debugger;
 		}
 	}
 };
