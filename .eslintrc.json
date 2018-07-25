@@ -14,15 +14,15 @@
     "rules": {
         "block-scoped-var": "error",
         "brace-style": ["error", "1tbs", {"allowSingleLine": true} ],
-        "comma-dangle": ["error", "never"],
+        "comma-dangle": ["warn", "never"],
         "comma-spacing": "error",
         "consistent-return": "error",
         "curly": "error",
-        "eol-last": ["error", "always"],
+        "eol-last": ["warn", "always"],
         "eqeqeq": ["error", "always", {"null": "never"}],
         "func-call-spacing": "error",
         "guard-for-in": "error",
-        "indent": ["error", "tab", {"outerIIFEBody": 0, "SwitchCase": 1}],
+        "indent": ["warn", "tab", {"outerIIFEBody": 0, "SwitchCase": 1}],
         "linebreak-style": ["error", "windows"],
         "key-spacing": "error",
         "keyword-spacing": "error",
@@ -31,6 +31,7 @@
         "no-caller": "error",
         "no-console": "warn",
         "no-debugger": "warn",
+        "no-empty": "warn",
         "no-floating-decimal": "error",
         "no-global-assign": "error",
         "no-implicit-globals": "error",
@@ -52,7 +53,7 @@
         "no-self-assign": "error",
         "no-self-compare": "error",
         "no-sequences": "error",
-        "no-trailing-spaces": "error",
+        "no-trailing-spaces": "warn",
         "no-unmodified-loop-condition": "error",
         "no-unused-expressions": "error",
         "no-unused-labels": "error",
@@ -80,6 +81,7 @@
         "vue/require-prop-types": "off",
         "vue/require-default-prop": "off",
         "vue/order-in-components": ["error", {"order": ["el", "name", "parent", "template", "functional", "delimiters", "comments", "filters", "directives", "components", "extends", "mixins", "inheritAttrs", "model", ["props", "propsData"], "data", "render", "watch", "methods", "computed", "LIFECYCLE_HOOKS", "renderError"]}],
-        "vue/html-indent": ["error", "tab"]
+        "vue/html-indent": ["warn", "tab"],
+        "vue/html-self-closing": "warn"
     }
 }
