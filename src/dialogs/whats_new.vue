@@ -2,6 +2,7 @@
 
 <template>
 	<el-dialog
+		id="whats_new_dialog"
 		:show-close="false"
 		:visible="visible"
 		:title="tr('dialog.whats_new.title')"

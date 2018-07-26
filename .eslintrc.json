@@ -7,6 +7,9 @@
         "commonjs": true,
         "mocha": true
     },
+    "globals": {
+		"cy": false
+    },
     "extends": [
         "eslint:recommended",
         "plugin:vue/recommended"
