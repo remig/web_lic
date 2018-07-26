@@ -121,7 +121,7 @@ function removeGuides() {
 }
 
 const menu = [
-	{text: 'navbar.file.root', children: [
+	{text: 'navbar.file.root', id: 'file', children: [
 		{
 			text: 'navbar.file.open_lic',
 			id: 'open',
@@ -250,7 +250,7 @@ const menu = [
 			]
 		}
 	]},
-	{text: 'navbar.edit.root', children: [
+	{text: 'navbar.edit.root', id: 'edit', children: [
 		{
 			id: 'undo',
 			text: undoStack.undoText,
@@ -326,7 +326,7 @@ const menu = [
 			}
 		}
 	]},
-	{text: 'navbar.view.root', children: [
+	{text: 'navbar.view.root', id: 'view', children: [
 		{
 			text: 'navbar.view.show_pages.root',
 			enabled: enableIfModel,
@@ -408,7 +408,7 @@ const menu = [
 			]
 		}
 	]},
-	{text: 'navbar.export.root', children: [
+	{text: 'navbar.export.root', id: 'export', children: [
 		{
 			text: 'navbar.export.pdf',
 			enabled: enableIfModel,

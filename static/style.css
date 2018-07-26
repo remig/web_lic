@@ -301,10 +301,6 @@ ul {
 	height: calc(100% - 38px - 25px); /* 38 = height of menu bar, 25 = height of status bar */
 }
 
-#leftPane {
-	overflow-y: auto;
-}
-
 #rightPane {
 	background-color: #bbb;
 	display: flex;

@@ -3,6 +3,8 @@
 <template>
 	<div id="tree">
 		<div class="treeButtons">
+			<el-button icon="fas fa-expand-arrows-alt" @click="expand" />
+			<el-button icon="fas fa-compress" @click="collapse" />
 			<el-dropdown
 				id="treeShowHideMenu"
 				:hide-on-click="false"
@@ -30,10 +32,8 @@
 					</template>
 				</el-dropdown-menu>
 			</el-dropdown>
-			<el-button icon="fas fa-compress" @click="collapse" />
-			<el-button icon="fas fa-expand-arrows-alt" @click="expand" />
 		</div>
-		<ul>
+		<ul class="treeScroll">
 			<li
 				v-for="(node, idx) in store.get.topLevelTreeNodes()"
 				:key="`root_${idx}`"
@@ -215,18 +215,21 @@ export default {
 <style>
 
 #tree {
-	padding: 7px 5px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 }
 
 .treeButtons {
-	margin-bottom: 10px;
+	display: flex;
+	padding: 10px;
 	min-width: 110px;
-	height: 32px;
 	border-bottom: 1px solid #AAA;
 }
 
 .treeButtons > button {
-	float: right;
+	align-self: flex-end;
+	margin-left: auto;
 	font-size: 8pt;
 	margin-right: 6px;
 	padding: 6px 7px;
@@ -245,6 +248,13 @@ export default {
 
 .treeShowHideDropdown i {
 	padding-top: 5px;
+}
+
+.treeScroll {
+	flex: 1;
+	overflow-y: auto;
+	padding: 10px 0 50px 10px;
+	margin: 0;
 }
 
 .indent {
