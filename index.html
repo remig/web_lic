@@ -63,6 +63,7 @@
 		</div>
 
 		<nav-menu
+			id="navMenu"
 			:menu-entry-list="navBarContent"
 			:filename="{name: filename, isDirty}"
 			:version="version" :key="navUpdateState"
@@ -196,6 +197,7 @@
 					<li
 						v-for="child in resolveProperty(entry.children)"
 						v-if="isVisible(child)"
+						:id="child.id | sanitizeMenuID"
 						:class="{divider: child.text == 'separator', disabled: child.enabled ? !child.enabled(selectedItem) : false}"
 					>
 						<a @click="triggerMenu(child, $event)" class="clickable">

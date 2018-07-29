@@ -8,7 +8,8 @@
         "mocha": true
     },
     "globals": {
-		"cy": false
+		"cy": false,
+		"expect": false
     },
     "extends": [
         "eslint:recommended",
@@ -40,7 +41,7 @@
         "no-global-assign": "error",
         "no-implicit-globals": "error",
         "no-implied-eval": "error",
-        "no-invalid-this": "error",
+        "no-invalid-this": "warn",
         "no-irregular-whitespace": "error",
         "no-iterator": "error",
         "no-lone-blocks": "error",
@@ -72,9 +73,9 @@
         "no-whitespace-before-property": "error",
         "no-with": "error",
         "prefer-const": "error",
-        "quotes": ["error", "single", {"avoidEscape": true}],
+        "quotes": ["warn", "single", {"avoidEscape": true}],
         "radix": "error",
-        "semi": ["error", "always"],
+        "semi": ["warn", "always"],
         "space-before-blocks": "error",
         "space-before-function-paren": ["error", "never"],
         "space-infix-ops": "error",

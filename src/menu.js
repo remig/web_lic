@@ -129,14 +129,21 @@ const menu = [
 				openFileHandler('.lic', 'text', app.openLicFile);
 			}
 		},
-		{text: 'navbar.file.open_lic_recent', enabled: () => false, cb: () => {}},
+		{
+			text: 'navbar.file.open_lic_recent',
+			id: 'open_recent',
+			enabled: () => false,
+			cb: () => {}
+		},
 		{
 			text: 'navbar.file.close',
+			id: 'close',
 			enabled: enableIfModel,
 			cb: 'closeModel'
 		},
 		{
 			text: 'navbar.file.save',
+			id: 'save',
 			shortcut: 'ctrl+s',
 			enabled: enableIfModel,
 			cb: 'save'
@@ -144,12 +151,14 @@ const menu = [
 		{text: 'separator'},
 		{
 			text: 'navbar.file.import_model',
+			id: 'import_custom_model',
 			cb() {
 				openFileHandler('.ldr, .mpd', 'text', app.importLocalModel);
 			}
 		},
 		{
 			text: 'navbar.file.import_builtin_model',
+			id: 'import_builtin_model',
 			children: [
 				{
 					text: 'Trivial Model',
@@ -180,23 +189,32 @@ const menu = [
 		{text: 'separator'},
 		{
 			text: 'navbar.file.template.root',
+			id: 'template',
 			enabled: enableIfModel,
 			children: [
 				{
 					text: 'navbar.file.template.save',
+					id: 'save_template',
 					cb() {
 						store.save('file', 'template', '\t');
 					}
 				},
 				{
 					text: 'navbar.file.template.load',
+					id: 'load_template',
 					cb() {
 						openFileHandler('.lit', 'text', app.importTemplate);
 					}
 				},
-				{text: 'navbar.file.template.load_builtin', enabled: false, cb() {}},
+				{
+					text: 'navbar.file.template.load_builtin',
+					id: 'load_builtin_template',
+					enabled: false,
+					cb() {}
+				},
 				{
 					text: 'navbar.file.template.reset',
+					id: 'reset_template',
 					cb() {
 						const text = tr('navbar.file.template.reset_undo');
 						undoStack.commit('templatePage.reset', null, text, ['csi', 'pliItem']);
@@ -207,6 +225,7 @@ const menu = [
 		{text: 'separator'},
 		{
 			text: 'navbar.file.set_language.root',
+			id: 'set_language',
 			children() {
 				return LocaleManager.LanguageList.map(language => {
 					return {
@@ -221,9 +240,11 @@ const menu = [
 		},
 		{
 			text: 'navbar.file.clear_cache.root',
+			id: 'clear_cache',
 			children: [
 				{
 					text: 'navbar.file.clear_cache.model',
+					id: 'clear_cache_model',
 					cb() {
 						app.closeModel();
 						Storage.clear.model();
@@ -232,6 +253,7 @@ const menu = [
 				},
 				{
 					text: 'navbar.file.clear_cache.ui',
+					id: 'clear_cache_ui',
 					cb() {
 						uiState.resetUIState();
 						Storage.clear.ui();
@@ -240,6 +262,7 @@ const menu = [
 				},
 				{
 					text: 'navbar.file.clear_cache.everything',
+					id: 'clear_cache_everything',
 					cb() {
 						app.closeModel();
 						uiState.resetUIState();
