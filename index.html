@@ -498,58 +498,6 @@
 		</el-dialog>
 	</script>
 
-	<script type="text/x-template" id="numberChooserDialogTemplate">
-		<el-dialog
-			:title="title"
-			:modal="false"
-			:show-close="false"
-			:visible="visible"
-			width="300px"
-		>
-			<input
-				v-model.number="value"
-				@input="updateValues"
-				type="number"
-				:min="min"
-				:max="max"
-				:step="step"
-				class="form-control"
-			/>
-			<div v-if="bodyText" style="margin-top: 15px" v-html="bodyText"></div>
-			<span slot="footer" class="dialog-footer">
-				<el-button @click="cancel">{{tr("cancel")}}</el-button>
-				<el-button type="primary" @click="ok">{{tr("ok")}}</el-button>
-			</span>
-		</el-dialog>
-	</script>
-
-	<script type="text/x-template" id="stringTemplate">
-		<baseDialog :title="title">
-			<div slot="body" class="container-fluid">
-				<form class="form-horizontal" role="form">
-					<div class="form-group">
-						<label
-							class="col-sm-2 control-label"
-							for="stringInput"
-						>
-							{{labelText}}
-						</label>
-						<div class="col-sm-10">
-							<input
-								v-model="string"
-								v-on:input="updateValues"
-								type="text"
-								class="form-control"
-								id="stringInput"
-								:placeholder="string"
-							/>
-						</div>
-					</div>
-				</form>
-			</div>
-		</baseDialog>
-	</script>
-
 	<!-- Template Page Components -->
 	<script type="text/x-template" id="templatePanel">
 		<div @click.stop="" class="container">

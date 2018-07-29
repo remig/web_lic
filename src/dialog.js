@@ -5,6 +5,8 @@
 'use strict';
 
 import _ from './util';
+import stringChooserDialog from './dialogs/string_chooser.vue'
+import numberChooserDialog from './dialogs/number_chooser.vue'
 
 // TODO: set focus to correct UI widget when showing each dialog
 Vue.component('baseDialog', {
@@ -70,11 +72,6 @@ const dialogs = {
 	},
 	copyRotation: {
 		nextXSteps: 0
-	},
-	string: {
-		title: '',
-		labelText: '',
-		string: ''
 	}
 };
 
@@ -93,47 +90,12 @@ _.forOwn(dialogs, (data, name) => {
 	});
 });
 
-const elDialogs = {
-	numberChooser: {
-		// TODO: Element inputNumber is broken; doesn't emit input events and doesn't filter non-numeric keys
-		// TODO: Need to implement my own better looking number input, with nice scroll buttons.
-		title: '',
-		value: 0,
-		bodyText: '',
-		min: 0,
-		max: 100,
-		step: 1
-	}
-};
-
-_.forOwn(elDialogs, (data, name) => {
-	Vue.component(name + 'Dialog', {
-		template: `#${name}DialogTemplate`,
-		data: function() {
-			data = _.cloneDeep(data);
-			data.visible = false;
-			return data;
-		},
-		methods: {
-			updateValues() {
-				this.$emit('update', {...this.$data});
-			},
-			ok() {
-				this.visible = false;
-				this.$emit('ok', {...this.$data});
-			},
-			cancel() {
-				this.visible = false;
-				this.$emit('cancel');
-			}
-		}
-	});
-});
-
 let component;
 
 Vue.component('dialogManager', {
 	components: {
+		stringChooserDialog,
+		numberChooserDialog,
 		brickColorDialog: () => import(
 			/* webpackChunkName: "brickColorDialog" */
 			'./dialogs/brick_colors.vue'

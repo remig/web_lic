@@ -1,0 +1,69 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
+<template>
+	<el-dialog
+		:title="title"
+		:modal="false"
+		:show-close="false"
+		:visible="visible"
+		:width="width"
+	>
+		<el-form :label-width="calculatedLabelWidth">
+			<el-form-item :label="label">
+				<input
+					v-model.number="value"
+					:min="min"
+					:max="max"
+					:step="step"
+					type="number"
+					class="form-control"
+					@input="updateValues"
+				>
+				<div v-if="bodyText" style="margin-top: 15px" v-html="bodyText" />
+			</el-form-item>
+		</el-form>
+		<span slot="footer" class="dialog-footer">
+			<el-button @click="cancel">{{tr("cancel")}}</el-button>
+			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
+		</span>
+	</el-dialog>
+</template>
+
+<script>
+
+// TODO: Need to implement my own better looking number input, with nice scroll buttons.
+export default {
+	data: function() {
+		return {
+			visible: false,
+			value: null,
+			width: '500px',
+			title: 'Get String',
+			label: '',
+			labelWidth: '0',
+			bodyText: '',
+			min: 0,
+			max: 100,
+			step: 1
+		};
+	},
+	methods: {
+		updateValues() {
+			this.$emit('update', {...this.$data});
+		},
+		ok() {
+			this.visible = false;
+			this.$emit('ok', {...this.$data});
+		},
+		cancel() {
+			this.visible = false;
+			this.$emit('cancel');
+		}
+	},
+	computed: {
+		calculatedLabelWidth() {
+			return this.label ? this.labelWidth : '0';
+		}
+	}
+};
+</script>
