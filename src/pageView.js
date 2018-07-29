@@ -56,9 +56,8 @@ Vue.component('pageView', {
 				lockSwitch = createElement(
 					'el-switch',
 					{
-						props: {width: 20},
+						props: {width: 20, value: locked},
 						class: 'pageLockSwitch',
-						domProps: {value: locked},
 						on: {input: setPageLocked(pageLookup.id)}
 					}
 				);
