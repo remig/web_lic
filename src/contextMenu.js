@@ -823,7 +823,7 @@ const contextMenu = {
 		};
 
 		const setStyleMenu = {
-			text: 'Style...',
+			text: 'Change Text & Style...',
 			shown(selectedItem) {
 				const annotation = store.get.annotation(selectedItem);
 				return annotation && annotation.annotationType === 'label';
@@ -1011,7 +1011,6 @@ const contextMenu = {
 					});
 					dialog.visible = true;
 					dialog.title = 'Resize Page Divider';
-					dialog.bodyText = '';
 					dialog.min = 1;
 					dialog.max = 10000;
 					dialog.step = 1;
