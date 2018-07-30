@@ -52,6 +52,8 @@ export default {
 	},
 	computed: {
 		calculatedLabelWidth() {
+			// TODO: If we can figure out which font we're drawing with here, we can measure label
+			// And remove labelWidth from public API entirely...
 			return this.label ? this.labelWidth : '0';
 		}
 	}

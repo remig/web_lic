@@ -12,6 +12,8 @@ const keys = {
 };
 
 const api = {
+	// TODO: Do *NOT* assume local storage always contains default UI settings.  If localStorage
+	// is wiped mid-model edit, Lic should not crash.
 	initialize(defaultState) {
 		if (localStorage.length === 0 || localStorage.getItem(keys.ui) == null) {
 			localStorage.setItem(keys.ui, JSON.stringify(defaultState));
