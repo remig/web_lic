@@ -445,9 +445,9 @@ const app = new Vue({
 	},
 	mounted() {
 
-		// TODO: show template page always, even when no model loaded.
-		// TODO: this lets you import a model with the desired template already in place.
 		// TODO: show some kind of 'getting started' content when model not yet loaded.
+		// TODO: show template page always, even when no model loaded.
+		// 		This lets you import a model with the desired template already in place.
 		document.body.addEventListener('keyup', e => {
 			this.globalKeyPress(e);
 		});
@@ -480,6 +480,8 @@ const app = new Vue({
 		});
 
 		LDParse.setProgressCallback(this.updateProgress);
+		LDParse.loadLDConfig();
+
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();
 			this.redrawUI();

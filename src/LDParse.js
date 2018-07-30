@@ -1,5 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
+let needLDConfig = true;
+
 const api = {
 
 	LDrawPath: '../ldraw/',  // Path to load LDraw parts via HTTP. Either absolute or relative to current page
@@ -41,6 +43,8 @@ const api = {
 		if (colors[24]) {
 			colors[24].color = colors[24].edge = -1;
 		}
+		api.setColorTable(colors);
+		needLDConfig = false;
 		return colors;
 	},
 
@@ -158,8 +162,6 @@ async function requestPart(fn) {
 
 // key: submodel filename, value: lineList to be loaded
 const unloadedSubModels = {};
-
-let needLDConfig = true;
 
 const primitiveTypes = {
 	'2': 'line',
@@ -344,8 +346,7 @@ async function loadSubModels(lineList) {
 async function loadPart(fn, content, progressCallback) {
 	let part;
 	if (needLDConfig) {
-		api.colorTable = await api.loadLDConfig();
-		needLDConfig = false;
+		await api.loadLDConfig();
 	}
 	if (fn && fn in api.partDictionary) {
 		return api.partDictionary[fn];
