@@ -11,6 +11,7 @@ export default {
 
 	ids: {
 		rootContainer: '#container',
+		navbar: '#navMenu',
 		statusBar: '#statusBar',
 		leftPane: '#leftPane',
 		tree: '#tree',
@@ -42,10 +43,17 @@ export default {
 				close: '#close_menu',
 				save: '#save_menu',
 				importModel: '#import_custom_model_menu',
+				importBuiltInModel: '#import_builtin_model_menu',
+				template: '#template_menu',
 				saveTemplate: '#save_template_menu',
-				saveTemplateAs: '#save_template_as_menu',
 				loadTemplate: '#load_template_menu',
-				resetTemplate: '#reset_template_menu'
+				loadBuiltInTemplate: '#load_builtin_template_menu',
+				resetTemplate: '#reset_template_menu',
+				setLanguage: '#set_language',
+				clearCache: '#clear_cache_menu',
+				clearCacheModel: '#clear_cache_model_menu',
+				clearCacheUI: '#clear_cache_ui_menu',
+				clearCacheEverything: '#clear_cache_everything_menu',
 			},
 			edit: {
 				undo: '#undo_menu',
@@ -76,7 +84,7 @@ export default {
 	},
 	classes: {
 		menu: {
-			closed: 'dropdown',
+			dropdown: 'dropdown',
 			open: 'open',
 			enabled: '',
 			disabled: 'disabled'
@@ -94,6 +102,11 @@ export default {
 				hidden: 'treeChildren indent hidden',
 				visible: 'treeChildren indent'
 			}
+		},
+		dialog: {
+			header: 'el-dialog__header',
+			body: 'el-dialog__body',
+			footer: 'el-dialog__footer'
 		}
 	},
 	selectors: {
