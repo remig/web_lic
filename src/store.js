@@ -29,6 +29,7 @@ import packageInfo from '../package.json';
 
 const emptyState = {
 	template: _.cloneDeep(defaultTemplate),
+	licFilename: null,  // user-visible filename (without extension) used to load / save lic file
 	templatePage: null,
 	titlePage: null,
 	plisVisible: true,
@@ -58,6 +59,7 @@ const store = {
 	setModel(model) {
 		store.model = model;
 		LDRender.setPartDictionary(LDParse.partDictionary);
+		store.state.licFilename = store.get.modelFilenameBase();
 	},
 	// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic,
 	//  except static stuff in model, like part geometries
@@ -78,7 +80,8 @@ const store = {
 		store.replaceState(content.state);
 	},
 	// mode is either 'file' or 'local', target is either 'state' or 'template'
-	save(mode, target = 'state', jsonIndent) {
+	// filename is optional; if set, will use that instead of store.state.licFilename
+	save({mode, target = 'state', filename, jsonIndent}) {
 		let content;
 		if (target === 'template') {
 			content = {template: store.state.template};
@@ -94,7 +97,9 @@ const store = {
 		if (mode === 'file') {
 			content = JSON.stringify(content, null, jsonIndent);
 			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
-			saveAs(blob, store.get.modelFilenameBase((target === 'template') ? '.lit' : '.lic'));
+			filename = filename || store.state.licFilename;
+			filename = (target === 'template') ? filename + '.lit' : filename + '.lic';
+			saveAs(blob, filename);
 		} else if (mode === 'local' && target !== 'template') {
 			console.log('Updating local storage');  // eslint-disable-line no-console
 			Storage.replace.model(content);

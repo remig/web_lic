@@ -74,10 +74,10 @@ const app = new Vue({
 		navUpdateState: 0    // Not used directly, only used to force the nav bar to redraw
 	},
 	methods: {
-		importRemoteModel(url) {
+		importBuiltInModel(url) {
 			this.importModel(() => LDParse.loadRemotePart(url));
 		},
-		importLocalModel(content, filename) {
+		importCustomModel(content, filename) {
 			this.importModel(() => LDParse.loadPartContent(content, filename));
 		},
 		importModel(modelGenerator) {
@@ -90,7 +90,7 @@ const app = new Vue({
 			modelGenerator().then(model => {
 				store.mutations.templatePage.add();
 				store.setModel(model);
-				this.filename = store.model.filename;
+				this.filename = store.state.licFilename;
 
 				DialogManager('importModelDialog', dialog => {
 					dialog.visible = true;
@@ -111,7 +111,7 @@ const app = new Vue({
 						if (layoutChoices.include.partListPage) {
 							store.mutations.inventoryPage.add();
 						}
-						store.save('local');
+						store.save({mode: 'local'});
 
 						const firstPage = store.get.titlePage() || store.get.firstPage();
 						this.currentPageLookup = store.get.itemToLookup(firstPage);
@@ -138,14 +138,14 @@ const app = new Vue({
 				this.closeModel();
 			}
 			store.load(content);
-			this.filename = store.model.filename;
+			this.filename = store.state.licFilename;
 			const firstPage = store.get.titlePage() || store.get.firstPage();
 			this.currentPageLookup = store.get.itemToLookup(firstPage);
-			store.save('local');
+			store.save({mode: 'local'});
 			undoStack.saveBaseState();
 			this.clearSelected();
 			const time = _.formatTime(start, Date.now());
-			this.statusText = `"${this.filename}" openend successfully (${time})`;
+			this.statusText = `"${store.model.filename}" openend successfully (${time})`;
 			Vue.nextTick(() => {
 				this.forceUIUpdate();
 				this.drawCurrentPage();
@@ -158,8 +158,38 @@ const app = new Vue({
 			}
 		},
 		save() {
-			store.save('file');
+			store.save({mode: 'file'});
 			this.dirtyState.lastSaveIndex = undoStack.getIndex();
+		},
+		saveAs() {
+			DialogManager('stringChooserDialog', dialog => {
+				dialog.$on('ok', newString => {
+					const fn = newString.replace(/[^a-zA-Z0-9 _]/ig, '').replace(/li[ct]$/ig, '');
+					this.filename = store.state.licFilename = fn;
+					this.save();
+				});
+				dialog.title = this.tr('dialog.save_as.title');
+				dialog.label = this.tr('dialog.save_as.fn');
+				dialog.labelWidth = '80px';
+				dialog.newString = this.filename;
+				dialog.visible = true;
+			});
+		},
+		saveTemplate(filename) {
+			store.save({mode: 'file', target: 'template', filename, jsonIndent: '\t'});
+		},
+		saveTemplateAs() {
+			DialogManager('stringChooserDialog', dialog => {
+				dialog.$on('ok', newString => {
+					const fn = newString.replace(/[^a-zA-Z0-9 _]/ig, '').replace(/li[ct]$/ig, '');
+					this.saveTemplate(fn);
+				});
+				dialog.title = this.tr('dialog.save_template_as.title');
+				dialog.label = this.tr('dialog.save_template_as.fn');
+				dialog.labelWidth = '80px';
+				dialog.newString = this.filename;
+				dialog.visible = true;
+			});
 		},
 		importTemplate(result, filename) {
 			undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template');

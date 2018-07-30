@@ -148,12 +148,18 @@ const menu = [
 			enabled: enableIfModel,
 			cb: 'save'
 		},
+		{
+			text: 'navbar.file.save_as',
+			id: 'save_as',
+			enabled: enableIfModel,
+			cb: 'saveAs'
+		},
 		{text: 'separator'},
 		{
 			text: 'navbar.file.import_model',
 			id: 'import_custom_model',
 			cb() {
-				openFileHandler('.ldr, .mpd', 'text', app.importLocalModel);
+				openFileHandler('.ldr, .mpd', 'text', app.importCustomModel);
 			}
 		},
 		{
@@ -163,25 +169,25 @@ const menu = [
 				{
 					text: 'Trivial Model',
 					cb() {
-						app.importRemoteModel('trivial_model.ldr');
+						app.importBuiltInModel('trivial_model.ldr');
 					}
 				},
 				{
 					text: 'Creator Alligator',
 					cb() {
-						app.importRemoteModel('Creator/20015 - Alligator.mpd');
+						app.importBuiltInModel('Creator/20015 - Alligator.mpd');
 					}
 				},
 				{
 					text: 'X-Wing',
 					cb() {
-						app.importRemoteModel('Star Wars/7140 - X-Wing Fighter.mpd');
+						app.importBuiltInModel('Star Wars/7140 - X-Wing Fighter.mpd');
 					}
 				},
 				{
 					text: 'Mobile Lab',
 					cb() {
-						app.importRemoteModel('Space/6901 - Mobile Lab.mpd');
+						app.importBuiltInModel('Space/6901 - Mobile Lab.mpd');
 					}
 				}
 			]
@@ -195,14 +201,18 @@ const menu = [
 				{
 					text: 'navbar.file.template.save',
 					id: 'save_template',
-					cb() {
-						store.save('file', 'template', '\t');
-					}
+					cb: 'saveTemplate'
+				},
+				{
+					text: 'navbar.file.template.save_as',
+					id: 'save_template_as',
+					cb: 'saveTemplateAs'
 				},
 				{
 					text: 'navbar.file.template.load',
 					id: 'load_template',
 					cb() {
+						// TODO: Need to re-layout every page after loading a template
 						openFileHandler('.lit', 'text', app.importTemplate);
 					}
 				},

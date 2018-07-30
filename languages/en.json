@@ -13,11 +13,13 @@
 			"open_lic_recent": "Open Recent (NYI)",
 			"close": "Close",
 			"save": "Save",
+			"save_as": "Save As...",
 			"import_model": "Import Custom Model...",
 			"import_builtin_model": "Import Built-in Model...",
 			"template": {
 				"root": "Template",
 				"save": "Save",
+				"save_as": "Save As...",
 				"load": "Load",
 				"load_builtin": "Load Built-in (NYI)",
 				"reset": "Reset",
@@ -117,6 +119,14 @@
 			"auto_color": "auto",
 			"width": "Width",
 			"dash": "Dash"
+		},
+		"save_as": {
+			"title": "Save As",
+			"fn": "Filename"
+		},
+		"save_template_as": {
+			"title": "Save Template As",
+			"fn": "Filename"
 		},
 		"style": {
 			"title": "Style",

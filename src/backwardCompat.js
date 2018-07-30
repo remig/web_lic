@@ -14,6 +14,16 @@ const api = {
 			state.inventoryPages = [];
 		}
 
+		if (_.isEmpty(content.state.licFilename)) {
+			state.licFilename = content.modelFilename.split('.')[0];
+		}
+
+		state.pages.forEach(page => {
+			if (page.pliItems == null) {
+				page.pliItems = [];
+			}
+		});
+
 		state.steps.forEach(step => {
 			if (step.stretchedPages == null) {
 				step.stretchedPages = [];

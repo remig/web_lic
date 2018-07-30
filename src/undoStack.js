@@ -191,7 +191,7 @@ function setStateTimer() {
 	// Save the current state to local storage if we haven't saved it in the last 30 seconds
 	// Need 'typeof setTimeout' check to not crash in unit tests
 	if (typeof setTimeout === 'function' && state.localStorageTimer == null) {
-		store.save('local');
+		store.save({mode: 'local'});
 		state.localStorageTimer = setTimeout(() => {
 			state.localStorageTimer = null;
 		}, 30);
