@@ -151,6 +151,26 @@
 			"action": "Change Brick Colors"
 		}
 	},
-	"templatePanel": {
+	"template": {
+		"page": {
+			"title": "Page Size",
+			"formats": {
+				"custom": "Custom...",
+				"a3": "A3",
+				"a4": "A4",
+				"a5": "A5",
+				"letter": "Letter",
+				"gov-letter": "Gov. Letter",
+				"legal": "Legal",
+				"junior-legal": "Junior Legal"
+			},
+			"orientation": {
+				"landscape": "Landscape",
+				"portrait": "Portrait"
+			},
+			"width": "Width (px)",
+			"height": "Height (px)",
+			"aspect_ratio_@mf": "Maintain Aspect Ratio (${aspect_ratio})"
+		}
 	}
 }

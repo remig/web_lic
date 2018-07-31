@@ -7,6 +7,7 @@ const template = {
 	page: {
 		width: 900,
 		height: 700,
+		sizePreset: null,  // {format, orientation}, formats defined in page_template.vue: pageSizeLookups
 		innerMargin: 0.025,
 		numberLabel: {
 			font: 'bold 18pt Helvetica',

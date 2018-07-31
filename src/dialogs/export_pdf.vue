@@ -103,6 +103,10 @@ export default{
 			units = units || this.newState.units;
 			return unitCount / this.unitConversions[units];
 		},
+		pointsToUnits(pointCount, units) {
+			const pixels = this.unitsToPixels(pointCount, 'point');
+			return this.pixelsToUnits(pixels, units);
+		},
 		unitToPoints(unitCount) {
 			const pixels = this.unitsToPixels(unitCount);
 			return this.pixelsToUnits(pixels, 'point');
