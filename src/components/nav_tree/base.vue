@@ -265,6 +265,7 @@ export default {
 .unindent {
 	position: relative;
 	left: -16px;
+	white-space: nowrap;
 }
 
 .treeIcon {

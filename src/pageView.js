@@ -159,6 +159,7 @@ Vue.component('pageView', {
 		const subRoot = createElement(
 			'div',
 			{
+				class: 'pageViewContainer',
 				style: {
 					width: facing ? pageWidth + pageWidth + 70 + 'px' : pageWidth + 'px',
 					height: scrolling ? null : pageHeight + 'px'
