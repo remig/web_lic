@@ -1,6 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 let needLDConfig = true;
+const blackColor = {name: 'Black', color: '#05131D', edge: '#595959', alpha: 0};
 
 const api = {
 
@@ -66,14 +67,20 @@ const api = {
 	setColorTable(dict) {
 		api.colorTable = dict;
 	},
+	customColorTable: {},
+	setCustomColorTable(dict) {
+		api.customColorTable = dict;
+	},
 
 	// colorID: an LDraw color to lookup
 	// type: either 'color' or 'edge'
-	getColor(colorCode, type) {
-		if (colorCode in api.colorTable) {
-			return api.colorTable[colorCode][type || 'color'];
+	getColor(colorCode, type = 'color') {
+		if (colorCode in api.customColorTable && api.customColorTable[colorCode][type]) {
+			return api.customColorTable[colorCode][type];
+		} else if (colorCode in api.colorTable) {
+			return api.colorTable[colorCode][type];
 		}
-		return 0;  // Treat any unrecognized colors as black
+		return blackColor[type || 'color'];  // Treat any unrecognized colors as black
 	},
 
 	model: {  // All 'model' arguments below are abstractParts

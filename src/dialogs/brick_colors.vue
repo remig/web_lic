@@ -49,28 +49,33 @@
 
 import _ from '../util';
 import store from '../store';
-import undoStack from '../undoStack';
 import LDParse from '../LDParse';
+import Storage from '../storage';
+const customColors = Storage.get.customBrickColors();
+
+function buildColorTable() {
+	const colors = [];
+	_.forOwn(LDParse.colorTable, (v, k) => {
+		if (v.color < 0 || v.edge < 0) {
+			return;
+		}
+		k = parseInt(k, 10);
+		const customColor = customColors[k] || {};
+		colors[k] = {
+			id: k,
+			name: v.name,
+			color: customColor.color || v.color,
+			edge: customColor.edge || v.edge
+		};
+	});
+	return colors;
+}
 
 export default {
-	// TODO: Add option to draw grid above / below page elements
 	data: function() {
-		const colors = [];
-		_.forOwn(LDParse.colorTable, (v, k) => {
-			if (v.color < 0 || v.edge < 0) {
-				return;
-			}
-			k = parseInt(k, 10);
-			colors[k] = {
-				id: k,
-				name: v.name,
-				color: v.color,
-				edge: v.edge
-			};
-		});
 		return {
 			visible: false,
-			colorData: colors
+			colorData: buildColorTable()
 		};
 	},
 	methods: {
@@ -79,54 +84,39 @@ export default {
 		},
 		ok() {
 			this.visible = false;
-			let haveChange = false;
-			const undo = [], redo = [];
 			this.colorData.forEach(el => {
 				const ldColor = LDParse.colorTable[el.id];
-				if (ldColor.color !== el.color) {
-					if (ldColor.originalColor == null) {
-						redo.push({root: ldColor, op: 'add', path: '/originalColor', value: ldColor.color});
-						undo.push({root: ldColor, op: 'remove', path: '/originalColor'});
-					}
-					redo.push({root: ldColor, op: 'replace', path: '/color', value: el.color});
-					undo.push({root: ldColor, op: 'replace', path: '/color', value: ldColor.color});
-					haveChange = true;
+				let customColor = customColors[el.id];
+				if (ldColor.color === el.color && customColor) {
+					delete customColor.color;
+				} else if (ldColor.color !== el.color) {
+					customColor = customColors[el.id] = customColors[el.id] || {};
+					customColor.color = el.color;
 				}
-				if (ldColor.edge !== el.edge) {
-					if (ldColor.originalEdge == null) {
-						redo.push({root: ldColor, op: 'add', path: '/originalEdge', value: ldColor.edge});
-						undo.push({root: ldColor, op: 'remove', path: '/originalEdge'});
-					}
-					redo.push({root: ldColor, op: 'replace', path: '/edge', value: el.edge});
-					undo.push({root: ldColor, op: 'replace', path: '/edge', value: ldColor.edge});
-					haveChange = true;
+				if (ldColor.edge === el.edge && customColor) {
+					delete customColor.edge;
+				} else if (ldColor.edge !== el.edge) {
+					customColor = customColors[el.id] = customColors[el.id] || {};
+					customColor.edge = el.edge;
+				}
+				if (_.isEmpty(customColor)) {
+					delete customColors[el.id];
 				}
 			});
-			if (haveChange) {
-				const change = {action: {undo, redo}};
-				const text = this.tr('dialog.brick_colors.action');
-				undoStack.commit(change, null, text, ['csi', 'pliItem']);
-				store.mutations.csi.markAllDirty();
-				store.mutations.pliItem.markAllDirty();
-				this.$root.redrawUI();
-			}
+			this.applyChange();
+		},
+		applyChange() {
+			Storage.replace.customBrickColors(customColors);
+			LDParse.setCustomColorTable(customColors);
+			store.mutations.csi.markAllDirty();
+			store.mutations.pliItem.markAllDirty();
+			this.$root.redrawUI();
 		},
 		reset() {
-			_.forOwn(LDParse.colorTable, (v, k) => {
-				const el = this.colorData[k];
-				if (el == null) {
-					return;
-				}
-				if (v.originalColor) {
-					el.color = v.originalColor;
-				} else if (el.color !== v.color) {
-					el.color = v.color;
-				}
-				if (v.originalEdge) {
-					el.edge = v.originalEdge;
-				} else if (el.edge !== v.edge) {
-					el.edge = v.edge;
-				}
+			this.colorData.forEach(el => {
+				const entry = LDParse.colorTable[el.id];
+				el.color = entry.color;
+				el.edge = entry.edge;
 			});
 		},
 		cancel() {

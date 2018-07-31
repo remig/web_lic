@@ -8,7 +8,8 @@ import uiState from './uiState';
 const keys = {
 	model: 'lic_model',
 	ui: 'ui_defaults',
-	customFonts: 'custom_fonts'
+	customFonts: 'custom_fonts',
+	customBrickColors: 'custom_brick_colors'
 };
 
 const api = {
@@ -61,6 +62,14 @@ api.get.customFonts = function() {
 	const res = localStorage.getItem(keys.customFonts);
 	if (res == null) {  // If key is totally null, save and return an empty array instead
 		return api.replace.customFonts([]);
+	}
+	return JSON.parse(res);
+};
+
+api.get.customBrickColors = function() {
+	const res = localStorage.getItem(keys.customBrickColors);
+	if (res == null) {  // If key is totally null, save and return an empty array instead
+		return api.replace.customBrickColors({});
 	}
 	return JSON.parse(res);
 };

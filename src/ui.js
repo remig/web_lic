@@ -481,6 +481,7 @@ const app = new Vue({
 
 		LDParse.setProgressCallback(this.updateProgress);
 		LDParse.loadLDConfig();
+		LDParse.setCustomColorTable(Storage.get.customBrickColors());
 
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();

@@ -87,12 +87,8 @@ function nicePartName(filename) {
 }
 
 function niceColorName(colorCode) {
-	const color = LDParse.colorTable[colorCode];
-	return color ? color.name.replace(/_/g, ' ') : '';
+	const name = LDParse.getColor(colorCode, 'name');
+	return name ? name.replace(/_/g, ' ') : '';
 }
 
 </script>
-
-<style>
-
-</style>
