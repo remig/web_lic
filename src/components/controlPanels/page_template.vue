@@ -65,6 +65,11 @@
 					{{tr("template.page.aspect_ratio_@mf", {aspect_ratio: aspectRatio.toFixed(2)})}}
 				</el-checkbox>
 			</el-form-item>
+			<el-form-item label-width="0px" class="pageSizeInfo">
+				<div v-html="tr('template.page.printed_size')" />
+				<div v-html="tr('template.page.centimeter_size_@mf', printedSize('cm'))" />
+				<div v-html="tr('template.page.inch_size_@mf', printedSize('in'))" />
+			</el-form-item>
 		</panel-base>
 		<fill-panel
 			template-entry="page"
@@ -167,6 +172,12 @@ export default {
 			if (haveChange) {
 				this.$emit('new-values', 'Page');
 			}
+		},
+		printedSize(unit) {
+			return {
+				width: _.round(_.units.pixelsToUnits(this.width, unit), 2),
+				height: _.round(_.units.pixelsToUnits(this.height, unit), 2)
+			};
 		}
 	},
 	computed: {
@@ -177,3 +188,12 @@ export default {
 };
 
 </script>
+
+<style>
+
+.pageSizeInfo > div {
+	line-height: unset;
+	color: #606266;
+}
+
+</style>
