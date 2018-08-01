@@ -209,12 +209,6 @@ div#container {
 	animation: unset;
 }
 
-.pdfExportDialog input {
-	display: inline;
-	width: 95px;
-	margin: 0 5px;
-}
-
 /* Splitter stuff */
 .gutter.gutter-horizontal {
 	cursor: ew-resize;

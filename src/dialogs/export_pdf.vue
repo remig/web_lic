@@ -128,3 +128,13 @@ export default{
 	}
 };
 </script>
+
+<style>
+
+.pdfExportDialog input {
+	display: inline;
+	width: 95px;
+	margin: 0 5px;
+}
+
+</style>
