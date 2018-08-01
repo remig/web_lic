@@ -4,7 +4,7 @@
 	<div>
 		<panel-base :title="tr('template.page.title')" label-width="100px">
 			<el-form-item label-width="0">
-				<el-select :value="sizePreset.format" @change="updatePageSize">
+				<el-select :value="sizePreset.format" @change="updatePagePreset">
 					<el-option
 						key="custom"
 						:label="tr('template.page.formats.custom')"
@@ -91,8 +91,8 @@ const pageSizeLookups = {  // [width, height] in pixels
 	'a5': [559, 794],
 	'letter': [816, 1056],
 	'gov-letter': [768, 1008],
-	'legal': [816, 1344 ],
-	'junior-legal': [768, 480]
+	'legal': [816, 1344],
+	'junior-legal': [480, 768]
 };
 
 // TODO: add UI to set default page layout (horizontal vs. vertical , row / cols, etc)
@@ -122,13 +122,18 @@ export default {
 		newValues() {
 			this.$emit('new-values', 'Page');
 		},
-		updatePageSize(newPageSize) {
-			this.sizePreset.format = newPageSize;
-			if (newPageSize !== 'custom') {
+		updatePagePreset(newPagePreset) {
+			this.sizePreset.format = newPagePreset;
+			if (newPagePreset !== 'custom') {
 				this.maintainAspectRatio = false;
-				const pageSize = pageSizeLookups[newPageSize];
-				this.width = pageSize[0];
-				this.height = pageSize[1];
+				const pageSize = pageSizeLookups[newPagePreset];
+				if (this.sizePreset.orientation === 'vertical') {
+					this.width = pageSize[0];
+					this.height = pageSize[1];
+				} else {
+					this.width = pageSize[1];
+					this.height = pageSize[0];
+				}
 				this.aspectRatio = this.width / this.height;
 			}
 			this.updateValues();
