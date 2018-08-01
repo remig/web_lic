@@ -153,6 +153,7 @@ export default {
 				}
 				template.width = this.width;
 				template.height = this.height;
+				haveChange = true;
 			}
 			if (!_.isEqual(template.sizePreset, this.sizePreset)) {
 				template.sizePreset = {...this.sizePreset};
