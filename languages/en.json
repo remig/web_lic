@@ -178,7 +178,10 @@
 			},
 			"width": "Width (px)",
 			"height": "Height (px)",
-			"aspect_ratio_@mf": "Maintain Aspect Ratio (${aspect_ratio})"
+			"aspect_ratio_@mf": "Maintain Aspect Ratio (${aspect_ratio})",
+			"printed_size": "Printed Page will be:",
+			"centimeter_size_@mf": "${width} x ${height} cm",
+			"inch_size_@mf": "${width} x ${height} in"
 		}
 	}
 }
