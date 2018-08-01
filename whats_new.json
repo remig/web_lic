@@ -1,5 +1,21 @@
 [
 	{
+		"version": "0.37.0",
+		"date": "July 31, 2018",
+		"features": [
+			"Add 'Save As...' option for both Lic files and Lic Template files",
+			"You can now edit brick colors before a model is imported",
+			"Custom brick colors are now stored globally, and separately from the model; setting custom brick colors will apply to all imported models going forward",
+			"The Page's template panel now includes the ability to pick pre-defined page sizes, like 'A4', 'Legal', 'Letter'.  You can also pick between Portrait and Landscape",
+			"You can now set a custom DPI when exporting Hi-Res PNG images.  DPI can be set such that the scale factor is automatically calculated to preserve the current printed page size"
+		],
+		"bug_fixes": [
+			"Make Page Layout lock icon lock & unlock when clicked",
+			"Fix page layout on small screens so you can scroll to the top left corner of a page",
+			"Remove line wrapping in navigation tree"
+		]
+	},
+	{
 		"version": "0.36.0",
 		"date": "July 24, 2018",
 		"features": [
