@@ -22,18 +22,18 @@
 				<el-radio
 					:disabled="haveCustomFormat"
 					v-model="sizePreset.orientation"
-					:label="tr('template.page.orientation.landscape')"
+					label="horizontal"
 					@change="updateOrientation"
 				>
-					Horizontal
+					{{tr('template.page.orientation.landscape')}}
 				</el-radio>
 				<el-radio
 					:disabled="haveCustomFormat"
 					v-model="sizePreset.orientation"
-					:label="tr('template.page.orientation.portrait')"
+					label="vertical"
 					@change="updateOrientation"
 				>
-					Vertical
+					{{tr('template.page.orientation.portrait')}}
 				</el-radio>
 			</el-form-item>
 			<el-form-item :label="tr('template.page.width')">
