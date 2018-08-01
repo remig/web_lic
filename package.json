@@ -30,6 +30,7 @@
 		"webpack-cli": "2.0.12"
 	},
 	"dependencies": {
+		"changedpi": "1.0.3",
 		"messageformat": "2.0.2"
 	}
 }

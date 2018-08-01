@@ -108,6 +108,10 @@ Vue.component('dialogManager', {
 			/* webpackChunkName: "pdfExportDialog" */
 			'./dialogs/export_pdf.vue'
 		),
+		pngExportDialog: () => import(
+			/* webpackChunkName: "pngExportDialog" */
+			'./dialogs/export_png.vue'
+		),
 		styleDialog: () => import(
 			/* webpackChunkName: "styleDialog" */
 			'./dialogs/style.vue'

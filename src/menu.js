@@ -472,28 +472,12 @@ const menu = [
 			text: 'navbar.export.hi_res_png',
 			enabled: enableIfModel,
 			cb() {
-
-				const originalScale = uiState.get('dialog.export.images.scale');
-				const pageSize = store.state.template.page;
-				function sizeText(scale) {
-					const size = {
-						width: Math.floor(pageSize.width * scale),
-						height: Math.floor(pageSize.height * scale)
-					};
-					return tr('dialog.scale_images.image_size_@mf', size);
-				}
-				DialogManager('numberChooserDialog', dialog => {
-					dialog.$on('update', newValues => {
-						dialog.bodyText = sizeText(newValues.value);
-					});
+				DialogManager('pngExportDialog', dialog => {
 					dialog.$on('ok', newValues => {
-						uiState.get('dialog.export.images').scale = newValues.value;
-						InstructionExporter.generatePNGZip(app, store, newValues.value);
+						InstructionExporter.generatePNGZip(app, store, newValues.scale, newValues.dpi);
 					});
-					dialog.visible = true;
-					dialog.title = tr('dialog.scale_images.title');
-					dialog.bodyText = sizeText(originalScale);
-					dialog.value = originalScale;
+					const pageSize = store.state.template.page;
+					dialog.show({width: pageSize.width, height: pageSize.height});
 				});
 			}
 		}

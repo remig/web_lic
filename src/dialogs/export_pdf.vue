@@ -64,20 +64,15 @@ export default{
 			visible: false,
 			aspectRatio: 0,
 			newState: uiState.get('dialog.export.pdf'),  // dpi & units
-			pageSize: {width: 0, height: 0},  // stored in this.units
-			unitConversions: {  // this conversion factor * pixel count = units
-				point: 0.75,
-				in: 0.75 / 72,
-				mm: 0.75 / 72 * 25.4,
-				cm: 0.75 / 72 * 2.54
-			}
+			pageSize: {width: 0, height: 0}  // stored in this.units
 		};
 	},
 	methods: {
 		show(pageSizeInPixels) {
+			const units = this.newState.units;
+			this.pageSize.width = _.units.pixelsToUnits(pageSizeInPixels.width, units);
+			this.pageSize.height = _.units.pixelsToUnits(pageSizeInPixels.height, units);
 			this.aspectRatio = pageSizeInPixels.width / pageSizeInPixels.height;
-			this.pageSize.width = this.pixelsToUnits(pageSizeInPixels.width);
-			this.pageSize.height = this.pixelsToUnits(pageSizeInPixels.height);
 			this.visible = true;
 		},
 		updateWidth(newWidth) {
@@ -89,36 +84,21 @@ export default{
 			this.pageSize.width = _.round(this.pageSize.height * this.aspectRatio, 2);
 		},
 		updateUnits(newUnits) {
-			const widthInPixels = this.unitsToPixels(this.pageSize.width, this.newState.units);
-			this.pageSize.width = _.round(this.pixelsToUnits(widthInPixels, newUnits), 2);
-			const heightInPixels = this.unitsToPixels(this.pageSize.height, this.newState.units);
-			this.pageSize.height = _.round(this.pixelsToUnits(heightInPixels, newUnits));
+			const widthInPixels = _.units.unitsToPixels(this.pageSize.width, this.newState.units);
+			this.pageSize.width = _.round(_.units.pixelsToUnits(widthInPixels, newUnits), 2);
+			const heightInPixels = _.units.unitsToPixels(this.pageSize.height, this.newState.units);
+			this.pageSize.height = _.round(_.units.pixelsToUnits(heightInPixels, newUnits));
 			this.newState.units = newUnits;
 		},
-		pixelsToUnits(pixelCount, units) {
-			units = units || this.newState.units;
-			return pixelCount * this.unitConversions[units];
-		},
-		unitsToPixels(unitCount, units) {
-			units = units || this.newState.units;
-			return unitCount / this.unitConversions[units];
-		},
-		pointsToUnits(pointCount, units) {
-			const pixels = this.unitsToPixels(pointCount, 'point');
-			return this.pixelsToUnits(pixels, units);
-		},
-		unitToPoints(unitCount) {
-			const pixels = this.unitsToPixels(unitCount);
-			return this.pixelsToUnits(pixels, 'point');
-		},
 		ok() {
+			const units = this.newState.units;
 			this.visible = false;
 			this.$emit('ok', {
 				dpi: this.newState.dpi,
 				units: this.newState.units,
 				pageSize: {
-					width: this.unitToPoints(this.pageSize.width),
-					height: this.unitToPoints(this.pageSize.height)
+					width: _.units.unitToPoints(this.pageSize.width, units),
+					height: _.units.unitToPoints(this.pageSize.height, units)
 				}
 			});
 		},

@@ -5,6 +5,7 @@
 
 import _ from './util';
 import Draw from './draw';
+import {changeDpiDataUrl} from 'changeDPI';
 
 function exportInstructions(app, store, exportType, hiResScale, drawPageCallback, doneCallback) {
 
@@ -93,7 +94,7 @@ function generatePDF(app, store, config) {
 	exportInstructions(app, store, 'PDF', hiResScale, drawPage, done);
 }
 
-function generatePNGZip(app, store, hiResScale = 1) {
+function generatePNGZip(app, store, hiResScale = 1, dpi = 96) {
 
 	const fn = store.get.modelFilenameBase();
 	const zip = new JSZip();
@@ -102,6 +103,9 @@ function generatePNGZip(app, store, hiResScale = 1) {
 	function drawPage(page, canvas) {
 		const pageName = (page.type === 'titlePage') ? 'Page 0 Title Page.png' : `Page ${page.number}.png`;
 		let data = canvas.toDataURL();
+		if (dpi !== 96) {
+			data = changeDpiDataUrl(data, dpi);
+		}
 		data = data.substr(data.indexOf(',') + 1);
 		imgFolder.file(pageName, data, {base64: true});
 	}

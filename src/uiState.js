@@ -24,7 +24,9 @@ const defaultState = {
 		},
 		export: {
 			images: {
-				scale: 1
+				scale: 1,
+				dpi: 96,
+				maintainPrintSize: true
 			},
 			pdf: {
 				// Don't cache physical page size because it should initially match current pixel page size

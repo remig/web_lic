@@ -143,6 +143,14 @@
 			"image_res": "Image Resolution",
 			"dpi": "DPI"
 		},
+		"export_hi_res_png": {
+			"title": "Export Hi-Res PNGs",
+			"scale": "Scale By",
+			"maintain_print_size": "Maintain Print Size",
+			"dpi": "DPI",
+			"size_@mf": "Images will be <strong>${width} x ${height}</strong> pixels",
+			"print_size_@mf": "Images should print <strong>${cm_width} x ${cm_height}</strong> cm (<strong>${in_width} x ${in_height}</strong> in)"
+		},
 		"locale_chooser": {
 			"title": "Pick a Language"
 		},
