@@ -153,7 +153,15 @@ export default {
 	addCallout(opts) {  // opts: {step}
 		const step = store.get.lookupToItem(opts.step);
 		step.callouts = step.callouts || [];
-		store.mutations.callout.add({parent: step});
+		let position = 'left';
+		if (step.callouts.length) {
+			const availablePositions = _.difference(
+				['left', 'bottom', 'right', 'top'],
+				step.callouts.map(calloutID => store.get.callout(calloutID).position)
+			);
+			position = availablePositions[0] || 'left';
+		}
+		store.mutations.callout.add({parent: step, position});
 		store.mutations.page.layout({page: store.get.pageForItem(step)});
 	},
 	addSubStep(opts) {  // opts: {step, doLayout}
