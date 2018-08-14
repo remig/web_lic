@@ -52,6 +52,8 @@ export default {
 					case 'label':
 						return t.text;
 				}
+			} else if (t.type === 'callout') {
+				return `Callout (${t.position})`;
 			} else if (t.type === 'pliItem') {
 				return `${nicePartName(t.filename)} - ${niceColorName(t.colorCode)}`;
 			} else if (t.type === 'quantityLabel') {
