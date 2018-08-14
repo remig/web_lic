@@ -456,7 +456,20 @@ const contextMenu = {
 			}
 		},
 		{text: 'separator'},
-		{text: 'Add Rotate Icon (NYI)', enabled() { return false; }},
+		{
+			text(selectedItem) {
+				const step = store.get.lookupToItem(selectedItem);
+				return `${step.rotateIconID == null ? 'Add' : 'Delete'} Rotate Icon`;
+			},
+			cb(selectedItem) {
+				const step = store.get.step(selectedItem.id);
+				undoStack.commit(
+					'step.toggleRotateIcon',
+					{step, display: step.rotateIconID == null, doLayout: true},
+					this.text(selectedItem)
+				);
+			}
+		},
 		annotationMenu
 	],
 	numberLabel(selectedItem) {
@@ -817,6 +830,15 @@ const contextMenu = {
 		}
 	],
 	quantityLabel: [],
+	rotateIcon: [
+		{
+			text: 'Delete Rotate Icon',
+			cb(selectedItem) {
+				const rotateIcon = selectedItem;
+				undoStack.commit('rotateIcon.delete', {rotateIcon}, this.text);
+			}
+		}
+	],
 	annotation(selectedItem) {
 		const deleteMenu = {
 			text: 'Delete',

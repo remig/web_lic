@@ -187,12 +187,16 @@ export default {
 			store.mutations.page.layout({page: store.get.pageForItem(step)});
 		}
 	},
-	toggleRotateIcon(opts) { // opts: {step, display}
+	toggleRotateIcon(opts) { // opts: {step, display, doLayout}
 		const step = store.get.lookupToItem(opts.step);
-		if (opts.display) {
+		if (opts.display && step.rotateIconID == null) {
 			store.mutations.rotateIcon.add({parent: step});
 		} else if (!opts.display && step.rotateIconID != null) {
-			store.mutations.item.delete({item: {type: 'rotateIcon', id: step.rotateIconID}});
+			const rotateIcon = store.get.rotateIcon(step.rotateIconID);
+			store.mutations.rotateIcon.delete({rotateIcon});
+		}
+		if (opts.doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(step)});
 		}
 	},
 	copyRotation(opts) {  // {step, nextXSteps, rotation}  Copy step's CSI rotation to next X steps

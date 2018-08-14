@@ -164,6 +164,9 @@ const store = {
 					type: 'rotateIcon',
 					x: null, y: null, scale: 1
 				}, parent: opts.parent});
+			},
+			delete(opts) {  // opts: {rotateIcon}
+				store.mutations.item.delete({item: opts.rotateIcon});
 			}
 		},
 		divider: {
