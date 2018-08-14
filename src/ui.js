@@ -445,6 +445,9 @@ const app = new Vue({
 	},
 	mounted() {
 
+		// TODO: grey out progress bar when 'Model Import' dialog is visible; otherwise it's confusing
+		//		 if progress bar isn't at 100 but its done loading and waiting for user to click
+		// TODO: progress bar should never stop at less than 100; clear it when model is imported
 		// TODO: show some kind of 'getting started' content when model not yet loaded.
 		// TODO: show template page always, even when no model loaded.
 		// 		This lets you import a model with the desired template already in place.
@@ -455,7 +458,8 @@ const app = new Vue({
 		document.body.addEventListener('keydown', e => {
 			if ((e.key === 'PageDown' || e.key === 'PageUp'
 				|| e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey))
-				&& e.target.nodeName !== 'INPUT') {
+				&& e.target.nodeName !== 'INPUT'
+			) {
 				e.preventDefault();
 			}
 		});
@@ -484,6 +488,7 @@ const app = new Vue({
 		LDParse.setCustomColorTable(Storage.get.customBrickColors());
 
 		undoStack.onChange(() => {
+			this.clearSelected();
 			this.dirtyState.undoIndex = undoStack.getIndex();
 			this.redrawUI();
 		});
