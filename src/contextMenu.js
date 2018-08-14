@@ -1174,7 +1174,7 @@ const contextMenu = {
 			text: 'Add Part to Callout',
 			shown(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
-				return !_.isEmpty(step.callouts);
+				return step.callouts.length === 1;
 			},
 			cb(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
@@ -1186,6 +1186,31 @@ const contextMenu = {
 					this.text,
 					[{type: 'csi', id: targetStep.csiID}]
 				);
+			}
+		},
+		{
+			text: 'Add Part to Callout',
+			shown(selectedItem) {
+				const step = store.get.step({type: 'step', id: selectedItem.stepID});
+				return step.callouts.length > 1;
+			},
+			children(selectedItem) {
+				const step = store.get.step({type: 'step', id: selectedItem.stepID});
+				return step.callouts.map(calloutID => {
+					const callout = store.get.callout(calloutID);
+					const targetStep = store.get.step(_.last(callout.steps));
+					return {
+						text: _.startCase(callout.position),
+						cb() {
+							undoStack.commit(
+								'part.addToCallout',
+								{partID: selectedItem.id, step, callout, doLayout: true},
+								'Add Part to Callout',
+								[{type: 'csi', id: targetStep.csiID}]
+							);
+						}
+					};
+				});
 			}
 		},
 		{
