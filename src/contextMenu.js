@@ -440,14 +440,19 @@ const contextMenu = {
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
-				const opts = {
-					dest, stepNumber: step.number + 1,
-					doLayout: true, renumber: true,
-					model: _.cloneDeep(step.model),
-					insertionIndex: store.state.steps.indexOf(step) + 1,
-					parentInsertionIndex: dest.steps.indexOf(step.id) + 1
-				};
-				undoStack.commit('step.add', opts, this.text);
+				if (dest.type === 'callout') {
+					const opts = {callout: dest, doLayout: true};
+					undoStack.commit('callout.addStep', opts, this.text);
+				} else {
+					const opts = {
+						dest, stepNumber: step.number + 1,
+						doLayout: true, renumber: true,
+						model: _.cloneDeep(step.model),
+						insertionIndex: store.state.steps.indexOf(step) + 1,
+						parentInsertionIndex: dest.steps.indexOf(step.id) + 1
+					};
+					undoStack.commit('step.add', opts, this.text);
+				}
 			}
 		},
 		{text: 'separator'},
