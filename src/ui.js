@@ -488,7 +488,6 @@ const app = new Vue({
 		LDParse.setCustomColorTable(Storage.get.customBrickColors());
 
 		undoStack.onChange(() => {
-			this.clearSelected();
 			this.dirtyState.undoIndex = undoStack.getIndex();
 			this.redrawUI();
 		});
