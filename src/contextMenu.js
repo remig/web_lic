@@ -937,27 +937,6 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Position (NYI)',
-			children: [
-				{
-					text: 'Top',
-					enabled() { return false; }
-				},
-				{
-					text: 'Right',
-					enabled() { return false; }
-				},
-				{
-					text: 'Bottom',
-					enabled() { return false; }
-				},
-				{
-					text: 'Left',
-					enabled() { return false; }
-				}
-			]
-		},
-		{
 			text: 'Delete Empty Callout',
 			shown(selectedItem) {
 				const callout = store.get.callout(selectedItem);

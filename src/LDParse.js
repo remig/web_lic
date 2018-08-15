@@ -293,6 +293,7 @@ async function lineListToAbstractPart(fn, lineList, progressCallback) {
 		primitives: []
 	};
 	// First line in any LDraw file is assumed to be the part / main model's colloquial name
+	// TODO: if first line is some variant of 'untitled', and if a subsequent line is 0 Name: foo, use foo
 	if (lineList[0] && lineList[0][0] === '0') {
 		if (lineList[0][1] === 'FILE') {
 			abstractPart.name = lineList[0].slice(2).join(' ');
