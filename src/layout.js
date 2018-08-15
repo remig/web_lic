@@ -359,6 +359,14 @@ const api = {
 			icon.height = icon.width * rotateIconAspectRatio;
 			icon.x = csi.x - icon.width - margin;
 			icon.y = csi.y - icon.height;
+			if (icon.x < 0) {
+				csi.x += -icon.x;
+				icon.x = 0;
+			}
+			if (icon.y < 0) {
+				csi.y += -icon.y;
+				icon.y = 0;
+			}
 		}
 
 		if (store.get.stepHasSubmodel(step)) {
@@ -638,16 +646,20 @@ const api = {
 		}
 
 		// Coordinates for first point (base) are relative to the *callout*
-		// Position on edge of callout centered  on last step
+		// Position on edge of callout centered on last step
 		const lastStep = callout.steps.length > 1 ? store.get.step(_.last(callout.steps)) : null;
 		const p1 = store.get.point(arrow.points[0]);
 		p1.relativeTo = {type: 'callout', id: callout.id};
 
 		if (isOnSide) {
 			p1.x = (calloutPos === 'left') ? callout.borderOffset.x + callout.width : 0;
-			p1.y = lastStep ? lastStep.y + (lastStep.height / 2) : callout.height / 2;
+			p1.y = lastStep
+				? lastStep.y + (lastStep.height / 2)
+				: callout.borderOffset.y + callout.height / 2;
 		} else {
-			p1.x = lastStep ? lastStep.x + (lastStep.width / 2) : callout.width / 2;
+			p1.x = lastStep
+				? lastStep.x + (lastStep.width / 2)
+				: callout.borderOffset.x + callout.width / 2;
 			p1.y = (calloutPos === 'top') ? callout.borderOffset.y + callout.height : 0;
 		}
 
@@ -785,7 +797,7 @@ const api = {
 
 	adjustBoundingBox: {
 		step() {
-			// Make step's  box tightly fit its content.  This makes it easier to manually layout content
+			// Make step's box tightly fit its content.  This makes it easier to manually layout content
 		},
 		// csi(item) {
 		// 	const step = store.get.parent(item);
@@ -869,9 +881,15 @@ function measureStep(step) {
 			height: Math.max(emptyCSISize, lblSize.height)
 		};
 	}
+	const iconSize = {width: 0, height: 0};
+	if (step.rotateIconID != null) {
+		const size = store.state.template.rotateIcon.size;
+		iconSize.width = size + margin;
+		iconSize.height = size;
+	}
 	return {
-		width: lblSize.width + csiSize.width + margin,
-		height: lblSize.height + csiSize.height + margin
+		width: lblSize.width + csiSize.width + iconSize.width + margin,
+		height: lblSize.height + csiSize.height + iconSize.height + margin
 	};
 }
 
