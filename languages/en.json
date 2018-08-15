@@ -183,5 +183,10 @@
 			"centimeter_size_@mf": "${width} x ${height} cm",
 			"inch_size_@mf": "${width} x ${height} in"
 		}
+	},
+	"status_bar": {
+		"file_loaded_@mf": "\"${filename}\" loaded successfully (${time})",
+		"file_opened_@mf": "\"${filename}\" opened successfully (${time})",
+		"template_opened_@mf": "\"${filename}\" template opened successfully"
 	}
 }

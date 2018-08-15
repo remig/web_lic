@@ -118,9 +118,10 @@ const app = new Vue({
 						undoStack.saveBaseState();
 						this.forceUIUpdate();
 
-						const time = _.formatTime(start, Date.now());
 						this.updateProgress({clear: true});
-						this.statusText = `"${store.get.modelFilename()}" loaded successfully (${time})`;
+						const time = _.formatTime(start, Date.now());
+						const filename = store.get.modelFilename();
+						this.statusText = this.tr('status_bar.file_loaded_@mf', {filename, time});
 						Vue.nextTick(this.drawCurrentPage);
 					});
 				});
@@ -145,7 +146,8 @@ const app = new Vue({
 			undoStack.saveBaseState();
 			this.clearSelected();
 			const time = _.formatTime(start, Date.now());
-			this.statusText = `"${store.model.filename}" openend successfully (${time})`;
+			const filename = store.model.filename;
+			this.statusText = this.tr('status_bar.file_opened_@mf', {filename, time});
 			Vue.nextTick(() => {
 				this.forceUIUpdate();
 				this.drawCurrentPage();
@@ -193,7 +195,7 @@ const app = new Vue({
 		},
 		importTemplate(result, filename) {
 			undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template');
-			this.statusText = `"${filename}" template openend successfully`;
+			this.statusText = this.tr('status_bar.template_opened_@mf', {filename});
 			Vue.nextTick(() => {
 				this.drawCurrentPage();
 				this.forceUIUpdate();
