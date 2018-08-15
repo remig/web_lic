@@ -355,17 +355,18 @@ const api = {
 		if (step.rotateIconID != null && step.csiID != null) {
 			const csi = store.get.csi(step.csiID);
 			const icon = store.get.rotateIcon(step.rotateIconID);
+			const halfMargin = margin / 2;
 			icon.width = store.state.template.rotateIcon.size;
 			icon.height = icon.width * rotateIconAspectRatio;
 			icon.x = csi.x - icon.width - margin;
 			icon.y = csi.y - icon.height;
 			if (icon.x < 0) {
-				csi.x += -icon.x;
-				icon.x = 0;
+				csi.x += halfMargin - icon.x;
+				icon.x = halfMargin;
 			}
 			if (icon.y < 0) {
-				csi.y += -icon.y;
-				icon.y = 0;
+				csi.y += halfMargin - icon.y;
+				icon.y = halfMargin;
 			}
 		}
 
