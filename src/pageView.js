@@ -501,6 +501,10 @@ function itemHighlightBox(selItem, pageSize, currentPage) {
 		let pointBox = _.geom.bbox([selItem.p1, selItem.p2]);
 		pointBox = _.geom.expandBox(pointBox, 8, 8);
 		box = store.get.targetBox({...selItem, ...pointBox});
+	} else if (type === 'pliItem') {  // Special case: pliItem box should include its quantity label
+		box = store.get.targetBox(selItem);
+		const lbl = store.get.quantityLabel(selItem.quantityLabelID);
+		box = _.geom.bbox([box, store.get.targetBox(lbl)]);
 	} else {
 		box = store.get.targetBox(selItem);
 		if (type === 'point') {
