@@ -69,9 +69,6 @@ const dialogs = {
 		},
 		showRotateIconCheckbox: true,
 		addRotateIcon: true
-	},
-	copyRotation: {
-		nextXSteps: 0
 	}
 };
 

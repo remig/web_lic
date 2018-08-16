@@ -569,6 +569,7 @@ const contextMenu = {
 			cb(selectedItem) {
 				// TODO: rewrite this to use simple number picker dialog
 				// TODO: this doesn't re-layout pages after applying changes. Must check all affected pages.
+				// TODO: If next step spinner is spun up then back down, need to undo some rotations
 				const csi = store.get.csi(selectedItem.id);
 				const rotation = _.cloneDeep(csi.rotation);
 				const step = store.get.step(csi.parent.id);
@@ -577,13 +578,13 @@ const contextMenu = {
 				app.clearSelected();
 				app.redrawUI(true);
 
-				DialogManager('copyRotationDialog', dialog => {
+				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('ok', newValues => {
 						const csiList = originalRotations
 							.map((rotation, id) => ({type: 'csi', id})).filter(el => el);
 						undoStack.commit(
 							'step.copyRotation',
-							{step, rotation, ...newValues},
+							{step, rotation, nextXSteps: newValues.value},
 							'Copy CSI Rotations',
 							csiList
 						);
@@ -600,7 +601,7 @@ const contextMenu = {
 					});
 					dialog.$on('update', newValues => {
 						let csi, nextStep = step;
-						for (let i = 0; i < newValues.nextXSteps; i++) {
+						for (let i = 0; i < newValues.value; i++) {
 							if (nextStep) {
 								nextStep = store.get.nextStep(nextStep);
 							}
@@ -618,8 +619,11 @@ const contextMenu = {
 						}
 						app.redrawUI(true);
 					});
-					dialog.nextXSteps = 0;
-					dialog.show({x: 400, y: 150});
+					dialog.title = 'Copy Rotation';
+					dialog.label = 'Copy Rotation to Next Steps';
+					dialog.labelWidth = '220px';
+					dialog.min = dialog.value = 0;
+					dialog.visible = true;
 				});
 			}
 		},
