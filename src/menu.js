@@ -1,6 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-/* global Vue: false, $: false */
+/* global Vue: false */
 'use strict';
 
 import _ from './util';
@@ -36,8 +36,8 @@ Vue.component('menu-list', {
 		toggleSubMenu(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			$('.dropdown-submenu.open').removeClass('open');
-			$(e.target.parentElement).addClass('open');
+			this.hideSubMenus();
+			e.target.parentElement.classList.add('open');
 		},
 		isVisible(entry) {
 			if (this.selectedItem == null) {
@@ -55,17 +55,22 @@ Vue.component('menu-list', {
 			return true;
 		},
 		show(e) {
-			$('#contextMenu')
-				.css({
-					'outline-style': 'none',
-					display: 'block',
-					left: e.pageX,
-					top: e.pageY
-				}).focus();
+			const menu = document.getElementById('contextMenu');
+			menu.style['outline-style'] = 'none';
+			menu.style.display = 'block';
+			menu.style.left = e.pageX + 'px';
+			menu.style.top = e.pageY + 'px';
+			menu.focus();
 		},
 		hide() {
-			$('.dropdown-submenu.open').removeClass('open');
-			$('#contextMenu').css('display', 'none');
+			this.hideSubMenus();
+			document.getElementById('contextMenu').style.display = 'none';
+		},
+		hideSubMenus() {
+			const openMenu = document.querySelector('.dropdown-submenu.open');
+			if (openMenu) {
+				openMenu.classList.remove('open');
+			}
 		}
 	}
 });
