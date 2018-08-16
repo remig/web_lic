@@ -34,10 +34,31 @@ Vue.component('menu-list', {
 			}
 		},
 		toggleSubMenu(e) {
+
 			e.preventDefault();
 			e.stopPropagation();
 			this.hideSubMenus();
-			e.target.parentElement.classList.add('open');
+			const target = e.target.parentElement;
+			target.classList.add('open');
+
+			// If submenu can't fit on the right, show it on the left
+			const menuBox = target.getBoundingClientRect();
+			const submenu = target.querySelector('ul');
+			const submenuRightEdge = menuBox.x + menuBox.width + submenu.clientWidth;
+			if (submenuRightEdge > document.documentElement.clientWidth - 20) {
+				submenu.style.left = 'unset';
+				submenu.style.right = '100%';
+			} else {
+				submenu.style.left = '100%';
+				submenu.style.right = 'unset';
+			}
+			const submenuBottomEdge = menuBox.y + submenu.clientHeight;
+			if (submenuBottomEdge > document.documentElement.clientHeight - 20) {
+				const dy = document.documentElement.clientHeight - submenuBottomEdge - 10;
+				submenu.style['margin-top'] = dy + 'px';
+			} else {
+				submenu.style.removeProperty('margin-top');
+			}
 		},
 		isVisible(entry) {
 			if (this.selectedItem == null) {
@@ -58,9 +79,14 @@ Vue.component('menu-list', {
 			const menu = document.getElementById('contextMenu');
 			menu.style['outline-style'] = 'none';
 			menu.style.display = 'block';
-			menu.style.left = e.pageX + 'px';
-			menu.style.top = e.pageY + 'px';
 			menu.focus();
+			Vue.nextTick(() => this.position(e));
+		},
+		position(e) {
+			const menu = document.getElementById('contextMenu');
+			const doc = document.documentElement;
+			menu.style.left = Math.min(e.pageX, doc.clientWidth - menu.clientWidth - 10) + 'px';
+			menu.style.top = Math.min(e.pageY, doc.clientHeight - menu.clientHeight - 10) + 'px';
 		},
 		hide() {
 			this.hideSubMenus();

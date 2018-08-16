@@ -408,6 +408,7 @@ ul {
 
 #contextMenu > ul {
 	display: block;
+	position: relative;
 }
 
 [v-cloak] {
