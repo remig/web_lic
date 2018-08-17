@@ -157,6 +157,13 @@
 		"brick_colors": {
 			"title": "Brick Colors",
 			"action": "Change Brick Colors"
+		},
+		"displace_part": {
+			"title": "Displace Part",
+			"part_distance": "Part Distance",
+			"arrow_length": "Arrow Length",
+			"arrow_distance": "Arrow Distance",
+			"arrow_rotation": "Arrow Rotation"
 		}
 	},
 	"template": {

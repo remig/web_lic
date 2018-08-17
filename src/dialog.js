@@ -51,12 +51,6 @@ const baseDialogPropagator = {
 };
 
 const dialogs = {
-	partDisplacement: {
-		partDistance: 60,
-		arrowOffset: 0,
-		arrowLength: 0,
-		arrowRotation: 0
-	},
 	pageRowColLayout: {
 		rows: 2,
 		cols: 2,
@@ -93,6 +87,14 @@ Vue.component('dialogManager', {
 	components: {
 		stringChooserDialog,
 		numberChooserDialog,
+		brickColorDialog: () => import(
+			/* webpackChunkName: "brickColorDialog" */
+			'./dialogs/brick_colors.vue'
+		),
+		displacePartDialog: () => import(
+			/* webpackChunkName: "displacePartDialog" */
+			'./dialogs/displace_part.vue'
+		),
 		brickColorDialog: () => import(
 			/* webpackChunkName: "brickColorDialog" */
 			'./dialogs/brick_colors.vue'

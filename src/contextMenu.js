@@ -1100,34 +1100,30 @@ const contextMenu = {
 				const step = store.get.step(selectedItem.stepID);
 				const csi = store.get.csi(step.csiID);
 				const displacement = step.displacedParts.find(p => p.partID === selectedItem.id);
-				const originalDisplacement = _.cloneDeep(displacement);
+				const originalDisplacement = {
+					partDistance: displacement.partDistance,
+					arrowOffset: displacement.arrowOffset,
+					arrowLength: displacement.arrowLength,
+					arrowRotation: displacement.arrowRotation
+				};
 
 				app.clearSelected();
-				DialogManager('partDisplacementDialog', dialog => {
+				DialogManager('displacePartDialog', dialog => {
 					dialog.$on('ok', () => {
 						undoStack.commit('part.displace', {step, ...displacement}, 'Adjust Displaced Part');
 					});
 					dialog.$on('cancel', () => {
-						displacement.partDistance = originalDisplacement.partDistance;
-						displacement.arrowOffset = originalDisplacement.arrowOffset;
-						displacement.arrowLength = originalDisplacement.arrowLength;
-						displacement.arrowRotation = originalDisplacement.arrowRotation;
+						Object.assign(displacement, originalDisplacement);
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
 					dialog.$on('update', newValues => {
-						displacement.partDistance = newValues.partDistance;
-						displacement.arrowOffset = newValues.arrowOffset;
-						displacement.arrowLength = newValues.arrowLength;
-						displacement.arrowRotation = newValues.arrowRotation;
+						Object.assign(displacement, newValues);
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
-					dialog.partDistance = displacement.partDistance;
-					dialog.arrowOffset = displacement.arrowOffset;
-					dialog.arrowLength = displacement.arrowLength;
-					dialog.arrowRotation = displacement.arrowRotation;
-					dialog.show({x: 400, y: 150});
+					dialog.values = displacement;
+					dialog.visible = true;
 				});
 			}
 		},
