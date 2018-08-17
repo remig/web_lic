@@ -179,8 +179,16 @@ const api = {
 		let rows = Math.ceil(stepCount / cols);
 		let layoutDirection;
 		if (layout.rows != null && layout.cols != null) {
-			cols = layout.cols;
-			rows = layout.rows;
+			if (layout.rows === 'auto' && layout.cols !== 'auto') {
+				cols = layout.cols;
+				rows = Math.ceil(stepCount / cols);
+			} else if (layout.rows !== 'auto' && layout.cols === 'auto') {
+				rows = layout.rows;
+				cols = Math.ceil(stepCount / rows);
+			} else if (layout.rows !== 'auto' && layout.cols !== 'auto') {
+				rows = layout.rows;
+				cols = layout.cols;
+			}
 			layoutDirection = layout.direction
 				|| (pageSize.width > pageSize.height ? 'horizontal' : 'vertical');
 		} else {
@@ -355,18 +363,17 @@ const api = {
 		if (step.rotateIconID != null && step.csiID != null) {
 			const csi = store.get.csi(step.csiID);
 			const icon = store.get.rotateIcon(step.rotateIconID);
-			const halfMargin = margin / 2;
 			icon.width = store.state.template.rotateIcon.size;
 			icon.height = icon.width * rotateIconAspectRatio;
 			icon.x = csi.x - icon.width - margin;
 			icon.y = csi.y - icon.height;
 			if (icon.x < 0) {
-				csi.x += halfMargin - icon.x;
-				icon.x = halfMargin;
+				csi.x -= icon.x;
+				icon.x = 0;
 			}
 			if (icon.y < 0) {
-				csi.y += halfMargin - icon.y;
-				icon.y = halfMargin;
+				csi.y -= icon.y;
+				icon.y = 0;
 			}
 		}
 
@@ -797,22 +804,41 @@ const api = {
 	},
 
 	adjustBoundingBox: {
-		step() {
-			// Make step's box tightly fit its content.  This makes it easier to manually layout content
-		},
-		// csi(item) {
-		// 	const step = store.get.parent(item);
-		// 	if (step.parent.type === 'callout') {
-		// 	}
-		// },
 		item(item, boxes, template) {
-			const borderWidth = template.border.width;
+			const borderWidth = template.border ? template.border.width : 0;
 			const margin = getMargin(template.innerMargin);
 			const bbox = _.geom.bbox(boxes);
+			item.borderOffset = item.borderOffset || {};
 			item.borderOffset.x = bbox.x - item.x - margin;
 			item.borderOffset.y = bbox.y - item.y - margin;
 			item.width = borderWidth + margin + bbox.width + margin + borderWidth;
 			item.height = borderWidth + margin + bbox.height + margin + borderWidth;
+		},
+
+		stepUnused(item) {
+			const step = store.get.lookupToItem(item);
+			const children = store.get.stepChildren(step);
+			const boxes = [];
+			children.forEach(child => {
+				boxes.push(child);
+			});
+			if (boxes.length === 1) {
+				const margin = getMargin(store.state.template.step.innerMargin);
+				boxes[0] = {
+					x: boxes[0].x - (margin / 2),
+					y: boxes[0].y - (margin / 2),
+					width: boxes[0].width + margin,
+					height: boxes[0].height + margin
+				};
+			}
+			const bbox = _.geom.bbox(boxes);  // bbox of all children in step coordinates
+			step.x += bbox.x;
+			step.y += bbox.y;
+			step.width = bbox.width;
+			step.height = bbox.height;
+			if (step.parent.type === 'callout') {
+				api.adjustBoundingBox.callout(store.get.parent(step));
+			}
 		},
 
 		pli(item) {
@@ -862,36 +888,45 @@ const api = {
 	}
 };
 
+// This is only used for 'inside-out' type layouts, which are only used in callouts for now
 function measureStep(step) {
 
-	const margin = getMargin(store.state.template.step.innerMargin);
-	let lblSize = {width: 0, height: 0};
+	const box = {width: 0, height: 0};
+	const template = store.state.template;
+	const margin = getMargin(template.step.innerMargin);
+
 	if (step.numberLabelID != null) {
-		lblSize = _.measureLabel(store.state.template.callout.step.numberLabel.font, step.number);
-		lblSize.width += margin;
-		lblSize.height += margin;
+		const lblSize = _.measureLabel(template.callout.step.numberLabel.font, step.number);
+		box.width += lblSize.width;
+		box.height += lblSize.height;
 	}
 
 	const csi = store.get.csi(step.csiID);
 	const localModel = LDParse.model.get.abstractPart(step.model.filename);
 	const csiSize = store.render.csi(localModel, step, csi);
-	if (csiSize == null) {
-		const emptyCSISize = emptyCalloutSize - margin;
-		return {
-			width: Math.max(emptyCSISize, lblSize.width),
-			height: Math.max(emptyCSISize, lblSize.height)
-		};
+	if (csiSize != null) {
+		box.width += (box.width === 0) ? csiSize.width : csiSize.width + margin;
+		box.height += (box.height === 0) ? csiSize.height : csiSize.height + margin;
 	}
-	const iconSize = {width: 0, height: 0};
 	if (step.rotateIconID != null) {
-		const size = store.state.template.rotateIcon.size;
-		iconSize.width = size + margin;
-		iconSize.height = size;
+		const size = template.rotateIcon.size;
+		box.width += (box.width === 0) ? size : size + margin;
+		box.height += size;
 	}
-	return {
-		width: lblSize.width + csiSize.width + iconSize.width + margin,
-		height: lblSize.height + csiSize.height + iconSize.height + margin
-	};
+
+	const children = store.get.stepChildren(step);
+	if (children.length === 1) {
+		// Special case: for exactly one child, pad step to be bigger than child so step is selectable
+		box.width += margin;
+		box.height += margin;
+	}
+
+	if (box.width < 1 && box.height < 1) {
+		const emptyStepSize = emptyCalloutSize - margin;
+		return {width: emptyStepSize, height: emptyStepSize};
+	}
+
+	return box;
 }
 
 function getMargin(margin) {

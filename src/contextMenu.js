@@ -113,7 +113,6 @@ const contextMenu = {
 					}
 				},
 				{
-					// TODO: allow either 'row' or 'col' to be 'auto': as many as necessary
 					// TODO: don't allow insufficient row / col layouts that hide steps
 					text: 'By Row and Column...',
 					cb(selectedItem) {
@@ -123,7 +122,7 @@ const contextMenu = {
 						app.clearSelected();
 						app.redrawUI(true);
 
-						DialogManager('pageRowColLayoutDialog', dialog => {
+						DialogManager('pageLayoutDialog', dialog => {
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'page.layout',
@@ -139,10 +138,10 @@ const contextMenu = {
 								store.mutations.page.layout({page, layout: newValues});
 								app.redrawUI(true);
 							});
-							dialog.rows = originalLayout.rows || 2;
-							dialog.cols = originalLayout.cols || 2;
-							dialog.direction = originalLayout.direction || 'vertical';
-							dialog.show({x: 400, y: 150});
+							dialog.values.rows = originalLayout.rows || 'auto';
+							dialog.values.cols = originalLayout.cols || 'auto';
+							dialog.values.direction = originalLayout.direction || 'vertical';
+							dialog.show();
 						});
 					}
 				}

@@ -6,6 +6,7 @@
 	"color": "Color",
 	"size": "Size",
 	"reset": "Reset",
+	"auto": "Auto",
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -164,6 +165,14 @@
 			"arrow_length": "Arrow Length",
 			"arrow_distance": "Arrow Distance",
 			"arrow_rotation": "Arrow Rotation"
+		},
+		"page_layout": {
+			"title": "Layout Page by Rows and Columns",
+			"rows": "Rows",
+			"cols": "Columns",
+			"orientation": "Orientation",
+			"horizontal": "Horizontal",
+			"vertical": "Vertical"
 		}
 	},
 	"template": {

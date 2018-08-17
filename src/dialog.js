@@ -51,11 +51,6 @@ const baseDialogPropagator = {
 };
 
 const dialogs = {
-	pageRowColLayout: {
-		rows: 2,
-		cols: 2,
-		direction: 'vertical'
-	},
 	rotateCSI: {
 		title: '',
 		rotation: {
@@ -94,6 +89,10 @@ Vue.component('dialogManager', {
 		displacePartDialog: () => import(
 			/* webpackChunkName: "displacePartDialog" */
 			'./dialogs/displace_part.vue'
+		),
+		pageLayoutDialog: () => import(
+			/* webpackChunkName: "pageLayoutDialog" */
+			'./dialogs/page_layout.vue'
 		),
 		brickColorDialog: () => import(
 			/* webpackChunkName: "brickColorDialog" */
