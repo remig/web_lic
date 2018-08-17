@@ -9,8 +9,10 @@ import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
 import uiState from './uiState';
 import DialogManager from './dialog';
+import LocaleManager from './translate';
 
 let app;
+const tr = LocaleManager.translate;
 
 const annotationMenu = {
 	text: 'Add Annotation',
@@ -519,7 +521,7 @@ const contextMenu = {
 						csi.rotation = initialRotation;
 
 						app.clearSelected();
-						DialogManager('rotateCSIDialog', dialog => {
+						DialogManager('rotatePartImageDialog', dialog => {
 							dialog.$on('ok', newValues => {
 								undoStack.commit(
 									'csi.rotate',
@@ -538,9 +540,9 @@ const contextMenu = {
 								csi.isDirty = true;
 								app.redrawUI(true);
 							});
-							dialog.title = 'Rotate CSI';
+							dialog.title = tr('dialog.rotate_part_image.title_csi');
 							dialog.rotation = _.cloneDeep(initialRotation);
-							dialog.show({x: 400, y: 150});
+							dialog.visible = true;
 						});
 					}
 				},
@@ -721,7 +723,7 @@ const contextMenu = {
 				pliTransforms[filename] = pliTransforms[filename] || {};
 
 				app.clearSelected();
-				DialogManager('rotateCSIDialog', dialog => {
+				DialogManager('rotatePartImageDialog', dialog => {
 					dialog.$on('update', newValues => {
 						pliTransforms[filename].rotation = {...newValues.rotation};
 						store.mutations.pliItem.markAllDirty(filename);
@@ -749,10 +751,10 @@ const contextMenu = {
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
-					dialog.title = 'Rotate Part List Image';
+					dialog.title = tr('dialog.rotate_part_image.title_pli');
 					dialog.showRotateIconCheckbox = false;
 					dialog.rotation = (originalTransform || {}).rotation || {x: 0, y: 0, z: 0};
-					dialog.show({x: 400, y: 150});
+					dialog.visible = true;
 				});
 			}
 		},

@@ -7,6 +7,9 @@
 	"size": "Size",
 	"reset": "Reset",
 	"auto": "Auto",
+	"x": "X",
+	"y": "Y",
+	"z": "Z",
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -173,6 +176,11 @@
 			"orientation": "Orientation",
 			"horizontal": "Horizontal",
 			"vertical": "Vertical"
+		},
+		"rotate_part_image": {
+			"title_pli": "Rotate Part List Image",
+			"title_csi": "Rotate CSI",
+			"add_rotate_icon": "Add Rotation Icon"
 		}
 	},
 	"template": {
