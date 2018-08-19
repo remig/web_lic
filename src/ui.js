@@ -324,11 +324,12 @@ const app = new Vue({
 		pageCoordsToCanvasCoords(point) {
 			return this.$refs.pageView.pageCoordsToCanvasCoords(point);
 		},
-		closeContextMenu() {
+		closeMenus() {
 			this.$refs.contextMenuComponent.hide();
+			this.$refs.navMenuComponent.hide();
 		},
 		globalKeyPress(e) {
-			this.closeContextMenu();
+			this.closeMenus();
 			const selItem = this.selectedItemLookup;
 			if (e.key === 'PageDown') {
 				this.$refs.pageView.pageDown();

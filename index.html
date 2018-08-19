@@ -14,8 +14,6 @@
 	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 	<link rel="stylesheet" href="static/style.css">
 
-	<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	<script src='https://cdn.jsdelivr.net/g/lodash@4.17.4'></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/89/three.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js"></script>
@@ -31,8 +29,6 @@
 	<link rel="stylesheet" href="lib/bootstrap-3.3.7.css">
 	<link rel="stylesheet" href="lib/element-ui_theme-chalk-2.4.1.css">
 
-	<script src="lib/jquery-3.3.1.js"></script>
-	<script src="lib/bootstrap-3.3.7.js"></script>
 	<script src="lib/lodash-4.17.4.js"></script>
 	<script src="lib/three-89.js"></script>
 	<script src="lib/vue-2.5.16.js"></script>
@@ -47,7 +43,7 @@
 
 </head>
 <body>
-	<div id="container">
+	<div id="container" @click="closeMenus()">
 		<div id="busyOverlay" :class="{hidden: busyText === ''}" v-cloak>
 			<!--<div id="busyText">{{busyText}}<div id="spinner"></div></div>-->
 			<div id="busyContainer">
@@ -63,6 +59,7 @@
 			:menu-entry-list="navBarContent"
 			:filename="{name: filename, isDirty}"
 			:version="version" :key="navUpdateState"
+			ref="navMenuComponent"
 		></nav-menu>
 
 		<div class="mainBody" @contextmenu.stop.prevent="rightClick($event)">
@@ -96,8 +93,6 @@
 			id="contextMenu"
 			class="dropdown"
 			tabindex="-1"
-			@blur="closeContextMenu"
-			@click="closeContextMenu"
 		>
 			<menu-list
 				:menu-entries="contextMenu"
@@ -135,6 +130,7 @@
 						role="button"
 						aria-haspopup="true"
 						aria-expanded="false"
+						@click.prevent.stop="triggerMenu($event)"
 					>
 						{{tr(menu.text)}}
 						<span class="caret"></span>

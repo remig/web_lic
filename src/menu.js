@@ -16,6 +16,12 @@ import DialogManager from './dialog';
 let app;
 const tr = LocaleManager.translate;
 
+function hideSubMenus() {
+	document.querySelectorAll('.dropdown-submenu.open').forEach(el => {
+		el.classList.remove('open');
+	});
+}
+
 // TODO: Add checkbox to 'selected' menu entries, like the currently selected view entry
 Vue.component('menu-list', {
 	template: '#menuTemplate',
@@ -37,7 +43,7 @@ Vue.component('menu-list', {
 
 			e.preventDefault();
 			e.stopPropagation();
-			this.hideSubMenus();
+			hideSubMenus();
 			const target = e.target.parentElement;
 			target.classList.add('open');
 
@@ -89,21 +95,27 @@ Vue.component('menu-list', {
 			menu.style.top = Math.min(e.pageY, doc.clientHeight - menu.clientHeight - 10) + 'px';
 		},
 		hide() {
-			this.hideSubMenus();
+			hideSubMenus();
 			document.getElementById('contextMenu').style.display = 'none';
-		},
-		hideSubMenus() {
-			const openMenu = document.querySelector('.dropdown-submenu.open');
-			if (openMenu) {
-				openMenu.classList.remove('open');
-			}
 		}
 	}
 });
 
 Vue.component('nav-menu', {
 	template: '#navMenuTemplate',
-	props: ['menuEntryList', 'filename', 'version']
+	props: ['menuEntryList', 'filename', 'version'],
+	methods: {
+		hide() {
+			hideSubMenus();
+			document.querySelectorAll('.dropdown.open').forEach(el => {
+				el.classList.remove('open');
+			});
+		},
+		triggerMenu(e) {
+			this.hide();
+			e.target.parentElement.classList.add('open');
+		}
+	}
 });
 
 function enableIfModel() {
