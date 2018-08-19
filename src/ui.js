@@ -16,8 +16,8 @@ import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
 import DialogManager from './dialog';
 import NavTree from './components/nav_tree/base.vue';
+import TemplatePanel from './components/template_panel.vue';
 import './pageView';
-import './templatePanel';
 
 ELEMENT.locale(ELEMENT.lang.en);
 
@@ -53,7 +53,7 @@ Vue.use({
 
 const app = new Vue({
 	el: '#container',
-	components: {NavTree},
+	components: {NavTree, TemplatePanel},
 	data: {
 		// Store transient UI state data here.  Do *not* store state items here; Vue turns these
 		// into observers, which destroys performance for big stores like we have here

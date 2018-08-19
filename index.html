@@ -228,22 +228,6 @@
 		</el-dialog>
 	</script>
 
-	<!-- Template Page Components -->
-	<script type="text/x-template" id="templatePanel">
-		<div @click.stop="" class="container">
-			<h4>{{selectedItem ? selectedItem.type : 'Select a Page Item' | prettyPrint}}</h4>
-			<div class="panel-group">
-				<component
-					ref="currentTemplatePanel"
-					:is="currentTemplatePanel"
-					:selected-item="selectedItem"
-					:template-entry="templateEntry"
-					@new-values="newValues"
-				></component>
-			</div>
-		</div>
-	</script>
-
 	<script src="dist/bundle.js"></script>
 
 </body>

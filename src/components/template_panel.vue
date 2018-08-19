@@ -1,20 +1,35 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-/* global Vue: false */
+<template>
+	<div class="container" @click.stop="">
+		<h4>{{selectedItem ? selectedItem.type : 'Select a Page Item' | prettyPrint}}</h4>
+		<div class="panel-group">
+			<component
+				ref="currentTemplatePanel"
+				:is="currentTemplatePanel"
+				:selected-item="selectedItem"
+				:template-entry="templateEntry"
+				@new-values="newValues"
+			/>
+		</div>
+	</div>
+</template>
+
+<script>
 'use strict';
 
-import _ from './util';
-import store from './store';
-import undoStack from './undoStack';
-import borderPanel from './components/controlPanels/border.vue';
-import fontPanel from './components/controlPanels/font.vue';
-import fillAndBorderTemplatePanel from './components/controlPanels/fill_border.vue';
-import pageTemplatePanel from './components/controlPanels/page_template.vue';
-import csiTemplatePanel from './components/controlPanels/csi_template.vue';
-import pliTemplatePanel from './components/controlPanels/pli_template.vue';
-import pliItemTemplatePanel from './components/controlPanels/pli_item_template.vue';
-import pageNumberTemplatePanel from './components/controlPanels/page_number.vue';
-import rotateIconTemplatePanel from './components/controlPanels/rotate_icon_template.vue';
+import _ from '../util';
+import store from '../store';
+import undoStack from '../undoStack';
+import borderPanel from './controlPanels/border.vue';
+import fontPanel from './controlPanels/font.vue';
+import fillAndBorderTemplatePanel from './controlPanels/fill_border.vue';
+import pageTemplatePanel from './controlPanels/page_template.vue';
+import csiTemplatePanel from './controlPanels/csi_template.vue';
+import pliTemplatePanel from './controlPanels/pli_template.vue';
+import pliItemTemplatePanel from './controlPanels/pli_item_template.vue';
+import pageNumberTemplatePanel from './controlPanels/page_number.vue';
+import rotateIconTemplatePanel from './controlPanels/rotate_icon_template.vue';
 
 const componentLookup = {
 	templatePage: pageTemplatePanel,
@@ -42,8 +57,7 @@ const componentLookup = {
 	}
 };
 
-Vue.component('templatePanel', {
-	template: '#templatePanel',
+export default {
 	props: ['selectedItem', 'app'],
 	data() {
 		return {lastEdit: null, templateEntry: null};
@@ -118,4 +132,6 @@ Vue.component('templatePanel', {
 		// Catch changes if user switches from template panel directly to nav tree or new page via keyboard
 		this.applyChanges();
 	}
-});
+};
+
+</script>
