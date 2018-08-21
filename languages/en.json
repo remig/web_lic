@@ -72,7 +72,8 @@
 				"root": "Grid",
 				"show": "Show",
 				"hide": "Hide",
-				"show_hide_undo": "Show Grid",
+				"show_undo": "Show Grid",
+				"hide_undo": "Hide Grid",
 				"customize": "Customize"
 			},
 			"guides": {

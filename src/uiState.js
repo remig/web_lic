@@ -106,10 +106,8 @@ const api = {
 				const originalPosition = currentState.guides[guideID].position;
 				const path = `/${guideID}/position`, root = currentState.guides;
 				return {
-					action: {
-						redo: [{root, op: 'replace', path, value: newPosition}],
-						undo: [{root, op: 'replace', path, value: originalPosition}]
-					}
+					redo: [{root, op: 'replace', path, value: newPosition}],
+					undo: [{root, op: 'replace', path, value: originalPosition}]
 				};
 			}
 		}

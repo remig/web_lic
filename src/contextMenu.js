@@ -732,15 +732,15 @@ const contextMenu = {
 					dialog.$on('ok', newValues => {
 						const path = `/${filename}/rotation`, root = pliTransforms;
 						const op = 'replace';
-						const change = {
-							mutations: ['page.layout'],
-							action: {
+						const change = [
+							{
 								redo: [{root, op, path, value: {...newValues.rotation}}],
 								undo: [{root, op, path, value: (originalTransform || {}).rotation || null}]
-							}
-						};
+							},
+							{mutation: 'page.layout', opts: {page}}
+						];
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						undoStack.commit(change, {page}, 'Rotate Part List Image', dirtyItems);
+						undoStack.commit(change, null, 'Rotate Part List Image', dirtyItems);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -778,15 +778,15 @@ const contextMenu = {
 						const value = _.clamp(newValues.value || 0, 0.001, 5);
 						const path = `/${filename}/scale`, root = pliTransforms;
 						const op = 'replace';
-						const change = {
-							mutations: ['page.layout'],
-							action: {
+						const change = [
+							{
 								redo: [{root, op, path, value}],
 								undo: [{root, op, path, value: (originalTransform || {}).scale || null}]
-							}
-						};
+							},
+							{mutation: 'page.layout', opts: {page}}
+						];
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						undoStack.commit(change, {page}, 'Scale Part List Image', dirtyItems);
+						undoStack.commit(change, null, 'Scale Part List Image', dirtyItems);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -820,17 +820,16 @@ const contextMenu = {
 				const pliTransforms = uiState.get('pliTransforms');
 				const originalScale = pliTransforms[filename].scale;
 				const path = `/${filename}/scale`, root = pliTransforms;
-				const change = {
-				// TODO: undo performs mutations before actions.  But we need the opposite; change undo
-				// to take a single mixed array of mutations + actions, and perform them in order.
-					mutations: ['page.layout'],
-					action: {
+				const change = [
+					{
 						redo: [{root, op: 'remove', path}],
 						undo: [{root, op: 'add', path, value: originalScale}]
-					}
-				};
+					},
+					'clearCacheTargets',
+					{mutation: 'page.layout', opts: {page}}
+				];
 				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-				undoStack.commit(change, {page}, 'Remove Part List Image Scale', dirtyItems);
+				undoStack.commit(change, null, 'Remove Part List Image Scale', dirtyItems);
 			}
 		}
 	],

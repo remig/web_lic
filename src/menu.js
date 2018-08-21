@@ -127,12 +127,11 @@ function toggleGrid(newState) {
 	return function() {
 		const root = uiState.get('grid'), op = 'replace', path = '/enabled';
 		const change = {
-			action: {
-				redo: [{root, op, path, value: newState}],
-				undo: [{root, op, path, value: !newState}]
-			}
+			redo: [{root, op, path, value: newState}],
+			undo: [{root, op, path, value: !newState}]
 		};
-		undoStack.commit(change, null, tr('navbar.view.grid.show_hide_undo'));
+		const text = tr('navbar.view.grid.' + (newState ? 'show_undo' : 'hide_undo'));
+		undoStack.commit(change, null, text);
 	};
 }
 
@@ -142,10 +141,8 @@ function addGuide(orientation) {
 		const {width, height} = store.state.template.page;
 		const position = Math.floor((orientation === 'vertical') ? (width / 2) : (height / 2));
 		const change = {
-			action: {
-				redo: [{root, op: 'add', path: '/-', value: {orientation, position}}],
-				undo: [{root, op: 'remove', path: `/${root.length}`}]
-			}
+			redo: [{root, op: 'add', path: '/-', value: {orientation, position}}],
+			undo: [{root, op: 'remove', path: `/${root.length}`}]
 		};
 		undoStack.commit(change, null, tr('navbar.view.guides.add_undo'));
 	};
@@ -155,10 +152,8 @@ function removeGuides() {
 	const root = uiState.getCurrentState(), op = 'replace', path = '/guides';
 	const originalGuides = _.cloneDeep(root.guides);
 	const change = {
-		action: {
-			redo: [{root, op, path, value: []}],
-			undo: [{root, op, path, value: originalGuides}]
-		}
+		redo: [{root, op, path, value: []}],
+		undo: [{root, op, path, value: originalGuides}]
 	};
 	undoStack.commit(change, null, tr('navbar.view.guides.remove_undo'));
 }

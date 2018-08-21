@@ -26,39 +26,41 @@ const api = {
 		state.onChangeCB = onChangeCB;
 	},
 
-	// Perform a new state mutation action then push it to the undo / redo stack
-	// change is either a string matching an entry in store.mutations,
-	// or an object with {undo, redo} JSON patch operations,
-	// or an object with properties {mutations, action}.
-	// 'mutations' is an array of strings matching store.mutation entries.
+	// Perform a new state mutation action then push it to the undo / redo stack.
+	// changeList is an array of changes.
+	// A change is either a string matching an entry in store.mutations,
+	// or an object with {mutation, opts} mutation operation,
+	// or an object with {undo, redo} JSON patch operations.
+	// 'mutation' is an array of strings matching store.mutation entries.
 	// 'action' is a {undo, redo} JSON patch operation.
 	// clearCacheTargets is an array of either:
 	//  - items or {id, type} selectionItems that will get their 'isDirty' flag set when an undo / reo
 	//  - a item type string like 'csi', which resets all items of that type
-	commit(change, opts, undoText, clearCacheTargets) {
+	commit(changeList, opts, undoText, clearCacheTargets) {
 
-		if (typeof change === 'string') {
-			change = {
-				mutations: [change]
-			};
-		} else if (change.hasOwnProperty('undo') && change.hasOwnProperty('redo')) {
-			change = {
-				action: change
-			};
+		if (typeof changeList === 'string') {
+			changeList = [{mutation: changeList, opts}];
+		} else if (isAction(changeList)) {
+			changeList = [changeList];
 		}
 
-		(change.mutations || []).forEach(mutation => {
-			mutation = _.get(store.mutations, mutation);
-			if (mutation) {
-				mutation(opts);  // Perform the actual state mutation
+		performClearCacheTargets(state.index - 1, state.index);
+
+		// We now have an array of mutation & action objects.  Apply it
+		changeList.forEach(change => {
+			if (isMutation(change)) {
+				const mutation = _.get(store.mutations, change.mutation);
+				if (mutation) {
+					mutation(change.opts);
+				}
+			} else if (isAction(change)) {
+				change.redo.forEach(action => {
+					jsonpatch.applyOperation(action.root, action);
+				});
+			} else if (change === 'clearCacheTargets') {
+				performClearCacheTargets(state.index - 1, state.index);
 			}
 		});
-
-		if (change.action) {
-			change.action.redo.forEach(action => {
-				jsonpatch.applyOperation(action.root, action);
-			});
-		}
 
 		if (state.index < state.stack.length - 1) {
 			// If there's undo actions after the 'current' action, delete them
@@ -66,7 +68,7 @@ const api = {
 		}
 
 		let newState;
-		if (_.isEmpty(change.mutations)) {
+		if (_.isEmpty(changeList.filter(isMutation))) {
 			// If we have no new state, reuse previous stack state entry
 			newState = state.stack[state.stack.length - 1].state;
 		} else {
@@ -76,7 +78,7 @@ const api = {
 		// TODO: state can be really big; consider switching store.mutations to JSON-patch
 		state.stack.push({
 			state: newState,
-			action: change.action,
+			actionList: changeList.filter(isAction),
 			undoText,
 			clearCacheTargets
 		});
@@ -136,6 +138,14 @@ const api = {
 	}
 };
 
+function isMutation(change) {
+	return change && (change.hasOwnProperty('mutation') || typeof change === 'string');
+}
+
+function isAction(change) {
+	return change && change.hasOwnProperty('undo') && change.hasOwnProperty('redo');
+}
+
 function performUndoRedoAction(undoOrRedo, newIndex) {
 
 	const newStack = state.stack[newIndex];
@@ -143,11 +153,11 @@ function performUndoRedoAction(undoOrRedo, newIndex) {
 	store.replaceState(newState);
 
 	const actionStack = (undoOrRedo === 'undo') ? state.stack[state.index] : newStack;
-	if (actionStack.action) {
-		actionStack.action[undoOrRedo].forEach(action => {
-			jsonpatch.applyOperation(action.root, action);
+	(actionStack.actionList || []).forEach(action => {
+		action[undoOrRedo].forEach(subAction => {
+			jsonpatch.applyOperation(subAction.root, subAction);
 		});
-	}
+	});
 
 	performClearCacheTargets(state.index, newIndex);
 	state.index = newIndex;
