@@ -196,13 +196,11 @@ export default {
 	},
 
 	// Given a pli and a part, find a pliItem in the pli that matches the part's filename & color (if any)
-	matchingPLIItem(pli, partID) {
+	matchingPLIItem(pli, part) {
 		pli = store.get.lookupToItem(pli);
-		const step = store.get.parent(pli);
-		const part = LDParse.model.get.partFromID(partID, step.model.filename);
-		const targets = pli.pliItems.map(id => store.get.pliItem(id))
+		const targets = pli.pliItems.map(store.get.pliItem)
 			.filter(i => i.filename === part.filename && i.colorCode === part.colorCode);
-		return targets.length ? targets[0] : null;
+		return targets[0];
 	},
 	pliItemIsSubmodel(pliItem) {
 		pliItem = store.get.lookupToItem(pliItem);
