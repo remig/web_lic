@@ -22,6 +22,10 @@ Vue.component('dialogManager', {
 			/* webpackChunkName: "brickColorDialog" */
 			'./dialogs/brick_colors.vue'
 		),
+		ldColorPickerDialog: () => import(
+			/* webpackChunkName: "ldColorPickerDialog" */
+			'./dialogs/ld_color_picker.vue'
+		),
 		displacePartDialog: () => import(
 			/* webpackChunkName: "displacePartDialog" */
 			'./dialogs/displace_part.vue'

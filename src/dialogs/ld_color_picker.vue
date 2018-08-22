@@ -1,0 +1,137 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
+<template>
+	<el-dialog
+		:title="tr('dialog.ld_color_picker.title')"
+		:modal="false"
+		:show-close="false"
+		:visible="visible"
+		class="ldColorPickerDialog"
+		width="500px"
+	>
+		<table class="el-table brickColorTable">
+			<tr>
+				<th>LDraw Code</th>
+				<th style="text-align: left;">Name</th>
+				<th style="text-align: left;">Pick</th>
+			</tr>
+		</table>
+		<div class="brickColorTableScroll">
+			<table class="el-table brickColorTable">
+				<tr v-for="row in colorData" v-if="row" :key="row.id" class="brickColorRow">
+					<td>{{row.id}}</td>
+					<td style="text-align: left;">{{row.name | prettyPrint}}</td>
+					<td>
+						<div class="swatch" @click="pick(row.id)">
+							<div :style="{'background-color': row.color}" class="inner_swatch" />
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<span slot="footer" class="dialog-footer">
+			<el-button @click="cancel">{{tr("cancel")}}</el-button>
+		</span>
+	</el-dialog>
+</template>
+
+<script>
+
+import _ from '../util';
+import LDParse from '../LDParse';
+import Storage from '../storage';
+const customColors = Storage.get.customBrickColors();
+
+function buildColorTable() {
+	const colors = [];
+	_.forOwn(LDParse.colorTable, (v, k) => {
+		if (v.color < 0 || v.edge < 0) {
+			return;
+		}
+		k = parseInt(k, 10);
+		const customColor = customColors[k] || {};
+		colors[k] = {
+			id: k,
+			name: v.name,
+			color: customColor.color || v.color,
+			edge: customColor.edge || v.edge
+		};
+	});
+	return colors;
+}
+
+export default {
+	data: function() {
+		return {
+			visible: false,
+			colorData: buildColorTable()
+		};
+	},
+	methods: {
+		pick(colorCode) {
+			this.$emit('ok', colorCode);
+			this.visible = false;
+		},
+		cancel() {
+			this.visible = false;
+		}
+	}
+};
+</script>
+
+<style>
+
+.ldColorPickerDialog {
+	table-layout: fixed;
+}
+
+.ldColorPickerDialog td:nth-of-type(1), .ldColorPickerDialog th:nth-of-type(1) {
+	width: 100px;
+}
+
+.ldColorPickerDialog td:nth-of-type(2), .ldColorPickerDialog th:nth-of-type(2) {
+	width: 160px;
+}
+
+.ldColorPickerDialog td:nth-of-type(3), .ldColorPickerDialog th:nth-of-type(3) {
+	width: 50px;
+}
+
+.ldColorPickerDialog .swatch {
+	width: 30px;
+	height: 30px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 3px;
+	cursor: pointer;
+}
+
+.ldColorPickerDialog .inner_swatch {
+	width: 100%;
+	height: 100%;
+	border: 1px solid #999;
+	border-radius: 2px;
+}
+
+.ldColorPickerDialog .el-dialog__body {
+	max-height: 70vh;
+}
+
+.brickColorTableScroll {
+	max-height: 65vh;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+
+.ldColorPickerDialog .el-table th, .ldColorPickerDialog .el-table td {
+	padding: 5px 0;
+	text-align: center;
+	overflow: hidden;
+}
+
+.ldColorPickerDialog .el-color-picker {
+	height: 34px;
+}
+
+</style>
+

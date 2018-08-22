@@ -23,16 +23,10 @@
 					<td>{{row.id}}</td>
 					<td style="text-align: left;">{{row.name | prettyPrint}}</td>
 					<td>
-						<el-color-picker
-							v-model="row.color"
-							color-format="hex"
-						/>
+						<el-color-picker v-model="row.color" color-format="hex" />
 					</td>
 					<td>
-						<el-color-picker
-							v-model="row.edge"
-							color-format="hex"
-						/>
+						<el-color-picker v-model="row.edge" color-format="hex" />
 					</td>
 				</tr>
 			</table>

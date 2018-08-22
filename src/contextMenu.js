@@ -1236,9 +1236,27 @@ const contextMenu = {
 			cb() {}
 		},
 		{
-			text: 'Change Part (NYI)',
+			text: 'Change Part',
 			children: [
-				{text: 'Change Color (NYI)', enabled: () => false},
+				{
+					text: 'Change Color',
+					cb(selectedItem) {
+						DialogManager('ldColorPickerDialog', dialog => {
+							dialog.$on('ok', newColorCode => {
+								const step = store.get.step({type: 'step', id: selectedItem.stepID});
+								const pli = {type: 'pli', id: step.pliID};
+								const action = LDParse.getAction.partColor({
+									filename: step.model.filename,
+									partID: selectedItem.id,
+									color: newColorCode
+								});
+								const mutation = {mutation: 'pli.syncContent', opts: {pli, doLayout: true}};
+								undoStack.commit([action, mutation], null, 'Change Part Color', ['csi']);
+							});
+							dialog.visible = true;
+						});
+					}
+				},
 				{text: 'Change to Different Part (NYI)', enabled: () => false},
 				{text: 'Change Position and Rotation (NYI)', enabled: () => false},
 				{text: 'Duplicate (NYI)', enabled: () => false},

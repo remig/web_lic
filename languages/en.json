@@ -163,6 +163,9 @@
 			"title": "Brick Colors",
 			"action": "Change Brick Colors"
 		},
+		"ld_color_picker": {
+			"title": "Choose a Color"
+		},
 		"displace_part": {
 			"title": "Displace Part",
 			"part_distance": "Part Distance",
