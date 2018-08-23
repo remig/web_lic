@@ -1296,7 +1296,18 @@ const contextMenu = {
 					}
 				},
 				{text: 'Change to Different Part (NYI)', enabled: () => false},
-				{text: 'Duplicate (NYI)', enabled: () => false},
+				{
+					text: 'Duplicate',
+					cb(selectedItem) {
+						const step = store.get.step({type: 'step', id: selectedItem.stepID});
+						const filename = step.model.filename;
+						const part = _.cloneDeep(store.get.part(selectedItem.id, step));
+						const partID = LDParse.partDictionary[filename].parts.length;
+						const action = LDParse.getAction.addPart({filename, part});
+						const mutation = {mutation: 'step.addPart', opts: {step, partID}};
+						undoStack.commit([action, mutation], null, 'Duplicate Part', ['csi']);
+					}
+				},
 				{
 					text: 'Delete',
 					cb(selectedItem) {

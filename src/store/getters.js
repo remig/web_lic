@@ -162,6 +162,9 @@ export default {
 		}
 		return nextStep;
 	},
+	part(partID, step) {
+		return LDParse.model.get.partFromID(partID, step.model.filename);
+	},
 	partsInStep(step) {
 		step = store.get.lookupToItem(step);
 		return (step.parts || []).map(partID => {

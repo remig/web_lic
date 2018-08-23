@@ -122,8 +122,8 @@ const api = {
 	getAction: {
 		partColor(opts) {  // opts: {filename, partID, color}
 
-			const originalColor = api.partDictionary[opts.filename].parts[opts.partID].colorCode;
 			const root = api.partDictionary, op = 'replace';
+			const originalColor = root[opts.filename].parts[opts.partID].colorCode;
 			const path = `/${opts.filename}/parts/${opts.partID}/colorCode`;
 			return {
 				redo: [{root, op, path, value: opts.color}],
@@ -131,12 +131,21 @@ const api = {
 			};
 		},
 		matrix(opts) {  // opts: {filename, partID, matrix}
-			const originalMatrix = api.partDictionary[opts.filename].parts[opts.partID].matrix;
 			const root = api.partDictionary, op = 'replace';
+			const originalMatrix = root[opts.filename].parts[opts.partID].matrix;
 			const path = `/${opts.filename}/parts/${opts.partID}/matrix`;
 			return {
 				redo: [{root, op, path, value: opts.matrix}],
 				undo: [{root, op, path, value: originalMatrix}]
+			};
+		},
+		addPart(opts) {  // opts: {filename, part}
+			const root = api.partDictionary;
+			const idx = root[opts.filename].parts.length;
+			const path = `/${opts.filename}/parts/${idx}`;
+			return {
+				redo: [{root, op: 'add', path, value: opts.part}],
+				undo: [{root, op: 'remove', path}]
 			};
 		}
 	}
