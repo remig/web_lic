@@ -4,6 +4,7 @@
 
 import _ from './util';
 import LDParse from './LDParse';
+import LDRender from './LDRender';
 import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
@@ -1239,6 +1240,43 @@ const contextMenu = {
 			text: 'Change Part',
 			children: [
 				{
+					text: 'Change Position and Rotation',
+					cb(selectedItem) {
+						const step = store.get.step({type: 'step', id: selectedItem.stepID});
+						const csi = store.get.csi(step.csiID);
+						const part = LDParse.model.get.partFromID(selectedItem.id, step.model.filename);
+						const originalMatrix = _.cloneDeep(part.matrix);
+						const transform = LDRender.LDMatrixToTransform(part.matrix);
+						DialogManager('transformPartDialog', dialog => {
+							dialog.$on('update', newTransform => {
+								part.matrix = LDRender.TransformToLDMatrix(newTransform);
+								csi.isDirty = true;
+								app.redrawUI(true);
+							});
+							dialog.$on('ok', newTransform => {
+								part.matrix = originalMatrix;
+								const matrix = LDRender.TransformToLDMatrix(newTransform);
+								const action = LDParse.getAction.matrix({
+									filename: step.model.filename,
+									partID: selectedItem.id,
+									matrix
+								});
+								const page = store.get.pageForItem(step);
+								const mutation = {mutation: 'page.layout', opts: {page}};
+								undoStack.commit([action, mutation], null, 'Change Part Transform', ['csi']);
+							});
+							dialog.$on('cancel', () => {
+								part.matrix = originalMatrix;
+								csi.isDirty = true;
+								app.redrawUI(true);
+							});
+							dialog.rotation = transform.rotation;
+							dialog.position = transform.position;
+							dialog.visible = true;
+						});
+					}
+				},
+				{
 					text: 'Change Color',
 					cb(selectedItem) {
 						DialogManager('ldColorPickerDialog', dialog => {
@@ -1258,7 +1296,6 @@ const contextMenu = {
 					}
 				},
 				{text: 'Change to Different Part (NYI)', enabled: () => false},
-				{text: 'Change Position and Rotation (NYI)', enabled: () => false},
 				{text: 'Duplicate (NYI)', enabled: () => false},
 				{text: 'Delete (NYI)', enabled: () => false}
 			]

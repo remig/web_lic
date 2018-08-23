@@ -166,6 +166,11 @@
 		"ld_color_picker": {
 			"title": "Choose a Color"
 		},
+		"transform_part": {
+			"title": "Transform Part",
+			"position": "Position",
+			"rotation": "Rotation"
+		},
 		"displace_part": {
 			"title": "Displace Part",
 			"part_distance": "Part Distance",

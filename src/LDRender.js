@@ -6,6 +6,7 @@
 import LDParse from './LDParse';
 
 const rad = THREE.Math.degToRad;
+const deg = THREE.Math.radToDeg;
 let renderer, camera;
 let isInitialized = false;
 
@@ -78,6 +79,29 @@ const api = {
 			dx: Math.max(0, noSelectedPartsBounds.x - selectedPartsBounds.x),
 			dy: Math.max(0, noSelectedPartsBounds.y - selectedPartsBounds.y)
 		};
+	},
+
+	LDMatrixToTransform(m) {
+		const position = new THREE.Vector3();
+		const quaternion = new THREE.Quaternion();
+		const scale = new THREE.Vector3();
+		const matrix = LDMatrixToMatrix(m);
+		matrix.decompose(position, quaternion, scale);
+		const rotation = new THREE.Euler();
+		rotation.setFromQuaternion(quaternion);
+		rotation.x = deg(rotation.x);
+		rotation.y = deg(rotation.y);
+		rotation.z = deg(rotation.z);
+		return {position, rotation, scale};
+	},
+
+	TransformToLDMatrix(transform) {
+		const rot = transform.rotation;
+		const euler = new THREE.Euler(rad(rot.x), rad(rot.y), rad(rot.z));
+		const matrix = new THREE.Matrix4();
+		matrix.makeRotationFromEuler(euler);
+		matrix.setPosition(transform.position);
+		return MatrixToLDMatrix(matrix).map(el => Math.abs(el) < 0.0000001 ? 0 : el);
 	},
 
 	setPartDictionary(dict) {
@@ -242,6 +266,14 @@ function LDMatrixToMatrix(m) {
 		   0,     0,     0,    1
 	);
 	return matrix;
+}
+
+function MatrixToLDMatrix(m) {
+	const a = m.elements;
+	return [
+		a[12], a[13], a[14],  // x, y, z
+		a[ 0], a[ 4], a[ 8], a[1], a[5], a[9], a[2], a[6], a[10]  // a - i
+	];
 }
 /* eslint-enable no-multi-spaces, no-mixed-spaces-and-tabs */
 

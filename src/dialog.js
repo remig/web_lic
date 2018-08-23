@@ -34,6 +34,10 @@ Vue.component('dialogManager', {
 			/* webpackChunkName: "rotatePartImageDialog" */
 			'./dialogs/rotate_part_image.vue'
 		),
+		transformPartDialog: () => import(
+			/* webpackChunkName: "transformPartDialog" */
+			'./dialogs/transform_part.vue'
+		),
 		pageLayoutDialog: () => import(
 			/* webpackChunkName: "pageLayoutDialog" */
 			'./dialogs/page_layout.vue'
