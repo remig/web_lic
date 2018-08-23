@@ -346,33 +346,41 @@ Vue.component('pageView', {
 					return;
 				}
 				page = store.get.lookupToItem(page);
-				if (page) {
-					const canvas = getCanvasForPage(page);
-					if (canvas) {
-						const container = document.getElementById('rightSubPane');
-						const dy = ((container.offsetHeight - canvas.offsetHeight) / 2) - multiPagePadding;
-						// TODO: this parent element lookup is hideously fragile and hideous
-						let newScroll;
-						if (this.isFacingView) {
-							newScroll = canvas.parentElement.parentElement.parentElement.offsetTop - dy;
-						} else {
-							newScroll = canvas.parentElement.parentElement.offsetTop - dy;
-						}
-						newScroll = Math.max(0, Math.floor(newScroll));
-						if (container.scrollTop === newScroll) {
-							// If scrollTop doesn't change, it doesn't trigger a scroll event
-							this.drawVisiblePages();
-						} else {
-							// This triggers a scroll event, which will redraw visible pages
-							container.scrollTop = newScroll;
-						}
-					}
+				if (!page) {
+					return;
+				}
+				const canvas = getCanvasForPage(page);
+				if (!canvas) {
+					return;
+				}
+				const container = document.getElementById('rightSubPane');
+				if (!container) {
+					return;
+				}
+				const dy = ((container.offsetHeight - canvas.offsetHeight) / 2) - multiPagePadding;
+				// TODO: this parent element lookup is hideously fragile and hideous
+				let newScroll;
+				if (this.isFacingView) {
+					newScroll = canvas.parentElement.parentElement.parentElement.offsetTop - dy;
+				} else {
+					newScroll = canvas.parentElement.parentElement.offsetTop - dy;
+				}
+				newScroll = Math.max(0, Math.floor(newScroll));
+				if (container.scrollTop === newScroll) {
+					// If scrollTop doesn't change, it doesn't trigger a scroll event
+					this.drawVisiblePages();
+				} else {
+					// This triggers a scroll event, which will redraw visible pages
+					container.scrollTop = newScroll;
 				}
 			});
 		},
 		drawVisiblePages() {
 			// TODO: this gets called a lot; try caching some of this in the component or somewhere
 			const container = document.getElementById('rightSubPane');
+			if (container == null) {
+				return;
+			}
 			const containerHeight = container.offsetHeight;
 			const containerTop = container.parentElement.offsetTop;
 			document.querySelectorAll('canvas[id^="pageCanvas"]').forEach(canvas => {
