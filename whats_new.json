@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.38.0",
+		"date": "August 22, 2018",
+		"features": [
+			"Add support for everything in the selected part's 'Change Part' menu.  You can change a part's color, position, rotation and basic part type.  You can also duplicate a part or delete it.",
+			"When there's multiple callouts in one step, add option to select which callout to add a selected part to",
+			"When adding multiple callouts to one step, add them to different positions, not always just 'left'",
+			"You can add a rotate icon to any step with step's new 'Add Rotate Icon' menu option",
+			"You can delete a rotate icon by selecting it and hitting 'delete' or with the icon's 'Remove Icon' menu option"
+		],
+		"bug_fixes": [
+			"Include callout's position in nav tree text, so you can tell multiple callouts apart",
+			"Correctly add steps to a callout when selecting a step in a callout and using its 'Append Step' menu entry",
+			"Don't crash when undoing / redoing an action on a selected item",
+			"Fix bounding box around PLI Items to include quantity label",
+			"Make sure context menu & submenus always appear entirely on the screen"
+		]
+	},
+	{
 		"version": "0.37.0",
 		"date": "July 31, 2018",
 		"features": [
