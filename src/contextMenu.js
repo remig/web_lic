@@ -1295,7 +1295,33 @@ const contextMenu = {
 						});
 					}
 				},
-				{text: 'Change to Different Part (NYI)', enabled: () => false},
+				{
+					text: 'Change to Different Part',
+					cb(selectedItem) {
+						DialogManager('stringChooserDialog', dialog => {
+							dialog.$on('ok', filename => {
+								(LDParse.loadRemotePart(filename, true)).then(abstractPart => {
+									const step = store.get.step({type: 'step', id: selectedItem.stepID});
+									const pli = {type: 'pli', id: step.pliID};
+									const newFilename = abstractPart.filename;
+									const action = LDParse.getAction.filename({
+										filename: step.model.filename,
+										partID: selectedItem.id,
+										newFilename
+									});
+									const mutation = {
+										mutation: 'pli.syncContent', opts: {pli, doLayout: true}
+									};
+									undoStack.commit([action, mutation], null, 'Change Part Type', ['csi']);
+								});
+							});
+							dialog.title = 'New Part Filename';
+							dialog.label = 'Filename';
+							dialog.labelWidth = '80px';
+							dialog.visible = true;
+						});
+					}
+				},
 				{
 					text: 'Duplicate',
 					cb(selectedItem) {

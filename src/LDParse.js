@@ -121,23 +121,13 @@ const api = {
 	// 'redo' performs perform the action, 'undo' will undo the action.
 	getAction: {
 		partColor(opts) {  // opts: {filename, partID, color}
-
-			const root = api.partDictionary, op = 'replace';
-			const originalColor = root[opts.filename].parts[opts.partID].colorCode;
-			const path = `/${opts.filename}/parts/${opts.partID}/colorCode`;
-			return {
-				redo: [{root, op, path, value: opts.color}],
-				undo: [{root, op, path, value: originalColor}]
-			};
+			return actionBuilder(opts.filename, opts.partID, 'colorCode', opts.color);
 		},
 		matrix(opts) {  // opts: {filename, partID, matrix}
-			const root = api.partDictionary, op = 'replace';
-			const originalMatrix = root[opts.filename].parts[opts.partID].matrix;
-			const path = `/${opts.filename}/parts/${opts.partID}/matrix`;
-			return {
-				redo: [{root, op, path, value: opts.matrix}],
-				undo: [{root, op, path, value: originalMatrix}]
-			};
+			return actionBuilder(opts.filename, opts.partID, 'matrix', opts.matrix);
+		},
+		filename(opts) { // opts: {filename, partID, newFilename}
+			return actionBuilder(opts.filename, opts.partID, 'filename', opts.newFilename);
 		},
 		addPart(opts) {  // opts: {filename, part}
 			const root = api.partDictionary;
@@ -150,6 +140,16 @@ const api = {
 		}
 	}
 };
+
+function actionBuilder(filename, partID, property, newValue) {
+	const root = api.partDictionary, op = 'replace';
+	const originalValue = root[filename].parts[partID][property];
+	const path = `/${filename}/parts/${partID}/${property}`;
+	return {
+		redo: [{root, op, path, value: newValue}],
+		undo: [{root, op, path, value: originalValue}]
+	};
+}
 
 // Cache list of parts in the 'p' folder, so we don't have to make
 // extraneous requests guessing whether a part is in 'parts' or 'p'.
