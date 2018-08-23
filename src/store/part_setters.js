@@ -4,7 +4,6 @@
 
 import _ from '../util';
 import store from '../store';
-import LDParse from '../LDParse';
 
 export default {
 	// opts: {partID, step, direction, partDistance=60, arrowOffset=0, arrowLength=60, arrowRotation=0}
@@ -38,23 +37,13 @@ export default {
 	},
 	moveToStep(opts) { // opts: {partID, srcStep, destStep, doLayout = false}
 		const srcStep = store.get.lookupToItem(opts.srcStep);
-		const part = LDParse.model.get.partFromID(opts.partID, srcStep.model.filename);
+		store.mutations.step.removePart({step: srcStep, partID: opts.partID});
 		store.mutations.csi.resetSize({csi: srcStep.csiID});
-		_.deleteItem(srcStep.parts, opts.partID);
 
 		const destStep = store.get.lookupToItem(opts.destStep);
+		store.mutations.step.addPart({step: destStep, partID: opts.partID});
 		store.mutations.csi.resetSize({csi: destStep.csiID});
-		destStep.parts.push(opts.partID);
-		destStep.parts.sort(_.sort.numeric.ascending);
 
-		if (srcStep.pliID != null) {
-			const srcPLI = store.get.pli(srcStep.pliID);
-			store.mutations.pli.removePart({pli: srcPLI, part});
-		}
-		if (destStep.pliID != null) {
-			const destPLI = store.get.pli(destStep.pliID);
-			store.mutations.pli.addPart({pli: destPLI, part});
-		}
 		if (opts.doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(srcStep)});
 			if (srcStep.parent.id !== destStep.parent.id) {

@@ -1297,7 +1297,17 @@ const contextMenu = {
 				},
 				{text: 'Change to Different Part (NYI)', enabled: () => false},
 				{text: 'Duplicate (NYI)', enabled: () => false},
-				{text: 'Delete (NYI)', enabled: () => false}
+				{
+					text: 'Delete',
+					cb(selectedItem) {
+						const opts = {
+							step: {type: 'step', id: selectedItem.stepID},
+							partID: selectedItem.id,
+							doLayout: true
+						};
+						undoStack.commit('step.removePart', opts, 'Delete Part', ['csi']);
+					}
+				}
 			]
 		}
 	]

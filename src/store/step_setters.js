@@ -5,6 +5,7 @@
 import _ from '../util';
 import store from '../store';
 import Layout from '../layout';
+import LDParse from '../LDParse';
 
 export default {
 	// opts: {dest, doLayout=false, model=null, stepNumber=null, renumber=false,
@@ -213,6 +214,28 @@ export default {
 					csi.rotation = opts.rotation;
 				}
 			}
+		}
+	},
+	addPart(opts) {  // opts: {step, partID, doLayout: false}
+		const step = store.get.lookupToItem(opts.step);
+		step.parts.push(opts.partID);
+		step.parts.sort(_.sort.numeric.ascending);
+		if (step.pliID != null) {
+			const part = LDParse.model.get.partFromID(opts.partID, step.model.filename);
+			const pli = {type: 'pli', id: step.pliID};
+			store.mutations.pli.addPart({pli, part});
+		}
+	},
+	removePart(opts) {  // opts: {step, partID, doLayout: false}
+		const step = store.get.lookupToItem(opts.step);
+		_.deleteItem(step.parts, opts.partID);
+		const part = LDParse.model.get.partFromID(opts.partID, step.model.filename);
+		if (step.pliID != null) {
+			const pli = {type: 'pli', id: step.pliID};
+			store.mutations.pli.removePart({pli, part});
+		}
+		if (opts.doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(step)});
 		}
 	}
 };
