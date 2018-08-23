@@ -209,13 +209,7 @@ function parseFloatList(a) {
 
 function parseComment(abstractPart, line) {
 	const command = line[1];
-	if (command === 'BFC') {
-		if (line[2] === 'CERTIFY') {
-			abstractPart.winding = line[3];
-		} else if (line[2] === 'INVERTNEXT') {
-			// NYI
-		}
-	} else if (command === 'FILE') {
+	if (command === 'FILE') {
 		// NYI
 	} else if (command === 'ROTSTEP') {
 		// NYI
@@ -298,7 +292,6 @@ async function lineListToAbstractPart(fn, lineList, progressCallback) {
 	const abstractPart = {
 		filename: fn,
 		name: '',
-		winding: 'CW',
 		parts: [],
 		primitives: []
 	};

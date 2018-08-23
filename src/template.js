@@ -146,7 +146,7 @@ const model = {
 	filename: 'templateModel.ldr',
 	name: 'templateModel.ldr',
 	parts: [part1, part2],
-	primitives: [], steps: []
+	primitives: []
 };
 
 template.modelData = {

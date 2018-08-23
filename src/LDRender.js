@@ -634,7 +634,7 @@ function addPartToScene(scene, colorCode, filename, config) {
 	const model = {
 		filename: part.filename,
 		name: part.filename,
-		parts: [part], primitives: [], steps: []
+		parts: [part], primitives: []
 	};
 
 	return addModelToScene(scene, model, [0], config);
