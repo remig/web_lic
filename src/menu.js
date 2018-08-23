@@ -112,7 +112,7 @@ Vue.component('nav-menu', {
 			});
 		},
 		triggerMenu(e) {
-			this.hide();
+			app.closeMenus();
 			e.target.parentElement.classList.add('open');
 		}
 	}

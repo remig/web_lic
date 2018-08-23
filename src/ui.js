@@ -218,6 +218,7 @@ const app = new Vue({
 			}
 		},
 		setSelected(target, page) {
+			this.closeMenus();
 			if (_.itemEq(target, this.selectedItemLookup)
 				&& (!page || _.itemEq(page, this.currentPageLookup))
 			) {
@@ -303,6 +304,7 @@ const app = new Vue({
 			this.forceUIUpdate();
 		},
 		rightClick(e) {
+			this.closeMenus();
 			this.lastRightClickPos.x = e.clientX;
 			this.lastRightClickPos.y = e.clientY;
 			this.contextMenu = null;
