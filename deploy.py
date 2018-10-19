@@ -5,13 +5,13 @@ with open('package.json') as f:
 	data = json.load(f)
 version = data['version']
 
-site = raw_input('Site: ')
-username = raw_input('Username: ')
-pwd = raw_input('Password: ' )
+site = input('Site: ')
+username = input('Username: ')
+pwd = input('Password: ' )
 
-print 'Deploying version ' + version + ' to ' + site
+print('Deploying version ' + version + ' to ' + site)
 ftp = FTP('ftp.' + site, username, pwd)
-ftp.cwd('~/' + site + '/alpha/web_lic')
+ftp.cwd('~/' + site + '/lic')
 ftp.mkd(version)
 ftp.mkd(version + '/static')
 ftp.mkd(version + '/dist')
@@ -22,10 +22,10 @@ for fn in ['whats_new.json', 'index.html', 'favicon.ico', 'static/style.css', 'd
 		ftp.delete(fn)
 	except error_perm:
 		pass
-	upfile = open(fn, 'r')
+	upfile = open(fn, 'rb')
 	ftp.storbinary('STOR ' + fn, upfile, blocksize=400000)
-	upfile = open(fn, 'r')
+	upfile = open(fn, 'rb')
 	ftp.storbinary('STOR ' + version + '/' + fn, upfile, blocksize=400000)
-	print ' - Uploaded ' + fn
+	print(' - Uploaded ' + fn)
 ftp.quit()
-print 'Success'
+print('Success')
