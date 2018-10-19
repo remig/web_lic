@@ -44,6 +44,12 @@ const api = {
 		if (colors[24]) {
 			colors[24].color = colors[24].edge = -1;
 		}
+		colors[api.studFaceColorCode] = {
+			name: 'Stud Face',
+			color: '#05131D',
+			edge: '#05131D',
+			alpha: 0
+		};
 		api.setColorTable(colors);
 		needLDConfig = false;
 		return colors;
@@ -60,6 +66,8 @@ const api = {
 	setPartDictionary(dict) {
 		api.partDictionary = dict;
 	},
+
+	studFaceColorCode: 987,
 
 	// key: LDraw color code, value: {name, color, edge}.
 	// JSON representation of the LDConfig.ldr file, which defines RGB colors for each LDraw color code
@@ -202,7 +210,7 @@ function forceBlack(colorCode, abstractPartName, partName) {
 	if (partName === '4-4cyli.dat') {
 		if (abstractPartName === 'stud.dat' || abstractPartName === 'stud2.dat' ||
 				abstractPartName === 'stud2a.dat' || abstractPartName === 'stod3.dat') {
-			return 0;
+			return api.studFaceColorCode;
 		}
 	}
 	return colorCode;

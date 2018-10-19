@@ -20,7 +20,7 @@
 		<div class="brickColorTableScroll">
 			<table class="el-table brickColorTable">
 				<tr v-for="row in colorData" v-if="row" :key="row.id" class="brickColorRow">
-					<td>{{row.id}}</td>
+					<td>{{(row.id) === studFaceColorCode ? '--' : row.id}}</td>
 					<td style="text-align: left;">{{row.name | prettyPrint}}</td>
 					<td>
 						<el-color-picker v-model="row.color" color-format="hex" />
@@ -62,6 +62,7 @@ function buildColorTable() {
 			edge: customColor.edge || v.edge
 		};
 	});
+	colors.unshift(colors.pop());  // Move last color (stud face) to first slot in the table
 	return colors;
 }
 
@@ -69,7 +70,8 @@ export default {
 	data: function() {
 		return {
 			visible: false,
-			colorData: buildColorTable()
+			colorData: buildColorTable(),
+			studFaceColorCode: LDParse.studFaceColorCode
 		};
 	},
 	methods: {
@@ -164,4 +166,3 @@ export default {
 }
 
 </style>
-
