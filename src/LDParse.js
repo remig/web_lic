@@ -408,16 +408,13 @@ async function loadPart(fn, content, progressCallback) {
 	}
 	api.partDictionary[part.filename] = part;
 	if (part.steps) {
-		delete part.steps.lastPart;
 		// Check if any parts were left out of the last step; add them to a new step if so.
 		// This happens often when a model / submodel does not end with a 'STEP 0' command.
-		const lastStepParts = part.steps[part.steps.length - 1].parts;
-		if (lastStepParts[lastStepParts.length - 1] < part.parts.length - 1) {
-			part.steps.push({parts: []});
-			for (let i = lastStepParts[lastStepParts.length - 1] + 1; i < part.parts.length; i++) {
-				part.steps[part.steps.length - 1].parts.push(i);
-			}
+		if (part.steps.lastPart < part.parts.length) {
+			const missingParts = part.parts.map((el, idx) => idx).slice(part.steps.lastPart);
+			part.steps.push({parts: missingParts});
 		}
+		delete part.steps.lastPart;
 	}
 	return part;
 }
