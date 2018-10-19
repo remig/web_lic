@@ -42,7 +42,7 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 		canvas.width = store.state.template.page.width * hiResScale;
 		canvas.height = store.state.template.page.height * hiResScale;
 
-		const pages = [store.get.titlePage(), ...store.state.pages];
+		const pages = [store.get.titlePage(), ...store.state.pages, ...store.state.inventoryPages];
 		app.updateProgress({stepCount: pages.length, text: 'Page 0'});
 		exportPages(pages, canvas).then(() => {
 			doneCallback(() => {
@@ -101,7 +101,7 @@ function generatePNGZip(app, store, hiResScale = 1, dpi = 96) {
 	const imgFolder = zip.folder(fn);
 
 	function drawPage(page, canvas) {
-		const pageName = (page.type === 'titlePage') ? 'Page 0 Title Page.png' : `Page ${page.number}.png`;
+		const pageName = (page.type === 'titlePage') ? 'Page 1 Title Page.png' : `Page ${page.number}.png`;
 		let data = canvas.toDataURL();
 		if (dpi !== 96) {
 			data = changeDpiDataUrl(data, dpi);
