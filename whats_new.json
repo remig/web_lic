@@ -1,5 +1,18 @@
 [
 	{
+		"version": "0.39.0",
+		"date": "October 18, 2018",
+		"features": [
+			"Add new 'Stud Face' color to list of Brick colors, which controls the color used on brick faces.  Can now be customized."
+		],
+		"bug_fixes": [
+			"Fix high res PNG export",
+			"Don't skip parts at the end of a model if there is multiple empty steps before them",
+			"Include part list pages in image export",
+			"Renumber part list pages when adding or removing a title page"
+		]
+	},
+	{
 		"version": "0.38.0",
 		"date": "August 22, 2018",
 		"features": [
