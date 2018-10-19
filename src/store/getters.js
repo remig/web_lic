@@ -55,11 +55,16 @@ export default {
 		if (!page || page.id == null || page.type === 'templatePage') {
 			return false;
 		} else if (page.type === 'titlePage') {
-			return store.state.pages.length < 1;
+			return store.state.pages.length < 1 && store.state.inventoryPages.length < 1;
+		} else if (page.type === 'page') {
+			if (store.state.inventoryPages.length > 0) {
+				return false;
+			}
+			return store.get.isLastBasicPage(page);
 		} else if (page.type === 'inventoryPage') {
-			return true;
+			return page.id === _.last(store.state.inventoryPages).id;
 		}
-		return store.get.isLastBasicPage(page);
+		return false;
 	},
 	isInventoryPage(page) {
 		return (page || {}).type === 'inventoryPage';
