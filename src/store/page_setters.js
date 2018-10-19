@@ -2,6 +2,7 @@
 
 'use strict';
 
+import _ from '../util';
 import store from '../store';
 import Layout from '../layout';
 
@@ -57,6 +58,8 @@ export default {
 	},
 	renumber() {
 		store.mutations.renumber(store.state.pages, store.state.titlePage ? 2 : 1);
+		const lastPageNumber = _.last(store.state.pages).number;
+		store.mutations.renumber(store.state.inventoryPages, lastPageNumber + 1);
 	},
 	layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
 		const page = store.get.lookupToItem(opts.page);
