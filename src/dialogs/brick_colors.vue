@@ -25,7 +25,7 @@
 					<td>
 						<el-color-picker v-model="row.color" color-format="hex" />
 					</td>
-					<td>
+					<td v-if="row.id !== studFaceColorCode">
 						<el-color-picker v-model="row.edge" color-format="hex" />
 					</td>
 				</tr>
@@ -88,6 +88,9 @@ export default {
 				} else if (ldColor.color !== el.color) {
 					customColor = customColors[el.id] = customColors[el.id] || {};
 					customColor.color = el.color;
+					if (el.id === LDParse.studFaceColorCode) {
+						customColor.edge = el.edge = el.color;
+					}
 				}
 				if (ldColor.edge === el.edge && customColor) {
 					delete customColor.edge;
