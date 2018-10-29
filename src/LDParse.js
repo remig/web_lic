@@ -87,8 +87,17 @@ const api = {
 			return api.customColorTable[colorCode][type];
 		} else if (colorCode in api.colorTable) {
 			return api.colorTable[colorCode][type];
+		} else if (
+			typeof colorCode === 'string' && colorCode.startsWith('#')
+			&& (type === 'color' || type === 'name')
+		) {
+			return colorCode;
 		}
 		return blackColor[type || 'color'];  // Treat any unrecognized colors as black
+	},
+
+	isValidColor(colorCode) {
+		return typeof colorCode === 'string' || (typeof colorCode === 'number' && colorCode >= 0);
 	},
 
 	model: {  // All 'model' arguments below are abstractParts
@@ -244,6 +253,9 @@ function parseComment(abstractPart, line) {
 }
 
 function parseColorCode(code) {
+	if (typeof code === 'string' && code.includes('x')) {
+		return '#' + code.slice(-6);
+	}
 	code = parseInt(code, 10);
 	return (code === 16 || code === 24) ? -1 : code;
 }

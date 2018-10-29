@@ -315,7 +315,7 @@ function getPartGeometry(abstractPart, colorCode) {
 		} else {
 
 			let color = colorObj;
-			if (primitive.colorCode >= 0) {
+			if (LDParse.isValidColor(primitive.colorCode)) {
 				color = new THREE.Color(LDParse.getColor(primitive.colorCode));
 			}
 
@@ -336,7 +336,7 @@ function getPartGeometry(abstractPart, colorCode) {
 	for (let i = 0; i < abstractPart.parts.length; i++) {
 		const part = abstractPart.parts[i];
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const color = part.colorCode >= 0 ? part.colorCode : colorCode;
+		const color = LDParse.isValidColor(part.colorCode) ? part.colorCode : colorCode;
 		const subPartGeometry = getPartGeometry(api.partDictionary[part.filename], color);
 
 		const faces = subPartGeometry.faces.clone().applyMatrix(matrix);
@@ -550,7 +550,7 @@ function addModelToScene(scene, model, partIDList, config) {
 		const displacement = displacedParts[partIDList[i]];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const color = (part.colorCode >= 0) ? part.colorCode : null;
+		const color = LDParse.isValidColor(part.colorCode) ? part.colorCode : null;
 		const partGeometry = getPartGeometry(abstractPart, color);
 
 		if (displacement) {
