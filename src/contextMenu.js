@@ -74,13 +74,23 @@ const annotationMenu = {
 };
 
 const contextMenu = {
+	titlePage: [
+		{
+			text: 'Redo Layout',
+			cb(selectedItem) {
+				undoStack.commit('page.layout', {page: selectedItem}, this.text);
+			}
+		},
+		annotationMenu
+	],
 	inventoryPage: [
 		{
 			text: 'Redo Layout',
 			cb(selectedItem) {
 				undoStack.commit('page.layout', {page: selectedItem}, this.text);
 			}
-		}
+		},
+		annotationMenu
 	],
 	page: [
 		{
