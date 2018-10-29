@@ -13,10 +13,26 @@ const api = {
 	},
 	// Create an abstractPart from the specified 'content' of an LDraw part file
 	async loadPartContent(content, fn) {
+
+		function fixPartColors(part) {
+			part.parts.forEach(part => {
+				if (typeof part.colorCode === 'number' && part.colorCode < 0) {
+					part.colorCode = 0;
+				}
+			});
+		}
+
 		const part = await loadPart(null, content, api.progressCallback);
 		if (part && fn && part.filename == null) {
 			part.filename = fn;
 		}
+
+		// Force all base parts with invalid colors to be black instead of undefined and render badly
+		fixPartColors(part);
+		Object.values(api.partDictionary)
+			.filter(part => part.isSubModel)
+			.forEach(fixPartColors);
+
 		return part;
 	},
 	async loadLDConfig(url = api.LDrawPath + 'LDConfig.ldr') {
