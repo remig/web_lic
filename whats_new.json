@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.40.0",
+		"date": "",
+		"features": [
+			"Add support for 0xnnRRGGBB style color codes in LDraw models",
+			"Add annotation option to title page and part list pages",
+			"Add new 'Change Count' menu option to inventory page part count labels"
+		],
+		"bug_fixes": [
+			"Force all base parts in a given LDraw file with invalid color codes to be black instead of rendering poorly"
+		]
+	},
+	{
 		"version": "0.39.0",
 		"date": "October 18, 2018",
 		"features": [
