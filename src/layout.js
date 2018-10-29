@@ -765,8 +765,8 @@ const api = {
 		}
 	},
 
-	label(label) {
-		const labelSize = _.measureLabel(label.font, label.text);
+	label(label, font, text) {
+		const labelSize = _.measureLabel(font || label.font, text || label.text);
 		label.width = labelSize.width;
 		label.height = labelSize.height;
 	},

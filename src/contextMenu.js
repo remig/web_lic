@@ -844,7 +844,35 @@ const contextMenu = {
 			}
 		}
 	],
-	quantityLabel: [],
+	quantityLabel(selectedItem) {
+		const page = store.get.pageForItem(selectedItem);
+		switch (page.type) {
+			case 'inventoryPage':
+				return [
+					{
+						text: 'Change Count',
+						cb(selectedItem) {
+							const pliItem = store.get.parent(selectedItem);
+							DialogManager('numberChooserDialog', dialog => {
+								dialog.$on('ok', newValues => {
+									undoStack.commit(
+										'pliItem.changeQuantity',
+										{pliItem, quantity: newValues.value},
+										'Change Count'
+									);
+								});
+								dialog.title = 'Change Part Count';
+								dialog.label = 'New Count';
+								dialog.labelWidth = '120px';
+								dialog.value = pliItem.quantity;
+								dialog.visible = true;
+							});
+						}
+					}
+				];
+		}
+		return [];
+	},
 	rotateIcon: [
 		{
 			text: 'Delete Rotate Icon',
