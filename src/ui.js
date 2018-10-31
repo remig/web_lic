@@ -3,6 +3,7 @@
 /* global Vue: false, Split: false, ELEMENT: false */
 'use strict';
 
+import './thickLines';
 import _ from './util';
 import uiState from './uiState';
 import store from './store';

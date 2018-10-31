@@ -388,6 +388,12 @@ function getArrowGeometry(length = 60) {
 	return geom;
 }
 
+const lineMaterial = new THREE.LineMaterial({
+	color: 0xffffff,
+	vertexColors: THREE.VertexColors,
+	linewidth: 0.0008
+});
+
 const selectedLineColor = 0xFF0000;
 const faceMaterials = [
 	new THREE.MeshBasicMaterial({
@@ -578,7 +584,18 @@ function addModelToScene(scene, model, partIDList, config) {
 		mesh.applyMatrix(matrix);
 		scene.add(mesh);
 
-		const line = new THREE.LineSegments(partGeometry.lines, faceMaterials[0]);
+		const lineGeom = new THREE.LineSegmentsGeometry();
+		const points = [], colors = [];
+		for (let i = 0; i < partGeometry.lines.vertices.length; i++) {
+			const v = partGeometry.lines.vertices[i];
+			const c = partGeometry.lines.colors[i];
+			points.push(v.x, v.y, v.z);
+			colors.push(c.r, c.g, c.b);
+		}
+		lineGeom.setPositions(points);
+		lineGeom.setColors(colors);
+
+		const line = new THREE.LineSegments2(lineGeom, lineMaterial);
 		line.applyMatrix(matrix);
 		scene.add(line);
 
@@ -607,7 +624,12 @@ function addModelToScene(scene, model, partIDList, config) {
 			const c2 = project(condline.c2.clone().applyMatrix4(matrix), camera, size);
 
 			if (lineSide(c1, l1, l2) === lineSide(c2, l1, l2)) {
-				scene.add(new THREE.LineSegments(cline, faceMaterials[0]));
+				const condLineGeom = new THREE.LineSegmentsGeometry();
+				const v = cline.vertices;
+				condLineGeom.setPositions([v[0].x, v[0].y, v[0].z, v[1].x, v[1].y, v[1].z]);
+				const c = cline.colors;
+				condLineGeom.setColors([c[0].r, c[0].g, c[0].b, c[1].r, c[1].g, c[1].b]);
+				scene.add(new THREE.LineSegments2(condLineGeom, lineMaterial));
 			}
 		}
 	}
