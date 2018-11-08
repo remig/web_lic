@@ -263,10 +263,14 @@ export default {
 		return false;
 	},
 	stepChildren(step) {
-		return store.get.children(step, [
-			'annotation', 'callout', 'csi', 'divider', 'numberLabel',
-			'pli', 'rotateIcon', 'step', 'submodelImage'
-		]);
+		const children = [
+			'annotation', 'callout', 'csi', 'divider',
+			'numberLabel', 'rotateIcon', 'step', 'submodelImage'
+		];
+		if (store.state.plisVisible) {
+			children.push('pli');
+		}
+		return store.get.children(step, children);
 	},
 	children(item, childTypeList) {
 		item = store.get.lookupToItem(item);
