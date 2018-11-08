@@ -25,6 +25,10 @@ const api = {
 		const part = await loadPart(null, content, api.progressCallback);
 		if (part && fn && part.filename == null) {
 			part.filename = fn;
+			api.partDictionary[fn] = part;
+			if (api.partDictionary[null]) {
+				delete api.partDictionary[null];
+			}
 		}
 
 		// Force all base parts with invalid colors to be black instead of undefined and render badly
@@ -350,7 +354,7 @@ async function lineListToAbstractPart(fn, lineList, progressCallback) {
 			abstractPart.name = abstractPart.name.replace(/^Name:\s*/ig, '');  // Trim leading 'Name: '
 		}
 	}
-	if (!fn && lineList[1] && lineList[1][0] === '0' && lineList[1][1] === 'Name:') {
+	if (!fn && lineList[1] && lineList[1][0] === '0' && lineList[1][1] === 'Name:' && lineList[1][2]) {
 		// If we don't have a filename but line 2 includes 'Name', use it
 		abstractPart.filename = lineList[1][2];
 	}
