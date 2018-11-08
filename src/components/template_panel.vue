@@ -48,7 +48,7 @@ const componentLookup = {
 		templatePage: pageNumberTemplatePanel,
 		step: {
 			callout: [fontPanel, 'callout.step.numberLabel'],
-			default: [fontPanel, 'step.numberLabel']
+			'default': [fontPanel, 'step.numberLabel']
 		}
 	},
 	quantityLabel: {

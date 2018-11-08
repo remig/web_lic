@@ -110,6 +110,7 @@ const api = {
 	partDictionary: {}
 };
 
+/* eslint-disable no-labels */
 function contextBoundingBox(data, w, h) {
 	let x, y, minX, minY, maxX, maxY;
 	o1: {
@@ -146,7 +147,7 @@ function contextBoundingBox(data, w, h) {
 		}
 	}
 	o4: {
-		for (y = 0;y <= maxY; ++y) {
+		for (y = 0; y <= maxY; ++y) {
 			for (x = minX; x <= maxX; ++x) {
 				if (data[(w * y + x) * 4 + 3] > 0) {
 					minY = y;
@@ -161,6 +162,7 @@ function contextBoundingBox(data, w, h) {
 		w: maxX - minX, h: maxY - minY
 	};
 }
+/* eslint-enable no-labels */
 
 function initialize() {
 
@@ -376,8 +378,8 @@ function getArrowGeometry(length = 60) {
 	geom.vertices.push(new THREE.Vector3(0, length, 0));  // 0
 	geom.vertices.push(new THREE.Vector3(-head.width, length - head.length, 0));  // 1
 	geom.vertices.push(new THREE.Vector3(-body.width, length - head.length + head.insetDepth, 0));  // 2
-	geom.vertices.push(new THREE.Vector3( body.width, length - head.length + head.insetDepth, 0));  // 3
-	geom.vertices.push(new THREE.Vector3( head.width, length - head.length, 0));  // 4
+	geom.vertices.push(new THREE.Vector3(body.width, length - head.length + head.insetDepth, 0));  // 3
+	geom.vertices.push(new THREE.Vector3(head.width, length - head.length, 0));  // 4
 	geom.vertices.push(new THREE.Vector3(body.width, 0, 0));  // 5
 	geom.vertices.push(new THREE.Vector3(-body.width, 0, 0));  // 6
 	geom.faces.push(new THREE.Face3(0, 1, 2));

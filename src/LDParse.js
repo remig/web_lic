@@ -223,10 +223,10 @@ async function requestPart(fn) {
 const unloadedSubModels = {};
 
 const primitiveTypes = {
-	'2': 'line',
-	'3': 'triangle',
-	'4': 'quad',
-	'5': 'condline'
+	2: 'line',
+	3: 'triangle',
+	4: 'quad',
+	5: 'condline'
 };
 
 function forceBlack(colorCode, abstractPartName, partName) {
@@ -325,12 +325,12 @@ function parseFace(abstractPart, line) {
 }
 
 const lineParsers = {
-	'0': parseComment,
-	'1': parsePart,
-	'2': parseLine,
-	'3': parseFace,
-	'4': parseFace,
-	'5': parseCondLine
+	0: parseComment,
+	1: parsePart,
+	2: parseLine,
+	3: parseFace,
+	4: parseFace,
+	5: parseCondLine
 };
 
 async function lineListToAbstractPart(fn, lineList, progressCallback) {

@@ -18,7 +18,7 @@ describe('Launch initial empty page', () => {
 		cy.clearLocalStorage().then(() => {
 			localStorage.clear();  // Need this because we overwrote cy.clearLocalStorage() to do nothing
 		});
-		cy.visit('http://192.168.1.101:9977/web_lic');
+		cy.visit('http://192.168.1.131:9988/web_lic');
 	});
 
 	it('Load basic page', () => {
@@ -28,7 +28,7 @@ describe('Launch initial empty page', () => {
 		});
 	});
 
-	it('Local Storage should be initialized with default UI settings', () => { 
+	it('Local Storage should be initialized with default UI settings', () => {
 		cy.get('body').then(() => {
 			expect(localStorage.getItem('custom_fonts')).to.eq('[]');
 			expect(localStorage.getItem('ui_defaults')).to.have.string('dialog');

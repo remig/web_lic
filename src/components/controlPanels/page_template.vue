@@ -91,12 +91,12 @@ import BorderPanel from './border.vue';
 import PanelBase from './panel_base.vue';
 
 const pageSizeLookups = {  // [width, height] in pixels
-	'a3': [1123, 1587],
-	'a4': [794, 1123],
-	'a5': [559, 794],
-	'letter': [816, 1056],
+	a3: [1123, 1587],
+	a4: [794, 1123],
+	a5: [559, 794],
+	letter: [816, 1056],
 	'gov-letter': [768, 1008],
-	'legal': [816, 1344],
+	legal: [816, 1344],
 	'junior-legal': [480, 768]
 };
 

@@ -50,7 +50,7 @@ export default {
 	components: {PanelBase},
 	props: {
 		templateEntry: {type: String, required: true},
-		title: {type: String, default: 'Fill'}
+		title: {type: String, 'default': 'Fill'}
 	},
 	data() {
 		const template = _.get(store.state.template, this.templateEntry).fill;

@@ -128,7 +128,7 @@ _.mixin({
 	units: (() => {
 		const unitConversions = {  // this conversion factor * pixel count = units
 			point: 0.75,
-			in: 0.75 / 72,
+			'in': 0.75 / 72,
 			mm: 0.75 / 72 * 25.4,
 			cm: 0.75 / 72 * 2.54
 		};

@@ -43,7 +43,7 @@ Vue.component('pageView', {
 						width: pageWidth,
 						height: pageHeight
 					},
-					class: ['pageCanvas']
+					'class': ['pageCanvas']
 				}
 			);
 
@@ -51,13 +51,13 @@ Vue.component('pageView', {
 			if (pageLookup && pageLookup.type === 'page') {
 				lockIcon = createElement(
 					'i',
-					{class: ['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}]}
+					{'class': ['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}]}
 				);
 				lockSwitch = createElement(
 					'el-switch',
 					{
 						props: {width: 20, value: locked},
-						class: 'pageLockSwitch',
+						'class': 'pageLockSwitch',
 						on: {input: setPageLocked(pageLookup.id)}
 					}
 				);
@@ -84,7 +84,7 @@ Vue.component('pageView', {
 				if (!_.isEmpty(guides)) {
 					guides = createElement(
 						'div',
-						{class: ['pageGuideContainer']},
+						{'class': ['pageGuideContainer']},
 						guides
 					);
 				}
@@ -93,7 +93,7 @@ Vue.component('pageView', {
 			const canvasHolder = createElement(
 				'div',
 				{
-					class: [
+					'class': [
 						'pageContainer',
 						{oddNumberedPage: facing && !_.isEven(idx)}
 					],
@@ -159,7 +159,7 @@ Vue.component('pageView', {
 		const subRoot = createElement(
 			'div',
 			{
-				class: 'pageViewContainer',
+				'class': 'pageViewContainer',
 				style: {
 					width: facing ? pageWidth + pageWidth + 70 + 'px' : pageWidth + 'px',
 					height: scrolling ? null : pageHeight + 'px'
@@ -180,7 +180,7 @@ Vue.component('pageView', {
 		return createElement(
 			'div',
 			{
-				class: {singleEntry: !scrolling},
+				'class': {singleEntry: !scrolling},
 				attrs: {id: 'rightSubPane'},
 				on: handlers
 			},

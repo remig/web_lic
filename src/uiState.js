@@ -22,7 +22,7 @@ const defaultState = {
 				partListPage: false
 			}
 		},
-		export: {
+		'export': {
 			images: {
 				scale: 1,
 				dpi: 96,

@@ -41,7 +41,7 @@ export default {
 	components: {PanelBase},
 	props: {
 		templateEntry: {type: String, required: true},
-		title: {type: String, default: 'Border'}
+		title: {type: String, 'default': 'Border'}
 	},
 	data() {
 		const template = _.get(store.state.template, this.templateEntry).border;

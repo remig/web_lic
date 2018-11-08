@@ -1116,6 +1116,8 @@ const contextMenu = {
 		}
 	],
 	part: [
+		// TODO: first add support for multiple selection, then add support for merging two parts in a PLI,
+		// like for antenna base and stick, or left / right hinge parts or 2x2 turntables
 		{
 			text: 'Displace Part...',
 			children: ['up', 'down', 'left', 'right', 'forward', 'backward', null].map(direction => {

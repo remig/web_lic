@@ -32,7 +32,7 @@ export default {
 			'div',
 			{
 				attrs: {'data-id': `guide-${this.id}`},
-				class: ['guide', isVertical ? 'guide-vertical' : 'guide-horizontal'],
+				'class': ['guide', isVertical ? 'guide-vertical' : 'guide-horizontal'],
 				style
 			}
 		);

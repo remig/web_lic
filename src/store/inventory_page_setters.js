@@ -32,7 +32,7 @@ export default {
 
 		_.forOwn(itemList, (partList, colorCode) => {
 			_.forOwn(partList, (quantity, filename) => {
-				store.mutations.pliItem.add({ parent: page, filename, colorCode, quantity});
+				store.mutations.pliItem.add({parent: page, filename, colorCode, quantity});
 			});
 		});
 	},
