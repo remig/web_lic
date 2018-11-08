@@ -1,4 +1,5 @@
 node_modules/*
+ldraw
 dist
 lib
 test/errorShots

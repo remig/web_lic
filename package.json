@@ -6,6 +6,7 @@
 	"scripts": {
 		"build": "webpack --config webpack.dev.js",
 		"build_prod": "webpack --config webpack.prod.js",
+		"start": "webpack-dev-server --open --config webpack.start.js",
 		"test": "npx cypress open",
 		"deploy": "python deploy.py",
 		"stats": "webpack --config webpack.prod.js --profile --json > stats.json",
@@ -27,7 +28,8 @@
 		"vue-template-compiler": "2.5.16",
 		"webpack": "4.1.1",
 		"webpack-bundle-analyzer": "2.13.1",
-		"webpack-cli": "2.0.12"
+		"webpack-cli": "2.0.12",
+		"webpack-dev-server": "3.1.10"
 	},
 	"dependencies": {
 		"changedpi": "1.0.3",
