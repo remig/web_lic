@@ -1,7 +1,14 @@
 [
 	{
+		"version": "0.41.0",
+		"date": "October 30, 2018",
+		"bug_fixes": [
+			"Draw nice thick edge lines even when exporting high-res images"
+		]
+	},
+	{
 		"version": "0.40.0",
-		"date": "",
+		"date": "October 28, 2018",
 		"features": [
 			"Add support for 0xnnRRGGBB style color codes in LDraw models",
 			"Add annotation option to title page and part list pages",
