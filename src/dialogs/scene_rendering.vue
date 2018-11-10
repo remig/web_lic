@@ -6,15 +6,24 @@
 		:modal="false"
 		:show-close="false"
 		:visible="visible"
-		width="550px"
+		width="450px"
 		class="sceneRenderingDialog"
 	>
-		<el-form :inline="true" label-width="140px">
+		<el-form label-width="140px">
 			<el-form-item :label="tr('dialog.scene_rendering.zoom')">
 				<input
 					v-model.number="values.zoom"
 					type="number"
-					min="-500"
+					class="form-control"
+					@input="updateValues"
+				>
+			</el-form-item>
+			<el-form-item :label="tr('dialog.scene_rendering.edge_width')">
+				<input
+					v-model.number="values.edgeWidth"
+					type="number"
+					min="0"
+					max="10"
 					class="form-control"
 					@input="updateValues"
 				>
@@ -29,6 +38,7 @@
 
 <script>
 
+import _ from '../util';
 import store from '../store';
 import undoStack from '../undoStack';
 
@@ -36,35 +46,41 @@ export default{
 	data: function() {
 		return {
 			visible: false,
-			values: {
-				zoom: store.state.template.sceneRendering.zoom
-			}
+			values: _.cloneDeep(store.state.template.sceneRendering)
 		};
 	},
 	methods: {
 		updateValues() {
-			store.mutations.sceneRendering.zoom({zoom: this.values.zoom, refresh: true});
+			store.mutations.sceneRendering.set({...this.values, refresh: true});
 			this.app.redrawUI(true);
 		},
 		show(app) {
-			this.originalZoom = store.state.template.sceneRendering.zoom;
+			this.originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
 			this.app = app;
 			this.visible = true;
 		},
 		ok() {
 			undoStack.commit(
 				'sceneRendering.zoom',
-				{zoom: this.values.zoom},
+				this.values,
 				this.tr('dialog.scene_rendering.undo'),
 				['renderer']
 			);
 			this.visible = false;
 		},
 		cancel() {
-			store.mutations.sceneRendering.zoom({zoom: this.originalZoom, refresh: true});
+			store.mutations.sceneRendering.set({...this.originalRenderState, refresh: true});
 			this.app.redrawUI(true);
 			this.visible = false;
 		}
 	}
 };
 </script>
+
+<style>
+
+.sceneRenderingDialog input {
+	width: 95px;
+}
+
+</style>

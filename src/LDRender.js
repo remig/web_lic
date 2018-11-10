@@ -10,6 +10,17 @@ const deg = THREE.Math.radToDeg;
 let renderer, camera;
 let isInitialized = false;
 
+const renderState = {
+	zoom: 500,
+	edgeWidth: 0.0008
+};
+
+const lineMaterial = new THREE.LineMaterial({
+	color: 0xffffff,
+	vertexColors: THREE.VertexColors,
+	linewidth: renderState.edgeWidth
+});
+
 const api = {
 
 	// Render the chosen part filename with the chosen color code to the chosen container.
@@ -109,18 +120,20 @@ const api = {
 	},
 	partDictionary: {},
 
-	setZoom(zoom) {
-		if (zoom !== api.zoom) {
-			api.zoom = zoom;
+	setRenderState(newState) {
+		if (newState.zoom != null) {
+			const viewBox = renderState.zoom = 500 + (newState.zoom * -10);
 			if (camera != null) {
-				const viewBox = 500 + api.zoom;
 				camera.right = camera.top = viewBox;
 				camera.left = camera.bottom = -viewBox;
 				camera.position.set(viewBox, -viewBox * 0.7, -viewBox);
 			}
 		}
-	},
-	zoom: 0
+		if (newState.edgeWidth != null) {
+			renderState.edgeWidth = newState.edgeWidth * 0.0002;
+			lineMaterial.linewidth = renderState.edgeWidth;
+		}
+	}
 };
 
 /* eslint-disable no-labels */
@@ -193,7 +206,7 @@ function initialize() {
 	renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 	offscreenContainer.appendChild(renderer.domElement);
 
-	const viewBox = 500 + api.zoom;
+	const viewBox = renderState.zoom;
 	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.01, 10000);
 	camera.up = new THREE.Vector3(0, -1, 0);  // -1 because LDraw coordinate space has -y as UP
 	camera.position.set(viewBox, -viewBox * 0.7, -viewBox);
@@ -400,12 +413,6 @@ function getArrowGeometry(length = 60) {
 	geom.faces.push(new THREE.Face3(2, 5, 6));
 	return geom;
 }
-
-const lineMaterial = new THREE.LineMaterial({
-	color: 0xffffff,
-	vertexColors: THREE.VertexColors,
-	linewidth: 0.0008
-});
 
 const selectedLineColor = 0xFF0000;
 const faceMaterials = [

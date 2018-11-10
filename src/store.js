@@ -76,7 +76,7 @@ const store = {
 		LDParse.setPartDictionary(content.partDictionary);
 		LDParse.setColorTable(content.colorTable);
 		LDRender.setPartDictionary(content.partDictionary);
-		LDRender.setZoom(content.state.template.sceneRendering.zoom);
+		LDRender.setRenderState(content.state.template.sceneRendering);
 		store.model = LDParse.partDictionary[content.modelFilename];
 		store.replaceState(content.state);
 	},
@@ -198,17 +198,15 @@ const store = {
 			}
 		},
 		sceneRendering: {
-			zoom(opts) {  // opts: {zoom, refresh: false}
+			set(opts) {  // opts: {zoom, edgeWidth, refresh: false}
 				store.state.template.sceneRendering.zoom = opts.zoom;
+				store.state.template.sceneRendering.edgeWidth = opts.edgeWidth;
 				if (opts.refresh) {
-					LDRender.setZoom(opts.zoom);
-					store.mutations.csi.markAllDirty();
-					store.mutations.pliItem.markAllDirty();
-					store.mutations.page.markAllDirty();
+					store.mutations.sceneRendering.refreshAll();
 				}
 			},
 			refreshAll() {
-				LDRender.setZoom(store.state.template.sceneRendering.zoom);
+				LDRender.setRenderState(store.state.template.sceneRendering);
 				store.mutations.csi.markAllDirty();
 				store.mutations.pliItem.markAllDirty();
 				store.mutations.page.markAllDirty();

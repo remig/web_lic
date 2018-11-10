@@ -70,6 +70,9 @@ const api = {
 		if (state.template.sceneRendering.zoom == null) {
 			state.template.sceneRendering.zoom = 0;
 		}
+		if (state.template.sceneRendering.edgeWidth == null) {
+			state.template.sceneRendering.edgeWidth = 4;
+		}
 
 		if (typeof content.colorTable[0].color === 'number') {
 			_.forOwn(content.colorTable, v => {

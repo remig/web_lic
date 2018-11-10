@@ -133,7 +133,8 @@ const template = {
 		}
 	},
 	sceneRendering: {
-		zoom: 0
+		zoom: 0,
+		edgeWidth: 4
 	}
 };
 
