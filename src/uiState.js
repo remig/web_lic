@@ -12,6 +12,7 @@ const defaultState = {
 		importModel: {
 			stepsPerPage: 1,
 			useMaxSteps: true,
+			autoShrinkCSI: true,
 			firstPageNumber: 1,
 			firstStepNumber: 1,
 			addStepsForSubmodels: true,

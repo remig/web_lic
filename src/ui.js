@@ -99,6 +99,9 @@ const app = new Vue({
 
 						// TODO: Add option to start new page for each submodel
 						store.mutations.pli.toggleVisibility({visible: layoutChoices.include.pli});
+						if (layoutChoices.autoShrinkCSI) {
+							store.render.adjustCameraZoom();
+						}
 						store.mutations.addInitialPages();
 						store.mutations.addInitialSubmodelImages();
 						if (layoutChoices.useMaxSteps) {

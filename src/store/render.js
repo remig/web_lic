@@ -122,5 +122,21 @@ export default {
 				container.remove();
 			}
 		}
+	},
+	adjustCameraZoom() {
+		// Render the main model; if it's too big to fit in the default view, zoom out until it fits
+		const containerSize = 1000, paddedContainerSize = containerSize - 300, zoomStep = 300;
+		const container = getCanvas('cameraZoomTestCanvas');
+		container.width = container.height = containerSize;
+
+		let zoom = -zoomStep;
+		const config = {resizeContainer: true};
+		while (container.width > paddedContainerSize || container.height > paddedContainerSize) {
+			zoom += zoomStep;
+			LDRender.setZoom(zoom);
+			LDRender.renderPart(0, store.model.filename, container, containerSize, config);
+		}
+		store.state.template.sceneRendering.zoom = zoom;
+		container.remove();
 	}
 };

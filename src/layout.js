@@ -495,6 +495,7 @@ const api = {
 
 	pli(pli) {
 
+		// TOOD: if generated PLI is too big (say, > 30% of page), auto shrink the big items
 		let pliItems = pli.pliItems;
 		if (!store.state.template.pli.includeSubmodels) {
 			pliItems = pliItems.filter(id => {
