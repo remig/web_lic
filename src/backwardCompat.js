@@ -64,6 +64,13 @@ const api = {
 			state.template.submodelImage.maxHeight = 0.3;
 		}
 
+		if (state.template.sceneRendering == null) {
+			state.template.sceneRendering = {};
+		}
+		if (state.template.sceneRendering.zoom == null) {
+			state.template.sceneRendering.zoom = 0;
+		}
+
 		if (typeof content.colorTable[0].color === 'number') {
 			_.forOwn(content.colorTable, v => {
 				v.color = '#' + (v.color).toString(16).padStart(6, '0');

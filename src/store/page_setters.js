@@ -61,6 +61,9 @@ export default {
 		const lastPageNumber = _.last(store.state.pages).number;
 		store.mutations.renumber(store.state.inventoryPages, lastPageNumber + 1);
 	},
+	markAllDirty() {
+		store.state.pages.forEach(page => (page.needsLayout = true));
+	},
 	layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
 		const page = store.get.lookupToItem(opts.page);
 		if (!page.locked) {

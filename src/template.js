@@ -131,6 +131,9 @@ const template = {
 				color: '#000000'
 			}
 		}
+	},
+	sceneRendering: {
+		zoom: 0
 	}
 };
 

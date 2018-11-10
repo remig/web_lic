@@ -389,6 +389,15 @@ const menu = [
 		},
 		{text: 'navbar.edit.snap', enabled: () => false, cb() {}},
 		{
+			text: 'navbar.edit.scene_rendering',
+			shown: enableIfModel,
+			cb() {
+				DialogManager('sceneRenderingDialog', dialog => {
+					dialog.show(app);
+				});
+			}
+		},
+		{
 			text: 'navbar.edit.brick_colors',
 			cb() {
 				DialogManager('brickColorDialog', dialog => {

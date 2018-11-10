@@ -105,9 +105,22 @@ const api = {
 	},
 
 	setPartDictionary(dict) {
-		api.partDictionary = dict;    // Part dictionary {partName : abstractPart} as created by LDParse
+		api.partDictionary = dict;  // Part dictionary {partName : abstractPart} as created by LDParse
 	},
-	partDictionary: {}
+	partDictionary: {},
+
+	setZoom(zoom) {
+		if (zoom !== api.zoom) {
+			api.zoom = zoom;
+			if (camera != null) {
+				const viewBox = 500 + api.zoom;
+				camera.right = camera.top = viewBox;
+				camera.left = camera.bottom = -viewBox;
+				camera.position.set(viewBox, -viewBox * 0.7, -viewBox);
+			}
+		}
+	},
+	zoom: 0
 };
 
 /* eslint-disable no-labels */
@@ -180,12 +193,10 @@ function initialize() {
 	renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 	offscreenContainer.appendChild(renderer.domElement);
 
-	const viewBox = (500 / 1);
-	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.1, 10000);
+	const viewBox = 500 + api.zoom;
+	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.01, 10000);
 	camera.up = new THREE.Vector3(0, -1, 0);  // -1 because LDraw coordinate space has -y as UP
-	camera.position.x = viewBox;
-	camera.position.y = -viewBox + (150 / 1);
-	camera.position.z = -viewBox;
+	camera.position.set(viewBox, -viewBox * 0.7, -viewBox);
 	camera.lookAt(new THREE.Vector3());
 	isInitialized = true;
 }

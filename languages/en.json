@@ -54,7 +54,8 @@
 				"remove": "Remove Part List Pages"
 			},
 			"snap": "Snap To (NYI)",
-			"brick_colors": " Brick Colors..."
+			"scene_rendering": "3D Scene Rendering...",
+			"brick_colors": "Brick Colors..."
 		},
 		"view": {
 			"root": "View",
@@ -162,6 +163,11 @@
 		"brick_colors": {
 			"title": "Brick Colors",
 			"action": "Change Brick Colors"
+		},
+		"scene_rendering": {
+			"title": "3D Scene Rendering",
+			"undo": "Change Camera Zoom",
+			"zoom": "Camera Zoom"
 		},
 		"ld_color_picker": {
 			"title": "Choose a Color"

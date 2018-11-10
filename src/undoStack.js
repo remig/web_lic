@@ -177,7 +177,11 @@ function performClearCacheTargets(prevIndex, newIndex) {
 	}
 	clearCacheTargets.forEach(item => {
 		if (typeof item === 'string') {
-			store.state[item + 's'].forEach(item => (item.isDirty = true));
+			if (item === 'renderer') {  // Special case: refresh renderer settings
+				store.mutations.sceneRendering.refreshAll();
+			} else {
+				store.state[item + 's'].forEach(item => (item.isDirty = true));
+			}
 		} else {
 			// Some cache items were cloned from previous states;
 			// ensure we pull only the actual item from the current state

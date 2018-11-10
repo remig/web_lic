@@ -1,6 +1,5 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-/* eslint-disable */
 /* global Vue: false */
 'use strict';
 
@@ -21,6 +20,10 @@ Vue.component('dialogManager', {
 		brickColorDialog: () => import(
 			/* webpackChunkName: "brickColorDialog" */
 			'./dialogs/brick_colors.vue'
+		),
+		sceneRenderingDialog: () => import(
+			/* webpackChunkName: "sceneRenderingDialog" */
+			'./dialogs/scene_rendering.vue'
 		),
 		ldColorPickerDialog: () => import(
 			/* webpackChunkName: "ldColorPickerDialog" */

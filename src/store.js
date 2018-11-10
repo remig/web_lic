@@ -76,6 +76,7 @@ const store = {
 		LDParse.setPartDictionary(content.partDictionary);
 		LDParse.setColorTable(content.colorTable);
 		LDRender.setPartDictionary(content.partDictionary);
+		LDRender.setZoom(content.state.template.sceneRendering.zoom);
 		store.model = LDParse.partDictionary[content.modelFilename];
 		store.replaceState(content.state);
 	},
@@ -196,6 +197,23 @@ const store = {
 				store.mutations.item.delete({item: opts.divider});
 			}
 		},
+		sceneRendering: {
+			zoom(opts) {  // opts: {zoom, refresh: false}
+				store.state.template.sceneRendering.zoom = opts.zoom;
+				if (opts.refresh) {
+					LDRender.setZoom(opts.zoom);
+					store.mutations.csi.markAllDirty();
+					store.mutations.pliItem.markAllDirty();
+					store.mutations.page.markAllDirty();
+				}
+			},
+			refreshAll() {
+				LDRender.setZoom(store.state.template.sceneRendering.zoom);
+				store.mutations.csi.markAllDirty();
+				store.mutations.pliItem.markAllDirty();
+				store.mutations.page.markAllDirty();
+			}
+		},
 		pli: {
 			add(opts) {  // opts: {parent}
 				return store.mutations.item.add({item: {
@@ -244,9 +262,7 @@ const store = {
 			},
 			toggleVisibility(opts) {  // opts: {visible}
 				store.state.plisVisible = opts.visible;
-				store.state.pages.forEach(p => {
-					p.needsLayout = true;
-				});
+				store.mutations.page.markAllDirty();
 			},
 			syncContent(opts) {  // opts: {pli, doLayout}
 				// Ensure the list of children pliItems matches the content of the parent step
