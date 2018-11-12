@@ -151,6 +151,7 @@ const contextMenu = {
 								store.mutations.page.layout({page, layout: newValues});
 								app.redrawUI(true);
 							});
+							// TODO: move these setters and 'show' call into single 'setValues' method
 							dialog.values.rows = originalLayout.rows || 'auto';
 							dialog.values.cols = originalLayout.cols || 'auto';
 							dialog.values.direction = originalLayout.direction || 'vertical';
@@ -553,7 +554,6 @@ const contextMenu = {
 							});
 							dialog.title = tr('dialog.rotate_part_image.title_csi');
 							dialog.rotation = _.cloneDeep(initialRotation);
-							dialog.visible = true;
 						});
 					}
 				},
@@ -635,7 +635,6 @@ const contextMenu = {
 					dialog.label = 'Copy Rotation to Next Steps';
 					dialog.labelWidth = '220px';
 					dialog.min = dialog.value = 0;
-					dialog.visible = true;
 				});
 			}
 		},
@@ -671,7 +670,6 @@ const contextMenu = {
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
-					dialog.visible = true;
 					dialog.title = 'Scale CSI';
 					dialog.min = 0;
 					dialog.max = 10;
@@ -765,7 +763,6 @@ const contextMenu = {
 					dialog.title = tr('dialog.rotate_part_image.title_pli');
 					dialog.showRotateIconCheckbox = false;
 					dialog.rotation = (originalTransform || {}).rotation || {x: 0, y: 0, z: 0};
-					dialog.visible = true;
 				});
 			}
 		},
@@ -808,7 +805,6 @@ const contextMenu = {
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
-					dialog.visible = true;
 					dialog.title = 'Scale Part List Image';
 					dialog.min = 0;
 					dialog.max = 10;
@@ -849,6 +845,7 @@ const contextMenu = {
 		switch (page.type) {
 			case 'inventoryPage':
 				return [
+					// TODO: add 'Reset Count' menu entry to labels with modified counts
 					{
 						text: 'Change Count',
 						cb(selectedItem) {
@@ -865,7 +862,6 @@ const contextMenu = {
 								dialog.label = 'New Count';
 								dialog.labelWidth = '120px';
 								dialog.value = pliItem.quantity;
-								dialog.visible = true;
 							});
 						}
 					}
@@ -1058,7 +1054,6 @@ const contextMenu = {
 						store.mutations.divider.setLength({divider, newLength: originalSize});
 						app.drawCurrentPage();
 					});
-					dialog.visible = true;
 					dialog.title = 'Resize Page Divider';
 					dialog.min = 1;
 					dialog.max = 10000;
@@ -1164,7 +1159,6 @@ const contextMenu = {
 						app.redrawUI(true);
 					});
 					dialog.values = displacement;
-					dialog.visible = true;
 				});
 			}
 		},
@@ -1312,7 +1306,6 @@ const contextMenu = {
 							});
 							dialog.rotation = transform.rotation;
 							dialog.position = transform.position;
-							dialog.visible = true;
 						});
 					}
 				},
@@ -1331,7 +1324,6 @@ const contextMenu = {
 								const mutation = {mutation: 'pli.syncContent', opts: {pli, doLayout: true}};
 								undoStack.commit([action, mutation], null, 'Change Part Color', ['csi']);
 							});
-							dialog.visible = true;
 						});
 					}
 				},
@@ -1358,7 +1350,6 @@ const contextMenu = {
 							dialog.title = 'New Part Filename';
 							dialog.label = 'Filename';
 							dialog.labelWidth = '80px';
-							dialog.visible = true;
 						});
 					}
 				},

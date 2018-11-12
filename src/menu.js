@@ -400,9 +400,7 @@ const menu = [
 		{
 			text: 'navbar.edit.brick_colors',
 			cb() {
-				DialogManager('brickColorDialog', dialog => {
-					dialog.show();
-				});
+				DialogManager('brickColorDialog');
 			}
 		}
 	]},

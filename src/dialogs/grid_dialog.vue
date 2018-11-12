@@ -5,7 +5,7 @@
 		:title="tr('dialog.grid.title')"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		class="gridDialog"
 		width="500px"
 	>
@@ -107,7 +107,6 @@ export default {
 	// TODO: Add option to draw grid above / below page elements
 	data: function() {
 		return {
-			visible: false,
 			useAutoColor: true,
 			lineColor: '',
 			newState: uiState.get('grid')
@@ -117,7 +116,6 @@ export default {
 		show(app) {
 			const grid = uiState.get('grid');
 			const color = grid.line.color;
-			this.visible = true;
 			this.useAutoColor = (color === 'auto');
 			this.lineColor = (color === 'auto') ? 'rgb(0, 0, 0)' : _.color.toRGB(color).toString();
 			this.newState = _.cloneDeep(grid);
@@ -139,7 +137,6 @@ export default {
 			this.update();
 		},
 		ok() {
-			this.visible = false;
 			const storeOp = {
 				root: store.cache.stateCache,
 				op: 'replace',
@@ -158,12 +155,13 @@ export default {
 				]
 			};
 			undoStack.commit(change, null, 'Style Grid');
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
 			uiState.set('grid', this.originalState);
 			store.cache.set('uiState', 'gridPath', null);
 			this.app.drawCurrentPage();
+			this.$emit('close');
 		}
 	}
 };

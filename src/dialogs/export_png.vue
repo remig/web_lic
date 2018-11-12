@@ -5,7 +5,7 @@
 		:title="tr('dialog.export_hi_res_png.title')"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		width="550px"
 		class="pngExportDialog"
 	>
@@ -58,7 +58,6 @@ import uiState from '../uiState';
 export default {
 	data: function() {
 		return {
-			visible: false,
 			pageSize: {width: 0, height: 0},
 			scale: uiState.get('dialog.export.images.scale'),
 			dpi: uiState.get('dialog.export.images.dpi') || 96,
@@ -69,7 +68,6 @@ export default {
 		show(originalPageSize) {
 			this.pageSize = _.clone(originalPageSize);
 			this.originalPageSize = _.clone(originalPageSize);
-			this.visible = true;
 		},
 		updateScale() {
 			if (this.maintainPrintSize) {
@@ -82,7 +80,6 @@ export default {
 			}
 		},
 		ok() {
-			this.visible = false;
 			uiState.get('dialog.export.images').scale = this.scale;
 			uiState.get('dialog.export.images').dpi = this.dpi;
 			uiState.get('dialog.export.images').maintainPrintSize = this.maintainPrintSize;
@@ -90,9 +87,10 @@ export default {
 				scale: this.scale,
 				dpi: this.dpi
 			});
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
+			this.$emit('close');
 		}
 	},
 	computed: {

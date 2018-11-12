@@ -94,7 +94,6 @@ const app = new Vue({
 				this.filename = store.state.licFilename;
 
 				DialogManager('importModelDialog', dialog => {
-					dialog.visible = true;
 					dialog.$on('ok', async layoutChoices => {
 
 						// TODO: Add option to start new page for each submodel
@@ -178,7 +177,6 @@ const app = new Vue({
 				dialog.label = this.tr('dialog.save_as.fn');
 				dialog.labelWidth = '80px';
 				dialog.newString = this.filename;
-				dialog.visible = true;
 			});
 		},
 		saveTemplate(filename) {
@@ -194,7 +192,6 @@ const app = new Vue({
 				dialog.label = this.tr('dialog.save_template_as.fn');
 				dialog.labelWidth = '80px';
 				dialog.newString = this.filename;
-				dialog.visible = true;
 			});
 		},
 		importTemplate(result, filename) {
@@ -511,9 +508,7 @@ const app = new Vue({
 		});
 
 		if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
-			DialogManager('whatsNewDialog', dialog => {
-				dialog.show();
-			});
+			DialogManager('whatsNewDialog');
 		}
 
 		// TODO: Find better way of calling 'redrawUI' from arbitrary places

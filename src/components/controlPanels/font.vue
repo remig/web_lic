@@ -113,7 +113,6 @@ export default {
 					});
 					dialog.font = _.fontString(this);
 					dialog.fontName = '';
-					dialog.visible = true;
 				});
 			} else {
 				this.updateValues();

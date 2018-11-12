@@ -5,7 +5,7 @@
 		:title="title"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		class="styleDialog"
 		width="500px"
 	>
@@ -75,7 +75,6 @@ import fontNameDialog from './font_name.vue';
 export default {
 	data: function() {
 		return {
-			visible: false,
 			title: this.tr('dialog.style.title'),
 			text: '',
 			color: '',
@@ -89,7 +88,6 @@ export default {
 	},
 	methods: {
 		show() {
-			this.visible = true;
 			this.color = _.color.toRGB(this.color).toString();
 			const fontParts = _.fontToFontParts(this.font);
 			fontNameDialog.methods.addCustomFont(fontParts.fontFamily);
@@ -103,15 +101,15 @@ export default {
 			this[prop] = !this[prop];
 		},
 		ok() {
-			this.visible = false;
 			this.$emit('ok', {
 				text: this.text,
 				font: _.fontString(this),
 				color: this.color
 			});
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
+			this.$emit('close');
 		}
 	},
 	computed: {

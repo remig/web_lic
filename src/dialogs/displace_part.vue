@@ -5,7 +5,7 @@
 		:title="tr('dialog.displace_part.title')"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		width="550px"
 		class="displacePartDialog"
 	>
@@ -57,7 +57,6 @@
 export default{
 	data: function() {
 		return {
-			visible: false,
 			values: {
 				partDistance: 0,
 				arrowOffset: 0,
@@ -71,12 +70,12 @@ export default{
 			this.$emit('update', this.values);
 		},
 		ok() {
-			this.visible = false;
 			this.$emit('ok', this.values);
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
 			this.$emit('cancel', this.values);
+			this.$emit('close');
 		}
 	}
 };

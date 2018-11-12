@@ -4,7 +4,7 @@
 	<el-dialog
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		:title="tr('dialog.import_model.title')"
 		class="importModelDialog"
 		width="630px"
@@ -64,7 +64,6 @@ import uiState from '../uiState';
 export default {
 	data: function() {
 		return {
-			visible: false,
 			newState: uiState.get('dialog.importModel')
 		};
 	},
@@ -73,8 +72,8 @@ export default {
 			this.newState.include[item] = !this.newState.include[item];
 		},
 		ok() {
-			this.visible = false;
 			this.$emit('ok', this.newState);
+			this.$emit('close');
 		}
 	}
 };

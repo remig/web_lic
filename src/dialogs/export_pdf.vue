@@ -5,7 +5,7 @@
 		:title="tr('dialog.export_hi_res_pdf.title')"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		width="525px"
 		class="pdfExportDialog"
 	>
@@ -58,10 +58,9 @@
 import _ from '../util';
 import uiState from '../uiState';
 
-export default{
+export default {
 	data: function() {
 		return {
-			visible: false,
 			aspectRatio: 0,
 			newState: uiState.get('dialog.export.pdf'),  // dpi & units
 			pageSize: {width: 0, height: 0}  // stored in this.units
@@ -73,7 +72,6 @@ export default{
 			this.pageSize.width = _.units.pixelsToUnits(pageSizeInPixels.width, units);
 			this.pageSize.height = _.units.pixelsToUnits(pageSizeInPixels.height, units);
 			this.aspectRatio = pageSizeInPixels.width / pageSizeInPixels.height;
-			this.visible = true;
 		},
 		updateWidth(newWidth) {
 			this.pageSize.width = _.round(parseFloat(newWidth), 2);
@@ -92,7 +90,6 @@ export default{
 		},
 		ok() {
 			const units = this.newState.units;
-			this.visible = false;
 			this.$emit('ok', {
 				dpi: this.newState.dpi,
 				units: this.newState.units,
@@ -101,9 +98,10 @@ export default{
 					height: _.units.unitToPoints(this.pageSize.height, units)
 				}
 			});
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
+			this.$emit('close');
 		}
 	}
 };

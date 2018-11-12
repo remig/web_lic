@@ -4,7 +4,7 @@
 	<el-dialog
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		title="Custom Font"
 		width="630px"
 		class="fontNameDialog"
@@ -39,7 +39,6 @@ const customFamilyNames = Storage.get.customFonts();
 export default {
 	data: function() {
 		return {
-			visible: false,
 			font: '',
 			fontName: ''
 		};
@@ -51,12 +50,12 @@ export default {
 			this.font = _.fontPartsToFont(fontParts);
 		},
 		ok() {
-			this.visible = false;
 			this.$emit('ok', this.fontName);
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
 			this.$emit('cancel');
+			this.$emit('close');
 		},
 		getFamilyNames() {
 			if (customFamilyNames.length) {

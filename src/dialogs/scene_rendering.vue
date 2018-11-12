@@ -5,7 +5,7 @@
 		:title="tr('dialog.scene_rendering.title')"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		width="450px"
 		class="sceneRenderingDialog"
 	>
@@ -45,7 +45,6 @@ import undoStack from '../undoStack';
 export default{
 	data: function() {
 		return {
-			visible: false,
 			values: _.cloneDeep(store.state.template.sceneRendering)
 		};
 	},
@@ -57,7 +56,6 @@ export default{
 		show(app) {
 			this.originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
 			this.app = app;
-			this.visible = true;
 		},
 		ok() {
 			undoStack.commit(
@@ -66,12 +64,12 @@ export default{
 				this.tr('dialog.scene_rendering.undo'),
 				['renderer']
 			);
-			this.visible = false;
+			this.$emit('close');
 		},
 		cancel() {
 			store.mutations.sceneRendering.set({...this.originalRenderState, refresh: true});
 			this.app.redrawUI(true);
-			this.visible = false;
+			this.$emit('close');
 		}
 	}
 };

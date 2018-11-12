@@ -5,7 +5,7 @@
 		:title="title"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		:width="width"
 	>
 		<el-form :label-width="calculatedLabelWidth">
@@ -29,7 +29,6 @@
 export default {
 	data: function() {
 		return {
-			visible: false,
 			newString: null,
 			title: 'Get String',
 			label: '',
@@ -42,12 +41,12 @@ export default {
 			this.$emit('update', {...this.$data});
 		},
 		ok() {
-			this.visible = false;
 			this.$emit('ok', this.newString);
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
 			this.$emit('cancel');
+			this.$emit('close');
 		}
 	},
 	computed: {

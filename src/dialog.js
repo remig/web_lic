@@ -75,20 +75,29 @@ Vue.component('dialogManager', {
 		)
 	},
 	data() {
-		return {currentDialog: null};
+		return {
+			visible: false,
+			currentDialog: null
+		};
 	},
 	render(createElement) {
-		return createElement(this.currentDialog, {ref: 'currentDialog', tag: 'component'});
+		return this.visible
+			? createElement(this.currentDialog, {ref: 'currentDialog', tag: 'component'})
+			: null;
 	},
 	updated() {
-		if (this.outstandingImport) {
-			Vue.nextTick(() => {
-				if (this.$refs && this.$refs.currentDialog) {
+		Vue.nextTick(() => {
+			if (this.$refs && this.$refs.currentDialog) {
+				if (this.outstandingImport) {
 					this.outstandingImport(this.$refs.currentDialog);
 					delete this.outstandingImport;
 				}
-			});
-		}
+				this.$refs.currentDialog.$on('close', () => {
+					this.visible = false;
+					this.resolve();
+				});
+			}
+		});
 	},
 	mounted() {
 		component = this;
@@ -98,7 +107,11 @@ Vue.component('dialogManager', {
 export default function setDialog(dialogName, cb) {
 	component.currentDialog = null;  // This forces Vue to re-render a dialog if it was just opened
 	component.outstandingImport = cb;
-	Vue.nextTick(() => {
-		component.currentDialog = dialogName;
+	return new Promise(resolve => {
+		Vue.nextTick(() => {
+			component.currentDialog = dialogName;
+			component.resolve = resolve;
+			component.visible = true;
+		});
 	});
 }

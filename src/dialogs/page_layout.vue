@@ -5,7 +5,7 @@
 		:title="tr('dialog.page_layout.title')"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		width="500px"
 		class="pageLayoutDialog"
 	>
@@ -73,7 +73,6 @@
 export default{
 	data: function() {
 		return {
-			visible: false,
 			autoRows: true,
 			autoCols: true,
 			values: {
@@ -97,18 +96,17 @@ export default{
 			} else {
 				this.autoCols = false;
 			}
-			this.visible = true;
 		},
 		updateValues() {
 			this.$emit('update', this.actualValues);
 		},
 		ok() {
-			this.visible = false;
 			this.$emit('ok', this.actualValues);
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
 			this.$emit('cancel', this.actualValues);
+			this.$emit('close');
 		}
 	},
 	computed: {

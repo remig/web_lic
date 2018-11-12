@@ -5,7 +5,7 @@
 		:title="title"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		width="500px"
 		class="rotatePartImageDialog"
 	>
@@ -52,7 +52,6 @@
 export default{
 	data: function() {
 		return {
-			visible: false,
 			title: '',
 			rotation: {
 				x: 0, y: 0, z: 0
@@ -66,12 +65,12 @@ export default{
 			this.$emit('update', this.$data);
 		},
 		ok() {
-			this.visible = false;
 			this.$emit('ok', this.$data);
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
 			this.$emit('cancel', this.$data);
+			this.$emit('close');
 		}
 	}
 };

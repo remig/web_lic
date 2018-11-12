@@ -4,11 +4,10 @@
 	<el-dialog
 		id="whats_new_dialog"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		:title="tr('dialog.whats_new.title')"
 		class="whatsNewDialog"
 		width="700px"
-		@close="visible = false"
 	>
 		<div v-for="(entry, eID) in content" :key="`entry_${eID}`" class="oneEntry">
 			<h4>
@@ -42,14 +41,10 @@
 export default {
 	data: function() {
 		return {
-			visible: false,
 			content: {}
 		};
 	},
 	methods: {
-		show() {
-			this.visible = true;
-		},
 		checkIncludeItem(item) {
 			this.newState.include[item] = !this.newState.include[item];
 		},
@@ -58,7 +53,7 @@ export default {
 			return new Date(date).toLocaleDateString('en-us', opts);
 		},
 		ok() {
-			this.visible = false;
+			this.$emit('close');
 		}
 	},
 	async mounted() {

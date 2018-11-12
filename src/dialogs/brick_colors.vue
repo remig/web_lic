@@ -5,7 +5,7 @@
 		:title="tr('dialog.brick_colors.title')"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		class="brickColorDialog"
 		width="500px"
 	>
@@ -69,17 +69,12 @@ function buildColorTable() {
 export default {
 	data: function() {
 		return {
-			visible: false,
 			colorData: buildColorTable(),
 			studFaceColorCode: LDParse.studFaceColorCode
 		};
 	},
 	methods: {
-		show() {
-			this.visible = true;
-		},
 		ok() {
-			this.visible = false;
 			this.colorData.forEach(el => {
 				const ldColor = LDParse.colorTable[el.id];
 				let customColor = customColors[el.id];
@@ -103,6 +98,7 @@ export default {
 				}
 			});
 			this.applyChange();
+			this.$emit('close');
 		},
 		applyChange() {
 			Storage.replace.customBrickColors(customColors);
@@ -119,7 +115,7 @@ export default {
 			});
 		},
 		cancel() {
-			this.visible = false;
+			this.$emit('close');
 		}
 	}
 };

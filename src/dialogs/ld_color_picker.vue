@@ -5,7 +5,7 @@
 		:title="tr('dialog.ld_color_picker.title')"
 		:modal="false"
 		:show-close="false"
-		:visible="visible"
+		:visible="true"
 		class="ldColorPickerDialog"
 		width="500px"
 	>
@@ -63,17 +63,16 @@ function buildColorTable() {
 export default {
 	data: function() {
 		return {
-			visible: false,
 			colorData: buildColorTable()
 		};
 	},
 	methods: {
 		pick(colorCode) {
 			this.$emit('ok', colorCode);
-			this.visible = false;
+			this.$emit('close');
 		},
 		cancel() {
-			this.visible = false;
+			this.$emit('close');
 		}
 	}
 };
