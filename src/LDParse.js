@@ -8,11 +8,11 @@ const api = {
 	LDrawPath: '../ldraw/',  // Path to load LDraw parts via HTTP. Either absolute or relative to current page
 
 	// Load the specified url via AJAX and return an abstractPart representing the content of url.
-	async loadRemotePart(url, skipProgress) {
-		return await loadPart(url, null, skipProgress ? null : api.progressCallback);
+	async loadRemotePart(url, progressCallback) {
+		return await loadPart(url, null, progressCallback);
 	},
 	// Create an abstractPart from the specified 'content' of an LDraw part file
-	async loadPartContent(content, fn) {
+	async loadPartContent(content, fn, progressCallback) {
 
 		function fixPartColors(part) {
 			part.parts.forEach(part => {
@@ -22,7 +22,7 @@ const api = {
 			});
 		}
 
-		const part = await loadPart(null, content, api.progressCallback);
+		const part = await loadPart(null, content, progressCallback);
 		if (part && fn && part.filename == null) {
 			part.filename = fn;
 			api.partDictionary[fn] = part;
@@ -73,11 +73,6 @@ const api = {
 		api.setColorTable(colors);
 		needLDConfig = false;
 		return colors;
-	},
-
-	// cb will be called incrementally during the part loading process
-	setProgressCallback(cb) {
-		api.progressCallback = cb;
 	},
 
 	// key: filename, value: abstractPart content.
@@ -370,7 +365,7 @@ async function lineListToAbstractPart(fn, lineList, progressCallback) {
 	return abstractPart;
 }
 
-async function loadSubModels(lineList) {
+async function loadSubModels(lineList, progressCallback) {
 	const models = [];
 	let lastFileLine, i, partName;
 	for (i = 0; i < lineList.length; i++) {
@@ -398,7 +393,7 @@ async function loadSubModels(lineList) {
 		}
 		partName = lineList[models[0].start].slice(2).join(' ');
 		const lines = lineList.slice(models[0].start, models[0].end + 1);
-		return await lineListToAbstractPart(partName, lines, api.progressCallback);
+		return await lineListToAbstractPart(partName, lines, progressCallback);
 	}
 	return null;
 }
@@ -412,7 +407,7 @@ async function loadPart(fn, content, progressCallback) {
 		return api.partDictionary[fn];
 	} else if (fn && fn.toLowerCase() in unloadedSubModels) {
 		const fnLower = fn.toLowerCase();
-		part = await lineListToAbstractPart(fn, unloadedSubModels[fnLower], api.progressCallback);
+		part = await lineListToAbstractPart(fn, unloadedSubModels[fnLower], progressCallback);
 		part.isSubModel = true;
 		delete unloadedSubModels[fnLower];
 	} else {
@@ -440,7 +435,7 @@ async function loadPart(fn, content, progressCallback) {
 			progressCallback({stepCount: partCount});
 		}
 		if (!fn || fn.endsWith('mpd')) {
-			part = await loadSubModels(lineList);
+			part = await loadSubModels(lineList, progressCallback);
 		}
 		if (part == null) {
 			part = await lineListToAbstractPart(fn, lineList, progressCallback);

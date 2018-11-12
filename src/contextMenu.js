@@ -1340,7 +1340,7 @@ const contextMenu = {
 					cb(selectedItem) {
 						DialogManager('stringChooserDialog', dialog => {
 							dialog.$on('ok', filename => {
-								(LDParse.loadRemotePart(filename, true)).then(abstractPart => {
+								(LDParse.loadRemotePart(filename)).then(abstractPart => {
 									const step = store.get.step({type: 'step', id: selectedItem.stepID});
 									const pli = {type: 'pli', id: step.pliID};
 									const newFilename = abstractPart.filename;

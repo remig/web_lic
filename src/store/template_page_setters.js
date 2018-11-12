@@ -14,10 +14,10 @@ export default {
 			LDParse.partDictionary[modelData.model.filename] = modelData.model;
 		}
 		if (!(modelData.part1.filename in LDParse.partDictionary)) {
-			await LDParse.loadRemotePart(modelData.part1.filename, true);
+			await LDParse.loadRemotePart(modelData.part1.filename);
 		}
 		if (!(modelData.part2.filename in LDParse.partDictionary)) {
-			await LDParse.loadRemotePart(modelData.part2.filename, true);
+			await LDParse.loadRemotePart(modelData.part2.filename);
 		}
 		const page = store.state.templatePage = store.mutations.page.add(
 			{pageType: 'templatePage', pageNumber: 0}

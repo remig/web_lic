@@ -76,10 +76,10 @@ const app = new Vue({
 	},
 	methods: {
 		importBuiltInModel(url) {
-			this.importModel(() => LDParse.loadRemotePart(url));
+			this.importModel(() => LDParse.loadRemotePart(url, this.updateProgress));
 		},
 		importCustomModel(content, filename) {
-			this.importModel(() => LDParse.loadPartContent(content, filename));
+			this.importModel(() => LDParse.loadPartContent(content, filename, this.updateProgress));
 		},
 		importModel(modelGenerator) {
 
@@ -492,7 +492,6 @@ const app = new Vue({
 			return null;
 		});
 
-		LDParse.setProgressCallback(this.updateProgress);
 		LDParse.loadLDConfig();
 		LDParse.setCustomColorTable(Storage.get.customBrickColors());
 
