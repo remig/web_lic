@@ -436,7 +436,6 @@ const store = {
 					store.mutations.pli.addPart({pli, part});
 				});
 			});
-			delete localModel.steps;
 			return pagesAdded;
 		},
 		addInitialSubmodelImages() {
