@@ -81,52 +81,52 @@ const app = new Vue({
 		importCustomModel(content, filename) {
 			this.importModel(() => LDParse.loadPartContent(content, filename, this.updateProgress));
 		},
-		importModel(modelGenerator) {
+		async importModel(modelGenerator) {
 
 			const start = Date.now();
 			if (store.model) {
 				this.closeModel();
 			}
+
 			this.busyText = 'Loading Model';
-			modelGenerator().then(model => {
-				store.mutations.templatePage.add();
-				store.setModel(model);
-				this.filename = store.state.licFilename;
+			const model = await modelGenerator();
+			store.mutations.templatePage.add();
+			store.setModel(model);
+			this.filename = store.state.licFilename;
 
-				DialogManager('importModelDialog', dialog => {
-					dialog.$on('ok', async layoutChoices => {
+			DialogManager('importModelDialog', dialog => {
+				dialog.$on('ok', async layoutChoices => {
 
-						// TODO: Add option to start new page for each submodel
-						store.mutations.pli.toggleVisibility({visible: layoutChoices.include.pli});
-						if (layoutChoices.autoShrinkCSI) {
-							store.render.adjustCameraZoom();
-						}
-						store.mutations.addInitialPages();
-						store.mutations.addInitialSubmodelImages();
-						if (layoutChoices.useMaxSteps) {
-							this.busyText = 'Merging Steps';
-							await store.mutations.mergeInitialPages(this.updateProgress);
-						}
-						if (layoutChoices.include.titlePage) {
-							// Add title page after regular pages so title page labels comes out correct
-							store.mutations.addTitlePage();
-						}
-						if (layoutChoices.include.partListPage) {
-							store.mutations.inventoryPage.add();
-						}
-						store.save({mode: 'local'});
+					// TODO: Add option to start new page for each submodel
+					store.mutations.pli.toggleVisibility({visible: layoutChoices.include.pli});
+					if (layoutChoices.autoShrinkCSI) {
+						store.render.adjustCameraZoom();
+					}
+					store.mutations.addInitialPages();
+					store.mutations.addInitialSubmodelImages();
+					if (layoutChoices.useMaxSteps) {
+						this.busyText = 'Merging Steps';
+						await store.mutations.mergeInitialPages(this.updateProgress);
+					}
+					if (layoutChoices.include.titlePage) {
+						// Add title page after regular pages so title page labels comes out correct
+						store.mutations.addTitlePage();
+					}
+					if (layoutChoices.include.partListPage) {
+						store.mutations.inventoryPage.add();
+					}
+					store.save({mode: 'local'});
 
-						const firstPage = store.get.titlePage() || store.get.firstPage();
-						this.currentPageLookup = store.get.itemToLookup(firstPage);
-						undoStack.saveBaseState();
-						this.forceUIUpdate();
+					const firstPage = store.get.titlePage() || store.get.firstPage();
+					this.currentPageLookup = store.get.itemToLookup(firstPage);
+					undoStack.saveBaseState();
+					this.forceUIUpdate();
 
-						this.updateProgress({clear: true});
-						const time = _.formatTime(start, Date.now());
-						const filename = store.get.modelFilename();
-						this.statusText = this.tr('status_bar.file_loaded_@mf', {filename, time});
-						Vue.nextTick(this.drawCurrentPage);
-					});
+					this.updateProgress({clear: true});
+					const time = _.formatTime(start, Date.now());
+					const filename = store.get.modelFilename();
+					this.statusText = this.tr('status_bar.file_loaded_@mf', {filename, time});
+					Vue.nextTick(this.drawCurrentPage);
 				});
 			});
 		},
