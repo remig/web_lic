@@ -1,19 +1,16 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<el-dialog
+	<licDialog
 		:title="tr('dialog.ld_color_picker.title')"
-		:modal="false"
-		:show-close="false"
-		:visible="true"
 		class="ldColorPickerDialog"
 		width="500px"
 	>
 		<table class="el-table brickColorTable">
 			<tr>
-				<th>LDraw Code</th>
-				<th style="text-align: left;">Name</th>
-				<th style="text-align: left;">Pick</th>
+				<th>{{tr('dialog.ld_color_picker.ld_code')}}</th>
+				<th style="text-align: left;">{{tr('dialog.ld_color_picker.name')}}</th>
+				<th style="text-align: left;">{{tr('dialog.ld_color_picker.choose')}}</th>
 			</tr>
 		</table>
 		<div class="brickColorTableScroll">
@@ -32,7 +29,7 @@
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="cancel">{{tr("cancel")}}</el-button>
 		</span>
-	</el-dialog>
+	</licDialog>
 </template>
 
 <script>
@@ -89,7 +86,7 @@ export default {
 }
 
 .ldColorPickerDialog td:nth-of-type(2), .ldColorPickerDialog th:nth-of-type(2) {
-	width: 160px;
+	width: 140px;
 }
 
 .ldColorPickerDialog td:nth-of-type(3), .ldColorPickerDialog th:nth-of-type(3) {
@@ -102,6 +99,7 @@ export default {
 	border: 1px solid #ccc;
 	border-radius: 4px;
 	padding: 3px;
+	margin-left: 20px;
 	cursor: pointer;
 }
 

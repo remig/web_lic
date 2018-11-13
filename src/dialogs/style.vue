@@ -1,11 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<el-dialog
+	<licDialog
 		:title="title"
-		:modal="false"
-		:show-close="false"
-		:visible="true"
 		class="styleDialog"
 		width="500px"
 	>
@@ -64,7 +61,7 @@
 			<el-button @click="cancel">{{tr("cancel")}}</el-button>
 			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
 		</span>
-	</el-dialog>
+	</licDialog>
 </template>
 
 <script>

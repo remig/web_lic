@@ -19,6 +19,7 @@ import DialogManager from './dialog';
 import NavTree from './components/nav_tree/base.vue';
 import TemplatePanel from './components/template_panel.vue';
 import './pageView';
+import './components/element_extensions.vue';
 
 ELEMENT.locale(ELEMENT.lang.en);
 

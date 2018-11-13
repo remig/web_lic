@@ -1,20 +1,17 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<el-dialog
+	<licDialog
 		:title="tr('dialog.brick_colors.title')"
-		:modal="false"
-		:show-close="false"
-		:visible="true"
 		class="brickColorDialog"
 		width="500px"
 	>
 		<table class="el-table brickColorTable">
 			<tr>
-				<th>LDraw Code</th>
-				<th style="text-align: left;">Name</th>
-				<th>Color</th>
-				<th>Edge Color</th>
+				<th>{{tr('dialog.brick_colors.ld_code')}}</th>
+				<th style="text-align: left;">{{tr('dialog.brick_colors.name')}}</th>
+				<th>{{tr('color')}}</th>
+				<th>{{tr('dialog.brick_colors.edge_color')}}</th>
 			</tr>
 		</table>
 		<div class="brickColorTableScroll">
@@ -36,7 +33,7 @@
 			<el-button @click="cancel">{{tr("cancel")}}</el-button>
 			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
 		</span>
-	</el-dialog>
+	</licDialog>
 </template>
 
 <script>

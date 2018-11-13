@@ -1,31 +1,30 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<el-dialog
-		:modal="false"
-		:show-close="false"
-		:visible="true"
-		title="Custom Font"
+	<licDialog
+		:title="tr('dialog.custom_font.title')"
 		width="630px"
 		class="fontNameDialog"
 	>
 		<el-form label-width="160px">
-			<el-form-item label="Enter the name of a font on your system">
+			<el-form-item :label="tr('dialog.custom_font.name_input')">
 				<input
 					v-model="fontName"
 					class="form-control"
 					@input="updateValues"
 				>
 			</el-form-item>
-			<el-form-item label="Sample Text">
-				<div :style="{font: font}" class="fontNameDisplay">abc ABC 0 1 2 3 4 5 6 7 8 9</div>
+			<el-form-item :label="tr('dialog.custom_font.sample_text')">
+				<div :style="{font: font}" class="fontNameDisplay">
+					{{tr('dialog.custom_font.sample_characters')}}
+				</div>
 			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="cancel">{{tr("cancel")}}</el-button>
 			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
 		</span>
-	</el-dialog>
+	</licDialog>
 </template>
 
 <script>

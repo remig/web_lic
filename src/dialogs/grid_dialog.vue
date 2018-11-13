@@ -1,11 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<el-dialog
+	<licDialog
 		:title="tr('dialog.grid.title')"
-		:modal="false"
-		:show-close="false"
-		:visible="true"
 		class="gridDialog"
 		width="500px"
 	>
@@ -57,7 +54,7 @@
 			</el-form-item>
 			<el-form-item :label="tr('dialog.grid.line_style')">
 				<el-form-item
-					:label="tr('dialog.grid.color')"
+					:label="tr('color')"
 					label-width="70px"
 				>
 					<el-checkbox
@@ -93,7 +90,7 @@
 			<el-button @click="cancel">{{tr("cancel")}}</el-button>
 			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
 		</span>
-	</el-dialog>
+	</licDialog>
 </template>
 
 <script>

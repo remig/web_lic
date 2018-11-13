@@ -1,11 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<el-dialog
+	<licDialog
 		:title="tr('dialog.export_hi_res_pdf.title')"
-		:modal="false"
-		:show-close="false"
-		:visible="true"
 		width="525px"
 		class="pdfExportDialog"
 	>
@@ -50,7 +47,7 @@
 			<el-button @click="cancel">{{tr("cancel")}}</el-button>
 			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
 		</span>
-	</el-dialog>
+	</licDialog>
 </template>
 
 <script>

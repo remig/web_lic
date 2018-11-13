@@ -1,10 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<el-dialog
-		:modal="false"
-		:show-close="false"
-		:visible="true"
+	<licDialog
 		:title="tr('dialog.import_model.title')"
 		class="importModelDialog"
 		width="630px"
@@ -54,7 +51,7 @@
 		<span slot="footer" class="dialog-footer">
 			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
 		</span>
-	</el-dialog>
+	</licDialog>
 </template>
 
 <script>

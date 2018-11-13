@@ -7,6 +7,8 @@
 	"size": "Size",
 	"reset": "Reset",
 	"auto": "Auto",
+	"upload": "Upload",
+	"import": "Import",
 	"x": "X",
 	"y": "Y",
 	"z": "Z",
@@ -114,6 +116,12 @@
 			"features": "New Features",
 			"bug_fixes": "Bug Fixes"
 		},
+		"custom_font": {
+			"title": "Custom Font",
+			"name_input": "Enter the name of a font on your system",
+			"sample_text": "Sample Text",
+			"sample_characters": "abc ABC 0 1 2 3 4 5 6 7 8 9"
+		},
 		"grid": {
 			"title": "Change Grid",
 			"enabled": "Enabled",
@@ -163,16 +171,33 @@
 		},
 		"brick_colors": {
 			"title": "Brick Colors",
-			"action": "Change Brick Colors"
+			"action": "Change Brick Colors",
+			"ld_code": "LDraw Code",
+			"name": "Name",
+			"edge_color": "Edge Color"
+		},
+		"ld_color_picker": {
+			"title": "Choose a Color",
+			"ld_code": "LDraw Code",
+			"name": "Name",
+			"choose": "Choose",
+			"action": "Change Part Color"
+		},
+		"missing_parts": {
+			"title": "Missing Parts",
+			"subtitle": "These parts are used in your model, but could not be found in Lic's part list.<br>You can import a copy of each part from your machine, if available.",
+			"proceed": "Remove Missing Parts from Model and Continue",
+			"used_@mf": "${count} Used",
+			"send_to_remote": {
+				"title": "Share to Lic's public site",
+				"tooltip": "Share this part with the Lic website,<br>so other users can use it too.<br>Share only basic parts, not full models.<br />Entirely optional."
+			}
 		},
 		"scene_rendering": {
 			"title": "3D Part Rendering",
 			"undo": "Change Part Rendering",
 			"zoom": "Camera Zoom",
 			"edge_width": "Part Edge Width"
-		},
-		"ld_color_picker": {
-			"title": "Choose a Color"
 		},
 		"transform_part": {
 			"title": "Transform Part",

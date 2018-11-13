@@ -1322,7 +1322,12 @@ const contextMenu = {
 									color: newColorCode
 								});
 								const mutation = {mutation: 'pli.syncContent', opts: {pli, doLayout: true}};
-								undoStack.commit([action, mutation], null, 'Change Part Color', ['csi']);
+								undoStack.commit(
+									[action, mutation],
+									null,
+									tr('dialog.ld_color_picker.action'),
+									['csi']
+								);
 							});
 						});
 					}

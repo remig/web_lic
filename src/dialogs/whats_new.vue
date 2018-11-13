@@ -1,10 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<el-dialog
+	<licDialog
 		id="whats_new_dialog"
-		:show-close="false"
-		:visible="true"
+		:modal="true"
 		:title="tr('dialog.whats_new.title')"
 		class="whatsNewDialog"
 		width="700px"
@@ -33,7 +32,7 @@
 		<span slot="footer" class="dialog-footer">
 			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
 		</span>
-	</el-dialog>
+	</licDialog>
 </template>
 
 <script>
