@@ -18,7 +18,7 @@
 				</td>
 				<td>{{partCount(value.count)}}</td>
 				<td>
-					<licTooltip v-if="value.uploaded && enablePartSend">
+					<licTooltip v-if="showSendButton(filename)">
 						<div
 							slot="content"
 							v-html="tr('dialog.missing_parts.send_to_remote.tooltip')"
@@ -87,18 +87,22 @@ export default {
 				const xhr = new XMLHttpRequest();
 				xhr.open('POST', 'http://bugeyedmonkeys.com/lic/upload_part.php', true);
 				xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-				const content = `
-					&content=
-					filename: ${filename}
-					------------------------------
-					${this.loadedPartContent[filename]}
-					------------------------------
-				`;
+				const content = `&content=filename: ${filename}\n`
+					+ '------------------------------\n'
+					+ `${this.loadedPartContent[filename]}\n`
+					+ '------------------------------';
 				xhr.send(content);
 			}
+			this.loadedPartContent[filename] = null;
+			this.$forceUpdate();
 		},
 		partCount(count) {
 			return this.tr('dialog.missing_parts.used_@mf', {count});
+		},
+		showSendButton(filename) {
+			return this.missingPartsData[filename].uploaded
+				&& this.enablePartSend
+				&& this.loadedPartContent[filename] != null;
 		}
 	},
 	computed: {
