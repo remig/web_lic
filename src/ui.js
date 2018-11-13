@@ -80,7 +80,7 @@ const app = new Vue({
 			this.importModel(() => LDParse.loadRemotePart(url, this.updateProgress));
 		},
 		importCustomModel(content, filename) {
-			this.importModel(() => LDParse.loadPartContent(content, filename, this.updateProgress));
+			this.importModel(() => LDParse.loadModelContent(content, filename, this.updateProgress));
 		},
 		async importModel(modelGenerator) {
 
@@ -94,6 +94,10 @@ const app = new Vue({
 			store.mutations.templatePage.add();
 			store.setModel(model);
 			this.filename = store.state.licFilename;
+
+			if (!_.isEmpty(LDParse.missingParts)) {
+				await DialogManager('missingPartsDialog');
+			}
 
 			DialogManager('importModelDialog', dialog => {
 				dialog.$on('ok', async layoutChoices => {

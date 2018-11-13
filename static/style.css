@@ -158,6 +158,12 @@ div#container {
 	padding: 0;
 }
 
+.el-button:focus {
+	color: #606266;
+	border-color: #dcdfe6;
+	background-color: white;
+}
+
 .el-checkbox__inner, .el-checkbox__inner::after {
 	transition: unset;
 }

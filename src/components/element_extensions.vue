@@ -24,4 +24,34 @@ Vue.component('licDialog', {
 	}
 });
 
+Vue.component('licTooltip', {
+	mixins: [ELEMENT.Tooltip],
+	props: {
+		openDelay: {
+			type: Number,
+			'default': 500
+		},
+		effect: {
+			type: String,
+			'default': 'light'
+		},
+		arrowOffset: {
+			type: Number,
+			'default': 0
+		},
+		transition: {
+			type: String,
+			'default': 'none'
+		},
+		enterable: {
+			type: Boolean,
+			'default': false
+		},
+		placement: {
+			type: String,
+			'default': 'right'
+		}
+	}
+});
+
 </script>

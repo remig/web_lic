@@ -21,6 +21,10 @@ Vue.component('dialogManager', {
 			/* webpackChunkName: "brickColorDialog" */
 			'./dialogs/brick_colors.vue'
 		),
+		missingPartsDialog: () => import(
+			/* webpackChunkName: "missingPartsDialog" */
+			'./dialogs/missing_parts.vue'
+		),
 		sceneRenderingDialog: () => import(
 			/* webpackChunkName: "sceneRenderingDialog" */
 			'./dialogs/scene_rendering.vue'

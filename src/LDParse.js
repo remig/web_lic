@@ -12,7 +12,8 @@ const api = {
 		return await loadPart(url, null, progressCallback);
 	},
 	// Create an abstractPart from the specified 'content' of an LDraw part file
-	async loadPartContent(content, fn, progressCallback) {
+	// Treat loaded content as a final model: set its filename appropriately and fix bad color codes
+	async loadModelContent(content, fn, progressCallback) {
 
 		function fixPartColors(part) {
 			part.parts.forEach(part => {
@@ -34,10 +35,14 @@ const api = {
 		// Force all base parts with invalid colors to be black instead of undefined and render badly
 		fixPartColors(part);
 		Object.values(api.partDictionary)
-			.filter(part => part.isSubModel)
+			.filter(part => part && part.isSubModel)
 			.forEach(fixPartColors);
 
 		return part;
+	},
+	// Create an abstractPart from the specified 'content' of an LDraw part file
+	async loadPartContent(content, progressCallback) {
+		return await loadPart(null, content, progressCallback);
 	},
 	async loadLDConfig(url = api.LDrawPath + 'LDConfig.ldr') {
 		let content = await fetch(url);
@@ -81,6 +86,7 @@ const api = {
 	setPartDictionary(dict) {
 		api.partDictionary = dict;
 	},
+	missingParts: {},  // key: filename of part that failed to load, value: count of that part in model
 
 	studFaceColorCode: 987,
 
@@ -118,6 +124,47 @@ const api = {
 	model: {  // All 'model' arguments below are abstractParts
 		isSubmodel(filename) {
 			return api.partDictionary[filename].isSubModel;
+		},
+		removeMissingParts() {
+			function removeOnePartFromPart(part, missingFilename) {
+
+				const indicesToDelete = [];
+				part.parts.forEach((part, idx) => {
+					if (part.filename === missingFilename) {
+						indicesToDelete.push(idx);
+					}
+				});
+				indicesToDelete.reverse();
+				indicesToDelete.forEach(idx => {
+					removeOnePart(part, idx);
+				});
+			}
+
+			function removeOnePart(part, partIdxToRemove) {
+				part.parts.splice(partIdxToRemove, 1);
+				if (part.steps) {
+					part.steps.forEach(step => {
+						const newParts = [];
+						step.parts.forEach(partId => {
+							if (partId < partIdxToRemove) {
+								newParts.push(partId);
+							} else if (partId > partIdxToRemove) {
+								newParts.push(partId - 1);
+							}
+						});
+						step.parts = newParts;
+					});
+					part.steps = part.steps.filter(step => step.parts.length);
+				}
+			}
+
+			Object.keys(api.missingParts).forEach(missingFilename => {
+				Object.values(api.partDictionary).forEach(part => {
+					if (part.parts.length) {
+						removeOnePartFromPart(part, missingFilename);
+					}
+				});
+			});
 		},
 		get: {
 			// Return the total number of parts in this model, including parts in submodels
@@ -198,11 +245,11 @@ async function requestPart(fn) {
 
 	let pathsToTry;
 	if (fn.startsWith('8/') || fn.startsWith('48/') || partsInPFolder.includes(fn.split('.')[0])) {
-		pathsToTry = ['p/', 'parts/', 'models/'];
+		pathsToTry = ['p/', 'parts/', 'constraints/', 'models/'];
 	} else if (fn.endsWith('mpd') || fn.endsWith('ldr')) {
-		pathsToTry = ['models/', 'parts/', 'p/'];
+		pathsToTry = ['models/', 'parts/', 'p/', 'constraints/'];
 	} else {
-		pathsToTry = ['parts/', 'p/', 'models/'];
+		pathsToTry = ['parts/', 'p/', 'constraints/', 'models/'];
 	}
 
 	let resp = await fetch(api.LDrawPath + pathsToTry[0] + fn);
@@ -213,9 +260,13 @@ async function requestPart(fn) {
 		resp = await fetch(api.LDrawPath + pathsToTry[2] + fn);
 	}
 	if (resp == null || !resp.ok) {
-		console.log(`   *** FAILED TO LOAD: ${fn}`);  // eslint-disable-line no-console
+		resp = await fetch(api.LDrawPath + pathsToTry[3] + fn);
 	}
-	return await resp.text() || '';
+	if (resp == null || !resp.ok) {
+		console.log(`   *** FAILED TO LOAD: ${fn}`);  // eslint-disable-line no-console
+		return null;
+	}
+	return await resp.text();
 }
 
 // key: submodel filename, value: lineList to be loaded
@@ -279,14 +330,12 @@ async function parsePart(abstractPartParent, line) {
 	const partName = line.slice(14).join(' ');
 	let colorCode = parseColorCode(line[1]);
 	colorCode = forceBlack(colorCode, abstractPartParent.filename, partName);
-	const part = await loadPart(partName);
-	if (part) {
-		abstractPartParent.parts.push({
-			colorCode: colorCode,
-			filename: partName,
-			matrix: parseFloatList(line.slice(2, 14))
-		});
-	}
+	await loadPart(partName);
+	abstractPartParent.parts.push({
+		colorCode: colorCode,
+		filename: partName,
+		matrix: parseFloatList(line.slice(2, 14))
+	});
 }
 
 function parseLine(abstractPart, line) {
@@ -405,6 +454,9 @@ async function loadPart(fn, content, progressCallback) {
 	}
 	if (fn && fn in api.partDictionary) {
 		return api.partDictionary[fn];
+	} else if (fn && fn in api.missingParts) {
+		api.missingParts[fn] += 1;
+		return null;
 	} else if (fn && fn.toLowerCase() in unloadedSubModels) {
 		const fnLower = fn.toLowerCase();
 		part = await lineListToAbstractPart(fn, unloadedSubModels[fnLower], progressCallback);
@@ -415,7 +467,8 @@ async function loadPart(fn, content, progressCallback) {
 			content = await requestPart(fn);
 		}
 		if (!content) {
-			return null;  // No content, nothing to create
+			api.missingParts[fn] = 1;
+			return null;
 		}
 		const lineList = [], tmpList = content.split('\n');
 		let partCount = 0;
@@ -429,6 +482,7 @@ async function loadPart(fn, content, progressCallback) {
 			}
 		}
 		if (lineList.length < 1) {
+			api.missingParts[fn] = 1;
 			return null;  // No content, nothing to create
 		}
 		if (progressCallback) {
@@ -441,13 +495,17 @@ async function loadPart(fn, content, progressCallback) {
 			part = await lineListToAbstractPart(fn, lineList, progressCallback);
 		}
 	}
+
 	api.partDictionary[part.filename] = part;
+	if (part.filename in api.missingParts) {
+		delete api.missingParts[part.filename];
+	}
 	if (part.steps) {
 		// Check if any parts were left out of the last step; add them to a new step if so.
 		// This happens often when a model / submodel does not end with a 'STEP 0' command.
 		if (part.steps.lastPart < part.parts.length) {
-			const missingParts = part.parts.map((el, idx) => idx).slice(part.steps.lastPart);
-			part.steps.push({parts: missingParts});
+			const skippedParts = part.parts.map((el, idx) => idx).slice(part.steps.lastPart);
+			part.steps.push({parts: skippedParts});
 		}
 		delete part.steps.lastPart;
 	}
