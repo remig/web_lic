@@ -9,17 +9,25 @@ export default {
 		// Create a new callout in the step that this submodel is added to
 		const destStep = store.get.lookupToItem(opts.destStep);
 		const callout = store.mutations.callout.add({parent: destStep});
+		const destPLI = (destStep.pliID == null) ? null : store.get.pli(destStep.pliID);
+		if (destPLI) {
+			store.mutations.pli.empty({pli: destPLI});
+		}
 
 		// Move each step in the submodel into the new callout
 		const submodelSteps = store.state.steps.filter(step => step.model.filename === opts.modelFilename);
 
 		const pagesToDelete = new Set();
 		submodelSteps.forEach((step, stepIdx) => {
-			if (step.pliID) {
-				store.mutations.pli.delete({
-					pli: {type: 'pli', id: step.pliID},
-					deleteItems: true
-				});
+			if (step.pliID != null) {
+				const oldPLI = store.get.pli(step.pliID);
+				if (destPLI != null) {
+					while (oldPLI.pliItems.length) {
+						const item = {id: oldPLI.pliItems[0], type: 'pliItem'};
+						store.mutations.item.reparent({item, newParent: destPLI});
+					}
+				}
+				store.mutations.pli.delete({pli: oldPLI, deleteItems: true});
 			}
 			step.submodelImages.forEach(submodelImageID => {
 				store.mutations.submodelImage.delete({

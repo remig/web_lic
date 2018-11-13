@@ -162,7 +162,7 @@ export default {
 			);
 			position = availablePositions[0] || 'left';
 		}
-		store.mutations.callout.add({parent: step, position});
+		store.mutations.callout.add({parent: step, position, includeEmptyStep: true});
 		store.mutations.page.layout({page: store.get.pageForItem(step)});
 	},
 	addSubStep(opts) {  // opts: {step, doLayout}

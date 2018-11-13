@@ -6,7 +6,7 @@ import _ from '../util';
 import store from '../store';
 
 export default {
-	add(opts) {  // opts: {parent, position = 'left'}
+	add(opts) {  // opts: {parent, position = 'left', includeEmptyStep = false}
 		const pageSize = store.state.template.page;
 		const callout = store.mutations.item.add({item: {
 			type: 'callout',
@@ -18,7 +18,9 @@ export default {
 			position: opts.position || 'left'
 		}, parent: opts.parent});
 
-		store.mutations.callout.addStep({callout, doLayout: false});
+		if (opts.includeEmptyStep) {
+			store.mutations.callout.addStep({callout, doLayout: false});
+		}
 
 		store.mutations.calloutArrow.add({parent: callout});
 		return callout;

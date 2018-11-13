@@ -43,7 +43,7 @@ export default {
 		});
 		step.displacedParts = [{partID: 1, direction: 'up'}];
 
-		const callout = store.mutations.callout.add({parent: step});
+		const callout = store.mutations.callout.add({parent: step, includeEmptyStep: true});
 		store.mutations.part.addToCallout({partID: 0, step, callout});
 		store.mutations.callout.addStep({callout});
 		store.mutations.part.addToCallout({partID: 1, step, callout});
