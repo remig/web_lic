@@ -57,7 +57,7 @@ function buildMissingPartsTable() {
 export default {
 	data: function() {
 		return {
-			enablePartSend: 1 || window.location.host.toLowerCase().includes('bugeyedmonkeys'),
+			enablePartSend: window.location.host.toLowerCase().includes('bugeyedmonkeys'),
 			missingPartsData: buildMissingPartsTable(),
 			loadedPartContent: {}  // key: filename, value: LDraw content string
 		};
