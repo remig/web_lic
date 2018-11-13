@@ -1,5 +1,21 @@
 [
 	{
+		"version": "0.42.0",
+		"date": "Nov 12, 2018",
+		"features": [
+			"Add new dialog that lists parts in the model that can't be found, and makes it easy to upload missing barts before the model is fully imported",
+			"Add option to change part edge width",
+			"Add option to change 3D rendering camera zoom, to better handle big models",
+			"Add option to automatically zoom out a nice distance for big models during model import"
+		],
+		"bug_fixes": [
+			"When an LDraw file is missing both 'FILE' and 'NAME' commands, use the filename itself.  This fixes importing from LDD generated files.",
+			"Fix bug that prevented an alread imported model from being imported again",
+			"Don't select PLIs if they're turned off",
+			"Fix the PLI in submodel to callout conversion so it includes each part in the submodel, not just the submodel itself"
+		]
+	},
+	{
 		"version": "0.41.0",
 		"date": "October 30, 2018",
 		"bug_fixes": [
