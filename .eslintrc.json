@@ -63,6 +63,7 @@
         "no-trailing-spaces": "warn",
         "no-undefined": "error",
         "no-unmodified-loop-condition": "error",
+        "no-unreachable": "warn",
         "no-unused-expressions": "warn",
         "no-unused-labels": "warn",
         "no-unused-vars": "warn",
