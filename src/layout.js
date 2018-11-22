@@ -723,7 +723,7 @@ const api = {
 		const margin = getMargin(template.innerMargin);
 		const step = store.get.step(page.steps[0]);
 		const csi = store.get.csi(step.csiID);
-		const x = csi.x + csi.width + (margin * 5);
+		const x = margin + csi.x + csi.width + 30;
 		store.mutations.divider.add({
 			parent: page,
 			p1: {x, y: margin},

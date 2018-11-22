@@ -28,6 +28,15 @@
 				@input="updateValues"
 			>
 		</el-form-item>
+		<el-form-item v-if="innerMargin != null" label="Margin">
+			<input
+				v-model.number="innerMargin"
+				type="number"
+				step="0.1"
+				class="form-control"
+				@input="updateValues"
+			>
+		</el-form-item>
 	</panel-base>
 </template>
 
@@ -44,11 +53,12 @@ export default {
 		title: {type: String, 'default': 'Border'}
 	},
 	data() {
-		const template = _.get(store.state.template, this.templateEntry).border;
+		const template = _.get(store.state.template, this.templateEntry);
 		return {
-			width: template.width || 0,
-			color: template.color,
-			cornerRadius: template.cornerRadius
+			width: template.border.width || 0,
+			color: template.border.color,
+			cornerRadius: template.border.cornerRadius,
+			innerMargin: template.innerMargin == null ? null : template.innerMargin * 100
 		};
 	},
 	methods: {
@@ -57,10 +67,11 @@ export default {
 			this.updateValues();
 		},
 		updateValues() {
-			const template = _.get(store.state.template, this.templateEntry).border;
-			template.width = this.width;
-			template.color = this.color;
-			template.cornerRadius = this.cornerRadius;
+			const template = _.get(store.state.template, this.templateEntry);
+			template.border.width = this.width;
+			template.border.color = this.color;
+			template.border.cornerRadius = this.cornerRadius;
+			template.innerMargin = this.innerMargin == null ? null : this.innerMargin / 100;
 			this.$emit('new-values', this.templateEntry);
 		}
 	}
