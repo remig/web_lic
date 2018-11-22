@@ -11,6 +11,7 @@ const defaultState = {
 	dialog: {
 		importModel: {
 			stepsPerPage: 1,
+			partsPerStep: null,
 			useMaxSteps: true,
 			autoShrinkCSI: true,
 			firstPageNumber: 1,

@@ -99,6 +99,8 @@
 	"dialog": {
 		"import_model": {
 			"title": "Import Model",
+			"parts_per_step_1": "Model has no Steps. Add Steps with",
+			"parts_per_step_2": "Parts Per Step",
 			"steps_per_page": "Steps per Page",
 			"use_max_steps": "As many as can fit nicely",
 			"auto_shrink_csi": "Automatically shrink part images to fit page",

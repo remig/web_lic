@@ -20,6 +20,7 @@ import SubmodelImageSetters from './store/submodel_image_setters.js';
 import AnnotationSetters from './store/annotation_setters.js';
 import CalloutSetters from './store/callout_setters.js';
 import CalloutArrowSetters from './store/callout_arrow_setters.js';
+import StepInsertion from './store/step_insertion';
 
 import LDParse from './LDParse';
 import LDRender from './LDRender';
@@ -373,7 +374,7 @@ const store = {
 			store.state.titlePage = null;
 			store.mutations.page.renumber();
 		},
-		addInitialPages(opts) {  // opts: {modelFilename,  lastStepNumber}
+		addInitialPages(opts) {  // opts: {modelFilename,  lastStepNumber, partsPerStep}
 
 			opts = opts || {};
 			const lastStepNumber = opts.lastStepNumber || {num: opts.lastStepNumber || 1};
@@ -387,7 +388,7 @@ const store = {
 					// add one step per part in main model.
 					localModel.steps = localModel.parts.map((p, idx) => ({parts: [idx]}));
 				} else {
-					return null;  // No steps; can't add any pages.  TODO: automatic step insertion algorithm
+					localModel.steps = StepInsertion(localModel, {partsPerStep: opts.partsPerStep});
 				}
 			}
 

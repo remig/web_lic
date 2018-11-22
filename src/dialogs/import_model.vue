@@ -6,6 +6,16 @@
 		class="importModelDialog"
 		width="630px"
 	>
+		<el-row v-if="includePartsPerStep">
+			<span>{{tr('dialog.import_model.parts_per_step_1')}}</span>
+			<input
+				v-model.number="newState.partsPerStep"
+				min="1"
+				type="number"
+				class="form-control parts-per-step"
+			>
+			<span>{{tr('dialog.import_model.parts_per_step_2')}}</span>
+		</el-row>
 		<el-row>
 			<span>{{tr('dialog.import_model.steps_per_page')}}</span>
 			<input
@@ -61,6 +71,7 @@ import uiState from '../uiState';
 export default {
 	data: function() {
 		return {
+			includePartsPerStep: false,
 			newState: uiState.get('dialog.importModel')
 		};
 	},
@@ -99,6 +110,10 @@ export default {
 	display: inline;
 	width: 80px;
 	margin: 0 20px 0 10px;
+}
+
+.importModelDialog input.parts-per-step {
+	margin: 0 5px;
 }
 
 .includeDropDown {

@@ -100,6 +100,14 @@ const app = new Vue({
 			}
 
 			DialogManager('importModelDialog', dialog => {
+				if (_.isEmpty(model.steps)) {
+					const partCount = LDParse.model.get.partCount(model);
+					dialog.newState.partsPerStep = Math.min(20, Math.floor(partCount / 10));
+					dialog.includePartsPerStep = true;
+				} else {
+					dialog.newState.partsPerStep = null;
+					dialog.includePartsPerStep = false;
+				}
 				dialog.$on('ok', async layoutChoices => {
 
 					// TODO: Add option to start new page for each submodel
@@ -107,7 +115,7 @@ const app = new Vue({
 					if (layoutChoices.autoShrinkCSI) {
 						store.render.adjustCameraZoom();
 					}
-					store.mutations.addInitialPages();
+					store.mutations.addInitialPages({partsPerStep: layoutChoices.partsPerStep});
 					store.mutations.addInitialSubmodelImages();
 					if (layoutChoices.useMaxSteps) {
 						this.busyText = 'Merging Steps';
