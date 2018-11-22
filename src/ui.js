@@ -102,7 +102,7 @@ const app = new Vue({
 			DialogManager('importModelDialog', dialog => {
 				if (_.isEmpty(model.steps)) {
 					const partCount = LDParse.model.get.partCount(model);
-					dialog.newState.partsPerStep = Math.min(20, Math.floor(partCount / 10));
+					dialog.newState.partsPerStep = _.clamp(Math.floor(partCount / 10), 1, 20);
 					dialog.includePartsPerStep = true;
 				} else {
 					dialog.newState.partsPerStep = null;
