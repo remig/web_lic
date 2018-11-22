@@ -70,6 +70,10 @@ const store = {
 		store.cache.reset();
 	},
 	resetState() {
+		if (store.model) {
+			delete LDParse.partDictionary[store.model.filename];
+		}
+		store.model = null;
 		store.state = _.cloneDeep(emptyState);
 		store.cache.reset();
 	},

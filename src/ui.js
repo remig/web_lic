@@ -216,9 +216,9 @@ const app = new Vue({
 			});
 		},
 		closeModel() {
-			store.model = null;
 			store.resetState();
 			undoStack.clear();
+			Storage.clear.model();
 			this.clearState();
 			_.emptyNode(document.getElementById('canvasHolder'));
 			Vue.nextTick(() => {
