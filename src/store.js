@@ -5,21 +5,21 @@
 
 import _ from './util';
 import Layout from './layout';
-import Renderer from './store/render.js';
-import Getters from './store/getters.js';
+import Renderer from './store/render';
+import Getters from './store/getters';
 
-import ItemSetters from './store/item_setters.js';
-import PartSetters from './store/part_setters.js';
-import SubmodelSetters from './store/submodel_setters.js';
-import TemplatePageSetters from './store/template_page_setters.js';
-import PageSetters from './store/page_setters.js';
-import InventoryPageSetters from './store/inventory_page_setters.js';
-import StepSetters from './store/step_setters.js';
-import CSISetters from './store/csi_setters.js';
-import SubmodelImageSetters from './store/submodel_image_setters.js';
-import AnnotationSetters from './store/annotation_setters.js';
-import CalloutSetters from './store/callout_setters.js';
-import CalloutArrowSetters from './store/callout_arrow_setters.js';
+import ItemSetters from './store/item_setters';
+import PartSetters from './store/part_setters';
+import SubmodelSetters from './store/submodel_setters';
+import TemplatePageSetters from './store/template_page_setters';
+import PageSetters from './store/page_setters';
+import InventoryPageSetters from './store/inventory_page_setters';
+import StepSetters from './store/step_setters';
+import CSISetters from './store/csi_setters';
+import SubmodelImageSetters from './store/submodel_image_setters';
+import AnnotationSetters from './store/annotation_setters';
+import CalloutSetters from './store/callout_setters';
+import CalloutArrowSetters from './store/callout_arrow_setters';
 import StepInsertion from './store/step_insertion';
 
 import LDParse from './LDParse';
