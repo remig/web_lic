@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base title="Font" label-width="70px">
+	<panel-base :title="tr('font')" label-width="70px">
 		<el-form-item label-width="0px">
 			<el-select
 				v-model="family"
@@ -25,22 +25,22 @@
 				class="fontStyleButton"
 				@click.stop.prevent="toggleProp('bold')"
 			>
-				<strong>B</strong>
+				<strong>{{tr('template.font.bold_character')}}</strong>
 			</el-button>
 			<el-button
 				class="fontStyleButton"
 				@click.stop.prevent="toggleProp('italic')"
 			>
-				<em>I</em>
+				<em>{{tr('template.font.italic_character')}}</em>
 			</el-button>
 			<el-button
 				class="fontStyleButton"
 				@click.stop.prevent="toggleProp('underline')"
 			>
-				<u>U</u>
+				<u>{{tr('template.font.underline_character')}}</u>
 			</el-button>
 		</el-form-item>
-		<el-form-item label="Size">
+		<el-form-item :label="tr('size')">
 			<input
 				v-model.number="size"
 				type="number"
@@ -49,7 +49,7 @@
 				@input="updateValues"
 			>
 		</el-form-item>
-		<el-form-item label="Color">
+		<el-form-item :label="tr('color')">
 			<el-color-picker
 				v-model="color"
 				show-alpha

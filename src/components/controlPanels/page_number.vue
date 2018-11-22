@@ -2,10 +2,10 @@
 
 <template>
 	<div>
-		<panel-base title="Position">
+		<panel-base :title="tr('template.page_number.position')">
 			<el-form-item label-width="0px">
 				<el-select
-					:value="position | prettyPrint"
+					:value="tr('template.page_number.positions.' + position)"
 					@change="updatePosition"
 				>
 					<el-option
@@ -13,7 +13,7 @@
 						:key="position"
 						:value="position"
 					>
-						{{position | prettyPrint}}
+						{{tr('template.page_number.positions.' + position)}}
 					</el-option>
 				</el-select>
 			</el-form-item>
@@ -31,6 +31,10 @@ import store from '../../store';
 import PanelBase from './panel_base.vue';
 import FontPanel from './font.vue';
 
+// TODO: add UI to choose default page layout
+// TODO: add UI to choose whether to redo layout or just extend canvas
+// TODO: need to re-layout title page too, on some operations like page resize
+// TODO: explore component 'extends' to make panel / subpanel nesting easier https://vuejs.org/v2/api/#extends
 export default {
 	components: {PanelBase, FontPanel},
 	data() {

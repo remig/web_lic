@@ -2,13 +2,13 @@
 
 <template>
 	<div>
-		<panel-base title="Page Size" label-width="100px">
+		<panel-base :title="tr('template.pli.content')" label-width="100px">
 			<el-form-item label-width="0px">
 				<el-checkbox
 					v-model="includeSubmodels"
 					@change="updateValues"
 				>
-					Include Submodels in PLI
+					{{tr('template.pli.include_submodels')}}
 				</el-checkbox>
 			</el-form-item>
 		</panel-base>

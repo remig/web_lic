@@ -1,8 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base title="Transform" label-width="80px">
-		<el-form-item label="Rotate X">
+	<panel-base :title="tr('template.transform.title')" label-width="80px">
+		<el-form-item :label="tr('template.transform.rotate_x')">
 			<input
 				v-model.number="x"
 				type="number"
@@ -12,7 +12,7 @@
 				@input="updateValues"
 			>
 		</el-form-item>
-		<el-form-item label="Y">
+		<el-form-item :label="tr('template.transform.rotate_y')">
 			<input
 				v-model.number="y"
 				type="number"
@@ -22,7 +22,7 @@
 				@input="updateValues"
 			>
 		</el-form-item>
-		<el-form-item label="Z">
+		<el-form-item :label="tr('template.transform.rotate_z')">
 			<input
 				v-model.number="z"
 				type="number"
@@ -32,7 +32,7 @@
 				@input="updateValues"
 			>
 		</el-form-item>
-		<el-form-item label="Scale">
+		<el-form-item :label="tr('template.transform.scale')">
 			<input
 				v-model.number="scale"
 				type="number"

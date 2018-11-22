@@ -2,7 +2,7 @@
 
 <template>
 	<panel-base :title="title" class="fillTemplate" label-width="80px">
-		<el-form-item label="Color">
+		<el-form-item :label="tr('color')">
 			<el-color-picker
 				v-model="color"
 				show-alpha
@@ -10,10 +10,10 @@
 				@change="updateValues"
 			/>
 		</el-form-item>
-		<el-form-item v-if="gradient != null" label="Gradient">
+		<el-form-item v-if="gradient != null" :label="tr('template.fill.gradient')">
 			<label class="el-form-item__label">NYI</label>
 		</el-form-item>
-		<el-form-item v-if="imageFilename != null" label="Image">
+		<el-form-item v-if="imageFilename != null" :label="tr('template.fill.image')">
 			<el-button
 				v-if="imageFilename"
 				icon="el-icon-picture-outline"
@@ -45,12 +45,15 @@ import _ from '../../util';
 import store from '../../store';
 import openFileHandler from '../../fileUploader';
 import PanelBase from './panel_base.vue';
+import LocaleManager from '../../translate';
+
+const tr = LocaleManager.translate;
 
 export default {
 	components: {PanelBase},
 	props: {
 		templateEntry: {type: String, required: true},
-		title: {type: String, 'default': 'Fill'}
+		title: {type: String, 'default': tr('template.fill.title')}
 	},
 	data() {
 		const template = _.get(store.state.template, this.templateEntry).fill;

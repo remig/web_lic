@@ -250,6 +250,42 @@
 			"printed_size": "Printed Page will be:",
 			"centimeter_size_@mf": "${width} x ${height} cm",
 			"inch_size_@mf": "${width} x ${height} in"
+		},
+		"fill": {
+			"title": "Fill",
+			"gradient": "Gradient",
+			"image": "Image"
+		},
+		"border": {
+			"title": "Border",
+			"line_width": "Line Width",
+			"corner_radius": "Corner Radius",
+			"margin": "Margin"
+		},
+		"font": {
+			"bold_character": "B",
+			"italic_character": "I",
+			"underline_character": "U"
+		},
+		"transform": {
+			"title": "Transform",
+			"rotate_x": "Rotate X",
+			"rotate_y": "Y",
+			"rotate_z": "Z",
+			"scale": "Scale"
+		},
+		"pli": {
+			"content": "Content",
+			"include_submodels": "Include Submodels in PLI"
+		},
+		"page_number": {
+			"position": "Position",
+			"positions": {
+				"right": "Right",
+				"left": "Left",
+				"even-left": "Even Left, Odd Right",
+				"even-right": "Odd Left, Even Right"
+			}
 		}
 	},
 	"status_bar": {
