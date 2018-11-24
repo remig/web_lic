@@ -4,6 +4,7 @@
 
 import _ from '../util';
 import store from '../store';
+import LDParse from '../LDParse';
 
 export default {
 	// opts: {partID, step, direction, partDistance=60, arrowOffset=0, arrowLength=60, arrowRotation=0}
@@ -73,5 +74,22 @@ export default {
 		_.deleteItem(step.parts, opts.partID);
 		store.mutations.csi.resetSize({csi: step.csiID});
 		store.mutations.page.layout({page: store.get.pageForItem(step)});
+	},
+	delete(opts) { // opts: {partID, step, doLayout}
+		// Remove part from the step its in and from the model entirely
+		const partStep = store.get.lookupToItem(opts.step);
+		const model = LDParse.model.get.abstractPart(partStep.model.filename);
+		const part = LDParse.model.get.partFromID(opts.partID, model.filename);
+		store.mutations.step.removePart(opts);
+		store.mutations.inventoryPage.removePart({part, doLayout: opts.doLayout});
+		store.state.steps.filter(step => {
+			return step.model.filename === model.filename;
+		}).map(step => {
+			step.parts.forEach((partID, idx) => {
+				if (partID > opts.partID) {
+					step.parts[idx] -= 1;
+				}
+			});
+		});
 	}
 };

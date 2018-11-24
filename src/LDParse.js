@@ -216,6 +216,15 @@ const api = {
 				redo: [{root, op: 'add', path, value: opts.part}],
 				undo: [{root, op: 'remove', path}]
 			};
+		},
+		removePart(opts) {  // opts: {filename, partID}
+			const root = api.partDictionary;
+			const part = root[opts.filename].parts[opts.partID];
+			const path = `/${opts.filename}/parts/${opts.partID}`;
+			return {
+				redo: [{root, op: 'remove', path}],
+				undo: [{root, op: 'add', path, value: part}]
+			};
 		}
 	}
 };

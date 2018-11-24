@@ -84,6 +84,8 @@ const contextMenu = {
 		annotationMenu
 	],
 	inventoryPage: [
+		// TODO: add way to add new parts to page and delete existing parts
+		// TODO: add way to auto-recalculate part quantities (basically reset entire page)
 		{
 			text: 'Redo Layout',
 			cb(selectedItem) {
@@ -1063,7 +1065,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Remove',
+			text: 'Delete',
 			cb(selectedItem) {
 				undoStack.commit('divider.delete', {divider: selectedItem}, 'Remove Divider');
 				app.clearSelected();
@@ -1373,12 +1375,15 @@ const contextMenu = {
 				{
 					text: 'Delete',
 					cb(selectedItem) {
-						const opts = {
-							step: {type: 'step', id: selectedItem.stepID},
-							partID: selectedItem.id,
-							doLayout: true
-						};
-						undoStack.commit('step.removePart', opts, 'Delete Part', ['csi']);
+						const partID = selectedItem.id;
+						const step = store.get.step(selectedItem.stepID);
+						const action = LDParse.getAction.removePart({
+							filename: step.model.filename,
+							partID
+						});
+						const opts = {step, partID, doLayout: true};
+						const mutation = {mutation: 'part.delete', opts};
+						undoStack.commit([mutation, action], null, 'Delete Part', ['csi']);
 					}
 				}
 			]

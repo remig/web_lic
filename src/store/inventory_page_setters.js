@@ -11,7 +11,7 @@ export default {
 		const pageNumber = store.get.lastPage().number + 1;
 		const opts = {pageType: 'inventoryPage', pageNumber};
 		const page = store.mutations.page.add(opts);
-		const itemList = {};  // key: colorCode, value: {filename: quantity}}
+		const itemList = [];  // index: colorCode, value: {filename: quantity}}
 
 		function buildPartList(model) {
 			model.parts.forEach(({filename, colorCode}) => {
@@ -30,7 +30,7 @@ export default {
 
 		buildPartList(store.model);
 
-		_.forOwn(itemList, (partList, colorCode) => {
+		itemList.forEach((partList, colorCode) => {
 			_.forOwn(partList, (quantity, filename) => {
 				store.mutations.pliItem.add({parent: page, filename, colorCode, quantity});
 			});
@@ -48,6 +48,27 @@ export default {
 		const pages = store.state.inventoryPages;
 		while (pages.length) {
 			store.mutations.inventoryPage.delete({page: pages[0]});
+		}
+	},
+	removePart(opts) {  // opts: {filename & colorCode or part, doLayout: false}
+		const filename = opts.filename || opts.part.filename;
+		const colorCode = opts.colorCode || opts.part.colorCode;
+		store.state.inventoryPages.forEach(page => {
+			page.pliItems.forEach(id => {
+				const pliItem = store.get.pliItem(id);
+				if (pliItem.filename === filename && pliItem.colorCode === colorCode) {
+					if (pliItem.quantity === 1) {
+						store.mutations.pliItem.delete({pliItem});
+					} else {
+						pliItem.quantity--;
+					}
+				}
+			});
+		});
+		if (opts.doLayout) {
+			store.state.inventoryPages.forEach(page => {
+				store.mutations.page.layout({page});
+			});
 		}
 	}
 };
