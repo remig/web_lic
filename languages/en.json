@@ -228,6 +228,7 @@
 		}
 	},
 	"template": {
+		"selectPageItem": "Select a Page Item",
 		"page": {
 			"title": "Page Size",
 			"formats": {

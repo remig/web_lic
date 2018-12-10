@@ -228,6 +228,7 @@
 		}
 	},
 	"template": {
+		"selectPageItem": "Kein Element selektiert",
 		"page": {
 			"title": "Seitenformat",
 			"formats": {
@@ -246,7 +247,7 @@
 			},
 			"width": "Breite (px)",
 			"height": "Höhe (px)",
-			"aspect_ratio_@mf": "Seitenverhältnis beibehalten<br/>(${aspect_ratio})",
+			"aspect_ratio_@mf": "Seitenverhältnis beibehalten (${aspect_ratio})",
 			"printed_size": "Größe der gedruckten Seite",
 			"centimeter_size_@mf": "${width} x ${height} cm",
 			"inch_size_@mf": "${width} x ${height} in"
