@@ -225,6 +225,10 @@
 			"title_pli": "Rotate Part List Image",
 			"title_csi": "Rotate CSI",
 			"add_rotate_icon": "Add Rotation Icon"
+		},
+		"busyIndicator": {
+			"generatingPDF": "Generating PDF...",
+			"generatingPNG": "Generating PNG Zip..."
 		}
 	},
 	"template": {
@@ -292,6 +296,8 @@
 	"status_bar": {
 		"file_loaded_@mf": "\"${filename}\" loaded successfully (${time})",
 		"file_opened_@mf": "\"${filename}\" opened successfully (${time})",
-		"template_opened_@mf": "\"${filename}\" template opened successfully"
+		"template_opened_@mf": "\"${filename}\" template opened successfully",
+		"generated_PDF_successfully_@mf": "PDF Generated Successfully (${time})",
+		"generated_PNG_successfully_@mf": "PNG Zip Generated Successfully (${time})"
 	}
 }

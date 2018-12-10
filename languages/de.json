@@ -225,6 +225,10 @@
 			"title_pli": "Rotiere Bild der Teileliste",
 			"title_csi": "Rotiere CSI",
 			"add_rotate_icon": "Rotationszeiche hinzufügen"
+		},
+		"busyIndicator": {
+			"generatingPDF": "Erzeuge PDF...",
+			"generatingPNG": "Erzeuge PNG Zip..."
 		}
 	},
 	"template": {
@@ -292,6 +296,8 @@
 	"status_bar": {
 		"file_loaded_@mf": "\"${filename}\" erfolgreich geladen (${time})",
 		"file_opened_@mf": "\"${filename}\" erfolgreich geöffnet (${time})",
-		"template_opened_@mf": "\"${filename}\" Vorlage erfolgreich geöffnet"
+		"template_opened_@mf": "\"${filename}\" Vorlage erfolgreich geöffnet",
+		"generated_PDF_successfully_@mf": "PDF erfolgreich erstellt (${time})",
+		"generated_PNG_successfully_@mf": "PNG Zip erfolgreich erstellt (${time})"
 	}
 }

@@ -6,10 +6,11 @@
 import _ from './util';
 import Draw from './draw';
 import {changeDpiDataUrl} from 'changeDPI';
+import LocaleManger from './translate';
 
 function exportInstructions(app, store, exportType, hiResScale, drawPageCallback, doneCallback) {
 
-	app.busyText = `Generating ${exportType}`;
+	app.busyText = LocaleManger.translate(`dialog.busyIndicator.generating${exportType}`);
 
 	async function exportPage(page, canvas) {
 		return new Promise(resolve => window.setTimeout(() => {
@@ -48,7 +49,9 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 			doneCallback(() => {
 				app.updateProgress({clear: true});
 				const end = Date.now();
-				app.statusText = `${exportType} Generated Successfully (${_.formatTime(start, end)})`;
+				const time = _.formatTime(start, end);
+				app.statusText = LocaleManger.translate(`status_bar.generated_${exportType}_successfully_@mf`,
+					{exportType, time});
 			});
 		});
 	}, 0);
@@ -116,7 +119,7 @@ function generatePNGZip(app, store, hiResScale = 1, dpi = 96) {
 			.then(finishedCallback);
 	}
 
-	exportInstructions(app, store, 'PNG Zip', hiResScale, drawPage, done);
+	exportInstructions(app, store, 'PNG', hiResScale, drawPage, done);
 }
 
 export default {generatePDF, generatePNGZip};
