@@ -227,8 +227,10 @@
 			"add_rotate_icon": "Rotationszeiche hinzufügen"
 		},
 		"busyIndicator": {
-			"generatingPDF": "Erzeuge PDF...",
-			"generatingPNG": "Erzeuge PNG Zip..."
+            "loadingModel": "Lade Modell",
+            "mergingSteps": "Führe Schritte zusammen",
+			"generatingPDF": "Erzeuge PDF",
+			"generatingPNG": "Erzeuge PNG Zip"
 		}
 	},
 	"template": {

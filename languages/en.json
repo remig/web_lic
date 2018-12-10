@@ -227,8 +227,10 @@
 			"add_rotate_icon": "Add Rotation Icon"
 		},
 		"busyIndicator": {
-			"generatingPDF": "Generating PDF...",
-			"generatingPNG": "Generating PNG Zip..."
+            "loadingModel": "Loading Model",
+            "mergingSteps": "Merging Steps",
+			"generatingPDF": "Generating PDF",
+			"generatingPNG": "Generating PNG Zip"
 		}
 	},
 	"template": {
