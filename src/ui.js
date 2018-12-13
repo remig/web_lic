@@ -89,7 +89,7 @@ const app = new Vue({
 				this.closeModel();
 			}
 
-			this.busyText = 'Loading Model';
+			this.busyText = this.tr('dialog.busyIndicator.loadingModel');
 			const model = await modelGenerator();
 			store.mutations.templatePage.add();
 			store.setModel(model);
@@ -118,7 +118,7 @@ const app = new Vue({
 					store.mutations.addInitialPages({partsPerStep: layoutChoices.partsPerStep});
 					store.mutations.addInitialSubmodelImages();
 					if (layoutChoices.useMaxSteps) {
-						this.busyText = 'Merging Steps';
+						this.busyText = this.tr('dialog.busyIndicator.mergingSteps');
 						await store.mutations.mergeInitialPages(this.updateProgress);
 					}
 					if (layoutChoices.include.titlePage) {

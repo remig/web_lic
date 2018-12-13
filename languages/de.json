@@ -1,0 +1,305 @@
+{
+	"ok": "Ok",
+	"cancel": "Abbrechen",
+	"font": "Schriftart",
+	"font_size": "Schriftgröße",
+	"color": "Farbe",
+	"size": "Größe",
+	"reset": "Zurücksetzen",
+	"auto": "Automatisch",
+	"upload": "Upload",
+	"import": "Importieren",
+	"x": "X",
+	"y": "Y",
+	"z": "Z",
+	"navbar": {
+		"file": {
+			"root": "Datei",
+			"open_lic": "Lic Datei öffnen...",
+			"open_lic_recent": "Zuletzt verwendet (NYI)",
+			"close": "Schließen",
+			"save": "Speichern",
+			"save_as": "Speichern unter...",
+			"import_model": "Modell importieren...",
+			"import_builtin_model": "Integriertes Modell laden...",
+			"template": {
+				"root": "Vorlage",
+				"save": "Speichern",
+				"save_as": "Speichern unter...",
+				"load": "Laden",
+				"load_builtin": "Lade integrierte Vorlage (NYI)",
+				"reset": "Zurücksetzen",
+				"reset_undo": "Vorlage zurücksetzen"
+			},
+			"set_language": {
+				"root": "Sprache"
+			},
+			"clear_cache": {
+				"root": "Cache leeren",
+				"model": "Aktuelle Anleitung",
+				"ui": "UI Einstellungen",
+				"everything": "Alles"
+			}
+		},
+		"edit": {
+			"root": "Bearbeiten",
+			"title_page": {
+				"add": "Titelseite hinzufügen",
+				"remove": "Titelseite entfernen"
+			},
+			"pli": {
+				"show": "PLIs anzeigen",
+				"hide": "PLIs verstecken"
+			},
+			"inventory_page": {
+				"add": "Seite mit allen Teilen hinzufügen",
+				"remove": "Seite mit allen Teilen entfernen"
+			},
+			"snap": "Einrasten (NYI)",
+			"scene_rendering": "3D Teile Rendering...",
+			"brick_colors": "Steinfarben..."
+		},
+		"view": {
+			"root": "Ansicht",
+			"show_pages": {
+				"root": "Seiten anzeigen",
+				"one": "Einzelne Seite",
+				"two" : "Doppeleite",
+				"one_scroll": "Einzelne Seite fortlaufend",
+				"two_scroll": "Doppelseite fortlaufend"
+			},
+			"zoom": {
+				"root": "Zoom (NYI)"
+			},
+			"grid": {
+				"root": "Gitter",
+				"show": "Anzeigen",
+				"hide": "Ausblenden",
+				"show_undo": "Gitter anzeigen",
+				"hide_undo": "Gitter verbergen",
+				"customize": "Anpassen"
+			},
+			"guides": {
+				"root": "Hilfslinien",
+				"add_horizontal": "Horizontale Hilfslinie hinzufügen",
+				"add_vertical": "Vertikale Hilfslinie hinzufügen",
+				"add_undo": "Hilfslinie hinzufügen",
+				"remove": "Hilfslinien entfernen",
+				"remove_undo": "Hilfslinien entfernen"
+			}
+		},
+		"export": {
+			"root": "Exportieren",
+			"pdf": "PDF",
+			"hi_res_pdf": "Hochauflösendes PDF...",
+			"png": "PNG Bilder",
+			"hi_res_png": "Hochauflösende PNG Bilder..."
+		}
+	},
+	"dialog": {
+		"import_model": {
+			"title": "Modell importieren",
+			"parts_per_step_1": "Im Modell sind keine Schritte vorhanden. Erzeuge Schritte mit",
+			"parts_per_step_2": "Teilen pro Schritt",
+			"steps_per_page": "Schritte pro Seite",
+			"use_max_steps": "Soviele wie möglich, solange es gut aussieht",
+			"auto_shrink_csi": "Teilebilder automatisch verkleinern, damit sie auf die Seite passen",
+			"include": {
+				"root": "Aufnehmen...",
+				"titlePage": "Titelseite",
+				"submodelBreakdown": "Untermodell / Teilebeutel (NYI)",
+				"pli": "PLIs in jedem Schritt",
+				"partListPage": "Seite mit allen Teilen"
+			}
+		},
+		"whats_new": {
+			"title": "Neuerungen",
+			"version": "Version",
+			"features": "Neue Funktionen",
+			"bug_fixes": "Behobene Fehler"
+		},
+		"custom_font": {
+			"title": "Benutzerdefinierte Schriftart",
+			"name_input": "Name der Schriftart auf dem System",
+			"sample_text": "Beispieltext",
+			"sample_characters": "abc ABC 0 1 2 3 4 5 6 7 8 9"
+		},
+		"grid": {
+			"title": "Gitter anpassen",
+			"enabled": "Anzeigen",
+			"spacing": "Gitterabstand",
+			"offset": "Starte Gitter bei",
+			"offset_top": "Oben",
+			"offset_left": "Links",
+			"line_style": "Linenstil",
+			"color": "Farbe",
+			"auto_color": "automatisch",
+			"width": "Breite",
+			"dash": "Gestrichelt"
+		},
+		"save_as": {
+			"title": "Speichern unter",
+			"fn": "Dateiname"
+		},
+		"save_template_as": {
+			"title": "Vorlage speichern unter",
+			"fn": "Dateiname"
+		},
+		"style": {
+			"title": "Stil",
+			"label_text": "Text"
+		},
+		"scale_images": {
+			"title": "Bilder skalieren um",
+			"image_size_@mf": "Bilder werden <strong>${width} x ${height}</strong> Pixel groß"
+		},
+		"export_hi_res_pdf": {
+			"title": "Exportiere hochauflösendes PDF",
+			"page_size": "Seitengröße",
+			"by": "x",
+			"image_res": "Bildauflösung",
+			"dpi": "DPI"
+		},
+		"export_hi_res_png": {
+			"title": "Exportiere hochauflösendes PNGs",
+			"scale": "Skalierung",
+			"maintain_print_size": "Beachte Druckgröße",
+			"dpi": "DPI",
+			"size_@mf": "Bilder werden <strong>${width} x ${height}</strong> Pixel groß",
+			"print_size_@mf": "Bilder sollten auf <strong>${cm_width} x ${cm_height}</strong> cm (<strong>${in_width} x ${in_height}</strong> in) gedruckt werden"
+		},
+		"locale_chooser": {
+			"title": "Sprache wählen"
+		},
+		"brick_colors": {
+			"title": "Steinfarben",
+			"action": "Steinfarben ändern",
+			"ld_code": "LDraw Code",
+			"name": "Name",
+			"edge_color": "Kantenfarbe"
+		},
+		"ld_color_picker": {
+			"title": "Farbe auswählen",
+			"ld_code": "LDraw Code",
+			"name": "Name",
+			"choose": "Wählen",
+			"action": "Teilfarbe ändern"
+		},
+		"missing_parts": {
+			"title": "Fehlende Teile",
+			"subtitle": "Folgende Teile werden im Modell verwendet, sind aber nicht in Lic's Teileliste enthalten.<br>Hier können die Teile importiert werden, so eine Datendatei vorhanden ist.",
+			"proceed": "Fehlende Teile vom Modell entfernen und fortfahren",
+			"used_@mf": "${count} mal genutzt",
+			"send_to_remote": {
+				"title": "Mit Lic's Webseite teilen",
+				"tooltip": "Dieses Teil mit Lic's Webseite teilen,<br> damit andere Benutzer es ebenfalls verwenden können.<br>Nur einzlene Teile, nicht ganze Modelle ollten geteilt werden.<br />Dies ist völlig freiwillig."
+			}
+		},
+		"scene_rendering": {
+			"title": "3D Teile Rendering",
+			"undo": "Teil Rendering ändern",
+			"zoom": "Kamera Zoom",
+			"edge_width": "Strichstärke"
+		},
+		"transform_part": {
+			"title": "Teil transformieren",
+			"position": "Position",
+			"rotation": "Rotation"
+		},
+		"displace_part": {
+			"title": "Teil versetzen",
+			"part_distance": "Teilabstand",
+			"arrow_length": "Pfeillänge",
+			"arrow_distance": "Pfeilabstand",
+			"arrow_rotation": "Pfeilrotation"
+		},
+		"page_layout": {
+			"title": "Layout der Seite in Zeilen und Spalten",
+			"rows": "Zeilen",
+			"cols": "Spalten",
+			"orientation": "Orientierung",
+			"horizontal": "Horizontal",
+			"vertical": "Vertikal"
+		},
+		"rotate_part_image": {
+			"title_pli": "Rotiere Bild der Teileliste",
+			"title_csi": "Rotiere CSI",
+			"add_rotate_icon": "Rotationszeiche hinzufügen"
+		},
+		"busyIndicator": {
+            "loadingModel": "Lade Modell",
+            "mergingSteps": "Führe Schritte zusammen",
+			"generatingPDF": "Erzeuge PDF",
+			"generatingPNG": "Erzeuge PNG Zip"
+		}
+	},
+	"template": {
+		"selectPageItem": "Kein Element selektiert",
+		"page": {
+			"title": "Seitenformat",
+			"formats": {
+				"custom": "Individuell...",
+				"a3": "A3",
+				"a4": "A4",
+				"a5": "A5",
+				"letter": "Letter",
+				"gov-letter": "Gov. Letter",
+				"legal": "Legal",
+				"junior-legal": "Junior Legal"
+			},
+			"orientation": {
+				"landscape": "Quer",
+				"portrait": "Hoch"
+			},
+			"width": "Breite (px)",
+			"height": "Höhe (px)",
+			"aspect_ratio_@mf": "Seitenverhältnis beibehalten (${aspect_ratio})",
+			"printed_size": "Größe der gedruckten Seite",
+			"centimeter_size_@mf": "${width} x ${height} cm",
+			"inch_size_@mf": "${width} x ${height} in"
+		},
+		"fill": {
+			"title": "Füllung",
+			"gradient": "Farbverlauf",
+			"image": "Bild"
+		},
+		"border": {
+			"title": "Rahmen",
+			"line_width": "Strichstärke",
+			"corner_radius": "Eckradius",
+			"margin": "Abstand"
+		},
+		"font": {
+			"bold_character": "B",
+			"italic_character": "I",
+			"underline_character": "U"
+		},
+		"transform": {
+			"title": "Transformieren",
+			"rotate_x": "Rotatation X",
+			"rotate_y": "Y",
+			"rotate_z": "Z",
+			"scale": "Skalierung"
+		},
+		"pli": {
+			"content": "Inhalt",
+			"include_submodels": "Teile von Untermodelen in PLI"
+		},
+		"page_number": {
+			"position": "Position",
+			"positions": {
+				"right": "Rechts",
+				"left": "Links",
+				"even-left": "Gerade links, Ungerade rechts",
+				"even-right": "Ungerade links, Gerade rechts"
+			}
+		}
+	},
+	"status_bar": {
+		"file_loaded_@mf": "\"${filename}\" erfolgreich geladen (${time})",
+		"file_opened_@mf": "\"${filename}\" erfolgreich geöffnet (${time})",
+		"template_opened_@mf": "\"${filename}\" Vorlage erfolgreich geöffnet",
+		"generated_PDF_successfully_@mf": "PDF erfolgreich erstellt (${time})",
+		"generated_PNG_successfully_@mf": "PNG Zip erfolgreich erstellt (${time})"
+	}
+}
