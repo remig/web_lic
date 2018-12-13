@@ -226,15 +226,15 @@
 			"title_csi": "Rotate CSI",
 			"add_rotate_icon": "Add Rotation Icon"
 		},
-		"busyIndicator": {
-            "loadingModel": "Loading Model",
-            "mergingSteps": "Merging Steps",
-			"generatingPDF": "Generating PDF",
-			"generatingPNG": "Generating PNG Zip"
+		"busy_indicator": {
+            "loading_model": "Loading Model",
+            "merging_steps": "Merging Steps",
+			"generating_PDF": "Generating PDF",
+			"generating_PNG": "Generating PNG Zip"
 		}
 	},
 	"template": {
-		"selectPageItem": "Select a Page Item",
+		"select_page_item": "Select a Page Item",
 		"page": {
 			"title": "Page Size",
 			"formats": {

@@ -2,7 +2,7 @@
 
 <template>
 	<div class="container" @click.stop="">
-		<h4>{{selectedItem ? selectedItem.type : tr('template.selectPageItem') | prettyPrint}}</h4>
+		<h4>{{selectedItem ? selectedItem.type : tr('template.select_page_item') | prettyPrint}}</h4>
 		<div class="panel-group">
 			<component
 				ref="currentTemplatePanel"

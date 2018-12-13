@@ -10,7 +10,7 @@ import LocaleManger from './translate';
 
 function exportInstructions(app, store, exportType, hiResScale, drawPageCallback, doneCallback) {
 
-	app.busyText = LocaleManger.translate(`dialog.busyIndicator.generating${exportType}`);
+	app.busyText = LocaleManger.translate(`dialog.busy_indicator.generating_${exportType}`);
 
 	async function exportPage(page, canvas) {
 		return new Promise(resolve => window.setTimeout(() => {

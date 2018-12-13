@@ -226,15 +226,15 @@
 			"title_csi": "Rotiere CSI",
 			"add_rotate_icon": "Rotationszeiche hinzufügen"
 		},
-		"busyIndicator": {
-            "loadingModel": "Lade Modell",
-            "mergingSteps": "Führe Schritte zusammen",
-			"generatingPDF": "Erzeuge PDF",
-			"generatingPNG": "Erzeuge PNG Zip"
+		"busy_indicator": {
+            "loading_model": "Lade Modell",
+            "merging_steps": "Führe Schritte zusammen",
+			"generating_PDF": "Erzeuge PDF",
+			"generating_PNG": "Erzeuge PNG Zip"
 		}
 	},
 	"template": {
-		"selectPageItem": "Kein Element selektiert",
+		"select_page_item": "Kein Element selektiert",
 		"page": {
 			"title": "Seitenformat",
 			"formats": {
