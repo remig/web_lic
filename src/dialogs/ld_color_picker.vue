@@ -17,7 +17,7 @@
 			<table class="el-table brickColorTable">
 				<tr v-for="row in colorData" v-if="row" :key="row.id" class="brickColorRow">
 					<td>{{row.id}}</td>
-					<td style="text-align: left;">{{row.name | prettyPrint}}</td>
+					<td style="text-align: left;">{{_.startCase(row.name)}}</td>
 					<td>
 						<div class="swatch" @click="pick(row.id)">
 							<div :style="{'background-color': row.color}" class="inner_swatch" />
