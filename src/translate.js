@@ -44,7 +44,7 @@ function __tr(key, args, locale) {
 function translate(key, args) {
 
 	if (key.startsWith('ctrl+')) {
-		return 'Ctrl + ' + key.charAt(key.length - 1).toUpperCase();
+		return translate('ctrl') + ' + ' + key.charAt(key.length - 1).toUpperCase();
 	}
 
 	let res;

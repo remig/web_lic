@@ -28,6 +28,7 @@
 	"divider": "Divider",
 	"annotation": "Annotation",
 	"callout": "Callout",
+	"ctrl": "Ctrl",
 	"navbar": {
 		"file": {
 			"root": "File",

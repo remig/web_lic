@@ -28,6 +28,7 @@
 	"divider": "Trennlinie",
 	"annotation": "Anmerkung",
 	"callout": "Callout",
+	"ctrl": "Strg",
 	"navbar": {
 		"file": {
 			"root": "Datei",
