@@ -12,6 +12,22 @@
 	"x": "X",
 	"y": "Y",
 	"z": "Z",
+	"page": "Seite",
+	"submodelimage": "Untermodellbild",
+	"step": "Schritt",
+	"csi": "CSI",
+	"pli": "PLI",
+	"pliitem": "PLI Teil",
+	"quantitylabel": "Anzahl Text",
+	"calloutarrow": "Callout Pfeil",
+	"numberlabel": "Nummer Text",
+	"rotateicon": "Rotationszeichen",
+	"templatepage": "Seite",
+	"titlepage": "Titelseite",
+	"inventorypage": "Seite mit allen Teilen",
+	"divider": "Trennlinie",
+	"annotation": "Anmerkung",
+	"callout": "Callout",
 	"navbar": {
 		"file": {
 			"root": "Datei",
@@ -222,9 +238,9 @@
 			"vertical": "Vertikal"
 		},
 		"rotate_part_image": {
-			"title_pli": "Rotiere Bild der Teileliste",
+			"title_pli": "Bild der Teileliste rotieren",
 			"title_csi": "Rotiere CSI",
-			"add_rotate_icon": "Rotationszeiche hinzufügen"
+			"add_rotate_icon": "Rotationszeichen hinzufügen"
 		},
 		"busy_indicator": {
             "loading_model": "Lade Modell",
@@ -294,6 +310,14 @@
 				"even-right": "Ungerade links, Gerade rechts"
 			}
 		}
+	},
+	"undo": {
+		"undo": "Rückgängig:",
+		"redo": "Wiederherstellen:",
+		"delete_@mf": "${item} löschen",
+		"move_@mf": "${item} bewegen",
+		"change_@mf": "${item} ändern",
+		"change_template_@mf": "${item} der Vorlage ändern"
 	},
 	"status_bar": {
 		"file_loaded_@mf": "\"${filename}\" erfolgreich geladen (${time})",

@@ -27,6 +27,7 @@
 	"inventorypage": "Part List Page",
 	"divider": "Divider",
 	"annotation": "Annotation",
+	"callout": "Callout",
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -311,6 +312,8 @@
 		}
 	},
 	"undo": {
+		"undo": "Undo",
+		"redo": "Redo",
 		"delete_@mf": "Delete ${item}",
 		"move_@mf": "Move ${item}",
 		"change_@mf": "Change ${item}",
