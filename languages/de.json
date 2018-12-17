@@ -234,7 +234,7 @@
 		}
 	},
 	"template": {
-		"select_page_item": "Kein Element selektiert",
+		"select_page_item": "Element auswählen",
 		"page": {
 			"title": "Seitenformat",
 			"formats": {
