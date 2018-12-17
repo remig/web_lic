@@ -68,7 +68,7 @@ export default {
 				}
 				return `${partName}`;
 			}
-			return _.prettyPrint(t.type);
+			return this.tr(t.type.toLowerCase());
 		}
 	},
 	computed: {

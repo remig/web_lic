@@ -2,7 +2,7 @@
 
 <template>
 	<div class="container" @click.stop="">
-		<h4>{{selectedItem ? selectedItem.type : tr('template.select_page_item') | prettyPrint}}</h4>
+		<h4>{{selectedItem ? tr(selectedItem.type.toLowerCase()) : tr('template.selectPageItem')}}</h4>
 		<div class="panel-group">
 			<component
 				ref="currentTemplatePanel"
@@ -18,7 +18,6 @@
 <script>
 'use strict';
 
-import _ from '../util';
 import store from '../store';
 import undoStack from '../undoStack';
 import borderPanel from './controlPanels/border.vue';
@@ -85,7 +84,9 @@ export default {
 					if (!this.lastEdit.noLayout) {
 						store.state.pages.forEach(page => (page.needsLayout = true));
 					}
-					undoStack.commit('', null, `Change ${_.prettyPrint(this.lastEdit.type)} Template`);
+					const item = this.tr(this.lastEdit.type.toLowerCase());
+					const undoText = this.tr('undo.change_template_@mf', {item});
+					undoStack.commit('', null, undoText);
 				}
 				this.lastEdit = null;
 			}
@@ -94,8 +95,9 @@ export default {
 			store.mutations[entryType].markAllDirty();
 			store.state.pages.forEach(page => (page.needsLayout = true));
 			store.state.templatePage.needsLayout = true;
-			const text = `Change ${_.prettyPrint(entryType)} Template`;
-			undoStack.commit('', null, text, [entryType]);
+			const item = this.tr(entryType.toLowerCase());
+			const undoText = this.tr('undo.change_template_@mf', {item});
+			undoStack.commit('', null, undoText, [entryType]);
 		}
 	},
 	computed: {

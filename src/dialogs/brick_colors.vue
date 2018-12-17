@@ -18,7 +18,7 @@
 			<table class="el-table brickColorTable">
 				<tr v-for="row in colorData" v-if="row" :key="row.id" class="brickColorRow">
 					<td>{{(row.id) === studFaceColorCode ? '--' : row.id}}</td>
-					<td style="text-align: left;">{{row.name | prettyPrint}}</td>
+					<td style="text-align: left;">{{_.startCase(row.name)}}</td>
 					<td>
 						<el-color-picker v-model="row.color" color-format="hex" />
 					</td>

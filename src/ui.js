@@ -36,8 +36,6 @@ Vue.filter('sanitizeMenuID', id => {
 		.replace(/[^a-z_]/g, '') + '_menu';
 });
 
-Vue.filter('prettyPrint', _.prettyPrint);
-
 Vue.use({
 	// Add a 'tr' method to every component, which makes translating strings in template HTML easier
 	install(Vue) {
@@ -50,6 +48,12 @@ Vue.use({
 			}
 			return str;
 		};
+	}
+});
+
+Vue.use({
+	install(Vue) {
+		Vue.prototype._ = _;  // Add _ to every component
 	}
 });
 
@@ -356,7 +360,7 @@ const app = new Vue({
 			) {
 				const opts = {doLayout: true};
 				opts[selItem.type] = selItem;
-				const undoText = `Delete ${_.prettyPrint(selItem.type)}`;
+				const undoText = this.tr('undo.delete_@mf', {item: this.tr(selItem.type.toLowerCase())});
 				try {
 					this.clearSelected();
 					undoStack.commit(`${selItem.type}.delete`, opts, undoText);
@@ -405,7 +409,7 @@ const app = new Vue({
 				}
 
 				if (dx !== 0 || dy !== 0) {
-					const undoText = `Move ${_.prettyPrint(selItem.type)}`;
+					const undoText = this.tr('undo.move_@mf', {item: this.tr(selItem.type.toLowerCase())});
 					undoStack.commit('item.reposition', {item: item, dx, dy}, undoText);
 				}
 			} else {

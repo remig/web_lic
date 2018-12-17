@@ -18,7 +18,7 @@ export default {
 		}
 		const name = store.get.modelFilenameBase();
 		if (nice) {
-			return _.prettyPrint(name.replace(/\//g, '-').replace(/_/g, ' '));
+			return _.startCase(name.replace(/\//g, '-').replace(/_/g, ' '));
 		}
 		return name;
 	},

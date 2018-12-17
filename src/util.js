@@ -267,38 +267,6 @@ _.mixin({
 		}
 		return t + 'ms';
 	},
-	prettyPrint(s) {  // Human readable versions of common internal strings
-		s = s + '';
-		s = s.replace(/[._]/g, ' ');  // Some strings come in as foo.bar; replace extraneous dots with spaces
-		switch (s.toLowerCase()) {
-			case 'submodelimage':
-				return 'Submodel Image';
-			case 'csi':
-				return 'CSI';
-			case 'pli':
-				return 'PLI';
-			case 'pliitem':
-				return 'PLI Item';
-			case 'quantitylabel':
-				return 'Quantity Label';
-			case 'calloutarrow':
-				return 'Callout Arrow';
-			case 'numberlabel':
-				return 'Number Label';
-			case 'rotateicon':
-				return 'Rotate Icon';
-			case 'templatepage':
-				return 'Page';
-			case 'titlepage':
-				return 'Title Page';
-			case 'inventorypage':
-				return 'Part List Page';
-		}
-		if (s.startsWith('ctrl+')) {
-			return 'Ctrl + ' + s.charAt(s.length - 1).toUpperCase();
-		}
-		return _.startCase(s);
-	},
 	color: (() => {
 		function color() {}
 		color.toRGB = (() => {

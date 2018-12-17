@@ -12,6 +12,21 @@
 	"x": "X",
 	"y": "Y",
 	"z": "Z",
+	"page": "Page",
+	"submodelimage": "Submodel Image",
+	"step": "Step",
+	"csi": "CSI",
+	"pli": "PLI",
+	"pliitem": "PLI Item",
+	"quantitylabel": "Quantity Label",
+	"calloutarrow": "Callout Arrow",
+	"numberlabel": "Number Label",
+	"rotateicon": "Rotate Icon",
+	"templatepage": "Page",
+	"titlepage": "Title Page",
+	"inventorypage": "Part List Page",
+	"divider": "Divider",
+	"annotation": "Annotation",
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -294,6 +309,12 @@
 				"even-right": "Odd Left, Even Right"
 			}
 		}
+	},
+	"undo": {
+		"delete_@mf": "Delete ${item}",
+		"move_@mf": "Move ${item}",
+		"change_@mf": "Change ${item}",
+		"change_template_@mf": "Change ${item} Template"
 	},
 	"status_bar": {
 		"file_loaded_@mf": "\"${filename}\" loaded successfully (${time})",
