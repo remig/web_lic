@@ -26,9 +26,33 @@
 	"titlepage": "Titelseite",
 	"inventorypage": "Seite mit allen Teilen",
 	"divider": "Trennlinie",
-	"annotation": "Anmerkung",
+	"annotation": "Objekt",
 	"callout": "Callout",
 	"ctrl": "Strg",
+	"action": {
+		"add_annotation": {
+			"name": "Objekt hinzufügen",
+			"label": {
+				"name": "Text",
+				"undo": "Text hinzufügen",
+				"initial_text": "Neuer Text"
+			},
+			"line": {
+				"name": "Linie (NYI)"
+			},
+			"circle": {
+				"name": "Kreis (NYI)"
+			},
+			"arrow": {
+				"name": "Pfeil",
+				"undo": "Pfeil hinzufügen"
+			},
+			"image": {
+				"name": "Bild",
+				"undo": "Bild hinzufügen"
+			}
+		},
+	},
 	"navbar": {
 		"file": {
 			"root": "Datei",
@@ -231,7 +255,7 @@
 			"arrow_rotation": "Pfeilrotation"
 		},
 		"page_layout": {
-			"title": "Layout der Seite in Zeilen und Spalten",
+			"title": "Anordnung der Seite in Zeilen und Spalten",
 			"rows": "Zeilen",
 			"cols": "Spalten",
 			"orientation": "Orientierung",

@@ -29,6 +29,30 @@
 	"annotation": "Annotation",
 	"callout": "Callout",
 	"ctrl": "Ctrl",
+	"action": {
+		"add_annotation": {
+			"name": "Add Annotation",
+			"label": {
+				"name": "Label",
+				"undo": "Add Label",
+				"initial_text": "New Label"
+			},
+			"line": {
+				"name": "Line (NYI)"
+			},
+			"circle": {
+				"name": "Circle (NYI)"
+			},
+			"arrow": {
+				"name": "Arrow",
+				"undo": "Add Arrow"
+			},
+			"image": {
+				"name": "Image",
+				"undo": "Add Image"
+			}
+		},
+	},
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -81,7 +105,7 @@
 			"show_pages": {
 				"root": "Show Pages",
 				"one": "One Page",
-				"two" : "Two Facing Pages",
+				"two": "Two Facing Pages",
 				"one_scroll": "One Page Scrolling View",
 				"two_scroll": "Two Pages Scrolling View"
 			},
@@ -244,8 +268,8 @@
 			"add_rotate_icon": "Add Rotation Icon"
 		},
 		"busy_indicator": {
-            "loading_model": "Loading Model",
-            "merging_steps": "Merging Steps",
+			"loading_model": "Loading Model",
+			"merging_steps": "Merging Steps",
 			"generating_PDF": "Generating PDF",
 			"generating_PNG": "Generating PNG Zip"
 		}

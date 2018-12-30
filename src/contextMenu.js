@@ -16,32 +16,32 @@ let app;
 const tr = LocaleManager.translate;
 
 const annotationMenu = {
-	text: 'Add Annotation',
+	text: 'action.add_annotation.name',
 	children: [
 		{
-			text: 'Label',
+			text: 'action.add_annotation.label.name',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				const opts = {
 					annotationType: 'label',
-					properties: {text: 'New Label'},
+					properties: {text: tr('action.add_annotation.label.initial_text')},
 					parent: selectedItem,
 					...pos
 				};
-				undoStack.commit('annotation.add', opts, 'Add Label');
+				undoStack.commit('annotation.add', opts, tr('action.add_annotation.label.undo'));
 			}
 		},
 		{
-			text: 'Line (NYI)',
+			text: 'action.add_annotation.line.name',
 			cb() {}
 		},
 		{
-			text: 'Circle (NYI)',
+			text: 'action.add_annotation.circle.name',
 			cb() {}
 		},
 		{
-			text: 'Arrow',
+			text: 'action.add_annotation.arrow.name',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
@@ -51,11 +51,11 @@ const annotationMenu = {
 					parent: selectedItem,
 					...pos
 				};
-				undoStack.commit('annotation.add', opts, 'Add Arrow');
+				undoStack.commit('annotation.add', opts, tr('action.add_annotation.arrow.undo'));
 			}
 		},
 		{
-			text: 'Image',
+			text: 'action.add_annotation.image.name',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
@@ -66,7 +66,7 @@ const annotationMenu = {
 						parent: selectedItem,
 						...pos
 					};
-					undoStack.commit('annotation.add', opts, 'Add Image');
+					undoStack.commit('annotation.add', opts, tr('action.add_annotation.image.undo'));
 				});
 			}
 		}
