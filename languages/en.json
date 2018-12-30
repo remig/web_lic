@@ -138,8 +138,45 @@
 		},
 		"change_step_number": {
 			"name": "Change Step Number (NYI)"
+		},
+		"rotate_csi": {
+			"name": "Rotate CSI",
+            "flip_upside_down": {
+                "name": "Flip Upside Down",
+                "undo": "Flip Step Image"
+            },
+            "rotate_front_to_back": {
+                "name": "Rotate Front to Back",
+                "undo": "Rotate Step Image"
+            },
+            "custom_rotation": {
+                "name": "Custom Rotation...",
+                "undo": "Rotate Step Image"
+            },
+            "remove_rotation": {
+                "name": "Remove Rotation",
+                "undo": "Remove Step Image Rotation"
+            }
+        },
+		"copy_rotation_to_next_steps": {
+			"name": "Copy Rotation to next Steps...",
+            "undo": "Copy CSI Rotations"
+		},
+		"scale_csi": {
+			"name": "Scale CSI",
+            "undo": "Scale Step Image"
+		},
+		"remove_scale": {
+			"name": "Remove Scale",
+            "undo": "Clear Step Image Scale"
+		},
+		"select_part": {
+			"name": "Select Part"
+		},
+		"add_new_part": {
+			"name": "Add New Part (NYI)"
 		}
-	},
+    },
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -354,6 +391,13 @@
 			"title_csi": "Rotate CSI",
 			"add_rotate_icon": "Add Rotation Icon"
 		},
+        "copy_csi_rotation": {
+            "title": "Copy Rotation",
+            "label": "Copy Rotation to Next Steps"
+        },
+        "scale_csi": {
+            "title": "Scale CSI"
+        },
 		"busy_indicator": {
 			"loading_model": "Loading Model",
 			"merging_steps": "Merging Steps",

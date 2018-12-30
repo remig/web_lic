@@ -138,8 +138,45 @@
 		},
 		"change_step_number": {
 			"name": "Schrittnummer ändern (NYI)"
-		}
-	},
+        },
+        "rotate_csi": {
+            "name": "Rotation des Schrittbildes",
+            "flip_upside_down": {
+                "name": "Tausche oben und unten",
+                "undo": "Im Schrittbild oben und unten vertauschen"
+            },
+            "rotate_front_to_back": {
+                "name": "Tausche vorne und hinten",
+                "undo": "Im Schrittbild vorne und hinten vertauschen"
+            },
+            "custom_rotation": {
+                "name": "Andere Ausrichtung...",
+                "undo": "Schrittbild rotieren"
+            },
+            "remove_rotation": {
+                "name": "Rotation entfernen",
+                "undo": "Rotation des Schrittbildes entfernen"
+            }
+        },
+        "copy_rotation_to_next_steps": {
+            "name": "Rotation auf folgende Schritte übertragen...",
+            "undo": "Rotation des Schrittbildes übertragen"
+        },
+        "scale_csi": {
+            "name": "Skalierung ändern",
+            "undo": "Skalierung des Schrittbildes ändern"
+        },
+        "remove_scale": {
+            "name": "Skalierung entfernen",
+            "undo": "Skalierung des Schrittbildes entfernen"
+        },
+        "select_part": {
+            "name": "Teil auswählen"
+        },
+        "add_new_part": {
+            "name": "Neues Teil hinzufügen (NYI)"
+        }
+    },
 	"navbar": {
 		"file": {
 			"root": "Datei",
@@ -354,6 +391,13 @@
 			"title_csi": "Rotiere CSI",
 			"add_rotate_icon": "Rotationszeichen hinzufügen"
 		},
+        "copy_csi_rotation": {
+            "title": "Rotation übertragen",
+            "label": "Rotation übertragen auf nächste Schritte"
+        },
+        "scale_csi": {
+            "title": "Skalierung CSI"
+        },
 		"busy_indicator": {
             "loading_model": "Lade Modell",
             "merging_steps": "Führe Schritte zusammen",

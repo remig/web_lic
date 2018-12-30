@@ -509,28 +509,30 @@ const contextMenu = {
 	},
 	csi: [
 		{
-			text: 'Rotate CSI',
+			text: 'action.rotate_csi.name',
 			children: [
 				{
-					text: 'Flip Upside Down',
+					text: 'action.rotate_csi.flip_upside_down.name',
 					cb(selectedItem) {
 						const csi = selectedItem;
 						const rotation = {x: 0, y: 0, z: 180};
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
-						undoStack.commit('csi.rotate', opts, 'Flip Step Image', [csi]);
+						undoStack.commit('csi.rotate', opts, tr('action.rotate_csi.flip_upside_down.undo'),
+							[csi]);
 					}
 				},
 				{
-					text: 'Rotate Front to Back',
+					text: 'action.rotate_csi.rotate_front_to_back.name',
 					cb(selectedItem) {
 						const csi = selectedItem;
 						const rotation = {x: 0, y: 180, z: 0};
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
-						undoStack.commit('csi.rotate', opts, 'Rotate Step Image', [csi]);
+						undoStack.commit('csi.rotate', opts,
+							tr('action.rotate_csi.rotate_front_to_back.undo'), [csi]);
 					}
 				},
 				{
-					text: 'Custom Rotation...',
+					text: 'action.rotate_csi.custom_rotation.name',
 					cb(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
 						const originalRotation = _.cloneDeep(csi.rotation);
@@ -546,7 +548,7 @@ const contextMenu = {
 								undoStack.commit(
 									'csi.rotate',
 									{csi, ..._.cloneDeep(newValues), doLayout: true},
-									'Rotate Step Image',
+									tr('action.rotate_csi.custom_rotation.undo'),
 									[csi]
 								);
 							});
@@ -566,7 +568,7 @@ const contextMenu = {
 					}
 				},
 				{
-					text: 'Remove Rotation',
+					text: 'action.rotate_csi.remove_rotation.name',
 					shown(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
 						return csi.rotation != null;
@@ -574,13 +576,14 @@ const contextMenu = {
 					cb(selectedItem) {
 						const csi = selectedItem;
 						const opts = {csi, rotation: null, addRotateIcon: false, doLayout: true};
-						undoStack.commit('csi.rotate', opts, 'Remove Step Image Rotation', [csi]);
+						undoStack.commit('csi.rotate', opts, tr('action.rotate_csi.remove_rotation.undo'),
+							[csi]);
 					}
 				}
 			]
 		},
 		{
-			text: 'Copy Rotation to next Steps...',
+			text: 'action.copy_rotation_to_next_steps.name',
 			shown(selectedItem) {
 				const csi = store.get.csi(selectedItem);
 				const rotation = csi.rotation;
@@ -605,7 +608,7 @@ const contextMenu = {
 						undoStack.commit(
 							'step.copyRotation',
 							{step, rotation, nextXSteps: newValues.value},
-							'Copy CSI Rotations',
+							tr('action.copy_rotation_to_next_steps.undo'),
 							csiList
 						);
 					});
@@ -639,15 +642,15 @@ const contextMenu = {
 						}
 						app.redrawUI(true);
 					});
-					dialog.title = 'Copy Rotation';
-					dialog.label = 'Copy Rotation to Next Steps';
+					dialog.title = tr('dialog.copy_csi_rotation.title');
+					dialog.label = tr('dialog.copy_csi_rotation.label');
 					dialog.labelWidth = '220px';
 					dialog.min = dialog.value = 0;
 				});
 			}
 		},
 		{
-			text: 'Scale CSI',
+			text: 'action.scale_csi.name',
 			cb(selectedItem) {
 				const csi = store.get.csi(selectedItem.id);
 				const originalScale = csi.scale;
@@ -669,7 +672,7 @@ const contextMenu = {
 						undoStack.commit(
 							'csi.scale',
 							{csi, scale: newValues.value, doLayout: true},
-							'Scale Step Image',
+							tr('action.scale_csi.undo'),
 							[csi]
 						);
 					});
@@ -678,7 +681,7 @@ const contextMenu = {
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
-					dialog.title = 'Scale CSI';
+					dialog.title = tr('dialog.scale_csi.title');
 					dialog.min = 0;
 					dialog.max = 10;
 					dialog.step = 0.1;
@@ -688,7 +691,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Remove Scale',
+			text: 'action.remove_scale.name',
 			shown(selectedItem) {
 				const csi = store.get.csi(selectedItem.id);
 				return (csi.scale != null);
@@ -698,14 +701,14 @@ const contextMenu = {
 				undoStack.commit(
 					'csi.scale',
 					{csi, scale: null, doLayout: true},
-					'Clear Step Image Scale',
+					tr('action.remove_scale.undo'),
 					[csi]
 				);
 			}
 		},
 		{text: 'separator'},
 		{
-			text: 'Select Part',
+			text: 'action.select_part.name',
 			shown(selectedItem) {
 				const step = store.get.parent(selectedItem);
 				return step && step.parts && step.parts.length;
@@ -724,7 +727,7 @@ const contextMenu = {
 				});
 			}
 		},
-		{text: 'Add New Part (NYI)', cb: () => {}},
+		{text: 'action.add_new_part.name', cb: () => {}},
 		annotationMenu
 	],
 	pli: [],
