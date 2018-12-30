@@ -52,6 +52,93 @@
 				"undo": "Bild hinzufügen"
 			}
 		},
+		"redo_layout": {
+			"name": "Neu anordnen"
+		},
+		"layout": {
+			"name": "Anordnung",
+			"vertical": {
+				"name": "Vertikal",
+				"undo": "Vertikal anordnen"
+			},
+			"horizontal": {
+				"name": "Horizontal",
+				"undo": "Horizontal anordnen"
+			},
+			"by_row_and_column": {
+				"name": "In Zeilen und Spalten...",
+				"undo": "Seite in Zeilen und Spalten anordnen",
+				"undo_step": "Schritt in Zeilen und Spalten anordnen"
+			}
+		},
+		"prepend_blank_page": {
+			"name": "Leere Seite vor dieser einfügen"
+		},
+		"append_blank_page": {
+			"name": "Leere Seite nach dieser einfügen"
+		},
+		"hide_step_separators": {
+			"name": "Schritttrenner verstecken (NYI)"
+		},
+		"add_blank_step": {
+			"name": "Leeren Schritt hinzufügen"
+		},
+		"delete_this_blank_page": {
+			"name": "Diese leere Seite löschen",
+			"undo": "Seite löschen"
+		},
+		"add_callout": {
+			"name": "Callout hinzufügen"
+		},
+		"divide_into_sub_steps": {
+			"name": "In Unterschritte unterteilen"
+		},
+		"stretch_step_to_next_page": {
+			"name": "Schritt auf nächste Seite ausdehnen"
+		},
+		"move_step_to": {
+			"name": "Schritt verschieben auf...",
+			"previous_page": {
+				"name": "Vorherige Seite",
+				"undo": "Schritt auf vorherige Seite verschieben"
+			},
+			"next_page": {
+				"name": "Nächste Seite",
+				"undo": "Schritt auf nächste Seite verschieben"
+			}
+		},
+		"merge_step_with": {
+			"name": "Schritt zusammenführen mit...",
+			"previous_step": {
+				"name": "Vorherigem Schritt",
+				"undo": "Schritt mit vorherigem Schritt zusammenführen"
+			},
+			"next_step": {
+				"name": "Nächstem Schritt",
+				"undo": "Schritt mit nächstem Schritt zusammenführen"
+			}
+		},
+		"delete_empty_step": {
+			"name": "Leeren Schritt löschen"
+		},
+		"prepend_blank_step": {
+			"name": "Leeren Schritt vor diesem einfügen"
+		},
+		"append_blank_step": {
+			"name": "Leeren Schritt nach diesem einfügen"
+		},
+		"add_rotate_icon": {
+			"name": "Rotationszeichen hinzufügen"
+		},
+		"delete_rotate_icon": {
+			"name": "Rotationszeichen entfernen"
+		},
+		"change_page_number": {
+			"name": "Seitenzahl ändern (NYI)"
+		},
+		"change_step_number": {
+			"name": "Schrittnummer ändern (NYI)"
+		}
 	},
 	"navbar": {
 		"file": {

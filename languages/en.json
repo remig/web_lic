@@ -52,6 +52,93 @@
 				"undo": "Add Image"
 			}
 		},
+		"redo_layout": {
+			"name": "Redo Layout"
+		},
+		"layout": {
+			"name": "Layout",
+			"vertical": {
+				"name": "Vertical",
+				"undo": "Layout Vertical"
+			},
+			"horizontal": {
+				"name": "Horizontal",
+				"undo": "Layout Horizontal"
+			},
+			"by_row_and_column": {
+				"name": "By Row and Column...",
+				"undo": "Layout Page by Row and Column",
+				"undo_step": "Layout Step by Row and Column"
+			}
+		},
+		"prepend_blank_page": {
+			"name": "Prepend Blank Page"
+		},
+		"append_blank_page": {
+			"name": "Append Blank Page"
+		},
+		"hide_step_separators": {
+			"name": "Hide Step Separators (NYI)"
+		},
+		"add_blank_step": {
+			"name": "Add Blank Step"
+		},
+		"delete_this_blank_page": {
+			"name": "Delete This Blank Page",
+			"undo": "Delete Page"
+		},
+		"add_callout": {
+			"name": "Add Callout"
+		},
+		"divide_into_sub_steps": {
+			"name": "Divide into Sub-Steps"
+		},
+		"stretch_step_to_next_page": {
+			"name": "Stretch Step to Next Page"
+		},
+		"move_step_to": {
+			"name": "Move Step to...",
+			"previous_page": {
+				"name": "Previous Page",
+				"undo": "Move Step to Previous Page"
+			},
+			"next_page": {
+				"name": "Next Page",
+				"undo": "Move Step to Next Page"
+			}
+		},
+		"merge_step_with": {
+			"name": "Merge Step with...",
+			"previous_step": {
+				"name": "Previous Step",
+				"undo": "Merge Step with Previous Step"
+			},
+			"next_step": {
+				"name": "Next Step",
+				"undo": "Merge Step with Next Step"
+			}
+		},
+		"delete_empty_step": {
+			"name": "Delete Empty Step"
+		},
+		"prepend_blank_step": {
+			"name": "Prepend Blank Step"
+		},
+		"append_blank_step": {
+			"name": "Append Blank Step"
+		},
+		"add_rotate_icon": {
+			"name": "Add Rotate Icon"
+		},
+		"delete_rotate_icon": {
+			"name": "Delete Rotate Icon"
+		},
+		"change_page_number": {
+			"name": "Change Page Number (NYI)"
+		},
+		"change_step_number": {
+			"name": "Change Step Number (NYI)"
+		}
 	},
 	"navbar": {
 		"file": {

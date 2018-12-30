@@ -76,9 +76,9 @@ const annotationMenu = {
 const contextMenu = {
 	titlePage: [
 		{
-			text: 'Redo Layout',
+			text: 'action.redo_layout.name',
 			cb(selectedItem) {
-				undoStack.commit('page.layout', {page: selectedItem}, this.text);
+				undoStack.commit('page.layout', {page: selectedItem}, tr(this.text));
 			}
 		},
 		annotationMenu
@@ -87,9 +87,9 @@ const contextMenu = {
 		// TODO: add way to add new parts to page and delete existing parts
 		// TODO: add way to auto-recalculate part quantities (basically reset entire page)
 		{
-			text: 'Redo Layout',
+			text: 'action.redo_layout.name',
 			cb(selectedItem) {
-				undoStack.commit('page.layout', {page: selectedItem}, this.text);
+				undoStack.commit('page.layout', {page: selectedItem}, tr(this.text));
 			}
 		},
 		annotationMenu
@@ -97,39 +97,40 @@ const contextMenu = {
 	page: [
 		{
 			// TODO: concatenate parent -> child text so it comes out 'Layout Vertical' and not 'Vertical'
-			text: 'Layout',
+			text: 'action.layout.name',
 			enabled: enableIfUnlocked,
 			children: [
 				{
-					text: 'Redo Layout',
+					text: 'action.redo_layout.name',
 					cb(selectedItem) {
-						undoStack.commit('page.layout', {page: selectedItem}, this.text);
+						undoStack.commit('page.layout', {page: selectedItem}, tr(this.text));
 					}
 				},
 				{
-					text: 'Vertical',
+					text: 'action.layout.vertical.name',
 					shown(selectedItem) {
 						const page = store.get.lookupToItem(selectedItem);
 						return page.layout !== 'vertical';
 					},
 					cb(selectedItem) {
-						undoStack.commit('page.layout', {page: selectedItem, layout: 'vertical'}, this.text);
+						undoStack.commit('page.layout', {page: selectedItem, layout: 'vertical'},
+							tr('action.layout.vertical.undo'));
 					}
 				},
 				{
-					text: 'Horizontal',
+					text: 'action.layout.horizontal.name',
 					shown(selectedItem) {
 						const page = store.get.lookupToItem(selectedItem);
 						return page.layout !== 'horizontal';
 					},
 					cb(selectedItem) {
 						const opts = {page: selectedItem, layout: 'horizontal'};
-						undoStack.commit('page.layout', opts, this.text);
+						undoStack.commit('page.layout', opts, tr('action.layout.horizontal.undo'));
 					}
 				},
 				{
 					// TODO: don't allow insufficient row / col layouts that hide steps
-					text: 'By Row and Column...',
+					text: 'action.layout.by_row_and_column.name',
 					cb(selectedItem) {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.cloneDeep(page.layout);
@@ -142,7 +143,7 @@ const contextMenu = {
 								undoStack.commit(
 									'page.layout',
 									{page, layout: newValues},
-									'Layout Page by Row and Column'
+									tr('action.layout.by_row_and_column.undo')
 								);
 							});
 							dialog.$on('cancel', () => {
@@ -165,29 +166,29 @@ const contextMenu = {
 		},
 		{text: 'separator'},
 		{
-			text: 'Prepend Blank Page',
+			text: 'action.prepend_blank_page.name',
 			cb(selectedItem) {
 				const nextPage = store.get.lookupToItem(selectedItem);
 				undoStack.commit('page.add', {
 					pageNumber: nextPage.number,
 					insertionIndex: store.state.pages.indexOf(nextPage)
-				}, this.text);
+				}, tr(this.text));
 			}
 		},
 		{
-			text: 'Append Blank Page',
+			text: 'action.append_blank_page.name',
 			cb(selectedItem) {
 				const prevPage = store.get.lookupToItem(selectedItem);
 				undoStack.commit('page.add', {
 					pageNumber: prevPage.number + 1,
 					insertionIndex: store.state.pages.indexOf(prevPage) + 1
-				}, this.text);
+				}, tr(this.text));
 			}
 		},
 		{text: 'separator'},
-		{text: 'Hide Step Separators (NYI)', cb: () => {}},
+		{text: 'action.hide_step_separators.name', cb: () => {}},
 		{
-			text: 'Add Blank Step',
+			text: 'action.add_blank_step.name',
 			enabled: enableIfUnlocked,
 			cb(selectedItem) {
 				const dest = store.get.page(selectedItem.id);
@@ -210,12 +211,12 @@ const contextMenu = {
 					model: _.cloneDeep(prevStep.model),
 					insertionIndex: store.state.steps.indexOf(prevStep) + 1
 				};
-				undoStack.commit('step.add', opts, this.text);
+				undoStack.commit('step.add', opts, tr(this.text));
 			}
 		},
 		annotationMenu,
 		{
-			text: 'Delete This Blank Page',
+			text: 'action.delete_this_blank_page.name',
 			shown(selectedItem) {
 				const page = store.get.lookupToItem(selectedItem);
 				return page.steps.length < 1;
@@ -225,7 +226,7 @@ const contextMenu = {
 				const nextPage = store.get.isLastPage(page)
 					? store.get.prevPage(page)
 					: store.get.nextPage(page);
-				undoStack.commit('page.delete', {page}, 'Delete Page');
+				undoStack.commit('page.delete', {page}, tr('action.delete_this_blank_page.undo'));
 				app.clearSelected();
 				app.setCurrentPage(nextPage);
 			}
@@ -233,7 +234,7 @@ const contextMenu = {
 	],
 	step: [
 		{
-			text: 'Layout',
+			text: 'action.layout.name',
 			enabled: enableIfUnlocked,
 			shown(selectedItem) {
 				const step = store.get.lookupToItem(selectedItem);
@@ -241,29 +242,29 @@ const contextMenu = {
 			},
 			children: [
 				{
-					text: 'Vertical',
+					text: 'action.layout.vertical.name',
 					shown(selectedItem) {
 						const step = store.get.lookupToItem(selectedItem);
 						return step.subStepLayout !== 'vertical';
 					},
 					cb(selectedItem) {
 						const opts = {step: selectedItem, layout: 'vertical', doLayout: true};
-						undoStack.commit('step.setSubStepLayout', opts, this.text);
+						undoStack.commit('step.setSubStepLayout', opts, tr('action.layout.vertical.undo'));
 					}
 				},
 				{
-					text: 'Horizontal',
+					text: 'action.layout.horizontal.name',
 					shown(selectedItem) {
 						const step = store.get.lookupToItem(selectedItem);
 						return step.subStepLayout !== 'horizontal';
 					},
 					cb(selectedItem) {
 						const opts = {step: selectedItem, layout: 'horizontal', doLayout: true};
-						undoStack.commit('step.setSubStepLayout', opts, this.text);
+						undoStack.commit('step.setSubStepLayout', opts, tr('action.layout.horizontal.undo'));
 					}
 				},
 				{
-					text: 'By Row and Column... (NYI)',
+					text: 'action.layout.by_row_and_column.name',
 					cb(selectedItem) {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.cloneDeep(page.layout);
@@ -276,7 +277,7 @@ const contextMenu = {
 								undoStack.commit(
 									'page.layout',
 									{page, layout: newValues},
-									'Layout Page by Row and Column'
+									tr('action.layout.by_row_and_column.undo_step')
 								);
 							});
 							dialog.$on('cancel', () => {
@@ -297,17 +298,17 @@ const contextMenu = {
 			]
 		},
 		{
-			text: 'Add Callout',
+			text: 'action.add_callout.name',
 			shown(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				return !step.steps.length;
 			},
 			cb(selectedItem) {
-				undoStack.commit('step.addCallout', {step: selectedItem}, this.text);
+				undoStack.commit('step.addCallout', {step: selectedItem}, tr(this.text));
 			}
 		},
 		{
-			text: 'Divide into Sub-Steps',
+			text: 'action.divide_into_sub_steps.name',
 			shown(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const parent = store.get.parent(selectedItem);
@@ -317,11 +318,11 @@ const contextMenu = {
 				return false;
 			},
 			cb(selectedItem) {
-				undoStack.commit('step.addSubStep', {step: selectedItem, doLayout: true}, this.text);
+				undoStack.commit('step.addSubStep', {step: selectedItem, doLayout: true}, tr(this.text));
 			}
 		},
 		{
-			text: 'Stretch Step to Next Page',
+			text: 'action.stretch_step_to_next_page.name',
 			enabled(selectedItem) {
 				const step = store.get.lookupToItem(selectedItem);
 				if (step.parent.type !== 'page') {
@@ -341,15 +342,15 @@ const contextMenu = {
 				}
 				const stretchToPage = store.get.nextBasicPage(page);
 				const opts = {step: selectedItem, stretchToPage, doLayout: true};
-				undoStack.commit('step.stretchToPage', opts, 'Stretch Step to Page');
+				undoStack.commit('step.stretchToPage', opts, tr(this.text));
 			}
 		},
 		{
-			text: 'Move Step to',
+			text: 'action.move_step_to.name',
 			enabled: enableIfUnlocked,
 			children: [
 				{
-					text: 'Previous Page',
+					text: 'action.move_step_to.previous_page.name',
 					shown(selectedItem) {
 						const page = store.get.pageForItem(selectedItem);
 						if (store.get.isFirstBasicPage(page) || store.get.isTitlePage(page)) {
@@ -363,11 +364,12 @@ const contextMenu = {
 						return !(store.get.prevBasicPage(selectedItem) || {}).locked;
 					},
 					cb(selectedItem) {
-						undoStack.commit('step.moveToPreviousPage', {step: selectedItem}, this.text);
+						undoStack.commit('step.moveToPreviousPage', {step: selectedItem},
+							tr('action.move_step_to.previous_page.undo'));
 					}
 				},
 				{
-					text: 'Next Page',
+					text: 'action.move_step_to.next_page.name',
 					shown(selectedItem) {
 						const page = store.get.pageForItem(selectedItem);
 						if (store.get.isLastBasicPage(page) || store.get.isTitlePage(page)) {
@@ -381,44 +383,47 @@ const contextMenu = {
 						return !(store.get.nextBasicPage(selectedItem) || {}).locked;
 					},
 					cb(selectedItem) {
-						undoStack.commit('step.moveToNextPage', {step: selectedItem}, this.text);
+						undoStack.commit('step.moveToNextPage', {step: selectedItem},
+							tr('action.move_step_to.next_page.undo'));
 					}
 				}
 			]
 		},
 		{
 			// TODO: If step being merged contains a submodel, must reorder all steps in that submodel too
-			text: 'Merge Step with...',
+			text: 'action.merge_step_with.name',
 			enabled: enableIfUnlocked,
 			children: [
 				{
-					text: 'Previous Step',
+					text: 'action.merge_step_with.previous_step.name',
 					shown(selectedItem) {
 						return store.get.prevStep(selectedItem, true) != null;
 					},
 					cb(selectedItem) {
 						const srcStep = selectedItem;
 						const destStep = store.get.prevStep(selectedItem, true);
-						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
+						undoStack.commit('step.mergeWithStep', {srcStep, destStep},
+							tr('action.merge_step_with.previous_step.undo'));
 						app.clearSelected();
 					}
 				},
 				{
-					text: 'Next Step',
+					text: 'action.merge_step_with.next_step.name',
 					shown(selectedItem) {
 						return store.get.nextStep(selectedItem, true) != null;
 					},
 					cb(selectedItem) {
 						const srcStep = selectedItem;
 						const destStep = store.get.nextStep(selectedItem, true);
-						undoStack.commit('step.mergeWithStep', {srcStep, destStep}, this.text);
+						undoStack.commit('step.mergeWithStep', {srcStep, destStep},
+							tr('action.merge_step_with.next_step.undo'));
 						app.clearSelected();
 					}
 				}
 			]
 		},
 		{
-			text: 'Delete Empty Step',
+			text: 'action.delete_empty_step.name',
 			enabled: enableIfUnlocked,
 			shown(selectedItem) {
 				const step = store.get.step(selectedItem);
@@ -428,13 +433,13 @@ const contextMenu = {
 				return _.isEmpty(step.parts);
 			},
 			cb(selectedItem) {
-				undoStack.commit('step.delete', {step: selectedItem, doLayout: true}, this.text);
+				undoStack.commit('step.delete', {step: selectedItem, doLayout: true}, tr(this.text));
 				app.clearSelected();
 			}
 		},
 		{text: 'separator'},
 		{
-			text: 'Prepend Blank Step',
+			text: 'action.prepend_blank_step.name',
 			enabled: enableIfUnlocked,  // TODO: disable this if previous step is in a different submodel
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
@@ -446,18 +451,18 @@ const contextMenu = {
 					insertionIndex: store.state.steps.indexOf(step),
 					parentInsertionIndex: dest.steps.indexOf(step.id)
 				};
-				undoStack.commit('step.add', opts, this.text);
+				undoStack.commit('step.add', opts, tr(this.text));
 			}
 		},
 		{
-			text: 'Append Blank Step',
+			text: 'action.append_blank_step.name',
 			enabled: enableIfUnlocked,
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
 				if (dest.type === 'callout') {
 					const opts = {callout: dest, doLayout: true};
-					undoStack.commit('callout.addStep', opts, this.text);
+					undoStack.commit('callout.addStep', opts, tr(this.text));
 				} else {
 					const opts = {
 						dest, stepNumber: step.number + 1,
@@ -466,7 +471,7 @@ const contextMenu = {
 						insertionIndex: store.state.steps.indexOf(step) + 1,
 						parentInsertionIndex: dest.steps.indexOf(step.id) + 1
 					};
-					undoStack.commit('step.add', opts, this.text);
+					undoStack.commit('step.add', opts, tr(this.text));
 				}
 			}
 		},
@@ -474,14 +479,15 @@ const contextMenu = {
 		{
 			text(selectedItem) {
 				const step = store.get.lookupToItem(selectedItem);
-				return `${step.rotateIconID == null ? 'Add' : 'Delete'} Rotate Icon`;
+				return step.rotateIconID == null ? 'action.add_rotate_icon.name'
+					: 'action.delete_rotate_icon.name';
 			},
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				undoStack.commit(
 					'step.toggleRotateIcon',
 					{step, display: step.rotateIconID == null, doLayout: true},
-					this.text(selectedItem)
+					tr(this.text(selectedItem))
 				);
 			}
 		},
@@ -492,11 +498,11 @@ const contextMenu = {
 		switch (parent.type) {
 			case 'page':
 				return [
-					{text: 'Change Page Number (NYI)', cb() {}}
+					{text: 'action.change_page_number.name', cb() {}}
 				];
 			case 'step':
 				return [
-					{text: 'Change Step Number (NYI)', cb() {}}
+					{text: 'action.change_step_number.name', cb() {}}
 				];
 		}
 		return [];
