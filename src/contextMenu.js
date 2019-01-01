@@ -733,7 +733,7 @@ const contextMenu = {
 	pli: [],
 	pliItem: [
 		{
-			text: 'Rotate Part List Image',
+			text: 'action.rotate_part_list_image.name',
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
@@ -760,7 +760,7 @@ const contextMenu = {
 							{mutation: 'page.layout', opts: {page}}
 						];
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						undoStack.commit(change, null, 'Rotate Part List Image', dirtyItems);
+						undoStack.commit(change, null, tr('action.rotate_part_list_image.undo'), dirtyItems);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -778,7 +778,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Scale Part List Image',
+			text: 'action.scale_part_list_image.name',
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
@@ -805,7 +805,7 @@ const contextMenu = {
 							{mutation: 'page.layout', opts: {page}}
 						];
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						undoStack.commit(change, null, 'Scale Part List Image', dirtyItems);
+						undoStack.commit(change, null, tr('action.scale_part_list_image.undo'), dirtyItems);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -816,7 +816,7 @@ const contextMenu = {
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
-					dialog.title = 'Scale Part List Image';
+					dialog.title = tr('dialog.scale_pli.title');
 					dialog.min = 0;
 					dialog.max = 10;
 					dialog.step = 0.1;
@@ -826,7 +826,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Remove Scale',
+			text: 'action.remove_part_list_image_scale.name',
 			shown(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				return uiState.getPLITransform(pliItem.filename).scale != null;
@@ -847,7 +847,7 @@ const contextMenu = {
 					{mutation: 'page.layout', opts: {page}}
 				];
 				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-				undoStack.commit(change, null, 'Remove Part List Image Scale', dirtyItems);
+				undoStack.commit(change, null, tr('action.remove_part_list_image_scale.undo'), dirtyItems);
 			}
 		}
 	],

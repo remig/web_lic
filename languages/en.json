@@ -175,8 +175,20 @@
 		},
 		"add_new_part": {
 			"name": "Add New Part (NYI)"
-		}
-    },
+		},
+		"rotate_part_list_image": {
+			"name": "Rotate Part List Image...",
+            "undo": "Rotate Part List Image"
+		},
+		"scale_part_list_image": {
+			"name": "Scale Part List Image...",
+            "undo": "Scale Part List Image"
+		},
+        "remove_part_list_image_scale": {
+            "name": "Remove Scale",
+            "undo": "Remove Part List Image Scale"
+        }
+	},
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -397,6 +409,9 @@
         },
         "scale_csi": {
             "title": "Scale CSI"
+        },
+        "scale_pli": {
+            "title": "Scale Part List Image"
         },
 		"busy_indicator": {
 			"loading_model": "Loading Model",

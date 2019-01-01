@@ -175,6 +175,18 @@
         },
         "add_new_part": {
             "name": "Neues Teil hinzufügen (NYI)"
+        },
+        "rotate_part_list_image": {
+            "name": "Rotation ändern...",
+            "undo": "Teilelistenbild rotieren"
+        },
+        "scale_part_list_image": {
+            "name": "Skalierung ändern...",
+            "undo": "Teilelistenbild skalieren"
+        },
+        "remove_part_list_image_scale": {
+            "name": "Skalierung entfernen",
+            "undo": "Skalierung des Teilelistenbildes entfernen"
         }
     },
 	"navbar": {
@@ -396,7 +408,10 @@
             "label": "Rotation übertragen auf nächste Schritte"
         },
         "scale_csi": {
-            "title": "Skalierung CSI"
+            "title": "Skalierung Schrittbild"
+        },
+        "scale_pli": {
+            "title": "Skalierung Teilelistenbild"
         },
 		"busy_indicator": {
             "loading_model": "Lade Modell",
