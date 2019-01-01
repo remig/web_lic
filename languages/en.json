@@ -187,8 +187,12 @@
         "remove_part_list_image_scale": {
             "name": "Remove Scale",
             "undo": "Remove Part List Image Scale"
-        }
-	},
+        },
+		"change_count": {
+			"name": "Change Count",
+            "undo": "Change Part Count"
+		}
+    },
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -412,6 +416,10 @@
         },
         "scale_pli": {
             "title": "Scale Part List Image"
+        },
+        "change_part_count": {
+            "title": "Change Part Count",
+            "label": "New Count"
         },
 		"busy_indicator": {
 			"loading_model": "Loading Model",

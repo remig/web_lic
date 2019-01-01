@@ -858,7 +858,7 @@ const contextMenu = {
 				return [
 					// TODO: add 'Reset Count' menu entry to labels with modified counts
 					{
-						text: 'Change Count',
+						text: 'action.change_count.name',
 						cb(selectedItem) {
 							const pliItem = store.get.parent(selectedItem);
 							DialogManager('numberChooserDialog', dialog => {
@@ -866,11 +866,11 @@ const contextMenu = {
 									undoStack.commit(
 										'pliItem.changeQuantity',
 										{pliItem, quantity: newValues.value},
-										'Change Count'
+										tr('action.change_count.undo')
 									);
 								});
-								dialog.title = 'Change Part Count';
-								dialog.label = 'New Count';
+								dialog.title = tr('dialog.change_part_count.title');
+								dialog.label = tr('dialog.change_part_count.label');
 								dialog.labelWidth = '120px';
 								dialog.value = pliItem.quantity;
 							});

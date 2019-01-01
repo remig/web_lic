@@ -187,6 +187,10 @@
         "remove_part_list_image_scale": {
             "name": "Skalierung entfernen",
             "undo": "Skalierung des Teilelistenbildes entfernen"
+        },
+        "change_count": {
+            "name": "Anzahl ändern",
+            "undo": "Anzahl eines Teils ändern"
         }
     },
 	"navbar": {
@@ -412,6 +416,10 @@
         },
         "scale_pli": {
             "title": "Skalierung Teilelistenbild"
+        },
+        "change_part_count": {
+            "title": "Anzahl eines Teils ändern",
+            "label": "Neue Anzahl"
         },
 		"busy_indicator": {
             "loading_model": "Lade Modell",
