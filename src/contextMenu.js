@@ -882,10 +882,10 @@ const contextMenu = {
 	},
 	rotateIcon: [
 		{
-			text: 'Delete Rotate Icon',
+			text: 'action.delete_rotate_icon.name',
 			cb(selectedItem) {
 				const rotateIcon = selectedItem;
-				undoStack.commit('rotateIcon.delete', {rotateIcon}, this.text);
+				undoStack.commit('rotateIcon.delete', {rotateIcon}, tr(this.text));
 			}
 		}
 	],
