@@ -190,9 +190,17 @@
         },
 		"change_count": {
 			"name": "Change Count",
-            "undo": "Change Part Count"
+			"undo": "Change Part Count"
+		},
+		"delete_annotation": {
+			"name": "Delete",
+			"undo": "Delete Annotation"
+		},
+		"change_annotation_text_and_style": {
+			"name": "Change Text & Style...",
+			"undo": "Change Annotation"
 		}
-    },
+	},
 	"navbar": {
 		"file": {
 			"root": "File",
@@ -421,6 +429,9 @@
             "title": "Change Part Count",
             "label": "New Count"
         },
+		"style_annotation": {
+			"title": "Style Annotation"
+		},
 		"busy_indicator": {
 			"loading_model": "Loading Model",
 			"merging_steps": "Merging Steps",

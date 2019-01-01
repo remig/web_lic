@@ -891,16 +891,16 @@ const contextMenu = {
 	],
 	annotation(selectedItem) {
 		const deleteMenu = {
-			text: 'Delete',
+			text: 'action.delete_annotation.name',
 			cb(selectedItem) {
 				const annotation = selectedItem;
-				undoStack.commit('annotation.delete', {annotation}, 'Delete Annotation');
+				undoStack.commit('annotation.delete', {annotation}, tr('action.delete_annotation.undo'));
 				app.clearSelected();
 			}
 		};
 
 		const setStyleMenu = {
-			text: 'Change Text & Style...',
+			text: 'action.change_annotation_text_and_style.name',
 			shown(selectedItem) {
 				const annotation = store.get.annotation(selectedItem);
 				return annotation && annotation.annotationType === 'label';
@@ -910,9 +910,10 @@ const contextMenu = {
 				DialogManager('styleDialog', dialog => {
 					dialog.$on('ok', newProperties => {
 						const opts = {annotation, newProperties};
-						undoStack.commit('annotation.set', opts, 'Change Annotation');
+						undoStack.commit('annotation.set', opts,
+							tr('action.change_annotation_text_and_style.undo'));
 					});
-					dialog.title = 'Style Annotation';
+					dialog.title = tr('dialog.style_annotation.title');
 					dialog.text = annotation.text;
 					dialog.color = annotation.color;
 					dialog.font = annotation.font;

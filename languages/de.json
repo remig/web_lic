@@ -191,6 +191,14 @@
         "change_count": {
             "name": "Anzahl ändern",
             "undo": "Anzahl eines Teils ändern"
+        },
+        "delete_annotation": {
+            "name": "Löschen",
+            "undo": "Objekt löschen"
+        },
+        "change_annotation_text_and_style": {
+            "name": "Text & Stil ändern...",
+            "undo": "Objekt anpassen"
         }
     },
 	"navbar": {
@@ -420,6 +428,9 @@
         "change_part_count": {
             "title": "Anzahl eines Teils ändern",
             "label": "Neue Anzahl"
+        },
+        "style_annotation": {
+            "title": "Objekt anpassen"
         },
 		"busy_indicator": {
             "loading_model": "Lade Modell",
