@@ -935,10 +935,10 @@ const contextMenu = {
 	},
 	callout: [
 		{
-			text: 'Position',
+			text: 'action.position.name',
 			children: ['top', 'right', 'bottom', 'left'].map(position => {
 				return {
-					text: _.startCase(position),
+					text: tr('action.position.' + position + '.name'),
 					shown: (function(position) {
 						return function(selectedItem) {
 							const callout = store.get.lookupToItem(selectedItem);
@@ -948,47 +948,47 @@ const contextMenu = {
 					cb: (function(position) {
 						return function(selectedItem) {
 							const opts = {callout: selectedItem, position, doLayout: true};
-							undoStack.commit('callout.layout', opts, 'Set Callout Position');
+							undoStack.commit('callout.layout', opts, tr('action.position.undo'));
 						};
 					})(position)
 				};
 			})
 		},
 		{
-			text: 'Layout',
+			text: 'action.layout.name',
 			children: [
 				{
-					text: 'Horizontal',
+					text: 'action.layout.horizontal.name',
 					shown(selectedItem) {
 						const callout = store.get.lookupToItem(selectedItem);
 						return callout.layout !== 'horizontal';
 					},
 					cb(selectedItem) {
 						const opts = {callout: selectedItem, layout: 'horizontal', doLayout: true};
-						undoStack.commit('callout.layout', opts, this.text);
+						undoStack.commit('callout.layout', opts, tr('action.layout.horizontal.undo'));
 					}
 				},
 				{
-					text: 'Vertical',
+					text: 'action.layout.vertical.name',
 					shown(selectedItem) {
 						const callout = store.get.lookupToItem(selectedItem);
 						return callout.layout !== 'vertical';
 					},
 					cb(selectedItem) {
 						const opts = {callout: selectedItem, layout: 'vertical', doLayout: true};
-						undoStack.commit('callout.layout', opts, this.text);
+						undoStack.commit('callout.layout', opts, tr('action.layout.vertical.undo'));
 					}
 				}
 			]
 		},
 		{
-			text: 'Add Step',
+			text: 'action.add_step.name',
 			cb(selectedItem) {
-				undoStack.commit('callout.addStep', {callout: selectedItem, doLayout: true}, this.text);
+				undoStack.commit('callout.addStep', {callout: selectedItem, doLayout: true}, tr(this.text));
 			}
 		},
 		{
-			text: 'Delete Empty Callout',
+			text: 'action.delete_empty_callout.name',
 			shown(selectedItem) {
 				const callout = store.get.callout(selectedItem);
 				if (callout == null || callout.steps.length > 1) {
@@ -1001,7 +1001,7 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				app.clearSelected();
-				undoStack.commit('callout.delete', {callout: selectedItem, doLayout: true}, this.text);
+				undoStack.commit('callout.delete', {callout: selectedItem, doLayout: true}, tr(this.text));
 			}
 		}
 	],

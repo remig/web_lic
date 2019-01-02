@@ -24,7 +24,7 @@
 	"rotateicon": "Rotationszeichen",
 	"templatepage": "Seite",
 	"titlepage": "Titelseite",
-	"inventorypage": "Seite mit allen Teilen",
+	"inventorypage": "Teileübersicht",
 	"divider": "Trennlinie",
 	"annotation": "Objekt",
 	"callout": "Callout",
@@ -199,6 +199,28 @@
         "change_annotation_text_and_style": {
             "name": "Text & Stil ändern...",
             "undo": "Objekt anpassen"
+        },
+        "position": {
+            "name": "Position",
+            "undo": "Callout positionieren",
+            "top": {
+                "name": "Oben"
+            },
+            "bottom": {
+                "name": "Unten"
+            },
+            "right": {
+                "name": "Rechts"
+            },
+            "left": {
+                "name": "Links"
+            }
+        },
+        "add_step": {
+            "name": "Schritt hinzufügen"
+        },
+        "delete_empty_callout": {
+            "name": "Leeren Callout löschen"
         }
     },
 	"navbar": {
@@ -241,8 +263,8 @@
 				"hide": "PLIs verstecken"
 			},
 			"inventory_page": {
-				"add": "Seite mit allen Teilen hinzufügen",
-				"remove": "Seite mit allen Teilen entfernen"
+				"add": "Teileübersicht hinzufügen",
+				"remove": "Teileübersicht entfernen"
 			},
 			"snap": "Einrasten (NYI)",
 			"scene_rendering": "3D Teile Rendering...",
@@ -297,8 +319,8 @@
 				"root": "Aufnehmen...",
 				"titlePage": "Titelseite",
 				"submodelBreakdown": "Untermodell / Teilebeutel (NYI)",
-				"pli": "PLIs in jedem Schritt",
-				"partListPage": "Seite mit allen Teilen"
+				"pli": "Teilelisten in jedem Schritt",
+				"partListPage": "Teileübersicht"
 			}
 		},
 		"whats_new": {

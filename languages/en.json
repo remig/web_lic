@@ -199,6 +199,28 @@
 		"change_annotation_text_and_style": {
 			"name": "Change Text & Style...",
 			"undo": "Change Annotation"
+		},
+		"position": {
+			"name": "Position",
+			"undo": "Set Callout Position",
+			"top": {
+				"name": "Top"
+			},
+			"bottom": {
+				"name": "Bottom"
+			},
+			"right": {
+				"name": "Right"
+			},
+			"left": {
+				"name": "Left"
+			}
+		},
+		"add_step": {
+			"name": "Add Step"
+		},
+		"delete_empty_callout": {
+			"name": "Delete Empty Callout"
 		}
 	},
 	"navbar": {
