@@ -255,6 +255,16 @@
 			"left": {
 				"name": "Left"
 			}
+		},
+        "divider": {
+            "resize": {
+                "name": "Resize",
+                "undo": "Set Divider Length"
+            },
+            "delete": {
+                "name": "Delete",
+                "undo": "Remove Divider"
+            }
 		}
 	},
 	"navbar": {
@@ -488,6 +498,9 @@
 		"style_annotation": {
 			"title": "Style Annotation"
 		},
+        "resize_page_divider": {
+            "title": "Resize Page Divider"
+        },
 		"busy_indicator": {
 			"loading_model": "Loading Model",
 			"merging_steps": "Merging Steps",

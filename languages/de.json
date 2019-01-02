@@ -255,6 +255,16 @@
             "left": {
                 "name": "Links"
             }
+        },
+        "divider": {
+            "resize": {
+                "name": "Größe ändern",
+                "undo": "Länge der Trennlinie anpassen"
+            },
+            "delete": {
+                "name": "Löschen",
+                "undo": "Trennlinie löschen"
+            }
         }
     },
 	"navbar": {
@@ -487,6 +497,9 @@
         },
         "style_annotation": {
             "title": "Objekt anpassen"
+        },
+        "resize_page_divider": {
+            "title": "Länge der Trennlinie ändern"
         },
 		"busy_indicator": {
             "loading_model": "Lade Modell",

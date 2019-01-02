@@ -1048,7 +1048,7 @@ const contextMenu = {
 	],
 	divider: [
 		{
-			text: 'Resize',
+			text: 'action.divider.resize.name',
 			cb(selectedItem) {
 				const divider = store.get.divider(selectedItem);
 				const bbox = _.geom.bbox([divider.p1, divider.p2]);
@@ -1061,13 +1061,13 @@ const contextMenu = {
 						app.drawCurrentPage();
 					});
 					dialog.$on('ok', () => {
-						undoStack.commit('', null, 'Set Divider Length');
+						undoStack.commit('', null, tr('action.divider.resize.undo'));
 					});
 					dialog.$on('cancel', () => {
 						store.mutations.divider.setLength({divider, newLength: originalSize});
 						app.drawCurrentPage();
 					});
-					dialog.title = 'Resize Page Divider';
+					dialog.title = tr('dialog.resize_page_divider.title');
 					dialog.min = 1;
 					dialog.max = 10000;
 					dialog.step = 1;
@@ -1076,9 +1076,9 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Delete',
+			text: 'action.divider.delete.name',
 			cb(selectedItem) {
-				undoStack.commit('divider.delete', {divider: selectedItem}, 'Remove Divider');
+				undoStack.commit('divider.delete', {divider: selectedItem}, tr('action.divider.delete.undo'));
 				app.clearSelected();
 			}
 		}
