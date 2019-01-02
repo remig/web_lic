@@ -222,40 +222,46 @@
         "delete_empty_callout": {
             "name": "Leeren Callout löschen"
         },
-        "select_point": {
-            "name": "Punkt auswählen...",
-            "base": {
-                "name": "Start"
-            },
-            "tip": {
-                "name": "Spitze"
-            },
-            "point": {
-                "name_@mf": "Punkt ${idx}"
-            }
-        },
-        "add_point": {
-            "name": "Punkt hinzufügen"
-        },
-        "add_tip": {
-            "name": "Pfeilspitze hinzufügen (NYI)"
-        },
-        "rotate_tip": {
-            "name": "Pfeilspitze rotieren...",
-            "undo": "Pfeilspitze rotieren",
-            "up": {
-                "name": "Hoch"
-            },
-            "right": {
-                "name": "Rechts"
-            },
-            "down": {
-                "name": "Unten"
-            },
-            "left": {
-                "name": "Links"
-            }
-        },
+		"callout_arrow": {
+			"select_point": {
+				"name": "Punkt auswählen...",
+				"base": {
+					"name": "Start"
+				},
+				"tip": {
+					"name": "Spitze"
+				},
+				"point": {
+					"name_@mf": "Punkt ${idx}"
+				}
+			},
+			"add_point": {
+				"name": "Punkt hinzufügen"
+			},
+			"delete_point": {
+				"name": "Löschen",
+				"undo": "Punkt löschen"
+			},
+			"add_tip": {
+				"name": "Pfeilspitze hinzufügen (NYI)"
+			},
+			"rotate_tip": {
+				"name": "Pfeilspitze rotieren...",
+				"undo": "Pfeilspitze rotieren",
+				"up": {
+					"name": "Hoch"
+				},
+				"right": {
+					"name": "Rechts"
+				},
+				"down": {
+					"name": "Unten"
+				},
+				"left": {
+					"name": "Links"
+				}
+			}
+		},
         "divider": {
             "resize": {
                 "name": "Größe ändern",

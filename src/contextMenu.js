@@ -1007,14 +1007,15 @@ const contextMenu = {
 	],
 	calloutArrow: [
 		{
-			text: 'action.select_point.name',
+			text: 'action.callout_arrow.select_point.name',
 			children(selectedItem) {
 				const arrow = store.get.calloutArrow(selectedItem);
 				return arrow.points.map((pointID, idx) => {
 					return {
-						text: (idx === 0) ? tr('action.select_point.base.name') :
-							(idx === arrow.points.length - 1) ? tr('action.select_point.tip.name') :
-								tr('action.select_point.point.name_@mf', {idx}),
+						text: (idx === 0) ? tr('action.callout_arrow.select_point.base.name') :
+							(idx === arrow.points.length - 1) ?
+								tr('action.callout_arrow.select_point.tip.name') :
+								tr('action.callout_arrow.select_point.point.name_@mf', {idx}),
 						cb() {
 							app.setSelected({type: 'point', id: pointID});
 						}
@@ -1023,7 +1024,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.add_point.name',
+			text: 'action.callout_arrow.add_point.name',
 			cb(selectedItem) {
 				const arrow = store.get.calloutArrow(selectedItem);
 				const newPointIdx = Math.ceil(arrow.points.length / 2);
@@ -1032,14 +1033,14 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.add_tip.name',
+			text: 'action.callout_arrow.add_tip.name',
 			cb() {}
 		},
 		{
-			text: 'action.rotate_tip.name',
+			text: 'action.callout_arrow.rotate_tip.name',
 			children: ['up', 'right', 'down', 'left'].map(direction => {
 				return {
-					text: tr('action.rotate_tip.' + direction + '.name'),
+					text: tr('action.callout_arrow.rotate_tip.' + direction + '.name'),
 					shown: arrowTipRotationVisible(direction),
 					cb: rotateArrowTip(direction)
 				};
@@ -1085,7 +1086,7 @@ const contextMenu = {
 	],
 	point: [
 		{
-			text: 'Delete',
+			text: 'action.callout_arrow.delete_point.name',
 			shown(selectedItem) {
 				const point = store.get.point(selectedItem);
 				if (point.parent.type === 'calloutArrow') {
@@ -1095,7 +1096,8 @@ const contextMenu = {
 				return true;
 			},
 			cb(selectedItem) {
-				undoStack.commit('item.delete', {item: selectedItem}, 'Delete Point');
+				undoStack.commit('item.delete', {item: selectedItem},
+					tr('action.callout_arrow.delete_point.undo'));
 				app.clearSelected();
 			}
 		}
@@ -1412,7 +1414,8 @@ function arrowTipRotationVisible(direction) {
 function rotateArrowTip(direction) {
 	return (selectedItem) => {
 		const arrow = store.get.lookupToItem(selectedItem);
-		undoStack.commit('calloutArrow.rotateTip', {arrow, direction}, tr('action.rotate_tip.undo'));
+		undoStack.commit('calloutArrow.rotateTip', {arrow, direction},
+			tr('action.callout_arrow.rotate_tip.undo'));
 	};
 }
 

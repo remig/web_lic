@@ -222,40 +222,46 @@
 		"delete_empty_callout": {
 			"name": "Delete Empty Callout"
 		},
-		"select_point": {
-			"name": "Select Point...",
-			"base": {
-				"name": "Base"
-			},
-			"tip": {
-				"name": "Tip"
-			},
-			"point": {
-				"name_@mf": "Point ${idx}"
-			}
-		},
-		"add_point": {
-			"name": "Add Point"
-		},
-		"add_tip": {
-			"name": "Add Tip (NYI)"
-		},
-		"rotate_tip": {
-			"name": "Rotate Tip...",
-			"undo": "Rotate Arrow Tip",
-			"up": {
-				"name": "Up"
-			},
-			"right": {
-				"name": "Right"
-			},
-			"down": {
-				"name": "Down"
-			},
-			"left": {
-				"name": "Left"
-			}
-		},
+        "callout_arrow": {
+            "select_point": {
+                "name": "Select Point...",
+                "base": {
+                    "name": "Base"
+                },
+                "tip": {
+                    "name": "Tip"
+                },
+                "point": {
+                    "name_@mf": "Point ${idx}"
+                }
+            },
+            "add_point": {
+                "name": "Add Point"
+            },
+            "delete_point": {
+                "name": "Delete",
+                "undo": "Delete Point"
+            },
+            "add_tip": {
+                "name": "Add Tip (NYI)"
+            },
+            "rotate_tip": {
+                "name": "Rotate Tip...",
+                "undo": "Rotate Arrow Tip",
+                "up": {
+                    "name": "Up"
+                },
+                "right": {
+                    "name": "Right"
+                },
+                "down": {
+                    "name": "Down"
+                },
+                "left": {
+                    "name": "Left"
+                }
+            }
+        },
         "divider": {
             "resize": {
                 "name": "Resize",
