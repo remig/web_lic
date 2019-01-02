@@ -1412,7 +1412,7 @@ function arrowTipRotationVisible(direction) {
 function rotateArrowTip(direction) {
 	return (selectedItem) => {
 		const arrow = store.get.lookupToItem(selectedItem);
-		undoStack.commit('calloutArrow.rotateTip', {arrow, direction}, 'Rotate Arrow Tip');
+		undoStack.commit('calloutArrow.rotateTip', {arrow, direction}, tr('action.rotate_tip.undo'));
 	};
 }
 
@@ -1504,7 +1504,7 @@ export default function ContextMenu(selectedItem, localApp) {
 	filterMenu(menu, selectedItem);
 
 	if (menu) {
-		// Copy item type to each meny entry; saves typing them all out everywhere above
+		// Copy item type to each menu entry; saves typing them all out everywhere above
 		menu.forEach(menuEntry => (menuEntry.selectedItem = selectedItem));
 		return menu;
 	}
