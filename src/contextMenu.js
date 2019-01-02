@@ -1007,13 +1007,14 @@ const contextMenu = {
 	],
 	calloutArrow: [
 		{
-			text: 'Select Point...',
+			text: 'action.select_point.name',
 			children(selectedItem) {
 				const arrow = store.get.calloutArrow(selectedItem);
 				return arrow.points.map((pointID, idx) => {
 					return {
-						text: (idx === 0) ? 'Base' :
-							(idx === arrow.points.length - 1) ? 'Tip' : `Point ${idx}`,
+						text: (idx === 0) ? tr('action.select_point.base.name') :
+							(idx === arrow.points.length - 1) ? tr('action.select_point.tip.name') :
+								tr('action.select_point.point.name_@mf', {idx}),
 						cb() {
 							app.setSelected({type: 'point', id: pointID});
 						}
@@ -1022,23 +1023,23 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Add Point',
+			text: 'action.add_point.name',
 			cb(selectedItem) {
 				const arrow = store.get.calloutArrow(selectedItem);
 				const newPointIdx = Math.ceil(arrow.points.length / 2);
-				undoStack.commit('calloutArrow.addPoint', {arrow}, this.text);
+				undoStack.commit('calloutArrow.addPoint', {arrow}, tr(this.text));
 				app.setSelected({type: 'point', id: arrow.points[newPointIdx]});
 			}
 		},
 		{
-			text: 'Add Tip (NYI)',
+			text: 'action.add_tip.name',
 			cb() {}
 		},
 		{
-			text: 'Rotate Tip...',
+			text: 'action.rotate_tip.name',
 			children: ['up', 'right', 'down', 'left'].map(direction => {
 				return {
-					text: _.startCase(direction),
+					text: tr('action.rotate_tip.' + direction + '.name'),
 					shown: arrowTipRotationVisible(direction),
 					cb: rotateArrowTip(direction)
 				};
