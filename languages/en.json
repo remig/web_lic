@@ -30,31 +30,38 @@
 	"callout": "Callout",
 	"ctrl": "Ctrl",
 	"action": {
-		"add_annotation": {
-			"name": "Add Annotation",
-			"label": {
-				"name": "Label",
-				"undo": "Add Label",
-				"initial_text": "New Label"
-			},
-			"line": {
-				"name": "Line (NYI)"
-			},
-			"circle": {
-				"name": "Circle (NYI)"
-			},
-			"arrow": {
-				"name": "Arrow",
-				"undo": "Add Arrow"
-			},
-			"image": {
-				"name": "Image",
-				"undo": "Add Image"
-			}
-		},
-		"redo_layout": {
-			"name": "Redo Layout"
-		},
+        "annotation": {
+            "add": {
+                "name": "Add Annotation",
+                "label": {
+                    "name": "Label",
+                    "undo": "Add Label",
+                    "initial_text": "New Label"
+                },
+                "line": {
+                    "name": "Line (NYI)"
+                },
+                "circle": {
+                    "name": "Circle (NYI)"
+                },
+                "arrow": {
+                    "name": "Arrow",
+                    "undo": "Add Arrow"
+                },
+                "image": {
+                    "name": "Image",
+                    "undo": "Add Image"
+                }
+            },
+            "delete": {
+                "name": "Delete",
+                "undo": "Delete Annotation"
+            },
+            "change_text_and_style": {
+                "name": "Change Text & Style...",
+                "undo": "Change Annotation"
+            }
+        },
 		"layout": {
 			"name": "Layout",
 			"vertical": {
@@ -69,159 +76,183 @@
 				"name": "By Row and Column...",
 				"undo": "Layout Page by Row and Column",
 				"undo_step": "Layout Step by Row and Column"
-			}
-		},
-		"prepend_blank_page": {
-			"name": "Prepend Blank Page"
-		},
-		"append_blank_page": {
-			"name": "Append Blank Page"
-		},
-		"hide_step_separators": {
-			"name": "Hide Step Separators (NYI)"
-		},
-		"add_blank_step": {
-			"name": "Add Blank Step"
-		},
-		"delete_this_blank_page": {
-			"name": "Delete This Blank Page",
-			"undo": "Delete Page"
-		},
-		"add_callout": {
-			"name": "Add Callout"
-		},
-		"divide_into_sub_steps": {
-			"name": "Divide into Sub-Steps"
-		},
-		"stretch_step_to_next_page": {
-			"name": "Stretch Step to Next Page"
-		},
-		"move_step_to": {
-			"name": "Move Step to...",
-			"previous_page": {
-				"name": "Previous Page",
-				"undo": "Move Step to Previous Page"
 			},
-			"next_page": {
-				"name": "Next Page",
-				"undo": "Move Step to Next Page"
-			}
-		},
-		"merge_step_with": {
-			"name": "Merge Step with...",
-			"previous_step": {
-				"name": "Previous Step",
-				"undo": "Merge Step with Previous Step"
-			},
-			"next_step": {
-				"name": "Next Step",
-				"undo": "Merge Step with Next Step"
-			}
-		},
-		"delete_empty_step": {
-			"name": "Delete Empty Step"
-		},
-		"prepend_blank_step": {
-			"name": "Prepend Blank Step"
-		},
-		"append_blank_step": {
-			"name": "Append Blank Step"
-		},
-		"add_rotate_icon": {
-			"name": "Add Rotate Icon"
-		},
-		"delete_rotate_icon": {
-			"name": "Delete Rotate Icon"
-		},
-		"change_page_number": {
-			"name": "Change Page Number (NYI)"
-		},
-		"change_step_number": {
-			"name": "Change Step Number (NYI)"
-		},
-		"rotate_csi": {
-			"name": "Rotate CSI",
-            "flip_upside_down": {
-                "name": "Flip Upside Down",
-                "undo": "Flip Step Image"
-            },
-            "rotate_front_to_back": {
-                "name": "Rotate Front to Back",
-                "undo": "Rotate Step Image"
-            },
-            "custom_rotation": {
-                "name": "Custom Rotation...",
-                "undo": "Rotate Step Image"
-            },
-            "remove_rotation": {
-                "name": "Remove Rotation",
-                "undo": "Remove Step Image Rotation"
+            "redo_layout": {
+                "name": "Redo Layout"
             }
         },
-		"copy_rotation_to_next_steps": {
-			"name": "Copy Rotation to next Steps...",
-            "undo": "Copy CSI Rotations"
-		},
-		"scale_csi": {
-			"name": "Scale CSI",
-            "undo": "Scale Step Image"
-		},
-		"remove_scale": {
-			"name": "Remove Scale",
-            "undo": "Clear Step Image Scale"
-		},
-		"select_part": {
-			"name": "Select Part"
-		},
-		"add_new_part": {
-			"name": "Add New Part (NYI)"
-		},
-		"rotate_part_list_image": {
-			"name": "Rotate Part List Image...",
-            "undo": "Rotate Part List Image"
-		},
-		"scale_part_list_image": {
-			"name": "Scale Part List Image...",
-            "undo": "Scale Part List Image"
-		},
-        "remove_part_list_image_scale": {
-            "name": "Remove Scale",
-            "undo": "Remove Part List Image Scale"
+        "page": {
+            "prepend_blank_page": {
+                "name": "Prepend Blank Page"
+            },
+            "append_blank_page": {
+                "name": "Append Blank Page"
+            },
+            "hide_step_separators": {
+                "name": "Hide Step Separators (NYI)"
+            },
+            "add_blank_step": {
+                "name": "Add Blank Step"
+            },
+            "delete_this_blank_page": {
+                "name": "Delete This Blank Page",
+                "undo": "Delete Page"
+            }
         },
-		"change_count": {
-			"name": "Change Count",
-			"undo": "Change Part Count"
-		},
-		"delete_annotation": {
-			"name": "Delete",
-			"undo": "Delete Annotation"
-		},
-		"change_annotation_text_and_style": {
-			"name": "Change Text & Style...",
-			"undo": "Change Annotation"
-		},
-		"position": {
-			"name": "Position",
-			"undo": "Set Callout Position",
-			"top": {
-				"name": "Top"
-			},
-			"bottom": {
-				"name": "Bottom"
-			},
-			"right": {
-				"name": "Right"
-			},
-			"left": {
-				"name": "Left"
-			}
-		},
-		"add_step": {
-			"name": "Add Step"
-		},
-		"delete_empty_callout": {
-			"name": "Delete Empty Callout"
-		},
+        "step": {
+            "add_callout": {
+                "name": "Add Callout"
+            },
+            "divide_into_sub_steps": {
+                "name": "Divide into Sub-Steps"
+            },
+            "stretch_to_next_page": {
+                "name": "Stretch Step to Next Page"
+            },
+            "move_to": {
+                "name": "Move Step to...",
+                "previous_page": {
+                    "name": "Previous Page",
+                    "undo": "Move Step to Previous Page"
+                },
+                "next_page": {
+                    "name": "Next Page",
+                    "undo": "Move Step to Next Page"
+                }
+            },
+            "merge_with": {
+                "name": "Merge Step with...",
+                "previous_step": {
+                    "name": "Previous Step",
+                    "undo": "Merge Step with Previous Step"
+                },
+                "next_step": {
+                    "name": "Next Step",
+                    "undo": "Merge Step with Next Step"
+                }
+            },
+            "delete_empty_step": {
+                "name": "Delete Empty Step"
+            },
+            "prepend_blank_step": {
+                "name": "Prepend Blank Step"
+            },
+            "append_blank_step": {
+                "name": "Append Blank Step"
+            }
+        },
+        "rotate_icon": {
+            "add": {
+                "name": "Add Rotate Icon"
+            },
+            "delete": {
+                "name": "Delete Rotate Icon"
+            }
+        },
+        "page_number": {
+            "change_number": {
+                "name": "Change Page Number (NYI)"
+            }
+        },
+        "step_number": {
+            "change_number": {
+                "name": "Change Step Number (NYI)"
+            }
+        },
+        "csi": {
+            "rotate": {
+                "name": "Rotate CSI",
+                "flip_upside_down": {
+                    "name": "Flip Upside Down",
+                    "undo": "Flip Step Image"
+                },
+                "rotate_front_to_back": {
+                    "name": "Rotate Front to Back",
+                    "undo": "Rotate Step Image"
+                },
+                "custom_rotation": {
+                    "name": "Custom Rotation...",
+                    "undo": "Rotate Step Image"
+                },
+                "remove_rotation": {
+                    "name": "Remove Rotation",
+                    "undo": "Remove Step Image Rotation"
+                }
+            },
+            "copy_rotation_to_next_steps": {
+                "name": "Copy Rotation to next Steps...",
+                "undo": "Copy CSI Rotations"
+            },
+            "scale": {
+                "name": "Scale CSI",
+                "undo": "Scale Step Image"
+            },
+            "remove_scale": {
+                "name": "Remove Scale",
+                "undo": "Clear Step Image Scale"
+            },
+            "select_part": {
+                "name": "Select Part"
+            },
+            "add_new_part": {
+                "name": "Add New Part (NYI)"
+            }
+        },
+        "pli_item": {
+            "rotate_part_list_image": {
+                "name": "Rotate Part List Image...",
+                "undo": "Rotate Part List Image"
+            },
+            "scale_part_list_image": {
+                "name": "Scale Part List Image...",
+                "undo": "Scale Part List Image"
+            },
+            "remove_part_list_image_scale": {
+                "name": "Remove Scale",
+                "undo": "Remove Part List Image Scale"
+            }
+        },
+        "quantity_label": {
+            "change_count": {
+                "name": "Change Count",
+                "undo": "Change Part Count"
+            }
+        },
+        "callout": {
+            "position": {
+                "name": "Position",
+                "undo": "Set Callout Position",
+                "top": {
+                    "name": "Top"
+                },
+                "bottom": {
+                    "name": "Bottom"
+                },
+                "right": {
+                    "name": "Right"
+                },
+                "left": {
+                    "name": "Left"
+                }
+            },
+            "layout": {
+                "name": "Layout",
+                "vertical": {
+                    "name": "Vertical",
+                    "undo": "Layout Vertical"
+                },
+                "horizontal": {
+                    "name": "Horizontal",
+                    "undo": "Layout Horizontal"
+                }
+            },
+            "add_step": {
+                "name": "Add Step"
+            },
+            "delete_empty_callout": {
+                "name": "Delete Empty Callout"
+            }
+        },
         "callout_arrow": {
             "select_point": {
                 "name": "Select Point...",

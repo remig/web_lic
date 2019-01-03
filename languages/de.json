@@ -30,31 +30,38 @@
 	"callout": "Callout",
 	"ctrl": "Strg",
 	"action": {
-		"add_annotation": {
-			"name": "Objekt hinzufügen",
-			"label": {
-				"name": "Text",
-				"undo": "Text hinzufügen",
-				"initial_text": "Neuer Text"
-			},
-			"line": {
-				"name": "Linie (NYI)"
-			},
-			"circle": {
-				"name": "Kreis (NYI)"
-			},
-			"arrow": {
-				"name": "Pfeil",
-				"undo": "Pfeil hinzufügen"
-			},
-			"image": {
-				"name": "Bild",
-				"undo": "Bild hinzufügen"
-			}
-		},
-		"redo_layout": {
-			"name": "Neu anordnen"
-		},
+        "annotation": {
+            "add": {
+                "name": "Objekt hinzufügen",
+                "label": {
+                    "name": "Text",
+                    "undo": "Text hinzufügen",
+                    "initial_text": "Neuer Text"
+                },
+                "line": {
+                    "name": "Linie (NYI)"
+                },
+                "circle": {
+                    "name": "Kreis (NYI)"
+                },
+                "arrow": {
+                    "name": "Pfeil",
+                    "undo": "Pfeil hinzufügen"
+                },
+                "image": {
+                    "name": "Bild",
+                    "undo": "Bild hinzufügen"
+                }
+            },
+            "delete": {
+                "name": "Löschen",
+                "undo": "Objekt löschen"
+            },
+            "change_text_and_style": {
+                "name": "Text & Stil ändern...",
+                "undo": "Objekt anpassen"
+            }
+        },
 		"layout": {
 			"name": "Anordnung",
 			"vertical": {
@@ -69,158 +76,182 @@
 				"name": "In Zeilen und Spalten...",
 				"undo": "Seite in Zeilen und Spalten anordnen",
 				"undo_step": "Schritt in Zeilen und Spalten anordnen"
-			}
-		},
-		"prepend_blank_page": {
-			"name": "Leere Seite vor dieser einfügen"
-		},
-		"append_blank_page": {
-			"name": "Leere Seite nach dieser einfügen"
-		},
-		"hide_step_separators": {
-			"name": "Schritttrenner verstecken (NYI)"
-		},
-		"add_blank_step": {
-			"name": "Leeren Schritt hinzufügen"
-		},
-		"delete_this_blank_page": {
-			"name": "Diese leere Seite löschen",
-			"undo": "Seite löschen"
-		},
-		"add_callout": {
-			"name": "Callout hinzufügen"
-		},
-		"divide_into_sub_steps": {
-			"name": "In Unterschritte unterteilen"
-		},
-		"stretch_step_to_next_page": {
-			"name": "Schritt auf nächste Seite ausdehnen"
-		},
-		"move_step_to": {
-			"name": "Schritt verschieben auf...",
-			"previous_page": {
-				"name": "Vorherige Seite",
-				"undo": "Schritt auf vorherige Seite verschieben"
 			},
-			"next_page": {
-				"name": "Nächste Seite",
-				"undo": "Schritt auf nächste Seite verschieben"
-			}
-		},
-		"merge_step_with": {
-			"name": "Schritt zusammenführen mit...",
-			"previous_step": {
-				"name": "Vorherigem Schritt",
-				"undo": "Schritt mit vorherigem Schritt zusammenführen"
-			},
-			"next_step": {
-				"name": "Nächstem Schritt",
-				"undo": "Schritt mit nächstem Schritt zusammenführen"
-			}
-		},
-		"delete_empty_step": {
-			"name": "Leeren Schritt löschen"
-		},
-		"prepend_blank_step": {
-			"name": "Leeren Schritt vor diesem einfügen"
-		},
-		"append_blank_step": {
-			"name": "Leeren Schritt nach diesem einfügen"
-		},
-		"add_rotate_icon": {
-			"name": "Rotationszeichen hinzufügen"
-		},
-		"delete_rotate_icon": {
-			"name": "Rotationszeichen entfernen"
-		},
-		"change_page_number": {
-			"name": "Seitenzahl ändern (NYI)"
-		},
-		"change_step_number": {
-			"name": "Schrittnummer ändern (NYI)"
-        },
-        "rotate_csi": {
-            "name": "Rotation des Schrittbildes",
-            "flip_upside_down": {
-                "name": "Tausche oben und unten",
-                "undo": "Im Schrittbild oben und unten vertauschen"
-            },
-            "rotate_front_to_back": {
-                "name": "Tausche vorne und hinten",
-                "undo": "Im Schrittbild vorne und hinten vertauschen"
-            },
-            "custom_rotation": {
-                "name": "Andere Ausrichtung...",
-                "undo": "Schrittbild rotieren"
-            },
-            "remove_rotation": {
-                "name": "Rotation entfernen",
-                "undo": "Rotation des Schrittbildes entfernen"
+            "redo_layout": {
+                "name": "Neu anordnen"
             }
         },
-        "copy_rotation_to_next_steps": {
-            "name": "Rotation auf folgende Schritte übertragen...",
-            "undo": "Rotation des Schrittbildes übertragen"
-        },
-        "scale_csi": {
-            "name": "Skalierung ändern",
-            "undo": "Skalierung des Schrittbildes ändern"
-        },
-        "remove_scale": {
-            "name": "Skalierung entfernen",
-            "undo": "Skalierung des Schrittbildes entfernen"
-        },
-        "select_part": {
-            "name": "Teil auswählen"
-        },
-        "add_new_part": {
-            "name": "Neues Teil hinzufügen (NYI)"
-        },
-        "rotate_part_list_image": {
-            "name": "Rotation ändern...",
-            "undo": "Teilelistenbild rotieren"
-        },
-        "scale_part_list_image": {
-            "name": "Skalierung ändern...",
-            "undo": "Teilelistenbild skalieren"
-        },
-        "remove_part_list_image_scale": {
-            "name": "Skalierung entfernen",
-            "undo": "Skalierung des Teilelistenbildes entfernen"
-        },
-        "change_count": {
-            "name": "Anzahl ändern",
-            "undo": "Anzahl eines Teils ändern"
-        },
-        "delete_annotation": {
-            "name": "Löschen",
-            "undo": "Objekt löschen"
-        },
-        "change_annotation_text_and_style": {
-            "name": "Text & Stil ändern...",
-            "undo": "Objekt anpassen"
-        },
-        "position": {
-            "name": "Position",
-            "undo": "Callout positionieren",
-            "top": {
-                "name": "Oben"
+        "page": {
+            "prepend_blank_page": {
+                "name": "Leere Seite vor dieser einfügen"
             },
-            "bottom": {
-                "name": "Unten"
+            "append_blank_page": {
+                "name": "Leere Seite nach dieser einfügen"
             },
-            "right": {
-                "name": "Rechts"
+            "hide_step_separators": {
+                "name": "Schritttrenner verstecken (NYI)"
             },
-            "left": {
-                "name": "Links"
+            "add_blank_step": {
+                "name": "Leeren Schritt hinzufügen"
+            },
+            "delete_this_blank_page": {
+                "name": "Diese leere Seite löschen",
+                "undo": "Seite löschen"
             }
         },
-        "add_step": {
-            "name": "Schritt hinzufügen"
+        "step": {
+            "add_callout": {
+                "name": "Callout hinzufügen"
+            },
+            "divide_into_sub_steps": {
+                "name": "In Unterschritte unterteilen"
+            },
+            "stretch_to_next_page": {
+                "name": "Schritt auf nächste Seite ausdehnen"
+            },
+            "move_to": {
+                "name": "Schritt verschieben auf...",
+                "previous_page": {
+                    "name": "Vorherige Seite",
+                    "undo": "Schritt auf vorherige Seite verschieben"
+                },
+                "next_page": {
+                    "name": "Nächste Seite",
+                    "undo": "Schritt auf nächste Seite verschieben"
+                }
+            },
+            "merge_with": {
+                "name": "Schritt zusammenführen mit...",
+                "previous_step": {
+                    "name": "Vorherigem Schritt",
+                    "undo": "Schritt mit vorherigem Schritt zusammenführen"
+                },
+                "next_step": {
+                    "name": "Nächstem Schritt",
+                    "undo": "Schritt mit nächstem Schritt zusammenführen"
+                }
+            },
+            "delete_empty_step": {
+                "name": "Leeren Schritt löschen"
+            },
+            "prepend_blank_step": {
+                "name": "Leeren Schritt vor diesem einfügen"
+            },
+            "append_blank_step": {
+                "name": "Leeren Schritt nach diesem einfügen"
+            }
         },
-        "delete_empty_callout": {
-            "name": "Leeren Callout löschen"
+        "rotate_icon": {
+            "add": {
+                "name": "Rotationszeichen hinzufügen"
+            },
+            "delete": {
+                "name": "Rotationszeichen entfernen"
+            }
+        },
+        "page_number": {
+            "change_number": {
+                "name": "Seitenzahl ändern (NYI)"
+            }
+        },
+        "step_number": {
+            "change_number": {
+                "name": "Schrittnummer ändern (NYI)"
+            }
+        },
+        "csi": {
+            "rotate": {
+                "name": "Rotation des Schrittbildes",
+                "flip_upside_down": {
+                    "name": "Tausche oben und unten",
+                    "undo": "Im Schrittbild oben und unten vertauschen"
+                },
+                "rotate_front_to_back": {
+                    "name": "Tausche vorne und hinten",
+                    "undo": "Im Schrittbild vorne und hinten vertauschen"
+                },
+                "custom_rotation": {
+                    "name": "Andere Ausrichtung...",
+                    "undo": "Schrittbild rotieren"
+                },
+                "remove_rotation": {
+                    "name": "Rotation entfernen",
+                    "undo": "Rotation des Schrittbildes entfernen"
+                }
+            },
+            "copy_rotation_to_next_steps": {
+                "name": "Rotation auf folgende Schritte übertragen...",
+                "undo": "Rotation des Schrittbildes übertragen"
+            },
+            "scale": {
+                "name": "Skalierung ändern",
+                "undo": "Skalierung des Schrittbildes ändern"
+            },
+            "remove_scale": {
+                "name": "Skalierung entfernen",
+                "undo": "Skalierung des Schrittbildes entfernen"
+            },
+            "select_part": {
+                "name": "Teil auswählen"
+            },
+            "add_new_part": {
+                "name": "Neues Teil hinzufügen (NYI)"
+            }
+        },
+        "pli_item": {
+            "rotate_part_list_image": {
+                "name": "Rotation ändern...",
+                "undo": "Teilelistenbild rotieren"
+            },
+            "scale_part_list_image": {
+                "name": "Skalierung ändern...",
+                "undo": "Teilelistenbild skalieren"
+            },
+            "remove_part_list_image_scale": {
+                "name": "Skalierung entfernen",
+                "undo": "Skalierung des Teilelistenbildes entfernen"
+            }
+        },
+        "quantity_label": {
+            "change_count": {
+                "name": "Anzahl ändern",
+                "undo": "Anzahl eines Teils ändern"
+            }
+        },
+        "callout": {
+            "position": {
+                "name": "Position",
+                "undo": "Callout positionieren",
+                "top": {
+                    "name": "Oben"
+                },
+                "bottom": {
+                    "name": "Unten"
+                },
+                "right": {
+                    "name": "Rechts"
+                },
+                "left": {
+                    "name": "Links"
+                }
+            },
+            "layout": {
+                "name": "Anordnung",
+                "vertical": {
+                    "name": "Vertikal",
+                    "undo": "Vertikal anordnen"
+                },
+                "horizontal": {
+                    "name": "Horizontal",
+                    "undo": "Horizontal anordnen"
+                }
+            },
+            "add_step": {
+                "name": "Schritt hinzufügen"
+            },
+            "delete_empty_callout": {
+                "name": "Leeren Callout löschen"
+            }
         },
 		"callout_arrow": {
 			"select_point": {

@@ -16,32 +16,32 @@ let app;
 const tr = LocaleManager.translate;
 
 const annotationMenu = {
-	text: 'action.add_annotation.name',
+	text: 'action.annotation.add.name',
 	children: [
 		{
-			text: 'action.add_annotation.label.name',
+			text: 'action.annotation.add.label.name',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				const opts = {
 					annotationType: 'label',
-					properties: {text: tr('action.add_annotation.label.initial_text')},
+					properties: {text: tr('action.annotation.add.label.initial_text')},
 					parent: selectedItem,
 					...pos
 				};
-				undoStack.commit('annotation.add', opts, tr('action.add_annotation.label.undo'));
+				undoStack.commit('annotation.add', opts, tr('action.annotation.add.label.undo'));
 			}
 		},
 		{
-			text: 'action.add_annotation.line.name',
+			text: 'action.annotation.add.line.name',
 			cb() {}
 		},
 		{
-			text: 'action.add_annotation.circle.name',
+			text: 'action.annotation.add.circle.name',
 			cb() {}
 		},
 		{
-			text: 'action.add_annotation.arrow.name',
+			text: 'action.annotation.add.arrow.name',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
@@ -51,11 +51,11 @@ const annotationMenu = {
 					parent: selectedItem,
 					...pos
 				};
-				undoStack.commit('annotation.add', opts, tr('action.add_annotation.arrow.undo'));
+				undoStack.commit('annotation.add', opts, tr('action.annotation.add.arrow.undo'));
 			}
 		},
 		{
-			text: 'action.add_annotation.image.name',
+			text: 'action.annotation.add.image.name',
 			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
@@ -66,7 +66,7 @@ const annotationMenu = {
 						parent: selectedItem,
 						...pos
 					};
-					undoStack.commit('annotation.add', opts, tr('action.add_annotation.image.undo'));
+					undoStack.commit('annotation.add', opts, tr('action.annotation.add.image.undo'));
 				});
 			}
 		}
@@ -76,7 +76,7 @@ const annotationMenu = {
 const contextMenu = {
 	titlePage: [
 		{
-			text: 'action.redo_layout.name',
+			text: 'action.layout.redo_layout.name',
 			cb(selectedItem) {
 				undoStack.commit('page.layout', {page: selectedItem}, tr(this.text));
 			}
@@ -87,7 +87,7 @@ const contextMenu = {
 		// TODO: add way to add new parts to page and delete existing parts
 		// TODO: add way to auto-recalculate part quantities (basically reset entire page)
 		{
-			text: 'action.redo_layout.name',
+			text: 'action.layout.redo_layout.name',
 			cb(selectedItem) {
 				undoStack.commit('page.layout', {page: selectedItem}, tr(this.text));
 			}
@@ -101,7 +101,7 @@ const contextMenu = {
 			enabled: enableIfUnlocked,
 			children: [
 				{
-					text: 'action.redo_layout.name',
+					text: 'action.layout.redo_layout.name',
 					cb(selectedItem) {
 						undoStack.commit('page.layout', {page: selectedItem}, tr(this.text));
 					}
@@ -166,7 +166,7 @@ const contextMenu = {
 		},
 		{text: 'separator'},
 		{
-			text: 'action.prepend_blank_page.name',
+			text: 'action.page.prepend_blank_page.name',
 			cb(selectedItem) {
 				const nextPage = store.get.lookupToItem(selectedItem);
 				undoStack.commit('page.add', {
@@ -176,7 +176,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.append_blank_page.name',
+			text: 'action.page.append_blank_page.name',
 			cb(selectedItem) {
 				const prevPage = store.get.lookupToItem(selectedItem);
 				undoStack.commit('page.add', {
@@ -186,9 +186,9 @@ const contextMenu = {
 			}
 		},
 		{text: 'separator'},
-		{text: 'action.hide_step_separators.name', cb: () => {}},
+		{text: 'action.page.hide_step_separators.name', cb: () => {}},
 		{
-			text: 'action.add_blank_step.name',
+			text: 'action.page.add_blank_step.name',
 			enabled: enableIfUnlocked,
 			cb(selectedItem) {
 				const dest = store.get.page(selectedItem.id);
@@ -216,7 +216,7 @@ const contextMenu = {
 		},
 		annotationMenu,
 		{
-			text: 'action.delete_this_blank_page.name',
+			text: 'action.page.delete_this_blank_page.name',
 			shown(selectedItem) {
 				const page = store.get.lookupToItem(selectedItem);
 				return page.steps.length < 1;
@@ -226,7 +226,7 @@ const contextMenu = {
 				const nextPage = store.get.isLastPage(page)
 					? store.get.prevPage(page)
 					: store.get.nextPage(page);
-				undoStack.commit('page.delete', {page}, tr('action.delete_this_blank_page.undo'));
+				undoStack.commit('page.delete', {page}, tr('action.page.delete_this_blank_page.undo'));
 				app.clearSelected();
 				app.setCurrentPage(nextPage);
 			}
@@ -298,7 +298,7 @@ const contextMenu = {
 			]
 		},
 		{
-			text: 'action.add_callout.name',
+			text: 'action.step.add_callout.name',
 			shown(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				return !step.steps.length;
@@ -308,7 +308,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.divide_into_sub_steps.name',
+			text: 'action.step.divide_into_sub_steps.name',
 			shown(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const parent = store.get.parent(selectedItem);
@@ -322,7 +322,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.stretch_step_to_next_page.name',
+			text: 'action.step.stretch_to_next_page.name',
 			enabled(selectedItem) {
 				const step = store.get.lookupToItem(selectedItem);
 				if (step.parent.type !== 'page') {
@@ -346,11 +346,11 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.move_step_to.name',
+			text: 'action.step.move_to.name',
 			enabled: enableIfUnlocked,
 			children: [
 				{
-					text: 'action.move_step_to.previous_page.name',
+					text: 'action.step.move_to.previous_page.name',
 					shown(selectedItem) {
 						const page = store.get.pageForItem(selectedItem);
 						if (store.get.isFirstBasicPage(page) || store.get.isTitlePage(page)) {
@@ -365,11 +365,11 @@ const contextMenu = {
 					},
 					cb(selectedItem) {
 						undoStack.commit('step.moveToPreviousPage', {step: selectedItem},
-							tr('action.move_step_to.previous_page.undo'));
+							tr('action.step.move_to.previous_page.undo'));
 					}
 				},
 				{
-					text: 'action.move_step_to.next_page.name',
+					text: 'action.step.move_to.next_page.name',
 					shown(selectedItem) {
 						const page = store.get.pageForItem(selectedItem);
 						if (store.get.isLastBasicPage(page) || store.get.isTitlePage(page)) {
@@ -384,18 +384,18 @@ const contextMenu = {
 					},
 					cb(selectedItem) {
 						undoStack.commit('step.moveToNextPage', {step: selectedItem},
-							tr('action.move_step_to.next_page.undo'));
+							tr('action.step.move_to.next_page.undo'));
 					}
 				}
 			]
 		},
 		{
 			// TODO: If step being merged contains a submodel, must reorder all steps in that submodel too
-			text: 'action.merge_step_with.name',
+			text: 'action.step.merge_with.name',
 			enabled: enableIfUnlocked,
 			children: [
 				{
-					text: 'action.merge_step_with.previous_step.name',
+					text: 'action.step.merge_with.previous_step.name',
 					shown(selectedItem) {
 						return store.get.prevStep(selectedItem, true) != null;
 					},
@@ -403,12 +403,12 @@ const contextMenu = {
 						const srcStep = selectedItem;
 						const destStep = store.get.prevStep(selectedItem, true);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep},
-							tr('action.merge_step_with.previous_step.undo'));
+							tr('action.step.merge_with.previous_step.undo'));
 						app.clearSelected();
 					}
 				},
 				{
-					text: 'action.merge_step_with.next_step.name',
+					text: 'action.step.merge_with.next_step.name',
 					shown(selectedItem) {
 						return store.get.nextStep(selectedItem, true) != null;
 					},
@@ -416,14 +416,14 @@ const contextMenu = {
 						const srcStep = selectedItem;
 						const destStep = store.get.nextStep(selectedItem, true);
 						undoStack.commit('step.mergeWithStep', {srcStep, destStep},
-							tr('action.merge_step_with.next_step.undo'));
+							tr('action.step.merge_with.next_step.undo'));
 						app.clearSelected();
 					}
 				}
 			]
 		},
 		{
-			text: 'action.delete_empty_step.name',
+			text: 'action.step.delete_empty_step.name',
 			enabled: enableIfUnlocked,
 			shown(selectedItem) {
 				const step = store.get.step(selectedItem);
@@ -439,7 +439,7 @@ const contextMenu = {
 		},
 		{text: 'separator'},
 		{
-			text: 'action.prepend_blank_step.name',
+			text: 'action.step.prepend_blank_step.name',
 			enabled: enableIfUnlocked,  // TODO: disable this if previous step is in a different submodel
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
@@ -455,7 +455,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.append_blank_step.name',
+			text: 'action.step.append_blank_step.name',
 			enabled: enableIfUnlocked,
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
@@ -479,8 +479,8 @@ const contextMenu = {
 		{
 			text(selectedItem) {
 				const step = store.get.lookupToItem(selectedItem);
-				return step.rotateIconID == null ? 'action.add_rotate_icon.name'
-					: 'action.delete_rotate_icon.name';
+				return step.rotateIconID == null ? 'action.rotate_icon.add.name'
+					: 'action.rotate_icon.delete.name';
 			},
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
@@ -498,41 +498,41 @@ const contextMenu = {
 		switch (parent.type) {
 			case 'page':
 				return [
-					{text: 'action.change_page_number.name', cb() {}}
+					{text: 'action.page_number.change_number.name', cb() {}}
 				];
 			case 'step':
 				return [
-					{text: 'action.change_step_number.name', cb() {}}
+					{text: 'action.step_number.change_number.name', cb() {}}
 				];
 		}
 		return [];
 	},
 	csi: [
 		{
-			text: 'action.rotate_csi.name',
+			text: 'action.csi.rotate.name',
 			children: [
 				{
-					text: 'action.rotate_csi.flip_upside_down.name',
+					text: 'action.csi.rotate.flip_upside_down.name',
 					cb(selectedItem) {
 						const csi = selectedItem;
 						const rotation = {x: 0, y: 0, z: 180};
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
-						undoStack.commit('csi.rotate', opts, tr('action.rotate_csi.flip_upside_down.undo'),
-							[csi]);
+						undoStack.commit('csi.rotate', opts,
+							tr('action.csi.rotate.flip_upside_down.undo'), [csi]);
 					}
 				},
 				{
-					text: 'action.rotate_csi.rotate_front_to_back.name',
+					text: 'action.csi.rotate.rotate_front_to_back.name',
 					cb(selectedItem) {
 						const csi = selectedItem;
 						const rotation = {x: 0, y: 180, z: 0};
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts,
-							tr('action.rotate_csi.rotate_front_to_back.undo'), [csi]);
+							tr('action.csi.rotate.rotate_front_to_back.undo'), [csi]);
 					}
 				},
 				{
-					text: 'action.rotate_csi.custom_rotation.name',
+					text: 'action.csi.rotate.custom_rotation.name',
 					cb(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
 						const originalRotation = _.cloneDeep(csi.rotation);
@@ -548,7 +548,7 @@ const contextMenu = {
 								undoStack.commit(
 									'csi.rotate',
 									{csi, ..._.cloneDeep(newValues), doLayout: true},
-									tr('action.rotate_csi.custom_rotation.undo'),
+									tr('action.csi.rotate.custom_rotation.undo'),
 									[csi]
 								);
 							});
@@ -568,7 +568,7 @@ const contextMenu = {
 					}
 				},
 				{
-					text: 'action.rotate_csi.remove_rotation.name',
+					text: 'action.csi.rotate.remove_rotation.name',
 					shown(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
 						return csi.rotation != null;
@@ -576,14 +576,14 @@ const contextMenu = {
 					cb(selectedItem) {
 						const csi = selectedItem;
 						const opts = {csi, rotation: null, addRotateIcon: false, doLayout: true};
-						undoStack.commit('csi.rotate', opts, tr('action.rotate_csi.remove_rotation.undo'),
+						undoStack.commit('csi.rotate', opts, tr('action.csi.rotate.remove_rotation.undo'),
 							[csi]);
 					}
 				}
 			]
 		},
 		{
-			text: 'action.copy_rotation_to_next_steps.name',
+			text: 'action.csi.copy_rotation_to_next_steps.name',
 			shown(selectedItem) {
 				const csi = store.get.csi(selectedItem);
 				const rotation = csi.rotation;
@@ -608,7 +608,7 @@ const contextMenu = {
 						undoStack.commit(
 							'step.copyRotation',
 							{step, rotation, nextXSteps: newValues.value},
-							tr('action.copy_rotation_to_next_steps.undo'),
+							tr('action.csi.copy_rotation_to_next_steps.undo'),
 							csiList
 						);
 					});
@@ -650,7 +650,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.scale_csi.name',
+			text: 'action.csi.scale.name',
 			cb(selectedItem) {
 				const csi = store.get.csi(selectedItem.id);
 				const originalScale = csi.scale;
@@ -672,7 +672,7 @@ const contextMenu = {
 						undoStack.commit(
 							'csi.scale',
 							{csi, scale: newValues.value, doLayout: true},
-							tr('action.scale_csi.undo'),
+							tr('action.csi.scale.undo'),
 							[csi]
 						);
 					});
@@ -691,7 +691,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.remove_scale.name',
+			text: 'action.csi.remove_scale.name',
 			shown(selectedItem) {
 				const csi = store.get.csi(selectedItem.id);
 				return (csi.scale != null);
@@ -701,14 +701,14 @@ const contextMenu = {
 				undoStack.commit(
 					'csi.scale',
 					{csi, scale: null, doLayout: true},
-					tr('action.remove_scale.undo'),
+					tr('action.csi.remove_scale.undo'),
 					[csi]
 				);
 			}
 		},
 		{text: 'separator'},
 		{
-			text: 'action.select_part.name',
+			text: 'action.csi.select_part.name',
 			shown(selectedItem) {
 				const step = store.get.parent(selectedItem);
 				return step && step.parts && step.parts.length;
@@ -727,13 +727,13 @@ const contextMenu = {
 				});
 			}
 		},
-		{text: 'action.add_new_part.name', cb: () => {}},
+		{text: 'action.csi.add_new_part.name', cb: () => {}},
 		annotationMenu
 	],
 	pli: [],
 	pliItem: [
 		{
-			text: 'action.rotate_part_list_image.name',
+			text: 'action.pli_item.rotate_part_list_image.name',
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
@@ -760,7 +760,8 @@ const contextMenu = {
 							{mutation: 'page.layout', opts: {page}}
 						];
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						undoStack.commit(change, null, tr('action.rotate_part_list_image.undo'), dirtyItems);
+						undoStack.commit(change, null, tr('action.pli_item.rotate_part_list_image.undo'),
+							dirtyItems);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -778,7 +779,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.scale_part_list_image.name',
+			text: 'action.pli_item.scale_part_list_image.name',
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
@@ -805,7 +806,8 @@ const contextMenu = {
 							{mutation: 'page.layout', opts: {page}}
 						];
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						undoStack.commit(change, null, tr('action.scale_part_list_image.undo'), dirtyItems);
+						undoStack.commit(change, null, tr('action.pli_item.scale_part_list_image.undo'),
+							dirtyItems);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -826,7 +828,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'action.remove_part_list_image_scale.name',
+			text: 'action.pli_item.remove_part_list_image_scale.name',
 			shown(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				return uiState.getPLITransform(pliItem.filename).scale != null;
@@ -847,7 +849,8 @@ const contextMenu = {
 					{mutation: 'page.layout', opts: {page}}
 				];
 				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-				undoStack.commit(change, null, tr('action.remove_part_list_image_scale.undo'), dirtyItems);
+				undoStack.commit(change, null, tr('action.pli_item.remove_part_list_image_scale.undo'),
+					dirtyItems);
 			}
 		}
 	],
@@ -858,7 +861,7 @@ const contextMenu = {
 				return [
 					// TODO: add 'Reset Count' menu entry to labels with modified counts
 					{
-						text: 'action.change_count.name',
+						text: 'action.quantity_label.change_count.name',
 						cb(selectedItem) {
 							const pliItem = store.get.parent(selectedItem);
 							DialogManager('numberChooserDialog', dialog => {
@@ -866,7 +869,7 @@ const contextMenu = {
 									undoStack.commit(
 										'pliItem.changeQuantity',
 										{pliItem, quantity: newValues.value},
-										tr('action.change_count.undo')
+										tr('action.quantity_label.change_count.undo')
 									);
 								});
 								dialog.title = tr('dialog.change_part_count.title');
@@ -882,7 +885,7 @@ const contextMenu = {
 	},
 	rotateIcon: [
 		{
-			text: 'action.delete_rotate_icon.name',
+			text: 'action.rotate_icon.delete.name',
 			cb(selectedItem) {
 				const rotateIcon = selectedItem;
 				undoStack.commit('rotateIcon.delete', {rotateIcon}, tr(this.text));
@@ -891,16 +894,16 @@ const contextMenu = {
 	],
 	annotation(selectedItem) {
 		const deleteMenu = {
-			text: 'action.delete_annotation.name',
+			text: 'action.annotation.delete.name',
 			cb(selectedItem) {
 				const annotation = selectedItem;
-				undoStack.commit('annotation.delete', {annotation}, tr('action.delete_annotation.undo'));
+				undoStack.commit('annotation.delete', {annotation}, tr('action.annotation.delete.undo'));
 				app.clearSelected();
 			}
 		};
 
 		const setStyleMenu = {
-			text: 'action.change_annotation_text_and_style.name',
+			text: 'action.annotation.change_text_and_style.name',
 			shown(selectedItem) {
 				const annotation = store.get.annotation(selectedItem);
 				return annotation && annotation.annotationType === 'label';
@@ -911,7 +914,7 @@ const contextMenu = {
 					dialog.$on('ok', newProperties => {
 						const opts = {annotation, newProperties};
 						undoStack.commit('annotation.set', opts,
-							tr('action.change_annotation_text_and_style.undo'));
+							tr('action.annotation.change_text_and_style.undo'));
 					});
 					dialog.title = tr('dialog.style_annotation.title');
 					dialog.text = annotation.text;
@@ -935,10 +938,10 @@ const contextMenu = {
 	},
 	callout: [
 		{
-			text: 'action.position.name',
+			text: 'action.callout.position.name',
 			children: ['top', 'right', 'bottom', 'left'].map(position => {
 				return {
-					text: tr('action.position.' + position + '.name'),
+					text: tr('action.callout.position.' + position + '.name'),
 					shown: (function(position) {
 						return function(selectedItem) {
 							const callout = store.get.lookupToItem(selectedItem);
@@ -948,7 +951,7 @@ const contextMenu = {
 					cb: (function(position) {
 						return function(selectedItem) {
 							const opts = {callout: selectedItem, position, doLayout: true};
-							undoStack.commit('callout.layout', opts, tr('action.position.undo'));
+							undoStack.commit('callout.layout', opts, tr('action.callout.position.undo'));
 						};
 					})(position)
 				};
@@ -958,37 +961,37 @@ const contextMenu = {
 			text: 'action.layout.name',
 			children: [
 				{
-					text: 'action.layout.horizontal.name',
+					text: 'action.callout.layout.horizontal.name',
 					shown(selectedItem) {
 						const callout = store.get.lookupToItem(selectedItem);
 						return callout.layout !== 'horizontal';
 					},
 					cb(selectedItem) {
 						const opts = {callout: selectedItem, layout: 'horizontal', doLayout: true};
-						undoStack.commit('callout.layout', opts, tr('action.layout.horizontal.undo'));
+						undoStack.commit('callout.layout', opts, tr('action.callout.layout.horizontal.undo'));
 					}
 				},
 				{
-					text: 'action.layout.vertical.name',
+					text: 'action.callout.layout.vertical.name',
 					shown(selectedItem) {
 						const callout = store.get.lookupToItem(selectedItem);
 						return callout.layout !== 'vertical';
 					},
 					cb(selectedItem) {
 						const opts = {callout: selectedItem, layout: 'vertical', doLayout: true};
-						undoStack.commit('callout.layout', opts, tr('action.layout.vertical.undo'));
+						undoStack.commit('callout.layout', opts, tr('action.callout.layout.vertical.undo'));
 					}
 				}
 			]
 		},
 		{
-			text: 'action.add_step.name',
+			text: 'action.callout.add_step.name',
 			cb(selectedItem) {
 				undoStack.commit('callout.addStep', {callout: selectedItem, doLayout: true}, tr(this.text));
 			}
 		},
 		{
-			text: 'action.delete_empty_callout.name',
+			text: 'action.callout.delete_empty_callout.name',
 			shown(selectedItem) {
 				const callout = store.get.callout(selectedItem);
 				if (callout == null || callout.steps.length > 1) {
