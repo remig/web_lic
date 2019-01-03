@@ -1129,17 +1129,18 @@ const contextMenu = {
 		// TODO: first add support for multiple selection, then add support for merging two parts in a PLI,
 		// like for antenna base and stick, or left / right hinge parts or 2x2 turntables
 		{
-			text: 'Displace Part...',
+			text: 'action.part.displace_part.name',
 			children: ['up', 'down', 'left', 'right', 'forward', 'backward', null].map(direction => {
 				return {
-					text: _.startCase(direction || 'None'),
+					text: tr(direction != null ? 'action.part.displace_part.' + direction + '.name'
+						: 'action.part.displace_part.none.name'),
 					shown: showDisplacement(direction),
 					cb: displacePart(direction)
 				};
 			})
 		},
 		{
-			text: 'Adjust Displacement',
+			text: 'action.part.adjust_displacement.name',
 			shown(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
 				if (step.displacedParts) {
@@ -1161,7 +1162,8 @@ const contextMenu = {
 				app.clearSelected();
 				DialogManager('displacePartDialog', dialog => {
 					dialog.$on('ok', () => {
-						undoStack.commit('part.displace', {step, ...displacement}, 'Adjust Displaced Part');
+						undoStack.commit('part.displace', {step, ...displacement},
+							tr('action.part.adjust_displacement.undo'));
 					});
 					dialog.$on('cancel', () => {
 						Object.assign(displacement, originalDisplacement);
@@ -1178,15 +1180,15 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Remove Displacement',
+			text: 'action.part.remove_displacement.name',
 			shown: showDisplacement(null),
 			cb: displacePart(null)
 		},
 		{
-			text: 'Move Part to...',
+			text: 'action.part.move_part_to.name',
 			children: [
 				{
-					text: 'Previous Step',
+					text: 'action.part.move_part_to.previous_step.name',
 					shown(selectedItem) {
 						const step = store.get.step({type: 'step', id: selectedItem.stepID});
 						return store.get.prevStep(step) != null;
@@ -1197,13 +1199,13 @@ const contextMenu = {
 						undoStack.commit(
 							'part.moveToStep',
 							{partID: selectedItem.id, srcStep, destStep, doLayout: true},
-							'Move Part to Previous Step',
+							tr('action.part.move_part_to.previous_step.undo'),
 							[{type: 'csi', id: srcStep.csiID}, {type: 'csi', id: destStep.csiID}]
 						);
 					}
 				},
 				{
-					text: 'Next Step',
+					text: 'action.part.move_part_to.next_step.name',
 					shown(selectedItem) {
 						const step = store.get.step({type: 'step', id: selectedItem.stepID});
 						return store.get.nextStep(step) != null;
@@ -1214,7 +1216,7 @@ const contextMenu = {
 						undoStack.commit(
 							'part.moveToStep',
 							{partID: selectedItem.id, srcStep, destStep, doLayout: true},
-							'Move Part to Next Step',
+							tr('action.part.move_part_to.next_step.undo'),
 							[{type: 'csi', id: srcStep.csiID}, {type: 'csi', id: destStep.csiID}]
 						);
 					}
@@ -1222,7 +1224,7 @@ const contextMenu = {
 			]
 		},
 		{
-			text: 'Add Part to Callout',
+			text: 'action.part.add_part_to_callout.name',
 			shown(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
 				return step.callouts.length === 1;
@@ -1234,13 +1236,13 @@ const contextMenu = {
 				undoStack.commit(
 					'part.addToCallout',
 					{partID: selectedItem.id, step, callout, doLayout: true},
-					this.text,
+					tr('action.part.add_part_to_callout.undo'),
 					[{type: 'csi', id: targetStep.csiID}]
 				);
 			}
 		},
 		{
-			text: 'Add Part to Callout',
+			text: 'action.part.add_part_to_callout.name',
 			shown(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
 				return step.callouts.length > 1;
@@ -1251,12 +1253,12 @@ const contextMenu = {
 					const callout = store.get.callout(calloutID);
 					const targetStep = store.get.step(_.last(callout.steps));
 					return {
-						text: _.startCase(callout.position),
+						text: tr('action.position.' + callout.position + '.name'),
 						cb() {
 							undoStack.commit(
 								'part.addToCallout',
 								{partID: selectedItem.id, step, callout, doLayout: true},
-								'Add Part to Callout',
+								tr('action.part.add_part_to_callout.undo'),
 								[{type: 'csi', id: targetStep.csiID}]
 							);
 						}
@@ -1265,7 +1267,7 @@ const contextMenu = {
 			}
 		},
 		{
-			text: 'Remove Part from Callout',
+			text: 'action.part.remove_part_from_callout.name',
 			shown(selectedItem) {
 				const step = store.get.step({type: 'step', id: selectedItem.stepID});
 				return step.parent.type === 'callout';
@@ -1276,20 +1278,20 @@ const contextMenu = {
 				undoStack.commit(
 					'part.removeFromCallout',
 					{partID: selectedItem.id, step},
-					this.text
+					tr('action.part.remove_part_from_callout.undo')
 				);
 			}
 		},
 		{
-			text: 'Remove from PLI (NYI)',
+			text: 'action.part.remove_from_pli.name',
 			enabled() { return false;},
 			cb() {}
 		},
 		{
-			text: 'Change Part',
+			text: 'action.part.change_part.name',
 			children: [
 				{
-					text: 'Change Position and Rotation',
+					text: 'action.part.change_part.position_and_rotation.name',
 					cb(selectedItem) {
 						const step = store.get.step({type: 'step', id: selectedItem.stepID});
 						const csi = store.get.csi(step.csiID);
@@ -1312,7 +1314,8 @@ const contextMenu = {
 								});
 								const page = store.get.pageForItem(step);
 								const mutation = {mutation: 'page.layout', opts: {page}};
-								undoStack.commit([action, mutation], null, 'Change Part Transform', ['csi']);
+								undoStack.commit([action, mutation], null,
+									tr('action.part.change_part.position_and_rotation.undo'), ['csi']);
 							});
 							dialog.$on('cancel', () => {
 								part.matrix = originalMatrix;
@@ -1325,7 +1328,7 @@ const contextMenu = {
 					}
 				},
 				{
-					text: 'Change Color',
+					text: 'action.part.change_part.color.name',
 					cb(selectedItem) {
 						DialogManager('ldColorPickerDialog', dialog => {
 							dialog.$on('ok', newColorCode => {
@@ -1348,7 +1351,7 @@ const contextMenu = {
 					}
 				},
 				{
-					text: 'Change to Different Part',
+					text: 'action.part.change_part.to_different_part.name',
 					cb(selectedItem) {
 						DialogManager('stringChooserDialog', dialog => {
 							dialog.$on('ok', filename => {
@@ -1364,7 +1367,8 @@ const contextMenu = {
 									const mutation = {
 										mutation: 'pli.syncContent', opts: {pli, doLayout: true}
 									};
-									undoStack.commit([action, mutation], null, 'Change Part Type', ['csi']);
+									undoStack.commit([action, mutation], null,
+										tr('action.part.change_part.to_different_part.undo'), ['csi']);
 								});
 							});
 							dialog.title = 'New Part Filename';
@@ -1374,7 +1378,7 @@ const contextMenu = {
 					}
 				},
 				{
-					text: 'Duplicate',
+					text: 'action.part.change_part.duplicate.name',
 					cb(selectedItem) {
 						const step = store.get.step({type: 'step', id: selectedItem.stepID});
 						const filename = step.model.filename;
@@ -1382,11 +1386,12 @@ const contextMenu = {
 						const partID = LDParse.partDictionary[filename].parts.length;
 						const action = LDParse.getAction.addPart({filename, part});
 						const mutation = {mutation: 'step.addPart', opts: {step, partID}};
-						undoStack.commit([action, mutation], null, 'Duplicate Part', ['csi']);
+						undoStack.commit([action, mutation], null,
+							tr('action.part.change_part.duplicate.undo'), ['csi']);
 					}
 				},
 				{
-					text: 'Delete',
+					text: 'action.part.change_part.delete.name',
 					cb(selectedItem) {
 						const partID = selectedItem.id;
 						const step = store.get.step(selectedItem.stepID);
@@ -1396,7 +1401,8 @@ const contextMenu = {
 						});
 						const opts = {step, partID, doLayout: true};
 						const mutation = {mutation: 'part.delete', opts};
-						undoStack.commit([mutation, action], null, 'Delete Part', ['csi']);
+						undoStack.commit([mutation, action], null,
+							tr('action.part.change_part.delete.undo'), ['csi']);
 					}
 				}
 			]
@@ -1438,10 +1444,13 @@ function showDisplacement(direction) {
 function displacePart(direction) {
 	return (selectedItem) => {
 		const step = store.get.step(selectedItem.stepID);
+		const directionName = tr(direction != null
+			? 'action.part.displace_part.' + direction + '.name'
+			: 'action.part.displace_part.none.name');
 		undoStack.commit(
 			'part.displace',
 			{partID: selectedItem.id, step, direction},
-			`Displace Part ${_.startCase(direction || 'None')}`,
+			tr('action.part.displace_part.undo_@mf', {direction: directionName}),
 			[{type: 'csi', id: step.csiID}]
 		);
 	};

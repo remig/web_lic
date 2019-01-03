@@ -276,6 +276,84 @@
 			"convert_to_callout": {
 				"name": "Convert to Callout"
 			}
+		},
+		"part": {
+			"displace_part": {
+				"name": "Displace Part...",
+				"undo_@mf": "Displace Part ${direction}",
+				"up": {
+					"name": "Up"
+				},
+				"down": {
+					"name": "Down"
+				},
+				"left": {
+					"name": "Left"
+				},
+				"right": {
+					"name": "Right"
+				},
+				"forward": {
+					"name": "Forward"
+				},
+				"backward": {
+					"name": "Backward"
+				},
+				"none": {
+					"name": "None"
+				}
+			},
+			"adjust_displacement": {
+				"name": "Adjust Displacement",
+				"undo": "Adjust Displaced Part"
+			},
+			"remove_displacement": {
+				"name": "Remove Displacement"
+			},
+			"move_part_to": {
+				"name": "Move Part to...",
+				"previous_step": {
+					"name": "Previous Step",
+					"undo": "Move Part to Previous Step"
+				},
+				"next_step": {
+					"name": "Next Step",
+					"undo": "Move Part to Next Step"
+				}
+			},
+			"add_part_to_callout": {
+				"name": "Add Part to Callout",
+				"undo": "Add Part to Callout"
+			},
+			"remove_part_from_callout": {
+				"name": "Remove Part from Callout",
+				"undo": "Remove Part from Callout"
+			},
+			"remove_from_pli": {
+				"name": "Remove from PLI (NYI)"
+			},
+			"change_part": {
+				"name": "Change Part",
+				"position_and_rotation": {
+					"name": "Change Position and Rotation",
+					"undo": "Change Part Transform"
+				},
+				"color": {
+					"name": "Change Color"
+				},
+				"to_different_part": {
+					"name": "Change to Different Part",
+					"undo": "Change Part Type"
+				},
+				"duplicate": {
+					"name": "Duplicate",
+					"undo": "Duplicate Part"
+				},
+				"delete": {
+					"name": "Delete",
+					"undo": "Delete Part"
+				}
+			}
 		}
 	},
 	"navbar": {

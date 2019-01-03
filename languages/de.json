@@ -276,6 +276,84 @@
             "convert_to_callout": {
                 "name": "In Callout umwandeln"
             }
+        },
+        "part": {
+            "displace_part": {
+                "name": "Teil versetzen...",
+                "undo_@mf": "Teil versetzen ${direction}",
+                "up": {
+                    "name": "Hoch"
+                },
+                "down": {
+                    "name": "Runter"
+                },
+                "left": {
+                    "name": "Links"
+                },
+                "right": {
+                    "name": "Rechts"
+                },
+                "forward": {
+                    "name": "Vorwärts"
+                },
+                "backward": {
+                    "name": "Rückwärts"
+                },
+                "none": {
+                    "name": "Ohne"
+                }
+            },
+            "adjust_displacement": {
+                "name": "Versetzung anpassen",
+                "undo": "Versetzung anpassen"
+            },
+            "remove_displacement": {
+                "name": "Versetzung entfernen"
+            },
+            "move_part_to": {
+                "name": "Teil verschieben...",
+                "previous_step": {
+                    "name": "Vorheriger Schritt",
+                    "undo": "Teil in den vorherigen Schritt verschieben"
+                },
+                "next_step": {
+                    "name": "Nächster Schritt",
+                    "undo": "Teil in den nächsten Schritt verschieben"
+                }
+            },
+            "add_part_to_callout": {
+                "name": "Zu Callout hinzufügen",
+                "undo": "Teil zu Callout hinzufügen"
+            },
+            "remove_part_from_callout": {
+                "name": "Aus Callout entfernen",
+                "undo": "Teil aus Callout entfernen"
+            },
+            "remove_from_pli": {
+                "name": "Aus Teileliste entfernen (NYI)"
+            },
+            "change_part": {
+                "name": "Anpassen",
+                "position_and_rotation": {
+                    "name": "Position und Rotation ändern",
+                    "undo": "Teilposition und -rotation ändern"
+                },
+                "color": {
+                    "name": "Farbe ändern"
+                },
+                "to_different_part": {
+                    "name": "Ersetzen durch anderes Teil",
+                    "undo": "Teil durch ein anderes ersetzen"
+                },
+                "duplicate": {
+                    "name": "Duplizieren",
+                    "undo": "Teil duplizieren"
+                },
+                "delete": {
+                    "name": "Löschen",
+                    "undo": "Teil löschen"
+                }
+            }
         }
     },
 	"navbar": {
