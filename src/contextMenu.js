@@ -1104,7 +1104,7 @@ const contextMenu = {
 	],
 	submodel: [
 		{
-			text: 'Convert to Callout',
+			text: 'action.submodel.convert_to_callout.name',
 			shown(selectedItem) {
 				// Only allow submodel -> callout conversion if submodel contains no submodels
 				const submodel = LDParse.model.get.abstractPart(selectedItem.filename);
@@ -1119,7 +1119,7 @@ const contextMenu = {
 				const step = store.get.step(selectedItem.stepID);
 				const destStep = {type: 'step', id: step.model.parentStepID};
 				const opts = {modelFilename: selectedItem.filename, destStep, doLayout: true};
-				undoStack.commit('submodel.convertToCallout', opts, this.text);
+				undoStack.commit('submodel.convertToCallout', opts, tr(this.text));
 				app.clearSelected();
 				app.setCurrentPage(store.get.pageForItem(destStep));
 			}
