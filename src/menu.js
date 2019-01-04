@@ -130,7 +130,7 @@ function toggleGrid(newState) {
 			redo: [{root, op, path, value: newState}],
 			undo: [{root, op, path, value: !newState}]
 		};
-		const text = tr('navbar.view.grid.' + (newState ? 'show_undo' : 'hide_undo'));
+		const text = tr('action.view.grid.' + (newState ? 'show' : 'hide') + '.undo');
 		undoStack.commit(change, null, text);
 	};
 }
@@ -144,7 +144,7 @@ function addGuide(orientation) {
 			redo: [{root, op: 'add', path: '/-', value: {orientation, position}}],
 			undo: [{root, op: 'remove', path: `/${root.length}`}]
 		};
-		undoStack.commit(change, null, tr('navbar.view.guides.add_undo'));
+		undoStack.commit(change, null, tr('action.view.guides.add_' + orientation + '.undo'));
 	};
 }
 
@@ -155,53 +155,53 @@ function removeGuides() {
 		redo: [{root, op, path, value: []}],
 		undo: [{root, op, path, value: originalGuides}]
 	};
-	undoStack.commit(change, null, tr('navbar.view.guides.remove_undo'));
+	undoStack.commit(change, null, tr('action.view.guides.remove.undo'));
 }
 
 const menu = [
-	{text: 'navbar.file.root', id: 'file', children: [
+	{text: 'action.file.name', id: 'file', children: [
 		{
-			text: 'navbar.file.open_lic',
+			text: 'action.file.open_lic.name',
 			id: 'open',
 			cb() {
 				openFileHandler('.lic', 'text', app.openLicFile);
 			}
 		},
 		{
-			text: 'navbar.file.open_lic_recent',
+			text: 'action.file.open_lic_recent.name',
 			id: 'open_recent',
 			enabled: () => false,
 			cb: () => {}
 		},
 		{
-			text: 'navbar.file.close',
+			text: 'action.file.close.name',
 			id: 'close',
 			enabled: enableIfModel,
 			cb: 'closeModel'
 		},
 		{
-			text: 'navbar.file.save',
+			text: 'action.file.save.name',
 			id: 'save',
 			shortcut: 'ctrl+s',
 			enabled: enableIfModel,
 			cb: 'save'
 		},
 		{
-			text: 'navbar.file.save_as',
+			text: 'action.file.save_as.name',
 			id: 'save_as',
 			enabled: enableIfModel,
 			cb: 'saveAs'
 		},
 		{text: 'separator'},
 		{
-			text: 'navbar.file.import_model',
+			text: 'action.file.import_model.name',
 			id: 'import_custom_model',
 			cb() {
 				openFileHandler('.ldr, .mpd', 'text', app.importCustomModel);
 			}
 		},
 		{
-			text: 'navbar.file.import_builtin_model',
+			text: 'action.file.import_builtin_model.name',
 			id: 'import_builtin_model',
 			children: [
 				{
@@ -232,22 +232,22 @@ const menu = [
 		},
 		{text: 'separator'},
 		{
-			text: 'navbar.file.template.root',
+			text: 'action.file.template.name',
 			id: 'template',
 			enabled: enableIfModel,
 			children: [
 				{
-					text: 'navbar.file.template.save',
+					text: 'action.file.template.save.name',
 					id: 'save_template',
 					cb: 'saveTemplate'
 				},
 				{
-					text: 'navbar.file.template.save_as',
+					text: 'action.file.template.save_as.name',
 					id: 'save_template_as',
 					cb: 'saveTemplateAs'
 				},
 				{
-					text: 'navbar.file.template.load',
+					text: 'action.file.template.load.name',
 					id: 'load_template',
 					cb() {
 						// TODO: Need to re-layout every page after loading a template
@@ -255,16 +255,16 @@ const menu = [
 					}
 				},
 				{
-					text: 'navbar.file.template.load_builtin',
+					text: 'action.file.template.load_builtin.name',
 					id: 'load_builtin_template',
 					enabled: false,
 					cb() {}
 				},
 				{
-					text: 'navbar.file.template.reset',
+					text: 'action.file.template.reset.name',
 					id: 'reset_template',
 					cb() {
-						const text = tr('navbar.file.template.reset_undo');
+						const text = tr('action.file.template.reset.undo');
 						undoStack.commit('templatePage.reset', null, text, ['csi', 'pliItem']);
 					}
 				}
@@ -272,7 +272,7 @@ const menu = [
 		},
 		{text: 'separator'},
 		{
-			text: 'navbar.file.set_language.root',
+			text: 'action.file.set_language.name',
 			id: 'set_language',
 			children() {
 				return LocaleManager.LanguageList.map(language => {
@@ -287,11 +287,11 @@ const menu = [
 			}
 		},
 		{
-			text: 'navbar.file.clear_cache.root',
+			text: 'action.file.clear_cache.name',
 			id: 'clear_cache',
 			children: [
 				{
-					text: 'navbar.file.clear_cache.model',
+					text: 'action.file.clear_cache.model.name',
 					id: 'clear_cache_model',
 					cb() {
 						app.closeModel();
@@ -300,7 +300,7 @@ const menu = [
 					}
 				},
 				{
-					text: 'navbar.file.clear_cache.ui',
+					text: 'action.file.clear_cache.ui.name',
 					id: 'clear_cache_ui',
 					cb() {
 						uiState.resetUIState();
@@ -309,7 +309,7 @@ const menu = [
 					}
 				},
 				{
-					text: 'navbar.file.clear_cache.everything',
+					text: 'action.file.clear_cache.everything.name',
 					id: 'clear_cache_everything',
 					cb() {
 						app.closeModel();
@@ -321,7 +321,7 @@ const menu = [
 			]
 		}
 	]},
-	{text: 'navbar.edit.root', id: 'edit', children: [
+	{text: 'action.edit.name', id: 'edit', children: [
 		{
 			id: 'undo',
 			text: undoStack.undoText,
@@ -338,7 +338,7 @@ const menu = [
 		},
 		{text: 'separator'},
 		{
-			text: 'navbar.edit.title_page.add',
+			text: 'action.edit.title_page.add.name',
 			shown: () => enableIfModel() && store.get.titlePage() == null,
 			cb() {
 				undoStack.commit('addTitlePage', null, tr(this.text));
@@ -347,7 +347,7 @@ const menu = [
 			}
 		},
 		{
-			text: 'navbar.edit.title_page.remove',
+			text: 'action.edit.title_page.remove.name',
 			shown: () => enableIfModel() && store.get.titlePage() != null,
 			cb() {
 				app.clearSelected();
@@ -356,21 +356,21 @@ const menu = [
 			}
 		},
 		{
-			text: 'navbar.edit.pli.show',
+			text: 'action.edit.pli.show.name',
 			shown: () => enableIfModel() && !store.state.plisVisible,
 			cb() {
 				undoStack.commit('pli.toggleVisibility', {visible: true}, tr(this.text));
 			}
 		},
 		{
-			text: 'navbar.edit.pli.hide',
+			text: 'action.edit.pli.hide.name',
 			shown: () => enableIfModel() && store.state.plisVisible,
 			cb() {
 				undoStack.commit('pli.toggleVisibility', {visible: false}, tr(this.text));
 			}
 		},
 		{
-			text: 'navbar.edit.inventory_page.add',
+			text: 'action.edit.inventory_page.add.name',
 			shown: () => enableIfModel() && !store.state.inventoryPages.length,
 			cb() {
 				app.clearSelected();
@@ -379,7 +379,7 @@ const menu = [
 			}
 		},
 		{
-			text: 'navbar.edit.inventory_page.remove',
+			text: 'action.edit.inventory_page.remove.name',
 			shown: () => enableIfModel() && store.state.inventoryPages.length,
 			cb() {
 				app.clearSelected();
@@ -387,9 +387,9 @@ const menu = [
 				app.setCurrentPage(store.get.lastPage());
 			}
 		},
-		{text: 'navbar.edit.snap', enabled: () => false, cb() {}},
+		{text: 'action.edit.snap.name', enabled: () => false, cb() {}},
 		{
-			text: 'navbar.edit.scene_rendering',
+			text: 'action.edit.scene_rendering.name',
 			shown: enableIfModel,
 			cb() {
 				DialogManager('sceneRenderingDialog', dialog => {
@@ -398,39 +398,39 @@ const menu = [
 			}
 		},
 		{
-			text: 'navbar.edit.brick_colors',
+			text: 'action.edit.brick_colors.name',
 			cb() {
 				DialogManager('brickColorDialog');
 			}
 		}
 	]},
-	{text: 'navbar.view.root', id: 'view', children: [
+	{text: 'action.view.name', id: 'view', children: [
 		{
-			text: 'navbar.view.show_pages.root',
+			text: 'action.view.show_pages.name',
 			enabled: enableIfModel,
 			children: [
 				{
-					text: 'navbar.view.show_pages.one',
+					text: 'action.view.show_pages.one.name',
 					cb: () => app.setPageView({facingPage: false, scroll: false})
 				},
 				{
-					text: 'navbar.view.show_pages.two',
+					text: 'action.view.show_pages.two.name',
 					enabled: false,
 					cb: () => app.setPageView({facingPage: true, scroll: false})
 				},
 				{
-					text: 'navbar.view.show_pages.one_scroll',
+					text: 'action.view.show_pages.one_scroll.name',
 					cb: () => app.setPageView({facingPage: false, scroll: true})
 				},
 				{
-					text: 'navbar.view.show_pages.two_scroll',
+					text: 'action.view.show_pages.two_scroll.name',
 					enabled: false,
 					cb: () => app.setPageView({facingPage: true, scroll: true})
 				}
 			]
 		},
 		{
-			text: 'navbar.view.zoom.root',
+			text: 'action.view.zoom.name',
 			enabled: enableIfModel,
 			children: [
 				{text: '100%', enabled: () => false, cb() {}},
@@ -440,25 +440,25 @@ const menu = [
 			]
 		},
 		{
-			text: 'navbar.view.grid.root',
+			text: 'action.view.grid.name',
 			enabled: enableIfModel,
 			children: [
 				{
-					text: 'navbar.view.grid.show',
+					text: 'action.view.grid.show.name',
 					shown() {
 						return !uiState.get('grid').enabled;
 					},
 					cb: toggleGrid(true)
 				},
 				{
-					text: 'navbar.view.grid.hide',
+					text: 'action.view.grid.hide.name',
 					shown() {
 						return uiState.get('grid.enabled');
 					},
 					cb: toggleGrid(false)
 				},
 				{
-					text: 'navbar.view.grid.customize',
+					text: 'action.view.grid.customize.name',
 					cb() {
 						DialogManager('gridDialog', dialog => {
 							dialog.show(app);
@@ -468,34 +468,34 @@ const menu = [
 			]
 		},
 		{
-			text: 'navbar.view.guides.root',
+			text: 'action.view.guides.name',
 			enabled: enableIfModel,
 			children: [
 				{
-					text: 'navbar.view.guides.add_horizontal',
+					text: 'action.view.guides.add_horizontal.name',
 					cb: addGuide('horizontal')
 				},
 				{
-					text: 'navbar.view.guides.add_vertical',
+					text: 'action.view.guides.add_vertical.name',
 					cb: addGuide('vertical')
 				},
 				{
-					text: 'navbar.view.guides.remove',
+					text: 'action.view.guides.remove.name',
 					cb: removeGuides
 				}
 			]
 		}
 	]},
-	{text: 'navbar.export.root', id: 'export', children: [
+	{text: 'action.export.name', id: 'export', children: [
 		{
-			text: 'navbar.export.pdf',
+			text: 'action.export.pdf.name',
 			enabled: enableIfModel,
 			cb() {
 				InstructionExporter.generatePDF(app, store);
 			}
 		},
 		{
-			text: 'navbar.export.hi_res_pdf',
+			text: 'action.export.hi_res_pdf.name',
 			enabled: enableIfModel,
 			cb() {
 				DialogManager('pdfExportDialog', dialog => {
@@ -507,14 +507,14 @@ const menu = [
 			}
 		},
 		{
-			text: 'navbar.export.png',
+			text: 'action.export.png.name',
 			enabled: enableIfModel,
 			cb() {
 				InstructionExporter.generatePNGZip(app, store);
 			}
 		},
 		{
-			text: 'navbar.export.hi_res_png',
+			text: 'action.export.hi_res_png.name',
 			enabled: enableIfModel,
 			cb() {
 				DialogManager('pngExportDialog', dialog => {

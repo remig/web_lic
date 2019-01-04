@@ -131,12 +131,12 @@ const api = {
 	},
 
 	undoText() {
-		return LocaleManager.translate('undo.undo') +
+		return LocaleManager.translate('action.edit.undo.name') +
 			` ${api.isUndoAvailable() ? state.stack[state.index].undoText : ''}`;
 	},
 
 	redoText() {
-		return LocaleManager.translate('undo.redo') +
+		return LocaleManager.translate('action.edit.redo.name') +
 			` ${api.isRedoAvailable() ? state.stack[state.index + 1].undoText : ''}`;
 	}
 };

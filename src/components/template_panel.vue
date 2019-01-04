@@ -85,7 +85,7 @@ export default {
 						store.state.pages.forEach(page => (page.needsLayout = true));
 					}
 					const item = this.tr(this.lastEdit.type.toLowerCase());
-					const undoText = this.tr('undo.change_template_@mf', {item});
+					const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 					undoStack.commit('', null, undoText);
 				}
 				this.lastEdit = null;
@@ -96,7 +96,7 @@ export default {
 			store.state.pages.forEach(page => (page.needsLayout = true));
 			store.state.templatePage.needsLayout = true;
 			const item = this.tr(entryType.toLowerCase());
-			const undoText = this.tr('undo.change_template_@mf', {item});
+			const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 			undoStack.commit('', null, undoText, [entryType]);
 		}
 	},

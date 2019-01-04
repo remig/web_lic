@@ -30,6 +30,189 @@
 	"callout": "Callout",
 	"ctrl": "Ctrl",
 	"action": {
+        "file": {
+            "name": "File",
+            "open_lic": {
+                "name": "Open Lic File...",
+                "success_message_@mf": "\"${filename}\" opened successfully (${time})"
+            },
+            "open_lic_recent": {
+                "name": "Open Recent (NYI)"
+            },
+            "close": {
+                "name": "Close"
+            },
+            "save": {
+                "name": "Save"
+            },
+            "save_as": {
+                "name": "Save As..."
+            },
+            "import_model": {
+                "name": "Import Custom Model...",
+                "success_message_@mf": "\"${filename}\" loaded successfully (${time})"
+            },
+            "import_builtin_model": {
+                "name": "Import Built-in Model..."
+            },
+            "template": {
+                "name": "Template",
+                "save": {
+                    "name": "Save"
+                },
+                "save_as": {
+                    "name": "Save As..."
+                },
+                "load": {
+                    "name": "Load",
+                    "success_message_@mf": "\"${filename}\" template opened successfully"
+                },
+                "load_builtin": {
+                    "name": "Load Built-in (NYI)"
+                },
+                "reset": {
+                    "name": "Reset",
+                    "undo": "Reset Template"
+                }
+            },
+            "set_language": {
+                "name": "Set Language"
+            },
+            "clear_cache": {
+                "name": "Clear Cache",
+                "model": {
+                    "name": "Current Instruction Book"
+                },
+                "ui": {
+                    "name": "UI Settings"
+                },
+                "everything": {
+                    "name": "Everything"
+                }
+            }
+        },
+        "edit": {
+            "name": "Edit",
+            "undo": {
+                "name": "Undo"
+            },
+            "redo": {
+                "name": "Redo"
+            },
+            "title_page": {
+                "add": {
+                    "name": "Add Title Page"
+                },
+                "remove": {
+                    "name": "Remove Title Page"
+                }
+            },
+            "pli": {
+                "show": {
+                    "name": "Show PLIs"
+                },
+                "hide": {
+                    "name": "Hide PLIs"
+                }
+            },
+            "inventory_page": {
+                "add": {
+                    "name": "Add Part List Pages"
+                },
+                "remove": {
+                    "name": "Remove Part List Pages"
+                }
+            },
+            "snap": {
+                "name": "Snap To (NYI)"
+            },
+            "scene_rendering": {
+                "name": "3D Part Rendering..."
+            },
+            "brick_colors": {
+                "name": "Brick Colors..."
+            },
+            "template": {
+                "change": {
+                    "undo_@mf": "Change ${item} Template"
+                }
+            },
+            "item": {
+                "move": {
+                    "undo_@mf": "Move ${item}"
+                },
+                "delete": {
+                    "undo_@mf": "Delete ${item}"
+                }
+            }
+        },
+        "view": {
+            "name": "View",
+            "show_pages": {
+                "name": "Show Pages",
+                "one": {
+                    "name": "One Page"
+                },
+                "two": {
+                    "name": "Two Facing Pages"
+                },
+                "one_scroll": {
+                    "name": "One Page Scrolling View"
+                },
+                "two_scroll": {
+                    "name": "Two Pages Scrolling View"
+                }
+            },
+            "zoom": {
+                "name": "Zoom (NYI)"
+            },
+            "grid": {
+                "name": "Grid",
+                "show": {
+                    "name": "Show",
+                    "undo": "Show Grid"
+                },
+                "hide": {
+                    "name": "Hide",
+                    "undo": "Hide Grid"
+                },
+                "customize": {
+                    "name": "Customize"
+                }
+            },
+            "guides": {
+                "name": "Guides",
+                "add_horizontal": {
+                    "name": "Add Horizontal Guide",
+                    "undo": "Add Guide"
+                },
+                "add_vertical": {
+                    "name": "Add Vertical Guide",
+                    "undo": "Add Guide"
+                },
+                "remove": {
+                    "name": "Remove Guides",
+                    "undo": "Remove Guides"
+                }
+            }
+        },
+        "export": {
+            "name": "Export",
+            "pdf": {
+                "name": "PDF",
+                "success_message_@mf": "PDF Generated Successfully (${time})"
+            },
+            "hi_res_pdf": {
+                "name": "Hi-Res PDF..."
+            },
+            "png": {
+                "name": "PNG Images",
+                "success_message_@mf": "PNG Zip Generated Successfully (${time})"
+            },
+            "hi_res_png": {
+                "name": "Hi-Res PNG Images..."
+            }
+        },
         "annotation": {
             "add": {
                 "name": "Add Annotation",
@@ -387,90 +570,6 @@
 			}
 		}
 	},
-	"navbar": {
-		"file": {
-			"root": "File",
-			"open_lic": "Open Lic File...",
-			"open_lic_recent": "Open Recent (NYI)",
-			"close": "Close",
-			"save": "Save",
-			"save_as": "Save As...",
-			"import_model": "Import Custom Model...",
-			"import_builtin_model": "Import Built-in Model...",
-			"template": {
-				"root": "Template",
-				"save": "Save",
-				"save_as": "Save As...",
-				"load": "Load",
-				"load_builtin": "Load Built-in (NYI)",
-				"reset": "Reset",
-				"reset_undo": "Reset Template"
-			},
-			"set_language": {
-				"root": "Set Language"
-			},
-			"clear_cache": {
-				"root": "Clear Cache",
-				"model": "Current Instruction Book",
-				"ui": "UI Settings",
-				"everything": "Everything"
-			}
-		},
-		"edit": {
-			"root": "Edit",
-			"title_page": {
-				"add": "Add Title Page",
-				"remove": "Remove Title Page"
-			},
-			"pli": {
-				"show": "Show PLIs",
-				"hide": "Hide PLIs"
-			},
-			"inventory_page": {
-				"add": "Add Part List Pages",
-				"remove": "Remove Part List Pages"
-			},
-			"snap": "Snap To (NYI)",
-			"scene_rendering": "3D Part Rendering...",
-			"brick_colors": "Brick Colors..."
-		},
-		"view": {
-			"root": "View",
-			"show_pages": {
-				"root": "Show Pages",
-				"one": "One Page",
-				"two": "Two Facing Pages",
-				"one_scroll": "One Page Scrolling View",
-				"two_scroll": "Two Pages Scrolling View"
-			},
-			"zoom": {
-				"root": "Zoom (NYI)"
-			},
-			"grid": {
-				"root": "Grid",
-				"show": "Show",
-				"hide": "Hide",
-				"show_undo": "Show Grid",
-				"hide_undo": "Hide Grid",
-				"customize": "Customize"
-			},
-			"guides": {
-				"root": "Guides",
-				"add_horizontal": "Add Horizontal Guide",
-				"add_vertical": "Add Vertical Guide",
-				"add_undo": "Add Guide",
-				"remove": "Remove Guides",
-				"remove_undo": "Remove Guides"
-			}
-		},
-		"export": {
-			"root": "Export",
-			"pdf": "PDF",
-			"hi_res_pdf": "Hi-Res PDF...",
-			"png": "PNG Images",
-			"hi_res_png": "Hi-Res PNG Images..."
-		}
-	},
 	"dialog": {
 		"import_model": {
 			"title": "Import Model",
@@ -689,20 +788,5 @@
 				"even-right": "Odd Left, Even Right"
 			}
 		}
-	},
-	"undo": {
-		"undo": "Undo",
-		"redo": "Redo",
-		"delete_@mf": "Delete ${item}",
-		"move_@mf": "Move ${item}",
-		"change_@mf": "Change ${item}",
-		"change_template_@mf": "Change ${item} Template"
-	},
-	"status_bar": {
-		"file_loaded_@mf": "\"${filename}\" loaded successfully (${time})",
-		"file_opened_@mf": "\"${filename}\" opened successfully (${time})",
-		"template_opened_@mf": "\"${filename}\" template opened successfully",
-		"generated_PDF_successfully_@mf": "PDF Generated Successfully (${time})",
-		"generated_PNG_successfully_@mf": "PNG Zip Generated Successfully (${time})"
 	}
 }

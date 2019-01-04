@@ -50,7 +50,8 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 				app.updateProgress({clear: true});
 				const end = Date.now();
 				const time = _.formatTime(start, end);
-				app.statusText = LocaleManger.translate(`status_bar.generated_${exportType}_successfully_@mf`,
+				app.statusText = LocaleManger.translate(
+					`action.export.${exportType.toLowerCase()}.success_message_@mf`,
 					{exportType, time});
 			});
 		});
