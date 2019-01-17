@@ -84,7 +84,7 @@ export default {
 					if (!this.lastEdit.noLayout) {
 						store.state.pages.forEach(page => (page.needsLayout = true));
 					}
-					const item = this.tr(this.lastEdit.type.toLowerCase());
+					const item = this.tr('glossary.' + this.lastEdit.type.toLowerCase());
 					const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 					undoStack.commit('', null, undoText);
 				}
@@ -95,7 +95,7 @@ export default {
 			store.mutations[entryType].markAllDirty();
 			store.state.pages.forEach(page => (page.needsLayout = true));
 			store.state.templatePage.needsLayout = true;
-			const item = this.tr(entryType.toLowerCase());
+			const item = this.tr('glossary.' + entryType.toLowerCase());
 			const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 			undoStack.commit('', null, undoText, [entryType]);
 		}

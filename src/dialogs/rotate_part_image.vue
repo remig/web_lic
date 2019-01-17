@@ -7,7 +7,7 @@
 		class="rotatePartImageDialog"
 	>
 		<el-form :inline="true" label-width="50px">
-			<el-form-item :label="tr('x')">
+			<el-form-item :label="tr('glossary.x')">
 				<input
 					v-model.number="rotation.x"
 					type="number"
@@ -15,7 +15,7 @@
 					@input="updateValues"
 				>
 			</el-form-item>
-			<el-form-item :label="tr('y')">
+			<el-form-item :label="tr('glossary.y')">
 				<input
 					v-model.number="rotation.y"
 					type="number"
@@ -23,7 +23,7 @@
 					@input="updateValues"
 				>
 			</el-form-item>
-			<el-form-item :label="tr('z')">
+			<el-form-item :label="tr('glossary.z')">
 				<input
 					v-model.number="rotation.z"
 					type="number"
@@ -38,8 +38,8 @@
 			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
+			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
+			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>

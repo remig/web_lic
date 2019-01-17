@@ -68,7 +68,7 @@ export default {
 				}
 				return `${partName}`;
 			}
-			return this.tr(t.type.toLowerCase());
+			return this.tr('glossary.' + t.type.toLowerCase());
 		}
 	},
 	computed: {

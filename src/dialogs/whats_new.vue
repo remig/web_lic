@@ -30,7 +30,7 @@
 			</div>
 		</div>
 		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
+			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>

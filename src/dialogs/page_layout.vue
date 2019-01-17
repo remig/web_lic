@@ -9,7 +9,7 @@
 		<el-form :inline="true" label-width="100px">
 			<el-form-item :label="tr('dialog.page_layout.rows')">
 				<el-checkbox v-model="autoRows" @change="updateValues">
-					{{tr('auto')}}
+					{{tr('glossary.auto')}}
 				</el-checkbox>
 			</el-form-item>
 			<el-form-item>
@@ -26,7 +26,7 @@
 		<el-form :inline="true" label-width="100px">
 			<el-form-item :label="tr('dialog.page_layout.cols')">
 				<el-checkbox v-model="autoCols" @change="updateValues">
-					{{tr('auto')}}
+					{{tr('glossary.auto')}}
 				</el-checkbox>
 			</el-form-item>
 			<el-form-item>
@@ -59,8 +59,8 @@
 			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
+			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
+			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>

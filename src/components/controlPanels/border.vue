@@ -2,7 +2,7 @@
 
 <template>
 	<panel-base :title="title" label-width="120px">
-		<el-form-item :label="tr('color')">
+		<el-form-item :label="tr('glossary.color')">
 			<el-color-picker
 				v-model="color"
 				show-alpha

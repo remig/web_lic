@@ -362,7 +362,7 @@ const app = new Vue({
 				const opts = {doLayout: true};
 				opts[selItem.type] = selItem;
 				const undoText = this.tr('action.edit.item.delete.undo_@mf',
-					{item: this.tr(selItem.type.toLowerCase())});
+					{item: this.tr('glossary.' + selItem.type.toLowerCase())});
 				try {
 					this.clearSelected();
 					undoStack.commit(`${selItem.type}.delete`, opts, undoText);
@@ -412,7 +412,7 @@ const app = new Vue({
 
 				if (dx !== 0 || dy !== 0) {
 					const undoText = this.tr('action.edit.item.move.undo_@mf',
-						{item: this.tr(selItem.type.toLowerCase())});
+						{item: this.tr('glossary.' + selItem.type.toLowerCase())});
 					undoStack.commit('item.reposition', {item: item, dx, dy}, undoText);
 				}
 			} else {

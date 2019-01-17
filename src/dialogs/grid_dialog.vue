@@ -54,7 +54,7 @@
 			</el-form-item>
 			<el-form-item :label="tr('dialog.grid.line_style')">
 				<el-form-item
-					:label="tr('color')"
+					:label="tr('glossary.color')"
 					label-width="70px"
 				>
 					<el-checkbox
@@ -87,8 +87,8 @@
 			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
+			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
+			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>
