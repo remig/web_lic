@@ -74,22 +74,23 @@ function getLocale() {
 }
 
 function setLocale(locale) {
+	if (locale == null) {
+		return;
+	}
 	currentLocale = locale;
 	uiState.set('locale', locale);
 	if (!(loadedLanguages.hasOwnProperty(locale))) {
+		// TODO: loading languages via require means all languages are included in the compiled bundle,
+		// so need to switch to ajax and load only what we need
 		loadedLanguages[locale] = require(`../languages/${locale}.json`);
 	}
 }
 
+function restoreLanguage() {
+	setLocale(uiState.get('localess'));
+}
+
 function pickLanguage(onOk, onLanguageChange) {
-
-	currentLocale = uiState.get('locale');
-	if (currentLocale && currentLocale !== 'en') {
-		// TODO: loading languages via require means all languages are included in the compiled bundle,
-		// so need to switch to ajax and load only what we need
-		loadedLanguages[currentLocale] = require(`../languages/${currentLocale}.json`);
-	}
-
 	if (currentLocale != null || LanguageList.length < 2) {
 		onOk();
 		if (currentLocale != null) {
@@ -131,5 +132,7 @@ Vue.component('localeChooserDialog', {
 		}
 	}
 });
+
+restoreLanguage();
 
 export default {translate, getLocale, setLocale, pickLanguage, LanguageList};
