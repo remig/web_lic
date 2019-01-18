@@ -10,6 +10,10 @@
         "x": "X",
         "y": "Y",
         "z": "Z",
+        "top": "Top",
+        "bottom": "Bottom",
+        "left": "Left",
+        "right": "Right",
         "page": "Page",
         "submodelimage": "Submodel Image",
         "step": "Step",
@@ -781,6 +785,9 @@
 			"content": "Content",
 			"include_submodels": "Include Submodels in PLI"
 		},
+        "csi": {
+            "displacement_arrow_color": "Displacement Arrow Color"
+        },
 		"page_number": {
 			"position": "Position",
 			"positions": {
@@ -790,5 +797,24 @@
 				"even-right": "Odd Left, Even Right"
 			}
 		}
-	}
+	},
+    "nav_tree": {
+        "show": "Show",
+        "all": "All",
+        "page_step_part": "Pages, Steps, CSIs, Parts",
+        "steps": "Steps",
+        "submodel_images": "Submodel Images",
+        "submodel_csi": "Submodel CSIs",
+        "csis": "CSIs",
+        "parts": "Parts",
+        "plis": "PLIs",
+        "pli_items": "PLI Images",
+        "callouts": "Callouts",
+        "callout_arrows": "Callout Arrows",
+        "annotations": "Annotations",
+        "number_labels": "Number Labels",
+        "quantity_labels": "Quantity Labels",
+        "dividers": "Dividers",
+        "group_parts": "Group Parts By Type (NYI)"
+    }
 }

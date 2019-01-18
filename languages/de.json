@@ -10,6 +10,10 @@
         "x": "X",
         "y": "Y",
         "z": "Z",
+        "top": "Oben",
+        "bottom": "Unten",
+        "left": "Links",
+        "right": "Rechts",
         "page": "Seite",
         "submodelimage": "Untermodellbild",
         "step": "Schritt",
@@ -20,7 +24,7 @@
         "calloutarrow": "Callout Pfeil",
         "numberlabel": "Nummer Text",
         "rotateicon": "Rotationszeichen",
-        "templatepage": "Seite",
+        "templatepage": "Vorlage",
         "titlepage": "Titelseite",
         "inventorypage": "Teileübersicht",
         "divider": "Trennlinie",
@@ -755,7 +759,7 @@
 			"inch_size_@mf": "${width} x ${height} in"
 		},
 		"fill": {
-			"title": "Füllung",
+			"title": "Hintergrund",
 			"gradient": "Farbverlauf",
 			"image": "Bild"
 		},
@@ -781,6 +785,9 @@
 			"content": "Inhalt",
 			"include_submodels": "Teile von Untermodelen in PLI"
 		},
+        "csi": {
+            "displacement_arrow_color": "Versetzungpfeil Farbe"
+        },
 		"page_number": {
 			"position": "Position",
 			"positions": {
@@ -790,5 +797,24 @@
 				"even-right": "Ungerade links, Gerade rechts"
 			}
 		}
-	}
+	},
+    "nav_tree": {
+        "show": "Zeige",
+        "all": "Alle",
+        "page_step_part": "Seiten, Schritte, Schrittbilder, Teile",
+        "steps": "Schritte",
+        "submodel_images": "Untermodellbilder",
+        "submodel_csi": "Untermodellschrittbilder",
+        "csis": "Schrittbilder",
+        "parts": "Teile",
+        "plis": "Teilelisten",
+        "pli_items": "Teilelistenbilder",
+        "callouts": "Callouts",
+        "callout_arrows": "Callout Pfeile",
+        "annotations": "Objekte",
+        "number_labels": "Zahlen",
+        "quantity_labels": "Anzahl",
+        "dividers": "Trenner",
+        "group_parts": "Teile nach Art gruppieren (NYI)"
+    }
 }

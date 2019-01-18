@@ -2,7 +2,8 @@
 
 <template>
 	<div class="container" @click.stop="">
-		<h4>{{selectedItem ? tr(selectedItem.type.toLowerCase()) : tr('template.select_page_item')}}</h4>
+		<h4>{{selectedItem ? tr('glossary.' + selectedItem.type.toLowerCase())
+		: tr('template.select_page_item')}}</h4>
 		<div class="panel-group">
 			<component
 				ref="currentTemplatePanel"
