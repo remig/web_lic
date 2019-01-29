@@ -112,7 +112,7 @@ export default {
 		okText() {
 			return this.stillHaveMissingParts
 				? this.tr('dialog.missing_parts.proceed')
-				: this.tr('ok');
+				: this.tr('dialog.ok');
 		}
 	}
 };

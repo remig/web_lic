@@ -1,117 +1,582 @@
 {
-	"ok": "Ok",
-	"cancel": "Cancel",
-	"font": "Font",
-	"font_size": "Font Size",
-	"color": "Color",
-	"size": "Size",
-	"reset": "Reset",
-	"auto": "Auto",
-	"upload": "Upload",
-	"import": "Import",
-	"x": "X",
-	"y": "Y",
-	"z": "Z",
-	"page": "Page",
-	"submodelimage": "Submodel Image",
-	"step": "Step",
-	"csi": "CSI",
-	"pli": "PLI",
-	"pliitem": "PLI Item",
-	"quantitylabel": "Quantity Label",
-	"calloutarrow": "Callout Arrow",
-	"numberlabel": "Number Label",
-	"rotateicon": "Rotate Icon",
-	"templatepage": "Page",
-	"titlepage": "Title Page",
-	"inventorypage": "Part List Page",
-	"divider": "Divider",
-	"annotation": "Annotation",
-	"navbar": {
-		"file": {
-			"root": "File",
-			"open_lic": "Open Lic File...",
-			"open_lic_recent": "Open Recent (NYI)",
-			"close": "Close",
-			"save": "Save",
-			"save_as": "Save As...",
-			"import_model": "Import Custom Model...",
-			"import_builtin_model": "Import Built-in Model...",
-			"template": {
-				"root": "Template",
-				"save": "Save",
-				"save_as": "Save As...",
-				"load": "Load",
-				"load_builtin": "Load Built-in (NYI)",
-				"reset": "Reset",
-				"reset_undo": "Reset Template"
+    "glossary": {
+        "font": "Font",
+        "font_size": "Font Size",
+        "color": "Color",
+        "size": "Size",
+        "auto": "Auto",
+        "upload": "Upload",
+        "import": "Import",
+        "x": "X",
+        "y": "Y",
+        "z": "Z",
+        "top": "Top",
+        "bottom": "Bottom",
+        "left": "Left",
+        "right": "Right",
+        "page": "Page",
+        "submodelimage": "Submodel Image",
+        "step": "Step",
+        "csi": "CSI",
+        "pli": "PLI",
+        "pliitem": "PLI Item",
+        "quantitylabel": "Quantity Label",
+        "calloutarrow": "Callout Arrow",
+        "numberlabel": "Number Label",
+        "rotateicon": "Rotate Icon",
+        "templatepage": "Page",
+        "titlepage": "Title Page",
+        "inventorypage": "Part List Page",
+        "divider": "Divider",
+        "annotation": "Annotation",
+        "callout": "Callout",
+        "ctrl": "Ctrl"
+    },
+	"action": {
+        "file": {
+            "name": "File",
+            "open_lic": {
+                "name": "Open Lic File...",
+                "success_message_@mf": "\"${filename}\" opened successfully (${time})"
+            },
+            "open_lic_recent": {
+                "name": "Open Recent (NYI)"
+            },
+            "close": {
+                "name": "Close"
+            },
+            "save": {
+                "name": "Save"
+            },
+            "save_as": {
+                "name": "Save As..."
+            },
+            "import_model": {
+                "name": "Import Custom Model...",
+                "success_message_@mf": "\"${filename}\" loaded successfully (${time})"
+            },
+            "import_builtin_model": {
+                "name": "Import Built-in Model..."
+            },
+            "template": {
+                "name": "Template",
+                "save": {
+                    "name": "Save"
+                },
+                "save_as": {
+                    "name": "Save As..."
+                },
+                "load": {
+                    "name": "Load",
+                    "success_message_@mf": "\"${filename}\" template opened successfully"
+                },
+                "load_builtin": {
+                    "name": "Load Built-in (NYI)"
+                },
+                "reset": {
+                    "name": "Reset",
+                    "undo": "Reset Template"
+                }
+            },
+            "set_language": {
+                "name": "Set Language"
+            },
+            "clear_cache": {
+                "name": "Clear Cache",
+                "model": {
+                    "name": "Current Instruction Book"
+                },
+                "ui": {
+                    "name": "UI Settings"
+                },
+                "everything": {
+                    "name": "Everything"
+                }
+            }
+        },
+        "edit": {
+            "name": "Edit",
+            "undo": {
+                "name": "Undo"
+            },
+            "redo": {
+                "name": "Redo"
+            },
+            "title_page": {
+                "add": {
+                    "name": "Add Title Page"
+                },
+                "remove": {
+                    "name": "Remove Title Page"
+                }
+            },
+            "pli": {
+                "show": {
+                    "name": "Show PLIs"
+                },
+                "hide": {
+                    "name": "Hide PLIs"
+                }
+            },
+            "inventory_page": {
+                "add": {
+                    "name": "Add Part List Pages"
+                },
+                "remove": {
+                    "name": "Remove Part List Pages"
+                }
+            },
+            "snap": {
+                "name": "Snap To (NYI)"
+            },
+            "scene_rendering": {
+                "name": "3D Part Rendering..."
+            },
+            "brick_colors": {
+                "name": "Brick Colors..."
+            },
+            "template": {
+                "change": {
+                    "undo_@mf": "Change ${item} Template"
+                }
+            },
+            "item": {
+                "move": {
+                    "undo_@mf": "Move ${item}"
+                },
+                "delete": {
+                    "undo_@mf": "Delete ${item}"
+                }
+            }
+        },
+        "view": {
+            "name": "View",
+            "show_pages": {
+                "name": "Show Pages",
+                "one": {
+                    "name": "One Page"
+                },
+                "two": {
+                    "name": "Two Facing Pages"
+                },
+                "one_scroll": {
+                    "name": "One Page Scrolling View"
+                },
+                "two_scroll": {
+                    "name": "Two Pages Scrolling View"
+                }
+            },
+            "zoom": {
+                "name": "Zoom (NYI)"
+            },
+            "grid": {
+                "name": "Grid",
+                "show": {
+                    "name": "Show",
+                    "undo": "Show Grid"
+                },
+                "hide": {
+                    "name": "Hide",
+                    "undo": "Hide Grid"
+                },
+                "customize": {
+                    "name": "Customize"
+                }
+            },
+            "guides": {
+                "name": "Guides",
+                "add_horizontal": {
+                    "name": "Add Horizontal Guide",
+                    "undo": "Add Guide"
+                },
+                "add_vertical": {
+                    "name": "Add Vertical Guide",
+                    "undo": "Add Guide"
+                },
+                "remove": {
+                    "name": "Remove Guides",
+                    "undo": "Remove Guides"
+                }
+            }
+        },
+        "export": {
+            "name": "Export",
+            "pdf": {
+                "name": "PDF",
+                "success_message_@mf": "PDF Generated Successfully (${time})"
+            },
+            "hi_res_pdf": {
+                "name": "Hi-Res PDF..."
+            },
+            "png": {
+                "name": "PNG Images",
+                "success_message_@mf": "PNG Zip Generated Successfully (${time})"
+            },
+            "hi_res_png": {
+                "name": "Hi-Res PNG Images..."
+            }
+        },
+        "annotation": {
+            "add": {
+                "name": "Add Annotation",
+                "label": {
+                    "name": "Label",
+                    "undo": "Add Label",
+                    "initial_text": "New Label"
+                },
+                "line": {
+                    "name": "Line (NYI)"
+                },
+                "circle": {
+                    "name": "Circle (NYI)"
+                },
+                "arrow": {
+                    "name": "Arrow",
+                    "undo": "Add Arrow"
+                },
+                "image": {
+                    "name": "Image",
+                    "undo": "Add Image"
+                }
+            },
+            "delete": {
+                "name": "Delete",
+                "undo": "Delete Annotation"
+            },
+            "change_text_and_style": {
+                "name": "Change Text & Style...",
+                "undo": "Change Annotation"
+            }
+        },
+		"layout": {
+			"name": "Layout",
+			"vertical": {
+				"name": "Vertical",
+				"undo": "Layout Vertical"
 			},
-			"set_language": {
-				"root": "Set Language"
+			"horizontal": {
+				"name": "Horizontal",
+				"undo": "Layout Horizontal"
 			},
-			"clear_cache": {
-				"root": "Clear Cache",
-				"model": "Current Instruction Book",
-				"ui": "UI Settings",
-				"everything": "Everything"
+			"by_row_and_column": {
+				"name": "By Row and Column...",
+				"undo": "Layout Page by Row and Column",
+				"undo_step": "Layout Step by Row and Column"
+			},
+            "redo_layout": {
+                "name": "Redo Layout"
+            }
+        },
+        "page": {
+            "prepend_blank_page": {
+                "name": "Prepend Blank Page"
+            },
+            "append_blank_page": {
+                "name": "Append Blank Page"
+            },
+            "hide_step_separators": {
+                "name": "Hide Step Separators (NYI)"
+            },
+            "add_blank_step": {
+                "name": "Add Blank Step"
+            },
+            "delete_this_blank_page": {
+                "name": "Delete This Blank Page",
+                "undo": "Delete Page"
+            }
+        },
+        "step": {
+            "add_callout": {
+                "name": "Add Callout"
+            },
+            "divide_into_sub_steps": {
+                "name": "Divide into Sub-Steps"
+            },
+            "stretch_to_next_page": {
+                "name": "Stretch Step to Next Page"
+            },
+            "move_to": {
+                "name": "Move Step to...",
+                "previous_page": {
+                    "name": "Previous Page",
+                    "undo": "Move Step to Previous Page"
+                },
+                "next_page": {
+                    "name": "Next Page",
+                    "undo": "Move Step to Next Page"
+                }
+            },
+            "merge_with": {
+                "name": "Merge Step with...",
+                "previous_step": {
+                    "name": "Previous Step",
+                    "undo": "Merge Step with Previous Step"
+                },
+                "next_step": {
+                    "name": "Next Step",
+                    "undo": "Merge Step with Next Step"
+                }
+            },
+            "delete_empty_step": {
+                "name": "Delete Empty Step"
+            },
+            "prepend_blank_step": {
+                "name": "Prepend Blank Step"
+            },
+            "append_blank_step": {
+                "name": "Append Blank Step"
+            }
+        },
+        "rotate_icon": {
+            "add": {
+                "name": "Add Rotate Icon"
+            },
+            "delete": {
+                "name": "Delete Rotate Icon"
+            }
+        },
+        "page_number": {
+            "change_number": {
+                "name": "Change Page Number (NYI)"
+            }
+        },
+        "step_number": {
+            "change_number": {
+                "name": "Change Step Number (NYI)"
+            }
+        },
+        "csi": {
+            "rotate": {
+                "name": "Rotate CSI",
+                "flip_upside_down": {
+                    "name": "Flip Upside Down",
+                    "undo": "Flip Step Image"
+                },
+                "rotate_front_to_back": {
+                    "name": "Rotate Front to Back",
+                    "undo": "Rotate Step Image"
+                },
+                "custom_rotation": {
+                    "name": "Custom Rotation...",
+                    "undo": "Rotate Step Image"
+                },
+                "remove_rotation": {
+                    "name": "Remove Rotation",
+                    "undo": "Remove Step Image Rotation"
+                }
+            },
+            "copy_rotation_to_next_steps": {
+                "name": "Copy Rotation to next Steps...",
+                "undo": "Copy CSI Rotations"
+            },
+            "scale": {
+                "name": "Scale CSI",
+                "undo": "Scale Step Image"
+            },
+            "remove_scale": {
+                "name": "Remove Scale",
+                "undo": "Clear Step Image Scale"
+            },
+            "select_part": {
+                "name": "Select Part"
+            },
+            "add_new_part": {
+                "name": "Add New Part (NYI)"
+            }
+        },
+        "pli_item": {
+            "rotate_part_list_image": {
+                "name": "Rotate Part List Image...",
+                "undo": "Rotate Part List Image"
+            },
+            "scale_part_list_image": {
+                "name": "Scale Part List Image...",
+                "undo": "Scale Part List Image"
+            },
+            "remove_part_list_image_scale": {
+                "name": "Remove Scale",
+                "undo": "Remove Part List Image Scale"
+            }
+        },
+        "quantity_label": {
+            "change_count": {
+                "name": "Change Count",
+                "undo": "Change Part Count"
+            }
+        },
+        "callout": {
+            "position": {
+                "name": "Position",
+                "undo": "Set Callout Position",
+                "top": {
+                    "name": "Top"
+                },
+                "bottom": {
+                    "name": "Bottom"
+                },
+                "right": {
+                    "name": "Right"
+                },
+                "left": {
+                    "name": "Left"
+                }
+            },
+            "layout": {
+                "name": "Layout",
+                "vertical": {
+                    "name": "Vertical",
+                    "undo": "Layout Vertical"
+                },
+                "horizontal": {
+                    "name": "Horizontal",
+                    "undo": "Layout Horizontal"
+                }
+            },
+            "add_step": {
+                "name": "Add Step"
+            },
+            "delete_empty_callout": {
+                "name": "Delete Empty Callout"
+            }
+        },
+        "callout_arrow": {
+            "select_point": {
+                "name": "Select Point...",
+                "base": {
+                    "name": "Base"
+                },
+                "tip": {
+                    "name": "Tip"
+                },
+                "point": {
+                    "name_@mf": "Point ${idx}"
+                }
+            },
+            "add_point": {
+                "name": "Add Point"
+            },
+            "delete_point": {
+                "name": "Delete",
+                "undo": "Delete Point"
+            },
+            "add_tip": {
+                "name": "Add Tip (NYI)"
+            },
+            "rotate_tip": {
+                "name": "Rotate Tip...",
+                "undo": "Rotate Arrow Tip",
+                "up": {
+                    "name": "Up"
+                },
+                "right": {
+                    "name": "Right"
+                },
+                "down": {
+                    "name": "Down"
+                },
+                "left": {
+                    "name": "Left"
+                }
+            }
+        },
+        "divider": {
+            "resize": {
+                "name": "Resize",
+                "undo": "Set Divider Length"
+            },
+            "delete": {
+                "name": "Delete",
+                "undo": "Remove Divider"
+            }
+        },
+		"submodel": {
+			"convert_to_callout": {
+				"name": "Convert to Callout"
 			}
 		},
-		"edit": {
-			"root": "Edit",
-			"title_page": {
-				"add": "Add Title Page",
-				"remove": "Remove Title Page"
+		"part": {
+			"displace_part": {
+				"name": "Displace Part...",
+				"undo_@mf": "Displace Part ${direction}",
+				"up": {
+					"name": "Up"
+				},
+				"down": {
+					"name": "Down"
+				},
+				"left": {
+					"name": "Left"
+				},
+				"right": {
+					"name": "Right"
+				},
+				"forward": {
+					"name": "Forward"
+				},
+				"backward": {
+					"name": "Backward"
+				},
+				"none": {
+					"name": "None"
+				}
 			},
-			"pli": {
-				"show": "Show PLIs",
-				"hide": "Hide PLIs"
+			"adjust_displacement": {
+				"name": "Adjust Displacement",
+				"undo": "Adjust Displaced Part"
 			},
-			"inventory_page": {
-				"add": "Add Part List Pages",
-				"remove": "Remove Part List Pages"
+			"remove_displacement": {
+				"name": "Remove Displacement"
 			},
-			"snap": "Snap To (NYI)",
-			"scene_rendering": "3D Part Rendering...",
-			"brick_colors": "Brick Colors..."
-		},
-		"view": {
-			"root": "View",
-			"show_pages": {
-				"root": "Show Pages",
-				"one": "One Page",
-				"two" : "Two Facing Pages",
-				"one_scroll": "One Page Scrolling View",
-				"two_scroll": "Two Pages Scrolling View"
+			"move_part_to": {
+				"name": "Move Part to...",
+				"previous_step": {
+					"name": "Previous Step",
+					"undo": "Move Part to Previous Step"
+				},
+				"next_step": {
+					"name": "Next Step",
+					"undo": "Move Part to Next Step"
+				}
 			},
-			"zoom": {
-				"root": "Zoom (NYI)"
+			"add_part_to_callout": {
+				"name": "Add Part to Callout",
+				"undo": "Add Part to Callout"
 			},
-			"grid": {
-				"root": "Grid",
-				"show": "Show",
-				"hide": "Hide",
-				"show_undo": "Show Grid",
-				"hide_undo": "Hide Grid",
-				"customize": "Customize"
+			"remove_part_from_callout": {
+				"name": "Remove Part from Callout",
+				"undo": "Remove Part from Callout"
 			},
-			"guides": {
-				"root": "Guides",
-				"add_horizontal": "Add Horizontal Guide",
-				"add_vertical": "Add Vertical Guide",
-				"add_undo": "Add Guide",
-				"remove": "Remove Guides",
-				"remove_undo": "Remove Guides"
+			"remove_from_pli": {
+				"name": "Remove from PLI (NYI)"
+			},
+			"change_part": {
+				"name": "Change Part",
+				"position_and_rotation": {
+					"name": "Change Position and Rotation",
+					"undo": "Change Part Transform"
+				},
+				"color": {
+					"name": "Change Color"
+				},
+				"to_different_part": {
+					"name": "Change to Different Part",
+					"undo": "Change Part Type"
+				},
+				"duplicate": {
+					"name": "Duplicate",
+					"undo": "Duplicate Part"
+				},
+				"delete": {
+					"name": "Delete",
+					"undo": "Delete Part"
+				}
 			}
-		},
-		"export": {
-			"root": "Export",
-			"pdf": "PDF",
-			"hi_res_pdf": "Hi-Res PDF...",
-			"png": "PNG Images",
-			"hi_res_png": "Hi-Res PNG Images..."
 		}
 	},
 	"dialog": {
+        "ok": "Ok",
+        "cancel": "Cancel",
+        "reset": "Reset",
 		"import_model": {
 			"title": "Import Model",
 			"parts_per_step_1": "Model has no Steps. Add Steps with",
@@ -241,15 +706,35 @@
 			"title_csi": "Rotate CSI",
 			"add_rotate_icon": "Add Rotation Icon"
 		},
-		"busyIndicator": {
-            "loadingModel": "Loading Model",
-            "mergingSteps": "Merging Steps",
-			"generatingPDF": "Generating PDF",
-			"generatingPNG": "Generating PNG Zip"
+        "copy_csi_rotation": {
+            "title": "Copy Rotation",
+            "label": "Copy Rotation to Next Steps"
+        },
+        "scale_csi": {
+            "title": "Scale CSI"
+        },
+        "scale_pli": {
+            "title": "Scale Part List Image"
+        },
+        "change_part_count": {
+            "title": "Change Part Count",
+            "label": "New Count"
+        },
+		"style_annotation": {
+			"title": "Style Annotation"
+		},
+        "resize_page_divider": {
+            "title": "Resize Page Divider"
+        },
+		"busy_indicator": {
+			"loading_model": "Loading Model",
+			"merging_steps": "Merging Steps",
+			"generating_PDF": "Generating PDF",
+			"generating_PNG": "Generating PNG Zip"
 		}
 	},
 	"template": {
-		"selectPageItem": "Select a Page Item",
+		"select_page_item": "Select a Page Item",
 		"page": {
 			"title": "Page Size",
 			"formats": {
@@ -300,6 +785,9 @@
 			"content": "Content",
 			"include_submodels": "Include Submodels in PLI"
 		},
+        "csi": {
+            "displacement_arrow_color": "Displacement Arrow Color"
+        },
 		"page_number": {
 			"position": "Position",
 			"positions": {
@@ -310,17 +798,23 @@
 			}
 		}
 	},
-	"undo": {
-		"delete_@mf": "Delete ${item}",
-		"move_@mf": "Move ${item}",
-		"change_@mf": "Change ${item}",
-		"change_template_@mf": "Change ${item} Template"
-	},
-	"status_bar": {
-		"file_loaded_@mf": "\"${filename}\" loaded successfully (${time})",
-		"file_opened_@mf": "\"${filename}\" opened successfully (${time})",
-		"template_opened_@mf": "\"${filename}\" template opened successfully",
-		"generated_PDF_successfully_@mf": "PDF Generated Successfully (${time})",
-		"generated_PNG_successfully_@mf": "PNG Zip Generated Successfully (${time})"
-	}
+    "nav_tree": {
+        "show": "Show",
+        "all": "All",
+        "page_step_part": "Pages, Steps, CSIs, Parts",
+        "steps": "Steps",
+        "submodel_images": "Submodel Images",
+        "submodel_csi": "Submodel CSIs",
+        "csis": "CSIs",
+        "parts": "Parts",
+        "plis": "PLIs",
+        "pli_items": "PLI Images",
+        "callouts": "Callouts",
+        "callout_arrows": "Callout Arrows",
+        "annotations": "Annotations",
+        "number_labels": "Number Labels",
+        "quantity_labels": "Quantity Labels",
+        "dividers": "Dividers",
+        "group_parts": "Group Parts By Type (NYI)"
+    }
 }

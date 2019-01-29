@@ -14,7 +14,7 @@
 					type="textarea"
 				/>
 			</el-form-item>
-			<el-form-item :label="tr('font')">
+			<el-form-item :label="tr('glossary.font')">
 				<el-select
 					v-model="family"
 				>
@@ -42,7 +42,7 @@
 					<em>I</em>
 				</el-button>
 			</el-form-item>
-			<el-form-item :label="tr('font_size')">
+			<el-form-item :label="tr('glossary.font_size')">
 				<input
 					v-model.number="size"
 					type="number"
@@ -50,7 +50,7 @@
 					class="form-control size-input"
 				>
 			</el-form-item>
-			<el-form-item :label="tr('color')">
+			<el-form-item :label="tr('glossary.color')">
 				<el-color-picker
 					v-model="color"
 					show-alpha
@@ -58,8 +58,8 @@
 			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
+			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
+			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>

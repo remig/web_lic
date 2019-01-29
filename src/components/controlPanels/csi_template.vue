@@ -7,8 +7,8 @@
 			@new-values="newValues"
 		/>
 		<fill-panel
+			:title="tr('template.csi.displacement_arrow_color')"
 			template-entry="step.csi.displacementArrow"
-			title="Displacement Arrow Color"
 			@new-values="newArrowStyle"
 		/>
 		<!--<border-panel title="Displacement Arrow Border" v-on:new-values="newArrowStyle"></border-panel>-->

@@ -10,7 +10,7 @@
 			<tr>
 				<th>{{tr('dialog.brick_colors.ld_code')}}</th>
 				<th style="text-align: left;">{{tr('dialog.brick_colors.name')}}</th>
-				<th>{{tr('color')}}</th>
+				<th>{{tr('glossary.color')}}</th>
 				<th>{{tr('dialog.brick_colors.edge_color')}}</th>
 			</tr>
 		</table>
@@ -29,9 +29,9 @@
 			</table>
 		</div>
 		<span slot="footer" class="dialog-footer">
-			<el-button @click="reset">{{tr("reset")}}</el-button>
-			<el-button @click="cancel">{{tr("cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("ok")}}</el-button>
+			<el-button @click="reset">{{tr("dialog.reset")}}</el-button>
+			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
+			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>

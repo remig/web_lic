@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base :title="tr('font')" label-width="70px">
+	<panel-base :title="tr('glossary.font')" label-width="70px">
 		<el-form-item label-width="0px">
 			<el-select
 				v-model="family"
@@ -40,7 +40,7 @@
 				<u>{{tr('template.font.underline_character')}}</u>
 			</el-button>
 		</el-form-item>
-		<el-form-item :label="tr('size')">
+		<el-form-item :label="tr('glossary.size')">
 			<input
 				v-model.number="size"
 				type="number"
@@ -49,7 +49,7 @@
 				@input="updateValues"
 			>
 		</el-form-item>
-		<el-form-item :label="tr('color')">
+		<el-form-item :label="tr('glossary.color')">
 			<el-color-picker
 				v-model="color"
 				show-alpha

@@ -2,7 +2,8 @@
 
 <template>
 	<div class="container" @click.stop="">
-		<h4>{{selectedItem ? tr(selectedItem.type.toLowerCase()) : tr('template.selectPageItem')}}</h4>
+		<h4>{{selectedItem ? tr('glossary.' + selectedItem.type.toLowerCase())
+		: tr('template.select_page_item')}}</h4>
 		<div class="panel-group">
 			<component
 				ref="currentTemplatePanel"
@@ -84,8 +85,8 @@ export default {
 					if (!this.lastEdit.noLayout) {
 						store.state.pages.forEach(page => (page.needsLayout = true));
 					}
-					const item = this.tr(this.lastEdit.type.toLowerCase());
-					const undoText = this.tr('undo.change_template_@mf', {item});
+					const item = this.tr('glossary.' + this.lastEdit.type.toLowerCase());
+					const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 					undoStack.commit('', null, undoText);
 				}
 				this.lastEdit = null;
@@ -95,8 +96,8 @@ export default {
 			store.mutations[entryType].markAllDirty();
 			store.state.pages.forEach(page => (page.needsLayout = true));
 			store.state.templatePage.needsLayout = true;
-			const item = this.tr(entryType.toLowerCase());
-			const undoText = this.tr('undo.change_template_@mf', {item});
+			const item = this.tr('glossary.' + entryType.toLowerCase());
+			const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 			undoStack.commit('', null, undoText, [entryType]);
 		}
 	},

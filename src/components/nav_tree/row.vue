@@ -37,14 +37,12 @@ export default {
 			const t = this.target;
 			if (!t) {
 				return '';
-			} else if (t.type === 'templatePage') {
-				return 'Template';
 			} else if (t.type === 'page') {
-				return 'Page ' + (t.number || '');
+				return this.tr('glossary.page') + ' ' + (t.number || '');
 			} else if (t.type === 'inventoryPage') {
-				return 'Part List Page ' + (t.number || '');
+				return this.tr('glossary.inventorypage') + ' ' + (t.number || '');
 			} else if (t.type === 'step') {
-				return 'Step ' + (t.number || '');
+				return this.tr('glossary.step') + ' ' + (t.number || '');
 			} else if (t.type === 'submodel') {
 				return t.filename;
 			} else if (t.type === 'annotation') {
@@ -53,11 +51,11 @@ export default {
 						return t.text;
 				}
 			} else if (t.type === 'callout') {
-				return `Callout (${t.position})`;
+				return this.tr('glossary.callout') + ' ' + this.tr('glossary.' + t.position);
 			} else if (t.type === 'pliItem') {
 				return `${nicePartName(t.filename)} - ${niceColorName(t.colorCode)}`;
 			} else if (t.type === 'quantityLabel') {
-				return `Quantity Label x${store.get.parent(t).quantity}`;
+				return this.tr('glossary.quantitylabel') + ' x' + store.get.parent(t).quantity;
 			} else if (t.type === 'part') {
 				const step = store.get.step(t.stepID);
 				const part = LDParse.model.get.partFromID(t.id, step.model.filename);
@@ -68,7 +66,7 @@ export default {
 				}
 				return `${partName}`;
 			}
-			return this.tr(t.type.toLowerCase());
+			return this.tr('glossary.' + t.type.toLowerCase());
 		}
 	},
 	computed: {

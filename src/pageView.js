@@ -300,8 +300,8 @@ Vue.component('pageView', {
 				this.mouseDragItem.guide.savePosition();
 			} else if (this.mouseDragItem && this.mouseDragItem.moved) {
 				// Mouse drag is complete; add undo event to stack
-				const item = this.tr(this.mouseDragItem.item.type.toLowerCase());
-				const undoText = this.tr('undo.move_@mf', {item});
+				const item = this.tr('glossary.' + this.mouseDragItem.item.type.toLowerCase());
+				const undoText = this.tr('action.edit.item.move.undo_@mf', {item});
 				undoStack.commit('', null, undoText);
 			} else if (e.target.nodeName !== 'CANVAS') {
 				this.app.clearSelected();

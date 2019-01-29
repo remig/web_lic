@@ -27,7 +27,7 @@
 			</table>
 		</div>
 		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("cancel")}}</el-button>
+			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
 		</span>
 	</licDialog>
 </template>

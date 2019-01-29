@@ -93,7 +93,7 @@ const app = new Vue({
 				this.closeModel();
 			}
 
-			this.busyText = this.tr('dialog.busyIndicator.loadingModel');
+			this.busyText = this.tr('dialog.busy_indicator.loading_model');
 			const model = await modelGenerator();
 			store.mutations.templatePage.add();
 			store.setModel(model);
@@ -122,7 +122,7 @@ const app = new Vue({
 					store.mutations.addInitialPages({partsPerStep: layoutChoices.partsPerStep});
 					store.mutations.addInitialSubmodelImages();
 					if (layoutChoices.useMaxSteps) {
-						this.busyText = this.tr('dialog.busyIndicator.mergingSteps');
+						this.busyText = this.tr('dialog.busy_indicator.merging_steps');
 						await store.mutations.mergeInitialPages(this.updateProgress);
 					}
 					if (layoutChoices.include.titlePage) {
@@ -142,7 +142,8 @@ const app = new Vue({
 					this.updateProgress({clear: true});
 					const time = _.formatTime(start, Date.now());
 					const filename = store.get.modelFilename();
-					this.statusText = this.tr('status_bar.file_loaded_@mf', {filename, time});
+					this.statusText = this.tr('action.file.import_model.success_message_@mf',
+						{filename, time});
 					Vue.nextTick(this.drawCurrentPage);
 				});
 			});
@@ -167,7 +168,7 @@ const app = new Vue({
 			this.clearSelected();
 			const time = _.formatTime(start, Date.now());
 			const filename = store.model.filename;
-			this.statusText = this.tr('status_bar.file_opened_@mf', {filename, time});
+			this.statusText = this.tr('action.file.open_lic.success_message_@mf', {filename, time});
 			Vue.nextTick(() => {
 				this.forceUIUpdate();
 				this.drawCurrentPage();
@@ -213,7 +214,7 @@ const app = new Vue({
 		},
 		importTemplate(result, filename) {
 			undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template');
-			this.statusText = this.tr('status_bar.template_opened_@mf', {filename});
+			this.statusText = this.tr('action.file.template.load.success_message_@mf', {filename});
 			Vue.nextTick(() => {
 				this.drawCurrentPage();
 				this.forceUIUpdate();
@@ -360,7 +361,8 @@ const app = new Vue({
 			) {
 				const opts = {doLayout: true};
 				opts[selItem.type] = selItem;
-				const undoText = this.tr('undo.delete_@mf', {item: this.tr(selItem.type.toLowerCase())});
+				const undoText = this.tr('action.edit.item.delete.undo_@mf',
+					{item: this.tr('glossary.' + selItem.type.toLowerCase())});
 				try {
 					this.clearSelected();
 					undoStack.commit(`${selItem.type}.delete`, opts, undoText);
@@ -409,7 +411,8 @@ const app = new Vue({
 				}
 
 				if (dx !== 0 || dy !== 0) {
-					const undoText = this.tr('undo.move_@mf', {item: this.tr(selItem.type.toLowerCase())});
+					const undoText = this.tr('action.edit.item.move.undo_@mf',
+						{item: this.tr('glossary.' + selItem.type.toLowerCase())});
 					undoStack.commit('item.reposition', {item: item, dx, dy}, undoText);
 				}
 			} else {

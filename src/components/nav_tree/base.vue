@@ -13,7 +13,7 @@
 				placement="bottom-start"
 				@command="checkItem"
 			>
-				<span class="el-dropdown-link">Show</span>
+				<span class="el-dropdown-link">{{tr('nav_tree.show')}}</span>
 				<el-dropdown-menu slot="dropdown" class="treeShowHideDropdown">
 					<template v-for="(el, idx) in checkedElements">
 						<el-dropdown-item
@@ -26,7 +26,7 @@
 							:key="`${el}_${idx}`"
 							:command="el"
 						>
-							{{el.name}}
+							{{tr(el.name)}}
 							<i v-if="el.checked" class="fas fa-check"/>
 						</el-dropdown-item>
 					</template>
@@ -79,24 +79,24 @@ if (navTreeState == null) {  // temp backwards compatibility fixup
 }
 
 const treeElementList = [
-	{name: 'All', value: 'all', checked: false},
-	{name: 'Pages, Steps, CSIs, Parts', value: 'page_step_part', checked: false},
+	{name: 'nav_tree.all', value: 'all', checked: false},
+	{name: 'nav_tree.page_step_part', value: 'page_step_part', checked: false},
 	{name: 'divider'},
-	{name: 'Steps', value: 'steps', checked: false, child: true},
-	{name: 'Submodel Images', value: 'submodelImages', checked: false, child: true},
-	{name: 'Submodel CSIs', value: 'submodelCSI', checked: false, child: true},
-	{name: 'CSIs', value: 'csis', checked: false, child: true},
-	{name: 'Parts', value: 'parts', checked: false, child: true},
-	{name: 'PLIs', value: 'plis', checked: false, child: true},
-	{name: 'PLI Images', value: 'pliItems', checked: false, child: true},
-	{name: 'Callouts', value: 'callouts', checked: false, child: true},
-	{name: 'Callout Arrows', value: 'calloutArrows', checked: false, child: true},
-	{name: 'Annotations', value: 'annotations', checked: false, child: true},
-	{name: 'Number Labels', value: 'numberLabels', checked: false, child: true},
-	{name: 'Quantity Labels', value: 'quantityLabels', checked: false, child: true},
-	{name: 'Dividers', value: 'dividers', checked: false, child: true},
+	{name: 'nav_tree.steps', value: 'steps', checked: false, child: true},
+	{name: 'nav_tree.submodel_images', value: 'submodelImages', checked: false, child: true},
+	{name: 'nav_tree.submodel_csi', value: 'submodelCSI', checked: false, child: true},
+	{name: 'nav_tree.csis', value: 'csis', checked: false, child: true},
+	{name: 'nav_tree.parts', value: 'parts', checked: false, child: true},
+	{name: 'nav_tree.plis', value: 'plis', checked: false, child: true},
+	{name: 'nav_tree.pli_items', value: 'pliItems', checked: false, child: true},
+	{name: 'nav_tree.callouts', value: 'callouts', checked: false, child: true},
+	{name: 'nav_tree.callout_arrows', value: 'calloutArrows', checked: false, child: true},
+	{name: 'nav_tree.annotations', value: 'annotations', checked: false, child: true},
+	{name: 'nav_tree.number_labels', value: 'numberLabels', checked: false, child: true},
+	{name: 'nav_tree.quantity_labels', value: 'quantityLabels', checked: false, child: true},
+	{name: 'nav_tree.dividers', value: 'dividers', checked: false, child: true},
 	{name: 'divider'},
-	{name: 'Group Parts By Type (NYI)', value: 'group_parts', checked: false}
+	{name: 'nav_tree.group_parts', value: 'group_parts', checked: false}
 ];
 
 treeElementList.forEach(el => (el.checked = navTreeState.checkedItems[el.value]));

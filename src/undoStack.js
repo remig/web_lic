@@ -5,6 +5,7 @@
 
 import _ from './util';
 import store from './store';
+import LocaleManager from './translate';
 
 // stack is an array of state
 // undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone
@@ -130,11 +131,13 @@ const api = {
 	},
 
 	undoText() {
-		return `Undo ${api.isUndoAvailable() ? state.stack[state.index].undoText : ''}`;
+		return LocaleManager.translate('action.edit.undo.name') +
+			` ${api.isUndoAvailable() ? state.stack[state.index].undoText : ''}`;
 	},
 
 	redoText() {
-		return `Redo ${api.isRedoAvailable() ? state.stack[state.index + 1].undoText : ''}`;
+		return LocaleManager.translate('action.edit.redo.name') +
+			` ${api.isRedoAvailable() ? state.stack[state.index + 1].undoText : ''}`;
 	}
 };
 
