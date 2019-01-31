@@ -205,25 +205,25 @@ const menu = [
 			id: 'import_builtin_model',
 			children: [
 				{
-					text: 'Trivial Model',
+					text: 'action.file.import_builtin_model.models.trivial',
 					cb() {
 						app.importBuiltInModel('trivial_model.ldr');
 					}
 				},
 				{
-					text: 'Creator Alligator',
+					text: 'action.file.import_builtin_model.models.alligator',
 					cb() {
 						app.importBuiltInModel('Creator/20015 - Alligator.mpd');
 					}
 				},
 				{
-					text: 'X-Wing',
+					text: 'action.file.import_builtin_model.models.xwing',
 					cb() {
 						app.importBuiltInModel('Star Wars/7140 - X-Wing Fighter.mpd');
 					}
 				},
 				{
-					text: 'Mobile Lab',
+					text: 'action.file.import_builtin_model.models.lab',
 					cb() {
 						app.importBuiltInModel('Space/6901 - Mobile Lab.mpd');
 					}
@@ -433,10 +433,10 @@ const menu = [
 			text: 'action.view.zoom.name',
 			enabled: enableIfModel,
 			children: [
-				{text: '100%', enabled: () => false, cb() {}},
-				{text: 'To Fit', enabled: () => false, cb() {}},
-				{text: 'In', enabled: () => false, cb() {}},
-				{text: 'Out', enabled: () => false, cb() {}}
+				{text: 'action.view.zoom.full.name', enabled: () => false, cb() {}},
+				{text: 'action.view.zoom.fit.name', enabled: () => false, cb() {}},
+				{text: 'action.view.zoom.in.name', enabled: () => false, cb() {}},
+				{text: 'action.view.zoom.out.name', enabled: () => false, cb() {}}
 			]
 		},
 		{

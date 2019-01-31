@@ -56,7 +56,13 @@
                 "success_message_@mf": "\"${filename}\" loaded successfully (${time})"
             },
             "import_builtin_model": {
-                "name": "Import Built-in Model..."
+                "name": "Import Built-in Model...",
+                "models": {
+                    "trivial": "Trivial Model",
+                    "alligator": "Creator Alligator",
+                    "xwing": "X-Wing",
+                    "lab": "Mobile Lab"
+                }
             },
             "template": {
                 "name": "Template",
@@ -167,7 +173,19 @@
                 }
             },
             "zoom": {
-                "name": "Zoom (NYI)"
+                "name": "Zoom (NYI)",
+                "full": {
+                    "name": "100%"
+                },
+                "fit": {
+                    "name": "To Fit"
+                },
+                "in": {
+                    "name": "In"
+                },
+                "out": {
+                    "name": "Out"
+                }
             },
             "grid": {
                 "name": "Grid",
