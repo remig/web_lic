@@ -5,7 +5,7 @@
 
 import _ from './util';
 import Draw from './draw';
-import {changeDpiDataUrl} from 'changeDPI';
+import {changeDpiDataUrl} from 'changedpi';
 import LocaleManger from './translate';
 
 function exportInstructions(app, store, exportType, hiResScale, drawPageCallback, doneCallback) {
