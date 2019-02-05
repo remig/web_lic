@@ -1,0 +1,339 @@
+0 FILE 6901 - Main Model.ldr
+0 Main Model
+0 Name: 6901 - Main Model.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 0 0 0 1 0 1 0 -1 0 0 3028.dat
+0 STEP
+1 7 0 -8 110 -1 0 0 0 1 0 0 0 -1 3023.dat
+1 36 -30 -8 110 -1 0 0 0 1 0 0 0 -1 3024.dat
+1 36 30 -8 110 -1 0 0 0 1 0 0 0 -1 3024.dat
+1 7 -50 -8 100 0 0 -1 0 1 0 1 0 0 3069b.dat
+1 7 -50 -8 60 0 0 -1 0 1 0 1 0 0 3069b.dat
+1 7 -50 -8 20 0 0 -1 0 1 0 1 0 0 3069b.dat
+1 7 50 -8 100 0 0 -1 0 1 0 1 0 0 3069b.dat
+1 7 50 -8 60 0 0 -1 0 1 0 1 0 0 3069b.dat
+1 7 50 -8 20 0 0 -1 0 1 0 1 0 0 3069b.dat
+1 7 50 -8 -10 0 0 -1 0 1 0 1 0 0 4085a.dat
+1 7 -50 -8 -10 0 0 1 0 1 0 -1 0 0 4085a.dat
+1 7 -50 -8 -60 0 0 1 0 1 0 -1 0 0 3710.dat
+1 7 50 -8 -60 0 0 1 0 1 0 -1 0 0 3710.dat
+1 36 -50 -8 -110 0 0 1 0 1 0 -1 0 0 3024.dat
+1 36 50 -8 -110 0 0 1 0 1 0 -1 0 0 3024.dat
+1 34 -30 -8 -110 0 0 1 0 1 0 -1 0 0 3024.dat
+1 34 30 -8 -110 0 0 1 0 1 0 -1 0 0 3024.dat
+1 7 0 -24 -100 -1 0 0 0 1 0 0 0 -1 792.dat
+1 7 0 -24 -100 -1 0 0 0 1 0 0 0 -1 793.dat
+1 16 0 -14 -120 1 0 0 0 1 0 0 0 1 6901 - Detector with 7 Arm Pieces.ldr
+0 STEP
+1 7 0 -24 -70 1 0 0 0 1 0 0 0 1 3004.dat
+1 7 0 -8 -30 1 0 0 0 1 0 0 0 1 3829c01.dat
+1 7 -40 -16 -100 1 0 0 0 1 0 0 0 1 3022.dat
+1 7 40 -16 -100 1 0 0 0 1 0 0 0 1 3022.dat
+1 7 50 -16 -40 0 0 1 0 1 0 -1 0 0 3710.dat
+1 7 -50 -16 -40 0 0 1 0 1 0 -1 0 0 3710.dat
+1 0 -70 -16 -10 1 0 0 0 1 0 0 0 1 4006.dat
+1 7 -60 -40 0 0 0 1 0 1 0 -1 0 0 3830.dat
+1 16 -60 -40 0 1 0 0 0 1 0 0 0 1 6901 - Hatch Right.ldr
+1 7 0 -16 110 1 0 0 0 1 0 0 0 1 3710.dat
+0 STEP
+1 7 0 -32 -90 0 0 1 0 1 0 -1 0 0 3021.dat
+1 7 -50 -40 -50 0 0 1 0 1 0 -1 0 0 4070.dat
+1 7 50 -40 -50 0 0 -1 0 1 0 1 0 0 4070.dat
+1 7 60 -40 0 0 0 -1 0 1 0 1 0 0 3831.dat
+1 16 60 -40 0 1 0 0 0 1 0 0 0 1 6901 - Hatch Left.ldr
+0 STEP
+1 7 -40 -40 -70 1 0 0 0 1 0 0 0 1 3298p90.dat
+1 7 40 -40 -70 1 0 0 0 1 0 0 0 1 3298p90.dat
+1 7 0 -40 -90 1 0 0 0 1 0 0 0 1 3069b.dat
+1 7 0 -40 -70 1 0 0 0 1 0 0 0 1 3023.dat
+1 7 0 -40 -110 1 0 0 0 1 0 0 0 1 3794a.dat
+1 7 0 -40 110 1 0 0 0 1 0 0 0 1 3010.dat
+0 STEP
+1 36 64 -30 -50 0 -1 0 1 0 0 0 0 1 3024.dat
+1 36 -64 -30 -50 0 1 0 -1 0 0 0 0 1 3024.dat
+1 34 0 -64 -30 1 0 0 0 1 0 0 0 1 3939.dat
+1 7 50 -64 -10 1 0 0 0 1 0 0 0 1 3005.dat
+1 7 -50 -64 -10 1 0 0 0 1 0 0 0 1 3005.dat
+1 34 0 -64 110 1 0 0 0 1 0 0 0 1 3010.dat
+0 STEP
+1 7 -60 -88 0 0 0 1 0 1 0 -1 0 0 3830.dat
+1 7 60 -88 0 0 0 -1 0 1 0 1 0 0 3831.dat
+1 34 0 -88 110 1 0 0 0 1 0 0 0 1 3010.dat
+0 STEP
+1 7 50 -96 -20 0 0 1 0 1 0 -1 0 0 3023.dat
+1 7 -50 -96 -20 0 0 1 0 1 0 -1 0 0 3023.dat
+1 7 0 -96 110 -1 0 0 0 1 0 0 0 -1 3710.dat
+0 STEP
+1 7 0 -104 40 0 0 -1 0 1 0 1 0 0 3036.dat
+1 7 0 -112 30 1 0 0 0 1 0 0 0 1 3023.dat
+0 STEP
+1 7 0 -120 30 1 0 0 0 1 0 0 0 1 3794a.dat
+1 36 -50 -128 -30 1 0 0 0 1 0 0 0 1 3062b.dat
+1 36 50 -128 -30 1 0 0 0 1 0 0 0 1 3062b.dat
+1 7 0 -144 30 1 0 0 0 1 0 0 0 1 3062b.dat
+1 7 -30 -112 90 1 0 0 0 1 0 0 0 1 3957a.dat
+1 16 0 -156 30 0.866025 0 0.5 0 1 0 -0.5 0 0.866025 6901 - Radar Dish.ldr
+1 16 0 -56 -110 0.906308 0 -0.422618 0 1 0 0.422618 0 0.906308 6901 - Laser Cannon.ldr
+0 STEP
+1 7 -40 8 60 0 0 -1 0 1 0 1 0 0 3940.dat
+1 0 70 -4 -10 0 0 -1 0 1 0 1 0 0 3962a.dat
+1 7 40 8 60 0 0 -1 0 1 0 1 0 0 3940.dat
+1 7 -40 8 0 0 0 -1 0 1 0 1 0 0 3940.dat
+1 7 40 8 0 0 0 -1 0 1 0 1 0 0 3940.dat
+1 7 -40 8 -60 0 0 -1 0 1 0 1 0 0 3940.dat
+1 7 40 8 -60 0 0 -1 0 1 0 1 0 0 3940.dat
+0 STEP
+1 7 -40 56 0 0 0 1 0 1 0 -1 0 0 3034.dat
+1 7 40 56 0 0 0 1 0 1 0 -1 0 0 3034.dat
+1 7 0 64 30 -1 0 0 0 1 0 0 0 -1 3666.dat
+1 7 0 64 -30 -1 0 0 0 1 0 0 0 -1 3666.dat
+0 STEP
+1 7 -40 64 60 -1 0 0 0 1 0 0 0 -1 122c01.dat
+1 256 -70 70 60 0 0 -1 0 1 0 1 0 0 3641.dat
+1 256 -10 70 60 0 0 -1 0 1 0 1 0 0 3641.dat
+1 7 -40 64 0 -1 0 0 0 1 0 0 0 -1 122c01.dat
+1 256 -70 70 0 0 0 -1 0 1 0 1 0 0 3641.dat
+1 256 -10 70 0 0 0 -1 0 1 0 1 0 0 3641.dat
+1 7 -40 64 -60 -1 0 0 0 1 0 0 0 -1 122c01.dat
+1 256 -70 70 -60 0 0 -1 0 1 0 1 0 0 3641.dat
+1 256 -10 70 -60 0 0 -1 0 1 0 1 0 0 3641.dat
+1 7 40 64 60 -1 0 0 0 1 0 0 0 -1 122c01.dat
+1 256 10 70 60 0 0 -1 0 1 0 1 0 0 3641.dat
+1 256 70 70 60 0 0 -1 0 1 0 1 0 0 3641.dat
+1 7 40 64 0 -1 0 0 0 1 0 0 0 -1 122c01.dat
+1 256 10 70 0 0 0 -1 0 1 0 1 0 0 3641.dat
+1 256 70 70 0 0 0 -1 0 1 0 1 0 0 3641.dat
+1 7 40 64 -60 -1 0 0 0 1 0 0 0 -1 122c01.dat
+1 256 10 70 -60 0 0 -1 0 1 0 1 0 0 3641.dat
+1 256 70 70 -60 0 0 -1 0 1 0 1 0 0 3641.dat
+0 STEP
+1 16 0 -53 8 1 0 0 0 1 0 0 0 1 6901 - Red Minifig.ldr
+1 16 0 -53 68 1 0 0 0 1 0 0 0 1 6901 - White Minifig.ldr
+
+0 FILE 6901 - Detector with 7 Arm Pieces.ldr
+0 Detector with 7 Arm Pieces
+0 Name: 6901 - Detector with 7 Arm Pieces.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 0 0 -1 0 -1 0 0 0 0 -1 795.dat
+1 16 0 0 -10 1 0 0 0 0.984808 -0.173648 0 0.173648 0.984808 6901 - Detector with 6 Arm Pieces.ldr
+
+0 FILE 6901 - Detector with 6 Arm Pieces.ldr
+0 Detector with 6 Arm Pieces
+0 Name: 6901 - Detector with 6 Arm Pieces.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 -12 0 -1 0 1 0 0 0 0 1 3612.dat
+1 16 0 0 -24 1 0 0 0 0.984808 -0.173648 0 0.173648 0.984808 6901 - Detector with 5 Arm Pieces.ldr
+
+0 FILE 6901 - Detector with 5 Arm Pieces.ldr
+0 Detector with 5 Arm Pieces
+0 Name: 6901 - Detector with 5 Arm Pieces.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 -12 0 -1 0 1 0 0 0 0 1 3612.dat
+1 16 0 0 -24 1 0 0 0 0.984808 -0.173648 0 0.173648 0.984808 6901 - Detector with 4 Arm Pieces.ldr
+
+0 FILE 6901 - Detector with 4 Arm Pieces.ldr
+0 Detector with 4 Arm Pieces
+0 Name: 6901 - Detector with 4 Arm Pieces.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 -12 0 -1 0 1 0 0 0 0 1 3612.dat
+1 16 0 0 -24 1 0 0 0 1 0 0 0 1 6901 - Detector with 3 Arm Pieces.ldr
+
+0 FILE 6901 - Detector with 3 Arm Pieces.ldr
+0 Detector with 3 Arm Pieces
+0 Name: 6901 - Detector with 3 Arm Pieces.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 -12 0 -1 0 1 0 0 0 0 1 3612.dat
+1 16 0 0 -24 1 0 0 0 0.984808 0.173648 0 -0.173648 0.984808 6901 - Detector with 2 Arm Pieces.ldr
+
+0 FILE 6901 - Detector with 2 Arm Pieces.ldr
+0 Detector with 2 Arm Pieces
+0 Name: 6901 - Detector with 2 Arm Pieces.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 -12 0 -1 0 1 0 0 0 0 1 3612.dat
+1 16 0 0 -24 1 0 0 0 0.984808 0.173648 0 -0.173648 0.984808 6901 - Detector with 1 Arm Piece.ldr
+
+0 FILE 6901 - Detector with 1 Arm Piece.ldr
+0 Detector with 1 Arm Piece
+0 Name: 6901 - Detector with 1 Arm Piece.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 0 0 -1 0 1 0 0 0 0 1 3613.dat
+1 16 0 0 -22 0.906308 0.109382 -0.408218 0 0.965926 0.258819 0.422618 -0.23457 0.875426 6901 - Detector.ldr
+
+0 FILE 6901 - Detector.ldr
+0 Detector
+0 Name: 6901 - Detector.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 32 -18 1 0 0 0 1 0 0 0 1 3022.dat
+1 7 0 40 -28 1 0 0 0 1 0 0 0 1 3839b.dat
+1 7 0 40 -8 -1 0 0 0 1 0 0 0 -1 3839b.dat
+0 STEP
+1 7 0 8 -18 -1 0 0 0 0 -1 0 -1 0 3959.dat
+1 7 0 -4 -18 -1 0 0 0 1 0 0 0 -1 3614.dat
+
+0 FILE 6901 - Hatch Right.ldr
+0 Hatch Right
+0 Name: 6901 - Hatch Right.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 0 0 0 1 0 1 0 -1 0 0 3831.dat
+1 7 10 24 60 0 0 1 0 1 0 -1 0 0 3666.dat
+0 STEP
+1 7 10 0 80 0 0 1 0 1 0 -1 0 0 3010.dat
+0 STEP
+1 7 10 -24 20 0 0 1 0 1 0 -1 0 0 3004.dat
+1 34 10 -24 60 0 0 1 0 1 0 -1 0 0 3004.dat
+1 7 10 -24 100 0 0 1 0 1 0 -1 0 0 3004.dat
+0 STEP
+1 7 0 -48 0 0 0 1 0 1 0 -1 0 0 3831.dat
+1 34 10 -48 60 0 0 1 0 1 0 -1 0 0 3004.dat
+1 7 10 -48 100 0 0 1 0 1 0 -1 0 0 3004p90.dat
+0 STEP
+1 7 10 -56 10 0 0 1 0 1 0 -1 0 0 3070b.dat
+1 7 10 -56 110 0 0 1 0 1 0 -1 0 0 3070b.dat
+1 7 10 -56 80 0 0 1 0 1 0 -1 0 0 3069b.dat
+1 7 10 -56 40 0 0 1 0 1 0 -1 0 0 3069b.dat
+
+0 FILE 6901 - Hatch Left.ldr
+0 Hatch Left
+0 Name: 6901 - Hatch Left.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 0 0 0 -1 0 1 0 1 0 0 3830.dat
+1 7 -10 24 60 0 0 1 0 1 0 -1 0 0 3666.dat
+0 STEP
+1 7 -10 0 80 0 0 1 0 1 0 -1 0 0 3010.dat
+0 STEP
+1 7 -10 -24 20 0 0 1 0 1 0 -1 0 0 3004.dat
+1 34 -10 -24 60 0 0 1 0 1 0 -1 0 0 3004.dat
+1 7 -10 -24 100 0 0 1 0 1 0 -1 0 0 3004.dat
+0 STEP
+1 7 0 -48 0 0 0 -1 0 1 0 1 0 0 3830.dat
+1 34 -10 -48 60 0 0 1 0 1 0 -1 0 0 3004.dat
+1 7 -10 -48 100 0 0 -1 0 1 0 1 0 0 3004p90.dat
+0 STEP
+1 7 -10 -56 10 0 0 1 0 1 0 -1 0 0 3070b.dat
+1 7 -10 -56 110 0 0 1 0 1 0 -1 0 0 3070b.dat
+1 7 -10 -56 80 0 0 1 0 1 0 -1 0 0 3069b.dat
+1 7 -10 -56 40 0 0 1 0 1 0 -1 0 0 3069b.dat
+
+0 FILE 6901 - Radar Dish.ldr
+0 Radar Dish
+0 Name: 6901 - Radar Dish.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 0 1 0 0 0 1 0 0 0 1 3959.dat
+0 STEP
+1 34 0 0 -40 1 0 0 0 0 1 0 -1 0 3062b.dat
+1 7 0 0 -24 1 0 0 0 0 1 0 -1 0 3960.dat
+
+0 FILE 6901 - Laser Cannon.ldr
+0 Laser Cannon
+0 Name: 6901 - Laser Cannon.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 7 0 0 0 1 0 0 0 1 0 0 0 1 3959.dat
+1 34 0 0 -24 1 0 0 0 0 1 0 -1 0 3062b.dat
+
+0 FILE 6901 - Red Minifig.ldr
+0 Red Minifig
+0 Name: 6901 - Red Minifig.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 4 0 -27 0 1 0 0 0 1 0 0 0 1 3842a.dat
+1 14 0 -27 0 1 0 0 0 1 0 0 0 1 3626bp01.dat
+1 4 0 0 0 1 0 0 0 1 0 0 0 1 3838.dat
+1 4 0 0 0 1 0 0 0 1 0 0 0 1 973p90.dat
+1 4 0 32 0 1 0 0 0 1 0 0 0 1 3815.dat
+1 4 -15.552 9 0 0.985 -0.120208 -0.120208 0.17 0.6965 0.6965 0 -0.707107 0.707107 3818.dat
+1 4 15.552 9 0 0.985 0.120208 0.120208 -0.17 0.6965 0.6965 0 -0.707107 0.707107 3819.dat
+1 4 -21.6886 13.9945 -20.5641 0.985 -0.169974 0 0.17 0.984851 0 0 0 0.999849 3820.dat
+1 4 21.6886 13.9945 -20.5641 0.985 0.169974 0 -0.17 0.984851 0 0 0 0.999849 3820.dat
+1 4 0 44 0 1 0 0 0 0 1 0 -1 0 3816.dat
+1 4 0 44 0 1 0 0 0 0 1 0 -1 0 3817.dat
+
+0 FILE 6901 - White Minifig.ldr
+0 White Minifig
+0 Name: 6901 - White Minifig.ldr
+0 Author: Koyan
+0 !LDRAW_ORG Model
+0 !LICENSE Redistributable under CCAL version 2.0 : see CAreadme.txt
+
+0 !HISTORY 2012-05-18 [Holly-Wood] Made OMR complaint
+
+1 15 0 -27 0 1 0 0 0 1 0 0 0 1 3842a.dat
+1 14 0 -27 0 1 0 0 0 1 0 0 0 1 3626bp01.dat
+1 15 0 0 0 1 0 0 0 1 0 0 0 1 3838.dat
+1 15 0 0 0 1 0 0 0 1 0 0 0 1 973p90.dat
+1 15 0 32 0 1 0 0 0 1 0 0 0 1 3815.dat
+1 15 -15.552 9 0 0.985 -0.17 0 0.17 0.985 0 0 0 1 3818.dat
+1 15 15.552 9 0 0.985 0.17 0 -0.109274 0.633146 0.766044 0.130228 -0.754554 0.642788 3819.dat
+1 15 -23.8634 26.5956 -10.321 0.985 -0.12019 0.12019 0.17 0.696395 -0.696395 0 0.707 0.707 3820.dat
+1 15 23.863 12.405 -20.114 0.985 0.12019 -0.12019 -0.109274 0.989227 0.0939593 0.130228 -0.0790187 0.98792 3820.dat
+1 15 0 44 0 1 0 0 0 0 1 0 -1 0 3816.dat
+1 15 0 44 0 1 0 0 0 0 1 0 -1 0 3817.dat
+

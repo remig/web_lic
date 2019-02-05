@@ -252,25 +252,27 @@ async function requestPart(fn) {
 	}
 	fn = fn.replace(/\\/g, '/').toLowerCase();
 
-	let pathsToTry;
-	if (fn.startsWith('8/') || fn.startsWith('48/') || partsInPFolder.includes(fn.split('.')[0])) {
-		pathsToTry = ['p/', 'parts/', 'constraints/', 'models/'];
-	} else if (fn.endsWith('mpd') || fn.endsWith('ldr')) {
-		pathsToTry = ['models/', 'parts/', 'p/', 'constraints/'];
-	} else {
-		pathsToTry = ['parts/', 'p/', 'constraints/', 'models/'];
+	let pathsToTry, resp;
+	if (fn.startsWith('./')) {
+		resp = await fetch(fn);
 	}
 
-	let resp = await fetch(api.LDrawPath + pathsToTry[0] + fn);
 	if (resp == null || !resp.ok) {
-		resp = await fetch(api.LDrawPath + pathsToTry[1] + fn);
+		if (fn.startsWith('8/') || fn.startsWith('48/') || partsInPFolder.includes(fn.split('.')[0])) {
+			pathsToTry = ['p/', 'parts/', 'constraints/', 'models/'];
+		} else if (fn.endsWith('mpd') || fn.endsWith('ldr')) {
+			pathsToTry = ['models/', 'parts/', 'p/', 'constraints/'];
+		} else {
+			pathsToTry = ['parts/', 'p/', 'constraints/', 'models/'];
+		}
+
+		for (let i = 0; i < pathsToTry.length; i++) {
+			if (resp == null || !resp.ok) {
+				resp = await fetch(api.LDrawPath + pathsToTry[i] + fn);
+			}
+		}
 	}
-	if (resp == null || !resp.ok) {
-		resp = await fetch(api.LDrawPath + pathsToTry[2] + fn);
-	}
-	if (resp == null || !resp.ok) {
-		resp = await fetch(api.LDrawPath + pathsToTry[3] + fn);
-	}
+
 	if (resp == null || !resp.ok) {
 		console.log(`   *** FAILED TO LOAD: ${fn}`);  // eslint-disable-line no-console
 		return null;

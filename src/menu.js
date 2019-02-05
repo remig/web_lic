@@ -213,19 +213,19 @@ const menu = [
 				{
 					text: 'action.file.import_builtin_model.models.alligator',
 					cb() {
-						app.importBuiltInModel('Creator/20015 - Alligator.mpd');
+						app.importBuiltInModel('20015 - Alligator.mpd');
 					}
 				},
 				{
 					text: 'action.file.import_builtin_model.models.xwing',
 					cb() {
-						app.importBuiltInModel('Star Wars/7140 - X-Wing Fighter.mpd');
+						app.importBuiltInModel('7140 - X-Wing Fighter.mpd');
 					}
 				},
 				{
 					text: 'action.file.import_builtin_model.models.lab',
 					cb() {
-						app.importBuiltInModel('Space/6901 - Mobile Lab.mpd');
+						app.importBuiltInModel('6901 - Mobile Lab.mpd');
 					}
 				}
 			]
