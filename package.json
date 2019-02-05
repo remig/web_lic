@@ -32,7 +32,6 @@
 		"webpack-dev-server": "3.1.10"
 	},
 	"dependencies": {
-		"changedpi": "1.0.3",
-		"messageformat": "2.0.2"
+		"changedpi": "1.0.4"
 	}
 }
