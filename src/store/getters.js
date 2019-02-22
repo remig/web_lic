@@ -139,33 +139,30 @@ export default {
 	lastPage() {
 		return _.last(store.state.pages);
 	},
-	prevStep(step, limitToSubmodel) {
+	adjacentStep(step, direction, limitToSubmodel) {
+		// 'direction' is one of 'prev' or 'next'
 		step = store.get.lookupToItem(step);
 		let itemList;
 		if (step.parent.type === 'step' || step.parent.type === 'callout') {
 			itemList = store.get.parent(step).steps.map(store.get.step);
 		}
-		let prevStep = store.get.prev(step, itemList);
+		let adjacentStep = store.get[direction](step, itemList);
 		if (limitToSubmodel && itemList == null) {
-			while (prevStep && step.model.filename !== prevStep.model.filename) {
-				prevStep = store.get.prev(prevStep);
+			while (
+				adjacentStep
+				&& (step.model.filename !== adjacentStep.model.filename
+					|| step.model.parentStepID !== adjacentStep.model.parentStepID)
+			) {
+				adjacentStep = store.get[direction](adjacentStep);
 			}
 		}
-		return prevStep;
+		return adjacentStep;
+	},
+	prevStep(step, limitToSubmodel) {
+		return store.get.adjacentStep(step, 'prev', limitToSubmodel);
 	},
 	nextStep(step, limitToSubmodel) {
-		step = store.get.lookupToItem(step);
-		let itemList;
-		if (step.parent.type === 'step' || step.parent.type === 'callout') {
-			itemList = store.get.parent(step).steps.map(store.get.step);
-		}
-		let nextStep = store.get.next(step, itemList);
-		if (limitToSubmodel && itemList == null) {
-			while (nextStep && step.model.filename !== nextStep.model.filename) {
-				nextStep = store.get.next(nextStep);
-			}
-		}
-		return nextStep;
+		return store.get.adjacentStep(step, 'next', limitToSubmodel);
 	},
 	part(partID, step) {
 		return LDParse.model.get.partFromID(partID, step.model.filename);
