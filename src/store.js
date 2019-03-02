@@ -410,6 +410,7 @@ const store = {
 				for (const filename of submodelFilenames) {
 					const newPages = store.mutations.addInitialPages({
 						modelFilename: filename,
+						partsPerStep: opts.partsPerStep,
 						lastStepNumber
 					});
 					if (newPages) {
