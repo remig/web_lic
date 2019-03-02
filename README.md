@@ -19,23 +19,7 @@ Web Lic is intended to be a complete replacement for the aging and no longer mai
 
 Web Lic is built using [Vue.js](https://vuejs.org/).  Models and parts are rendered with [Three.js](https://threejs.org/).  This is a purely client side application; there is *no* server side anything - beyond a web server to serve the initial content, of course.
 
-##### Running Lic Locally
-
-Lic is built using Node.js, which you'll need to run Lic on your machine and to play with the code or contribute to the project.  You will also need a copy of the LDraw parts library. If you're not familiar with Node, it's pretty easy:
-
-- Install [Node.js](https://nodejs.org/en/)
-- Check out a copy of Lic from GitHub.  Place it in a directory that's sibling to your LDraw directory, eg:
-```
- root
-   - LDraw
-      - parts, p
-   - web_lic
-       - index.html, src, dist, etc
-```
-- From the command line, in the checked out web_lic directory, run `npm install`.  This will download a copy of all the 3rd party packages Lic depends on into a local `node_modules` directory.
-- Run `npm run start` to compile Lic and start up a simple development HTTP server. This should also open a new browser window running Lic.  If you change Lic's code, this window should automatically refresh with the latest changes.
-
-If you run into any problems, please [let me know](mailto:remigagne@gmail.com).
+For more information see [the Wiki](https://github.com/remig/web_lic/wiki), which covers [running Lic locally](https://github.com/remig/web_lic/wiki/Running-Lic-Locally) and [translating Lic](https://github.com/remig/web_lic/wiki/Translating-Lic).
 
 [LEGO®](http://lego.com/) is a registered trademark of the LEGO Group, which does not sponsor, endorse, or authorize this software project.
 
