@@ -56,7 +56,13 @@
                 "success_message_@mf": "\"${filename}\" erfolgreich geladen (${time})"
             },
             "import_builtin_model": {
-                "name": "Integriertes Modell laden..."
+                "name": "Integriertes Modell laden...",
+                "models": {
+                    "trivial": "Einfaches Modell",
+                    "alligator": "Creator Alligator",
+                    "xwing": "X-Wing",
+                    "lab": "Mobile Lab"
+                }
             },
             "template": {
                 "name": "Vorlage",
@@ -167,7 +173,19 @@
                 }
             },
             "zoom": {
-                "name": "Zoom (NYI)"
+                "name": "Zoom (NYI)",
+                "full": {
+                    "name": "100%"
+                },
+                "fit": {
+                    "name": "Maximieren"
+                },
+                "in": {
+                    "name": "Vergrößern"
+                },
+                "out": {
+                    "name": "Verkleinern"
+                }
             },
             "grid": {
                 "name": "Gitter",
