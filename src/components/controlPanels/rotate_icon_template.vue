@@ -12,7 +12,7 @@
 		/>
 		<border-panel
 			template-entry="rotateIcon.arrow"
-			title="Arrow"
+			title="glossary.arrow"
 			@new-values="newValues"
 		/>
 	</div>

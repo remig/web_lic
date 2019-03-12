@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base :title="title" class="fillTemplate" label-width="80px">
+	<panel-base :title="tr(title)" class="fillTemplate" label-width="80px">
 		<el-form-item :label="tr('glossary.color')">
 			<el-color-picker
 				v-model="color"
@@ -45,15 +45,12 @@ import _ from '../../util';
 import store from '../../store';
 import openFileHandler from '../../fileUploader';
 import PanelBase from './panel_base.vue';
-import LocaleManager from '../../translate';
-
-const tr = LocaleManager.translate;
 
 export default {
 	components: {PanelBase},
 	props: {
 		templateEntry: {type: String, required: true},
-		title: {type: String, 'default': tr('template.fill.title')}
+		title: {type: String, 'default': 'template.fill.title'}
 	},
 	data() {
 		const template = _.get(store.state.template, this.templateEntry).fill;

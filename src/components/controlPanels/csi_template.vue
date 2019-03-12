@@ -7,7 +7,7 @@
 			@new-values="newValues"
 		/>
 		<fill-panel
-			:title="tr('template.csi.displacement_arrow_color')"
+			:title="template.csi.displacement_arrow_color"
 			template-entry="step.csi.displacementArrow"
 			@new-values="newArrowStyle"
 		/>

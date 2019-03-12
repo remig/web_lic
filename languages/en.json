@@ -30,7 +30,8 @@
         "divider": "Divider",
         "annotation": "Annotation",
         "callout": "Callout",
-        "ctrl": "Ctrl"
+        "ctrl": "Ctrl",
+        "arrow": "Arrow"
     },
 	"action": {
         "file": {

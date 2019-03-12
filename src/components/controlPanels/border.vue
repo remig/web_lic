@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base :title="title" label-width="120px">
+	<panel-base :title="tr(title)" label-width="120px">
 		<el-form-item :label="tr('glossary.color')">
 			<el-color-picker
 				v-model="color"
@@ -45,15 +45,12 @@
 import _ from '../../util';
 import store from '../../store';
 import PanelBase from './panel_base.vue';
-import LocaleManager from '../../translate';
-
-const tr = LocaleManager.translate;
 
 export default {
 	components: {PanelBase},
 	props: {
 		templateEntry: {type: String, required: true},
-		title: {type: String, 'default': tr('template.border.title')}
+		title: {type: String, 'default': 'template.border.title'}
 	},
 	data() {
 		const template = _.get(store.state.template, this.templateEntry);
