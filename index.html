@@ -83,6 +83,7 @@
 				<template-panel
 					v-if="currentPageLookup && currentPageLookup.type === 'templatePage'"
 					id="templatePanelContainer"
+					ref="templatePanel"
 					:app="this"
 					:selected-item="selectedItemLookup"
 				></template-panel>

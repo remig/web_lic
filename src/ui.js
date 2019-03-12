@@ -294,8 +294,11 @@ const app = new Vue({
 			};
 		})(),
 		forceUIUpdate() {
-			this.$refs.pageView.forceUpdate();
-			this.$refs.navTree.forceUpdate();
+			Object.values(this.$refs).forEach(ref => {
+				if (ref && typeof ref.forceUpdate === 'function') {
+					ref.forceUpdate();
+				}
+			});
 			// TODO: add ref for the menu, then call $ref.forceUpdate()
 			this.navUpdateState = (this.navUpdateState + 1) % 10;
 			if (this.selectedItemLookup && this.selectedItemLookup.id != null) {

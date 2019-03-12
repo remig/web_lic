@@ -99,6 +99,12 @@ export default {
 			const item = this.tr('glossary.' + entryType.toLowerCase());
 			const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 			undoStack.commit('', null, undoText, [entryType]);
+		},
+		forceUpdate() {
+			if (this.$refs.currentTemplatePanel) {
+				this.$refs.currentTemplatePanel.$forceUpdate();
+				this.$refs.currentTemplatePanel.$children.forEach(el => el.$forceUpdate());
+			}
 		}
 	},
 	computed: {
