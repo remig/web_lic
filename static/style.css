@@ -130,6 +130,14 @@ div#container {
 	color: #606266;
 }
 
+.el-checkbox__inner, .el-checkbox__inner::after {
+	transition: unset;
+}
+
+.el-checkbox__inner {
+	border-color: #409EFF;
+}
+
 .el-color-picker__trigger, .el-color-picker__mask {
 	border-color: #ccc;
 	width: 34px;
@@ -162,10 +170,6 @@ div#container {
 	color: #606266;
 	border-color: #dcdfe6;
 	background-color: white;
-}
-
-.el-checkbox__inner, .el-checkbox__inner::after {
-	transition: unset;
 }
 
 .el-dialog {
@@ -394,15 +398,16 @@ ul {
 }
 
 #statusBar {
-	background-color: #bbb;
-	border-top: 1px solid #333;
+	background-color: #f8f8f8;
+	border: 1px solid #e7e7e7;
+	color: #777;
 	position: fixed;
 	left: 0px;
 	bottom: 0px;
 	width: 100%;
 	height: 25px;
-	padding: 5px 0px 0px 10px;
-	font: bold 10pt Helvetica;
+	padding: 5px 0px 0px 15px;
+	font: 10pt Helvetica;
 }
 
 #contextMenu {
