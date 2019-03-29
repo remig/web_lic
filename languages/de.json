@@ -30,7 +30,8 @@
         "divider": "Trennlinie",
         "annotation": "Objekt",
         "callout": "Callout",
-        "ctrl": "Strg"
+        "ctrl": "Strg",
+        "arrow": "Pfeil"
     },
 	"action": {
         "file": {
@@ -178,7 +179,7 @@
                     "name": "100%"
                 },
                 "fit": {
-                    "name": "Maximieren"
+                    "name": "Einpassen"
                 },
                 "in": {
                     "name": "Vergrößern"
