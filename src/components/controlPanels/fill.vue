@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base :title="tr(title)" class="fillTemplate" label-width="80px">
+	<panel-base :title="title" class="fillTemplate" label-width="80px">
 		<el-form-item :label="tr('glossary.color')">
 			<el-color-picker
 				v-model="color"

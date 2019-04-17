@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base :title="tr('template.transform.title')" label-width="80px">
+	<panel-base title="template.transform.title" label-width="80px">
 		<el-form-item :label="tr('template.transform.rotate_x')">
 			<input
 				v-model.number="x"

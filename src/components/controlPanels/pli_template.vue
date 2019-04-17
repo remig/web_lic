@@ -2,7 +2,7 @@
 
 <template>
 	<div>
-		<panel-base :title="tr('template.pli.content')" label-width="100px">
+		<panel-base title="template.pli.content" label-width="100px">
 			<el-form-item label-width="0px">
 				<el-checkbox
 					v-model="includeSubmodels"

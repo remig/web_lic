@@ -2,7 +2,7 @@
 
 <template>
 	<div class="panel panel-template">
-		<h5>{{title}}</h5>
+		<h5>{{tr(title)}}</h5>
 		<div class="panel-body">
 			<el-form :label-width="labelWidth" label-position="left">
 				<slot />

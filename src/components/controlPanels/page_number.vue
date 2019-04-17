@@ -2,7 +2,7 @@
 
 <template>
 	<div>
-		<panel-base :title="tr('template.page_number.position')">
+		<panel-base title="template.page_number.position">
 			<el-form-item label-width="0px">
 				<el-select
 					:value="tr('template.page_number.positions.' + position)"

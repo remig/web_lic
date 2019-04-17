@@ -2,7 +2,7 @@
 
 <template>
 	<div>
-		<panel-base :title="tr('template.page.title')" label-width="100px">
+		<panel-base title="template.page.title" label-width="100px">
 			<el-form-item label-width="0">
 				<el-select :value="sizePreset.format" @change="updatePagePreset">
 					<el-option
