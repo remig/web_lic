@@ -21,6 +21,7 @@ import AnnotationSetters from './store/annotation_setters';
 import CalloutSetters from './store/callout_setters';
 import CalloutArrowSetters from './store/callout_arrow_setters';
 import StepInsertion from './store/step_insertion';
+import LocaleManager from './translate';
 
 import LDParse from './LDParse';
 import LDRender from './LDRender';
@@ -460,7 +461,10 @@ const store = {
 					const steps = store.state.steps.filter(step => {
 						return step.parent.type === 'page';
 					});
-					progressCallback({stepCount: steps.length, text: 'Step 0'});
+					progressCallback({
+						stepCount: steps.length,
+						text: LocaleManager.translate('glossary.step_count_@mf', {count: 0})
+					});
 					for (let i = 0; i < steps.length; i++) {
 						const step = steps[i];
 						if (!prevModelName || prevModelName === step.model.filename) {

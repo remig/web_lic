@@ -5,6 +5,7 @@
 import _ from './util';
 import LDParse from './LDParse';
 import store from './store';
+import LocaleManager from './translate';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
@@ -791,7 +792,9 @@ const api = {
 					// Step fits; delete the now-empty page the step moved from
 					store.mutations.page.delete({page: originalPage});
 				}
-				progressCallback(`Step ${stepsToMerge[0].number}`);
+				progressCallback(
+					LocaleManager.translate('glossary.step_count_@mf', {count: stepsToMerge[0].number})
+				);
 				_.pullAt(stepsToMerge, 0);
 				resolve();
 			}, 100));

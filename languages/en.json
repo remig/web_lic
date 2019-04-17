@@ -17,9 +17,10 @@
         "page": "Page",
         "submodelimage": "Submodel Image",
         "step": "Step",
-        "csi": "CSI",
-        "pli": "PLI",
-        "pliitem": "PLI Item",
+        "step_count_@mf": "Step ${count}",
+        "csi": "Step Image",
+        "pli": "Part List Image",
+        "pliitem": "Part Image",
         "quantitylabel": "Quantity Label",
         "calloutarrow": "Callout Arrow",
         "numberlabel": "Number Label",
@@ -119,10 +120,10 @@
             },
             "pli": {
                 "show": {
-                    "name": "Show PLIs"
+                    "name": "Show Part Lists"
                 },
                 "hide": {
-                    "name": "Hide PLIs"
+                    "name": "Hide Part Lists"
                 }
             },
             "inventory_page": {
@@ -366,7 +367,7 @@
         },
         "csi": {
             "rotate": {
-                "name": "Rotate CSI",
+                "name": "Rotate Step Image",
                 "flip_upside_down": {
                     "name": "Flip Upside Down",
                     "undo": "Flip Step Image"
@@ -386,10 +387,10 @@
             },
             "copy_rotation_to_next_steps": {
                 "name": "Copy Rotation to next Steps...",
-                "undo": "Copy CSI Rotations"
+                "undo": "Copy Step Image Rotations"
             },
             "scale": {
-                "name": "Scale CSI",
+                "name": "Scale Step Image",
                 "undo": "Scale Step Image"
             },
             "remove_scale": {
@@ -566,7 +567,7 @@
 				"undo": "Remove Part from Callout"
 			},
 			"remove_from_pli": {
-				"name": "Remove from PLI (NYI)"
+				"name": "Remove from Part List (NYI)"
 			},
 			"change_part": {
 				"name": "Change Part",
@@ -607,7 +608,7 @@
 				"root": "Include...",
 				"titlePage": "Title Page",
 				"submodelBreakdown": "Sub Model / Part Bag Breakdown (NYI)",
-				"pli": "PLIs in each Step",
+				"pli": "Part List in each Step",
 				"partListPage": "Part List Page"
 			}
 		},
@@ -722,7 +723,7 @@
 		},
 		"rotate_part_image": {
 			"title_pli": "Rotate Part List Image",
-			"title_csi": "Rotate CSI",
+			"title_csi": "Rotate Step Image",
 			"add_rotate_icon": "Add Rotation Icon"
 		},
         "copy_csi_rotation": {
@@ -730,7 +731,7 @@
             "label": "Copy Rotation to Next Steps"
         },
         "scale_csi": {
-            "title": "Scale CSI"
+            "title": "Scale Step Image"
         },
         "scale_pli": {
             "title": "Scale Part List Image"
@@ -802,7 +803,7 @@
 		},
 		"pli": {
 			"content": "Content",
-			"include_submodels": "Include Submodels in PLI"
+			"include_submodels": "Include Submodels in Part List"
 		},
         "csi": {
             "displacement_arrow_color": "Displacement Arrow Color"
@@ -820,14 +821,14 @@
     "nav_tree": {
         "show": "Show",
         "all": "All",
-        "page_step_part": "Pages, Steps, CSIs, Parts",
+        "page_step_part": "Pages, Steps, Step Images, Parts",
         "steps": "Steps",
         "submodel_images": "Submodel Images",
-        "submodel_csi": "Submodel CSIs",
-        "csis": "CSIs",
+        "submodel_csi": "Submodel Images",
+        "csis": "Step Images",
         "parts": "Parts",
-        "plis": "PLIs",
-        "pli_items": "PLI Images",
+        "plis": "Part List",
+        "pli_items": "Part Images",
         "callouts": "Callouts",
         "callout_arrows": "Callout Arrows",
         "annotations": "Annotations",
