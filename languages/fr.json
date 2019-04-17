@@ -1,0 +1,840 @@
+{
+    "glossary": {
+        "font": "Police",
+        "font_size": "Taille de la police",
+        "color": "Couleur",
+        "size": "Taille",
+        "auto": "Auto",
+        "upload": "Télécharger",
+        "import": "Import",
+        "x": "X",
+        "y": "Y",
+        "z": "Z",
+        "top": "Dessus",
+        "bottom": "Dessous",
+        "left": "Gauche",
+        "right": "Droite",
+        "page": "Page",
+        "submodelimage": "Image de sous modèle",
+        "step": "Étape",
+        "step_count_@mf": "Étape ${count}",
+        "csi": "CSI",
+        "pli": "PLI",
+        "pliitem": "Objet PLI",
+        "quantitylabel": "Vignette de la quantité",
+        "calloutarrow": "Flèche de légende",
+        "numberlabel": "Vignette du numéro",
+        "rotateicon": "Icône de rotation",
+        "templatepage": "Modèle de la Page",
+        "titlepage": "Titre de la Page",
+        "inventorypage": "Page de la liste des pièces",
+        "divider": "Séparateur",
+        "annotation": "Annotation",
+        "callout": "Légende",
+        "ctrl": "Ctrl",
+        "arrow": "Flèche"
+    },
+	"action": {
+        "file": {
+            "name": "Fichier",
+            "open_lic": {
+                "name": "Ouvrir le fichier Lic...",
+                "success_message_@mf": "\"${filename}\" ouvert avec succès (${time})"
+            },
+            "open_lic_recent": {
+                "name": "Fichiers récents (NYI)"
+            },
+            "close": {
+                "name": "Fermer"
+            },
+            "save": {
+                "name": "Sauvegarder"
+            },
+            "save_as": {
+                "name": "Sauvegarder sous..."
+            },
+            "import_model": {
+                "name": "Importer un modèle personnalisé...",
+                "success_message_@mf": "\"${filename}\" chargé avec succès (${time})"
+            },
+            "import_builtin_model": {
+                "name": "Importer un modèle pré-conçu...",
+                "models": {
+                    "trivial": "Modèle trivial",
+                    "alligator": "Aligator Creator",
+                    "xwing": "X-Wing",
+                    "lab": "Laboratoire Mobile"
+                }
+            },
+            "template": {
+                "name": "Modèle",
+                "save": {
+                    "name": "Sauvegarder"
+                },
+                "save_as": {
+                    "name": "Sauvegarder sous..."
+                },
+                "load": {
+                    "name": "Charger",
+                    "success_message_@mf": "\"${filename}\" Modèle ouvert avec succès"
+                },
+                "load_builtin": {
+                    "name": "Chargement d'un pré-conçu (NYI)"
+                },
+                "reset": {
+                    "name": "Remise à zéro",
+                    "undo": "Remise à zéro du modèle"
+                }
+            },
+            "set_language": {
+                "name": "Définir la langue"
+            },
+            "clear_cache": {
+                "name": "Nettoyage des caches",
+                "model": {
+                    "name": "Libre d'instruction courant"
+                },
+                "ui": {
+                    "name": "Paramétrage de l'interface utilisateur"
+                },
+                "everything": {
+                    "name": "Tout"
+                }
+            }
+        },
+        "edit": {
+            "name": "Edition",
+            "undo": {
+                "name": "Revenir en arrière"
+            },
+            "redo": {
+                "name": "Refaire la dernière action"
+            },
+            "title_page": {
+                "add": {
+                    "name": "Ajouter le titre de la page"
+                },
+                "remove": {
+                    "name": "Enlever le titre de la page"
+                }
+            },
+            "pli": {
+                "show": {
+                    "name": "Afficher les PLIs"
+                },
+                "hide": {
+                    "name": "Cacher les PLIs"
+                }
+            },
+            "inventory_page": {
+                "add": {
+                    "name": "Ajouter la Page de la liste des pièces"
+                },
+                "remove": {
+                    "name": "Retirer la Page de la liste des pièces"
+                }
+            },
+            "snap": {
+                "name": "S'attacher au (NYI)"
+            },
+            "scene_rendering": {
+                "name": "Rendu 3D des pièces..."
+            },
+            "brick_colors": {
+                "name": "Couleur des briques..."
+            },
+            "template": {
+                "change": {
+                    "undo_@mf": "Changer le modèle ${item}"
+                }
+            },
+            "item": {
+                "move": {
+                    "undo_@mf": "Déplacer ${item}"
+                },
+                "delete": {
+                    "undo_@mf": "Détruire ${item}"
+                }
+            }
+        },
+        "view": {
+            "name": "Visualisation",
+            "show_pages": {
+                "name": "Affichage des pages",
+                "one": {
+                    "name": "Une Page"
+                },
+                "two": {
+                    "name": "Deux pages face à face"
+                },
+                "one_scroll": {
+                    "name": "Une Page en vue défillante"
+                },
+                "two_scroll": {
+                    "name": "Deux Pages en vue défillante"
+                }
+            },
+            "zoom": {
+                "name": "Agrandissement (NYI)",
+                "full": {
+                    "name": "100%"
+                },
+                "fit": {
+                    "name": "Adapté"
+                },
+                "in": {
+                    "name": "Plus proche"
+                },
+                "out": {
+                    "name": "Plus lointain"
+                }
+            },
+            "grid": {
+                "name": "Grille",
+                "show": {
+                    "name": "Afficher",
+                    "undo": "Afficher la grille"
+                },
+                "hide": {
+                    "name": "Cacher",
+                    "undo": "Cacher la grille"
+                },
+                "customize": {
+                    "name": "Paramétrage"
+                }
+            },
+            "guides": {
+                "name": "Guides",
+                "add_horizontal": {
+                    "name": "Ajouter un guide horizontal",
+                    "undo": "Ajouter un guide"
+                },
+                "add_vertical": {
+                    "name": "Ajouter un guide vertical",
+                    "undo": "Ajouter un guide"
+                },
+                "remove": {
+                    "name": "Retirer les guides",
+                    "undo": "Retirer les guides"
+                }
+            }
+        },
+        "export": {
+            "name": "Export",
+            "pdf": {
+                "name": "PDF",
+                "success_message_@mf": "PDF généré avec succès (${time})"
+            },
+            "hi_res_pdf": {
+                "name": "PDF haute résolution..."
+            },
+            "png": {
+                "name": "Images au format PNG",
+                "success_message_@mf": "Archive ZIP PNG générée avec succès (${time})"
+            },
+            "hi_res_png": {
+                "name": "Images haute résolution au format PNG..."
+            }
+        },
+        "annotation": {
+            "add": {
+                "name": "Ajouter une annotation",
+                "label": {
+                    "name": "Etiquette",
+                    "undo": "Ajouter un étiquette",
+                    "initial_text": "Nouvelle étiquette"
+                },
+                "line": {
+                    "name": "Ligne (NYI)"
+                },
+                "circle": {
+                    "name": "Cercle (NYI)"
+                },
+                "arrow": {
+                    "name": "Flèche",
+                    "undo": "Ajouter une flèche"
+                },
+                "image": {
+                    "name": "Image",
+                    "undo": "Ajouter une image"
+                }
+            },
+            "delete": {
+                "name": "Effacer",
+                "undo": "Effacer une annotation"
+            },
+            "change_text_and_style": {
+                "name": "Changer le text & le style...",
+                "undo": "Changer une annotation"
+            }
+        },
+		"layout": {
+			"name": "Agencement",
+			"vertical": {
+				"name": "Vertical",
+				"undo": "Agencement vertical"
+			},
+			"horizontal": {
+				"name": "Horizontal",
+				"undo": "Agencement horizontal"
+			},
+			"by_row_and_column": {
+				"name": "Par ligne et colonne...",
+				"undo": "Agencement de la page par ligne et colonne",
+				"undo_step": "Agencement des étapes par ligne et colonne"
+			},
+            "redo_layout": {
+                "name": "Retablir l'agencement"
+            }
+        },
+        "page": {
+            "prepend_blank_page": {
+                "name": "Ajouter une page vide au début"
+            },
+            "append_blank_page": {
+                "name": "Ajouter une page vide"
+            },
+            "hide_step_separators": {
+                "name": "Cacher les séparateurs d'étapes (NYI)"
+            },
+            "add_blank_step": {
+                "name": "Ajouter un séparateur vide"
+            },
+            "delete_this_blank_page": {
+                "name": "Retirer la page vide courante",
+                "undo": "Retirer la page"
+            }
+        },
+        "step": {
+            "add_callout": {
+                "name": "Ajouter un rappel"
+            },
+            "divide_into_sub_steps": {
+                "name": "Diviser en sous-étapes"
+            },
+            "stretch_to_next_page": {
+                "name": "Etirer l'étape jusqu'à la prochaine page"
+            },
+            "move_to": {
+                "name": "Déplacer l'étape vers...",
+                "previous_page": {
+                    "name": "La page précédente",
+                    "undo": "Déplacer l'étape vers la page précédente"
+                },
+                "next_page": {
+                    "name": "la prochaine page",
+                    "undo": "Déplacer l'étape vers la prochaine page"
+                }
+            },
+            "merge_with": {
+                "name": "Fusionner l'étape avec...",
+                "previous_step": {
+                    "name": "L'étape précédente",
+                    "undo": "Fusionner l'étape avec l'étape précédente"
+                },
+                "next_step": {
+                    "name": "L'étape suivante",
+                    "undo": "Fusionner l'étape avec l'étape suivante"
+                }
+            },
+            "delete_empty_step": {
+                "name": "Effacer l'étape vide"
+            },
+            "prepend_blank_step": {
+                "name": "Ajouter une étape vide au début"
+            },
+            "append_blank_step": {
+                "name": "Ajouter une étape vide"
+            }
+        },
+        "rotate_icon": {
+            "add": {
+                "name": "Ajouter l'icône de rotation"
+            },
+            "delete": {
+                "name": "Effacer l'icône de rotation"
+            }
+        },
+        "page_number": {
+            "change_number": {
+                "name": "Modifier le numéro de la page (NYI)"
+            }
+        },
+        "step_number": {
+            "change_number": {
+                "name": "Modifier le numéro de l'étape (NYI)"
+            }
+        },
+        "csi": {
+            "rotate": {
+                "name": "Tourner CSI",
+                "flip_upside_down": {
+                    "name": "Retourner à l'envers",
+                    "undo": "Inverser l'image de l'étape"
+                },
+                "rotate_front_to_back": {
+                    "name": "Inverser l'avant et l'arrière",
+                    "undo": "Tourner l'image de l'étape"
+                },
+                "custom_rotation": {
+                    "name": "Rotation spécifique...",
+                    "undo": "Tourner l'image de l'étape"
+                },
+                "remove_rotation": {
+                    "name": "Effacer la rotation",
+                    "undo": "Effacer la rotation de l'image de l'étape"
+                }
+            },
+            "copy_rotation_to_next_steps": {
+                "name": "Copier les rotations sur les prochaines étapes...",
+                "undo": "Copier les rotations CSI"
+            },
+            "scale": {
+                "name": "Mise à l'échelle CSI",
+                "undo": "Mise à l'échelle de l'image de l'étape"
+            },
+            "remove_scale": {
+                "name": "Effacer la mise à l'échelle",
+                "undo": "Effacer la mise à l'échele de l'iamge de l'étape"
+            },
+            "select_part": {
+                "name": "Selectionner une pièce"
+            },
+            "add_new_part": {
+                "name": "Ajouter une nouvelle pièce (NYI)"
+            }
+        },
+        "pli_item": {
+            "rotate_part_list_image": {
+                "name": "Effectuer une rotation de l'image de la liste des pièces...",
+                "undo": "Effectuer une rotation de l'image de la liste des pièces"
+            },
+            "scale_part_list_image": {
+                "name": "Mettre à l'échelle l'image de la liste des pièces...",
+                "undo": "Mettre à l'échelle l'image de la liste des pièces"
+            },
+            "remove_part_list_image_scale": {
+                "name": "Retirer la mise à l'échelle",
+                "undo": "Retirer l'image des pièces mises à l'échelle"
+            }
+        },
+        "quantity_label": {
+            "change_count": {
+                "name": "Modifier la quantité",
+                "undo": "Modifier la quantité de pièces"
+            }
+        },
+        "callout": {
+            "position": {
+                "name": "Position",
+                "undo": "Position de la légende",
+                "top": {
+                    "name": "En haut"
+                },
+                "bottom": {
+                    "name": "En bas"
+                },
+                "right": {
+                    "name": "A droite"
+                },
+                "left": {
+                    "name": "A gauche"
+                }
+            },
+            "layout": {
+                "name": "Agencement",
+                "vertical": {
+                    "name": "Vertical",
+                    "undo": "Agencement Vertical"
+                },
+                "horizontal": {
+                    "name": "Horizontal",
+                    "undo": "Agencement Horizontal"
+                }
+            },
+            "add_step": {
+                "name": "Ajouter une étape"
+            },
+            "delete_empty_callout": {
+                "name": "Effacer les légendes vides"
+            }
+        },
+        "callout_arrow": {
+            "select_point": {
+                "name": "Selectionner un point...",
+                "base": {
+                    "name": "de base"
+                },
+                "tip": {
+                    "name": "pour une astuce"
+                },
+                "point": {
+                    "name_@mf": "Point ${idx}"
+                }
+            },
+            "add_point": {
+                "name": "Ajouter un point"
+            },
+            "delete_point": {
+                "name": "Effacer",
+                "undo": "Effacer un point"
+            },
+            "add_tip": {
+                "name": "Ajouter une astuce (NYI)"
+            },
+            "rotate_tip": {
+                "name": "Effectuer une rotation d'astuce Tip...",
+                "undo": "Effectuer une rotation de flèche d'astuce",
+                "up": {
+                    "name": "Haut"
+                },
+                "right": {
+                    "name": "Droite"
+                },
+                "down": {
+                    "name": "Base"
+                },
+                "left": {
+                    "name": "Gauche"
+                }
+            }
+        },
+        "divider": {
+            "resize": {
+                "name": "Redimensionner",
+                "undo": "spécifier la longeur du séparateur"
+            },
+            "delete": {
+                "name": "Effacer",
+                "undo": "Effacer le séparateur"
+            }
+        },
+		"submodel": {
+			"convert_to_callout": {
+				"name": "Convertir en légende"
+			}
+		},
+		"part": {
+			"displace_part": {
+				"name": "Déplacer une pièce...",
+				"undo_@mf": "Déplacer une pièce ${direction}",
+				"up": {
+					"name": "Vers le haut"
+				},
+				"down": {
+					"name": "Vers le bas"
+				},
+				"left": {
+					"name": "Vers la gauche"
+				},
+				"right": {
+					"name": "Vers la droite"
+				},
+				"forward": {
+					"name": "Vers l'avant"
+				},
+				"backward": {
+					"name": "Vers l'arrière"
+				},
+				"none": {
+					"name": "Aucun"
+				}
+			},
+			"adjust_displacement": {
+				"name": "Ajuster le déplacement",
+				"undo": "Adjuster le déplacement de la pièce"
+			},
+			"remove_displacement": {
+				"name": "Retirer le déplacement"
+			},
+			"move_part_to": {
+				"name": "Déplacer la pièce vers...",
+				"previous_step": {
+					"name": "L'étape précédente",
+					"undo": "Déplacer la pièce vers l'étape précédente"
+				},
+				"next_step": {
+					"name": "L'étape suivante",
+					"undo": "Déplacer la pièce vers l'étape suivante"
+				}
+			},
+			"add_part_to_callout": {
+				"name": "Ajouter la pièce à la légende",
+				"undo": "Ajouter la pièce à la légende"
+			},
+			"remove_part_from_callout": {
+				"name": "Retirer la pièce de la légende",
+				"undo": "Retirer la pièce de la légende"
+			},
+			"remove_from_pli": {
+				"name": "Retirer du PLI (NYI)"
+			},
+			"change_part": {
+				"name": "Changer la pièce",
+				"position_and_rotation": {
+					"name": "Changer la position et rotation",
+					"undo": "Changer la transformation de la pièce"
+				},
+				"color": {
+					"name": "Changer la couleur"
+				},
+				"to_different_part": {
+					"name": "Changer vers un type de pièce différente",
+					"undo": "Changer le type de pièce"
+				},
+				"duplicate": {
+					"name": "Dupliquer",
+					"undo": "Dupliquer une pièce"
+				},
+				"delete": {
+					"name": "Effacer",
+					"undo": "Effacer une pièce"
+				}
+			}
+		}
+	},
+	"dialog": {
+        "ok": "Ok",
+        "cancel": "Annuler",
+        "reset": "Remise à zéro",
+		"import_model": {
+			"title": "Importer un Modèle",
+			"parts_per_step_1": "Le modèle n'a pas d'étapes. Ajout d'étapes via",
+			"parts_per_step_2": "des pièces par étape",
+			"steps_per_page": "des étapes par page",
+			"use_max_steps": "Autant que possible tant que cela reste joli",
+			"auto_shrink_csi": "la réduction automatique des images des pièces pour tenir sur la page",
+			"include": {
+				"root": "Inclure...",
+				"titlePage": "Le titre de la page",
+				"submodelBreakdown": "Sous Modèle / Description précise des sous parties (NYI)",
+				"pli": "PLIs pour chaque étape",
+				"partListPage": "Page avec le résumé des pièces"
+			}
+		},
+		"whats_new": {
+			"title": "Nouveautés",
+			"version": "Version",
+			"features": "Nouvelles fonctionnalités",
+			"bug_fixes": "Résolution d'anomalies"
+		},
+		"custom_font": {
+			"title": "Police de caractère spécifique",
+			"name_input": "Entrer le nom du police de caractère de votre système",
+			"sample_text": "Texte d'exemple'",
+			"sample_characters": "abc ABC 0 1 2 3 4 5 6 7 8 9"
+		},
+		"grid": {
+			"title": "Modifier la grille",
+			"enabled": "Activer",
+			"spacing": "Espace du maillage",
+			"offset": "Démarrer la grille ",
+			"offset_top": "En haut",
+			"offset_left": "A gauche",
+			"line_style": "Style de ligne",
+			"color": "Couleur",
+			"auto_color": "Automatique",
+			"width": "Largeur",
+			"dash": "Pointillé"
+		},
+		"save_as": {
+			"title": "Sauvegarder sous",
+			"fn": "Nom du fichier"
+		},
+		"save_template_as": {
+			"title": "Sauvegarder le modèle sous",
+			"fn": "Nom du fichier"
+		},
+		"style": {
+			"title": "Style",
+			"label_text": "Etiquette de texte"
+		},
+		"scale_images": {
+			"title": "Agrandir les images par",
+			"image_size_@mf": "Les images auront une taille de <strong>${width} x ${height}</strong> pixels"
+		},
+		"export_hi_res_pdf": {
+			"title": "Exporter en PDF haute résolution",
+			"page_size": "Taille physique de la page",
+			"by": "x",
+			"image_res": "Résolution de l'image",
+			"dpi": "Point Par Pouce"
+		},
+		"export_hi_res_png": {
+			"title": "Exporter en images PNG haute résolution",
+			"scale": "Agrandir",
+			"maintain_print_size": "En maintenant la taille d'impression",
+			"dpi": "Point Par Pouce",
+			"size_@mf": " images auront une taille de <strong>${width} x ${height}</strong> pixels",
+			"print_size_@mf": "Les images seront imprimées en <strong>${cm_width} x ${cm_height}</strong> cm (<strong>${in_width} x ${in_height}</strong> pouces)"
+		},
+		"locale_chooser": {
+			"title": "Choisissez une langue"
+		},
+		"brick_colors": {
+			"title": "Couleur des briques",
+			"action": "Modifier la couleur des briques",
+			"ld_code": "Code LDraw",
+			"name": "Nom",
+			"edge_color": "Couleur de l'arête"
+		},
+		"ld_color_picker": {
+			"title": "Choisissez une couleur",
+			"ld_code": "Code LDraw",
+			"name": "Nom",
+			"choose": "Choisissez",
+			"action": "Modifier la couleur de la pièce"
+		},
+		"missing_parts": {
+			"title": "Pièces manquantes",
+			"subtitle": "Ces pièces sont utilisées dans votre modèle, mais sont introuvables dans la liste des pièces de Lic. <br> Vous pouvez importer une copie de chaque pièce de votre ordinateur, si elle est disponible.",
+			"proceed": "Supprimer les pièces manquantes du modèle et continuer",
+			"used_@mf": "${count} utilisées",
+			"send_to_remote": {
+				"title": "Partager sur le site public de Lic",
+				"tooltip": "Partager cette pièce sur le site de Li,<br>afin que d'autres utilisateurs puisse l'utiliser également.<br>Partager uniquement les pièces simples, pas des modèles complets.<br />Entirely optional."
+			}
+		},
+		"scene_rendering": {
+			"title": "Rendu des pièces en 3D",
+			"undo": "Modifier le rendu des pièces",
+			"zoom": "Agrandissement de l'objectif",
+			"edge_width": "Largeur des arêtes des pièces"
+		},
+		"transform_part": {
+			"title": "Transformation de pièce",
+			"position": "Position",
+			"rotation": "Rotation"
+		},
+		"displace_part": {
+			"title": "Déplacement de pièce",
+			"part_distance": "Distance de la pièce",
+			"arrow_length": "Longueur de la flèche",
+			"arrow_distance": "Distance de la flèche",
+			"arrow_rotation": "Rotation de la flèche"
+		},
+		"page_layout": {
+			"title": "Agencer les pages par lignes et colonnes",
+			"rows": "Lignes",
+			"cols": "Colonnes",
+			"orientation": "Orientation",
+			"horizontal": "Horizontal",
+			"vertical": "Vertical"
+		},
+		"rotate_part_image": {
+			"title_pli": "Effectuer une rotation de l'image de la liste des pièces",
+			"title_csi": "Effectuer une rotation de la CSI",
+			"add_rotate_icon": "Ajouter l'icône de rotation"
+		},
+        "copy_csi_rotation": {
+            "title": "Copier la rotation",
+            "label": "Copier la rotation vers la prochaine étape"
+        },
+        "scale_csi": {
+            "title": "Mise à l'échelle CSI"
+        },
+        "scale_pli": {
+            "title": "Mise à l'échelle d la liste des images des pièces"
+        },
+        "change_part_count": {
+            "title": "Changer le comptage des pièces",
+            "label": "Nouveau comptage"
+        },
+		"style_annotation": {
+			"title": "Style des annotations"
+		},
+        "resize_page_divider": {
+            "title": "Redimensionner le séparateur de la Page"
+        },
+		"busy_indicator": {
+			"loading_model": "Chargement du modèle",
+			"merging_steps": "Fusion des étapes",
+			"generating_PDF": "Génération du PDF",
+			"generating_PNG": "Génération du ZIP des PNG"
+		}
+	},
+	"template": {
+		"select_page_item": "Sélectionner un attribut lié à la page",
+		"page": {
+			"title": "Taille de la page",
+			"formats": {
+				"custom": "Spécifique...",
+				"a3": "A3",
+				"a4": "A4",
+				"a5": "A5",
+				"letter": "Lettre",
+				"gov-letter": "Gov. Letter",
+				"legal": "Legal",
+				"junior-legal": "Junior Legal"
+			},
+			"orientation": {
+				"landscape": "Paysage",
+				"portrait": "Portrait"
+			},
+			"width": "Largeur (px)",
+			"height": "Hauteur (px)",
+			"aspect_ratio_@mf": "Maintenir le rapport hauteur / largeur (${aspect_ratio})",
+			"printed_size": "La page une fois imprimée aura comme taille:",
+			"centimeter_size_@mf": "${width} x ${height} cm",
+			"inch_size_@mf": "${width} x ${height} in"
+		},
+		"fill": {
+			"title": "Remplissage",
+			"gradient": "Dégradé",
+			"image": "Image"
+		},
+		"border": {
+			"title": "Bordure",
+			"line_width": "Grosseur de la ligne",
+			"corner_radius": "Rayon de courbure",
+			"margin": "Marge"
+		},
+		"font": {
+			"bold_character": "B",
+			"italic_character": "I",
+			"underline_character": "U"
+		},
+		"transform": {
+			"title": "Transformation",
+			"rotate_x": "Rotation X",
+			"rotate_y": "Y",
+			"rotate_z": "Z",
+			"scale": "Mise à l'échelle"
+		},
+		"pli": {
+			"content": "Sommaire",
+			"include_submodels": "Inclure les sous-modèles dans le PLI"
+		},
+        "csi": {
+            "displacement_arrow_color": "Déplacement des flèches de couleur"
+        },
+		"page_number": {
+			"position": "Position",
+			"positions": {
+				"right": "Droite",
+				"left": "Gauche",
+				"even-left": "Paire à gauche, impaire à droite",
+				"even-right": "Impaire à gauche, paire à droite"
+			}
+		}
+	},
+    "nav_tree": {
+        "show": "Afficher",
+        "all": "Tout",
+        "page_step_part": "Pages, Etapes, CSIs, Pièces",
+        "steps": "Etapes",
+        "submodel_images": "Image des sous-modèles",
+        "submodel_csi": "Sous-modèles CSIs",
+        "csis": "CSIs",
+        "parts": "Pièces",
+        "plis": "PLIs",
+        "pli_items": "Images PLI",
+        "callouts": "Légendes",
+        "callout_arrows": "Flèches de légende",
+        "annotations": "Annotations",
+        "number_labels": "Etiquettes des chiffres",
+        "quantity_labels": "Etiquettes des quantités",
+        "dividers": "Séparateurs",
+        "group_parts": "Grouper les pièces par type (NYI)"
+    }
+}
