@@ -16,7 +16,9 @@ import LocaleManager from './translate';
 import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
 import DialogManager from './dialog';
+import NavBar from './components/nav_bar.vue';
 import NavTree from './components/nav_tree/base.vue';
+import PopupMenu from './components/popup_menu.vue';
 import TemplatePanel from './components/template_panel.vue';
 import './pageView';
 import './components/element_extensions.vue';
@@ -59,7 +61,7 @@ Vue.use({
 
 const app = new Vue({
 	el: '#container',
-	components: {NavTree, TemplatePanel},
+	components: {NavBar, NavTree, PopupMenu, TemplatePanel},
 	data: {
 		// Store transient UI state data here.  Do *not* store state items here; Vue turns these
 		// into observers, which destroys performance for big stores like we have here
@@ -76,8 +78,7 @@ const app = new Vue({
 		lastRightClickPos: {
 			x: null,
 			y: null
-		},
-		navUpdateState: 0    // Not used directly, only used to force the nav bar to redraw
+		}
 	},
 	methods: {
 		importBuiltInModel(url) {
@@ -299,8 +300,6 @@ const app = new Vue({
 					ref.forceUpdate();
 				}
 			});
-			// TODO: add ref for the menu, then call $ref.forceUpdate()
-			this.navUpdateState = (this.navUpdateState + 1) % 10;
 			if (this.selectedItemLookup && this.selectedItemLookup.id != null) {
 				this.selectedItemLookup.id++;
 				this.selectedItemLookup.id--;

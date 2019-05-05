@@ -1,6 +1,5 @@
-/* Web Lic - Copyright (C) 2018 Remi Gagne */
+/* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-/* global Vue: false */
 'use strict';
 
 import _ from './util';
@@ -16,112 +15,9 @@ import DialogManager from './dialog';
 let app;
 const tr = LocaleManager.translate;
 
-function hideSubMenus() {
-	document.querySelectorAll('.dropdown-submenu.open').forEach(el => {
-		el.classList.remove('open');
-	});
-}
-
-// TODO: Add checkbox to 'selected' menu entries, like the currently selected view entry
-Vue.component('menu-list', {
-	template: '#menuTemplate',
-	props: ['menuEntries', 'selectedItem'],
-	methods: {
-		resolveProperty(p) {
-			return (typeof p === 'function') ? p(this.selectedItem) : p;
-		},
-		triggerMenu(entry, e) {
-			if (entry.children) {
-				this.toggleSubMenu(e);
-			} else if (typeof entry.cb === 'string') {
-				app[entry.cb]();
-			} else {
-				entry.cb(this.selectedItem);
-			}
-		},
-		toggleSubMenu(e) {
-
-			e.preventDefault();
-			e.stopPropagation();
-			hideSubMenus();
-			const target = e.target.parentElement;
-			target.classList.add('open');
-
-			// If submenu can't fit on the right, show it on the left
-			const menuBox = target.getBoundingClientRect();
-			const submenu = target.querySelector('ul');
-			const submenuRightEdge = menuBox.x + menuBox.width + submenu.clientWidth;
-			if (submenuRightEdge > document.documentElement.clientWidth - 20) {
-				submenu.style.left = 'unset';
-				submenu.style.right = '100%';
-			} else {
-				submenu.style.left = '100%';
-				submenu.style.right = 'unset';
-			}
-			const submenuBottomEdge = menuBox.y + submenu.clientHeight;
-			if (submenuBottomEdge > document.documentElement.clientHeight - 20) {
-				const dy = document.documentElement.clientHeight - submenuBottomEdge - 10;
-				submenu.style['margin-top'] = dy + 'px';
-			} else {
-				submenu.style.removeProperty('margin-top');
-			}
-		},
-		isVisible(entry) {
-			if (this.selectedItem == null) {
-				return false;
-			} else if (entry.selectedItem && entry.selectedItem.type !== this.selectedItem.type) {
-				return false;
-			} else if (entry.shown) {
-				return entry.shown(this.selectedItem);
-			} else if (entry.children) {
-				if (typeof entry.children === 'function') {
-					return !_.isEmpty(entry.children(this.selectedItem));
-				}
-				return entry.children.some(el => el.shown ? el.shown(this.selectedItem) : true);
-			}
-			return true;
-		},
-		show(e) {
-			const menu = document.getElementById('contextMenu');
-			menu.style['outline-style'] = 'none';
-			menu.style.display = 'block';
-			menu.focus();
-			Vue.nextTick(() => this.position(e));
-		},
-		position(e) {
-			const menu = document.getElementById('contextMenu');
-			const doc = document.documentElement;
-			menu.style.left = Math.min(e.pageX, doc.clientWidth - menu.clientWidth - 10) + 'px';
-			menu.style.top = Math.min(e.pageY, doc.clientHeight - menu.clientHeight - 10) + 'px';
-		},
-		hide() {
-			hideSubMenus();
-			document.getElementById('contextMenu').style.display = 'none';
-		}
-	}
-});
-
-Vue.component('nav-menu', {
-	template: '#navMenuTemplate',
-	props: ['menuEntryList', 'filename', 'version'],
-	methods: {
-		hide() {
-			hideSubMenus();
-			document.querySelectorAll('.dropdown.open').forEach(el => {
-				el.classList.remove('open');
-			});
-		},
-		triggerMenu(e) {
-			app.closeMenus();
-			e.target.parentElement.classList.add('open');
-		}
-	}
-});
-
 function enableIfModel() {
 	return store != null && store.model != null;
 }
-
 
 function toggleGrid(newState) {
 	return function() {
@@ -171,26 +67,32 @@ const menu = [
 			text: 'action.file.open_lic_recent.name',
 			id: 'open_recent',
 			enabled: () => false,
-			cb: () => {}
+			cb() {}
 		},
 		{
 			text: 'action.file.close.name',
 			id: 'close',
 			enabled: enableIfModel,
-			cb: 'closeModel'
+			cb() {
+				app.closeModel();
+			}
 		},
 		{
 			text: 'action.file.save.name',
 			id: 'save',
 			shortcut: 'ctrl+s',
 			enabled: enableIfModel,
-			cb: 'save'
+			cb() {
+				app.save();
+			}
 		},
 		{
 			text: 'action.file.save_as.name',
 			id: 'save_as',
 			enabled: enableIfModel,
-			cb: 'saveAs'
+			cb() {
+				app.saveAs();
+			}
 		},
 		{text: 'separator'},
 		{
@@ -239,12 +141,16 @@ const menu = [
 				{
 					text: 'action.file.template.save.name',
 					id: 'save_template',
-					cb: 'saveTemplate'
+					cb() {
+						app.saveTemplate();
+					}
 				},
 				{
 					text: 'action.file.template.save_as.name',
 					id: 'save_template_as',
-					cb: 'saveTemplateAs'
+					cb() {
+						app.saveTemplateAs();
+					}
 				},
 				{
 					text: 'action.file.template.load.name',
