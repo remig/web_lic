@@ -393,6 +393,9 @@ const lineParsers = {
 };
 
 async function lineListToAbstractPart(fn, lineList, progressCallback) {
+	if (fn.includes('/')) {  // Need only final filename, not the path to it
+		fn = fn.slice(fn.lastIndexOf('/') + 1);
+	}
 	const abstractPart = {
 		filename: fn,
 		name: '',
