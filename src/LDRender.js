@@ -282,7 +282,7 @@ function render(scene, size, container, config) {
 	return {x: bounds.x, y: bounds.y, width: bounds.w, height: bounds.h};
 }
 
-/* eslint-disable no-multi-spaces, no-mixed-spaces-and-tabs */
+/* eslint-disable no-multi-spaces, no-mixed-spaces-and-tabs, computed-property-spacing */
 function LDMatrixToMatrix(m) {
 	const matrix = new THREE.Matrix4();
 	matrix.set(
@@ -301,7 +301,7 @@ function MatrixToLDMatrix(m) {
 		a[ 0], a[ 4], a[ 8], a[1], a[5], a[9], a[2], a[6], a[10]  // a - i
 	];
 }
-/* eslint-enable no-multi-spaces, no-mixed-spaces-and-tabs */
+/* eslint-enable no-multi-spaces, no-mixed-spaces-and-tabs, computed-property-spacing */
 
 function getPartGeometry(abstractPart, colorCode) {
 
