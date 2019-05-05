@@ -941,7 +941,7 @@ const contextMenu = {
 			text: 'action.callout.position.name',
 			children: ['top', 'right', 'bottom', 'left'].map(position => {
 				return {
-					text: tr('action.callout.position.' + position + '.name'),
+					text: 'action.callout.position.' + position + '.name',
 					shown: (function(position) {
 						return function(selectedItem) {
 							const callout = store.get.lookupToItem(selectedItem);
@@ -1015,9 +1015,10 @@ const contextMenu = {
 				const arrow = store.get.calloutArrow(selectedItem);
 				return arrow.points.map((pointID, idx) => {
 					return {
-						text: (idx === 0) ? tr('action.callout_arrow.select_point.base.name') :
+						text: (idx === 0) ? 'action.callout_arrow.select_point.base.name' :
 							(idx === arrow.points.length - 1) ?
-								tr('action.callout_arrow.select_point.tip.name') :
+								'action.callout_arrow.select_point.tip.name' :
+								// TODO: text is menu's key too, but shouldn't use translated strings as keys
 								tr('action.callout_arrow.select_point.point.name_@mf', {idx}),
 						cb() {
 							app.setSelected({type: 'point', id: pointID});
@@ -1043,7 +1044,7 @@ const contextMenu = {
 			text: 'action.callout_arrow.rotate_tip.name',
 			children: ['up', 'right', 'down', 'left'].map(direction => {
 				return {
-					text: tr('action.callout_arrow.rotate_tip.' + direction + '.name'),
+					text: 'action.callout_arrow.rotate_tip.' + direction + '.name',
 					shown: arrowTipRotationVisible(direction),
 					cb: rotateArrowTip(direction)
 				};
@@ -1135,8 +1136,9 @@ const contextMenu = {
 			text: 'action.part.displace_part.name',
 			children: ['up', 'down', 'left', 'right', 'forward', 'backward', null].map(direction => {
 				return {
-					text: tr(direction != null ? 'action.part.displace_part.' + direction + '.name'
-						: 'action.part.displace_part.none.name'),
+					text: direction == null
+						? 'action.part.displace_part.none.name'
+						: 'action.part.displace_part.' + direction + '.name',
 					shown: showDisplacement(direction),
 					cb: displacePart(direction)
 				};
@@ -1256,7 +1258,7 @@ const contextMenu = {
 					const callout = store.get.callout(calloutID);
 					const targetStep = store.get.step(_.last(callout.steps));
 					return {
-						text: tr('action.position.' + callout.position + '.name'),
+						text: 'action.position.' + callout.position + '.name',
 						cb() {
 							undoStack.commit(
 								'part.addToCallout',
