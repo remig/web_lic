@@ -206,14 +206,16 @@
 	<!-- Dialog Components -->
 	<script type="text/x-template" id="localeChooserDialogTemplate">
 		<el-dialog
+			id="locale_chooser_dialog"
 			:title="tr('dialog.locale_chooser.title')"
 			width="400px"
 			:modal="false"
 			:show-close="false"
 			:visible="visible"
 		>
-			<el-select v-model="chosenLocaleCode" @change="changeLanguage">
+			<el-select id="localeChooserSelect" v-model="chosenLocaleCode" @change="changeLanguage">
 				<el-option
+					:id="`locale_${item.code}`"
 					v-for="item in languageList"
 					:key="item.code"
 					:label="item.language"

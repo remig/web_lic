@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 import page from '../page_api';
 
 function isMenuClosed(id) {
@@ -51,7 +52,16 @@ describe('Launch initial empty page', () => {
 		cy.get('.' + page.classes.dialog.footer).then(el => {
 			expect(el.position().top + el.outerHeight(true)).to.be.below(900);
 		});
-		cy.get(page.ids.dialog.whatsNew + ' .el-button').click().should('not.be.visible');
+		cy.get(page.ids.dialog.whatsNew + ' .el-button')
+			.click();
+		cy.get(page.ids.dialog.whatsNew).should('not.exist');
+	});
+
+	it('Language chooser dialog should show up with a few languages in it', () => {
+		cy.get(page.ids.dialog.localeChooser.container).should('be.visible');
+		cy.get(page.ids.dialog.localeChooser.select).should('be.visible');
+		cy.get(page.ids.dialog.localeChooser.container + ' .el-button')
+			.click();
 	});
 
 	it('General page layout is right', () => {
@@ -94,7 +104,9 @@ describe('Launch initial empty page', () => {
 		isMenuClosed(page.ids.menu.file);
 		isMenuOpen(page.ids.menu.edit);
 
-		cy.get(page.ids.menu.edit).click(1000, 0);
+		cy.get(page.ids.menu.edit).click();
+		isMenuOpen(page.ids.menu.edit);
+		cy.get(page.ids.rightPane).click();
 		isMenuClosed(page.ids.menu.edit);
 
 		cy.get(page.ids.menu.file).click();
@@ -102,5 +114,8 @@ describe('Launch initial empty page', () => {
 		cy.get(page.ids.subMenu.file.clearCacheModel)
 			.should('be.visible')
 			.should('have.class', page.classes.menu.enabled);
+
+		cy.get(page.ids.rightPane).click();
+		isMenuClosed(page.ids.menu.file);
 	});
 });

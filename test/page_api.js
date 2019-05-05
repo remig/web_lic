@@ -33,7 +33,7 @@ export default {
 			file: '#file_menu',
 			edit: '#edit_menu',
 			view: '#view_menu',
-			export: '#export_menu'
+			'export': '#export_menu'
 		},
 		filenameContainer: '#filename',
 		subMenu: {
@@ -64,12 +64,17 @@ export default {
 			view: {
 				addHorizontalGuide: '#add_horizontal_guide_menu'
 			},
-			export: {
+			'export': {
 				generatePdf: '#generate_pdf_menu',
 				generatePngImages: '#generate_png_images_menu'
 			}
 		},
 		dialog: {
+			localeChooser: {
+				container: '#locale_chooser_dialog',
+				select: '#localeChooserSelect',
+				locale_en: '#locale_en'
+			},
 			whatsNew: '#whats_new_dialog',
 			container: '#dialogContainer',
 			okButton: '#okDialogButton',
