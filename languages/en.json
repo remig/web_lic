@@ -699,7 +699,7 @@
 			"title": "3D Part Rendering",
 			"undo": "Change Part Rendering",
 			"zoom": "Camera Zoom",
-			"edge_width": "Part Edge Width"
+			"edge_width": "Part Edge Thickness"
 		},
 		"transform_part": {
 			"title": "Transform Part",
