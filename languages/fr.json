@@ -16,11 +16,11 @@
         "right": "Droite",
         "page": "Page",
         "submodelimage": "Image de sous modèle",
-        "step": "Étape",
-        "step_count_@mf": "Étape ${count}",
-        "csi": "CSI",
-        "pli": "PLI",
-        "pliitem": "Objet PLI",
+        "step": "Etape",
+        "step_count_@mf": "Etape ${count}",
+        "csi": "Image de l'étape",
+        "pli": "Image de la liste des pièces",
+        "pliitem": "Part Image",
         "quantitylabel": "Vignette de la quantité",
         "calloutarrow": "Flèche de légende",
         "numberlabel": "Vignette du numéro",
@@ -42,7 +42,7 @@
                 "success_message_@mf": "\"${filename}\" ouvert avec succès (${time})"
             },
             "open_lic_recent": {
-                "name": "Fichiers récents (NYI)"
+                "name": "Fichiers récents (Non encore implémenté)"
             },
             "close": {
                 "name": "Fermer"
@@ -79,7 +79,7 @@
                     "success_message_@mf": "\"${filename}\" Modèle ouvert avec succès"
                 },
                 "load_builtin": {
-                    "name": "Chargement d'un pré-conçu (NYI)"
+                    "name": "Chargement d'un pré-conçu (Non encore implémenté)"
                 },
                 "reset": {
                     "name": "Remise à zéro",
@@ -120,10 +120,10 @@
             },
             "pli": {
                 "show": {
-                    "name": "Afficher les PLIs"
+                    "name": "Afficher les listes des pièces"
                 },
                 "hide": {
-                    "name": "Cacher les PLIs"
+                    "name": "Cacher listes des pièces"
                 }
             },
             "inventory_page": {
@@ -135,7 +135,7 @@
                 }
             },
             "snap": {
-                "name": "S'attacher au (NYI)"
+                "name": "S'attacher au (Non encore implémenté)"
             },
             "scene_rendering": {
                 "name": "Rendu 3D des pièces..."
@@ -175,7 +175,7 @@
                 }
             },
             "zoom": {
-                "name": "Agrandissement (NYI)",
+                "name": "Agrandissement (Non encore implémenté)",
                 "full": {
                     "name": "100%"
                 },
@@ -245,10 +245,10 @@
                     "initial_text": "Nouvelle étiquette"
                 },
                 "line": {
-                    "name": "Ligne (NYI)"
+                    "name": "Ligne (Non encore implémenté)"
                 },
                 "circle": {
-                    "name": "Cercle (NYI)"
+                    "name": "Cercle (Non encore implémenté)"
                 },
                 "arrow": {
                     "name": "Flèche",
@@ -295,7 +295,7 @@
                 "name": "Ajouter une page vide"
             },
             "hide_step_separators": {
-                "name": "Cacher les séparateurs d'étapes (NYI)"
+                "name": "Cacher les séparateurs d'étapes (Non encore implémenté)"
             },
             "add_blank_step": {
                 "name": "Ajouter un séparateur vide"
@@ -357,17 +357,17 @@
         },
         "page_number": {
             "change_number": {
-                "name": "Modifier le numéro de la page (NYI)"
+                "name": "Modifier le numéro de la page (Non encore implémenté)"
             }
         },
         "step_number": {
             "change_number": {
-                "name": "Modifier le numéro de l'étape (NYI)"
+                "name": "Modifier le numéro de l'étape (Non encore implémenté)"
             }
         },
         "csi": {
             "rotate": {
-                "name": "Tourner CSI",
+                "name": "Effectuer une rotation de l'image de l'étape",
                 "flip_upside_down": {
                     "name": "Retourner à l'envers",
                     "undo": "Inverser l'image de l'étape"
@@ -387,10 +387,10 @@
             },
             "copy_rotation_to_next_steps": {
                 "name": "Copier les rotations sur les prochaines étapes...",
-                "undo": "Copier les rotations CSI"
+                "undo": "Copier les rotations de image des étapes"
             },
             "scale": {
-                "name": "Mise à l'échelle CSI",
+                "name": "Mise à l'échelle de l'image de l'étape",
                 "undo": "Mise à l'échelle de l'image de l'étape"
             },
             "remove_scale": {
@@ -401,7 +401,7 @@
                 "name": "Selectionner une pièce"
             },
             "add_new_part": {
-                "name": "Ajouter une nouvelle pièce (NYI)"
+                "name": "Ajouter une nouvelle pièce (Non encore implémenté)"
             }
         },
         "pli_item": {
@@ -480,7 +480,7 @@
                 "undo": "Effacer un point"
             },
             "add_tip": {
-                "name": "Ajouter une astuce (NYI)"
+                "name": "Ajouter une astuce (Non encore implémenté)"
             },
             "rotate_tip": {
                 "name": "Effectuer une rotation d'astuce Tip...",
@@ -567,7 +567,7 @@
 				"undo": "Retirer la pièce de la légende"
 			},
 			"remove_from_pli": {
-				"name": "Retirer du PLI (NYI)"
+				"name": "Retirer de la liste des pièces (Non encore implémenté)"
 			},
 			"change_part": {
 				"name": "Changer la pièce",
@@ -607,8 +607,8 @@
 			"include": {
 				"root": "Inclure...",
 				"titlePage": "Le titre de la page",
-				"submodelBreakdown": "Sous Modèle / Description précise des sous parties (NYI)",
-				"pli": "PLIs pour chaque étape",
+				"submodelBreakdown": "Sous Modèle / Description précise des sous parties (Non encore implémenté)",
+				"pli": "Liste des pièces pour chaque étape",
 				"partListPage": "Page avec le résumé des pièces"
 			}
 		},
@@ -621,7 +621,7 @@
 		"custom_font": {
 			"title": "Police de caractère spécifique",
 			"name_input": "Entrer le nom du police de caractère de votre système",
-			"sample_text": "Texte d'exemple'",
+			"sample_text": "Texte d'exemple",
 			"sample_characters": "abc ABC 0 1 2 3 4 5 6 7 8 9"
 		},
 		"grid": {
@@ -723,7 +723,7 @@
 		},
 		"rotate_part_image": {
 			"title_pli": "Effectuer une rotation de l'image de la liste des pièces",
-			"title_csi": "Effectuer une rotation de la CSI",
+			"title_csi": "Effectuer une rotation de l'image de l'étape",
 			"add_rotate_icon": "Ajouter l'icône de rotation"
 		},
         "copy_csi_rotation": {
@@ -731,7 +731,7 @@
             "label": "Copier la rotation vers la prochaine étape"
         },
         "scale_csi": {
-            "title": "Mise à l'échelle CSI"
+            "title": "Mise à l'échelle de l'image de l'étape"
         },
         "scale_pli": {
             "title": "Mise à l'échelle d la liste des images des pièces"
@@ -803,7 +803,7 @@
 		},
 		"pli": {
 			"content": "Sommaire",
-			"include_submodels": "Inclure les sous-modèles dans le PLI"
+			"include_submodels": "Inclure les sous-modèles dans la liste des pièces"
 		},
         "csi": {
             "displacement_arrow_color": "Déplacement des flèches de couleur"
@@ -821,20 +821,20 @@
     "nav_tree": {
         "show": "Afficher",
         "all": "Tout",
-        "page_step_part": "Pages, Etapes, CSIs, Pièces",
+        "page_step_part": "Pages, Etapes, Images de l'étape, Pièces",
         "steps": "Etapes",
         "submodel_images": "Image des sous-modèles",
-        "submodel_csi": "Sous-modèles CSIs",
-        "csis": "CSIs",
+        "submodel_csi": "Images des Sous-modèles",
+        "csis": "Images de l'étape",
         "parts": "Pièces",
-        "plis": "PLIs",
-        "pli_items": "Images PLI",
+        "plis": "Liste des pièces",
+        "pli_items": "Images des pièces",
         "callouts": "Légendes",
         "callout_arrows": "Flèches de légende",
         "annotations": "Annotations",
         "number_labels": "Etiquettes des chiffres",
         "quantity_labels": "Etiquettes des quantités",
         "dividers": "Séparateurs",
-        "group_parts": "Grouper les pièces par type (NYI)"
+        "group_parts": "Grouper les pièces par type (Non encore implémenté)"
     }
 }
