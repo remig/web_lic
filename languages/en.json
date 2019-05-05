@@ -751,6 +751,9 @@
 			"merging_steps": "Merging Steps",
 			"generating_PDF": "Generating PDF",
 			"generating_PNG": "Generating PNG Zip"
+		},
+		"about_lic": {
+			"title_@mf": "Lic Version ${version}"
 		}
 	},
 	"template": {

@@ -37,7 +37,10 @@
 				</li>
 			</template>
 			<li>
-				<a href="http://bugeyedmonkeys.com" target="_blank">
+				<a
+					class="clickable"
+					@click.prevent.stop="showAbout"
+				>
 					Web Lic {{version}}
 				</a>
 			</li>
@@ -47,15 +50,21 @@
 
 <script>
 
+import _ from '../util';
+import packageInfo from '../../package.json';
+import DialogManager from '../dialog';
 import PopupMenu from './popup_menu.vue';
 
 export default {
 	components: {PopupMenu},
-	props: ['menuEntryList', 'filename', 'version'],
+	props: ['menuEntryList', 'filename'],
 	methods: {
 		forceUpdate() {
 			this.$forceUpdate();
 			this.$children.forEach(el => el.$forceUpdate());
+		},
+		showAbout() {
+			DialogManager('aboutLicDialog');
 		},
 		hide() {
 			document.querySelectorAll('.dropdown.open').forEach(el => {
@@ -65,6 +74,11 @@ export default {
 		triggerMenu(e) {
 			this.$emit('close-menus');
 			e.target.parentElement.classList.add('open');
+		}
+	},
+	computed: {
+		version() {
+			return _.version.nice(packageInfo.version);  // major.minor is enough for public consumption
 		}
 	}
 };

@@ -467,9 +467,6 @@ const app = new Vue({
 		},
 		navBarContent() {
 			return Menu(this);
-		},
-		version() {
-			return _.version.nice(packageInfo.version);  // major.minor is enough for public consumption
 		}
 	},
 	mounted() {

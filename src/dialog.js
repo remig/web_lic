@@ -76,6 +76,10 @@ Vue.component('dialogManager', {
 		whatsNewDialog: () => import(
 			/* webpackChunkName: "whatsNewDialog" */
 			'./dialogs/whats_new.vue'
+		),
+		aboutLicDialog: () => import(
+			/* webpackChunkName: "aboutLicDialog" */
+			'./dialogs/about_lic.vue'
 		)
 	},
 	data() {
