@@ -3,7 +3,7 @@
 <template>
 	<div :id="`treeParent_${target.type}_${target.id}`">
 		<i
-			v-if="$children.length > 1"
+			v-if="needIcon()"
 			:class="['treeIcon', 'fas', 'fa-lg', {'fa-caret-down': expanded, 'fa-caret-right': !expanded}]"
 			@click.stop.prevent="arrowClick"
 		/>
@@ -190,6 +190,13 @@ export default {
 					c.forceUpdate();
 				}
 			});
+		},
+		needIcon() {
+			if (this.$children.length > 1) {
+				return true;
+			}
+			// Ensure icons are loaded on page load, where $children is populated after rendering
+			return this.store.get.hasChildren(this.target);
 		},
 		expandChildren(currentLevel, expandLevel) {
 			if (currentLevel > expandLevel) {

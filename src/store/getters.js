@@ -259,7 +259,7 @@ export default {
 		}
 		return false;
 	},
-	stepChildren(step) {
+	childList() {
 		const children = [
 			'annotation', 'callout', 'csi', 'divider',
 			'numberLabel', 'rotateIcon', 'step', 'submodelImage'
@@ -267,7 +267,21 @@ export default {
 		if (store.state.plisVisible) {
 			children.push('pli');
 		}
-		return store.get.children(step, children);
+		return children;
+	},
+	stepChildren(step) {
+		return store.get.children(step, store.get.childList());
+	},
+	hasChildren(item) {
+		item = store.get.lookupToItem(item);
+		const possibleChildren = store.get.childList();
+		for (let i = 0; i < possibleChildren.length; i++) {
+			const childList = item[possibleChildren[i] + 's'];
+			if (Array.isArray(childList) && childList.length > 0) {
+				return true;
+			}
+		}
+		return false;
 	},
 	children(item, childTypeList) {
 		item = store.get.lookupToItem(item);
