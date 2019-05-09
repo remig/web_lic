@@ -7,7 +7,7 @@ import LDParse from './LDParse';
 
 const rad = THREE.Math.degToRad;
 const deg = THREE.Math.radToDeg;
-let renderer, camera;
+let renderer, camera, measurementCanvas;
 let isInitialized = false;
 
 const renderState = {
@@ -198,13 +198,11 @@ function initialize() {
 		return;
 	}
 
-	const offscreenContainer = document.createElement('div');
-	offscreenContainer.setAttribute('style', 'position: absolute; left: -10000px; top: -10000px;');
-	offscreenContainer.setAttribute('id', 'offscreen_render_container');
-	document.body.appendChild(offscreenContainer);
+	// Create a new 2D canvas to convert the full 3D canvas into a 2D canvas, and retrieve its image data
+	measurementCanvas = document.createElement('canvas');
 
+	// Create the Three.js renderer that will draw everything
 	renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-	offscreenContainer.appendChild(renderer.domElement);
 
 	const viewBox = renderState.zoom;
 	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.01, 10000);
@@ -252,12 +250,8 @@ function render(scene, size, container, config) {
 
 	renderer.render(scene, camera);
 
-	// Create a new 2D canvas to convert the full 3D canvas into a 2D canvas, and retrieve its image data
-	// TODO: create this canvas just once way offscreen
-	const canvas = document.createElement('canvas');
-	canvas.width = canvas.height = size;
-
-	const ctx = canvas.getContext('2d');
+	measurementCanvas.width = measurementCanvas.height = size;
+	const ctx = measurementCanvas.getContext('2d');
 	ctx.drawImage(renderer.domElement, 0, 0);
 	const data = ctx.getImageData(0, 0, size, size);
 
