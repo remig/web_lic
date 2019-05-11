@@ -26,6 +26,10 @@ module.exports = {
 					'vue-style-loader',
 					'css-loader'
 				]
+			},
+			{
+				test: /\.glsl$/,
+				loader: 'webpack-glsl-loader'
 			}
 		]
 	},
