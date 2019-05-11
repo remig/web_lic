@@ -5,21 +5,15 @@
 
 import LDParse from './LDParse';
 
-const rad = THREE.Math.degToRad;
-const deg = THREE.Math.radToDeg;
 let renderer, camera, measurementCanvas;
 let isInitialized = false;
+const selectedLineColor = 0xFF0000;
+let rad, deg, lineMaterial, faceMaterials, selectedFaceMaterial, arrowMaterial;
 
 const renderState = {
 	zoom: 500,
 	edgeWidth: 0.0008
 };
-
-const lineMaterial = new THREE.LineMaterial({
-	color: 0xffffff,
-	vertexColors: THREE.VertexColors,
-	linewidth: renderState.edgeWidth
-});
 
 const api = {
 
@@ -121,6 +115,7 @@ const api = {
 	partDictionary: {},
 
 	setRenderState(newState) {
+		initialize();
 		if (newState.zoom != null) {
 			const viewBox = renderState.zoom = 500 + (newState.zoom * -10);
 			if (camera != null) {
@@ -197,6 +192,43 @@ function initialize() {
 	} else if (isInitialized) {
 		return;
 	}
+
+	rad = THREE.Math.degToRad;
+	deg = THREE.Math.radToDeg;
+	lineMaterial = new THREE.LineMaterial({
+		color: 0xffffff,
+		vertexColors: THREE.VertexColors,
+		linewidth: renderState.edgeWidth
+	});
+
+	faceMaterials = [
+		new THREE.MeshBasicMaterial({
+			vertexColors: THREE.FaceColors,
+			side: THREE.DoubleSide,
+			polygonOffset: true,
+			polygonOffsetFactor: 1,
+			polygonOffsetUnits: 1
+		}),
+		new THREE.MeshBasicMaterial({
+			vertexColors: THREE.FaceColors,
+			side: THREE.DoubleSide,
+			opacity: 0.5,
+			transparent: true,
+			polygonOffset: true,
+			polygonOffsetFactor: 1,
+			polygonOffsetUnits: 1
+		})
+	];
+	selectedFaceMaterial = new THREE.MeshBasicMaterial({
+		vertexColors: THREE.FaceColors,
+		opacity: 0.5,
+		transparent: true,
+		side: THREE.DoubleSide
+	});
+	arrowMaterial = new THREE.MeshBasicMaterial({
+		color: 0xFF0000,
+		side: THREE.DoubleSide
+	});
 
 	// Create a new 2D canvas to convert the full 3D canvas into a 2D canvas, and retrieve its image data
 	measurementCanvas = document.createElement('canvas');
@@ -407,36 +439,6 @@ function getArrowGeometry(length = 60) {
 	geom.faces.push(new THREE.Face3(2, 5, 6));
 	return geom;
 }
-
-const selectedLineColor = 0xFF0000;
-const faceMaterials = [
-	new THREE.MeshBasicMaterial({
-		vertexColors: THREE.FaceColors,
-		side: THREE.DoubleSide,
-		polygonOffset: true,
-		polygonOffsetFactor: 1,
-		polygonOffsetUnits: 1
-	}),
-	new THREE.MeshBasicMaterial({
-		vertexColors: THREE.FaceColors,
-		side: THREE.DoubleSide,
-		opacity: 0.5,
-		transparent: true,
-		polygonOffset: true,
-		polygonOffsetFactor: 1,
-		polygonOffsetUnits: 1
-	})
-];
-const selectedFaceMaterial = new THREE.MeshBasicMaterial({
-	vertexColors: THREE.FaceColors,
-	opacity: 0.5,
-	transparent: true,
-	side: THREE.DoubleSide
-});
-const arrowMaterial = new THREE.MeshBasicMaterial({
-	color: 0xFF0000,
-	side: THREE.DoubleSide
-});
 
 function project(vec, camera, size) {
 	vec = vec.clone();

@@ -30,13 +30,8 @@ module.exports = {
 				]
 			},
 			{
-				test: /\.(js|vue)$/,
-				exclude: [/node_modules/, /dialog\.js/],
-				loader: 'eslint-loader',
-				options: {
-					failOnWarning: true,
-					failOnError: true
-				}
+				test: /\.glsl$/,
+				loader: 'webpack-glsl-loader'
 			}
 		]
 	},

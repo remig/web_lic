@@ -343,7 +343,7 @@ async function parsePart(abstractPartParent, line) {
 	colorCode = forceBlack(colorCode, abstractPartParent.filename, partName);
 	await loadPart(partName);
 	abstractPartParent.parts.push({
-		colorCode: colorCode,
+		colorCode: colorCode,  // TODO: only save this if it's not -1; treat null color as -1 = inherit
 		filename: partName,
 		matrix: parseFloatList(line.slice(2, 14))
 	});
@@ -398,7 +398,7 @@ async function lineListToAbstractPart(fn, lineList, progressCallback) {
 	}
 	const abstractPart = {
 		filename: fn,
-		name: '',
+		name: '',  // TODO: only store this for real parts, not sub parts
 		parts: [],
 		primitives: []
 	};

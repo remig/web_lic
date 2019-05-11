@@ -31,7 +31,8 @@
 		"webpack": "4.1.1",
 		"webpack-bundle-analyzer": "2.13.1",
 		"webpack-cli": "2.0.12",
-		"webpack-dev-server": "3.1.10"
+		"webpack-dev-server": "3.1.10",
+		"webpack-glsl-loader": "^1.0.1"
 	},
 	"dependencies": {
 		"changedpi": "1.0.4"

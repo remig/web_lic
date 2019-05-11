@@ -40,6 +40,10 @@ module.exports = {
 					failOnWarning: false,
 					failOnError: true
 				}
+			},
+			{
+				test: /\.glsl$/,
+				loader: 'webpack-glsl-loader'
 			}
 		]
 	},
