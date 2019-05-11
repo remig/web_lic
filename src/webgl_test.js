@@ -36,85 +36,78 @@ window.toggleAnimation = function() {
 	toggleAnimation = !toggleAnimation;
 };
 
-function flatten(array) {
-	const res = [];
-	for (let i = 0; i < array.length; i++) {
-		res.push(...array[i]);
-	}
-	return res;
+const v = [
+	// Front face
+	[-1.0, -1.0, 1.0],
+	[1.0, -1.0, 1.0],
+	[1.0, 1.0, 1.0],
+	[-1.0, 1.0, 1.0],
+
+	// Back face
+	[-1.0, -1.0, -1.0],
+	[1.0, -1.0, -1.0],
+	[1.0, 1.0, -1.0],
+	[-1.0, 1.0, -1.0]
+];
+
+const points = [], nextPoints = [], indices = [];
+let lastIndex = 0;
+
+function addLine(p1, p2) {
+	// TODO: if we're pusing a point that coincides with a previous point, use that fact to draw an
+	// extra triangle in the corner to fill it up.  Or something.  Maybe.
+	points.push(...p1, ...p1, ...p2, ...p2);
+	nextPoints.push(...p2, ...p2, ...p1, ...p1);
+	indices.push(
+		lastIndex + 2, lastIndex + 1, lastIndex,
+		lastIndex + 3, lastIndex + 1, lastIndex + 2
+	);
+	lastIndex += 4;
 }
 
-function duplicate(array) {
-	const res = [];
-	for (let i = 0; i < array.length; i++) {
-		const v = array[i];
-		res.push(v, v);
-	}
-	return res;
-}
+// front lines
+addLine(v[0], v[1]);
+addLine(v[1], v[2]);
+addLine(v[2], v[3]);
+addLine(v[3], v[0]);
 
-function shift(array, offset) {
-	const res = [], len = array.length - 1;
-	for (let i = 0; i <= len; i++) {
-		let idx = i + offset;
-		if (idx < 0) {
-			idx = len;
-		} else if (idx > len) {
-			idx = 0;
-		}
-		res.push(array[idx]);
-	}
-	return res;
-}
+// back lines
+addLine(v[4], v[5]);
+addLine(v[5], v[6]);
+addLine(v[6], v[7]);
+addLine(v[7], v[4]);
+
+// side lines
+addLine(v[0], v[4]);
+addLine(v[1], v[5]);
+addLine(v[2], v[6]);
+addLine(v[3], v[7]);
 
 function initBuffers(gl) {
 
-	const positions = [
-		// Front face
-		[-1.0, -1.0, 1.0],
-		[1.0, -1.0, 1.0],
-		[1.0, 1.0, 1.0],
-		[-1.0, 1.0, 1.0],
-
-		// Back face
-		[-1.0, -1.0, 1.0],
-		[1.0, -1.0, 1.0],
-		[1.0, 1.0, 1.0],
-		[-1.0, 1.0, 1.0]
-	];
-
 	const positionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	gl.bufferData(
-		gl.ARRAY_BUFFER,
-		new Float32Array(flatten(duplicate(positions))),
-		gl.STATIC_DRAW
-	);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
 
-	const previousPoints = flatten(duplicate(shift(positions, -1)));
-	const previousBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, previousBuffer);
-	gl.bufferData(
-		gl.ARRAY_BUFFER,
-		new Float32Array(previousPoints),
-		gl.STATIC_DRAW
-	);
-
-	const nextPoints = flatten(duplicate(shift(positions, 1)));
 	const nextBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, nextBuffer);
-	gl.bufferData(
-		gl.ARRAY_BUFFER,
-		new Float32Array(nextPoints),
-		gl.STATIC_DRAW
-	);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(nextPoints), gl.STATIC_DRAW);
 
-	const direction = (new Array(16)).fill(1).map((el, idx) => idx % 2 ? 1 : -1);
+	const direction = (new Array(128)).fill(1).map((el, idx) => idx % 2 ? 1 : -1);
 	const directionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, directionBuffer);
 	gl.bufferData(
 		gl.ARRAY_BUFFER,
 		new Float32Array(direction),
+		gl.STATIC_DRAW
+	);
+
+	const order = (new Array(128).fill(0)).map((el, idx) => (idx % 4) > 1 ? 1 : 0);
+	const orderBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, orderBuffer);
+	gl.bufferData(
+		gl.ARRAY_BUFFER,
+		new Float32Array(order),
 		gl.STATIC_DRAW
 	);
 
@@ -125,6 +118,7 @@ function initBuffers(gl) {
 		0.0, 0.0, 1.0,
 		1.0, 1.0, 0.0,
 		1.0, 0.0, 1.0,
+		0.0, 1.0, 0.0,
 		1.0, 0.0, 0.0,
 		0.0, 1.0, 0.0,
 		0.0, 0.0, 1.0,
@@ -134,35 +128,63 @@ function initBuffers(gl) {
 		0.0, 1.0, 0.0,
 		0.0, 0.0, 1.0,
 		1.0, 1.0, 0.0,
-		1.0, 0.0, 1.0
+		1.0, 0.0, 1.0,
+		0.0, 1.0, 0.0,
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0,
+		1.0, 1.0, 0.0,
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0,
+		1.0, 1.0, 0.0,
+		1.0, 0.0, 1.0,
+		0.0, 1.0, 0.0,
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0,
+		1.0, 1.0, 0.0,
+		1.0, 0.0, 1.0,
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0,
+		1.0, 1.0, 0.0,
+		1.0, 0.0, 1.0,
+		0.0, 1.0, 0.0,
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0,
+		1.0, 1.0, 0.0,
+		1.0, 0.0, 1.0,
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0,
+		1.0, 1.0, 0.0,
+		1.0, 0.0, 1.0,
+		0.0, 1.0, 0.0
 	];
 	const colorBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
-	const indices = [
-		2, 1, 0, 3, 1, 2,
-		4, 3, 2, 5, 3, 4,
-		6, 5, 4, 7, 5, 6,
-		0, 7, 6, 1, 7, 0,
-	];
 	const indexBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
 
 	return {
 		positionBuffer,
+		orderBuffer,
 		directionBuffer,
-		previousBuffer,
 		nextBuffer,
 		colorBuffer,
-		indexBuffer,
-		indices
+		indexBuffer
 	};
 }
 
-const vertexCount = 24;
-let squareRotation = 0.0;
+const vertexCount = indices.length;
+// const vertexCount = 72;
+
+let squareRotation = 1.0;
 
 function drawScene(gl, programInfo, buffers, deltaTime) {
 
@@ -178,35 +200,29 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 	const projectionMatrix = glMatrix.mat4.create();
 
-	glMatrix.mat4.ortho(  //out, left, right, bottom, top, near, far
-		projectionMatrix,
-		0,  // left
-		3, // right
-		2,  // bottom
-		0,  // top
-		4,  // near
-		-4  // far
-	);
+	// out, left, right, bottom, top, near, far
+	glMatrix.mat4.ortho(projectionMatrix, 0, 3, 2, 0, 4, -4);
 
 	const modelViewMatrix = glMatrix.mat4.create();
+
+	glMatrix.mat4.translate(
+		modelViewMatrix,  // destination matrix
+		modelViewMatrix,  // matrix to rotate
+		[1, 1, 0]       // axis to rotate around
+	);
+
 	glMatrix.mat4.rotate(
 		modelViewMatrix,  // destination matrix
 		modelViewMatrix,  // matrix to rotate
-		0,   // amount to rotate in radians
+		0.75 * squareRotation,   // amount to rotate in radians
 		[1, 0, 0]       // axis to rotate around
 	);
 
 	glMatrix.mat4.rotate(
 		modelViewMatrix,  // destination matrix
 		modelViewMatrix,  // matrix to rotate
-		0,   // amount to rotate in radians
+		0.75 * squareRotation,   // amount to rotate in radians
 		[0, 1, 0]       // axis to rotate around
-	);
-
-	glMatrix.mat4.translate(
-		modelViewMatrix,  // destination matrix
-		modelViewMatrix,  // matrix to rotate
-		[1, 1, 0]       // axis to rotate around
 	);
 
 	{
@@ -249,17 +265,17 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 		);
 	}
 	{
-		const numComponents = 3;
+		const numComponents = 1;
 		const type = gl.FLOAT;
 		const normalize = false;
 		const stride = 0;
 		const offset = 0;
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffers.previousBuffer);
+		gl.bindBuffer(gl.ARRAY_BUFFER, buffers.orderBuffer);
 		gl.enableVertexAttribArray(
-			programInfo.attributeLocations.previous
+			programInfo.attributeLocations.order
 		);
 		gl.vertexAttribPointer(
-			programInfo.attributeLocations.previous,
+			programInfo.attributeLocations.order,
 			numComponents,
 			type,
 			normalize,
@@ -316,7 +332,7 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 	);
 
 	gl.uniform1f(programInfo.uniformLocations.aspect, aspect);
-	gl.uniform1f(programInfo.uniformLocations.thickness, 0.2);
+	gl.uniform1f(programInfo.uniformLocations.thickness, 0.03);
 	gl.uniform1i(programInfo.uniformLocations.miter, 1);
 
 	{
@@ -341,8 +357,8 @@ export default function init(canvas) {
 		attributeLocations: {
 			position: gl.getAttribLocation(shaderProgram, 'position'),
 			direction: gl.getAttribLocation(shaderProgram, 'direction'),
+			order: gl.getAttribLocation(shaderProgram, 'order'),
 			next: gl.getAttribLocation(shaderProgram, 'next'),
-			previous: gl.getAttribLocation(shaderProgram, 'previous'),
 			color: gl.getAttribLocation(shaderProgram, 'color')
 		},
 		uniformLocations: {
@@ -367,6 +383,7 @@ export default function init(canvas) {
 		}
 		requestAnimationFrame(render);
 	}
+
 	// requestAnimationFrame(render);
 	drawScene(gl, programInfo, buffers, 0);
 }
