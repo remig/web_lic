@@ -332,7 +332,7 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 	);
 
 	gl.uniform1f(programInfo.uniformLocations.aspect, aspect);
-	gl.uniform1f(programInfo.uniformLocations.thickness, 0.03);
+	gl.uniform1f(programInfo.uniformLocations.thickness, 0.4);
 	gl.uniform1i(programInfo.uniformLocations.miter, 1);
 
 	{
