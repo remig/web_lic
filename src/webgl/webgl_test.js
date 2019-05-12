@@ -1,8 +1,8 @@
-/* global glMatrix: false, WebGLDebugUtils: false */
+/* global glMatrix: false */
 /* eslint-disable no-alert */
 
-import vsSource from './vertexShader.glsl';
-import fsSource from './fragmentShader.glsl';
+import lineShaderSource from './lineShader.glsl';
+import fragmentShaderSource from './fragmentShader.glsl';
 
 function createShader(gl, type, source) {
 	const shader = gl.createShader(type);
@@ -83,33 +83,25 @@ addLine(v[1], v[5]);
 addLine(v[2], v[6]);
 addLine(v[3], v[7]);
 
+const directionPoints = (new Array(128)).fill(1).map((el, idx) => idx % 2 ? 1 : -1);
+const orderPoints = (new Array(128).fill(0)).map((el, idx) => (idx % 4) > 1 ? 1 : 0);
+
+function createBuffer(gl, points, bufferType, pointType) {
+	pointType = pointType || Float32Array;
+	bufferType = bufferType || gl.ARRAY_BUFFER;
+	const buffer = gl.createBuffer();
+	gl.bindBuffer(bufferType, buffer);
+	gl.bufferData(bufferType, new pointType(points), gl.STATIC_DRAW);
+	return buffer;
+}
+
 function initBuffers(gl) {
 
-	const positionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
-
-	const nextBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, nextBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(nextPoints), gl.STATIC_DRAW);
-
-	const direction = (new Array(128)).fill(1).map((el, idx) => idx % 2 ? 1 : -1);
-	const directionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, directionBuffer);
-	gl.bufferData(
-		gl.ARRAY_BUFFER,
-		new Float32Array(direction),
-		gl.STATIC_DRAW
-	);
-
-	const order = (new Array(128).fill(0)).map((el, idx) => (idx % 4) > 1 ? 1 : 0);
-	const orderBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, orderBuffer);
-	gl.bufferData(
-		gl.ARRAY_BUFFER,
-		new Float32Array(order),
-		gl.STATIC_DRAW
-	);
+	const positionBuffer = createBuffer(gl, points);
+	const nextBuffer = createBuffer(gl, nextPoints);
+	const indexBuffer = createBuffer(gl, indices, gl.ELEMENT_ARRAY_BUFFER, Uint16Array);
+	const directionBuffer = createBuffer(gl, directionPoints);
+	const orderBuffer = createBuffer(gl, orderPoints);
 
 	const colors = [
 		1.0, 0.0, 1.0,
@@ -163,13 +155,7 @@ function initBuffers(gl) {
 		1.0, 0.0, 1.0,
 		0.0, 1.0, 0.0
 	];
-	const colorBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-
-	const indexBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+	const colorBuffer = createBuffer(gl, colors);
 
 	return {
 		positionBuffer,
@@ -351,7 +337,7 @@ export default function init(canvas) {
 	};
 	const gl = canvas.getContext('webgl', props);
 
-	const shaderProgram = createShaderProgram(gl, vsSource, fsSource);
+	const shaderProgram = createShaderProgram(gl, lineShaderSource, fragmentShaderSource);
 	const programInfo = {
 		program: shaderProgram,
 		attributeLocations: {
