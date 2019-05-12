@@ -7,6 +7,7 @@ import './thickLines';
 import _ from './util';
 import uiState from './uiState';
 import store from './store';
+import LicGL from './webgl/webgl_test';
 import undoStack from './undoStack';
 import LDParse from './LDParse';
 import Menu from './menu';
@@ -349,8 +350,8 @@ const app = new Vue({
 			return this.$refs.pageView.pageCoordsToCanvasCoords(point);
 		},
 		closeMenus() {
-			this.$refs.contextMenuComponent.hide();
-			this.$refs.navMenuComponent.hide();
+			// this.$refs.contextMenuComponent.hide();
+			// this.$refs.navMenuComponent.hide();
 		},
 		globalKeyPress(e) {
 			this.closeMenus();
