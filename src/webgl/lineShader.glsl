@@ -7,9 +7,7 @@ attribute vec3 color;
 uniform mat4 projection;
 uniform mat4 modelView;
 uniform float aspect;
-
 uniform float thickness;
-uniform int miter;
 
 varying lowp vec3 vColor;
 

@@ -135,6 +135,16 @@ function drawScene(gl, objectsToDraw, deltaTime) {
 	const projectionMatrix = glMatrix.mat4.create();
 	glMatrix.mat4.ortho(projectionMatrix, 0, 3, 2, 0, 4, -4); // out, left, right, bottom, top, near, far
 
+	const lineMat = glMatrix.mat4.create();
+	glMatrix.mat4.translate(lineMat, lineMat, [1, 1, 0]);
+	glMatrix.mat4.rotate(lineMat, lineMat, 0.75 * squareRotation, [1, 0, 0]);
+	glMatrix.mat4.rotate(lineMat, lineMat, 0.75 * squareRotation, [0, 1, 0]);
+
+	const lines = objectsToDraw[0];
+	lines.uniforms.aspect = aspect;
+	lines.uniforms.projection = projectionMatrix;
+	lines.uniforms.modelView = lineMat;
+
 	for (let i = 0; i < objectsToDraw.length; i++) {
 		const object = objectsToDraw[i];
 
@@ -142,17 +152,7 @@ function drawScene(gl, objectsToDraw, deltaTime) {
 
 		twgl.setBuffersAndAttributes(gl, object.programInfo, object.buffers);
 
-		const modelViewMatrix = glMatrix.mat4.create();
-		glMatrix.mat4.translate(modelViewMatrix, modelViewMatrix, [1, 1, 0]);
-		glMatrix.mat4.rotate(modelViewMatrix, modelViewMatrix, 0.75 * squareRotation, [1, 0, 0]);
-		glMatrix.mat4.rotate(modelViewMatrix, modelViewMatrix, 0.75 * squareRotation, [0, 1, 0]);
-
-		gl.uniformMatrix4fv(object.uniformLoc.projectionMatrix, false, projectionMatrix);
-		gl.uniformMatrix4fv(object.uniformLoc.modelViewMatrix, false, modelViewMatrix);
-
-		gl.uniform1f(object.uniformLoc.aspect, aspect);
-		gl.uniform1f(object.uniformLoc.thickness, 0.4);
-		gl.uniform1i(object.uniformLoc.miter, 1);
+		twgl.setUniforms(object.programInfo, object.uniforms);
 
 		gl.drawElements(gl.TRIANGLES, 72, gl.UNSIGNED_SHORT, 0);
 	}
@@ -172,12 +172,11 @@ export default function init(canvas) {
 		{
 			programInfo: lineShaderProgram,
 			buffers: lineBuffers,
-			uniformLoc: {
-				projectionMatrix: gl.getUniformLocation(lineShaderProgram.program, 'projection'),
-				modelViewMatrix: gl.getUniformLocation(lineShaderProgram.program, 'modelView'),
-				aspect: gl.getUniformLocation(lineShaderProgram.program, 'aspect'),
-				thickness: gl.getUniformLocation(lineShaderProgram.program, 'thickness'),
-				miter: gl.getUniformLocation(lineShaderProgram.program, 'miter')
+			uniforms: {
+				projection: glMatrix.mat4.create(),
+				modelView: glMatrix.mat4.create(),
+				aspect: 1.0,
+				thickness: 0.4
 			}
 		}
 	];
