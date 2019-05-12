@@ -754,7 +754,17 @@
 		},
 		"about_lic": {
 			"title": "About Lic",
-			"version_@mf": "Version ${version}"
+			"version_@mf": "Version ${version}",
+			"free_@link": "Lic is totally free and $link{open source}.",
+			"read_more_@link": "Read more about Lic and how to get started $link{here}.",
+			"contact_@link": "Contact $email{} with questions or feature requests, or $link{open an issue}.",
+			"lang_@link": "If you know more than one language, please help other Lic users by translating Lic. $link{It's easy}!",
+			"thanks": "Special Thanks:",
+			"feedback": "Major feedback, bug hunting and moral support:",
+			"and": "and",
+			"german": "German Translation and translation code fixes:",
+			"french": "French Translation:",
+			"copyright": "Copyright © 2019"
 		}
 	},
 	"template": {

@@ -33,12 +33,24 @@ function __tr(key, args, locale) {
 	const keys = key.split('.');
 	for (let i = 0; i < keys.length; i++) {
 		const v = keys[i];
-		if (v.endsWith('_@mf')) {
-			return _.template(lookup[v])(args);
+		if (v.includes('@')) {
+			if (v.endsWith('_@mf')) {
+				return _.template(lookup[v])(args);
+			} else if (v.endsWith('_@link')) {
+				return translateLink(lookup[v], args);
+			}
 		}
 		lookup = lookup[v];
 	}
 	return lookup;
+}
+
+function translateLink(text, link) {
+	const email = '<a href="mailto:lic@bugeyedmonkeys.com" target="_blank">lic@bugeyedmonkeys.com</a>';
+	return text
+		.replace('$email{}', email)
+		.replace('$link{', `<a href="${link}" target="_blank">`)
+		.replace('}', '</a>');
 }
 
 function translate(key, args) {
