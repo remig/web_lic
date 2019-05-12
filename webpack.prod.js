@@ -1,6 +1,8 @@
+/* global __dirname: false */
+
 const webpack = require('webpack');
 const path = require('path');
-const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const {VueLoaderPlugin} = require('vue-loader');
 
 module.exports = {
@@ -26,6 +28,15 @@ module.exports = {
 					'vue-style-loader',
 					'css-loader'
 				]
+			},
+			{
+				test: /\.(js|vue)$/,
+				exclude: [/node_modules/, /dialog\.js/],
+				loader: 'eslint-loader',
+				options: {
+					failOnWarning: true,
+					failOnError: true
+				}
 			}
 		]
 	},

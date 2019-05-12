@@ -3,10 +3,8 @@
 const path = require('path');
 const {VueLoaderPlugin} = require('vue-loader');
 
-require('babel-polyfill');
-
 module.exports = {
-	entry: ['babel-polyfill', './src/ui.js'],
+	entry: './src/ui.js',
 	output: {
 		filename: 'bundle.js',
 		chunkFilename: '[name].bundle.js',

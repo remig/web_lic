@@ -1,3 +1,5 @@
+/* global __dirname: false */
+
 const path = require('path');
 const {VueLoaderPlugin} = require('vue-loader');
 
@@ -36,7 +38,7 @@ module.exports = {
 				loader: 'eslint-loader',
 				options: {
 					failOnWarning: false,
-					failOnError:  true
+					failOnError: true
 				}
 			}
 		]
