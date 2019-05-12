@@ -469,7 +469,7 @@ const app = new Vue({
 			return Menu(this);
 		}
 	},
-	mounted() {
+	async mounted() {
 
 		// TODO: grey out progress bar when 'Model Import' dialog is visible; otherwise it's confusing
 		//		 if progress bar isn't at 100 but its done loading and waiting for user to click
@@ -527,8 +527,8 @@ const app = new Vue({
 			snapOffset: 0
 		});
 
-		if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
-			DialogManager('whatsNewDialog');
+		if (1 || _.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
+			await DialogManager('whatsNewDialog');
 		}
 
 		// TODO: Find better way of calling 'redrawUI' from arbitrary places
