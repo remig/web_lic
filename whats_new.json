@@ -1,5 +1,19 @@
 [
 	{
+		"version": "0.44.0",
+		"date": "May 11, 2019",
+		"features": [
+			"Move all remaining hardcoded strings into the translation lookup table - thanks mreid!",
+			"New French translation - thanks again mreid!",
+			"New German translation - thanks Jean-Philippe!",
+			"New 'About Lic' dialog - click 'Web Lic' in the top right corner to see this"
+		],
+		"bug_fixes": [
+			"If a submodel is used multiple times in different steps, any use beyond the first would draw wrong: each step drew the entire submodel.  Fix that nonsense.",
+			"Draw nav tree icons when page first loads"
+		]
+	},
+	{
 		"version": "0.43.0",
 		"date": "Nov 23, 2018",
 		"features": [
