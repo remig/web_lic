@@ -527,7 +527,7 @@ const app = new Vue({
 			snapOffset: 0
 		});
 
-		if (1 || _.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
+		if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
 			await DialogManager('whatsNewDialog');
 		}
 
