@@ -2,6 +2,7 @@
 /* eslint-disable no-alert */
 
 import lineShaderSource from './lineShader.glsl';
+import faceShaderSource from './faceShader.glsl';
 import fragmentShaderSource from './fragmentShader.glsl';
 
 function createShader(gl, type, source) {
@@ -30,11 +31,6 @@ function createShaderProgram(gl, vsSource, fsSource) {
 	}
 	return shaderProgram;
 }
-
-let toggleAnimation = true;
-window.toggleAnimation = function() {
-	toggleAnimation = !toggleAnimation;
-};
 
 const v = [
 	// Front face
@@ -172,6 +168,13 @@ const vertexCount = indices.length;
 
 let squareRotation = 1.0;
 
+function setBufferAttribute(gl, buffer, attribute, numComponents) {
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	gl.enableVertexAttribArray(attribute);
+	// type, normalize, stride, offset
+	gl.vertexAttribPointer(attribute, numComponents, gl.FLOAT, false, 0, 0);
+}
+
 function drawScene(gl, programInfo, buffers, deltaTime) {
 
 	gl.clearColor(1.0, 1.0, 1.0, 0.0);
@@ -181,130 +184,24 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 	gl.depthFunc(gl.LEQUAL);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	gl.useProgram(programInfo.program);
-
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 	const projectionMatrix = glMatrix.mat4.create();
+	glMatrix.mat4.ortho(projectionMatrix, 0, 3, 2, 0, 4, -4); // out, left, right, bottom, top, near, far
 
-	// out, left, right, bottom, top, near, far
-	glMatrix.mat4.ortho(projectionMatrix, 0, 3, 2, 0, 4, -4);
+
+	gl.useProgram(programInfo.program);
 
 	const modelViewMatrix = glMatrix.mat4.create();
+	glMatrix.mat4.translate(modelViewMatrix, modelViewMatrix, [1, 1, 0]);
+	glMatrix.mat4.rotate(modelViewMatrix, modelViewMatrix, 0.75 * squareRotation, [1, 0, 0]);
+	glMatrix.mat4.rotate(modelViewMatrix, modelViewMatrix, 0.75 * squareRotation, [0, 1, 0]);
 
-	glMatrix.mat4.translate(
-		modelViewMatrix,  // destination matrix
-		modelViewMatrix,  // matrix to rotate
-		[1, 1, 0]       // axis to rotate around
-	);
-
-	glMatrix.mat4.rotate(
-		modelViewMatrix,  // destination matrix
-		modelViewMatrix,  // matrix to rotate
-		0.75 * squareRotation,   // amount to rotate in radians
-		[1, 0, 0]       // axis to rotate around
-	);
-
-	glMatrix.mat4.rotate(
-		modelViewMatrix,  // destination matrix
-		modelViewMatrix,  // matrix to rotate
-		0.75 * squareRotation,   // amount to rotate in radians
-		[0, 1, 0]       // axis to rotate around
-	);
-
-	{
-		const numComponents = 3;
-		const type = gl.FLOAT;
-		const normalize = false;
-		const stride = 0;
-		const offset = 0;
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffers.positionBuffer);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indexBuffer);
-		gl.enableVertexAttribArray(
-			programInfo.attributeLocations.position
-		);
-		gl.vertexAttribPointer(
-			programInfo.attributeLocations.position,
-			numComponents,
-			type,
-			normalize,
-			stride,
-			offset
-		);
-	}
-	{
-		const numComponents = 1;
-		const type = gl.FLOAT;
-		const normalize = false;
-		const stride = 0;
-		const offset = 0;
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffers.directionBuffer);
-		gl.enableVertexAttribArray(
-			programInfo.attributeLocations.direction
-		);
-		gl.vertexAttribPointer(
-			programInfo.attributeLocations.direction,
-			numComponents,
-			type,
-			normalize,
-			stride,
-			offset
-		);
-	}
-	{
-		const numComponents = 1;
-		const type = gl.FLOAT;
-		const normalize = false;
-		const stride = 0;
-		const offset = 0;
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffers.orderBuffer);
-		gl.enableVertexAttribArray(
-			programInfo.attributeLocations.order
-		);
-		gl.vertexAttribPointer(
-			programInfo.attributeLocations.order,
-			numComponents,
-			type,
-			normalize,
-			stride,
-			offset
-		);
-	}
-	{
-		const numComponents = 3;
-		const type = gl.FLOAT;
-		const normalize = false;
-		const stride = 0;
-		const offset = 0;
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffers.nextBuffer);
-		gl.enableVertexAttribArray(
-			programInfo.attributeLocations.next
-		);
-		gl.vertexAttribPointer(
-			programInfo.attributeLocations.next,
-			numComponents,
-			type,
-			normalize,
-			stride,
-			offset
-		);
-	}
-	{
-		const numComponents = 3;
-		const type = gl.FLOAT;
-		const normalize = false;
-		const stride = 0;
-		const offset = 0;
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffers.colorBuffer);
-		gl.vertexAttribPointer(
-			programInfo.attributeLocations.color,
-			numComponents,
-			type,
-			normalize,
-			stride,
-			offset
-		);
-		gl.enableVertexAttribArray(programInfo.attributeLocations.color);
-	}
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indexBuffer);
+	setBufferAttribute(gl, buffers.positionBuffer, programInfo.attributeLocations.position, 3);
+	setBufferAttribute(gl, buffers.nextBuffer, programInfo.attributeLocations.next, 3);
+	setBufferAttribute(gl, buffers.colorBuffer, programInfo.attributeLocations.color, 3);
+	setBufferAttribute(gl, buffers.orderBuffer, programInfo.attributeLocations.order, 1);
+	setBufferAttribute(gl, buffers.directionBuffer, programInfo.attributeLocations.direction, 1);
 
 	gl.uniformMatrix4fv(
 		programInfo.uniformLocations.projectionMatrix,
@@ -321,11 +218,8 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 	gl.uniform1f(programInfo.uniformLocations.thickness, 0.4);
 	gl.uniform1i(programInfo.uniformLocations.miter, 1);
 
-	{
-		const offset = 0;
-		const type = gl.UNSIGNED_SHORT;
-		gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
-	}
+	gl.drawElements(gl.TRIANGLES, vertexCount, gl.UNSIGNED_SHORT, 0);
+
 	squareRotation += deltaTime;
 }
 
@@ -337,22 +231,22 @@ export default function init(canvas) {
 	};
 	const gl = canvas.getContext('webgl', props);
 
-	const shaderProgram = createShaderProgram(gl, lineShaderSource, fragmentShaderSource);
+	const lineShaderProgram = createShaderProgram(gl, lineShaderSource, fragmentShaderSource);
 	const programInfo = {
-		program: shaderProgram,
+		program: lineShaderProgram,
 		attributeLocations: {
-			position: gl.getAttribLocation(shaderProgram, 'position'),
-			direction: gl.getAttribLocation(shaderProgram, 'direction'),
-			order: gl.getAttribLocation(shaderProgram, 'order'),
-			next: gl.getAttribLocation(shaderProgram, 'next'),
-			color: gl.getAttribLocation(shaderProgram, 'color')
+			position: gl.getAttribLocation(lineShaderProgram, 'position'),
+			direction: gl.getAttribLocation(lineShaderProgram, 'direction'),
+			order: gl.getAttribLocation(lineShaderProgram, 'order'),
+			next: gl.getAttribLocation(lineShaderProgram, 'next'),
+			color: gl.getAttribLocation(lineShaderProgram, 'color')
 		},
 		uniformLocations: {
-			projectionMatrix: gl.getUniformLocation(shaderProgram, 'projection'),
-			modelViewMatrix: gl.getUniformLocation(shaderProgram, 'modelView'),
-			aspect: gl.getUniformLocation(shaderProgram, 'aspect'),
-			thickness: gl.getUniformLocation(shaderProgram, 'thickness'),
-			miter: gl.getUniformLocation(shaderProgram, 'miter')
+			projectionMatrix: gl.getUniformLocation(lineShaderProgram, 'projection'),
+			modelViewMatrix: gl.getUniformLocation(lineShaderProgram, 'modelView'),
+			aspect: gl.getUniformLocation(lineShaderProgram, 'aspect'),
+			thickness: gl.getUniformLocation(lineShaderProgram, 'thickness'),
+			miter: gl.getUniformLocation(lineShaderProgram, 'miter')
 		}
 	};
 
@@ -361,12 +255,10 @@ export default function init(canvas) {
 
 	// Draw the scene repeatedly
 	function render(now) {
-		if (toggleAnimation) {
-			now *= 0.0005;  // convert to seconds
-			const deltaTime = now - then;
-			then = now;
-			drawScene(gl, programInfo, buffers, deltaTime);
-		}
+		now *= 0.0005;  // convert to seconds
+		const deltaTime = now - then;
+		then = now;
+		drawScene(gl, programInfo, buffers, deltaTime);
 		requestAnimationFrame(render);
 	}
 
