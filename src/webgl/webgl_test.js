@@ -115,7 +115,38 @@ function buildLineGeometry() {
 		next: {data: nextPoints, numComponents: 3},
 		direction: {data: directionPoints, numComponents: 1},
 		order: {data: orderPoints, numComponents: 1},
-		color: {data: colors, numComponents: 3},
+		color: {data: (new Array(144)).fill(0), numComponents: 3},
+		indices: {data: indices, numComponents: 3}
+	};
+}
+
+function buildFaceGeometry() {
+
+	const points = [], indices = [];
+	let lastIndex = 0;
+	function addFace(p1, p2, p3) {
+		points.push(...p1, ...p2, ...p3);
+		indices.push(lastIndex + 2, lastIndex + 1, lastIndex);
+		lastIndex += 3;
+	}
+
+	addFace(v[3], v[1], v[0]);
+	addFace(v[3], v[2], v[1]);
+	addFace(v[4], v[3], v[0]);
+	addFace(v[4], v[7], v[3]);
+	addFace(v[6], v[2], v[3]);
+	addFace(v[3], v[7], v[6]);
+
+	addFace(v[4], v[5], v[7]);
+	addFace(v[5], v[6], v[7]);
+	addFace(v[2], v[5], v[1]);
+	addFace(v[2], v[6], v[5]);
+	addFace(v[0], v[1], v[5]);
+	addFace(v[5], v[4], v[0]);
+
+	return {
+		position: {data: points, numComponents: 3},
+		color: {data: (new Array(144)).fill(0.8), numComponents: 3},
 		indices: {data: indices, numComponents: 3}
 	};
 }
@@ -133,14 +164,18 @@ function drawScene(gl, objectsToDraw, deltaTime) {
 
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 	const projectionMatrix = glMatrix.mat4.create();
-	glMatrix.mat4.ortho(projectionMatrix, 0, 3, 2, 0, 4, -4); // out, left, right, bottom, top, near, far
+	glMatrix.mat4.ortho(projectionMatrix, 0, 6, 4, 0, 4, -4); // out, left, right, bottom, top, near, far
 
 	const lineMat = glMatrix.mat4.create();
-	glMatrix.mat4.translate(lineMat, lineMat, [1, 1, 0]);
+	glMatrix.mat4.translate(lineMat, lineMat, [3, 2, 0]);
 	glMatrix.mat4.rotate(lineMat, lineMat, 0.75 * squareRotation, [1, 0, 0]);
 	glMatrix.mat4.rotate(lineMat, lineMat, 0.75 * squareRotation, [0, 1, 0]);
 
-	const lines = objectsToDraw[0];
+	const faces = objectsToDraw[0];
+	faces.uniforms.projection = projectionMatrix;
+	faces.uniforms.modelView = lineMat;
+
+	const lines = objectsToDraw[1];
 	lines.uniforms.aspect = aspect;
 	lines.uniforms.projection = projectionMatrix;
 	lines.uniforms.modelView = lineMat;
@@ -148,13 +183,20 @@ function drawScene(gl, objectsToDraw, deltaTime) {
 	for (let i = 0; i < objectsToDraw.length; i++) {
 		const object = objectsToDraw[i];
 
+		if (object.polygonOffset) {
+			gl.enable(gl.POLYGON_OFFSET_FILL);
+			gl.polygonOffset(object.polygonOffset, 1);
+		} else {
+			gl.disable(gl.POLYGON_OFFSET_FILL);
+		}
+
 		gl.useProgram(object.programInfo.program);
 
 		twgl.setBuffersAndAttributes(gl, object.programInfo, object.buffers);
 
 		twgl.setUniforms(object.programInfo, object.uniforms);
 
-		gl.drawElements(gl.TRIANGLES, 72, gl.UNSIGNED_SHORT, 0);
+		gl.drawElements(object.glType, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
 
 	squareRotation += deltaTime;
@@ -168,15 +210,30 @@ export default function init(canvas) {
 	const linePoints = buildLineGeometry();
 	const lineBuffers = twgl.createBufferInfoFromArrays(gl, linePoints);
 
+	const faceShaderProgram = twgl.createProgramInfo(gl, [faceShaderSource, fragmentShaderSource]);
+	const facePoints = buildFaceGeometry();
+	const faceBuffers = twgl.createBufferInfoFromArrays(gl, facePoints);
+
 	const objectsToDraw = [
 		{
+			polygonOffset: 2,
+			glType: gl.TRIANGLES,
+			programInfo: faceShaderProgram,
+			buffers: faceBuffers,
+			uniforms: {
+				projection: null,
+				modelView: null
+			}
+		},
+		{
+			glType: gl.TRIANGLES,
 			programInfo: lineShaderProgram,
 			buffers: lineBuffers,
 			uniforms: {
-				projection: glMatrix.mat4.create(),
-				modelView: glMatrix.mat4.create(),
+				projection: null,
+				modelView: null,
 				aspect: 1.0,
-				thickness: 0.4
+				thickness: 0.015
 			}
 		}
 	];
@@ -185,7 +242,7 @@ export default function init(canvas) {
 
 	// Draw the scene repeatedly
 	function render(now) {
-		now *= 0.0005;  // convert to seconds
+		now *= 0.001;  // convert to seconds
 		const deltaTime = now - then;
 		then = now;
 		drawScene(gl, objectsToDraw, deltaTime);
