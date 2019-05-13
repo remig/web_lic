@@ -31,7 +31,7 @@ void main() {
   normal *= thickness / 2.0;
   normal.x /= aspect;
 
-  vec4 offset = vec4(normal * direction, 0.0, 1.0);
-  gl_Position = currentProjected + offset;
+  vec3 offset = vec3(normal * direction, 0.0);
+  gl_Position = vec4(currentProjected.xyz + offset, 1.0);
   vColor = color;
 }
