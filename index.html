@@ -45,8 +45,10 @@
 
 </head>
 <body>
-	<div id="container">
-		<canvas id="foo" width="600" height="400" style="border: 1px solid black; margin: 20px;"></canvas>
+	<div id="container" style="margin: 20px;">
+		<button onclick="window.draw()">draw</button>
+		<canvas id="foo" width="900" height="600" style="border: 1px solid black;"></canvas>
+		<div id="fps">0 fps</div>
 	</div>
 	<!--
 	<div id="container" @click="closeMenus()">
