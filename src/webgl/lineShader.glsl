@@ -2,14 +2,11 @@ attribute vec3 position;
 attribute vec3 next;
 attribute float direction;
 attribute float order;
-attribute vec3 color;
 
 uniform mat4 projection;
 uniform mat4 modelView;
 uniform float aspect;
 uniform float thickness;
-
-varying lowp vec3 vColor;
 
 void main() {
 
@@ -34,5 +31,4 @@ void main() {
 
 	vec3 offset = vec3(normal * direction, 0.0);
 	gl_Position = vec4(currentProjected.xyz + offset, 1.0);
-	vColor = color;
 }
