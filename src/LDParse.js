@@ -56,10 +56,11 @@ const api = {
 			const line = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
 			if (line && line[1] === '!COLOUR') {
 				colors[line[4]] = {  // TODO: handle color modifiers like 'CHROME', 'METAL', 'LUMINANCE', etc
-					name: line[2],
+					name: line[2].split('').join(''),  // Force garbage collection
 					color: line[6],
 					edge: line[8],
-					alpha: line[10] ? parseInt(line[10], 10) : 0
+					alpha: line[10] ? parseInt(line[10], 10) : 0,
+					rgba: hexColorToVec4(line[6])
 				};
 			}
 		}
@@ -73,7 +74,8 @@ const api = {
 			name: 'Stud Face',
 			color: '#05131D',
 			edge: '#05131D',
-			alpha: 0
+			alpha: 0,
+			rgba: [0.0196078431372549, 0.07450980392156863, 0.11372549019607843, 1]
 		};
 		api.setColorTable(colors);
 		needLDConfig = false;
@@ -228,6 +230,14 @@ const api = {
 		}
 	}
 };
+
+function hexColorToVec4(color) {
+	color = color.replace('#', '');
+	const r = parseInt(color.substr(0, 2), 16) / 255;
+	const g = parseInt(color.substr(2, 2), 16) / 255;
+	const b = parseInt(color.substr(4, 2), 16) / 255;
+	return [r, g, b, 1];
+}
 
 function actionBuilder(filename, partID, property, newValue) {
 	const root = api.partDictionary, op = 'replace';
