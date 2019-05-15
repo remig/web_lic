@@ -1,8 +1,9 @@
 /* global glMatrix: false */
 /* eslint-disable no-alert */
 
-import lineShaderSource from './lineShader.glsl';
 import faceShaderSource from './faceShader.glsl';
+import lineShaderSource from './lineShader.glsl';
+import condLineShaderSource from './condLineShader.glsl';
 import fragmentShaderSource from './fragmentShader.glsl';
 import twgl from './twgl';
 
@@ -64,12 +65,25 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
 
+	gl.useProgram(programs.condLines.program);
+	for (let i = 0; i < objectsToDraw.condLines.length; i++) {
+		const object = objectsToDraw.condLines[i];
+
+		twgl.setBuffersAndAttributes(gl, programs.condLines, object.buffers);
+
+		programs.condLines.uniformSetters.projection(projectionMatrix);
+		programs.condLines.uniformSetters.aspect(aspect);
+		programs.condLines.uniformSetters.thickness(0.0035);
+
+		twgl.setUniforms(programs.condLines, object.uniforms);
+
+		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
+	}
+
 	squareRotation += deltaTime;
 }
 
-function addLine(lineData, p1, p2, lastIndex) {
-	// TODO: if we're pusing a point that coincides with a previous point, use that fact to draw an
-	// extra triangle in the corner to fill it up.  Or something.  Maybe.
+function addLine(lineData, p1, p2, lastIndex, condPointA, condPointB) {
 	lineData.position.data.push(...p1, ...p1, ...p2, ...p2);
 	lineData.next.data.push(...p2, ...p2, ...p1, ...p1);
 	lineData.indices.data.push(
@@ -78,23 +92,22 @@ function addLine(lineData, p1, p2, lastIndex) {
 	);
 	lineData.direction.data.push(-1, 1, -1, 1);
 	lineData.order.data.push(0, 0, 1, 1);
+	if (condPointA != null && condPointB != null) {
+		lineData.condPointA.data.push(...condPointA, ...condPointA, ...condPointA, ...condPointA);
+		lineData.condPointB.data.push(...condPointB, ...condPointB, ...condPointB, ...condPointB);
+	}
 	return lastIndex + 4;
 }
 
-const bufferCache = {
-};
+const partBufferCache = {};
 
 function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 
-	const objectsToDraw = {
-		faces: [],
-		lines: []
-	};
-
-	let faceBuffer, lineBuffer;
-	if (bufferCache[part.filename]) {
-		faceBuffer = bufferCache[part.filename].faceBuffer;
-		lineBuffer = bufferCache[part.filename].lineBuffer;
+	let faceBuffer, lineBuffer, condLineBuffer;
+	if (partBufferCache[part.filename]) {
+		faceBuffer = partBufferCache[part.filename].faceBuffer;
+		lineBuffer = partBufferCache[part.filename].lineBuffer;
+		condLineBuffer = partBufferCache[part.filename].condLineBuffer;
 	} else if (part.primitives.length) {
 		const faceData = {
 			position: {data: [], numComponents: 3},
@@ -107,8 +120,17 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 			order: {data: [], numComponents: 1},
 			indices: {data: [], numComponents: 3}
 		};
+		const condLineData = {
+			position: {data: [], numComponents: 3},
+			next: {data: [], numComponents: 3},
+			direction: {data: [], numComponents: 1},
+			order: {data: [], numComponents: 1},
+			condPointA: {data: [], numComponents: 3},
+			condPointB: {data: [], numComponents: 3},
+			indices: {data: [], numComponents: 3}
+		};
 
-		let lastLineIndex = 0, lastFaceIndex = 0;
+		let lastFaceIndex = 0, lastLineIndex = 0, lastCondLineIndex = 0;
 		for (let i = 0; i < part.primitives.length; i++) {
 			const primitive = part.primitives[i];
 			if (primitive.shape === 'triangle' || primitive.shape === 'quad') {
@@ -124,21 +146,33 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 				const p = primitive.points;
 				lastLineIndex = addLine(lineData, [p[0], p[1], p[2]], [p[3], p[4], p[5]], lastLineIndex);
 			} else if (primitive.shape === 'condline') {
-				debugger;
+				const p = primitive.points;
+				const condP = primitive.conditionalPoints;
+				lastCondLineIndex = addLine(
+					condLineData,
+					[p[0], p[1], p[2]], [p[3], p[4], p[5]],
+					lastCondLineIndex,
+					[condP[0], condP[1], condP[2]], [condP[3], condP[4], condP[5]]
+				);
 			}
 		}
 
-		bufferCache[part.filename] = {};
+		partBufferCache[part.filename] = {};
 		if (faceData.position.data.length) {
 			faceBuffer = twgl.createBufferInfoFromArrays(gl, faceData);
 		}
 		if (lineData.position.data.length) {
 			lineBuffer = twgl.createBufferInfoFromArrays(gl, lineData);
 		}
+		if (condLineData.position.data.length) {
+			condLineBuffer = twgl.createBufferInfoFromArrays(gl, condLineData);
+		}
 	}
 
+	const objectsToDraw = {faces: [], lines: [], condLines: []};
+
 	if (faceBuffer) {
-		bufferCache[part.filename].faceBuffer = faceBuffer;
+		partBufferCache[part.filename].faceBuffer = faceBuffer;
 		objectsToDraw.faces.push({
 			buffers: faceBuffer,
 			uniforms: {
@@ -149,9 +183,20 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 	}
 
 	if (lineBuffer) {
-		bufferCache[part.filename].lineBuffer = lineBuffer;
+		partBufferCache[part.filename].lineBuffer = lineBuffer;
 		objectsToDraw.lines.push({
 			buffers: lineBuffer,
+			uniforms: {
+				modelView,
+				colorVec: [0, 0, 0, 1]
+			}
+		});
+	}
+
+	if (condLineBuffer) {
+		partBufferCache[part.filename].condLineBuffer = condLineBuffer;
+		objectsToDraw.condLines.push({
+			buffers: condLineBuffer,
 			uniforms: {
 				modelView,
 				colorVec: [0, 0, 0, 1]
@@ -168,6 +213,7 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 		const partObject = ldPartToDrawObj(gl, abstractPart, newMat, programs, newColorCode);
 		objectsToDraw.faces.push(...partObject.faces);
 		objectsToDraw.lines.push(...partObject.lines);
+		objectsToDraw.condLines.push(...partObject.condLines);
 	}
 
 	return objectsToDraw;
@@ -221,8 +267,9 @@ export default function init(canvas) {
 
 	const gl = canvas.getContext('webgl', {alpha: false, antialias: true});
 	const programs = {
+		faces: twgl.createProgramInfo(gl, [faceShaderSource, fragmentShaderSource]),
 		lines: twgl.createProgramInfo(gl, [lineShaderSource, fragmentShaderSource]),
-		faces: twgl.createProgramInfo(gl, [faceShaderSource, fragmentShaderSource])
+		condLines: twgl.createProgramInfo(gl, [condLineShaderSource, fragmentShaderSource])
 	};
 
 	LDParse.loadLDConfig();
