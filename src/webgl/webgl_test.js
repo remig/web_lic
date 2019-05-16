@@ -34,6 +34,7 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 	glMatrix.mat4.ortho(projectionMatrix, -w, w, w / aspect, -w / aspect, w, -w);
 
 	const viewMatrix = glMatrix.mat4.create();
+	glMatrix.mat4.translate(viewMatrix, viewMatrix, [-180, 0, 0]);
 	glMatrix.mat4.rotate(viewMatrix, viewMatrix, 0.75 * squareRotation, [1, 0, 0]);
 	glMatrix.mat4.rotate(viewMatrix, viewMatrix, 0.75 * squareRotation, [0, 1, 0]);
 
@@ -87,6 +88,18 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 	squareRotation += deltaTime;
 }
 
+const partBufferCache = {};
+
+function addObject(objectsToDraw, objectType, buffers, fn, modelView, color) {
+	if (buffers) {
+		partBufferCache[fn][objectType] = buffers;
+		objectsToDraw[objectType].push({
+			buffers,
+			uniforms: {modelView, color}
+		});
+	}
+}
+
 function addLine(lineData, p, cp) {
 	const idx = lineData.indices.lastIndex;
 	lineData.position.data.push(p[0], p[1], p[2], p[0], p[1], p[2], p[3], p[4], p[5], p[3], p[4], p[5]);
@@ -108,8 +121,6 @@ function addLine(lineData, p, cp) {
 	lineData.indices.lastIndex += 4;
 }
 
-const partBufferCache = {};
-
 function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 
 	const rgba = LDParse.getColor(colorCode, 'rgba');
@@ -117,9 +128,9 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 	let faceBuffer, lineBuffer, condLineBuffer;
 
 	if (partBufferCache[part.filename]) {
-		faceBuffer = partBufferCache[part.filename].faceBuffer;
-		lineBuffer = partBufferCache[part.filename].lineBuffer;
-		condLineBuffer = partBufferCache[part.filename].condLineBuffer;
+		faceBuffer = partBufferCache[part.filename].faces;
+		lineBuffer = partBufferCache[part.filename].lines;
+		condLineBuffer = partBufferCache[part.filename].condLines;
 	} else if (part.primitives.length) {
 
 		const faceData = {
@@ -177,48 +188,15 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 
 	const objectsToDraw = {faces: [], lines: [], condLines: [], alphaFaces: []};
 
-	if (faceBuffer && rgba[3] === 1) {
-		partBufferCache[part.filename].faceBuffer = faceBuffer;
-		objectsToDraw.faces.push({
-			buffers: faceBuffer,
-			uniforms: {
-				modelView,
-				color: rgba
-			}
-		});
+	if (rgba && rgba[3] === 1) {
+		addObject(objectsToDraw, 'faces', faceBuffer, part.filename, modelView, rgba);
 	}
 
-	if (lineBuffer) {
-		partBufferCache[part.filename].lineBuffer = lineBuffer;
-		objectsToDraw.lines.push({
-			buffers: lineBuffer,
-			uniforms: {
-				modelView,
-				color: edgeRgba
-			}
-		});
-	}
+	addObject(objectsToDraw, 'lines', lineBuffer, part.filename, modelView, edgeRgba);
+	addObject(objectsToDraw, 'condLines', condLineBuffer, part.filename, modelView, edgeRgba);
 
-	if (condLineBuffer) {
-		partBufferCache[part.filename].condLineBuffer = condLineBuffer;
-		objectsToDraw.condLines.push({
-			buffers: condLineBuffer,
-			uniforms: {
-				modelView,
-				color: edgeRgba
-			}
-		});
-	}
-
-	if (faceBuffer && rgba[3] < 1) {
-		partBufferCache[part.filename].faceBuffer = faceBuffer;
-		objectsToDraw.alphaFaces.push({
-			buffers: faceBuffer,
-			uniforms: {
-				modelView,
-				color: rgba
-			}
-		});
+	if (rgba && rgba[3] < 1) {
+		addObject(objectsToDraw, 'alphaFaces', faceBuffer, part.filename, modelView, rgba);
 	}
 
 	for (let i = 0; i < part.parts.length; i++) {
