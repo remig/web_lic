@@ -55,12 +55,14 @@ const api = {
 		for (let i = 0; i < lineList.length; i++) {
 			const line = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
 			if (line && line[1] === '!COLOUR') {
+				const alpha = line[10] ? parseInt(line[10], 10) : 255;
 				colors[line[4]] = {  // TODO: handle color modifiers like 'CHROME', 'METAL', 'LUMINANCE', etc
 					name: line[2].split('').join(''),  // Force garbage collection
 					color: line[6],
 					edge: line[8],
-					alpha: line[10] ? parseInt(line[10], 10) : 0,
-					rgba: hexColorToVec4(line[6])
+					alpha,
+					rgba: hexColorToVec4(line[6], alpha),
+					edgeRgba: hexColorToVec4(line[8], 255)
 				};
 			}
 		}
@@ -75,7 +77,8 @@ const api = {
 			color: '#05131D',
 			edge: '#05131D',
 			alpha: 0,
-			rgba: [0.0196078431372549, 0.07450980392156863, 0.11372549019607843, 1]
+			rgba: [0.0196, 0.0745, 0.1137, 1],
+			edgeRgba: [0.0196, 0.0745, 0.1137, 1]
 		};
 		api.setColorTable(colors);
 		needLDConfig = false;
@@ -231,12 +234,12 @@ const api = {
 	}
 };
 
-function hexColorToVec4(color) {
+function hexColorToVec4(color, alpha) {
 	color = color.replace('#', '');
 	const r = parseInt(color.substr(0, 2), 16) / 255;
 	const g = parseInt(color.substr(2, 2), 16) / 255;
 	const b = parseInt(color.substr(4, 2), 16) / 255;
-	return [r, g, b, 1];
+	return [r, g, b, alpha / 255];
 }
 
 function actionBuilder(filename, partID, property, newValue) {

@@ -1,5 +1,6 @@
-uniform lowp vec4 colorVec;
+uniform lowp vec4 color;
 
 void main() {
-	gl_FragColor = colorVec;
+	gl_FragColor = color;
+	gl_FragColor.rgb *= gl_FragColor.a;
 }
