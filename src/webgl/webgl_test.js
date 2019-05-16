@@ -34,7 +34,6 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 	glMatrix.mat4.ortho(projectionMatrix, -w, w, w / aspect, -w / aspect, w, -w);
 
 	const viewMatrix = glMatrix.mat4.create();
-	glMatrix.mat4.translate(viewMatrix, viewMatrix, [-180, 0, 0]);
 	glMatrix.mat4.rotate(viewMatrix, viewMatrix, 0.75 * squareRotation, [1, 0, 0]);
 	glMatrix.mat4.rotate(viewMatrix, viewMatrix, 0.75 * squareRotation, [0, 1, 0]);
 
@@ -88,15 +87,24 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 	squareRotation += deltaTime;
 }
 
-const partBufferCache = {};
-
-function addObject(objectsToDraw, objectType, buffers, fn, modelView, color) {
+function addObject(objectsToDraw, buffers, modelView, color) {
 	if (buffers) {
-		partBufferCache[fn][objectType] = buffers;
-		objectsToDraw[objectType].push({
+		objectsToDraw.push({
 			buffers,
 			uniforms: {modelView, color}
 		});
+	}
+}
+
+function addFace(faceData, primitive) {
+	const idx = faceData.indices.lastIndex;
+	faceData.position.data.push(...primitive.points);
+	faceData.indices.data.push(idx, idx + 1, idx + 2);
+	if (primitive.shape === 'triangle') {
+		faceData.indices.lastIndex += 3;
+	} else {
+		faceData.indices.data.push(idx, idx + 2, idx + 3);
+		faceData.indices.lastIndex += 4;
 	}
 }
 
@@ -121,18 +129,16 @@ function addLine(lineData, p, cp) {
 	lineData.indices.lastIndex += 4;
 }
 
+const partBufferCache = {};
+
 function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 
 	const rgba = LDParse.getColor(colorCode, 'rgba');
 	const edgeRgba = LDParse.getColor(colorCode, 'edgeRgba');
-	let faceBuffer, lineBuffer, condLineBuffer;
 
-	if (partBufferCache[part.filename]) {
-		faceBuffer = partBufferCache[part.filename].faces;
-		lineBuffer = partBufferCache[part.filename].lines;
-		condLineBuffer = partBufferCache[part.filename].condLines;
-	} else if (part.primitives.length) {
+	if (partBufferCache[part.filename] == null && part.primitives.length) {
 
+		let coloredPrimitives;
 		const faceData = {
 			position: {data: [], numComponents: 3},
 			indices: {data: [], numComponents: 3, lastIndex: 0}
@@ -158,14 +164,17 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 			const primitive = part.primitives[i];
 			const p = primitive.points;
 			if (primitive.shape === 'triangle' || primitive.shape === 'quad') {
-				faceData.position.data.push(...p);
-				const lastIndex = faceData.indices.lastIndex;
-				faceData.indices.data.push(lastIndex, lastIndex + 1, lastIndex + 2);
-				if (primitive.shape === 'triangle') {
-					faceData.indices.lastIndex += 3;
+				if (primitive.colorCode >= 0) {
+					coloredPrimitives = coloredPrimitives || {};
+					if (coloredPrimitives[primitive.colorCode] == null) {
+						coloredPrimitives[primitive.colorCode] = {
+							position: {data: [], numComponents: 3},
+							indices: {data: [], numComponents: 3, lastIndex: 0}
+						};
+					}
+					addFace(coloredPrimitives[primitive.colorCode], primitive);
 				} else {
-					faceData.indices.data.push(lastIndex, lastIndex + 2, lastIndex + 3);
-					faceData.indices.lastIndex += 4;
+					addFace(faceData, primitive);
 				}
 			} else if (primitive.shape === 'line') {
 				addLine(lineData, p);
@@ -176,27 +185,50 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 
 		partBufferCache[part.filename] = {};
 		if (faceData.position.data.length) {
-			faceBuffer = twgl.createBufferInfoFromArrays(gl, faceData);
+			partBufferCache[part.filename].faces = twgl.createBufferInfoFromArrays(gl, faceData);
 		}
 		if (lineData.position.data.length) {
-			lineBuffer = twgl.createBufferInfoFromArrays(gl, lineData);
+			partBufferCache[part.filename].lines = twgl.createBufferInfoFromArrays(gl, lineData);
 		}
 		if (condLineData.position.data.length) {
-			condLineBuffer = twgl.createBufferInfoFromArrays(gl, condLineData);
+			partBufferCache[part.filename].condLines = twgl.createBufferInfoFromArrays(gl, condLineData);
+		}
+		if (coloredPrimitives != null) {
+			partBufferCache[part.filename].coloredFaces = {};
+			for (const colorCode in coloredPrimitives) {
+				if (coloredPrimitives.hasOwnProperty(colorCode)) {
+					const buf = twgl.createBufferInfoFromArrays(gl, coloredPrimitives[colorCode]);
+					partBufferCache[part.filename].coloredFaces[colorCode] = buf;
+				}
+			}
 		}
 	}
 
 	const objectsToDraw = {faces: [], lines: [], condLines: [], alphaFaces: []};
 
-	if (rgba && rgba[3] === 1) {
-		addObject(objectsToDraw, 'faces', faceBuffer, part.filename, modelView, rgba);
-	}
+	if (partBufferCache[part.filename]) {
 
-	addObject(objectsToDraw, 'lines', lineBuffer, part.filename, modelView, edgeRgba);
-	addObject(objectsToDraw, 'condLines', condLineBuffer, part.filename, modelView, edgeRgba);
+		const coloredFaceBuffer = partBufferCache[part.filename].coloredFaces;
+		if (coloredFaceBuffer) {
+			for (const colorCode in coloredFaceBuffer) {
+				if (coloredFaceBuffer.hasOwnProperty(colorCode)) {
+					const color = LDParse.getColor(colorCode, 'rgba');
+					addObject(objectsToDraw.faces, coloredFaceBuffer[colorCode], modelView, color);
+				}
+			}
+		}
 
-	if (rgba && rgba[3] < 1) {
-		addObject(objectsToDraw, 'alphaFaces', faceBuffer, part.filename, modelView, rgba);
+		if (rgba && rgba[3] === 1) {
+			addObject(objectsToDraw.faces, partBufferCache[part.filename].faces, modelView, rgba);
+		}
+
+		addObject(objectsToDraw.lines, partBufferCache[part.filename].lines, modelView, edgeRgba);
+
+		addObject(objectsToDraw.condLines, partBufferCache[part.filename].condLines, modelView, edgeRgba);
+
+		if (rgba && rgba[3] < 1) {
+			addObject(objectsToDraw.alphaFaces, partBufferCache[part.filename].faces, modelView, rgba);
+		}
 	}
 
 	for (let i = 0; i < part.parts.length; i++) {
