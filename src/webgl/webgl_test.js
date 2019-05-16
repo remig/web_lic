@@ -25,6 +25,7 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+	const thickness = 0.0035;
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 	const projectionMatrix = glMatrix.mat4.create();
 	// const w = 530;  // xwing
@@ -57,7 +58,7 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 		twgl.setBuffersAndAttributes(gl, programs.lines, object.buffers);
 		programs.lines.uniformSetters.projection(projectionMatrix);
 		programs.lines.uniformSetters.aspect(aspect);
-		programs.lines.uniformSetters.thickness(0.0035);
+		programs.lines.uniformSetters.thickness(thickness);
 		twgl.setUniforms(programs.lines, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
@@ -68,7 +69,7 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 		twgl.setBuffersAndAttributes(gl, programs.condLines, object.buffers);
 		programs.condLines.uniformSetters.projection(projectionMatrix);
 		programs.condLines.uniformSetters.aspect(aspect);
-		programs.condLines.uniformSetters.thickness(0.0035);
+		programs.condLines.uniformSetters.thickness(thickness);
 		twgl.setUniforms(programs.condLines, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
@@ -86,20 +87,25 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 	squareRotation += deltaTime;
 }
 
-function addLine(lineData, p1, p2, lastIndex, condPointA, condPointB) {
-	lineData.position.data.push(...p1, ...p1, ...p2, ...p2);
-	lineData.next.data.push(...p2, ...p2, ...p1, ...p1);
+function addLine(lineData, p, cp) {
+	const idx = lineData.indices.lastIndex;
+	lineData.position.data.push(p[0], p[1], p[2], p[0], p[1], p[2], p[3], p[4], p[5], p[3], p[4], p[5]);
+	lineData.next.data.push(p[3], p[4], p[5], p[3], p[4], p[5], p[0], p[1], p[2], p[0], p[1], p[2]);
 	lineData.indices.data.push(
-		lastIndex + 2, lastIndex + 1, lastIndex,
-		lastIndex + 3, lastIndex + 1, lastIndex + 2
+		idx + 2, idx + 1, idx,
+		idx + 3, idx + 1, idx + 2
 	);
 	lineData.direction.data.push(-1, 1, -1, 1);
 	lineData.order.data.push(0, 0, 1, 1);
-	if (condPointA != null && condPointB != null) {
-		lineData.condPointA.data.push(...condPointA, ...condPointA, ...condPointA, ...condPointA);
-		lineData.condPointB.data.push(...condPointB, ...condPointB, ...condPointB, ...condPointB);
+	if (cp != null) {
+		lineData.condPointA.data.push(
+			cp[0], cp[1], cp[2], cp[0], cp[1], cp[2], cp[0], cp[1], cp[2], cp[0], cp[1], cp[2]
+		);
+		lineData.condPointB.data.push(
+			cp[3], cp[4], cp[5], cp[3], cp[4], cp[5], cp[3], cp[4], cp[5], cp[3], cp[4], cp[5]
+		);
 	}
-	return lastIndex + 4;
+	lineData.indices.lastIndex += 4;
 }
 
 const partBufferCache = {};
@@ -139,8 +145,9 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 
 		for (let i = 0; i < part.primitives.length; i++) {
 			const primitive = part.primitives[i];
+			const p = primitive.points;
 			if (primitive.shape === 'triangle' || primitive.shape === 'quad') {
-				faceData.position.data.push(...primitive.points);
+				faceData.position.data.push(...p);
 				const lastIndex = faceData.indices.lastIndex;
 				faceData.indices.data.push(lastIndex, lastIndex + 1, lastIndex + 2);
 				if (primitive.shape === 'triangle') {
@@ -150,21 +157,9 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 					faceData.indices.lastIndex += 4;
 				}
 			} else if (primitive.shape === 'line') {
-				const p = primitive.points;
-				lineData.indices.lastIndex = addLine(
-					lineData,
-					[p[0], p[1], p[2]], [p[3], p[4], p[5]],
-					lineData.indices.lastIndex
-				);
+				addLine(lineData, p);
 			} else if (primitive.shape === 'condline') {
-				const p = primitive.points;
-				const condP = primitive.conditionalPoints;
-				condLineData.indices.lastIndex = addLine(
-					condLineData,
-					[p[0], p[1], p[2]], [p[3], p[4], p[5]],
-					condLineData.indices.lastIndex,
-					[condP[0], condP[1], condP[2]], [condP[3], condP[4], condP[5]]
-				);
+				addLine(condLineData, p, primitive.conditionalPoints);
 			}
 		}
 
@@ -287,14 +282,8 @@ export default function init(canvas) {
 
 	window.draw = function() {
 	};
-	canvas.setAttribute('style', 'background-color: purple;');
 
-	const localCanvas = document.createElement('canvas');
-	document.getElementById('container').appendChild(localCanvas);
-	localCanvas.width = canvas.clientWidth;
-	localCanvas.height = canvas.clientHeight;
-
-	const gl = localCanvas.getContext('webgl', {
+	const gl = canvas.getContext('webgl', {
 		antialias: true,
 		alpha: true
 	});
@@ -314,8 +303,5 @@ export default function init(canvas) {
 			const part = LDParse.partDictionary['7140 - Main Model.ldr'];
 
 			renderLDrawPart(gl, programs, part);
-
-			const ctx = canvas.getContext('2d');
-			ctx.drawImage(localCanvas, 0, 0);
 		});
 }
