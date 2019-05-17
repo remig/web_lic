@@ -11,13 +11,12 @@ const partBufferCache = {};
 
 function generateObjectList(part, modelView, colorCode, partCount) {
 
-	const color = LDParse.getColor(colorCode, 'rgba');
 	const edgeColor = LDParse.getColor(colorCode, 'edgeRgba');
-
 	const res = {faces: [], lines: [], condLines: [], alphaFaces: []};
 	const buffers = partBufferCache[part.filename];
 	if (buffers) {
 		if (buffers.faces) {
+			const color = LDParse.getColor(colorCode, 'rgba');
 			if (color && color[3] < 1) {
 				addObject(res.alphaFaces, buffers.faces, modelView, color);
 			} else {
@@ -59,9 +58,8 @@ function generateObjectList(part, modelView, colorCode, partCount) {
 	return res;
 }
 
-function drawScene(gl, programs, part, partCount) {
+function drawScene(gl, programs, objectsToDraw) {
 
-	const now = Date.now();
 	gl.clearColor(0, 0, 0, 0);
 	gl.clearDepth(1.0);
 	// gl.enable(gl.CULL_FACE);
@@ -84,8 +82,6 @@ function drawScene(gl, programs, part, partCount) {
 	twgl.m4.axisRotate(viewMatrix, [1, 0, 0], 0.75, viewMatrix);
 	twgl.m4.axisRotate(viewMatrix, [0, 1, 0], 0.75, viewMatrix);
 	twgl.m4.multiply(viewMatrix, projectionMatrix, projectionMatrix);
-
-	const objectsToDraw = generateObjectList(part, twgl.m4.create(), null, partCount);
 
 	// Draw opaque faces first
 	gl.enable(gl.POLYGON_OFFSET_FILL);
@@ -131,8 +127,6 @@ function drawScene(gl, programs, part, partCount) {
 		twgl.setUniforms(programs.faces, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
-
-	console.log('time: ' + (Date.now() - now));
 }
 
 function addObject(objectsToDraw, buffers, modelView, color) {
@@ -258,12 +252,12 @@ function isValidColorCode(colorCode) {
 
 /* eslint-disable computed-property-spacing */
 function LDMatrixToMatrix(m) {
-	return [
-		m[3], m[6], m[ 9], 0,
-		m[4], m[7], m[10], 0,
-		m[5], m[8], m[11], 0,
-		m[0], m[1], m[ 2], 1
-	];
+	const res = new Float32Array(16);
+	res[ 0] = m[3]; res[ 1] = m[6]; res[ 2] = m[ 9]; res[ 3] = 0;
+	res[ 4] = m[4]; res[ 5] = m[7]; res[ 6] = m[10]; res[ 7] = 0;
+	res[ 8] = m[5]; res[ 9] = m[8]; res[10] = m[11]; res[11] = 0;
+	res[12] = m[0]; res[13] = m[1]; res[14] = m[ 2]; res[15] = 1;
+	return res;
 }
 /* eslint-enable computed-property-spacing */
 
@@ -281,15 +275,19 @@ export default function init(canvas) {
 
 	LDParse.loadLDConfig();
 
-	const url = './static/models/20015 - Alligator.mpd';
-	// const url = './static/models/7140 - x-wing fighter.mpd';
+	// const url = './static/models/20015 - Alligator.mpd';
+	const url = './static/models/7140 - x-wing fighter.mpd';
 	LDParse.loadRemotePart(url)
 		.then(function() {
 			// const model = LDParse.partDictionary['3004.dat'];
-			const model = LDParse.partDictionary['20015 - Alligator.mpd'];
-			// const model = LDParse.partDictionary['7140 - Main Model.ldr'];
+			// const model = LDParse.partDictionary['20015 - Alligator.mpd'];
+			const model = LDParse.partDictionary['7140 - Main Model.ldr'];
 
 			importPart(gl, model);
-			drawScene(gl, programs, model);
+
+			const now = Date.now();
+			const objectsToDraw = generateObjectList(model, twgl.m4.create());
+			drawScene(gl, programs, objectsToDraw);
+			console.log('time: ' + (Date.now() - now));
 		});
 }
