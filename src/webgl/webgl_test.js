@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import faceShaderSource from './faceShader.glsl';
 import lineShaderSource from './lineShader.glsl';
 import condLineShaderSource from './condLineShader.glsl';
@@ -6,11 +7,61 @@ import twgl from './twgl';
 
 import LDParse from '../LDParse';
 
-let squareRotation = 1.0;
 const partBufferCache = {};
 
-function drawScene(gl, programs, objectsToDraw, deltaTime) {
+function generateObjectList(part, modelView, colorCode, partCount) {
 
+	const color = LDParse.getColor(colorCode, 'rgba');
+	const edgeColor = LDParse.getColor(colorCode, 'edgeRgba');
+
+	const res = {faces: [], lines: [], condLines: [], alphaFaces: []};
+	const buffers = partBufferCache[part.filename];
+	if (buffers) {
+		if (buffers.faces) {
+			if (color && color[3] < 1) {
+				addObject(res.alphaFaces, buffers.faces, modelView, color);
+			} else {
+				addObject(res.faces, buffers.faces, modelView, color);
+			}
+		}
+		if (buffers.coloredFaces) {
+			for (const key in buffers.coloredFaces) {
+				if (buffers.coloredFaces.hasOwnProperty(key)) {
+					addObject(
+						res.faces, buffers.coloredFaces[key],
+						modelView, LDParse.getColor(key, 'rgba')
+					);
+				}
+			}
+		}
+		if (buffers.lines) {
+			addObject(res.lines, buffers.lines, modelView, edgeColor);
+		}
+		if (buffers.condLines) {
+			addObject(res.condLines, buffers.condLines, modelView, edgeColor);
+		}
+	}
+	if (part.parts && part.parts.length) {
+		const len = (partCount == null) ? part.parts.length : partCount;
+		for (let i = 0; i < len; i++) {
+			const subPart = part.parts[i];
+			const abstractPart = LDParse.partDictionary[subPart.filename];
+			const newMat = LDMatrixToMatrix(subPart.matrix);
+			twgl.m4.multiply(newMat, modelView, newMat);
+			const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
+			const newObject = generateObjectList(abstractPart, newMat, newColorCode);
+			res.faces.push(...newObject.faces);
+			res.lines.push(...newObject.lines);
+			res.condLines.push(...newObject.condLines);
+			res.alphaFaces.push(...newObject.alphaFaces);
+		}
+	}
+	return res;
+}
+
+function drawScene(gl, programs, part, partCount) {
+
+	const now = Date.now();
 	gl.clearColor(0, 0, 0, 0);
 	gl.clearDepth(1.0);
 	// gl.enable(gl.CULL_FACE);
@@ -23,7 +74,6 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	// const w = 530;  // xwing
 	const w = 530;
 	const thickness = 0.0035;
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -31,56 +81,58 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 	const projectionMatrix = twgl.m4.ortho(-w, w, w / aspect, -w / aspect, w * 2, -w * 2);
 
 	const viewMatrix = twgl.m4.create();
-	twgl.m4.axisRotate(viewMatrix, [1, 0, 0], 0.75 * squareRotation, viewMatrix);
-	twgl.m4.axisRotate(viewMatrix, [0, 1, 0], 0.75 * squareRotation, viewMatrix);
+	twgl.m4.axisRotate(viewMatrix, [1, 0, 0], 0.75, viewMatrix);
+	twgl.m4.axisRotate(viewMatrix, [0, 1, 0], 0.75, viewMatrix);
 	twgl.m4.multiply(viewMatrix, projectionMatrix, projectionMatrix);
+
+	const objectsToDraw = generateObjectList(part, twgl.m4.create(), null, partCount);
 
 	// Draw opaque faces first
 	gl.enable(gl.POLYGON_OFFSET_FILL);
 	gl.polygonOffset(1, 1);
 	gl.useProgram(programs.faces.program);
+	programs.faces.uniformSetters.projection(projectionMatrix);
 	for (let i = 0; i < objectsToDraw.faces.length; i++) {
 		const object = objectsToDraw.faces[i];
 		twgl.setBuffersAndAttributes(gl, programs.faces, object.buffers);
-		programs.faces.uniformSetters.projection(projectionMatrix);
 		twgl.setUniforms(programs.faces, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
 
 	gl.disable(gl.POLYGON_OFFSET_FILL);
 	gl.useProgram(programs.lines.program);
+	programs.lines.uniformSetters.projection(projectionMatrix);
+	programs.lines.uniformSetters.aspect(aspect);
+	programs.lines.uniformSetters.thickness(thickness);
 	for (let i = 0; i < objectsToDraw.lines.length; i++) {
 		const object = objectsToDraw.lines[i];
 		twgl.setBuffersAndAttributes(gl, programs.lines, object.buffers);
-		programs.lines.uniformSetters.projection(projectionMatrix);
-		programs.lines.uniformSetters.aspect(aspect);
-		programs.lines.uniformSetters.thickness(thickness);
 		twgl.setUniforms(programs.lines, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
 
 	gl.useProgram(programs.condLines.program);
+	programs.condLines.uniformSetters.projection(projectionMatrix);
+	programs.condLines.uniformSetters.aspect(aspect);
+	programs.condLines.uniformSetters.thickness(thickness);
 	for (let i = 0; i < objectsToDraw.condLines.length; i++) {
 		const object = objectsToDraw.condLines[i];
 		twgl.setBuffersAndAttributes(gl, programs.condLines, object.buffers);
-		programs.condLines.uniformSetters.projection(projectionMatrix);
-		programs.condLines.uniformSetters.aspect(aspect);
-		programs.condLines.uniformSetters.thickness(thickness);
 		twgl.setUniforms(programs.condLines, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
 
 	// Draw partially transparent faces last
 	gl.useProgram(programs.faces.program);
+	programs.faces.uniformSetters.projection(projectionMatrix);
 	for (let i = 0; i < objectsToDraw.alphaFaces.length; i++) {
 		const object = objectsToDraw.alphaFaces[i];
 		twgl.setBuffersAndAttributes(gl, programs.faces, object.buffers);
-		programs.faces.uniformSetters.projection(projectionMatrix);
 		twgl.setUniforms(programs.faces, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
 
-	squareRotation += deltaTime;
+	console.log('time: ' + (Date.now() - now));
 }
 
 function addObject(objectsToDraw, buffers, modelView, color) {
@@ -125,10 +177,7 @@ function addLine(lineData, p, cp) {
 	lineData.indices.lastIndex += 4;
 }
 
-function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
-
-	const rgba = LDParse.getColor(colorCode, 'rgba');
-	const edgeRgba = LDParse.getColor(colorCode, 'edgeRgba');
+function importPart(gl, part) {
 
 	if (partBufferCache[part.filename] == null && part.primitives.length) {
 
@@ -198,47 +247,9 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 		}
 	}
 
-	const objectsToDraw = {faces: [], lines: [], condLines: [], alphaFaces: []};
-
-	if (partBufferCache[part.filename]) {
-
-		const coloredFaceBuffer = partBufferCache[part.filename].coloredFaces;
-		if (coloredFaceBuffer) {
-			for (const colorCode in coloredFaceBuffer) {
-				if (coloredFaceBuffer.hasOwnProperty(colorCode)) {
-					const color = LDParse.getColor(colorCode, 'rgba');
-					addObject(objectsToDraw.faces, coloredFaceBuffer[colorCode], modelView, color);
-				}
-			}
-		}
-
-		if (rgba && rgba[3] === 1) {
-			addObject(objectsToDraw.faces, partBufferCache[part.filename].faces, modelView, rgba);
-		}
-
-		addObject(objectsToDraw.lines, partBufferCache[part.filename].lines, modelView, edgeRgba);
-
-		addObject(objectsToDraw.condLines, partBufferCache[part.filename].condLines, modelView, edgeRgba);
-
-		if (rgba && rgba[3] < 1) {
-			addObject(objectsToDraw.alphaFaces, partBufferCache[part.filename].faces, modelView, rgba);
-		}
-	}
-
 	for (let i = 0; i < part.parts.length; i++) {
-		const subPart = part.parts[i];
-		const abstractPart = LDParse.partDictionary[subPart.filename];
-		const newMat = LDMatrixToMatrix(subPart.matrix);
-		twgl.m4.multiply(newMat, modelView, newMat);  // twgl.m4.multiply(modelView, newMat, newMat); cool
-		const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
-		const partObject = ldPartToDrawObj(gl, abstractPart, newMat, programs, newColorCode);
-		objectsToDraw.faces.push(...partObject.faces);
-		objectsToDraw.lines.push(...partObject.lines);
-		objectsToDraw.condLines.push(...partObject.condLines);
-		objectsToDraw.alphaFaces.push(...partObject.alphaFaces);
+		importPart(gl, LDParse.partDictionary[part.parts[i].filename]);
 	}
-
-	return objectsToDraw;
 }
 
 function isValidColorCode(colorCode) {
@@ -256,36 +267,7 @@ function LDMatrixToMatrix(m) {
 }
 /* eslint-enable computed-property-spacing */
 
-const animate = false;
-
-function renderLDrawPart(gl, programs, part) {
-
-	let then = 0;
-	const baseMatrix = twgl.m4.create();
-	const objectsToDraw = ldPartToDrawObj(gl, part, baseMatrix, programs);
-
-	// Draw the scene repeatedly
-	function render(now) {
-
-		now *= 0.001;  // convert to seconds
-		const deltaTime = now - then;
-		then = now;
-		drawScene(gl, programs, objectsToDraw, deltaTime);
-		document.getElementById('fps').innerText = (1 / deltaTime).toFixed(3) + ' fps';
-		requestAnimationFrame(render);
-	}
-
-	if (animate) {
-		requestAnimationFrame(render);
-	} else {
-		drawScene(gl, programs, objectsToDraw, 0);
-	}
-}
-
 export default function init(canvas) {
-
-	window.draw = function() {
-	};
 
 	const gl = canvas.getContext('webgl', {
 		antialias: true,
@@ -299,13 +281,15 @@ export default function init(canvas) {
 
 	LDParse.loadLDConfig();
 
-	// const url = './static/models/20015 - Alligator.mpd';
-	const url = './static/models/7140 - x-wing fighter.mpd';
+	const url = './static/models/20015 - Alligator.mpd';
+	// const url = './static/models/7140 - x-wing fighter.mpd';
 	LDParse.loadRemotePart(url)
 		.then(function() {
-			// const part = LDParse.partDictionary['20015 - Alligator.mpd'];
-			const part = LDParse.partDictionary['7140 - Main Model.ldr'];
+			// const model = LDParse.partDictionary['3004.dat'];
+			const model = LDParse.partDictionary['20015 - Alligator.mpd'];
+			// const model = LDParse.partDictionary['7140 - Main Model.ldr'];
 
-			renderLDrawPart(gl, programs, part);
+			importPart(gl, model);
+			drawScene(gl, programs, model);
 		});
 }
