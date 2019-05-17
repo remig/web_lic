@@ -1,6 +1,3 @@
-/* global glMatrix: false */
-/* eslint-disable no-alert */
-
 import faceShaderSource from './faceShader.glsl';
 import lineShaderSource from './lineShader.glsl';
 import condLineShaderSource from './condLineShader.glsl';
@@ -10,6 +7,7 @@ import twgl from './twgl';
 import LDParse from '../LDParse';
 
 let squareRotation = 1.0;
+const partBufferCache = {};
 
 function drawScene(gl, programs, objectsToDraw, deltaTime) {
 
@@ -25,19 +23,17 @@ function drawScene(gl, programs, objectsToDraw, deltaTime) {
 
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+	// const w = 530;  // xwing
+	const w = 530;
 	const thickness = 0.0035;
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-	const projectionMatrix = glMatrix.mat4.create();
-	// const w = 530;  // xwing
-	const w = 330;
-	// out, left, right, bottom, top, near, far
-	glMatrix.mat4.ortho(projectionMatrix, -w, w, w / aspect, -w / aspect, w, -w);
+	// left, right, bottom, top, near, far
+	const projectionMatrix = twgl.m4.ortho(-w, w, w / aspect, -w / aspect, w * 2, -w * 2);
 
-	const viewMatrix = glMatrix.mat4.create();
-	glMatrix.mat4.rotate(viewMatrix, viewMatrix, 0.75 * squareRotation, [1, 0, 0]);
-	glMatrix.mat4.rotate(viewMatrix, viewMatrix, 0.75 * squareRotation, [0, 1, 0]);
-
-	glMatrix.mat4.multiply(projectionMatrix, projectionMatrix, viewMatrix);
+	const viewMatrix = twgl.m4.create();
+	twgl.m4.axisRotate(viewMatrix, [1, 0, 0], 0.75 * squareRotation, viewMatrix);
+	twgl.m4.axisRotate(viewMatrix, [0, 1, 0], 0.75 * squareRotation, viewMatrix);
+	twgl.m4.multiply(viewMatrix, projectionMatrix, projectionMatrix);
 
 	// Draw opaque faces first
 	gl.enable(gl.POLYGON_OFFSET_FILL);
@@ -128,8 +124,6 @@ function addLine(lineData, p, cp) {
 	}
 	lineData.indices.lastIndex += 4;
 }
-
-const partBufferCache = {};
 
 function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 
@@ -235,7 +229,7 @@ function ldPartToDrawObj(gl, part, modelView, programs, colorCode) {
 		const subPart = part.parts[i];
 		const abstractPart = LDParse.partDictionary[subPart.filename];
 		const newMat = LDMatrixToMatrix(subPart.matrix);
-		glMatrix.mat4.multiply(newMat, modelView, newMat);
+		twgl.m4.multiply(newMat, modelView, newMat);  // twgl.m4.multiply(modelView, newMat, newMat); cool
 		const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
 		const partObject = ldPartToDrawObj(gl, abstractPart, newMat, programs, newColorCode);
 		objectsToDraw.faces.push(...partObject.faces);
@@ -267,7 +261,7 @@ const animate = false;
 function renderLDrawPart(gl, programs, part) {
 
 	let then = 0;
-	const baseMatrix = glMatrix.mat4.create();
+	const baseMatrix = twgl.m4.create();
 	const objectsToDraw = ldPartToDrawObj(gl, part, baseMatrix, programs);
 
 	// Draw the scene repeatedly
