@@ -6,6 +6,7 @@ import condLineShaderSource from './condLineShader.glsl';
 import fragmentShaderSource from './fragmentShader.glsl';
 import twgl from './twgl';
 
+import _ from '../util';
 import LDParse from '../LDParse';
 
 const partBufferCache = {};
@@ -61,7 +62,7 @@ function generateObjectList(part, modelView, colorCode, partCount) {
 	return res;
 }
 
-function drawScene(gl, programs, objectsToDraw) {
+function drawScene(gl, programs, objectsToDraw, rotation) {
 
 	gl.clearColor(0, 0, 0, 0);
 	gl.clearDepth(1.0);
@@ -82,8 +83,19 @@ function drawScene(gl, programs, objectsToDraw) {
 	const projectionMatrix = twgl.m4.ortho(-w, w, w / aspect, -w / aspect, w * 2, -w * 2);
 
 	const viewMatrix = twgl.m4.create();
-	twgl.m4.axisRotate(viewMatrix, [1, 0, 0], Math.PI / 6, viewMatrix);
-	twgl.m4.axisRotate(viewMatrix, [0, 1, 0], Math.PI / 4, viewMatrix);
+	twgl.m4.rotateX(viewMatrix, Math.PI / 6, viewMatrix);
+	twgl.m4.rotateY(viewMatrix, Math.PI / 4, viewMatrix);
+	if (rotation) {
+		if (rotation.x) {
+			twgl.m4.rotateX(viewMatrix, _.radians(rotation.x), viewMatrix);
+		}
+		if (rotation.y) {
+			twgl.m4.rotateY(viewMatrix, _.radians(rotation.y), viewMatrix);
+		}
+		if (rotation.z) {
+			twgl.m4.rotateZ(viewMatrix, _.radians(rotation.z), viewMatrix);
+		}
+	}
 	twgl.m4.multiply(viewMatrix, projectionMatrix, projectionMatrix);
 
 	// Draw opaque faces first
@@ -300,13 +312,13 @@ export default {
 			importPart(gl, model);
 		}
 	},
-	renderPart(part, colorCode, size) {
+	renderPart(part, colorCode, size, rotation) {
 		canvas.width = canvas.height = size;
 		gl.viewport(0, 0, size, size);
 		const now = Date.now();
 		const identity = twgl.m4.create();
 		const objectsToDraw = generateObjectList(part, identity, colorCode);
-		drawScene(gl, programs, objectsToDraw);
+		drawScene(gl, programs, objectsToDraw, rotation);
 		console.log('time: ' + (Date.now() - now)); // eslint-disable-line no-console
 		return canvas;
 	}
