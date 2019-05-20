@@ -310,7 +310,7 @@ function renderLicGL(colorCode, filename, size, container, config) {
 	const part = LDParse.partDictionary[filename];
 
 	config = config || {};
-	const canvas = LicGL.renderPart(part, colorCode, size);
+	const canvas = LicGL.renderPart(part, colorCode, size, config.rotation);
 
 	measurementCanvas.width = measurementCanvas.height = size;
 	const ctx = measurementCanvas.getContext('2d');
