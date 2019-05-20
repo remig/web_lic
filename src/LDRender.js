@@ -4,6 +4,7 @@
 'use strict';
 
 import LDParse from './LDParse';
+import LicGL from './webgl/webgl_test';
 
 let renderer, camera, measurementCanvas;
 let isInitialized = false;
@@ -22,17 +23,11 @@ const api = {
 	// Optional config: {resizeContainer, dx, dy, rotation: {x, y, z}}
 	renderPart(colorCode, filename, containerID, size, config) {
 
+		initialize();
 		size = Math.max(Math.floor(size), 1);
 		config = config || {};
 		config.size = size;
-
-		initialize();
-		const scene = initScene(size);
-
-		addPartToScene(scene, colorCode, filename, config);
-		const res = render(scene, size, containerID, config);
-		cleanup(scene);
-		return res;
+		return renderLicGL(colorCode, filename, size, containerID, config);
 	},
 	renderModel(part, containerID, size, config) {
 
@@ -109,10 +104,10 @@ const api = {
 		return MatrixToLDMatrix(matrix).map(el => Math.abs(el) < 0.0000001 ? 0 : el);
 	},
 
-	setPartDictionary(dict) {
-		api.partDictionary = dict;  // Part dictionary {partName : abstractPart} as created by LDParse
+	setModel(model) {
+		LicGL.initialize();
+		LicGL.initModel(model);
 	},
-	partDictionary: {},
 
 	setRenderState(newState) {
 		initialize();
@@ -187,8 +182,8 @@ function contextBoundingBox(data, w, h) {
 
 function initialize() {
 
-	if (api.partDictionary == null) {
-		throw 'LDRender: You must set a partDictionary via LDRender.setPartDictionary() before rendering a part.';  // eslint-disable-line max-len
+	if (LDParse.partDictionary == null) {
+		throw 'LDRender: You must import a model via LDParse.import() before rendering a part.';
 	} else if (isInitialized) {
 		return;
 	}
@@ -308,6 +303,41 @@ function render(scene, size, container, config) {
 	return {x: bounds.x, y: bounds.y, width: bounds.w, height: bounds.h};
 }
 
+// Render the specified scene in a size x size viewport, then crop it of all whitespace.
+// Return a {width, height} object specifying the final tightly cropped rendered image size.
+function renderLicGL(colorCode, filename, size, container, config) {
+
+	const part = LDParse.partDictionary[filename];
+
+	config = config || {};
+	const canvas = LicGL.renderPart(part, colorCode, size);
+
+	measurementCanvas.width = measurementCanvas.height = size;
+	const ctx = measurementCanvas.getContext('2d');
+	ctx.drawImage(canvas, 0, 0);
+	const data = ctx.getImageData(0, 0, size, size);
+
+	const bounds = contextBoundingBox(data.data, size, size);
+	if (!bounds) {
+		return null;
+	}
+
+	container = (typeof container === 'string') ? document.getElementById(container) : container;
+	if (config.resizeContainer) {
+		container.width = bounds.w + 1;
+		container.height = bounds.h + 1;
+	}
+	const ctx2 = container.getContext('2d');
+	ctx2.drawImage(
+		canvas,
+		bounds.x, bounds.y,
+		bounds.w + 1, bounds.h + 1,
+		config.dx || 0, config.dy || 0,
+		bounds.w + 1, bounds.h + 1
+	);
+	return {x: bounds.x, y: bounds.y, width: bounds.w, height: bounds.h};
+}
+
 /* eslint-disable no-multi-spaces, no-mixed-spaces-and-tabs, computed-property-spacing */
 function LDMatrixToMatrix(m) {
 	const matrix = new THREE.Matrix4();
@@ -389,7 +419,7 @@ function getPartGeometry(abstractPart, colorCode) {
 		const part = abstractPart.parts[i];
 		const matrix = LDMatrixToMatrix(part.matrix);
 		const color = LDParse.isValidColor(part.colorCode) ? part.colorCode : colorCode;
-		const subPartGeometry = getPartGeometry(api.partDictionary[part.filename], color);
+		const subPartGeometry = getPartGeometry(LDParse.partDictionary[part.filename], color);
 
 		const faces = subPartGeometry.faces.clone().applyMatrix(matrix);
 		geometry.faces.merge(faces);
@@ -567,7 +597,7 @@ function addModelToScene(scene, model, partIDList, config) {
 
 	for (let i = 0; i < partIDList.length; i++) {
 		const part = model.parts[partIDList[i]];
-		const abstractPart = api.partDictionary[part.filename];
+		const abstractPart = LDParse.partDictionary[part.filename];
 		const drawSelected = config.includeSelection && selectedPartIDs.includes(partIDList[i]);
 		const displacement = displacedParts[partIDList[i]];
 
@@ -649,33 +679,6 @@ function addModelToScene(scene, model, partIDList, config) {
 			}
 		}
 	}
-}
-
-function addPartToScene(scene, colorCode, filename, config) {
-
-	/*
-	const mesh = new THREE.Mesh(partGeometry.faces.clone(), faceMaterial);
-	if (config && config.rotation) {
-		mesh.rotation.x = config.rotation.x * Math.PI / 180;
-		mesh.rotation.y = config.rotation.y * Math.PI / 180;
-		mesh.rotation.z = config.rotation.z * Math.PI / 180;
-	}
-	scene.add(mesh);
-	*/
-
-	const part = {
-		colorCode: colorCode,
-		filename: filename,
-		matrix: [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
-	};
-
-	const model = {
-		filename: part.filename,
-		name: part.filename,
-		parts: [part], primitives: []
-	};
-
-	return addModelToScene(scene, model, [0], config);
 }
 
 export default api;

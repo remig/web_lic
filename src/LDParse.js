@@ -55,14 +55,14 @@ const api = {
 		for (let i = 0; i < lineList.length; i++) {
 			const line = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
 			if (line && line[1] === '!COLOUR') {
-				const alpha = line[10] ? parseInt(line[10], 10) : 255;
+				const alpha = line[10] ? parseInt(line[10], 10) : 0;
 				colors[line[4]] = {  // TODO: handle color modifiers like 'CHROME', 'METAL', 'LUMINANCE', etc
 					name: line[2].split('').join(''),  // Force garbage collection
 					color: line[6],
 					edge: line[8],
 					alpha,
 					rgba: hexColorToVec4(line[6], alpha),
-					edgeRgba: hexColorToVec4(line[8], 255)
+					edgeRgba: hexColorToVec4(line[8], 0)
 				};
 			}
 		}
@@ -239,7 +239,7 @@ function hexColorToVec4(color, alpha) {
 	const r = parseInt(color.substr(0, 2), 16) / 255;
 	const g = parseInt(color.substr(2, 2), 16) / 255;
 	const b = parseInt(color.substr(4, 2), 16) / 255;
-	return [r, g, b, alpha / 255];
+	return [r, g, b, (255 - alpha) / 255];
 }
 
 function actionBuilder(filename, partID, property, newValue) {

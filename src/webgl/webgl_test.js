@@ -1,4 +1,5 @@
-/* eslint-disable no-unused-vars */
+/* Web Lic - Copyright (C) 2019 Remi Gagne */
+
 import faceShaderSource from './faceShader.glsl';
 import lineShaderSource from './lineShader.glsl';
 import condLineShaderSource from './condLineShader.glsl';
@@ -8,6 +9,8 @@ import twgl from './twgl';
 import LDParse from '../LDParse';
 
 const partBufferCache = {};
+let canvas, gl, programs;
+let isInitialized = false;
 
 function generateObjectList(part, modelView, colorCode, partCount) {
 
@@ -73,14 +76,14 @@ function drawScene(gl, programs, objectsToDraw) {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	const w = 530;
-	const thickness = 0.0035;
+	const thickness = 0.002;
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 	// left, right, bottom, top, near, far
 	const projectionMatrix = twgl.m4.ortho(-w, w, w / aspect, -w / aspect, w * 2, -w * 2);
 
 	const viewMatrix = twgl.m4.create();
-	twgl.m4.axisRotate(viewMatrix, [1, 0, 0], 0.75, viewMatrix);
-	twgl.m4.axisRotate(viewMatrix, [0, 1, 0], 0.75, viewMatrix);
+	twgl.m4.axisRotate(viewMatrix, [1, 0, 0], Math.PI / 6, viewMatrix);
+	twgl.m4.axisRotate(viewMatrix, [0, 1, 0], Math.PI / 4, viewMatrix);
 	twgl.m4.multiply(viewMatrix, projectionMatrix, projectionMatrix);
 
 	// Draw opaque faces first
@@ -261,33 +264,50 @@ function LDMatrixToMatrix(m) {
 }
 /* eslint-enable computed-property-spacing */
 
-export default function init(canvas) {
+export default {
+	initialize: function() {
+		if (isInitialized) {
+			return;
+		}
+		isInitialized = true;
+		canvas = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
+		canvas.setAttribute('id', 'lic_gl_canvas');
+		gl = canvas.getContext('webgl', {antialias: true, alpha: true});
+		// TODO: figure out why canvas has to be in the DOM to render anything into it
+		document.getElementById('offscreenCache').appendChild(canvas);
 
-	const gl = canvas.getContext('webgl', {
-		antialias: true,
-		alpha: true
-	});
-	const programs = {
-		faces: twgl.createProgramInfo(gl, [faceShaderSource, fragmentShaderSource]),
-		lines: twgl.createProgramInfo(gl, [lineShaderSource, fragmentShaderSource]),
-		condLines: twgl.createProgramInfo(gl, [condLineShaderSource, fragmentShaderSource])
-	};
+		programs = {
+			faces: twgl.createProgramInfo(gl, [faceShaderSource, fragmentShaderSource]),
+			lines: twgl.createProgramInfo(gl, [lineShaderSource, fragmentShaderSource]),
+			condLines: twgl.createProgramInfo(gl, [condLineShaderSource, fragmentShaderSource])
+		};
 
-	LDParse.loadLDConfig();
-
-	// const url = './static/models/20015 - Alligator.mpd';
-	const url = './static/models/7140 - x-wing fighter.mpd';
-	LDParse.loadRemotePart(url)
-		.then(function() {
-			// const model = LDParse.partDictionary['3004.dat'];
-			// const model = LDParse.partDictionary['20015 - Alligator.mpd'];
-			const model = LDParse.partDictionary['7140 - Main Model.ldr'];
-
+		importPart(gl, LDParse.partDictionary['templateModel.ldr']);
+	},
+	initModel: function(model) {
+		if (model == null) {
+			LDParse.loadLDConfig();
+			// const url = './static/models/20015 - Alligator.mpd';
+			const url = './static/models/7140 - x-wing fighter.mpd';
+			LDParse.loadRemotePart(url)
+				.then(function() {
+					// const model = LDParse.partDictionary['3004.dat'];
+					// const model = LDParse.partDictionary['20015 - Alligator.mpd'];
+					const model = LDParse.partDictionary['7140 - Main Model.ldr'];
+					importPart(gl, model);
+				});
+		} else {
 			importPart(gl, model);
-
-			const now = Date.now();
-			const objectsToDraw = generateObjectList(model, twgl.m4.create());
-			drawScene(gl, programs, objectsToDraw);
-			console.log('time: ' + (Date.now() - now));
-		});
-}
+		}
+	},
+	renderPart(part, colorCode, size) {
+		canvas.width = canvas.height = size;
+		gl.viewport(0, 0, size, size);
+		const now = Date.now();
+		const identity = twgl.m4.create();
+		const objectsToDraw = generateObjectList(part, identity, colorCode);
+		drawScene(gl, programs, objectsToDraw);
+		console.log('time: ' + (Date.now() - now)); // eslint-disable-line no-console
+		return canvas;
+	}
+};

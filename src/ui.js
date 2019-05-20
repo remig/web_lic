@@ -3,11 +3,19 @@
 /* global Vue: false, Split: false, ELEMENT: false */
 'use strict';
 
+// TODO:
+// - submenus and tree are not re-translated on language change
+// - dialogs, like 3D part rendering, are wrapping badly
+// - 'enter' key on language picker / what's new / some dialogs reloads the page
+// - 'dupe key' error when selecting & right clicking CSIs
+// - add LDraw part library attribution to 'About Lic'
+// - add 'culled' versions of popular parts, with their inside bits removed
+// - add an 'LDraw_parts' repro to git, track all parts in there, clone that on bugeyedmonkeys
+
 import './thickLines';
 import _ from './util';
 import uiState from './uiState';
 import store from './store';
-import LicGL from './webgl/webgl_test';
 import undoStack from './undoStack';
 import LDParse from './LDParse';
 import Menu from './menu';
@@ -98,7 +106,7 @@ const app = new Vue({
 
 			this.busyText = this.tr('dialog.busy_indicator.loading_model');
 			const model = await modelGenerator();
-			store.mutations.templatePage.add();
+			await store.mutations.templatePage.add();
 			store.setModel(model);
 			this.filename = store.state.licFilename;
 
@@ -350,8 +358,8 @@ const app = new Vue({
 			return this.$refs.pageView.pageCoordsToCanvasCoords(point);
 		},
 		closeMenus() {
-			// this.$refs.contextMenuComponent.hide();
-			// this.$refs.navMenuComponent.hide();
+			this.$refs.contextMenuComponent.hide();
+			this.$refs.navMenuComponent.hide();
 		},
 		globalKeyPress(e) {
 			this.closeMenus();
