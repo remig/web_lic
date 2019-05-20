@@ -60,7 +60,7 @@ const store = {
 	model: null,  // Not in state because it is saved separately, and not affected by undo / redo
 	setModel(model) {
 		store.model = model;
-		LDRender.setPartDictionary(LDParse.partDictionary);
+		LDRender.setModel(model);
 		store.state.licFilename = store.get.modelFilenameBase();
 	},
 	// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic,
@@ -81,9 +81,9 @@ const store = {
 	load(content) {
 		LDParse.setPartDictionary(content.partDictionary);
 		LDParse.setColorTable(content.colorTable);
-		LDRender.setPartDictionary(content.partDictionary);
-		LDRender.setRenderState(content.state.template.sceneRendering);
 		store.model = LDParse.partDictionary[content.modelFilename];
+		LDRender.setModel(LDParse.partDictionary[content.modelFilename]);
+		LDRender.setRenderState(content.state.template.sceneRendering);
 		store.replaceState(content.state);
 	},
 	// mode is either 'file' or 'local', target is either 'state' or 'template'

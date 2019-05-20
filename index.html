@@ -44,19 +44,18 @@
 
 </head>
 <body>
+	<!--
 	<div id="container" style="margin: 20px;">
 		<button onclick="window.draw()">draw</button>
 		<canvas id="foo" width="900" height="600" style="border: 1px solid black; background-color: transparent;"></canvas>
 		<div id="fps">0 fps</div>
 	</div>
-	<!--
+	-->
+
 	<div id="container" @click="closeMenus()">
 
-
 		<div id="busyOverlay" :class="{hidden: busyText === ''}" v-cloak>
-		-->
 			<!--<div id="busyText">{{busyText}}<div id="spinner"></div></div>-->
-		<!--
 			<div id="busyContainer">
 				<div class="busyText">{{busyText}}</div>
 				<div class="progress">
@@ -123,7 +122,6 @@
 		<canvas id="generateImagesCanvas"></canvas>
 		<div id="canvasHolder"></div>
 	</div>
-	-->
 
 	<!-- Dialog Components -->
 	<script type="text/x-template" id="localeChooserDialogTemplate">
