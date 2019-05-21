@@ -74,11 +74,11 @@ const api = {
 		}
 		colors[api.studFaceColorCode] = {
 			name: 'Stud Face',
-			color: '#05131D',
-			edge: '#05131D',
+			color: '#333333',
+			edge: '#333333',
 			alpha: 0,
-			rgba: [0.0196, 0.0745, 0.1137, 1],
-			edgeRgba: [0.0196, 0.0745, 0.1137, 1]
+			rgba: [0.2, 0.2, 0.2, 1],
+			edgeRgba: [0.2, 0.2, 0.2, 1]
 		};
 		api.setColorTable(colors);
 		needLDConfig = false;
