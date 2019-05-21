@@ -13,14 +13,17 @@ const partBufferCache = {};
 let canvas, gl, programs;
 let isInitialized = false;
 
-function generateObjectList(part, modelView, colorCode, partCount) {
+function generateObjectList(part, modelView, colorCode, partIdList, selectedPartIds, alpha) {
 
 	const edgeColor = LDParse.getColor(colorCode, 'edgeRgba');
 	const res = {faces: [], lines: [], condLines: [], alphaFaces: []};
 	const buffers = partBufferCache[part.filename];
 	if (buffers) {
 		if (buffers.faces) {
-			const color = LDParse.getColor(colorCode, 'rgba');
+			let color = LDParse.getColor(colorCode, 'rgba');
+			if (alpha != null) {
+				color = [color[0], color[1], color[2], alpha];
+			}
 			if (color && color[3] < 1) {
 				addObject(res.alphaFaces, buffers.faces, modelView, color);
 			} else {
@@ -45,14 +48,25 @@ function generateObjectList(part, modelView, colorCode, partCount) {
 		}
 	}
 	if (part.parts && part.parts.length) {
-		const len = (partCount == null) ? part.parts.length : partCount;
-		for (let i = 0; i < len; i++) {
-			const subPart = part.parts[i];
+		// TODO: separately handle draawing a CSI with partial part lists and selected parts vs a PLI part
+		partIdList = (partIdList == null) ? part.parts.map((p, idx) => idx) : partIdList;
+		for (let i = 0; i < partIdList.length; i++) {
+
+			const subPart = part.parts[partIdList[i]];
 			const abstractPart = LDParse.partDictionary[subPart.filename];
+
 			const newMat = LDMatrixToMatrix(subPart.matrix);
 			twgl.m4.multiply(newMat, modelView, newMat);
+
 			const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
-			const newObject = generateObjectList(abstractPart, newMat, newColorCode);
+			let localAlpha = alpha;
+			if (selectedPartIds && selectedPartIds.includes(partIdList[i])) {
+				localAlpha = 0.5;
+				const box = getPartBoundingBox(abstractPart, modelView);
+				const boxBuffers = createBBoxBuffer(box);
+				addObject(res.lines, boxBuffers, newMat, [1, 0, 0, 1]);
+			}
+			const newObject = generateObjectList(abstractPart, newMat, newColorCode, null, null, localAlpha);
 			res.faces.push(...newObject.faces);
 			res.lines.push(...newObject.lines);
 			res.condLines.push(...newObject.condLines);
@@ -186,6 +200,83 @@ function addLine(lineData, p, cp) {
 	lineData.indices.lastIndex += 4;
 }
 
+function getPartBoundingBox(part, modelView) {
+	let minX = Infinity, minY = Infinity, minZ = Infinity;
+	let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+	if (part.primitives && part.primitives.length) {
+		for (let i = 0; i < part.primitives.length; i++) {
+			const shape = part.primitives[i].shape;
+			if (shape === 'triangle' || shape === 'quad') {
+				const pts = part.primitives[i].points;
+				for (let j = 0; j < pts.length; j += 3) {
+					const pt = twgl.m4.transformPoint(modelView, pts);
+					if (pt[j + 0] < minX) { minX = pt[j + 0]; }
+					if (pt[j + 1] < minY) { minY = pt[j + 1]; }
+					if (pt[j + 2] < minZ) { minZ = pt[j + 2]; }
+					if (pt[j + 0] > maxX) { maxX = pt[j + 0]; }
+					if (pt[j + 1] > maxY) { maxY = pt[j + 1]; }
+					if (pt[j + 2] > maxZ) { maxZ = pt[j + 2]; }
+				}
+			}
+		}
+	}
+	if (part.parts && part.parts.length) {
+		for (let i = 0; i < part.parts.length; i++) {
+			const subPart = part.parts[i];
+			const newMat = LDMatrixToMatrix(subPart.matrix);
+			twgl.m4.multiply(newMat, modelView, newMat);
+			const abstractPart = LDParse.partDictionary[subPart.filename];
+			const partBBox = getPartBoundingBox(abstractPart, newMat);
+			if (partBBox[0] < minX) { minX = partBBox[0]; }
+			if (partBBox[1] < minY) { minY = partBBox[1]; }
+			if (partBBox[2] < minZ) { minZ = partBBox[2]; }
+			if (partBBox[3] > maxX) { maxX = partBBox[3]; }
+			if (partBBox[4] > maxY) { maxY = partBBox[4]; }
+			if (partBBox[5] > maxZ) { maxZ = partBBox[5]; }
+		}
+	}
+	return [minX, minY, minZ, maxX, maxY, maxZ];
+}
+
+function growBox(box) {
+	const scale = 1.5;
+	return [
+		box[0] - scale, box[1] - scale, box[2] - scale,
+		box[3] + scale, box[4] + scale, box[5] + scale
+	];
+}
+
+function createBBoxBuffer(box) {
+	box = growBox(box);
+	const x0 = box[0], y0 = box[1], z0 = box[2];
+	const x1 = box[3], y1 = box[4], z1 = box[5];
+
+	const lineData = {
+		position: {data: [], numComponents: 3},
+		next: {data: [], numComponents: 3},
+		direction: {data: [], numComponents: 1},
+		order: {data: [], numComponents: 1},
+		indices: {data: [], numComponents: 3, lastIndex: 0}
+	};
+
+	addLine(lineData, [x0, y0, z0, x0, y0, z1]);
+	addLine(lineData, [x0, y0, z1, x1, y0, z1]);
+	addLine(lineData, [x1, y0, z1, x1, y0, z0]);
+	addLine(lineData, [x1, y0, z0, x0, y0, z0]);
+
+	addLine(lineData, [x0, y1, z0, x0, y1, z1]);
+	addLine(lineData, [x0, y1, z1, x1, y1, z1]);
+	addLine(lineData, [x1, y1, z1, x1, y1, z0]);
+	addLine(lineData, [x1, y1, z0, x0, y1, z0]);
+
+	addLine(lineData, [x0, y0, z0, x0, y1, z0]);
+	addLine(lineData, [x0, y0, z1, x0, y1, z1]);
+	addLine(lineData, [x1, y0, z0, x1, y1, z0]);
+	addLine(lineData, [x1, y0, z1, x1, y1, z1]);
+
+	return twgl.createBufferInfoFromArrays(gl, lineData);
+}
+
 function importPart(gl, part) {
 
 	if (partBufferCache[part.filename] == null && part.primitives.length) {
@@ -312,6 +403,18 @@ export default {
 			importPart(gl, model);
 		}
 	},
+	renderModel(model, size, rotation, partIdList, selectedPartIds) {
+		// eslint-disable-next-line no-undef
+		__lic.twgl = twgl;
+		canvas.width = canvas.height = size;
+		gl.viewport(0, 0, size, size);
+		const now = Date.now();
+		const identity = twgl.m4.create();
+		const objectsToDraw = generateObjectList(model, identity, null, partIdList, selectedPartIds);
+		drawScene(gl, programs, objectsToDraw, rotation);
+		console.log('time CSI: ' + (Date.now() - now)); // eslint-disable-line no-console
+		return canvas;
+	},
 	renderPart(part, colorCode, size, rotation) {
 		canvas.width = canvas.height = size;
 		gl.viewport(0, 0, size, size);
@@ -319,7 +422,7 @@ export default {
 		const identity = twgl.m4.create();
 		const objectsToDraw = generateObjectList(part, identity, colorCode);
 		drawScene(gl, programs, objectsToDraw, rotation);
-		console.log('time: ' + (Date.now() - now)); // eslint-disable-line no-console
+		console.log('time PLI: ' + (Date.now() - now)); // eslint-disable-line no-console
 		return canvas;
 	}
 };

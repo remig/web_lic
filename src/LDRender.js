@@ -6,15 +6,46 @@
 import LDParse from './LDParse';
 import LicGL from './webgl/webgl_test';
 
-let renderer, camera, measurementCanvas;
-let isInitialized = false;
-const selectedLineColor = 0xFF0000;
-let rad, deg, lineMaterial, faceMaterials, selectedFaceMaterial, arrowMaterial;
+let camera;
+const measurementCanvas = document.createElement('canvas');
 
 const renderState = {
 	zoom: 500,
 	edgeWidth: 0.0008
 };
+
+const rad = THREE.Math.degToRad;
+const deg = THREE.Math.radToDeg;
+
+const lineMaterial = new THREE.LineMaterial({
+	color: 0xffffff,
+	vertexColors: THREE.VertexColors,
+	linewidth: renderState.edgeWidth
+});
+
+const faceMaterials = [
+	new THREE.MeshBasicMaterial({
+		vertexColors: THREE.FaceColors,
+		side: THREE.DoubleSide,
+		polygonOffset: true,
+		polygonOffsetFactor: 1,
+		polygonOffsetUnits: 1
+	}),
+	new THREE.MeshBasicMaterial({
+		vertexColors: THREE.FaceColors,
+		side: THREE.DoubleSide,
+		opacity: 0.5,
+		transparent: true,
+		polygonOffset: true,
+		polygonOffsetFactor: 1,
+		polygonOffsetUnits: 1
+	})
+];
+
+const arrowMaterial = new THREE.MeshBasicMaterial({
+	color: 0xFF0000,
+	side: THREE.DoubleSide
+});
 
 const api = {
 
@@ -23,57 +54,42 @@ const api = {
 	// Optional config: {resizeContainer, dx, dy, rotation: {x, y, z}}
 	renderPart(colorCode, filename, containerID, size, config) {
 
-		initialize();
 		size = Math.max(Math.floor(size), 1);
 		config = config || {};
 		config.size = size;
-		return renderLicGL(colorCode, filename, size, containerID, config);
+
+		const part = LDParse.partDictionary[filename];
+		const canvas = LicGL.renderPart(part, colorCode, size, config.rotation);
+		return renderToCanvas(canvas, containerID, size, config);
 	},
-	renderModel(part, containerID, size, config) {
+
+	renderModel(model, containerID, size, config) {
 
 		size = Math.max(Math.floor(size), 1);
 		config = config || {};
 		config.size = size;
-		if (!config.partList) {
-			config.partList = part.parts.map((part, idx) => idx);
-		}
 
-		initialize();
-		const scene = initScene(size);
-
-		addModelToScene(scene, part, config.partList, config);
-		const res = render(scene, size, containerID, config);
-		cleanup(scene);
-		return res;
+		const canvas = LicGL.renderModel(model, size, config.rotation, config.partList);
+		return renderToCanvas(canvas, containerID, size, config);
 	},
 
 	// Renders the model twice; once with all parts unselected and once with parts selected.
 	// It renders the selected part to containerID, and returns the difference in position
 	// between the selected and unselected renderings.  This is useful for offsetting renderings
 	// so that they do not change positions when rendered with & without selected parts.
-	renderAndDeltaSelectedPart(part, containerID, size, config) {
+	renderAndDeltaSelectedPart(model, containerID, size, config) {
 
+		size = Math.max(Math.floor(size), 1);
 		config = config || {};
 		config.size = size;
-		if (!config.partList) {
-			config.partList = part.parts.map((part, idx) => idx);
-		}
-
-		initialize();
-		let scene = initScene(size);
 
 		// Render with no parts selected
-		config.includeSelection = false;
-		addModelToScene(scene, part, config.partList, config);
-		const noSelectedPartsBounds = render(scene, size, containerID, config);
-
-		scene = initScene(size);
+		let canvas = LicGL.renderModel(model, size, config.rotation, config.partList);
+		const noSelectedPartsBounds = renderToCanvas(canvas, containerID, size, config);
 
 		// Render again with parts selected
-		config.includeSelection = true;
-		addModelToScene(scene, part, config.partList, config);
-		const selectedPartsBounds = render(scene, size, containerID, config);
-		cleanup(scene);
+		canvas = LicGL.renderModel(model, size, config.rotation, config.partList, config.selectedPartIDs);
+		const selectedPartsBounds = renderToCanvas(canvas, containerID, size, config);
 
 		return {
 			dx: Math.max(0, noSelectedPartsBounds.x - selectedPartsBounds.x),
@@ -110,7 +126,6 @@ const api = {
 	},
 
 	setRenderState(newState) {
-		initialize();
 		if (newState.zoom != null) {
 			const viewBox = renderState.zoom = 500 + (newState.zoom * -10);
 			if (camera != null) {
@@ -180,137 +195,9 @@ function contextBoundingBox(data, w, h) {
 }
 /* eslint-enable no-labels */
 
-function initialize() {
-
-	if (LDParse.partDictionary == null) {
-		throw 'LDRender: You must import a model via LDParse.import() before rendering a part.';
-	} else if (isInitialized) {
-		return;
-	}
-
-	rad = THREE.Math.degToRad;
-	deg = THREE.Math.radToDeg;
-	lineMaterial = new THREE.LineMaterial({
-		color: 0xffffff,
-		vertexColors: THREE.VertexColors,
-		linewidth: renderState.edgeWidth
-	});
-
-	faceMaterials = [
-		new THREE.MeshBasicMaterial({
-			vertexColors: THREE.FaceColors,
-			side: THREE.DoubleSide,
-			polygonOffset: true,
-			polygonOffsetFactor: 1,
-			polygonOffsetUnits: 1
-		}),
-		new THREE.MeshBasicMaterial({
-			vertexColors: THREE.FaceColors,
-			side: THREE.DoubleSide,
-			opacity: 0.5,
-			transparent: true,
-			polygonOffset: true,
-			polygonOffsetFactor: 1,
-			polygonOffsetUnits: 1
-		})
-	];
-	selectedFaceMaterial = new THREE.MeshBasicMaterial({
-		vertexColors: THREE.FaceColors,
-		opacity: 0.5,
-		transparent: true,
-		side: THREE.DoubleSide
-	});
-	arrowMaterial = new THREE.MeshBasicMaterial({
-		color: 0xFF0000,
-		side: THREE.DoubleSide
-	});
-
-	// Create a new 2D canvas to convert the full 3D canvas into a 2D canvas, and retrieve its image data
-	measurementCanvas = document.createElement('canvas');
-
-	// Create the Three.js renderer that will draw everything
-	renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-
-	const viewBox = renderState.zoom;
-	camera = new THREE.OrthographicCamera(-viewBox, viewBox, viewBox, -viewBox, 0.01, 10000);
-	camera.up = new THREE.Vector3(0, -1, 0);  // -1 because LDraw coordinate space has -y as UP
-	camera.position.set(viewBox, -viewBox * 0.7, -viewBox);
-	camera.lookAt(new THREE.Vector3());
-	isInitialized = true;
-}
-
-function initScene(size) {
-
-	const scene = new THREE.Scene();
-	scene.add(new THREE.AmbientLight(0x404040));
-
-	// These three calls must be made before addModelToScene(), to correctly project
-	// points to screen (for conditional line rendering)
-	renderer.setSize(size, size);
-	camera.updateMatrixWorld();
-	camera.updateProjectionMatrix();
-
-	return scene;
-}
-
-function cleanup(scene) {
-	renderer.renderLists.dispose();
-	scene.traverse(node => {
-		if (node instanceof THREE.Mesh) {
-			if (node.geometry) {
-				node.geometry.dispose();
-			}
-			if (Array.isArray(node.material)) {
-				node.material.forEach(m => m.dispose());
-			} else if (node.material) {
-				node.material.dispose();
-			}
-		}
-	});
-}
-
 // Render the specified scene in a size x size viewport, then crop it of all whitespace.
 // Return a {width, height} object specifying the final tightly cropped rendered image size.
-function render(scene, size, container, config) {
-
-	config = config || {};
-
-	renderer.render(scene, camera);
-
-	measurementCanvas.width = measurementCanvas.height = size;
-	const ctx = measurementCanvas.getContext('2d');
-	ctx.drawImage(renderer.domElement, 0, 0);
-	const data = ctx.getImageData(0, 0, size, size);
-
-	const bounds = contextBoundingBox(data.data, size, size);
-	if (!bounds) {
-		return null;
-	}
-
-	container = (typeof container === 'string') ? document.getElementById(container) : container;
-	if (config.resizeContainer) {
-		container.width = bounds.w + 1;
-		container.height = bounds.h + 1;
-	}
-	const ctx2 = container.getContext('2d');
-	ctx2.drawImage(
-		renderer.domElement,
-		bounds.x, bounds.y,
-		bounds.w + 1, bounds.h + 1,
-		config.dx || 0, config.dy || 0,
-		bounds.w + 1, bounds.h + 1
-	);
-	return {x: bounds.x, y: bounds.y, width: bounds.w, height: bounds.h};
-}
-
-// Render the specified scene in a size x size viewport, then crop it of all whitespace.
-// Return a {width, height} object specifying the final tightly cropped rendered image size.
-function renderLicGL(colorCode, filename, size, container, config) {
-
-	const part = LDParse.partDictionary[filename];
-
-	config = config || {};
-	const canvas = LicGL.renderPart(part, colorCode, size, config.rotation);
+function renderToCanvas(canvas, container, size, config) {
 
 	measurementCanvas.width = measurementCanvas.height = size;
 	const ctx = measurementCanvas.getContext('2d');
@@ -359,87 +246,6 @@ function MatrixToLDMatrix(m) {
 }
 /* eslint-enable no-multi-spaces, no-mixed-spaces-and-tabs, computed-property-spacing */
 
-function getPartGeometry(abstractPart, colorCode) {
-
-	const geometry = {
-		faces: new THREE.Geometry(),
-		lines: new THREE.Geometry(),
-		condlines: []
-	};
-
-	const alphaIdx = !LDParse.getColor(colorCode, 'alpha') ? 0 : 1;
-	const colorObj = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode));
-	const lineColor = (colorCode == null) ? null : new THREE.Color(LDParse.getColor(colorCode, 'edge'));
-	for (let i = 0; i < abstractPart.primitives.length; i++) {
-		const primitive = abstractPart.primitives[i];
-		const p = primitive.points;
-		if (primitive.shape === 'line') {
-			geometry.lines.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
-			geometry.lines.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
-			if (lineColor) {
-				geometry.lines.colors.push(lineColor);
-				geometry.lines.colors.push(lineColor);
-			}
-		} else if (primitive.shape === 'condline') {
-			const cp = primitive.conditionalPoints;
-			const condLine = new THREE.Geometry();
-			condLine.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
-			condLine.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
-			if (lineColor) {
-				condLine.colors.push(lineColor);
-				condLine.colors.push(lineColor);
-			}
-			geometry.condlines.push({
-				line: condLine,
-				c1: new THREE.Vector3(cp[0], cp[1], cp[2]),
-				c2: new THREE.Vector3(cp[3], cp[4], cp[5])
-			});
-		} else {
-
-			let color = colorObj;
-			if (LDParse.isValidColor(primitive.colorCode)) {
-				color = new THREE.Color(LDParse.getColor(primitive.colorCode));
-			}
-
-			const vIdx = geometry.faces.vertices.length;
-			geometry.faces.faces.push(new THREE.Face3(vIdx, vIdx + 1, vIdx + 2, null, color, alphaIdx));
-			geometry.faces.vertices.push(new THREE.Vector3(p[0], p[1], p[2]));
-			geometry.faces.vertices.push(new THREE.Vector3(p[3], p[4], p[5]));
-			geometry.faces.vertices.push(new THREE.Vector3(p[6], p[7], p[8]));
-
-			if (primitive.shape === 'quad') {
-				geometry.faces.vertices.push(new THREE.Vector3(p[9], p[10], p[11]));
-				const face2 = new THREE.Face3(vIdx, vIdx + 2, vIdx + 3, null, color, alphaIdx);
-				geometry.faces.faces.push(face2);
-			}
-		}
-	}
-
-	for (let i = 0; i < abstractPart.parts.length; i++) {
-		const part = abstractPart.parts[i];
-		const matrix = LDMatrixToMatrix(part.matrix);
-		const color = LDParse.isValidColor(part.colorCode) ? part.colorCode : colorCode;
-		const subPartGeometry = getPartGeometry(LDParse.partDictionary[part.filename], color);
-
-		const faces = subPartGeometry.faces.clone().applyMatrix(matrix);
-		geometry.faces.merge(faces);
-
-		const lines = subPartGeometry.lines.clone().applyMatrix(matrix);
-		geometry.lines.merge(lines);
-
-		for (let l = 0; l < subPartGeometry.condlines.length; l++) {
-			const condline = subPartGeometry.condlines[l];
-			geometry.condlines.push({
-				line: condline.line.clone().applyMatrix(matrix),
-				c1: condline.c1.clone().applyMatrix4(matrix),
-				c2: condline.c2.clone().applyMatrix4(matrix)
-			});
-		}
-	}
-
-	return geometry;
-}
-
 const arrowDimensions = {
 	head: {
 		length: 28,
@@ -468,20 +274,6 @@ function getArrowGeometry(length = 60) {
 	geom.faces.push(new THREE.Face3(2, 3, 5));
 	geom.faces.push(new THREE.Face3(2, 5, 6));
 	return geom;
-}
-
-function project(vec, camera, size) {
-	vec = vec.clone();
-	vec.project(camera);
-	vec.x = (vec.x * size) + size;
-	vec.y = -(vec.y * size) + size;
-	vec.z = 0;
-	return vec;
-}
-
-function lineSide(p, l1, l2) {
-	const res = ((p.x - l1.x) * (l2.y - l1.y)) - ((p.y - l1.y) * (l2.x - l1.x));
-	return (res > 0) ? 1 : -1;
 }
 
 function getPartDisplacement({direction, partDistance = 60}) {
@@ -588,8 +380,6 @@ function getArrowMesh(partMesh, partBox, partRotation, displacement) {
 
 function addModelToScene(scene, model, partIDList, config) {
 
-	const size = config.size / 2;
-	const selectedPartIDs = config.selectedPartIDs || [];
 	const displacedParts = {};
 	(config.displacedParts || []).forEach(p => {
 		displacedParts[p.partID] = p;
@@ -597,13 +387,10 @@ function addModelToScene(scene, model, partIDList, config) {
 
 	for (let i = 0; i < partIDList.length; i++) {
 		const part = model.parts[partIDList[i]];
-		const abstractPart = LDParse.partDictionary[part.filename];
-		const drawSelected = config.includeSelection && selectedPartIDs.includes(partIDList[i]);
 		const displacement = displacedParts[partIDList[i]];
 
 		const matrix = LDMatrixToMatrix(part.matrix);
-		const color = LDParse.isValidColor(part.colorCode) ? part.colorCode : null;
-		const partGeometry = getPartGeometry(abstractPart, color);
+		const partGeometry = null;
 
 		if (displacement) {
 			const {x, y, z} = getPartDisplacement(displacement);
@@ -618,8 +405,7 @@ function addModelToScene(scene, model, partIDList, config) {
 			matrix.premultiply(partRotation);
 		}
 
-		const faceMat = drawSelected ? selectedFaceMaterial : faceMaterials;
-		const mesh = new THREE.Mesh(partGeometry.faces, faceMat);
+		const mesh = new THREE.Mesh(partGeometry.faces, faceMaterials);
 
 		let meshBox;
 		if (displacement) {
@@ -651,32 +437,6 @@ function addModelToScene(scene, model, partIDList, config) {
 			}
 			const arrowMesh = getArrowMesh(mesh, meshBox, partRotation, displacement);
 			scene.add(arrowMesh);
-		}
-
-		if (drawSelected) {
-			const box = new THREE.Box3().setFromObject(mesh);
-			const boxMesh = new THREE.Box3Helper(box, selectedLineColor);
-			scene.add(boxMesh);
-		}
-
-		for (let l = 0; l < partGeometry.condlines.length; l++) {
-
-			const condline = partGeometry.condlines[l];
-			const cline = condline.line.clone().applyMatrix(matrix);
-			const l1 = project(cline.vertices[0], camera, size);
-			const l2 = project(cline.vertices[1], camera, size);
-
-			const c1 = project(condline.c1.clone().applyMatrix4(matrix), camera, size);
-			const c2 = project(condline.c2.clone().applyMatrix4(matrix), camera, size);
-
-			if (lineSide(c1, l1, l2) === lineSide(c2, l1, l2)) {
-				const condLineGeom = new THREE.LineSegmentsGeometry();
-				const v = cline.vertices;
-				condLineGeom.setPositions([v[0].x, v[0].y, v[0].z, v[1].x, v[1].y, v[1].z]);
-				const c = cline.colors;
-				condLineGeom.setColors([c[0].r, c[0].g, c[0].b, c[1].r, c[1].g, c[1].b]);
-				scene.add(new THREE.LineSegments2(condLineGeom, lineMaterial));
-			}
 		}
 	}
 }
