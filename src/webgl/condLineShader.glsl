@@ -42,6 +42,6 @@ void main() {
 		vec3 offset = vec3(normal * direction, 0.0);
 		gl_Position = vec4(currentProjected.xyz + offset, 1.0);
 	} else {
-		gl_Position = vec4(0.0);
+		gl_Position = vec4(2.0, 0.0, 0.0, 0.0);  // skip this point (put it outside clip space)
 	}
 }
