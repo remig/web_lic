@@ -103,7 +103,19 @@ const api = {
 	},
 	customColorTable: {},
 	setCustomColorTable(dict) {
+		for (const colorCode in dict) {
+			if (dict.hasOwnProperty(colorCode)) {
+				const entry = dict[colorCode];
+				if (entry.color != null && entry.rgba == null) {
+					entry.rgba = hexColorToVec4(entry.color, 0);
+				}
+				if (entry.edge != null && entry.edgeRgba == null) {
+					entry.edgeRgba = hexColorToVec4(entry.edge, 0);
+				}
+			}
+		}
 		api.customColorTable = dict;
+		return dict;
 	},
 
 	// colorID: an LDraw color to lookup
@@ -406,7 +418,7 @@ const lineParsers = {
 };
 
 async function lineListToAbstractPart(fn, lineList, progressCallback) {
-	if (fn.includes('/')) {  // Need only final filename, not the path to it
+	if (fn && fn.includes('/')) {  // Need only final filename, not the path to it
 		fn = fn.slice(fn.lastIndexOf('/') + 1);
 	}
 	const abstractPart = {

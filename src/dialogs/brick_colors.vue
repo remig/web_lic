@@ -77,6 +77,7 @@ export default {
 				let customColor = customColors[el.id];
 				if (ldColor.color === el.color && customColor) {
 					delete customColor.color;
+					delete customColor.rgba;
 				} else if (ldColor.color !== el.color) {
 					customColor = customColors[el.id] = customColors[el.id] || {};
 					customColor.color = el.color;
@@ -86,6 +87,7 @@ export default {
 				}
 				if (ldColor.edge === el.edge && customColor) {
 					delete customColor.edge;
+					delete customColor.edgeRgba;
 				} else if (ldColor.edge !== el.edge) {
 					customColor = customColors[el.id] = customColors[el.id] || {};
 					customColor.edge = el.edge;
@@ -98,8 +100,8 @@ export default {
 			this.$emit('close');
 		},
 		applyChange() {
-			Storage.replace.customBrickColors(customColors);
-			LDParse.setCustomColorTable(customColors);
+			const fixedColors = LDParse.setCustomColorTable(customColors);
+			Storage.replace.customBrickColors(fixedColors);
 			store.mutations.csi.markAllDirty();
 			store.mutations.pliItem.markAllDirty();
 			this.$root.redrawUI();
