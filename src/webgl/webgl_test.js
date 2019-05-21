@@ -13,9 +13,13 @@ const partBufferCache = {};
 let canvas, gl, programs;
 let isInitialized = false;
 
-function generateObjectList(part, modelView, colorCode, partIdList, selectedPartIds, alpha) {
+function generateObjectList(
+	part, modelView, colorCode,
+	partIdList, selectedPartIds, alpha, previousColorCode
+) {
 
-	const edgeColor = LDParse.getColor(colorCode, 'edgeRgba');
+	const edgeColorCode = (colorCode === 987) ? previousColorCode : colorCode;
+	const edgeColor = LDParse.getColor(edgeColorCode, 'edgeRgba');
 	const res = {faces: [], lines: [], condLines: [], alphaFaces: []};
 	const buffers = partBufferCache[part.filename];
 	if (buffers) {
@@ -66,7 +70,10 @@ function generateObjectList(part, modelView, colorCode, partIdList, selectedPart
 				const boxBuffers = createBBoxBuffer(box);
 				addObject(res.lines, boxBuffers, newMat, [1, 0, 0, 1]);
 			}
-			const newObject = generateObjectList(abstractPart, newMat, newColorCode, null, null, localAlpha);
+			const newObject = generateObjectList(
+				abstractPart, newMat, newColorCode,
+				null, null, localAlpha, colorCode
+			);
 			res.faces.push(...newObject.faces);
 			res.lines.push(...newObject.lines);
 			res.condLines.push(...newObject.condLines);
