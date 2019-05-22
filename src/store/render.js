@@ -55,18 +55,19 @@ export default {
 			csi.domID = `CSI_${step.csiID}`;
 			csi.isDirty = true;
 		}
+		let config;
 		let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : csi.domID);
 		if (csi.isDirty || container == null || bypassCache) {
 			if (step.parts == null) {
 				// TODO: this only happens for title page; need better indicator for this non-step step
-				container = container || getCanvas(csi.domID);
-				LDRender.renderModel(localModel, container, 1000 * scale, {resizeContainer: true});
+				config = {size: 1000 * scale, resizeContainer: true};
 			} else {
 				const partList = store.get.partList(step);
 				if (_.isEmpty(partList)) {
 					return null;
 				}
-				const config = {
+				config = {
+					size: 1000 * scale,
 					partList,
 					selectedPartIDs,
 					resizeContainer: true,
@@ -74,15 +75,16 @@ export default {
 					rotation: getRotation(csi),
 					displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
 				};
-				container = container || getCanvas(csi.domID);
-				LDRender.renderModel(localModel, container, 1000 * scale, config);
 			}
+			container = container || getCanvas(csi.domID);
+			LDRender.renderModel(localModel, container, config);
 			delete csi.isDirty;
 		}
 		return {width: container.width, height: container.height, dx: 0, dy: 0, container};
 	},
 	csiWithSelection(localModel, step, csi, selectedPartIDs) {
 		const config = {
+			size: 1000 * (getScale(csi) || 1),
 			partList: store.get.partList(step),
 			selectedPartIDs,
 			resizeContainer: true,
@@ -90,10 +92,15 @@ export default {
 			rotation: getRotation(csi),
 			displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
 		};
-		const scale = getScale(csi) || 1;
 		const container = document.getElementById('generateImagesCanvas');
-		const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, 1000 * scale, config);
-		return {width: container.width, height: container.height, dx: offset.dx, dy: offset.dy, container};
+		const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, config);
+		return {
+			width: container.width,
+			height: container.height,
+			dx: offset.dx,
+			dy: offset.dy,
+			container
+		};
 	},
 	pli(colorCode, filename, item, hiResScale = 1, bypassCache) {
 		const scale = (getScale(item) || 1) * hiResScale;
@@ -104,11 +111,12 @@ export default {
 		let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : item.domID);
 		if ((item && item.isDirty) || container == null || bypassCache) {
 			const config = {
+				size: 1000 * scale,
 				resizeContainer: true,
 				rotation: getRotation(item)
 			};
 			container = container || getCanvas(item.domID, bypassCache);
-			LDRender.renderPart(colorCode, filename, container, 1000 * scale, config);
+			LDRender.renderPart(colorCode, filename, container, config);
 			delete item.isDirty;
 		}
 		return {width: container.width, height: container.height, container};
@@ -124,16 +132,16 @@ export default {
 	},
 	adjustCameraZoom() {
 		// Render the main model; if it's too big to fit in the default view, zoom out until it fits
-		const containerSize = 1000, paddedContainerSize = containerSize - 300, zoomStep = 30;
+		const size = 1000, paddedContainerSize = size - 300, zoomStep = 30;
 		const container = getCanvas('cameraZoomTestCanvas');
-		container.width = container.height = containerSize;
+		container.width = container.height = size;
 
 		let zoom = zoomStep;
-		const config = {resizeContainer: true};
+		const config = {size, resizeContainer: true};
 		while (container.width > paddedContainerSize || container.height > paddedContainerSize) {
 			zoom -= zoomStep;
 			LDRender.setRenderState({zoom});
-			LDRender.renderPart(0, store.model.filename, container, containerSize, config);
+			LDRender.renderPart(0, store.model.filename, container, config);
 		}
 		store.state.template.sceneRendering.zoom = zoom;
 		container.remove();
