@@ -9,24 +9,38 @@ import twgl from './twgl';
 import _ from '../util';
 import LDParse from '../LDParse';
 
+const studFaceColorCode = LDParse.studFaceColorCode;
 const partBufferCache = {};
 let canvas, gl, programs;
 let isInitialized = false;
 
-function generateObjectList(
-	part, modelView, colorCode,
-	partIdList, selectedPartIds, alpha, previousColorCode
-) {
+// config: {partList, selectedPartIDs, alpha, parentColorCode}
+function generateObjectList(part, modelView, colorCode, config) {
 
-	const edgeColorCode = (colorCode === 987) ? previousColorCode : colorCode;
-	const edgeColor = LDParse.getColor(edgeColorCode, 'edgeRgba');
 	const res = {faces: [], lines: [], condLines: [], alphaFaces: []};
 	const buffers = partBufferCache[part.filename];
+
 	if (buffers) {
+
+		const edgeColorCode = (colorCode === studFaceColorCode) ? config.parentColorCode : colorCode;
+		const edgeColor = LDParse.getColor(edgeColorCode, 'edgeRgba');
+
 		if (buffers.faces) {
-			let color = LDParse.getColor(colorCode, 'rgba');
-			if (alpha != null) {
-				color = [color[0], color[1], color[2], alpha];
+			let color;
+			if (colorCode === studFaceColorCode) {
+				// Custom stud face color logic
+				if (config.parentColorCode === 0) {
+					// If base part is black, use black for stud face too
+					color = LDParse.getColor(0, 'rgba');
+				} else {
+					// If base part is any other color, match stud face to edge color
+					color = LDParse.getColor(edgeColorCode, 'edgeRgba');
+				}
+			} else {
+				color = LDParse.getColor(colorCode, 'rgba');
+			}
+			if (config.alpha != null) {
+				color = [color[0], color[1], color[2], config.alpha];
 			}
 			if (color && color[3] < 1) {
 				addObject(res.alphaFaces, buffers.faces, modelView, color);
@@ -51,33 +65,76 @@ function generateObjectList(
 			addObject(res.condLines, buffers.condLines, modelView, edgeColor);
 		}
 	}
+
 	if (part.parts && part.parts.length) {
-		// TODO: separately handle draawing a CSI with partial part lists and selected parts vs a PLI part
-		partIdList = (partIdList == null) ? part.parts.map((p, idx) => idx) : partIdList;
-		for (let i = 0; i < partIdList.length; i++) {
 
-			const subPart = part.parts[partIdList[i]];
-			const abstractPart = LDParse.partDictionary[subPart.filename];
+		if (config.isModel) {
 
-			const newMat = LDMatrixToMatrix(subPart.matrix);
-			twgl.m4.multiply(newMat, modelView, newMat);
-
-			const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
-			let localAlpha = alpha;
-			if (selectedPartIds && selectedPartIds.includes(partIdList[i])) {
-				localAlpha = 0.5;
-				const box = getPartBoundingBox(abstractPart, modelView);
-				const boxBuffers = createBBoxBuffer(box);
-				addObject(res.lines, boxBuffers, newMat, [1, 0, 0, 1]);
+			const displacedParts = {};
+			if (config.displacedParts) {
+				config.displacedParts.forEach(p => {
+					displacedParts[p.partID] = p;
+				});
 			}
-			const newObject = generateObjectList(
-				abstractPart, newMat, newColorCode,
-				null, null, localAlpha, colorCode
-			);
-			res.faces.push(...newObject.faces);
-			res.lines.push(...newObject.lines);
-			res.condLines.push(...newObject.condLines);
-			res.alphaFaces.push(...newObject.alphaFaces);
+
+			const localPartList = (config.partList == null)
+				? part.parts.map((p, idx) => idx)
+				: config.partList;
+
+			for (let i = 0; i < localPartList.length; i++) {
+
+				const subPart = part.parts[localPartList[i]];
+				const abstractPart = LDParse.partDictionary[subPart.filename];
+
+				const newMat = LDMatrixToMatrix(subPart.matrix);
+				twgl.m4.multiply(newMat, modelView, newMat);
+
+				const displacement = displacedParts[localPartList[i]];
+				if (displacement) {
+					const translation = getPartDisplacement(displacement);
+					twgl.m4.translate(newMat, translation, newMat);
+				}
+
+				const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
+				let localAlpha = config.alpha;
+				if (config.selectedPartIDs && config.selectedPartIDs.includes(localPartList[i])) {
+					localAlpha = 0.5;
+					const box = getPartBoundingBox(abstractPart, modelView);
+					const boxBuffers = createBBoxBuffer(box);
+					addObject(res.lines, boxBuffers, newMat, [1, 0, 0, 1]);
+				}
+
+				const localConfig = {
+					alpha: localAlpha,
+					parentColorCode: colorCode
+				};
+				const newObject = generateObjectList(abstractPart, newMat, newColorCode, localConfig);
+				res.faces.push(...newObject.faces);
+				res.lines.push(...newObject.lines);
+				res.condLines.push(...newObject.condLines);
+				res.alphaFaces.push(...newObject.alphaFaces);
+			}
+		} else {
+			for (let i = 0; i < part.parts.length; i++) {
+
+				const subPart = part.parts[i];
+				const abstractPart = LDParse.partDictionary[subPart.filename];
+
+				const newMat = LDMatrixToMatrix(subPart.matrix);
+				twgl.m4.multiply(newMat, modelView, newMat);
+
+				const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
+				const localConfig = {
+					alpha: config.alpha,
+					parentColorCode: colorCode
+				};
+
+				const newObject = generateObjectList(abstractPart, newMat, newColorCode, localConfig);
+				res.faces.push(...newObject.faces);
+				res.lines.push(...newObject.lines);
+				res.condLines.push(...newObject.condLines);
+				res.alphaFaces.push(...newObject.alphaFaces);
+			}
 		}
 	}
 	return res;
@@ -374,6 +431,24 @@ function LDMatrixToMatrix(m) {
 }
 /* eslint-enable computed-property-spacing */
 
+function getPartDisplacement({direction, partDistance = 60}) {
+	switch (direction) {
+		case 'left':
+			return [-partDistance, 0, 0];
+		case 'right':
+			return [partDistance, 0, 0];
+		case 'forward':
+			return [0, 0, -partDistance];
+		case 'backward':
+			return [0, 0, partDistance];
+		case 'down':
+			return [0, partDistance, 0];
+		case 'up':
+		default:
+			return [0, -partDistance, 0];
+	}
+}
+
 export default {
 	initialize: function() {
 		if (isInitialized) {
@@ -410,25 +485,27 @@ export default {
 			importPart(gl, model);
 		}
 	},
-	renderModel(model, size, rotation, partIdList, selectedPartIds) {
+	// config: {size, rotation, partList, selectedPartIDs, displacedParts}
+	renderModel(model, config) {
 		// eslint-disable-next-line no-undef
 		__lic.twgl = twgl;
-		canvas.width = canvas.height = size;
-		gl.viewport(0, 0, size, size);
+		canvas.width = canvas.height = config.size;
+		gl.viewport(0, 0, config.size, config.size);
 		const now = Date.now();
 		const identity = twgl.m4.create();
-		const objectsToDraw = generateObjectList(model, identity, null, partIdList, selectedPartIds);
-		drawScene(gl, programs, objectsToDraw, rotation);
+		config.isModel = true;
+		const objectsToDraw = generateObjectList(model, identity, null, config);
+		drawScene(gl, programs, objectsToDraw, config.rotation);
 		console.log('time CSI: ' + (Date.now() - now)); // eslint-disable-line no-console
 		return canvas;
 	},
-	renderPart(part, colorCode, size, rotation) {
-		canvas.width = canvas.height = size;
-		gl.viewport(0, 0, size, size);
+	renderPart(part, colorCode, config) {
+		canvas.width = canvas.height = config.size;
+		gl.viewport(0, 0, config.size, config.size);
 		const now = Date.now();
 		const identity = twgl.m4.create();
-		const objectsToDraw = generateObjectList(part, identity, colorCode);
-		drawScene(gl, programs, objectsToDraw, rotation);
+		const objectsToDraw = generateObjectList(part, identity, colorCode, {});
+		drawScene(gl, programs, objectsToDraw, config.rotation);
 		console.log('time PLI: ' + (Date.now() - now)); // eslint-disable-line no-console
 		return canvas;
 	}

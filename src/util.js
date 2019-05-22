@@ -305,11 +305,15 @@ _.mixin({
 				return res;
 			};
 		})();
-		color.luma = (color) =>{
-			color = _.color.toRGB(color);
-			return (0.2126 * Math.pow(color.r / 255, 2.2))
-				+ (0.7151 * Math.pow(color.g / 255, 2.2))
-				+ (0.0721 * Math.pow(color.b / 255, 2.2));
+		color.luma = (color, isUnitColor) => {
+			if (!Array.isArray(color)) {
+				color = _.color.toRGB(color);
+				color = [color.r, color.g, color.b];
+			}
+			const scale = isUnitColor ? 1 : 255;
+			return (0.2126 * Math.pow(color[0] / scale, 2.2))
+				+ (0.7151 * Math.pow(color[1] / scale, 2.2))
+				+ (0.0721 * Math.pow(color[2] / scale, 2.2));
 		};
 		color.opposite = (color) => {
 			return (_.color.luma(color) < 0.18) ? 'white' : 'black';
