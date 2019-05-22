@@ -10,6 +10,7 @@ import _ from '../util';
 import LDParse from '../LDParse';
 
 const studFaceColorCode = LDParse.studFaceColorCode;
+const arrowPartName = 'lic_displacement_arrow';
 const partBufferCache = {};
 let canvas, gl, programs;
 let isInitialized = false;
@@ -65,6 +66,10 @@ function generateObjectList(part, modelView, colorCode, config) {
 			addObject(res.condLines, buffers.condLines, modelView, edgeColor);
 		}
 	}
+
+	// const arrowMat = twgl.m4.translation([-30, -60, 10]);
+	// twgl.m4.rotateY(arrowMat, -_.radians(45), arrowMat);
+	// addArrowObject(res.faces, arrowMat, 24);
 
 	if (part.parts && part.parts.length) {
 
@@ -161,8 +166,8 @@ function drawScene(gl, programs, objectsToDraw, rotation) {
 	const projectionMatrix = twgl.m4.ortho(-w, w, w / aspect, -w / aspect, w * 2, -w * 2);
 
 	const viewMatrix = twgl.m4.create();
-	twgl.m4.rotateX(viewMatrix, Math.PI / 6, viewMatrix);
-	twgl.m4.rotateY(viewMatrix, Math.PI / 4, viewMatrix);
+	twgl.m4.rotateX(viewMatrix, _.radians(30), viewMatrix);
+	twgl.m4.rotateY(viewMatrix, _.radians(45), viewMatrix);
 	if (rotation) {
 		if (rotation.x) {
 			twgl.m4.rotateX(viewMatrix, _.radians(rotation.x), viewMatrix);
@@ -231,15 +236,32 @@ function addObject(objectsToDraw, buffers, modelView, color) {
 	}
 }
 
+function addArrowObject(objectsToDraw, mat, length) {
+
+	const arrowBuffers = partBufferCache[arrowPartName];
+
+	// Arrows have their base at [0, 0, 0]
+	// Scale arrow body to correct length, then draw it
+	const bodyMat = twgl.m4.scaling([1, length, 1]);
+	twgl.m4.multiply(bodyMat, mat, bodyMat);
+	addObject(objectsToDraw, arrowBuffers.body, bodyMat, [1, 0, 0, 1]);
+
+	// Translate arrow tip to end of arrow body, then draw it
+	const tipMat = twgl.m4.translation([0, length - 1, 0]);
+	twgl.m4.multiply(tipMat, mat, tipMat);
+	addObject(objectsToDraw, arrowBuffers.tip, tipMat, [1, 0, 0, 1]);
+}
+
 function addFace(faceData, primitive) {
+	const points = primitive.points || primitive;
 	const idx = faceData.indices.lastIndex;
-	faceData.position.data.push(...primitive.points);
+	faceData.position.data.push(...points);
 	faceData.indices.data.push(idx, idx + 1, idx + 2);
-	if (primitive.shape === 'triangle') {
-		faceData.indices.lastIndex += 3;
-	} else {
+	if (primitive.shape === 'quad') {
 		faceData.indices.data.push(idx, idx + 2, idx + 3);
 		faceData.indices.lastIndex += 4;
+	} else {
+		faceData.indices.lastIndex += 3;
 	}
 }
 
@@ -339,6 +361,52 @@ function createBBoxBuffer(box) {
 	addLine(lineData, [x1, y0, z1, x1, y1, z1]);
 
 	return twgl.createBufferInfoFromArrays(gl, lineData);
+}
+
+// Arrow geometry has base at (0, 0, 0), pointing straight down along Y, facing forward along Z
+// Arrows are drawwn in two parts: the tip and the base, which can be stretched to any length
+function createArrowBuffers() {
+
+	const arrowDimensions = {
+		head: {
+			length: 28,
+			width: 7,
+			insetDepth: 4
+		},
+		body: {
+			width: 2.25
+		}
+	};
+
+	const head = arrowDimensions.head;
+	const body = arrowDimensions.body;
+	const bodyLength = 1;
+
+	const vertices = [
+		0, bodyLength - head.insetDepth + head.length, 0,   // 0 tip
+		-head.width, bodyLength - head.insetDepth, 0,  // 1 left arrow end
+		-body.width, bodyLength, 0,  // 2 left arrow joint
+		body.width, bodyLength, 0,  // 3 right arrow joint
+		head.width, bodyLength - head.insetDepth, 0,  // 4 right arrow end
+		body.width, 0, 0,  // 5 right base corner
+		-body.width, 0, 0  // 6 left base corner
+	];
+
+	const tipIndices = [0, 1, 2, 0, 2, 3, 0, 3, 4];
+	const bodyIndices = [2, 3, 5, 2, 5, 6];
+
+	const tipData = {
+		position: {data: vertices, numComponents: 3},
+		indices: {data: tipIndices, numComponents: 3}
+	};
+	const bodyData = {
+		position: {data: vertices, numComponents: 3},
+		indices: {data: bodyIndices, numComponents: 3}
+	};
+	return {
+		tip: twgl.createBufferInfoFromArrays(gl, tipData),
+		body: twgl.createBufferInfoFromArrays(gl, bodyData)
+	};
 }
 
 function importPart(gl, part) {
@@ -466,6 +534,8 @@ export default {
 			lines: twgl.createProgramInfo(gl, [lineShaderSource, fragmentShaderSource]),
 			condLines: twgl.createProgramInfo(gl, [condLineShaderSource, fragmentShaderSource])
 		};
+
+		partBufferCache[arrowPartName] = createArrowBuffers();
 
 		importPart(gl, LDParse.partDictionary['templateModel.ldr']);
 	},
