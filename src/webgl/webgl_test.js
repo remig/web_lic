@@ -9,6 +9,8 @@ import twgl from './twgl';
 import _ from '../util';
 import LDParse from '../LDParse';
 
+const selectedPartBoxColor = [1, 0, 0, 1];
+const selectedPartAlpha = 0.5;
 const studFaceColorCode = LDParse.studFaceColorCode;
 const arrowPartName = 'lic_displacement_arrow';
 const partBufferCache = {};
@@ -67,10 +69,6 @@ function generateObjectList(part, modelView, colorCode, config) {
 		}
 	}
 
-	// const arrowMat = twgl.m4.translation([-30, -60, 10]);
-	// twgl.m4.rotateY(arrowMat, -_.radians(45), arrowMat);
-	// addArrowObject(res.faces, arrowMat, 24);
-
 	if (part.parts && part.parts.length) {
 
 		if (config.isModel) {
@@ -88,32 +86,38 @@ function generateObjectList(part, modelView, colorCode, config) {
 
 			for (let i = 0; i < localPartList.length; i++) {
 
+				let partBox;
 				const subPart = part.parts[localPartList[i]];
 				const abstractPart = LDParse.partDictionary[subPart.filename];
 
-				const newMat = LDMatrixToMatrix(subPart.matrix);
-				twgl.m4.multiply(newMat, modelView, newMat);
-
-				const displacement = displacedParts[localPartList[i]];
-				if (displacement) {
-					const translation = getPartDisplacement(displacement);
-					twgl.m4.translate(newMat, translation, newMat);
-				}
+				const partMatrix = LDMatrixToMatrix(subPart.matrix);
+				twgl.m4.multiply(partMatrix, modelView, partMatrix);
 
 				const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
 				let localAlpha = config.alpha;
 				if (config.selectedPartIDs && config.selectedPartIDs.includes(localPartList[i])) {
-					localAlpha = 0.5;
-					const box = getPartBoundingBox(abstractPart, modelView);
-					const boxBuffers = createBBoxBuffer(box);
-					addObject(res.lines, boxBuffers, newMat, [1, 0, 0, 1]);
+					localAlpha = selectedPartAlpha;
+					partBox = getPartBoundingBox(abstractPart, modelView);
+					const boxBuffers = createBBoxBuffer(partBox);
+					addObject(res.lines, boxBuffers, partMatrix, selectedPartBoxColor);
+				}
+
+				const displacement = displacedParts[localPartList[i]];
+				if (displacement) {
+					const translation = getPartDisplacement(displacement);
+					twgl.m4.translate(partMatrix, translation, partMatrix);
+
+					partBox = partBox || getPartBoundingBox(abstractPart, modelView);
+					const arrowMat = getArrowPosition(partBox, partMatrix, displacement);
+					rotateArrow(arrowMat, displacement);
+					addArrowObject(res.faces, arrowMat, (displacement.arrowLength || 60) - 15);
 				}
 
 				const localConfig = {
 					alpha: localAlpha,
 					parentColorCode: colorCode
 				};
-				const newObject = generateObjectList(abstractPart, newMat, newColorCode, localConfig);
+				const newObject = generateObjectList(abstractPart, partMatrix, newColorCode, localConfig);
 				res.faces.push(...newObject.faces);
 				res.lines.push(...newObject.lines);
 				res.condLines.push(...newObject.condLines);
@@ -125,8 +129,8 @@ function generateObjectList(part, modelView, colorCode, config) {
 				const subPart = part.parts[i];
 				const abstractPart = LDParse.partDictionary[subPart.filename];
 
-				const newMat = LDMatrixToMatrix(subPart.matrix);
-				twgl.m4.multiply(newMat, modelView, newMat);
+				const partMatrix = LDMatrixToMatrix(subPart.matrix);
+				twgl.m4.multiply(partMatrix, modelView, partMatrix);
 
 				const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
 				const localConfig = {
@@ -134,7 +138,7 @@ function generateObjectList(part, modelView, colorCode, config) {
 					parentColorCode: colorCode
 				};
 
-				const newObject = generateObjectList(abstractPart, newMat, newColorCode, localConfig);
+				const newObject = generateObjectList(abstractPart, partMatrix, newColorCode, localConfig);
 				res.faces.push(...newObject.faces);
 				res.lines.push(...newObject.lines);
 				res.condLines.push(...newObject.condLines);
@@ -309,33 +313,37 @@ function getPartBoundingBox(part, modelView) {
 	if (part.parts && part.parts.length) {
 		for (let i = 0; i < part.parts.length; i++) {
 			const subPart = part.parts[i];
-			const newMat = LDMatrixToMatrix(subPart.matrix);
-			twgl.m4.multiply(newMat, modelView, newMat);
+			const partMatrix = LDMatrixToMatrix(subPart.matrix);
+			twgl.m4.multiply(partMatrix, modelView, partMatrix);
 			const abstractPart = LDParse.partDictionary[subPart.filename];
-			const partBBox = getPartBoundingBox(abstractPart, newMat);
-			if (partBBox[0] < minX) { minX = partBBox[0]; }
-			if (partBBox[1] < minY) { minY = partBBox[1]; }
-			if (partBBox[2] < minZ) { minZ = partBBox[2]; }
-			if (partBBox[3] > maxX) { maxX = partBBox[3]; }
-			if (partBBox[4] > maxY) { maxY = partBBox[4]; }
-			if (partBBox[5] > maxZ) { maxZ = partBBox[5]; }
+			const subBox = getPartBoundingBox(abstractPart, partMatrix);
+			if (subBox.min[0] < minX) { minX = subBox.min[0]; }
+			if (subBox.min[1] < minY) { minY = subBox.min[1]; }
+			if (subBox.min[2] < minZ) { minZ = subBox.min[2]; }
+			if (subBox.max[3] > maxX) { maxX = subBox.max[3]; }
+			if (subBox.max[4] > maxY) { maxY = subBox.max[4]; }
+			if (subBox.max[5] > maxZ) { maxZ = subBox.max[5]; }
 		}
 	}
-	return [minX, minY, minZ, maxX, maxY, maxZ];
+	return {
+		min: [minX, minY, minZ],
+		max: [maxX, maxY, maxZ]
+	};
 }
 
 function growBox(box) {
-	const scale = 1.5;
-	return [
-		box[0] - scale, box[1] - scale, box[2] - scale,
-		box[3] + scale, box[4] + scale, box[5] + scale
-	];
+	const scale = 1.5, min = box.min, max = box.max;
+	return {
+		min: [min[0] - scale, min[1] - scale, min[2] - scale],
+		max: [max[0] + scale, max[1] + scale, max[2] + scale]
+	};
 }
 
 function createBBoxBuffer(box) {
+
 	box = growBox(box);
-	const x0 = box[0], y0 = box[1], z0 = box[2];
-	const x1 = box[3], y1 = box[4], z1 = box[5];
+	const [x0, y0, z0] = box.min;
+	const [x1, y1, z1] = box.max;
 
 	const lineData = {
 		position: {data: [], numComponents: 3},
@@ -407,6 +415,66 @@ function createArrowBuffers() {
 		tip: twgl.createBufferInfoFromArrays(gl, tipData),
 		body: twgl.createBufferInfoFromArrays(gl, bodyData)
 	};
+}
+
+function getArrowPosition(partBox, modelView, {direction, arrowOffset = 0}) {
+
+	const min = twgl.m4.transformPoint(modelView, partBox.min);
+	const max = twgl.m4.transformPoint(modelView, partBox.max);
+
+	let x = (min[0] + max[0]) / 2;
+	let y = (min[1] + max[1]) / 2;
+	let z = (min[2] + max[2]) / 2;
+
+	if (arrowOffset) {
+		if (direction === 'left') {
+			x += arrowOffset;
+		} else if (direction === 'right') {
+			x -= arrowOffset;
+		} else if (direction === 'forward') {
+			z += arrowOffset;
+		} else if (direction === 'backward') {
+			z -= arrowOffset;
+		} else if (direction === 'down') {
+			y -= arrowOffset;
+		} else {
+			y += arrowOffset;
+		}
+	}
+	return twgl.m4.translation([x, y, z]);
+}
+
+function rotateArrow(arrowMat, {direction, arrowRotation = 0}) {
+
+	let rx, ry, rz;
+	if (direction === 'left') {
+		rz = -90;
+		rx = -45 + arrowRotation;
+	} else if (direction === 'right') {
+		rz = 90;
+		rx = -45 + arrowRotation;
+	} else if (direction === 'forward') {
+		rx = 90;
+		ry = 45 + arrowRotation;
+	} else if (direction === 'backward') {
+		rx = -90;
+		ry = -45 + arrowRotation;
+	} else if (direction === 'down') {
+		rx = 180;
+		ry = 45 + arrowRotation;
+	} else {
+		ry = -45 + arrowRotation;
+	}
+
+	if (rx) {
+		twgl.m4.rotateX(arrowMat, _.radians(rx), arrowMat);
+	}
+	if (rz) {
+		twgl.m4.rotateZ(arrowMat, _.radians(rz), arrowMat);
+	}
+	if (ry) {
+		twgl.m4.rotateY(arrowMat, _.radians(ry), arrowMat);
+	}
 }
 
 function importPart(gl, part) {
