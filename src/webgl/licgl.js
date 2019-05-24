@@ -296,17 +296,18 @@ function getPartBoundingBox(part, modelView) {
 	let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
 	if (part.primitives && part.primitives.length) {
 		for (let i = 0; i < part.primitives.length; i++) {
-			const shape = part.primitives[i].shape;
-			if (shape === 'triangle' || shape === 'quad') {
-				const pts = part.primitives[i].points;
+			const primitive = part.primitives[i];
+			if (primitive.shape === 'triangle' || primitive.shape === 'quad') {
+				const pts = primitive.points;
 				for (let j = 0; j < pts.length; j += 3) {
-					const pt = twgl.m4.transformPoint(modelView, pts);
-					if (pt[j + 0] < minX) { minX = pt[j + 0]; }
-					if (pt[j + 1] < minY) { minY = pt[j + 1]; }
-					if (pt[j + 2] < minZ) { minZ = pt[j + 2]; }
-					if (pt[j + 0] > maxX) { maxX = pt[j + 0]; }
-					if (pt[j + 1] > maxY) { maxY = pt[j + 1]; }
-					if (pt[j + 2] > maxZ) { maxZ = pt[j + 2]; }
+					const x = pts[j], y = pts[j + 1], z = pts[j + 2];
+					const pt = twgl.m4.transformPoint(modelView, [x, y, z]);
+					if (pt[0] < minX) { minX = pt[0]; }
+					if (pt[1] < minY) { minY = pt[1]; }
+					if (pt[2] < minZ) { minZ = pt[2]; }
+					if (pt[0] > maxX) { maxX = pt[0]; }
+					if (pt[1] > maxY) { maxY = pt[1]; }
+					if (pt[2] > maxZ) { maxZ = pt[2]; }
 				}
 			}
 		}
@@ -321,9 +322,9 @@ function getPartBoundingBox(part, modelView) {
 			if (subBox.min[0] < minX) { minX = subBox.min[0]; }
 			if (subBox.min[1] < minY) { minY = subBox.min[1]; }
 			if (subBox.min[2] < minZ) { minZ = subBox.min[2]; }
-			if (subBox.max[3] > maxX) { maxX = subBox.max[3]; }
-			if (subBox.max[4] > maxY) { maxY = subBox.max[4]; }
-			if (subBox.max[5] > maxZ) { maxZ = subBox.max[5]; }
+			if (subBox.max[0] > maxX) { maxX = subBox.max[0]; }
+			if (subBox.max[1] > maxY) { maxY = subBox.max[1]; }
+			if (subBox.max[2] > maxZ) { maxZ = subBox.max[2]; }
 		}
 	}
 	return {
