@@ -763,7 +763,7 @@ const contextMenu = {
 					const abstractPart = LDParse.partDictionary[part.filename];
 					return {
 						id: 'select_part_' + partID + '_cmenu',
-						text: abstractPart.name,
+						text: LocaleManager.noTranslate(abstractPart.name),
 						cb() {
 							app.setSelected({type: 'part', id: partID, stepID: step.id});
 						}

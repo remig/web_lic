@@ -132,17 +132,21 @@ const api = {
 
 	undoText() {
 		const text = api.isUndoAvailable() ? state.stack[state.index].undoText : '';
-		return '_tr_' + LocaleManager.translate(
-			'action.edit.undo.name_@mf',
-			{text}
+		return LocaleManager.noTranslate(
+			LocaleManager.translate(
+				'action.edit.undo.name_@mf',
+				{text}
+			)
 		);
 	},
 
 	redoText() {
 		const text = api.isRedoAvailable() ? state.stack[state.index + 1].undoText : '';
-		return '_tr_' + LocaleManager.translate(
-			'action.edit.redo.name_@mf',
-			{text}
+		return LocaleManager.noTranslate(
+			LocaleManager.translate(
+				'action.edit.redo.name_@mf',
+				{text}
+			)
 		);
 	}
 };

@@ -17,6 +17,7 @@ LanguageList.sort((a, b) => {
 	return 0;
 });
 
+const noTranslateKey = '_tr_';
 const loadedLanguages = {};  // key: locale code, value: language
 let currentLocale;
 
@@ -55,8 +56,8 @@ function translateLink(text, link) {
 
 function translate(key, args) {
 
-	if (key.startsWith('_tr_')) {
-		return key.replace('_tr_', '');  // Don't translate these already translated strings
+	if (key.startsWith(noTranslateKey)) {
+		return key.replace(noTranslateKey, '');  // Don't translate these already translated strings
 	}
 
 	if (key.startsWith('ctrl+')) {
@@ -149,6 +150,10 @@ Vue.component('localeChooserDialog', {
 	}
 });
 
+function noTranslate(str) {
+	return noTranslateKey + str;
+}
+
 restoreLanguage();
 
-export default {translate, getLocale, setLocale, pickLanguage, LanguageList};
+export default {translate, getLocale, setLocale, pickLanguage, LanguageList, noTranslate};
