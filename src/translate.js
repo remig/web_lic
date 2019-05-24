@@ -55,6 +55,10 @@ function translateLink(text, link) {
 
 function translate(key, args) {
 
+	if (key.startsWith('_tr_')) {
+		return key.replace('_tr_', '');  // Don't translate these already translated strings
+	}
+
 	if (key.startsWith('ctrl+')) {
 		return translate('glossary.ctrl') + ' + ' + key.charAt(key.length - 1).toUpperCase();
 	}

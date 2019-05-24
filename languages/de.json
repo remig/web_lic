@@ -105,10 +105,10 @@
         "edit": {
             "name": "Bearbeiten",
             "undo": {
-                "name": "Rückgängig:"
+                "name_@mf": "Rückgängig: ${text}"
             },
             "redo": {
-                "name": "Wiederherstellen:"
+                "name_@mf": "Wiederherstellen: ${text}"
             },
             "title_page": {
                 "add": {

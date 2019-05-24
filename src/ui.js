@@ -14,6 +14,8 @@
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
 // - show grid works, but menus still says 'show grid', which shows it again, can't hide it
 // - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
+// - Language choose dropdown bounces around annoyingly
+// - Template page, when selecting page itself, property panel title is not translated on language change
 
 import _ from './util';
 import uiState from './uiState';
@@ -41,15 +43,7 @@ Vue.config.performance = false;
 Vue.use({
 	// Add a 'tr' method to every component, which makes translating strings in template HTML easier
 	install(Vue) {
-		Vue.prototype.tr = function(str, args) {
-			try {
-				return LocaleManager.translate(str, args);
-			} catch (e) {  // eslint-disable-line no-empty
-				// TODO: Intentionally empty; once all strings are out of the HTML / components
-				// and into the translation files, remove this try catch
-			}
-			return str;
-		};
+		Vue.prototype.tr = LocaleManager.translate;
 	}
 });
 

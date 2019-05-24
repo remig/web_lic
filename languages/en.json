@@ -105,10 +105,10 @@
         "edit": {
             "name": "Edit",
             "undo": {
-                "name": "Undo"
+                "name_@mf": "Undo ${text}"
             },
             "redo": {
-                "name": "Redo"
+                "name_@mf": "Redo ${text}"
             },
             "title_page": {
                 "add": {

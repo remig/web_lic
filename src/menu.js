@@ -187,7 +187,7 @@ const menu = [
 			children() {
 				return LocaleManager.LanguageList.map(language => {
 					return {
-						text: language.language,
+						text: '_tr_' + language.language,
 						id: `language_${language.code}_menu`,
 						cb() {
 							LocaleManager.setLocale(language.code);

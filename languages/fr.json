@@ -105,10 +105,10 @@
         "edit": {
             "name": "Edition",
             "undo": {
-                "name": "Revenir en arrière"
+                "name_@mf": "Revenir en arrière ${text}"
             },
             "redo": {
-                "name": "Refaire la dernière action"
+                "name_@mf": "Refaire la dernière action ${text}"
             },
             "title_page": {
                 "add": {

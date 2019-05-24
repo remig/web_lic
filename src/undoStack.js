@@ -131,13 +131,19 @@ const api = {
 	},
 
 	undoText() {
-		return LocaleManager.translate('action.edit.undo.name') +
-			` ${api.isUndoAvailable() ? state.stack[state.index].undoText : ''}`;
+		const text = api.isUndoAvailable() ? state.stack[state.index].undoText : '';
+		return '_tr_' + LocaleManager.translate(
+			'action.edit.undo.name_@mf',
+			{text}
+		);
 	},
 
 	redoText() {
-		return LocaleManager.translate('action.edit.redo.name') +
-			` ${api.isRedoAvailable() ? state.stack[state.index + 1].undoText : ''}`;
+		const text = api.isRedoAvailable() ? state.stack[state.index + 1].undoText : '';
+		return '_tr_' + LocaleManager.translate(
+			'action.edit.redo.name_@mf',
+			{text}
+		);
 	}
 };
 
