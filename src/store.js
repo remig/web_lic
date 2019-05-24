@@ -392,8 +392,12 @@ const store = {
 					// If main model contains no steps but contains submodels that contain steps,
 					// add one step per part in main model.
 					localModel.steps = localModel.parts.map((p, idx) => ({parts: [idx]}));
-				} else {
+				} else if (localModel === store.model || store.model.steps == null) {
+					// Only auto-add steps to the main model or to sub models if the main model itself
+					// does not have any steps.
 					localModel.steps = StepInsertion(localModel, {partsPerStep: opts.partsPerStep});
+				} else {
+					localModel.steps = [];
 				}
 			}
 
