@@ -7,12 +7,15 @@
 // - submenus and tree are not re-translated on language change
 // - dialogs, like 3D part rendering, are wrapping badly
 // - 'enter' key on language picker / what's new / some dialogs reloads the page
-// - 'dupe key' error when selecting & right clicking CSIs
+// - 'dupe key' error when selecting & right clicking CSIs with 2x+ of one part
 // - add LDraw part library attribution to 'About Lic'
 // - add 'culled' versions of popular parts, with their inside bits removed
 // - add an 'LDraw_parts' repro to git, track all parts in there, clone that on bugeyedmonkeys
+// - select a template page item and hit 'delete' will deletes the item
+// - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
+// - show grid works, but menus still says 'show grid', which shows it again, can't hide it
+// - Add 'Side -> top | bottom | left | right | front | back' entries to CSI rotation
 
-import './thickLines';
 import _ from './util';
 import uiState from './uiState';
 import store from './store';
