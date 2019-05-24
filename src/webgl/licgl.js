@@ -528,25 +528,20 @@ export default {
 	// config: {size, rotation, partList, selectedPartIDs, displacedParts}
 	renderModel(model, config) {
 		// eslint-disable-next-line no-undef
-		__lic.twgl = twgl;
 		canvas.width = canvas.height = config.size;
 		gl.viewport(0, 0, config.size, config.size);
-		const now = Date.now();
 		const identity = twgl.m4.create();
 		config.isModel = true;
 		const objectsToDraw = generateObjectList(model, identity, null, config);
 		drawScene(gl, programs, objectsToDraw, config);
-		console.log('time CSI: ' + (Date.now() - now)); // eslint-disable-line no-console
 		return canvas;
 	},
 	renderPart(part, colorCode, config) {
 		canvas.width = canvas.height = config.size;
 		gl.viewport(0, 0, config.size, config.size);
-		const now = Date.now();
 		const identity = twgl.m4.create();
 		const objectsToDraw = generateObjectList(part, identity, colorCode, {});
 		drawScene(gl, programs, objectsToDraw, config);
-		console.log('time PLI: ' + (Date.now() - now)); // eslint-disable-line no-console
 		return canvas;
 	},
 	composeLDMatrix(transform) {
