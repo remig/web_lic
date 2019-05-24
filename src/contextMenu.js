@@ -4,7 +4,7 @@
 
 import _ from './util';
 import LDParse from './LDParse';
-import LicGL from './webgl/webgl_test';
+import LicGL from './webgl/licgl';
 import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';

@@ -4,7 +4,7 @@
 
 import _ from './util';
 import LDParse from './LDParse';
-import LicGL from './webgl/webgl_test';
+import LicGL from './webgl/licgl';
 
 const measurementCanvas = document.createElement('canvas');
 const renderState = {
