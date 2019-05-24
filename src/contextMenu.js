@@ -4,7 +4,7 @@
 
 import _ from './util';
 import LDParse from './LDParse';
-import LDRender from './LDRender';
+import LicGL from './webgl/webgl_test';
 import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
@@ -1302,16 +1302,16 @@ const contextMenu = {
 						const csi = store.get.csi(step.csiID);
 						const part = LDParse.model.get.partFromID(selectedItem.id, step.model.filename);
 						const originalMatrix = _.cloneDeep(part.matrix);
-						const transform = LDRender.LDMatrixToTransform(part.matrix);
+						const transform = LicGL.decomposeLDMatrix(part.matrix);
 						DialogManager('transformPartDialog', dialog => {
 							dialog.$on('update', newTransform => {
-								part.matrix = LDRender.TransformToLDMatrix(newTransform);
+								part.matrix = LicGL.composeLDMatrix(newTransform);
 								csi.isDirty = true;
 								app.redrawUI(true);
 							});
 							dialog.$on('ok', newTransform => {
 								part.matrix = originalMatrix;
-								const matrix = LDRender.TransformToLDMatrix(newTransform);
+								const matrix = LicGL.composeLDMatrix(newTransform);
 								const action = LDParse.getAction.matrix({
 									filename: step.model.filename,
 									partID: selectedItem.id,

@@ -17,6 +17,7 @@ const partBufferCache = {};
 let canvas, gl, programs;
 let isInitialized = false;
 
+// This gets called *a lot*.  Keep it fast.
 // config: {partList, selectedPartIDs, alpha, parentColorCode}
 function generateObjectList(part, modelView, colorCode, config) {
 
@@ -149,7 +150,7 @@ function generateObjectList(part, modelView, colorCode, config) {
 	return res;
 }
 
-function drawScene(gl, programs, objectsToDraw, rotation) {
+function drawScene(gl, programs, objectsToDraw, config) {
 
 	gl.clearColor(0, 0, 0, 0);
 	gl.clearDepth(1.0);
@@ -163,15 +164,13 @@ function drawScene(gl, programs, objectsToDraw, rotation) {
 
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	const w = 530;
-	const thickness = 0.002;
+	const {rotation, lineThickness, zoom} = config;
 	const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-	// left, right, bottom, top, near, far
-	const projectionMatrix = twgl.m4.ortho(-w, w, w / aspect, -w / aspect, w * 2, -w * 2);
+	const projectionMatrix = twgl.m4.ortho(-zoom, zoom, zoom / aspect, -zoom / aspect, zoom * 2, -zoom * 2);
 
 	const viewMatrix = twgl.m4.create();
-	twgl.m4.rotateX(viewMatrix, _.radians(30), viewMatrix);
-	twgl.m4.rotateY(viewMatrix, _.radians(45), viewMatrix);
+	twgl.m4.rotateX(viewMatrix, _.radians(36), viewMatrix);
+	twgl.m4.rotateY(viewMatrix, _.radians(55), viewMatrix);
 	if (rotation) {
 		if (rotation.x) {
 			twgl.m4.rotateX(viewMatrix, _.radians(rotation.x), viewMatrix);
@@ -201,7 +200,7 @@ function drawScene(gl, programs, objectsToDraw, rotation) {
 	gl.useProgram(programs.lines.program);
 	programs.lines.uniformSetters.projection(projectionMatrix);
 	programs.lines.uniformSetters.aspect(aspect);
-	programs.lines.uniformSetters.thickness(thickness);
+	programs.lines.uniformSetters.thickness(lineThickness);
 	for (let i = 0; i < objectsToDraw.lines.length; i++) {
 		const object = objectsToDraw.lines[i];
 		twgl.setBuffersAndAttributes(gl, programs.lines, object.buffers);
@@ -212,7 +211,7 @@ function drawScene(gl, programs, objectsToDraw, rotation) {
 	gl.useProgram(programs.condLines.program);
 	programs.condLines.uniformSetters.projection(projectionMatrix);
 	programs.condLines.uniformSetters.aspect(aspect);
-	programs.condLines.uniformSetters.thickness(thickness);
+	programs.condLines.uniformSetters.thickness(lineThickness);
 	for (let i = 0; i < objectsToDraw.condLines.length; i++) {
 		const object = objectsToDraw.condLines[i];
 		twgl.setBuffersAndAttributes(gl, programs.condLines, object.buffers);
@@ -377,12 +376,12 @@ function createArrowBuffers() {
 
 	const arrowDimensions = {
 		head: {
-			length: 28,
-			width: 7,
-			insetDepth: 4
+			length: 26,
+			width: 6,
+			insetDepth: 3
 		},
 		body: {
-			width: 2.25
+			width: 1.4
 		}
 	};
 
@@ -565,6 +564,13 @@ function LDMatrixToMatrix(m) {
 	res[12] = m[0]; res[13] = m[1]; res[14] = m[ 2]; res[15] = 1;
 	return res;
 }
+
+function MatrixToLDMatrix(m) {
+	return [
+		m[12], m[13], m[14],  // x, y, z
+		m[ 0], m[ 4], m[ 8], m[1], m[5], m[9], m[2], m[6], m[10]  // a - i
+	];
+}
 /* eslint-enable computed-property-spacing */
 
 function getPartDisplacement({direction, partDistance = 60}) {
@@ -633,7 +639,7 @@ export default {
 		const identity = twgl.m4.create();
 		config.isModel = true;
 		const objectsToDraw = generateObjectList(model, identity, null, config);
-		drawScene(gl, programs, objectsToDraw, config.rotation);
+		drawScene(gl, programs, objectsToDraw, config);
 		console.log('time CSI: ' + (Date.now() - now)); // eslint-disable-line no-console
 		return canvas;
 	},
@@ -643,8 +649,72 @@ export default {
 		const now = Date.now();
 		const identity = twgl.m4.create();
 		const objectsToDraw = generateObjectList(part, identity, colorCode, {});
-		drawScene(gl, programs, objectsToDraw, config.rotation);
+		drawScene(gl, programs, objectsToDraw, config);
 		console.log('time PLI: ' + (Date.now() - now)); // eslint-disable-line no-console
 		return canvas;
+	},
+	composeLDMatrix(transform) {
+		const pos = transform.position, rot = transform.rotation;
+
+		const x = _.radians(rot.x), y = _.radians(rot.y), z = _.radians(rot.z);
+		const a = Math.cos(x), b = Math.sin(x);
+		const c = Math.cos(y), d = Math.sin(y);
+		const e = Math.cos(z), f = Math.sin(z);
+
+		const ae = a * e, af = a * f, be = b * e, bf = b * f;
+
+		const m = [
+			c * e, af + be * d, bf - ae * d, 0,
+			-c * f, ae - bf * d, be + af * d, 0,
+			d, -b * c, a * c, 0,
+			pos.x, pos.y, pos.z, 1
+		];
+
+		return MatrixToLDMatrix(m).map(el => Math.abs(el) < 0.0000001 ? 0 : el);
+	},
+	decomposeLDMatrix(ldMatrix) {
+
+		const m = LDMatrixToMatrix(ldMatrix);
+
+		const sx = twgl.v3.length([m[0], m[1], m[2]]);
+		const sy = twgl.v3.length([m[4], m[5], m[6]]);
+		const sz = twgl.v3.length([m[8], m[9], m[10]]);
+
+		if (sx !== 1) {
+			m[0] *= 1 / sx;
+			m[1] *= 1 / sx;
+			m[2] *= 1 / sx;
+		}
+		if (sy !== 1) {
+			m[4] *= 1 / sy;
+			m[5] *= 1 / sy;
+			m[6] *= 1 / sy;
+		}
+		if (sz !== 1) {
+			m[8] *= 1 / sz;
+			m[9] *= 1 / sz;
+			m[10] *= 1 / sz;
+		}
+
+		const m11 = m[0], m12 = m[4], m13 = m[8];
+		const m22 = m[5], m23 = m[9];
+		const m32 = m[6], m33 = m[10];
+
+		const ry = Math.asin(_.clamp(m13, -1, 1));
+		let rx, rz;
+
+		if (Math.abs(m13) < 0.99999) {
+			rx = Math.atan2(-m23, m33);
+			rz = Math.atan2(-m12, m11);
+		} else {
+			rx = Math.atan2(m32, m22);
+			rz = 0;
+		}
+
+		return {
+			position: {x: m[12], y: m[13], z: m[14]},
+			rotation: {x: _.degrees(rx), y: _.degrees(ry), z: _.degrees(rz)},
+			scale: {x: sx, y: sy, z: sz}
+		};
 	}
 };
