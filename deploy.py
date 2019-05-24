@@ -15,9 +15,11 @@ ftp.cwd('~/' + site + '/lic')
 ftp.mkd(version)
 ftp.mkd(version + '/static')
 ftp.mkd(version + '/dist')
-bundles = glob.glob('dist/[0-9]*.bundle.js');
+bundles = glob.glob('dist/[0-9]*.bundle.js')
 bundles = [n.replace(os.path.sep, '/') for n in bundles]
-for fn in ['whats_new.json', 'index.html', 'favicon.ico', 'static/style.css', 'dist/bundle.js'] + bundles:
+models = glob.glob('static/models/*')
+files = ['whats_new.json', 'index.html', 'favicon.ico', 'dist/bundle.js', 'static/style.css', 'static/transparent_background.png']
+for fn in files + bundles + models:
 	try:
 		ftp.delete(fn)
 	except error_perm:
