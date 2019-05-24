@@ -16,6 +16,7 @@
 			-->
 			<p v-html="tr('dialog.about_lic.free_@link', 'https://github.com/remig/web_lic')" />
 			<p v-html="tr('dialog.about_lic.read_more_@link', 'http://bugeyedmonkeys.com/lic/about/')" />
+			<p v-html="tr('dialog.about_lic.ldraw_@link', 'https://www.ldraw.org/')" />
 			<p v-html="tr('dialog.about_lic.contact_@link', 'https://github.com/remig/web_lic/issues')" />
 			<!-- eslint-disable-next-line max-len -->
 			<p v-html="tr('dialog.about_lic.lang_@link', 'https://github.com/remig/web_lic/wiki/Translating-Lic')" />
