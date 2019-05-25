@@ -7,7 +7,6 @@
 // - 'enter' key on language picker / what's new / some dialogs reloads the page
 // - add 'culled' versions of popular parts, with their inside bits removed
 // - add an 'LDraw_parts' repro to git, track all parts in there, clone that on bugeyedmonkeys
-// - select a template page item and hit 'delete' will deletes the item
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
 // - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
 // - Language choose dropdown bounces around annoyingly
@@ -346,64 +345,71 @@ const app = new Vue({
 				this.$refs.pageView.pageDown();
 			} else if (e.key === 'PageUp') {
 				this.$refs.pageView.pageUp();
-			} else if (e.key === 'Delete' && selItem
-				&& store.mutations[selItem.type] && store.mutations[selItem.type].delete
-			) {
-				const opts = {doLayout: true};
-				opts[selItem.type] = selItem;
-				const undoText = this.tr('action.edit.item.delete.undo_@mf',
-					{item: this.tr('glossary.' + selItem.type.toLowerCase())});
-				try {
-					this.clearSelected();
-					undoStack.commit(`${selItem.type}.delete`, opts, undoText);
-				} catch (e) {  // eslint-disable-line no-empty
-					// TODO: Intentionally empty; need to change each store.mutation.foo.delete that
-					// throws an error if delete can't happen to just returning instead.
+			} else if (e.key === 'Delete') {
+				if (selItem
+					&& !store.get.isTemplatePage(store.get.pageForItem(selItem))
+					&& store.mutations[selItem.type]
+					&& store.mutations[selItem.type].delete
+				) {
+					const opts = {doLayout: true};
+					opts[selItem.type] = selItem;
+					const undoText = this.tr('action.edit.item.delete.undo_@mf',
+						{item: this.tr('glossary.' + selItem.type.toLowerCase())});
+					try {
+						this.clearSelected();
+						undoStack.commit(`${selItem.type}.delete`, opts, undoText);
+					} catch (e) {  // eslint-disable-line no-empty
+						// TODO: Intentionally empty; need to change each store.mutation.foo.delete that
+						// throws an error if delete can't happen to just returning instead.
+					}
 				}
-			} else if (selItem && e.key.startsWith('Arrow') && store.get.isMoveable(selItem)) {
-				let dx = 0, dy = 0, dv = 1;
-				dv *= e.shiftKey ? 5 : 1;
-				dv *= e.ctrlKey ? 20 : 1;
-				if (e.key === 'ArrowUp') {
-					dy = -dv;
-				} else if (e.key === 'ArrowDown') {
-					dy = dv;
-				} else if (e.key === 'ArrowLeft') {
-					dx = -dv;
-				} else if (e.key === 'ArrowRight') {
-					dx = dv;
-				}
-				const item = store.get.lookupToItem(selItem);
-				if (item.type === 'point') {
-					const arrow = store.get.lookupToItem(item.parent);
-					if (arrow.points.indexOf(item.id) === 0) {
-						const newPos = {x: item.x + dx, y: item.y + dy};
-						const dt = _.geom.distance;
-						if (arrow.type === 'calloutArrow') {
-							// Special case: first point in callout arrow can't move away from callout
-							// TODO: this doesn't prevent arrow base from coming off rounded callout corners
-							const callout = store.get.callout(arrow.parent.id);
-							if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-								if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
-									dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
+			} else if (e.key.startsWith('Arrow')) {
+				if (selItem && store.get.isMoveable(selItem)) {
+					let dx = 0, dy = 0, dv = 1;
+					dv *= e.shiftKey ? 5 : 1;
+					dv *= e.ctrlKey ? 20 : 1;
+					if (e.key === 'ArrowUp') {
+						dy = -dv;
+					} else if (e.key === 'ArrowDown') {
+						dy = dv;
+					} else if (e.key === 'ArrowLeft') {
+						dx = -dv;
+					} else if (e.key === 'ArrowRight') {
+						dx = dv;
+					}
+					const item = store.get.lookupToItem(selItem);
+					if (item.type === 'point') {
+						const arrow = store.get.lookupToItem(item.parent);
+						if (arrow.points.indexOf(item.id) === 0) {
+							const newPos = {x: item.x + dx, y: item.y + dy};
+							const dt = _.geom.distance;
+							if (arrow.type === 'calloutArrow') {
+								// Special case: first point in callout arrow can't move away from callout
+								// TODO: doesn't prevent arrow base from coming off rounded callout corners
+								const callout = store.get.callout(arrow.parent.id);
+								if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+									if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
+										dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
+									} else {
+										dx = 0;  // Prevent movement from pulling arrow base off callout
+									}
 								} else {
-									dx = 0;  // Prevent movement from pulling arrow base off callout
-								}
-							} else {
-								if (dt(newPos.x, 0) < 2 || dt(newPos.x, callout.width) < 2) {
-									dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
-								} else {
-									dx = 0;  // Prevent movement from pulling arrow base off callout
+									if (dt(newPos.x, 0) < 2 || dt(newPos.x, callout.width) < 2) {
+										dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
+									} else {
+										dx = 0;  // Prevent movement from pulling arrow base off callout
+									}
 								}
 							}
 						}
 					}
-				}
 
-				if (dx !== 0 || dy !== 0) {
-					const undoText = this.tr('action.edit.item.move.undo_@mf',
-						{item: this.tr('glossary.' + selItem.type.toLowerCase())});
-					undoStack.commit('item.reposition', {item: item, dx, dy}, undoText);
+					if (dx !== 0 || dy !== 0) {
+						const undoText = this.tr('action.edit.item.move.undo_@mf',
+							{item: this.tr('glossary.' + selItem.type.toLowerCase())}
+						);
+						undoStack.commit('item.reposition', {item, dx, dy}, undoText);
+					}
 				}
 			} else {
 				// Check if key is a menu shortcut
