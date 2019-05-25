@@ -60,6 +60,7 @@
 				<el-checkbox
 					:disabled="!haveCustomFormat"
 					v-model="maintainAspectRatio"
+					class="wrap-checkbox"
 					@change="changeAspectRatio"
 				>
 					{{tr("template.page.aspect_ratio_@mf", {aspect_ratio: aspectRatio.toFixed(2)})}}

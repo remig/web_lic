@@ -3,10 +3,10 @@
 <template>
 	<licDialog
 		:title="tr('dialog.scene_rendering.title')"
-		width="450px"
+		width="400px"
 		class="sceneRenderingDialog"
 	>
-		<el-form label-width="140px">
+		<el-form label-width="180px">
 			<el-form-item :label="tr('dialog.scene_rendering.zoom')">
 				<input
 					v-model.number="values.zoom"

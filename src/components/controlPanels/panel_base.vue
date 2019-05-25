@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<div class="panel panel-template">
+	<div class="panel-template">
 		<h5>{{tr(title)}}</h5>
 		<div class="panel-body">
 			<el-form :label-width="labelWidth" label-position="left">
@@ -18,11 +18,3 @@ export default {
 };
 
 </script>
-
-<style scoped>
-
-.el-form >>> .el-form-item {
-	height: 48px;
-}
-
-</style>

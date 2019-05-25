@@ -4,7 +4,6 @@
 'use strict';
 
 // TODO:
-// - dialogs, like 3D part rendering, are wrapping badly
 // - 'enter' key on language picker / what's new / some dialogs reloads the page
 // - add 'culled' versions of popular parts, with their inside bits removed
 // - add an 'LDraw_parts' repro to git, track all parts in there, clone that on bugeyedmonkeys
@@ -39,15 +38,10 @@ ELEMENT.locale(ELEMENT.lang.en);
 Vue.config.performance = false;
 
 Vue.use({
-	// Add a 'tr' method to every component, which makes translating strings in template HTML easier
 	install(Vue) {
+		// Add a 'tr' method to every component, which makes translating strings in template HTML easier
 		Vue.prototype.tr = LocaleManager.translate;
-	}
-});
-
-Vue.use({
-	install(Vue) {
-		Vue.prototype._ = _;  // Add _ to every component
+		Vue.prototype._ = _;
 	}
 });
 

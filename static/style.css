@@ -138,6 +138,11 @@ div#container {
 	border-color: #409EFF;
 }
 
+.wrap-checkbox > .el-checkbox__label {
+	white-space: normal;
+	vertical-align: middle;
+}
+
 .el-color-picker__trigger, .el-color-picker__mask {
 	border-color: #ccc;
 	width: 34px;
@@ -194,6 +199,7 @@ div#container {
 
 .el-dialog__body {
 	padding: 20px;
+	word-break: unset;
 }
 
 .el-dropdown {
@@ -454,7 +460,7 @@ ul {
 	padding-bottom: 10px;
 }
 
-.panel-group .panel {
+.panel-group .panel-template {
 	border-radius: 0;
 	margin-bottom: 10px;
 	padding-bottom: 20px;
@@ -481,9 +487,11 @@ ul {
 	text-align: left;
 }
 
+/*
 .panel-template .form-horizontal .col-sm-5 {
-	/*padding-left: 0px;	*/
+	padding-left: 0px;
 }
+*/
 
 .panel-template .btn-secondary {
 	min-width: 35px;
