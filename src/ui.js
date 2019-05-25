@@ -13,7 +13,7 @@
 // - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
 // - Language choose dropdown bounces around annoyingly
 // - Change part to other part doesn't refresh CSI select box
-// - Remove 'stud face' from brick color dialog.  Can't change it anymore, it's locked to  line color or black
+// - Fix ldconfig to be all black edges except for black bricks.  And maybe update the colors, or not
 
 import _ from './util';
 import uiState from './uiState';

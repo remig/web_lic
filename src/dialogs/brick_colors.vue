@@ -16,13 +16,13 @@
 		</table>
 		<div class="brickColorTableScroll">
 			<table class="el-table brickColorTable">
-				<tr v-for="row in colorData" v-if="row" :key="row.id" class="brickColorRow">
-					<td>{{(row.id) === studFaceColorCode ? '--' : row.id}}</td>
+				<tr v-for="row in colorData" :key="row.id" class="brickColorRow">
+					<td>{{row.id}}</td>
 					<td style="text-align: left;">{{_.startCase(row.name)}}</td>
 					<td>
 						<el-color-picker v-model="row.color" color-format="hex" />
 					</td>
-					<td v-if="row.id !== studFaceColorCode">
+					<td>
 						<el-color-picker v-model="row.edge" color-format="hex" />
 					</td>
 				</tr>
@@ -52,22 +52,20 @@ function buildColorTable() {
 		}
 		k = parseInt(k, 10);
 		const customColor = customColors[k] || {};
-		colors[k] = {
+		colors.push({
 			id: k,
 			name: v.name,
 			color: customColor.color || v.color,
 			edge: customColor.edge || v.edge
-		};
+		});
 	});
-	colors.unshift(colors.pop());  // Move last color (stud face) to first slot in the table
 	return colors;
 }
 
 export default {
 	data: function() {
 		return {
-			colorData: buildColorTable(),
-			studFaceColorCode: LDParse.studFaceColorCode
+			colorData: buildColorTable()
 		};
 	},
 	methods: {
@@ -81,9 +79,6 @@ export default {
 				} else if (ldColor.color !== el.color) {
 					customColor = customColors[el.id] = customColors[el.id] || {};
 					customColor.color = el.color;
-					if (el.id === LDParse.studFaceColorCode) {
-						customColor.edge = el.edge = el.color;
-					}
 				}
 				if (ldColor.edge === el.edge && customColor) {
 					delete customColor.edge;
