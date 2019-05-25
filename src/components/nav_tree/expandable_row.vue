@@ -185,11 +185,7 @@ export default {
 	methods: {
 		forceUpdate() {
 			this.$forceUpdate();
-			this.$children.forEach(c => {
-				if (typeof c.forceUpdate === 'function') {
-					c.forceUpdate();
-				}
-			});
+			this.$children.forEach(c => c.forceUpdate());
 		},
 		needIcon() {
 			if (this.$children.length > 1) {

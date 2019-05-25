@@ -4,10 +4,8 @@
 'use strict';
 
 // TODO:
-// - submenus and tree are not re-translated on language change
 // - dialogs, like 3D part rendering, are wrapping badly
 // - 'enter' key on language picker / what's new / some dialogs reloads the page
-// - add LDraw part library attribution to 'About Lic'
 // - add 'culled' versions of popular parts, with their inside bits removed
 // - add an 'LDraw_parts' repro to git, track all parts in there, clone that on bugeyedmonkeys
 // - select a template page item and hit 'delete' will deletes the item

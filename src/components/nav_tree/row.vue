@@ -30,6 +30,9 @@ export default {
 		}
 	},
 	methods: {
+		forceUpdate() {
+			this.$forceUpdate();
+		},
 		itemClick() {
 			this.$emit('select-item', this.target);
 		},
