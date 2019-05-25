@@ -95,7 +95,7 @@ function generateObjectList(part, modelView, colorCode, config) {
 				const partMatrix = LDMatrixToMatrix(subPart.matrix);
 				twgl.m4.multiply(partMatrix, modelView, partMatrix);
 
-				const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
+				const newColorCode = (subPart.colorCode == null) ? colorCode : subPart.colorCode;
 				let localAlpha = config.alpha;
 				if (config.selectedPartIDs && config.selectedPartIDs.includes(localPartList[i])) {
 					localAlpha = selectedPartAlpha;
@@ -135,7 +135,7 @@ function generateObjectList(part, modelView, colorCode, config) {
 				const partMatrix = LDMatrixToMatrix(subPart.matrix);
 				twgl.m4.multiply(partMatrix, modelView, partMatrix);
 
-				const newColorCode = isValidColorCode(subPart.colorCode) ? subPart.colorCode : colorCode;
+				const newColorCode = (subPart.colorCode == null) ? colorCode : subPart.colorCode;
 				const localConfig = {
 					alpha: config.alpha,
 					parentColorCode: colorCode
@@ -447,10 +447,6 @@ function importPart(gl, part) {
 	}
 }
 
-function isValidColorCode(colorCode) {
-	return typeof colorCode === 'number' && colorCode >= 0;
-}
-
 /* eslint-disable computed-property-spacing */
 function LDMatrixToMatrix(m) {
 	const res = new Float32Array(16);
@@ -527,7 +523,6 @@ export default {
 	},
 	// config: {size, rotation, partList, selectedPartIDs, displacedParts}
 	renderModel(model, config) {
-		// eslint-disable-next-line no-undef
 		canvas.width = canvas.height = config.size;
 		gl.viewport(0, 0, config.size, config.size);
 		const identity = twgl.m4.create();

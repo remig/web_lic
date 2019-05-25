@@ -66,12 +66,6 @@ const api = {
 				};
 			}
 		}
-		if (colors[16]) {
-			colors[16].color = colors[16].edge = -1;
-		}
-		if (colors[24]) {
-			colors[24].color = colors[24].edge = -1;
-		}
 		api.setColorTable(colors);
 		needLDConfig = false;
 		return colors;
@@ -113,6 +107,9 @@ const api = {
 	// colorID: an LDraw color to lookup
 	// type: either 'color' or 'edge'
 	getColor(colorCode, type = 'color') {
+		if (colorCode == null) {
+			return null;
+		}
 		if (colorCode in api.customColorTable && api.customColorTable[colorCode][type]) {
 			return api.customColorTable[colorCode][type];
 		} else if (colorCode in api.colorTable) {
@@ -351,36 +348,42 @@ function parseColorCode(code) {
 		return '#' + code.slice(-6);
 	}
 	code = parseInt(code, 10);
-	return (code === 16 || code === 24) ? -1 : code;
+	return (code === 16 || code === 24) ? null : code;
 }
 
 async function parsePart(abstractPartParent, line) {
-	const partName = line.slice(14).join(' ');
-	let colorCode = parseColorCode(line[1]);
-	colorCode = forceBlack(colorCode, abstractPartParent.filename, partName);
-	await loadPart(partName);
-	abstractPartParent.parts.push({
-		colorCode: colorCode,  // TODO: only save this if it's not -1; treat null color as -1 = inherit
-		filename: partName,
+	const filename = line.slice(14).join(' ');
+	await loadPart(filename);
+	const newPart = {
+		filename,
 		matrix: parseFloatList(line.slice(2, 14))
-	});
+	};
+	let colorCode = parseColorCode(line[1]);
+	colorCode = forceBlack(colorCode, abstractPartParent.filename, filename);
+	if (colorCode != null) {
+		newPart.colorCode = colorCode;
+	}
+	abstractPartParent.parts.push(newPart);
 }
 
 function parseLine(abstractPart, line) {
-	abstractPart.primitives.push({
+	const newPrimitive = {
 		shape: primitiveTypes[line[0]],
-		colorCode: parseColorCode(line[1]),
 		points: [
 			parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
 			parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
 		]
-	});
+	};
+	const colorCode = parseColorCode(line[1]);
+	if (colorCode != null) {
+		newPrimitive.colorCode = colorCode;
+	}
+	abstractPart.primitives.push(newPrimitive);
 }
 
 function parseCondLine(abstractPart, line) {
-	abstractPart.primitives.push({
+	const newPart = {
 		shape: primitiveTypes[line[0]],
-		colorCode: parseColorCode(line[1]),
 		points: [
 			parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
 			parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
@@ -389,15 +392,24 @@ function parseCondLine(abstractPart, line) {
 			parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
 			parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13])
 		]
-	});
+	};
+	const colorCode = parseColorCode(line[1]);
+	if (colorCode != null) {
+		newPart.colorCode = colorCode;
+	}
+	abstractPart.primitives.push(newPart);
 }
 
 function parseFace(abstractPart, line) {
-	abstractPart.primitives.push({
+	const newFace = {
 		shape: primitiveTypes[line[0]],
-		colorCode: parseColorCode(line[1]),
 		points: parseFloatList(line.slice(2))
-	});
+	};
+	const colorCode = parseColorCode(line[1]);
+	if (colorCode != null) {
+		newFace.colorCode = colorCode;
+	}
+	abstractPart.primitives.push(newFace);
 }
 
 const lineParsers = {
