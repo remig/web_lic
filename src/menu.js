@@ -19,16 +19,15 @@ function enableIfModel() {
 	return store != null && store.model != null;
 }
 
-function toggleGrid(newState) {
-	return function() {
-		const root = uiState.get('grid'), op = 'replace', path = '/enabled';
-		const change = {
-			redo: [{root, op, path, value: newState}],
-			undo: [{root, op, path, value: !newState}]
-		};
-		const text = tr('action.view.grid.' + (newState ? 'show' : 'hide') + '.undo');
-		undoStack.commit(change, null, text);
+function toggleGrid() {
+	const root = uiState.get('grid'), op = 'replace', path = '/enabled';
+	const value = root.enabled;
+	const change = {
+		redo: [{root, op, path, value: !value}],
+		undo: [{root, op, path, value}]
 	};
+	const text = tr('action.view.grid.' + (value ? 'hide' : 'show') + '.undo');
+	undoStack.commit(change, null, text);
 }
 
 function addGuide(orientation) {
@@ -370,20 +369,13 @@ const menu = [
 			enabled: enableIfModel,
 			children: [
 				{
-					text: 'action.view.grid.show.name',
-					id: 'show_grid_menu',
-					shown() {
-						return !uiState.get('grid').enabled;
+					text() {
+						return uiState.get('grid.enabled')
+							? 'action.view.grid.hide.name'
+							: 'action.view.grid.show.name';
 					},
-					cb: toggleGrid(true)
-				},
-				{
-					text: 'action.view.grid.hide.name',
-					id: 'hide_grid_menu',
-					shown() {
-						return uiState.get('grid.enabled');
-					},
-					cb: toggleGrid(false)
+					id: 'grid_show_hide_menu',
+					cb: toggleGrid
 				},
 				{
 					text: 'action.view.grid.customize.name',

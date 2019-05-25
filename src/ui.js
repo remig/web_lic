@@ -12,10 +12,10 @@
 // - add an 'LDraw_parts' repro to git, track all parts in there, clone that on bugeyedmonkeys
 // - select a template page item and hit 'delete' will deletes the item
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
-// - show grid works, but menus still says 'show grid', which shows it again, can't hide it
 // - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
 // - Language choose dropdown bounces around annoyingly
-// - Template page, when selecting page itself, property panel title is not translated on language change
+// - Change part to other part doesn't refresh CSI select box
+// - Remove 'stud face' from brick color dialog.  Can't change it anymore, it's locked to  line color or black
 
 import _ from './util';
 import uiState from './uiState';

@@ -61,7 +61,7 @@ export default {
 	methods: {
 		forceUpdate() {
 			this.$forceUpdate();
-			this.$children.forEach(el => el.$forceUpdate());
+			this.$children.forEach(el => el.forceUpdate());
 		},
 		showAbout() {
 			DialogManager('aboutLicDialog');

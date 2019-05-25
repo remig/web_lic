@@ -52,6 +52,10 @@ export default {
 	// TODO: selectedItem = '' means ignore selectedItem entirely, which is ugly as hell
 	props: ['menuEntries', 'selectedItem'],
 	methods: {
+		forceUpdate() {
+			this.$forceUpdate();
+			this.$children.forEach(el => el.forceUpdate());
+		},
 		resolveProperty(p) {
 			return (typeof p === 'function') ? p(this.selectedItem) : p;
 		},
