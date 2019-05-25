@@ -2,8 +2,7 @@
 
 <template>
 	<div class="container" @click.stop="">
-		<h4>{{selectedItem ? tr('glossary.' + selectedItem.type.toLowerCase())
-		: tr('template.select_page_item')}}</h4>
+		<h4>{{title()}}</h4>
 		<div class="panel-group">
 			<component
 				ref="currentTemplatePanel"
@@ -100,7 +99,13 @@ export default {
 			const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 			undoStack.commit('', null, undoText, [entryType]);
 		},
+		title() {
+			return this.selectedItem
+				? this.tr('glossary.' + this.selectedItem.type.toLowerCase())
+				: this.tr('template.select_page_item');
+		},
 		forceUpdate() {
+			this.$forceUpdate();
 			if (this.$refs.currentTemplatePanel) {
 				this.$refs.currentTemplatePanel.$forceUpdate();
 				this.$refs.currentTemplatePanel.$children.forEach(el => el.$forceUpdate());
