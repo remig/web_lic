@@ -6,7 +6,7 @@
 		width="500px"
 		class="pageLayoutDialog"
 	>
-		<el-form :inline="true" label-width="100px">
+		<el-form :inline="true" label-width="100px" onSubmit="return false;">
 			<el-form-item :label="tr('dialog.page_layout.rows')">
 				<el-checkbox v-model="autoRows" @change="updateValues">
 					{{tr('glossary.auto')}}
@@ -23,7 +23,7 @@
 				>
 			</el-form-item>
 		</el-form>
-		<el-form :inline="true" label-width="100px">
+		<el-form :inline="true" label-width="100px" onSubmit="return false;">
 			<el-form-item :label="tr('dialog.page_layout.cols')">
 				<el-checkbox v-model="autoCols" @change="updateValues">
 					{{tr('glossary.auto')}}
@@ -40,7 +40,7 @@
 				>
 			</el-form-item>
 		</el-form>
-		<el-form :inline="true" label-width="100px">
+		<el-form :inline="true" label-width="100px" onSubmit="return false;">
 			<el-form-item :label="tr('dialog.page_layout.orientation')">
 				<el-radio
 					v-model="values.direction"

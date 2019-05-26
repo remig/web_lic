@@ -5,7 +5,7 @@
 		:title="title"
 		:width="width"
 	>
-		<el-form>
+		<el-form onSubmit="return false;">
 			<el-form-item :label="label" class="string_chooser_input">
 				<input
 					ref="set_focus"

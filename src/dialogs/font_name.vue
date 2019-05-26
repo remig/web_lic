@@ -6,7 +6,7 @@
 		width="630px"
 		class="fontNameDialog"
 	>
-		<el-form label-width="160px">
+		<el-form label-width="160px" onSubmit="return false;">
 			<el-form-item :label="tr('dialog.custom_font.name_input')">
 				<input
 					v-model="fontName"

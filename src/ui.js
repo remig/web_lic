@@ -4,7 +4,6 @@
 'use strict';
 
 // TODO:
-// - 'enter' key on language picker / what's new / some dialogs reloads the page
 // - add 'culled' versions of popular parts, with their inside bits removed
 // - add an 'LDraw_parts' repro to git, track all parts in there, clone that on bugeyedmonkeys
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one

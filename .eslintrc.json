@@ -92,6 +92,7 @@
         "space-infix-ops": "warn",
         "space-unary-ops": "warn",
         "wrap-iife": [2, "inside", {"functionPrototypeMethods": true}],
+        "vue/attribute-hyphenation": ["warn", "always", {"ignore": ["onSubmit"]}],
         "vue/mustache-interpolation-spacing": [2, "never"],
         "vue/max-attributes-per-line": [2, {"singleline": 20}],
         "vue/require-prop-types": "off",
