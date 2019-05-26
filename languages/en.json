@@ -390,7 +390,7 @@
                 "undo": "Copy Step Image Rotations"
             },
             "scale": {
-                "name": "Scale Step Image",
+                "name": "Scale Step Image...",
                 "undo": "Scale Step Image"
             },
             "remove_scale": {
@@ -678,6 +678,10 @@
 			"name": "Name",
 			"edge_color": "Edge Color"
 		},
+		"change_part": {
+			"title": "New Part Filename",
+			"label" : "Filename"
+		},
 		"ld_color_picker": {
 			"title": "Choose a Color",
 			"ld_code": "LDraw Code",
@@ -731,7 +735,8 @@
             "label": "Copy Rotation to Next Steps"
         },
         "scale_csi": {
-            "title": "Scale Step Image"
+			"title": "Scale Step Image",
+			"label": "Scale By"
         },
         "scale_pli": {
             "title": "Scale Part List Image"

@@ -684,7 +684,6 @@ const contextMenu = {
 					});
 					dialog.title = tr('dialog.copy_csi_rotation.title');
 					dialog.label = tr('dialog.copy_csi_rotation.label');
-					dialog.labelWidth = '220px';
 					dialog.min = dialog.value = 0;
 				});
 			}
@@ -723,6 +722,7 @@ const contextMenu = {
 						app.redrawUI(true);
 					});
 					dialog.title = tr('dialog.scale_csi.title');
+					dialog.label = tr('dialog.scale_csi.label');
 					dialog.min = 0;
 					dialog.max = 10;
 					dialog.step = 0.1;
@@ -925,7 +925,6 @@ const contextMenu = {
 								});
 								dialog.title = tr('dialog.change_part_count.title');
 								dialog.label = tr('dialog.change_part_count.label');
-								dialog.labelWidth = '120px';
 								dialog.value = pliItem.quantity;
 							});
 						}
@@ -1447,6 +1446,9 @@ const contextMenu = {
 						DialogManager('stringChooserDialog', dialog => {
 							dialog.$on('ok', filename => {
 								(LDParse.loadRemotePart(filename)).then(abstractPart => {
+									if (!abstractPart) {
+										return;
+									}
 									store.mutations.csi.markAllDirty();
 									const step = store.get.step({type: 'step', id: selectedItem.stepID});
 									const pli = {type: 'pli', id: step.pliID};
@@ -1466,9 +1468,8 @@ const contextMenu = {
 									);
 								});
 							});
-							dialog.title = 'New Part Filename';
-							dialog.label = 'Filename';
-							dialog.labelWidth = '80px';
+							dialog.title = tr('dialog.change_part.title');
+							dialog.label = tr('dialog.change_part.label');
 						});
 					}
 				},

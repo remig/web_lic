@@ -5,9 +5,10 @@
 		:title="title"
 		:width="width"
 	>
-		<el-form :label-width="calculatedLabelWidth">
-			<el-form-item :label="label">
+		<el-form>
+			<el-form-item :label="label" class="number_chooser_input">
 				<input
+					ref="set_focus"
 					v-model.number="value"
 					:min="min"
 					:max="max"
@@ -33,10 +34,9 @@ export default {
 	data: function() {
 		return {
 			value: null,
-			width: '500px',
-			title: 'Get String',
+			title: '',
 			label: '',
-			labelWidth: '0',
+			width: '500px',
 			bodyText: '',
 			min: 0,
 			max: 100,
@@ -55,11 +55,20 @@ export default {
 			this.$emit('cancel');
 			this.$emit('close');
 		}
-	},
-	computed: {
-		calculatedLabelWidth() {
-			return this.label ? this.labelWidth : '0';
-		}
 	}
 };
 </script>
+
+<style>
+
+.number_chooser_input {
+	display: flex;
+}
+
+.number_chooser_input .el-form-item__content {
+	display: inline-block;
+	padding-top: 3px;
+	flex-grow: 1;
+}
+
+</style>

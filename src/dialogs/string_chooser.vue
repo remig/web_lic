@@ -5,9 +5,10 @@
 		:title="title"
 		:width="width"
 	>
-		<el-form :label-width="calculatedLabelWidth">
-			<el-form-item :label="label">
+		<el-form>
+			<el-form-item :label="label" class="string_chooser_input">
 				<input
+					ref="set_focus"
 					v-model="newString"
 					class="form-control"
 					@input="updateValues"
@@ -27,9 +28,8 @@ export default {
 	data: function() {
 		return {
 			newString: null,
-			title: 'Get String',
+			title: '',
 			label: '',
-			labelWidth: '0',
 			width: '500px'
 		};
 	},
@@ -45,13 +45,20 @@ export default {
 			this.$emit('cancel');
 			this.$emit('close');
 		}
-	},
-	computed: {
-		calculatedLabelWidth() {
-			// TODO: If we can figure out which font we're drawing with here, we can measure label
-			// And remove labelWidth from public API entirely...
-			return this.label ? this.labelWidth : '0';
-		}
 	}
 };
 </script>
+
+<style>
+
+.string_chooser_input {
+	display: flex;
+}
+
+.string_chooser_input .el-form-item__content {
+	display: inline-block;
+	padding-top: 3px;
+	flex-grow: 1;
+}
+
+</style>
