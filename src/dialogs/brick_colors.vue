@@ -31,7 +31,7 @@
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="reset">{{tr("dialog.reset")}}</el-button>
 			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
+			<el-button type="primary" @click="ok">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>

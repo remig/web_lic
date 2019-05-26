@@ -116,7 +116,7 @@ Vue.component('dialogManager', {
 	}
 });
 
-export default function setDialog(dialogName, cb) {
+function setDialog(dialogName, cb) {
 	component.currentDialog = null;  // This forces Vue to re-render a dialog if it was just opened
 	component.outstandingImport = cb;
 	return new Promise(resolve => {
@@ -127,3 +127,24 @@ export default function setDialog(dialogName, cb) {
 		});
 	});
 }
+
+setDialog.ok = function() {
+	if (component.visible && component.$refs.currentDialog) {
+		if (typeof component.$refs.currentDialog.ok === 'function') {
+			component.$refs.currentDialog.ok();
+		} else if (typeof component.$refs.currentDialog.cancel === 'function') {
+			component.$refs.currentDialog.cancel();
+		}
+	}
+};
+
+setDialog.cancel = function() {
+	if (component.visible
+		&& component.$refs.currentDialog
+		&& typeof component.$refs.currentDialog.cancel === 'function'
+	) {
+		component.$refs.currentDialog.cancel();
+	}
+};
+
+export default setDialog;

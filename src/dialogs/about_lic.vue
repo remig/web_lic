@@ -37,7 +37,7 @@
 			<p>{{tr('dialog.about_lic.copyright')}} <a href="mailto:lic@bugeyedmonkeys.com">Remi Gagne</a></p>
 		</div>
 		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="$emit('close')">{{tr("dialog.ok")}}</el-button>
+			<el-button type="primary" @click="cancel">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>
@@ -51,6 +51,11 @@ export default {
 		return {
 			version: packageInfo.version
 		};
+	},
+	methods: {
+		cancel() {
+			this.$emit('close');
+		}
 	}
 };
 

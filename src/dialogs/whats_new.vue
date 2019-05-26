@@ -30,7 +30,7 @@
 			</div>
 		</div>
 		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
+			<el-button type="primary" @click="cancel">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>
@@ -51,7 +51,7 @@ export default {
 			const opts = {month: 'long', day: 'numeric', year: 'numeric'};
 			return new Date(date).toLocaleDateString('en-us', opts);
 		},
-		ok() {
+		cancel() {
 			this.$emit('close');
 		}
 	},

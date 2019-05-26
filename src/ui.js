@@ -10,7 +10,6 @@
 // - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
 // - Language choose dropdown bounces around annoyingly
 // - Fix ldconfig to be all black edges except for black bricks.  And maybe update the colors, or not
-// - Make 'enter' and 'esc' work to 'ok' & 'cancel' any open dialogs
 
 import _ from './util';
 import uiState from './uiState';
@@ -342,6 +341,10 @@ const app = new Vue({
 				this.$refs.pageView.pageDown();
 			} else if (e.key === 'PageUp') {
 				this.$refs.pageView.pageUp();
+			} else if (e.key === 'Enter') {
+				DialogManager.ok();
+			} else if (e.key === 'Escape') {
+				DialogManager.cancel();
 			} else if (e.key === 'Delete') {
 				if (selItem
 					&& !store.get.isTemplatePage(store.get.pageForItem(selItem))

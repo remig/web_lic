@@ -5,7 +5,7 @@
 		:title="title"
 		:width="width"
 	>
-		<el-form>
+		<el-form onSubmit="return false;">
 			<el-form-item :label="label" class="number_chooser_input">
 				<input
 					ref="set_focus"
@@ -22,7 +22,7 @@
 		</el-form>
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
+			<el-button type="primary" @click="ok">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>
