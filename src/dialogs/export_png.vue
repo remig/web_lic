@@ -9,6 +9,7 @@
 		<el-form label-width="140px">
 			<el-form-item :label="tr('dialog.export_hi_res_png.scale')">
 				<input
+					ref="set_focus"
 					v-model.number="scale"
 					min="0"
 					max="100"

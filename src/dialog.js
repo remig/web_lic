@@ -96,11 +96,15 @@ Vue.component('dialogManager', {
 	updated() {
 		Vue.nextTick(() => {
 			if (this.$refs && this.$refs.currentDialog) {
+				const dlg = this.$refs.currentDialog;
 				if (this.outstandingImport) {
-					this.outstandingImport(this.$refs.currentDialog);
+					this.outstandingImport(dlg);
 					delete this.outstandingImport;
 				}
-				this.$refs.currentDialog.$on('close', () => {
+				if (dlg.$refs && dlg.$refs.set_focus) {
+					dlg.$refs.set_focus.focus();
+				}
+				dlg.$on('close', () => {
 					this.visible = false;
 					this.resolve();
 				});

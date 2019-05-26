@@ -9,6 +9,7 @@
 		<el-form :inline="true" label-width="50px">
 			<el-form-item :label="tr('glossary.x')">
 				<input
+					ref="set_focus"
 					v-model.number="rotation.x"
 					type="number"
 					class="form-control"

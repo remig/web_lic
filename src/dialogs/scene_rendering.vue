@@ -9,6 +9,7 @@
 		<el-form label-width="180px">
 			<el-form-item :label="tr('dialog.scene_rendering.zoom')">
 				<input
+					ref="set_focus"
 					v-model.number="values.zoom"
 					type="number"
 					class="form-control"

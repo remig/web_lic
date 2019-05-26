@@ -10,6 +10,7 @@
 			<el-form-item :label="tr('dialog.transform_part.position')" label-width="90px"/>
 			<el-form-item :label="tr('glossary.x')">
 				<input
+					ref="set_focus"
 					v-model.number="position.x"
 					type="number"
 					class="form-control"

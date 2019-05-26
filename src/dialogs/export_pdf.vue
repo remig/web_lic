@@ -9,6 +9,7 @@
 		<el-form label-width="140px">
 			<el-form-item :label="tr('dialog.export_hi_res_pdf.page_size')">
 				<input
+					ref="set_focus"
 					:value="pageSize.width"
 					min="0"
 					max="10000"
