@@ -805,8 +805,11 @@ const contextMenu = {
 							{mutation: 'page.layout', opts: {page}}
 						];
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						undoStack.commit(change, null, tr('action.pli_item.rotate_part_list_image.undo'),
-							dirtyItems);
+						undoStack.commit(
+							change, null,
+							tr('action.pli_item.rotate_part_list_image.undo'),
+							dirtyItems
+						);
 					});
 					dialog.$on('cancel', () => {
 						if (originalTransform == null) {
@@ -1444,19 +1447,23 @@ const contextMenu = {
 						DialogManager('stringChooserDialog', dialog => {
 							dialog.$on('ok', filename => {
 								(LDParse.loadRemotePart(filename)).then(abstractPart => {
+									store.mutations.csi.markAllDirty();
 									const step = store.get.step({type: 'step', id: selectedItem.stepID});
 									const pli = {type: 'pli', id: step.pliID};
 									const newFilename = abstractPart.filename;
-									const action = LDParse.getAction.filename({
-										filename: step.model.filename,
-										partID: selectedItem.id,
-										newFilename
-									});
-									const mutation = {
-										mutation: 'pli.syncContent', opts: {pli, doLayout: true}
-									};
-									undoStack.commit([action, mutation], null,
-										tr('action.part.change_part.to_different_part.undo'), ['csi']);
+									const change = [
+										LDParse.getAction.filename({
+											filename: step.model.filename,
+											partID: selectedItem.id,
+											newFilename
+										}),
+										{mutation: 'pli.syncContent', opts: {pli, doLayout: true}}
+									];
+									undoStack.commit(
+										change, null,
+										tr('action.part.change_part.to_different_part.undo'),
+										['csi']
+									);
 								});
 							});
 							dialog.title = 'New Part Filename';

@@ -10,8 +10,9 @@
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
 // - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
 // - Language choose dropdown bounces around annoyingly
-// - Change part to other part doesn't refresh CSI select box
 // - Fix ldconfig to be all black edges except for black bricks.  And maybe update the colors, or not
+// - When a dialog shows up, put input focus on the right widget
+// - Make 'enter' and 'esc' work to 'ok' & 'cancel' any open dialogs
 
 import _ from './util';
 import uiState from './uiState';
