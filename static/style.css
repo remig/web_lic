@@ -217,12 +217,15 @@ div#container {
 	border: 1px solid #ccc;
 }
 
-.dialog-fade-enter-active {
+.dialog-fade-enter-active, .dialog-fade-leave-active {
 	animation: unset;
 }
 
-.dialog-fade-leave-active {
-	animation: unset;
+.el-zoom-in-center-enter-active, .el-zoom-in-center-leave-active,
+.el-zoom-in-top-enter-active, .el-zoom-in-top-leave-active,
+.el-zoom-in-bottom-enter-active .el-zoom-in-bottom-leave-active,
+.el-zoom-in-left-enter-active, .el-zoom-in-left-leave-active {
+	transition: unset;
 }
 
 /* Splitter stuff */
