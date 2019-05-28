@@ -8,7 +8,7 @@ import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
 import Storage from './storage';
-import LocaleManager from './translate';
+import LocaleManager from './components/translate.vue';
 import uiState from './uiState';
 import DialogManager from './dialog';
 

@@ -10,7 +10,7 @@ import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
 import uiState from './uiState';
 import DialogManager from './dialog';
-import LocaleManager from './translate';
+import LocaleManager from './components/translate.vue';
 
 let app;
 const tr = LocaleManager.translate;

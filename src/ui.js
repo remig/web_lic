@@ -8,8 +8,8 @@
 // - add an 'LDraw_parts' repro to git, track all parts in there, clone that on bugeyedmonkeys
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
 // - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
-// - Language choose dropdown bounces around annoyingly
 // - Fix ldconfig to be all black edges except for black bricks.  And maybe update the colors, or not
+// - Undo / redo stack bakes action text into itself, which breaks translations
 
 import _ from './util';
 import uiState from './uiState';
@@ -19,7 +19,7 @@ import LDParse from './LDParse';
 import Menu from './menu';
 import ContextMenu from './contextMenu';
 import Storage from './storage';
-import LocaleManager from './translate';
+import LocaleManager from './components/translate.vue';
 import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
 import DialogManager from './dialog';

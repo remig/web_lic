@@ -6,11 +6,11 @@
 import _ from './util';
 import Draw from './draw';
 import {changeDpiDataUrl} from 'changedpi';
-import LocaleManger from './translate';
+import LocaleManager from './components/translate.vue';
 
 function exportInstructions(app, store, exportType, hiResScale, drawPageCallback, doneCallback) {
 
-	app.busyText = LocaleManger.translate(`dialog.busy_indicator.generating_${exportType}`);
+	app.busyText = LocaleManager.translate(`dialog.busy_indicator.generating_${exportType}`);
 
 	async function exportPage(page, canvas) {
 		return new Promise(resolve => window.setTimeout(() => {
@@ -50,7 +50,7 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 				app.updateProgress({clear: true});
 				const end = Date.now();
 				const time = _.formatTime(start, end);
-				app.statusText = LocaleManger.translate(
+				app.statusText = LocaleManager.translate(
 					`action.export.${exportType.toLowerCase()}.success_message_@mf`,
 					{exportType, time});
 			});

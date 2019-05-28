@@ -9,6 +9,10 @@ let component;
 
 Vue.component('dialogManager', {
 	components: {
+		localeChooserDialog: () => import(
+			/* webpackChunkName: "localeChooserDialog" */
+			'./components/translate.vue'
+		),
 		stringChooserDialog: () => import(
 			/* webpackChunkName: "stringChooserDialog" */
 			'./dialogs/string_chooser.vue'

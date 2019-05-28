@@ -21,7 +21,7 @@ import AnnotationSetters from './store/annotation_setters';
 import CalloutSetters from './store/callout_setters';
 import CalloutArrowSetters from './store/callout_arrow_setters';
 import StepInsertion from './store/step_insertion';
-import LocaleManager from './translate';
+import LocaleManager from './components/translate.vue';
 
 import LDParse from './LDParse';
 import LDRender from './LDRender';

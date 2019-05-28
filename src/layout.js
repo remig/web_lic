@@ -5,7 +5,7 @@
 import _ from './util';
 import LDParse from './LDParse';
 import store from './store';
-import LocaleManager from './translate';
+import LocaleManager from './components/translate.vue';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
