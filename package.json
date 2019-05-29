@@ -4,9 +4,9 @@
 	"description": "Create an instruction book from a 3D model",
 	"main": "src/ui.js",
 	"scripts": {
-		"build": "webpack --config webpack.dev.js",
-		"build_prod": "webpack --config webpack.prod.js",
-		"start": "webpack-dev-server --open --config webpack.start.js",
+		"build": "webpack --config webpack.config.js --config-name local",
+		"prod": "webpack --config webpack.config.js --config-name prod",
+		"start": "webpack-dev-server --open --config webpack.config.js --config-name local",
 		"test": "npx cypress open",
 		"deploy": "python deploy.py",
 		"stats": "webpack --config webpack.prod.js --profile --json > stats.json",
