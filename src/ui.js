@@ -10,6 +10,8 @@
 // - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
 // - Fix ldconfig to be all black edges except for black bricks.  And maybe update the colors, or not
 // - Undo / redo stack bakes action text into itself, which breaks translations
+// - Add ability to upload a custom ldconfig file, to customize all colors in one shot
+// - Add ability to switch between new nice ldconfig colors and old colors in brick color dialog
 
 import _ from './util';
 import uiState from './uiState';
@@ -525,7 +527,9 @@ const app = new Vue({
 		}
 
 		// TODO: Find better way of calling 'redrawUI' from arbitrary places
-		LocaleManager.pickLanguage(this.openLocalLicFile, this.redrawUI);
+		await LocaleManager.pickLanguage(this.redrawUI);
+
+		this.openLocalLicFile();
 	}
 });
 

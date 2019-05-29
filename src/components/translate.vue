@@ -132,19 +132,17 @@ function restoreLanguage() {
 	setLocale(uiState.get('locale'));
 }
 
-function pickLanguage(onOk, onLanguageChange) {
+async function pickLanguage(onLanguageChange) {
 	if (currentLocale != null || LanguageList.length < 2) {
-		onOk();
 		if (currentLocale != null) {
 			onLanguageChange();
 		}
-		return;
+	} else {
+		await DialogManager('localeChooserDialog', dialog => {
+			dialog.visible = true;
+			dialog.onLanguageChange = onLanguageChange;
+		});
 	}
-	DialogManager('localeChooserDialog', dialog => {
-		dialog.visible = true;
-		dialog.onLanguageChange = onLanguageChange;
-		dialog.onOK = onOk;
-	});
 }
 
 function noTranslate(str) {
@@ -157,7 +155,6 @@ export default {
 	data() {
 		return {
 			visible: false,
-			onOK: null,
 			onLanguageChange: null,
 			chosenLocaleCode: 'en',
 			languageList: LanguageList
@@ -167,9 +164,7 @@ export default {
 		ok() {
 			this.visible = false;
 			setLocale(this.chosenLocaleCode);
-			if (typeof this.onOK === 'function') {
-				this.onOK();
-			}
+			this.$emit('close');
 		},
 		changeLanguage() {
 			setLocale(this.chosenLocaleCode);
