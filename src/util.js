@@ -118,13 +118,35 @@ _.mixin({
 	radians(degrees) {
 		return degrees * Math.PI / 180;
 	},
-	emptyNode(node) {
-		if (node) {
-			while (node.firstChild) {
-				node.removeChild(node.firstChild);
+	dom: (() => {
+
+		function dom() {}
+
+		dom.createElement = function(type, attrs, parent, text) {
+			const node = document.createElement(type);
+			for (const key in attrs) {
+				if (attrs.hasOwnProperty(key)) {
+					node.setAttribute(key, attrs[key]);
+				}
 			}
-		}
-	},
+			if (text) {
+				node.innerHTML = text;
+			}
+			if (parent) {
+				parent.appendChild(node);
+			}
+			return node;
+		};
+
+		dom.emptyNode = function(node) {
+			if (node) {
+				while (node.firstChild) {
+					node.removeChild(node.firstChild);
+				}
+			}
+		};
+		return dom;
+	})(),
 	units: (() => {
 		const unitConversions = {  // this conversion factor * pixel count = units
 			point: 0.75,

@@ -210,7 +210,7 @@ const app = new Vue({
 			undoStack.clear();
 			Storage.clear.model();
 			this.clearState();
-			_.emptyNode(document.getElementById('canvasHolder'));
+			_.dom.emptyNode(document.getElementById('canvasHolder'));
 			Vue.nextTick(() => {
 				this.clearSelected();
 			});
