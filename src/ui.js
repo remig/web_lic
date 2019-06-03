@@ -27,7 +27,7 @@ import backwardCompat from './backwardCompat';
 import DialogManager from './dialog';
 import NavBar from './components/nav_bar.vue';
 import NavTree from './navtree';
-import NavTreeContainer from './components/nav_tree/base.vue';
+import NavTreeContainer from './components/nav_tree_container.vue';
 import PopupMenu from './components/popup_menu.vue';
 import TemplatePanel from './components/template_panel.vue';
 import './pageView';

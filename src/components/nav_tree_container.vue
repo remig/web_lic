@@ -40,9 +40,9 @@
 <script>
 
 
-import uiState from '../../uiState';
-import store from '../../store';
-import NavTree from '../../navtree';
+import uiState from '../uiState';
+import store from '../store';
+import NavTree from '../navtree';
 
 const treeElementList = [
 	{name: 'nav_tree.all', value: 'all', checked: true},
