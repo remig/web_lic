@@ -261,8 +261,8 @@ export default {
 	},
 	childList() {
 		const children = [
-			'annotation', 'callout', 'csi', 'divider',
-			'numberLabel', 'rotateIcon', 'step', 'submodelImage'
+			'numberLabel', 'divider', 'annotation', 'callout', 'csi',
+			'pliItem', 'quantityLabel', 'rotateIcon', 'step', 'submodelImage'
 		];
 		if (store.state.plisVisible) {
 			children.push('pli');
@@ -285,7 +285,13 @@ export default {
 	},
 	children(item, childTypeList) {
 		item = store.get.lookupToItem(item);
+		if (item == null) {
+			return [];
+		}
 		const children = [];
+		if (childTypeList == null) {
+			childTypeList = store.get.childList();
+		}
 		childTypeList.forEach(childType => {
 			const childList = item[childType + 's'];
 			const childID = item[childType + 'ID'];

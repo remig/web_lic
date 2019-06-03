@@ -26,11 +26,13 @@ import packageInfo from '../package.json';
 import backwardCompat from './backwardCompat';
 import DialogManager from './dialog';
 import NavBar from './components/nav_bar.vue';
-import NavTree from './components/nav_tree/base.vue';
+import NavTree from './navtree';
+import NavTreeContainer from './components/nav_tree/base.vue';
 import PopupMenu from './components/popup_menu.vue';
 import TemplatePanel from './components/template_panel.vue';
 import './pageView';
 import './components/element_extensions.vue';
+import EventBus from './event_bus';
 
 ELEMENT.locale(ELEMENT.lang.en);
 
@@ -46,7 +48,7 @@ Vue.use({
 
 const app = new Vue({
 	el: '#container',
-	components: {NavBar, NavTree, PopupMenu, TemplatePanel},
+	components: {NavBar, NavTreeContainer, PopupMenu, TemplatePanel},
 	data: {
 		// Store transient UI state data here.  Do *not* store state items here; Vue turns these
 		// into observers, which destroys performance for big stores like we have here
@@ -240,6 +242,7 @@ const app = new Vue({
 				this.currentPageLookup = store.get.itemToLookup(targetPage);
 			}
 			this.selectedItemLookup = store.get.itemToLookup(target);
+			NavTree.selectItem(target);
 		},
 		clearSelected() {
 			this.contextMenu = null;
@@ -248,6 +251,7 @@ const app = new Vue({
 			if (selItem && selItem.type === 'part') {
 				this.drawCurrentPage();
 			}
+			NavTree.clearSelected();
 		},
 		updateProgress: (() => {
 			let progress = 0, count = 0, text = '';
@@ -279,6 +283,7 @@ const app = new Vue({
 			};
 		})(),
 		forceUIUpdate() {
+			NavTree.update();
 			Object.values(this.$refs).forEach(ref => {
 				if (ref && typeof ref.forceUpdate === 'function') {
 					ref.forceUpdate();
@@ -492,8 +497,6 @@ const app = new Vue({
 
 			uiState.set('lastUsedVersion', packageInfo.version);
 
-			this.$refs.navTree.saveState();
-
 			Storage.replace.ui(uiState.getCurrentState());
 
 			if (this && this.isDirty) {
@@ -502,6 +505,10 @@ const app = new Vue({
 				return msg;
 			}
 			return null;
+		});
+
+		EventBus.$on('set-selected', item => {
+			this.setSelected(item);
 		});
 
 		LDParse.loadLDConfig();

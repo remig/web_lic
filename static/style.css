@@ -293,7 +293,7 @@ div#container {
 	100% { transform: rotate(360deg); }
 }
 
-.clickable.selected {
+.selected {
 	border: 1px dashed #2eb9ce;
 }
 

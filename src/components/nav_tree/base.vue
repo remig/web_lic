@@ -33,94 +33,67 @@
 				</el-dropdown-menu>
 			</el-dropdown>
 		</div>
-		<ul class="treeScroll">
-			<li
-				v-for="(node, idx) in store.get.topLevelTreeNodes()"
-				:key="`root_${idx}`"
-			>
-				<TreeExpandableRow
-					v-if="node.type.toLowerCase().endsWith('page')"
-					:row-visibility="rowVisibility"
-					:current-item="currentItem"
-					:target="node"
-					@select-item="$emit('select-item', arguments[0])"
-				/>
-				<TreeRow
-					v-else
-					:current-item="currentItem"
-					:target="node"
-					@select-item="$emit('select-item', arguments[0])"
-				/>
-			</li>
-		</ul>
+		<div id="nav-tree" class="treeScroll" />
 	</div>
 </template>
 
 <script>
-/* global Vue: false */
+
 
 import uiState from '../../uiState';
 import store from '../../store';
-import TreeExpandableRow from './expandable_row.vue';
-import TreeRow from './row.vue';
-
-let navTreeState = uiState.get('navTree');
-if (navTreeState == null) {  // temp backwards compatibility fixup
-	navTreeState = {
-		expandedLevel: 0,
-		checkedItems: {
-			all: true, page_step_part: false, group_parts: false,
-			steps: true, submodelImages: true, submodelCSI: true, csis: true, parts: true,
-			plis: true, pliItems: true, callouts: true, calloutArrows: true,
-			annotations: true, numberLabels: true, quantityLabels: true, dividers: true
-		}
-	};
-	uiState.set('navTree', navTreeState);
-}
+import NavTree from '../../navtree';
 
 const treeElementList = [
-	{name: 'nav_tree.all', value: 'all', checked: false},
+	{name: 'nav_tree.all', value: 'all', checked: true},
 	{name: 'nav_tree.page_step_part', value: 'page_step_part', checked: false},
 	{name: 'divider'},
-	{name: 'nav_tree.steps', value: 'steps', checked: false, child: true},
-	{name: 'nav_tree.submodel_images', value: 'submodelImages', checked: false, child: true},
-	{name: 'nav_tree.submodel_csi', value: 'submodelCSI', checked: false, child: true},
-	{name: 'nav_tree.csis', value: 'csis', checked: false, child: true},
-	{name: 'nav_tree.parts', value: 'parts', checked: false, child: true},
-	{name: 'nav_tree.plis', value: 'plis', checked: false, child: true},
-	{name: 'nav_tree.pli_items', value: 'pliItems', checked: false, child: true},
-	{name: 'nav_tree.callouts', value: 'callouts', checked: false, child: true},
-	{name: 'nav_tree.callout_arrows', value: 'calloutArrows', checked: false, child: true},
-	{name: 'nav_tree.annotations', value: 'annotations', checked: false, child: true},
-	{name: 'nav_tree.number_labels', value: 'numberLabels', checked: false, child: true},
-	{name: 'nav_tree.quantity_labels', value: 'quantityLabels', checked: false, child: true},
-	{name: 'nav_tree.dividers', value: 'dividers', checked: false, child: true},
+	{name: 'nav_tree.steps', value: 'step', checked: true, child: true},
+	{name: 'nav_tree.submodel_images', value: 'submodelImage', checked: true, child: true},
+	{name: 'nav_tree.csis', value: 'csi', checked: true, child: true},
+	{name: 'nav_tree.parts', value: 'part', checked: true, child: true},
+	{name: 'nav_tree.plis', value: 'pli', checked: true, child: true},
+	{name: 'nav_tree.pli_items', value: 'pliItem', checked: true, child: true},
+	{name: 'nav_tree.callouts', value: 'callout', checked: true, child: true},
+	{name: 'nav_tree.callout_arrows', value: 'calloutArrow', checked: true, child: true},
+	{name: 'nav_tree.annotations', value: 'annotation', checked: true, child: true},
+	{name: 'nav_tree.number_labels', value: 'numberLabel', checked: true, child: true},
+	{name: 'nav_tree.quantity_labels', value: 'quantityLabel', checked: true, child: true},
+	{name: 'nav_tree.dividers', value: 'divider', checked: true, child: true},
 	{name: 'divider'},
 	{name: 'nav_tree.group_parts', value: 'group_parts', checked: false}
 ];
 
-treeElementList.forEach(el => (el.checked = navTreeState.checkedItems[el.value]));
+const checkedItems = uiState.get('navTree.checkedItems');
+if (checkedItems) {
+	treeElementList.forEach(el => (el.checked = checkedItems[el.value]));
+}
 
 // TODO: need to scroll nav tree up / down whenever selected item changes, to ensure it's always in view
 export default {
-	name: 'NavTree',
-	components: {TreeExpandableRow, TreeRow},
+	name: 'NavTreeContainer',
 	props: ['currentItem'],
 	data() {
 		this.store = store;
 		return {
 			checkedElements: treeElementList,
-			expandedLevel: navTreeState.expandedLevel,
+			expandedLevel: 0,
 			expandLeveInitialized: false
 		};
 	},
 	methods: {
 		forceUpdate() {
 			this.$forceUpdate();
-			this.$children.forEach(c => {
-				if (typeof c.forceUpdate === 'function') {
-					c.forceUpdate();
-				}
+		},
+		updateCheckState() {
+
+			const checkedItems = this.checkedElements
+				.filter(el => !el.checked && el.child)
+				.map(el => el.value);
+			NavTree.setInvisibleNodeTypes(checkedItems);
+
+			this.checkedElements.forEach(el => {
+				uiState.set('navTree.checkedItems.' + el.value, el.checked);
 			});
 		},
 		checkItem(item) {
@@ -133,10 +106,9 @@ export default {
 			} else if (item.value === 'page_step_part') {
 				this[item.checked ? 'checkPageStepParts' : 'checkAll']();
 			// } else if (item.name === 'Group Parts By Type') {
+			} else {
+				this.updateCheckState();
 			}
-			Vue.nextTick(() => {
-				this.forceUpdate();
-			});
 		},
 		checkAll() {
 			this.checkedElements.forEach(el => {
@@ -146,66 +118,27 @@ export default {
 					el.checked = false;
 				}
 			});
+			this.updateCheckState();
 		},
 		checkPageStepParts() {
 			this.checkedElements.forEach(el => {
-				if (el.value === 'steps' || el.value === 'csis'
-					|| el.value === 'parts' || el.value === 'page_step_part'
+				if (el.value === 'step' || el.value === 'csi'
+					|| el.value === 'part' || el.value === 'page_step_part'
 				) {
 					el.checked = true;
 				} else if (el.hasOwnProperty('child') || el.value === 'all') {
 					el.checked = false;
 				}
 			});
+			this.updateCheckState();
 		},
 		expand() {
-			const level = this.expandedLevel;
-			this.$children.forEach(c => {
-				if (c.hasOwnProperty('expanded')) {
-					if (level === 0) {
-						c.expanded = true;
-					} else {
-						c.expandChildren(1, level);
-					}
-				}
-			});
 			this.expandedLevel += 1;
+			NavTree.expandToLevel(this.expandedLevel);
 		},
 		collapse() {
-			const level = this.expandedLevel;
-			if (level < 1) {
-				return;
-			}
-			this.$children.forEach(c => {
-				if (c.hasOwnProperty('expanded')) {
-					if (level === 1) {
-						c.expanded = false;
-					}
-					c.collapseChildren(1, level - 1);
-				}
-			});
-			this.expandedLevel -= 1;
-		},
-		saveState() {
-			navTreeState.expandedLevel = this.expandedLevel;
-			this.checkedElements.forEach(el => (navTreeState.checkedItems[el.value] = el.checked));
-		}
-	},
-	computed: {
-		rowVisibility() {
-			const res = {};
-			treeElementList.filter(el => el.child).forEach(el => (res[el.value] = el.checked));
-			return res;
-		}
-	},
-	updated() {
-		if (!this.expandLeveInitialized) {
-			const expandedLevel = this.expandedLevel;
 			this.expandedLevel = 0;
-			for (let i = 0; i < expandedLevel; i++) {
-				this.expand();
-			}
-			this.expandLeveInitialized = true;
+			NavTree.collapseAll();
 		}
 	}
 };
@@ -257,6 +190,21 @@ export default {
 	margin: 0;
 }
 
+.treeScroll ul {
+	list-style: none;
+	list-style-type: none;
+}
+
+.treeParent .treeChildren {
+	margin-left: 35px;
+}
+
+.treeChildren .treeParent {
+	position: relative;
+	left: -16px;
+	white-space: nowrap;
+}
+
 .indent {
 	margin-left: 35px;
 	list-style-type: none;
@@ -270,19 +218,21 @@ export default {
 
 .treeIcon {
 	display: inline-block;
+	margin-right: 4px;
 	width: 10px;
 	font-size: 1.25em;
 	vertical-align: 1px;
+	cursor: pointer;
 }
 
 .treeText {
 	font: 9pt Helvetica;
-	white-space:nowrap;
+	white-space: nowrap;
 	overflow: hidden;
 	position: relative;
 	bottom: 4px;
 	width: 100%;
-	border: 1px dashed #fff;
+	cursor: pointer;
 }
 
 </style>

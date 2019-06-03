@@ -28,7 +28,7 @@
         "eqeqeq": ["error", "always", {"null": "never"}],
         "func-call-spacing": "error",
         "guard-for-in": "error",
-        "indent": ["warn", "tab", {"outerIIFEBody": 0, "SwitchCase": 1}],
+        "indent": ["warn", "tab", {"SwitchCase": 1}],
         "key-spacing": "warn",
         "keyword-spacing": "error",
         "max-len": ["warn", 110],

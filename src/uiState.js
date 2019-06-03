@@ -39,12 +39,12 @@ const defaultState = {
 	},
 	template: null,  // NYI
 	navTree: {
-		expandedLevel: 0,
+		expandedNodes: [],
 		checkedItems: {
 			all: true, page_step_part: false, group_parts: false,
-			steps: true, submodelImages: true, submodelCSI: true, csis: true, parts: true,
-			plis: true, pliItems: true, callouts: true, calloutArrows: true,
-			annotations: true, numberLabels: true, quantityLabels: true, dividers: true
+			step: true, submodelImage: true, csi: true, part: true,
+			pli: true, pliItem: true, callout: true, calloutArrow: true,
+			annotation: true, numberLabel: true, quantityLabel: true, divider: true
 		}
 	},
 	pageView: {
@@ -83,7 +83,7 @@ const api = {
 		return _.get(currentState, key);
 	},
 	set(key, prop) {
-		currentState[key] = prop;  // TODO: this only works for root keys; 'foo.bar' doesn't work yet
+		_.set(currentState, key, prop);
 	},
 	getCurrentState() {
 		return currentState;
