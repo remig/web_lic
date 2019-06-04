@@ -18,7 +18,7 @@ const api = {
 
 		function fixPartColors(part) {
 			part.parts.forEach(part => {
-				if (typeof part.colorCode === 'number' && part.colorCode < 0) {
+				if (!(part.colorCode in api.colorTable)) {
 					part.colorCode = 0;
 				}
 			});
