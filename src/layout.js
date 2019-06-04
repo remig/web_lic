@@ -376,6 +376,14 @@ const api = {
 				csi.y -= icon.y;
 				icon.y = 0;
 			}
+
+			// Ensure icon doesn't overlap step label
+			const stepLabel = store.get.numberLabel(step.numberLabelID);
+			if (icon.y >= stepLabel.y && icon.y <= stepLabel.y + stepLabel.height + margin
+				&& icon.x >= stepLabel.x && icon.x <= stepLabel.x + stepLabel.width + margin
+			) {
+				icon.y = stepLabel.y + stepLabel.height + margin;
+			}
 		}
 
 		if (store.get.stepHasSubmodel(step)) {
