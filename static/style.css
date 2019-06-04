@@ -293,10 +293,6 @@ div#container {
 	100% { transform: rotate(360deg); }
 }
 
-.selected {
-	border: 1px dashed #2eb9ce;
-}
-
 .clickable, .selectable {
 	cursor: pointer;
 }

@@ -196,29 +196,18 @@ export default {
 }
 
 .treeParent .treeChildren {
-	margin-left: 35px;
+	margin-left: 30px;
 }
 
 .treeChildren .treeParent {
 	position: relative;
-	left: -16px;
-	white-space: nowrap;
-}
-
-.indent {
-	margin-left: 35px;
-	list-style-type: none;
-}
-
-.unindent {
-	position: relative;
-	left: -16px;
+	left: -13px;  /* treeIcon 10px width + 3px right margin */
 	white-space: nowrap;
 }
 
 .treeIcon {
 	display: inline-block;
-	margin-right: 4px;
+	margin-right: 3px;
 	width: 10px;
 	font-size: 1.25em;
 	vertical-align: 1px;
@@ -232,7 +221,13 @@ export default {
 	position: relative;
 	bottom: 4px;
 	width: 100%;
+	padding: 0 2px;
+	border: 2px solid white;
 	cursor: pointer;
+}
+
+.selected {
+	border: 2px dashed #2eb9ce;
 }
 
 </style>
