@@ -54,16 +54,22 @@ let currentLocale;
 // Always load English; fall back on this if a different language is missing a key
 loadedLanguages.en = require('../../languages/en.json');
 
-function __tr(key, args, locale) {
+function __tr(locale, key, args) {
 	let lookup = loadedLanguages[locale];
 	const keys = key.split('.');
 	for (let i = 0; i < keys.length; i++) {
 		const v = keys[i];
 		if (v.includes('@')) {
-			if (v.endsWith('_@mf')) {
-				return _.template(lookup[v])(args);
+			if (v.endsWith('_@c')) {
+				lookup = lookup[v];
+				for (let i = 0; i < args.length; i++) {
+					lookup = lookup.replace('${' + i + '}', args[i]);
+				}
+				return lookup;
+			} else if (v.endsWith('_@mf')) {
+				return _.template(lookup[v])(args[0]);
 			} else if (v.endsWith('_@link')) {
-				return translateLink(lookup[v], args);
+				return translateLink(lookup[v], args[0]);
 			}
 		}
 		lookup = lookup[v];
@@ -79,7 +85,7 @@ function translateLink(text, link) {
 		.replace('}', '</a>');
 }
 
-function translate(key, args) {
+function translate(key, ...args) {
 
 	if (key.startsWith(noTranslateKey)) {
 		return key.replace(noTranslateKey, '');  // Don't translate these already translated strings
@@ -92,7 +98,7 @@ function translate(key, args) {
 	let res;
 	if (currentLocale && currentLocale !== 'en') {
 		try {
-			res = __tr(key, args, currentLocale);
+			res = __tr(currentLocale, key, args);
 		} catch (e) {
 			console.log(`Locale ${currentLocale} missing translation key: ${key}`);  // eslint-disable-line no-console, max-len
 			res = null;
@@ -100,7 +106,7 @@ function translate(key, args) {
 	}
 	if (res == null) {  // If anything goes wrong with the non-english lookup, fallback to english
 		try {
-			res = __tr(key, args, 'en');
+			res = __tr('en', key, args);
 		} catch (e) {
 			throw 'Invalid key lookup: ' + key;
 		}

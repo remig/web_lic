@@ -470,7 +470,7 @@ const store = {
 					});
 					progressCallback({
 						stepCount: steps.length,
-						text: LocaleManager.translate('glossary.step_count_@mf', {count: 0})
+						text: LocaleManager.translate('glossary.step_count_@c', 0)
 					});
 					for (let i = 0; i < steps.length; i++) {
 						const step = steps[i];

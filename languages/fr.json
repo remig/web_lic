@@ -15,19 +15,22 @@
         "left": "Gauche",
         "right": "Droite",
         "page": "Page",
+        "page_count_@c": "Page ${0}",
         "submodelimage": "Image de sous modèle",
         "step": "Etape",
-        "step_count_@mf": "Etape ${count}",
+        "step_count_@c": "Etape ${count}",
         "csi": "Image de l'étape",
         "pli": "Image de la liste des pièces",
         "pliitem": "Part Image",
         "quantitylabel": "Vignette de la quantité",
+        "quantitylabel_count_@c": "Vignette de la quantité x${0}",
         "calloutarrow": "Flèche de légende",
         "numberlabel": "Vignette du numéro",
         "rotateicon": "Icône de rotation",
         "templatepage": "Modèle de la Page",
         "titlepage": "Titre de la Page",
         "inventorypage": "Page de la liste des pièces",
+        "inventorypage_count_@c": "Page de la liste des pièces ${0}",
         "divider": "Séparateur",
         "annotation": "Annotation",
         "callout": "Légende",
@@ -105,10 +108,10 @@
         "edit": {
             "name": "Edition",
             "undo": {
-                "name_@mf": "Revenir en arrière ${text}"
+                "name_@c": "Revenir en arrière ${text}"
             },
             "redo": {
-                "name_@mf": "Refaire la dernière action ${text}"
+                "name_@c": "Refaire la dernière action ${text}"
             },
             "title_page": {
                 "add": {
@@ -648,10 +651,6 @@
 		"style": {
 			"title": "Style",
 			"label_text": "Etiquette de texte"
-		},
-		"scale_images": {
-			"title": "Agrandir les images par",
-			"image_size_@mf": "Les images auront une taille de <strong>${width} x ${height}</strong> pixels"
 		},
 		"export_hi_res_pdf": {
 			"title": "Exporter en PDF haute résolution",

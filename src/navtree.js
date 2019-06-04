@@ -59,11 +59,11 @@ function getItemText(t) {
 	if (!t) {
 		return '';
 	} else if (t.type === 'page') {
-		return tr('glossary.page') + ' ' + (t.number || '');
+		return tr('glossary.page_count_@c', t.number);
 	} else if (t.type === 'inventoryPage') {
-		return tr('glossary.inventorypage') + ' ' + (t.number || '');
+		return tr('glossary.inventorypage', t.number);
 	} else if (t.type === 'step') {
-		return tr('glossary.step') + ' ' + (t.number || '');
+		return tr('glossary.step_count_@c', t.number);
 	} else if (t.type === 'submodel') {
 		return t.filename;
 	} else if (t.type === 'annotation') {
@@ -76,7 +76,7 @@ function getItemText(t) {
 	} else if (t.type === 'pliItem') {
 		return `${nicePartName(t.filename)} - ${niceColorName(t.colorCode)}`;
 	} else if (t.type === 'quantityLabel') {
-		return tr('glossary.quantitylabel') + ' x' + store.get.parent(t).quantity;
+		return tr('glossary.quantitylabel_count_@c', store.get.parent(t).quantity);
 	} else if (t.type === 'part') {
 		const step = store.get.step(t.stepID);
 		const part = LDParse.model.get.partFromID(t.id, step.model.filename);

@@ -15,19 +15,22 @@
         "left": "Left",
         "right": "Right",
         "page": "Page",
+        "page_count_@c": "Page ${0}",
         "submodelimage": "Submodel Image",
         "step": "Step",
-        "step_count_@mf": "Step ${count}",
+        "step_count_@c": "Step ${0}",
         "csi": "Step Image",
         "pli": "Part List Image",
         "pliitem": "Part Image",
         "quantitylabel": "Quantity Label",
+        "quantitylabel_count_@c": "Quantity Label x${0}",
         "calloutarrow": "Callout Arrow",
         "numberlabel": "Number Label",
         "rotateicon": "Rotate Icon",
         "templatepage": "Template Page",
         "titlepage": "Title Page",
         "inventorypage": "Part List Page",
+        "inventorypage_count_@c": "Part List Page ${0}",
         "divider": "Divider",
         "annotation": "Annotation",
         "callout": "Callout",
@@ -105,10 +108,10 @@
         "edit": {
             "name": "Edit",
             "undo": {
-                "name_@mf": "Undo ${text}"
+                "name_@c": "Undo ${0}"
             },
             "redo": {
-                "name_@mf": "Redo ${text}"
+                "name_@c": "Redo ${0}"
             },
             "title_page": {
                 "add": {
@@ -648,10 +651,6 @@
 		"style": {
 			"title": "Style",
 			"label_text": "Label Text"
-		},
-		"scale_images": {
-			"title": "Scale Images by",
-			"image_size_@mf": "Images will be <strong>${width} x ${height}</strong> pixels"
 		},
 		"export_hi_res_pdf": {
 			"title": "Export Hi-Res PDF",

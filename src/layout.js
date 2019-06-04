@@ -793,7 +793,7 @@ const api = {
 					store.mutations.page.delete({page: originalPage});
 				}
 				progressCallback(
-					LocaleManager.translate('glossary.step_count_@mf', {count: stepsToMerge[0].number})
+					LocaleManager.translate('glossary.step_count_@c', stepsToMerge[0].number)
 				);
 				_.pullAt(stepsToMerge, 0);
 				resolve();

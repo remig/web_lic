@@ -15,19 +15,22 @@
         "left": "Links",
         "right": "Rechts",
         "page": "Seite",
+        "page_count_@c": "Seite ${0}",
         "submodelimage": "Untermodellbild",
         "step": "Schritt",
-        "step_count_@mf": "Schritt ${count}",
+        "step_count_@c": "Schritt ${count}",
         "csi": "Schrittbild",
         "pli": "Teileliste",
         "pliitem": "Teil der Teileliste",
         "quantitylabel": "Anzahl Text",
+        "quantitylabel_count_@c": "Anzahl Text x${0}",
         "calloutarrow": "Callout Pfeil",
         "numberlabel": "Nummer Text",
         "rotateicon": "Rotationszeichen",
         "templatepage": "Vorlage",
         "titlepage": "Titelseite",
         "inventorypage": "Teileübersicht",
+        "inventorypage_count_@c": "Teileübersicht ${0}",
         "divider": "Trennlinie",
         "annotation": "Objekt",
         "callout": "Callout",
@@ -105,10 +108,10 @@
         "edit": {
             "name": "Bearbeiten",
             "undo": {
-                "name_@mf": "Rückgängig: ${text}"
+                "name_@c": "Rückgängig: ${text}"
             },
             "redo": {
-                "name_@mf": "Wiederherstellen: ${text}"
+                "name_@c": "Wiederherstellen: ${text}"
             },
             "title_page": {
                 "add": {
@@ -648,10 +651,6 @@
 		"style": {
 			"title": "Stil",
 			"label_text": "Text"
-		},
-		"scale_images": {
-			"title": "Bilder skalieren um",
-			"image_size_@mf": "Bilder werden <strong>${width} x ${height}</strong> Pixel groß"
 		},
 		"export_hi_res_pdf": {
 			"title": "Exportiere hochauflösendes PDF",
