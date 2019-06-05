@@ -1,6 +1,5 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-let needLDConfig = true;
 const blackColor = {name: 'Black', color: '#05131D', edge: '#595959', alpha: 0};
 
 const api = {
@@ -67,8 +66,7 @@ const api = {
 				};
 			}
 		}
-		api.setColorTable(colors);
-		needLDConfig = false;
+		api.colorTable = colors;
 		return colors;
 	},
 
@@ -110,8 +108,7 @@ const api = {
 	getColor(colorCode, type = 'color') {
 		if (colorCode == null) {
 			return null;
-		}
-		if (colorCode in api.customColorTable && api.customColorTable[colorCode][type]) {
+		} else if (colorCode in api.customColorTable && api.customColorTable[colorCode][type]) {
 			return api.customColorTable[colorCode][type];
 		} else if (colorCode in api.colorTable) {
 			return api.colorTable[colorCode][type];
@@ -486,9 +483,6 @@ async function loadSubModels(lineList, progressCallback) {
 
 async function loadPart(fn, content, progressCallback) {
 	let part;
-	if (needLDConfig) {
-		await api.loadLDConfig();
-	}
 	if (fn && fn in api.partDictionary) {
 		return api.partDictionary[fn];
 	} else if (fn && fn in api.missingParts) {

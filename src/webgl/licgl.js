@@ -507,7 +507,6 @@ export default {
 	},
 	initModel: function(model) {
 		if (model == null) {
-			LDParse.loadLDConfig();
 			// const url = './static/models/20015 - Alligator.mpd';
 			const url = './static/models/7140 - x-wing fighter.mpd';
 			LDParse.loadRemotePart(url)

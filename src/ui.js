@@ -5,10 +5,9 @@
 
 // TODO:
 // - add 'culled' versions of popular parts, with their inside bits removed
-// - add an 'LDraw_parts' repro to git, track all parts in there, clone that on bugeyedmonkeys
+// - clone LDraw repro  to bugeyedmonkeys then optimize it
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
 // - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
-// - Fix ldconfig to be all black edges except for black bricks.  And maybe update the colors, or not
 // - Undo / redo stack bakes action text into itself, which breaks translations
 // - Add ability to upload a custom ldconfig file, to customize all colors in one shot
 // - Add ability to switch between new nice ldconfig colors and old colors in brick color dialog
@@ -81,6 +80,8 @@ const app = new Vue({
 			if (store.model) {
 				this.closeModel();
 			}
+
+			await LDParse.loadLDConfig();  // Forcefully reload color table, to clear previous color table
 
 			this.busyText = this.tr('dialog.busy_indicator.loading_model');
 			const model = await modelGenerator();
@@ -162,12 +163,6 @@ const app = new Vue({
 				this.forceUIUpdate();
 				this.drawCurrentPage();
 			});
-		},
-		openLocalLicFile() {
-			const localModel = Storage.get.model();
-			if (!_.isEmpty(localModel)) {
-				this.openLicFile(localModel);
-			}
 		},
 		save() {
 			store.save({mode: 'file'});
@@ -511,9 +506,6 @@ const app = new Vue({
 			this.setSelected(item);
 		});
 
-		LDParse.loadLDConfig();
-		LDParse.setCustomColorTable(Storage.get.customBrickColors());
-
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();
 			this.redrawUI();
@@ -533,10 +525,15 @@ const app = new Vue({
 			await DialogManager('whatsNewDialog');
 		}
 
-		// TODO: Find better way of calling 'redrawUI' from arbitrary places
+		// TODO: use event bus to call 'redrawUI' from arbitrary places
 		await LocaleManager.pickLanguage(this.redrawUI);
 
-		this.openLocalLicFile();
+		LDParse.setCustomColorTable(Storage.get.customBrickColors());
+
+		const localModel = Storage.get.model();
+		if (!_.isEmpty(localModel)) {
+			this.openLicFile(localModel);
+		}
 	}
 });
 
