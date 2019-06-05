@@ -65,6 +65,13 @@ function fixState(state) {
 	if (state.template.sceneRendering.edgeWidth == null) {
 		state.template.sceneRendering.edgeWidth = 4;
 	}
+	if (state.template.sceneRendering.rotations == null) {
+		state.template.sceneRendering.rotations = [
+			// These are the camera rotations used in older versions of lic.
+			{axis: 'x', angle: 26.33},
+			{axis: 'y', angle: 45}
+		];
+	}
 }
 
 function fixColorTable(colorTable) {

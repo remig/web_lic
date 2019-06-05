@@ -3,19 +3,10 @@
 <template>
 	<licDialog
 		:title="tr('dialog.scene_rendering.title')"
-		width="400px"
+		width="420px"
 		class="sceneRenderingDialog"
 	>
 		<el-form label-width="180px">
-			<el-form-item :label="tr('dialog.scene_rendering.zoom')">
-				<input
-					ref="set_focus"
-					v-model.number="values.zoom"
-					type="number"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
 			<el-form-item :label="tr('dialog.scene_rendering.edge_width')">
 				<input
 					v-model.number="values.edgeWidth"
@@ -26,6 +17,20 @@
 					@input="updateValues"
 				>
 			</el-form-item>
+			<el-form-item :label="tr('dialog.scene_rendering.zoom')">
+				<input
+					ref="set_focus"
+					v-model.number="values.zoom"
+					type="number"
+					class="form-control"
+					@input="updateValues"
+				>
+			</el-form-item>
+			<rotateBuilder
+				:title="tr('dialog.scene_rendering.rotate_title')"
+				:initial-rotations="values.rotations"
+				@new-values="updateValues"
+			/>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
@@ -39,8 +44,10 @@
 import _ from '../util';
 import store from '../store';
 import undoStack from '../undoStack';
+import rotateBuilder from '../components/rotate.vue';
 
 export default{
+	components: {rotateBuilder},
 	data: function() {
 		return {
 			values: _.cloneDeep(store.state.template.sceneRendering)
@@ -77,6 +84,10 @@ export default{
 
 .sceneRenderingDialog input {
 	width: 95px;
+}
+
+.el-form-item {
+	margin-bottom: unset;
 }
 
 </style>

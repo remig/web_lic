@@ -134,7 +134,11 @@ const template = {
 	},
 	sceneRendering: {
 		zoom: 0,
-		edgeWidth: 4
+		edgeWidth: 4,
+		rotations: [
+			{axis: 'x', angle: 36},
+			{axis: 'y', angle: 50}
+		]
 	}
 };
 

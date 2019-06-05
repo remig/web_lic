@@ -207,6 +207,7 @@ const store = {
 			set(opts) {  // opts: {zoom, edgeWidth, refresh: false}
 				store.state.template.sceneRendering.zoom = opts.zoom;
 				store.state.template.sceneRendering.edgeWidth = opts.edgeWidth;
+				store.state.template.sceneRendering.rotations = _.cloneDeep(opts.rotations);
 				if (opts.refresh) {
 					store.mutations.sceneRendering.refreshAll();
 				}

@@ -702,7 +702,8 @@
 			"title": "3D Part Rendering",
 			"undo": "Change Part Rendering",
 			"zoom": "Camera Zoom",
-			"edge_width": "Part Edge Thickness"
+			"edge_width": "Part Edge Thickness",
+			"rotate_title": "Overall Model Rotation"
 		},
 		"transform_part": {
 			"title": "Transform Part",
@@ -770,6 +771,11 @@
 			"german": "German Translation and translation code fixes:",
 			"french": "French Translation:",
 			"copyright": "Copyright © 2019"
+		},
+		"rotation": {
+			"title": "Rotations",
+			"axis": "Axis",
+			"angle": "Angle"
 		}
 	},
 	"template": {

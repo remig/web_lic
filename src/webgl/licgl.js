@@ -9,6 +9,7 @@ import arrows from './arrows';
 
 import _ from '../util';
 import LDParse from '../LDParse';
+import store from '../store';
 
 const selectedPartBoxColor = [1, 0, 0, 1];
 const selectedPartAlpha = 0.5;
@@ -171,8 +172,14 @@ function drawScene(gl, programs, objectsToDraw, config) {
 	const projectionMatrix = twgl.m4.ortho(-zoom, zoom, zoom / aspect, -zoom / aspect, zoom * 2, -zoom * 2);
 
 	const viewMatrix = twgl.m4.create();
-	twgl.m4.rotateX(viewMatrix, _.radians(36), viewMatrix);
-	twgl.m4.rotateY(viewMatrix, _.radians(55), viewMatrix);
+
+	const cameraRotations = store.state.template.sceneRendering.rotations;
+	for (let i = 0; i < cameraRotations.length; i++) {
+		const rot = cameraRotations[i];
+		const axis = 'rotate' + rot.axis.toUpperCase();
+		twgl.m4[axis](viewMatrix, _.radians(rot.angle), viewMatrix);
+	}
+
 	if (rotation) {
 		if (rotation.x) {
 			twgl.m4.rotateX(viewMatrix, _.radians(rotation.x), viewMatrix);
