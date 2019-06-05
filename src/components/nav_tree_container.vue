@@ -226,7 +226,7 @@ export default {
 	cursor: pointer;
 }
 
-.selected {
+.treeSelected {
 	border: 2px dashed #2eb9ce;
 }
 

@@ -265,18 +265,18 @@ const api = {
 			if (lastSelectedId === id) {
 				return; // Selected item didn't actually change
 			}
-			document.getElementById(lastSelectedId).classList.remove('selected');
+			document.getElementById(lastSelectedId).classList.remove('treeSelected');
 		}
 		const node = document.getElementById(id);
 		if (node) {
-			node.classList.add('selected');
+			node.classList.add('treeSelected');
 			expandAncestors(node);
 			lastSelectedId = id;
 		}
 	},
 	clearSelected() {
 		if (lastSelectedId) {
-			document.getElementById(lastSelectedId).classList.remove('selected');
+			document.getElementById(lastSelectedId).classList.remove('treeSelected');
 			lastSelectedId = null;
 		}
 	},
