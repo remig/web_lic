@@ -327,6 +327,15 @@ _.mixin({
 				return res;
 			};
 		})();
+		color.hexToVec4 = (color, alpha) => {
+			color = color.replace('#', '');
+			return [
+				(parseInt(color.substr(0, 2), 16) / 255).toFixed(5),
+				(parseInt(color.substr(2, 2), 16) / 255).toFixed(5),
+				(parseInt(color.substr(4, 2), 16) / 255).toFixed(5),
+				((255 - alpha) / 255).toFixed(5)
+			];
+		};
 		color.luma = (color, isUnitColor) => {
 			if (!Array.isArray(color)) {
 				color = _.color.toRGB(color);

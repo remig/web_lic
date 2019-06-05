@@ -1,5 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
+import _ from './util';
+
 const blackColor = {name: 'Black', color: '#05131D', edge: '#595959', alpha: 0};
 
 const api = {
@@ -61,8 +63,8 @@ const api = {
 					color: line[6],
 					edge: line[8],
 					alpha,
-					rgba: hexColorToVec4(line[6], alpha),
-					edgeRgba: hexColorToVec4(line[8], 0)
+					rgba: _.color.hexToVec4(line[6], alpha),
+					edgeRgba: _.color.hexToVec4(line[8], 0)
 				};
 			}
 		}
@@ -85,20 +87,10 @@ const api = {
 	colorTable: {},
 	setColorTable(dict) {
 		api.colorTable = dict;
+		return dict;
 	},
 	customColorTable: {},
 	setCustomColorTable(dict) {
-		for (const colorCode in dict) {
-			if (dict.hasOwnProperty(colorCode)) {
-				const entry = dict[colorCode];
-				if (entry.color != null && entry.rgba == null) {
-					entry.rgba = hexColorToVec4(entry.color, 0);
-				}
-				if (entry.edge != null && entry.edgeRgba == null) {
-					entry.edgeRgba = hexColorToVec4(entry.edge, 0);
-				}
-			}
-		}
 		api.customColorTable = dict;
 		return dict;
 	},
@@ -232,14 +224,6 @@ const api = {
 		}
 	}
 };
-
-function hexColorToVec4(color, alpha) {
-	color = color.replace('#', '');
-	const r = parseInt(color.substr(0, 2), 16) / 255;
-	const g = parseInt(color.substr(2, 2), 16) / 255;
-	const b = parseInt(color.substr(4, 2), 16) / 255;
-	return [r, g, b, (255 - alpha) / 255];
-}
 
 function actionBuilder(filename, partID, property, newValue) {
 	const root = api.partDictionary, op = 'replace';

@@ -42,6 +42,7 @@ import _ from '../util';
 import store from '../store';
 import LDParse from '../LDParse';
 import Storage from '../storage';
+import backwardCompat from '../backwardCompat';
 const customColors = Storage.get.customBrickColors();
 
 function buildColorTable() {
@@ -95,7 +96,8 @@ export default {
 			this.$emit('close');
 		},
 		applyChange() {
-			const fixedColors = LDParse.setCustomColorTable(customColors);
+			const fixedColors = backwardCompat.fixColorTable(customColors);
+			LDParse.setCustomColorTable(fixedColors);
 			Storage.replace.customBrickColors(fixedColors);
 			store.mutations.csi.markAllDirty();
 			store.mutations.pliItem.markAllDirty();
