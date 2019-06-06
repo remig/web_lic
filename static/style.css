@@ -14,7 +14,6 @@ div#container {
 /* TODO: scrolling views do not center clicked page on small screens */
 /* TODO: grid customization dialog is ugly */
 /* TODO: When selected item changes, nav tree should auto-scroll so selected item is in view */
-/* TODO: Why is there an extra 6px under each el-color-picker?
 /* TODO: brick color picker refuses to have variable width columns */
 
 /* Overwrite Bootstrap stuff */
@@ -49,6 +48,10 @@ div#container {
 
 .menu-text {
 	pointer-events: none;
+}
+
+label {
+	margin-bottom: unset;
 }
 
 .shortcut {
@@ -143,7 +146,15 @@ div#container {
 	vertical-align: middle;
 }
 
+.el-color-picker {
+	display: unset;
+	position: unset;
+	line-height: unset;
+	height: unset;
+}
+
 .el-color-picker__trigger, .el-color-picker__mask {
+	display: block;
 	border-color: #ccc;
 	width: 34px;
 	height: 34px;
@@ -212,9 +223,25 @@ div#container {
 	margin-left: 12px;
 }
 
+.el-input__icon {
+	line-height: unset;
+}
+
 .el-input__inner {
 	height: 34px;
 	border: 1px solid #ccc;
+}
+
+.el-form-item {
+	margin-bottom: 10px;
+}
+
+.el-form-item__content {
+	line-height: unset;
+}
+
+.el-form-item__label {
+	line-height: 34px;
 }
 
 .dialog-fade-enter-active, .dialog-fade-leave-active {
@@ -461,6 +488,7 @@ ul {
 
 .panel-group .panel-template {
 	border-radius: 0;
+	margin-top: 20px;
 	margin-bottom: 10px;
 	padding-bottom: 20px;
 }
@@ -477,6 +505,7 @@ ul {
 }
 
 .panel-template h5 {
+	margin-bottom: 15px;
 	font-weight: 600;
 	font-size: 16px;
 }
@@ -486,12 +515,6 @@ ul {
 	text-align: left;
 }
 
-/*
-.panel-template .form-horizontal .col-sm-5 {
-	padding-left: 0px;
-}
-*/
-
 .panel-template .btn-secondary {
 	min-width: 35px;
 	font-weight: 600;
@@ -499,10 +522,6 @@ ul {
 
 .panel-template .btn-secondary strong {
 	font-weight: 800;
-}
-
-.panel-template .el-form-item {
-	margin-bottom: 0px;
 }
 
 /* Margin/Padding */

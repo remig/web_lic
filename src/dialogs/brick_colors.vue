@@ -157,7 +157,9 @@ export default {
 }
 
 .brickColorDialog .el-color-picker {
+	display: inline-block;
 	height: 34px;
+	margin-bottom: -4px;
 }
 
 </style>

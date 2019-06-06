@@ -192,6 +192,10 @@ export default {
 
 <style>
 
+.pageSizeInfo {
+	margin-top: 15px;
+}
+
 .pageSizeInfo > div {
 	line-height: unset;
 	color: #606266;
