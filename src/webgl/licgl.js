@@ -127,7 +127,7 @@ function generateObjectList(part, modelView, colorCode, config) {
 				res.condLines.push(...newObject.condLines);
 				res.alphaFaces.push(...newObject.alphaFaces);
 			}
-		} else {
+		} else if (part.parts) {
 			for (let i = 0; i < part.parts.length; i++) {
 
 				const subPart = part.parts[i];
@@ -377,7 +377,7 @@ function createBBoxBuffer(box) {
 }
 function importPart(gl, part) {
 
-	if (partBufferCache[part.filename] == null && part.primitives.length) {
+	if (partBufferCache[part.filename] == null && part.primitives && part.primitives.length) {
 
 		let coloredPrimitives;
 		const faceData = {
@@ -445,8 +445,10 @@ function importPart(gl, part) {
 		}
 	}
 
-	for (let i = 0; i < part.parts.length; i++) {
-		importPart(gl, LDParse.partDictionary[part.parts[i].filename]);
+	if (part.parts) {
+		for (let i = 0; i < part.parts.length; i++) {
+			importPart(gl, LDParse.partDictionary[part.parts[i].filename]);
+		}
 	}
 }
 

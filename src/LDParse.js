@@ -18,11 +18,13 @@ const api = {
 	async loadModelContent(content, fn, progressCallback) {
 
 		function fixPartColors(part) {
-			part.parts.forEach(part => {
-				if (!(part.colorCode in api.colorTable)) {
-					part.colorCode = 0;
-				}
-			});
+			if (part.parts) {
+				part.parts.forEach(part => {
+					if (!(part.colorCode in api.colorTable)) {
+						part.colorCode = 0;
+					}
+				});
+			}
 		}
 
 		const part = await loadPart(null, content, progressCallback);
@@ -156,7 +158,7 @@ const api = {
 
 			Object.keys(api.missingParts).forEach(missingFilename => {
 				Object.values(api.partDictionary).forEach(part => {
-					if (part.parts.length) {
+					if (part.parts && part.parts.length) {
 						removeOnePartFromPart(part, missingFilename);
 					}
 				});
@@ -303,11 +305,13 @@ function parseComment(abstractPart, line) {
 			abstractPart.steps = [];
 			abstractPart.steps.lastPart = 0;
 		}
-		abstractPart.steps.push({
-			parts: abstractPart.parts.slice(abstractPart.steps.lastPart)
-				.map((v, i) => i + abstractPart.steps.lastPart)
-		});
-		abstractPart.steps.lastPart = abstractPart.parts.length;
+		if (abstractPart.parts) {
+			abstractPart.steps.push({
+				parts: abstractPart.parts.slice(abstractPart.steps.lastPart)
+					.map((v, i) => i + abstractPart.steps.lastPart)
+			});
+			abstractPart.steps.lastPart = abstractPart.parts.length;
+		}
 	}
 }
 
@@ -331,6 +335,9 @@ async function parsePart(abstractPartParent, line) {
 	if (colorCode != null) {
 		newPart.colorCode = colorCode;
 	}
+	if (!abstractPartParent.parts) {
+		abstractPartParent.parts = [];
+	}
 	abstractPartParent.parts.push(newPart);
 }
 
@@ -341,6 +348,9 @@ async function parsePart(abstractPartParent, line) {
 // condlines will always be {p: points, cp: condpoints} objects.
 // Primitives with hardcoded colors will be {p: points, c: color} objects.
 function parseLine(abstractPart, line) {
+	if (!abstractPart.primitives) {
+		abstractPart.primitives = [];
+	}
 	abstractPart.primitives.push([
 		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
 		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
@@ -356,6 +366,9 @@ function parseTriangle(abstractPart, line) {
 	if (parseColorCode(line[1]) != null) {
 		points = {p: points, c: parseColorCode(line[1])};
 	}
+	if (!abstractPart.primitives) {
+		abstractPart.primitives = [];
+	}
 	abstractPart.primitives.push(points);
 }
 
@@ -369,10 +382,16 @@ function parseQuad(abstractPart, line) {
 	if (parseColorCode(line[1]) != null) {
 		points = {p: points, c: parseColorCode(line[1])};
 	}
+	if (!abstractPart.primitives) {
+		abstractPart.primitives = [];
+	}
 	abstractPart.primitives.push(points);
 }
 
 function parseCondLine(abstractPart, line) {
+	if (!abstractPart.primitives) {
+		abstractPart.primitives = [];
+	}
 	abstractPart.primitives.push({
 		p: [
 			parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
@@ -394,16 +413,12 @@ const lineParsers = {
 	5: parseCondLine
 };
 
-async function lineListToAbstractPart(fn, lineList, progressCallback) {
-	if (fn && fn.includes('/')) {  // Need only final filename, not the path to it
-		fn = fn.slice(fn.lastIndexOf('/') + 1);
+async function lineListToAbstractPart(filename, lineList, progressCallback) {
+	if (filename && filename.includes('/')) {  // Need only final filename, not the path to it
+		filename = filename.slice(filename.lastIndexOf('/') + 1);
 	}
-	const abstractPart = {
-		filename: fn,
-		name: '',  // TODO: only store this for real parts, not sub parts
-		parts: [],
-		primitives: []
-	};
+	const abstractPart = {filename, name: ''};  // optional: 'primitives', 'parts'
+
 	// First line in any LDraw file is assumed to be the part / main model's colloquial name
 	// TODO: if first line is some variant of 'untitled', and if a subsequent line is 0 Name: foo, use foo
 	if (lineList[0] && lineList[0][0] === '0') {
@@ -414,7 +429,7 @@ async function lineListToAbstractPart(fn, lineList, progressCallback) {
 			abstractPart.name = abstractPart.name.replace(/^Name:\s*/ig, '');  // Trim leading 'Name: '
 		}
 	}
-	if (!fn && lineList[1] && lineList[1][0] === '0' && lineList[1][1] === 'Name:' && lineList[1][2]) {
+	if (!filename && lineList[1] && lineList[1][0] === '0' && lineList[1][1] === 'Name:' && lineList[1][2]) {
 		// If we don't have a filename but line 2 includes 'Name', use it
 		abstractPart.filename = lineList[1][2];
 	}
@@ -513,7 +528,7 @@ async function loadPart(fn, content, progressCallback) {
 	if (part.filename in api.missingParts) {
 		delete api.missingParts[part.filename];
 	}
-	if (part.steps) {
+	if (part.steps && part.parts) {
 		// Check if any parts were left out of the last step; add them to a new step if so.
 		// This happens often when a model / submodel does not end with a 'STEP 0' command.
 		if (part.steps.lastPart < part.parts.length) {
