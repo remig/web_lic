@@ -20,9 +20,7 @@
 				>
 			</el-form-item>
 			<el-form-item>
-				<el-checkbox
-					v-model="maintainPrintSize"
-				>
+				<el-checkbox v-model="maintainPrintSize">
 					{{tr("dialog.export_hi_res_png.maintain_print_size")}}
 				</el-checkbox>
 			</el-form-item>
@@ -117,7 +115,4 @@ export default {
 </script>
 
 <style>
-.pngExportDialog .el-form-item {
-	margin-bottom: 0;
-}
 </style>
