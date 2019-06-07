@@ -13,7 +13,7 @@
 					type="number"
 					min="0"
 					max="10"
-					class="form-control"
+					class="form-control sceneRenderingInput"
 					@input="updateValues"
 				>
 			</el-form-item>
@@ -22,13 +22,13 @@
 					ref="set_focus"
 					v-model.number="values.zoom"
 					type="number"
-					class="form-control"
+					class="form-control sceneRenderingInput"
 					@input="updateValues"
 				>
 			</el-form-item>
 			<rotateBuilder
 				:title="tr('dialog.scene_rendering.rotate_title')"
-				:initial-rotations="values.rotations"
+				:initial-rotation="values.rotation"
 				@new-values="updateValues"
 			/>
 		</el-form>
@@ -54,7 +54,8 @@ export default{
 		};
 	},
 	methods: {
-		updateValues() {
+		updateValues(newRotation) {
+			this.values.rotation = newRotation;
 			store.mutations.sceneRendering.set({...this.values, refresh: true});
 			this.app.redrawUI(true);
 		},
@@ -82,12 +83,8 @@ export default{
 
 <style>
 
-.sceneRenderingDialog input {
+.sceneRenderingInput {
 	width: 95px;
-}
-
-.el-form-item {
-	margin-bottom: unset;
 }
 
 </style>

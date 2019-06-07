@@ -16,8 +16,8 @@ function getCanvas(domID) {
 
 function getRotation(item) {
 	let rot = item.rotation;
-	if (rot) {
-		return (rot.x === 0 && rot.y === 0 && rot.z === 0) ? null : rot;
+	if (rot && rot.length) {
+		return rot;
 	}
 	if (item.filename) {
 		const transform = uiState.getPLITransform(item.filename);
@@ -26,7 +26,7 @@ function getRotation(item) {
 		}
 	}
 	rot = store.get.templateForItem(item).rotation;
-	return (rot && rot.x === 0 && rot.y === 0 && rot.z === 0) ? null : rot;
+	return (rot && rot.length) ? rot : null;
 }
 
 function getScale(item) {

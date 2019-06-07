@@ -40,7 +40,7 @@ Vue.config.performance = false;
 Vue.use({
 	install(Vue) {
 		// Add a 'tr' method to every component, which makes translating strings in template HTML easier
-		Vue.tr = Vue.prototype.tr = LocaleManager.translate;
+		Vue.prototype.tr = LocaleManager.translate;
 		Vue.prototype._ = _;
 	}
 });

@@ -551,7 +551,7 @@ const contextMenu = {
 					id: 'csi_rotate_up_cmenu',
 					cb(selectedItem) {
 						const csi = selectedItem;
-						const rotation = {x: 0, y: 0, z: 180};
+						const rotation = [{axis: 'z', angle: 180}];
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts,
 							tr('action.csi.rotate.flip_upside_down.undo'), [csi]);
@@ -562,7 +562,7 @@ const contextMenu = {
 					id: 'csi_rotate_front_cmenu',
 					cb(selectedItem) {
 						const csi = selectedItem;
-						const rotation = {x: 0, y: 180, z: 0};
+						const rotation = [{axis: 'y', angle: 180}];
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
 						undoStack.commit('csi.rotate', opts,
 							tr('action.csi.rotate.rotate_front_to_back.undo'), [csi]);
@@ -601,7 +601,7 @@ const contextMenu = {
 								app.redrawUI(true);
 							});
 							dialog.title = tr('dialog.rotate_part_image.title_csi');
-							dialog.rotation = _.cloneDeep(initialRotation);
+							dialog.setRotation(_.cloneDeep(initialRotation));
 						});
 					}
 				},
@@ -626,13 +626,12 @@ const contextMenu = {
 			id: 'csi_copy_rotation_cmenu',
 			shown(selectedItem) {
 				const csi = store.get.csi(selectedItem);
-				const rotation = csi.rotation;
-				return rotation && (rotation.x || rotation.y || rotation.z);
+				return csi.rotation && csi.rotation.length;
 			},
 			cb(selectedItem) {
-				// TODO: rewrite this to use simple number picker dialog
 				// TODO: this doesn't re-layout pages after applying changes. Must check all affected pages.
 				// TODO: If next step spinner is spun up then back down, need to undo some rotations
+				// TODO: If selected csi step has a rotate icon, add one to the last rotated csi too
 				const csi = store.get.csi(selectedItem.id);
 				const rotation = _.cloneDeep(csi.rotation);
 				const step = store.get.step(csi.parent.id);
@@ -784,13 +783,14 @@ const contextMenu = {
 				const filename = pliItem.filename;
 				const pliTransforms = uiState.get('pliTransforms');
 				const originalTransform = _.cloneDeep(pliTransforms[filename]);
+				const initialRotation = (originalTransform || {}).rotation;
 				const page = store.get.pageForItem(pliItem);
 				pliTransforms[filename] = pliTransforms[filename] || {};
 
 				app.clearSelected();
 				DialogManager('rotatePartImageDialog', dialog => {
 					dialog.$on('update', newValues => {
-						pliTransforms[filename].rotation = {...newValues.rotation};
+						pliTransforms[filename].rotation = newValues.rotation;
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
@@ -799,8 +799,8 @@ const contextMenu = {
 						const op = 'replace';
 						const change = [
 							{
-								redo: [{root, op, path, value: {...newValues.rotation}}],
-								undo: [{root, op, path, value: (originalTransform || {}).rotation || null}]
+								redo: [{root, op, path, value: newValues.rotation}],
+								undo: [{root, op, path, value: initialRotation}]
 							},
 							{mutation: 'page.layout', opts: {page}}
 						];
@@ -822,7 +822,7 @@ const contextMenu = {
 					});
 					dialog.title = tr('dialog.rotate_part_image.title_pli');
 					dialog.showRotateIconCheckbox = false;
-					dialog.rotation = (originalTransform || {}).rotation || {x: 0, y: 0, z: 0};
+					dialog.setRotation(_.cloneDeep(initialRotation) || []);
 				});
 			}
 		},

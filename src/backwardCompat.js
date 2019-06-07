@@ -37,6 +37,19 @@ function fixState(state) {
 		if (csi.annotations == null) {
 			csi.annotations = [];
 		}
+		if (csi.rotation != null) {  // convert old {x, y, z} rotation to new [{axis, angle}]
+			const r = csi.rotation;
+			csi.rotation = [];
+			if (r.x) {
+				csi.rotation.push({axis: 'x', angle: r.x});
+			}
+			if (r.y) {
+				csi.rotation.push({axis: 'y', angle: r.y});
+			}
+			if (r.z) {
+				csi.rotation.push({axis: 'z', angle: r.z});
+			}
+		}
 	});
 
 	state.callouts.forEach(callout => {
@@ -65,8 +78,8 @@ function fixState(state) {
 	if (state.template.sceneRendering.edgeWidth == null) {
 		state.template.sceneRendering.edgeWidth = 4;
 	}
-	if (state.template.sceneRendering.rotations == null) {
-		state.template.sceneRendering.rotations = [
+	if (state.template.sceneRendering.rotation == null) {
+		state.template.sceneRendering.rotation = [
 			// These are the camera rotations used in older versions of lic.
 			{axis: 'x', angle: 26.33},
 			{axis: 'y', angle: 45}

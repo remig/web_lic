@@ -3,39 +3,21 @@
 <template>
 	<licDialog
 		:title="title"
-		width="500px"
+		width="400px"
 		class="rotatePartImageDialog"
 	>
 		<el-form :inline="true" label-width="50px">
-			<el-form-item :label="tr('glossary.x')">
-				<input
-					ref="set_focus"
-					v-model.number="rotation.x"
-					type="number"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-			<el-form-item :label="tr('glossary.y')">
-				<input
-					v-model.number="rotation.y"
-					type="number"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-			<el-form-item :label="tr('glossary.z')">
-				<input
-					v-model.number="rotation.z"
-					type="number"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
+			<rotateBuilder
+				ref="rotateBuilder"
+				title=""
+				@new-values="updateValues"
+			/>
 		</el-form>
 		<el-form v-if="showRotateIconCheckbox" :inline="true" label-width="180px">
-			<el-form-item :label="tr('dialog.rotate_part_image.add_rotate_icon')">
-				<el-checkbox v-model="addRotateIcon" @change="updateValues" />
+			<el-form-item>
+				<el-checkbox v-model="addRotateIcon" @change="updateValues">
+					{{tr('dialog.rotate_part_image.add_rotate_icon')}}
+				</el-checkbox>
 			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
@@ -47,19 +29,25 @@
 
 <script>
 
+import rotateBuilder from '../components/rotate.vue';
+
 export default{
+	components: {rotateBuilder},
 	data: function() {
 		return {
 			title: '',
-			rotation: {
-				x: 0, y: 0, z: 0
-			},
 			addRotateIcon: true,
 			showRotateIconCheckbox: true
 		};
 	},
 	methods: {
-		updateValues() {
+		setRotation(rotation) {
+			this.$refs.rotateBuilder.rotation = rotation;
+		},
+		updateValues(newRotation) {
+			if (newRotation) {
+				this.$data.rotation = newRotation;
+			}
 			this.$emit('update', this.$data);
 		},
 		ok() {
@@ -76,8 +64,8 @@ export default{
 
 <style>
 
-.rotatePartImageDialog input {
-	width: 80px;
+.rotatePartImageDialog .el-checkbox {
+	font-weight: 700;
 }
 
 </style>

@@ -173,24 +173,21 @@ function drawScene(gl, programs, objectsToDraw, config) {
 
 	const viewMatrix = twgl.m4.create();
 
-	const cameraRotations = store.state.template.sceneRendering.rotations;
-	for (let i = 0; i < cameraRotations.length; i++) {
-		const rot = cameraRotations[i];
+	const cameraRotation = store.state.template.sceneRendering.rotation;
+	for (let i = 0; i < cameraRotation.length; i++) {
+		const rot = cameraRotation[i];
 		const axis = 'rotate' + rot.axis.toUpperCase();
 		twgl.m4[axis](viewMatrix, _.radians(rot.angle), viewMatrix);
 	}
 
-	if (rotation) {
-		if (rotation.x) {
-			twgl.m4.rotateX(viewMatrix, _.radians(rotation.x), viewMatrix);
-		}
-		if (rotation.y) {
-			twgl.m4.rotateY(viewMatrix, _.radians(rotation.y), viewMatrix);
-		}
-		if (rotation.z) {
-			twgl.m4.rotateZ(viewMatrix, _.radians(rotation.z), viewMatrix);
+	if (rotation && rotation.length) {
+		for (let i = 0; i < rotation.length; i++) {
+			const rot = rotation[i];
+			const axis = 'rotate' + rot.axis.toUpperCase();
+			twgl.m4[axis](viewMatrix, _.radians(rot.angle), viewMatrix);
 		}
 	}
+
 	twgl.m4.multiply(viewMatrix, projectionMatrix, projectionMatrix);
 
 	// Draw opaque faces first

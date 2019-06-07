@@ -29,7 +29,7 @@ const template = {
 		innerMargin: 0.02,
 		csi: {
 			scale: 1,
-			rotation: {x: 0, y: 0, z: 0},
+			rotation: [],
 			displacementArrow: {
 				fill: {
 					color: '#ff0000'
@@ -50,7 +50,7 @@ const template = {
 		maxHeight: 0.3,  // as a percentage of page height
 		csi: {
 			scale: 1,
-			rotation: {x: 0, y: 0, z: 0}
+			rotation: []
 		},
 		fill: {
 			color: null
@@ -79,7 +79,7 @@ const template = {
 	},
 	pliItem: {
 		scale: 1,
-		rotation: {x: 0, y: 0, z: 0},
+		rotation: [],
 		quantityLabel: {
 			font: 'bold 10pt Helvetica',
 			color: '#000000'
@@ -135,7 +135,7 @@ const template = {
 	sceneRendering: {
 		zoom: 0,
 		edgeWidth: 4,
-		rotations: [
+		rotation: [
 			{axis: 'x', angle: 36},
 			{axis: 'y', angle: 50}
 		]

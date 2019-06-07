@@ -2,36 +2,6 @@
 
 <template>
 	<panel-base title="template.transform.title" label-width="80px">
-		<el-form-item :label="tr('template.transform.rotate_x')">
-			<input
-				v-model.number="x"
-				type="number"
-				min="-360"
-				max="360"
-				class="form-control"
-				@input="updateValues"
-			>
-		</el-form-item>
-		<el-form-item :label="tr('template.transform.rotate_y')">
-			<input
-				v-model.number="y"
-				type="number"
-				min="-360"
-				max="360"
-				class="form-control"
-				@input="updateValues"
-			>
-		</el-form-item>
-		<el-form-item :label="tr('template.transform.rotate_z')">
-			<input
-				v-model.number="z"
-				type="number"
-				min="-360"
-				max="360"
-				class="form-control"
-				@input="updateValues"
-			>
-		</el-form-item>
 		<el-form-item :label="tr('template.transform.scale')">
 			<input
 				v-model.number="scale"
@@ -43,6 +13,12 @@
 				@input="updateValues"
 			>
 		</el-form-item>
+		<rotate-builder
+			:initial-rotation="rotation"
+			:include-labels="false"
+			title="Rotations"
+			@new-values="updateValues"
+		/>
 	</panel-base>
 </template>
 
@@ -51,31 +27,25 @@
 import _ from '../../util';
 import store from '../../store';
 import PanelBase from './panel_base.vue';
+import RotateBuilder from '../rotate.vue';
 
 export default {
-	components: {PanelBase},
+	components: {PanelBase, RotateBuilder},
 	props: ['templateEntry'],
 	data() {
 		const template = _.get(store.state.template, this.templateEntry);
 		return {
-			x: template.rotation.x,
-			y: template.rotation.y,
-			z: template.rotation.z,
+			rotation: template.rotation,
 			scale: template.scale
 		};
 	},
 	methods: {
-		updateValues() {
+		updateValues(newRotation) {
+			// TODO: only emit if something actually changed
 			const transform = _.get(store.state.template, this.templateEntry);
-			const rotation = transform.rotation;
-			if (rotation.x !== this.x || rotation.y !== this.y || rotation.z !== this.z
-					|| transform.scale !== this.scale) {
-				rotation.x = this.x;
-				rotation.y = this.y;
-				rotation.z = this.z;
-				transform.scale = this.scale;
-				this.$emit('new-values');
-			}
+			transform.rotation = newRotation;
+			transform.scale = this.scale;
+			this.$emit('new-values');
 		}
 	}
 };
