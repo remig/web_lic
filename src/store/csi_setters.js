@@ -13,7 +13,7 @@ export default {
 			x: null, y: null, width: null, height: null
 		}, parent: opts.parent});
 	},
-	rotate(opts) {  // opts: {csi, rotation: {x, y, z}, addRotateIcon, doLayout = false}
+	rotate(opts) {  // opts: {csi, rotation: [{axis, angle}], addRotateIcon, doLayout = false}
 		const csi = store.get.lookupToItem(opts.csi);
 		csi.rotation = opts.rotation;
 		csi.isDirty = true;

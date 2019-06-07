@@ -71,7 +71,8 @@ const defaultState = {
 		width: 1,
 		color: 'black'
 	},
-	pliTransforms: {}  // TODO: If scale set back to 1, delete it, don't store it. Same for rotations x|y|z=0
+	// TODO: If scale set back to 1, delete it, don't store it. Same for rotations x|y|z=0
+	pliTransforms: {}  // key: part filename, value: {rotation, scale}
 };
 
 Storage.initialize(defaultState);
