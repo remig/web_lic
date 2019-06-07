@@ -199,36 +199,12 @@ const menu = [
 		{
 			text: 'action.file.clear_cache.name',
 			id: 'clear_cache_menu',
-			children: [
-				{
-					text: 'action.file.clear_cache.model.name',
-					id: 'clear_cache_model_menu',
-					cb() {
-						app.closeModel();
-						Storage.clear.model();
-						app.redrawUI();
-					}
-				},
-				{
-					text: 'action.file.clear_cache.ui.name',
-					id: 'clear_cache_ui_menu',
-					cb() {
-						uiState.resetUIState();
-						Storage.clear.ui();
-						app.redrawUI();
-					}
-				},
-				{
-					text: 'action.file.clear_cache.everything.name',
-					id: 'clear_cache_everything_menu',
-					cb() {
-						app.closeModel();
-						uiState.resetUIState();
-						Storage.clear.everything();
-						app.redrawUI();
-					}
-				}
-			]
+			cb() {
+				app.closeModel();
+				uiState.resetUIState();
+				Storage.clear.everything();
+				app.redrawUI();
+			}
 		}
 	]},
 	{text: 'action.edit.name', id: 'edit_menu', children: [
