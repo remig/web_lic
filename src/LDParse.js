@@ -272,13 +272,6 @@ async function requestPart(fn) {
 // key: submodel filename, value: lineList to be loaded
 const unloadedSubModels = {};
 
-const primitiveTypes = {
-	2: 'line',
-	3: 'triangle',
-	4: 'quad',
-	5: 'condline'
-};
-
 function forceBlack(colorCode, abstractPartName, partName) {
 	partName = (partName + '').toLowerCase();
 	abstractPartName = (abstractPartName + '').toLowerCase();
@@ -293,7 +286,7 @@ function forceBlack(colorCode, abstractPartName, partName) {
 
 // These parsers get called *a lot*.  Keep them fast, at the expense of readibility
 function parseFloatList(a) {
-	for (let i = 0; i < a.length; i++) {  // Noticeably faster than a.map(parseFloat)
+	for (let i = 0; i < a.length; i++) {
 		a[i] = parseFloat(a[i]);
 	}
 	return a;
@@ -341,58 +334,63 @@ async function parsePart(abstractPartParent, line) {
 	abstractPartParent.parts.push(newPart);
 }
 
+// Primitive data can get *huge*, so store it in as compact a representation as possible.
+// The vast majority of primitives have no color data; they inherit that from their parent.
+// So store most primitives as a flat array of points, then render based on number of points.
+// Quads & condlines have the same number of points, so to distingusih,
+// condlines will always be {p: points, cp: condpoints} objects.
+// Primitives with hardcoded colors will be {p: points, c: color} objects.
 function parseLine(abstractPart, line) {
-	const newPrimitive = {
-		shape: primitiveTypes[line[0]],
-		points: [
-			parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
-			parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
-		]
-	};
-	const colorCode = parseColorCode(line[1]);
-	if (colorCode != null) {
-		newPrimitive.colorCode = colorCode;
+	abstractPart.primitives.push([
+		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
+		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
+	]);
+}
+
+function parseTriangle(abstractPart, line) {
+	let points = [
+		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
+		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
+		parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10])
+	];
+	if (parseColorCode(line[1]) != null) {
+		points = {p: points, c: parseColorCode(line[1])};
 	}
-	abstractPart.primitives.push(newPrimitive);
+	abstractPart.primitives.push(points);
+}
+
+function parseQuad(abstractPart, line) {
+	let points = [
+		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
+		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
+		parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
+		parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13])
+	];
+	if (parseColorCode(line[1]) != null) {
+		points = {p: points, c: parseColorCode(line[1])};
+	}
+	abstractPart.primitives.push(points);
 }
 
 function parseCondLine(abstractPart, line) {
-	const newPart = {
-		shape: primitiveTypes[line[0]],
-		points: [
+	abstractPart.primitives.push({
+		p: [
 			parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
 			parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
 		],
-		conditionalPoints: [
+		cp: [
 			parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
 			parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13])
 		]
-	};
-	const colorCode = parseColorCode(line[1]);
-	if (colorCode != null) {
-		newPart.colorCode = colorCode;
-	}
-	abstractPart.primitives.push(newPart);
-}
-
-function parseFace(abstractPart, line) {
-	const newFace = {
-		shape: primitiveTypes[line[0]],
-		points: parseFloatList(line.slice(2))
-	};
-	const colorCode = parseColorCode(line[1]);
-	if (colorCode != null) {
-		newFace.colorCode = colorCode;
-	}
-	abstractPart.primitives.push(newFace);
+	});
 }
 
 const lineParsers = {
 	0: parseComment,
 	1: parsePart,
 	2: parseLine,
-	3: parseFace,
-	4: parseFace,
+	3: parseTriangle,
+	4: parseQuad,
 	5: parseCondLine
 };
 

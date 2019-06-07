@@ -115,16 +115,28 @@ function fixColorTable(colorTable) {
 
 function fixPartDictionary(partDictionary) {
 
-	// Newer code treats missing color codes as 'inherit', instead of storing -1s everywhere
 	for (const partFn in partDictionary) {
 		if (partDictionary.hasOwnProperty(partFn)) {
 			const part = partDictionary[partFn];
-			if (part.parts && part.parts.length) {
+			if (part.parts) {
+				// Newer code treats missing color codes as 'inherit', instead of storing -1s everywhere
 				for (let i = 0; i < part.parts.length; i++) {
 					if (part.parts[i].colorCode === -1) {
 						delete part.parts[i].colorCode;
 					}
 				}
+			}
+			if (part.primitives) {
+				// convert primitives to new, more compact form
+				part.primitives = part.primitives.map(p => {
+					if (p.colorCode === -1 || p.shape === 'line' || p.shape === 'condline') {
+						if (p.shape === 'condline') {
+							return {p: p.points, cp: p.conditionalPoints};
+						}
+						return p.points;
+					}
+					return {p: p.points, c: p.colorCode};
+				});
 			}
 		}
 	}

@@ -237,7 +237,7 @@ function drawScene(gl, programs, objectsToDraw, config) {
 }
 
 function addObject(objectsToDraw, buffers, modelView, color) {
-	if (buffers) {
+	if (buffers && modelView && color) {
 		objectsToDraw.push({
 			buffers,
 			uniforms: {modelView, color}
@@ -261,12 +261,11 @@ function addArrowObject(objectsToDraw, mat, length) {
 	addObject(objectsToDraw, arrowBuffers.tip, tipMat, [1, 0, 0, 1]);
 }
 
-function addFace(faceData, primitive) {
-	const points = primitive.points || primitive;
+function addFace(faceData, points) {
 	const idx = faceData.indices.lastIndex;
 	faceData.position.data.push(...points);
 	faceData.indices.data.push(idx, idx + 1, idx + 2);
-	if (primitive.shape === 'quad') {
+	if (points.length === 12) {
 		faceData.indices.data.push(idx, idx + 2, idx + 3);
 		faceData.indices.lastIndex += 4;
 	} else {
@@ -403,44 +402,44 @@ function importPart(gl, part) {
 		};
 
 		for (let i = 0; i < part.primitives.length; i++) {
-			const primitive = part.primitives[i];
-			const p = primitive.points;
-			if (primitive.shape === 'triangle' || primitive.shape === 'quad') {
-				if (primitive.colorCode >= 0) {
-					coloredPrimitives = coloredPrimitives || {};
-					if (coloredPrimitives[primitive.colorCode] == null) {
-						coloredPrimitives[primitive.colorCode] = {
-							position: {data: [], numComponents: 3},
-							indices: {data: [], numComponents: 3, lastIndex: 0}
-						};
-					}
-					addFace(coloredPrimitives[primitive.colorCode], primitive);
+			const p = part.primitives[i];
+			if (Array.isArray(p)) {
+				if (p.length === 6) {
+					addLine(lineData, p);
 				} else {
-					addFace(faceData, primitive);
+					addFace(faceData, p);
 				}
-			} else if (primitive.shape === 'line') {
-				addLine(lineData, p);
-			} else if (primitive.shape === 'condline') {
-				addLine(condLineData, p, primitive.conditionalPoints);
+			} else if (p.cp) {
+				addLine(condLineData, p.p, p.cp);
+			} else if (p.c >= 0) {
+				const colorCode = p.c;
+				coloredPrimitives = coloredPrimitives || {};
+				if (coloredPrimitives[colorCode] == null) {
+					coloredPrimitives[colorCode] = {
+						position: {data: [], numComponents: 3},
+						indices: {data: [], numComponents: 3, lastIndex: 0}
+					};
+				}
+				addFace(coloredPrimitives[colorCode], p.p);
 			}
 		}
 
-		partBufferCache[part.filename] = {};
+		const partBuffer = partBufferCache[part.filename] = {};
 		if (faceData.position.data.length) {
-			partBufferCache[part.filename].faces = twgl.createBufferInfoFromArrays(gl, faceData);
+			partBuffer.faces = twgl.createBufferInfoFromArrays(gl, faceData);
 		}
 		if (lineData.position.data.length) {
-			partBufferCache[part.filename].lines = twgl.createBufferInfoFromArrays(gl, lineData);
+			partBuffer.lines = twgl.createBufferInfoFromArrays(gl, lineData);
 		}
 		if (condLineData.position.data.length) {
-			partBufferCache[part.filename].condLines = twgl.createBufferInfoFromArrays(gl, condLineData);
+			partBuffer.condLines = twgl.createBufferInfoFromArrays(gl, condLineData);
 		}
 		if (coloredPrimitives != null) {
-			partBufferCache[part.filename].coloredFaces = {};
+			partBuffer.coloredFaces = {};
 			for (const colorCode in coloredPrimitives) {
 				if (coloredPrimitives.hasOwnProperty(colorCode)) {
 					const buf = twgl.createBufferInfoFromArrays(gl, coloredPrimitives[colorCode]);
-					partBufferCache[part.filename].coloredFaces[colorCode] = buf;
+					partBuffer.coloredFaces[colorCode] = buf;
 				}
 			}
 		}
