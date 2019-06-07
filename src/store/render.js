@@ -138,7 +138,9 @@ export default {
 
 		let zoom = zoomStep;
 		const config = {size, resizeContainer: true};
-		while (container.width > paddedContainerSize || container.height > paddedContainerSize) {
+		while ((container.width > paddedContainerSize || container.height > paddedContainerSize)
+			&& zoom > -1000
+		) {
 			zoom -= zoomStep;
 			LDRender.setRenderState({zoom});
 			LDRender.renderPart(0, store.model.filename, container, config);
