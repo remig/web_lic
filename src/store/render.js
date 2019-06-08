@@ -70,25 +70,21 @@ export default {
 
 		let container = canvasCache.get(csi.domID, bypassCache);
 		if (csi.isDirty || container == null || bypassCache) {
-			let config;
-			const size = (getScale(csi) || 1) * hiResScale * 1000;
-			if (step.parts == null) {
-				// TODO: this only happens for title page; need better indicator for this non-step step
-				config = {size, resizeContainer: true};
-			} else {
+			const config = {
+				size: hiResScale * 1000,
+				zoom: getScale(csi),
+				resizeContainer: true
+			};
+			if (step.parts != null) {
 				const partList = store.get.partList(step);
 				if (!partList.length) {
 					return null;
 				}
-				config = {
-					size,
-					partList,
-					selectedPartIDs,
-					resizeContainer: true,
-					displacedParts: step.displacedParts,
-					rotation: getRotation(csi),
-					displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
-				};
+				config.partList = partList;
+				config.selectedPartIDs = selectedPartIDs;
+				config.displacedParts = step.displacedParts;
+				config.rotation = getRotation(csi);
+				config.displacementArrowColor = store.state.template.step.csi.displacementArrow.fill.color;
 			}
 			container = container || canvasCache.create(csi.domID);
 			LDRender.renderModel(localModel, container, config);
@@ -98,7 +94,8 @@ export default {
 	},
 	csiWithSelection(localModel, step, csi, selectedPartIDs) {
 		const config = {
-			size: 1000 * (getScale(csi) || 1),
+			size: 1000,
+			zoom: getScale(csi),
 			partList: store.get.partList(step),
 			selectedPartIDs,
 			resizeContainer: true,
@@ -126,7 +123,8 @@ export default {
 		let container = canvasCache.get(item.domID, bypassCache);
 		if (item.isDirty || container == null || bypassCache) {
 			const config = {
-				size: (getScale(item) || 1) * hiResScale * 1000,
+				size: hiResScale * 1000,
+				zoom: getScale(item),
 				resizeContainer: true,
 				rotation: getRotation(item)
 			};
@@ -158,7 +156,9 @@ export default {
 
 		let res = LDRender.renderPart(0, store.model.filename, container, config);
 
-		while ((res.x < 1 || res.y < 1 || res.width > maxSize || res.height > maxSize) && zoom > -500) {
+		while (res && zoom > -500
+			&& (res.x < 1 || res.y < 1 || res.width > maxSize || res.height > maxSize)
+		) {
 			zoom -= zoomStep;
 			LDRender.setRenderState({zoom});
 			res = LDRender.renderPart(0, store.model.filename, container, config);

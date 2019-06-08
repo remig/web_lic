@@ -72,9 +72,16 @@ const api = {
 };
 
 function buildConfig(config) {
-	_.assign(config, renderState);
-	config.size = Math.max(Math.floor(config.size), 1);
-	return config;
+
+	const res = _.cloneDeep(config);
+	if (config.zoom && config.zoom !== 1) {
+		res.zoom = renderState.zoom / config.zoom;
+	} else {
+		res.zoom = renderState.zoom;
+	}
+	res.lineThickness = renderState.lineThickness;
+	res.size = Math.max(Math.floor(config.size), 1);
+	return res;
 }
 
 /* eslint-disable no-labels */
