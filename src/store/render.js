@@ -149,19 +149,19 @@ export default {
 		}
 	},
 	adjustCameraZoom() {
-		// Render the main model; if it's too big to fit in the default view, zoom out until it fits
-		const size = 1000, paddedContainerSize = size - 300, zoomStep = 30;
-		const container = canvasCache.get(null, true);
-		container.width = container.height = size;
 
-		let zoom = zoomStep;
+		// Render the main model; if it's too big to fit in the default view, zoom out until it fits
+		const size = 1000, maxSize = size - 300, zoomStep = 30;
 		const config = {size, resizeContainer: true};
-		while ((container.width > paddedContainerSize || container.height > paddedContainerSize)
-			&& zoom > -1000
-		) {
+		const container = canvasCache.get(null, true);
+		let zoom = 0;
+
+		let res = LDRender.renderPart(0, store.model.filename, container, config);
+
+		while ((res.x < 1 || res.y < 1 || res.width > maxSize || res.height > maxSize) && zoom > -500) {
 			zoom -= zoomStep;
 			LDRender.setRenderState({zoom});
-			LDRender.renderPart(0, store.model.filename, container, config);
+			res = LDRender.renderPart(0, store.model.filename, container, config);
 		}
 		store.state.template.sceneRendering.zoom = zoom;
 	}
