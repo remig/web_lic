@@ -85,13 +85,14 @@ const app = new Vue({
 
 			this.busyText = this.tr('dialog.busy_indicator.loading_model');
 			const model = await modelGenerator();
-			await store.mutations.templatePage.add();
-			store.setModel(model);
-			this.filename = store.state.licFilename;
 
 			if (!_.isEmpty(LDParse.missingParts)) {
 				await DialogManager('missingPartsDialog');
 			}
+
+			await store.mutations.templatePage.add();
+			store.setModel(model);
+			this.filename = store.state.licFilename;
 
 			DialogManager('importModelDialog', dialog => {
 				if (_.isEmpty(model.steps)) {
