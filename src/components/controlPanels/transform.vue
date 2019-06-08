@@ -43,7 +43,9 @@ export default {
 		updateValues(newRotation) {
 			// TODO: only emit if something actually changed
 			const transform = _.get(store.state.template, this.templateEntry);
-			transform.rotation = newRotation;
+			if (newRotation && Array.isArray(newRotation)) {
+				transform.rotation = newRotation;
+			}
 			transform.scale = this.scale;
 			this.$emit('new-values');
 		}

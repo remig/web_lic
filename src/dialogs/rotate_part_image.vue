@@ -45,7 +45,7 @@ export default{
 			this.$refs.rotateBuilder.rotation = rotation;
 		},
 		updateValues(newRotation) {
-			if (newRotation) {
+			if (newRotation && Array.isArray(newRotation)) {
 				this.$data.rotation = newRotation;
 			}
 			this.$emit('update', this.$data);

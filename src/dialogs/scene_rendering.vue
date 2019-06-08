@@ -55,7 +55,9 @@ export default{
 	},
 	methods: {
 		updateValues(newRotation) {
-			this.values.rotation = newRotation;
+			if (newRotation && Array.isArray(newRotation)) {
+				this.values.rotation = newRotation;
+			}
 			store.mutations.sceneRendering.set({...this.values, refresh: true});
 			this.app.redrawUI(true);
 		},
