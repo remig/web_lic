@@ -606,7 +606,6 @@
 			"parts_per_step_2": "Parts Per Step",
 			"steps_per_page": "Steps per Page",
 			"use_max_steps": "As many as can fit nicely",
-			"auto_shrink_csi": "Automatically shrink part images to fit page",
 			"include": {
 				"root": "Include...",
 				"titlePage": "Title Page",

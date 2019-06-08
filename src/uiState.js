@@ -13,7 +13,6 @@ const defaultState = {
 			stepsPerPage: 1,
 			partsPerStep: null,
 			useMaxSteps: true,
-			autoShrinkCSI: true,
 			firstPageNumber: 1,
 			firstStepNumber: 1,
 			addStepsForSubmodels: true,

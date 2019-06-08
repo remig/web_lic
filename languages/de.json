@@ -606,7 +606,6 @@
 			"parts_per_step_2": "Teilen pro Schritt",
 			"steps_per_page": "Schritte pro Seite",
 			"use_max_steps": "Soviele wie möglich, solange es gut aussieht",
-			"auto_shrink_csi": "Teilebilder automatisch verkleinern, damit sie auf die Seite passen",
 			"include": {
 				"root": "Aufnehmen...",
 				"titlePage": "Titelseite",

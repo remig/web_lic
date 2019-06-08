@@ -93,6 +93,7 @@ const app = new Vue({
 			await store.mutations.templatePage.add();
 			store.setModel(model);
 			this.filename = store.state.licFilename;
+			store.render.adjustCameraZoom();
 
 			DialogManager('importModelDialog', dialog => {
 				if (_.isEmpty(model.steps)) {
@@ -107,9 +108,6 @@ const app = new Vue({
 
 					// TODO: Add option to start new page for each submodel
 					store.mutations.pli.toggleVisibility({visible: layoutChoices.include.pli});
-					if (layoutChoices.autoShrinkCSI) {
-						store.render.adjustCameraZoom();
-					}
 					store.mutations.addInitialPages({partsPerStep: layoutChoices.partsPerStep});
 					store.mutations.addInitialSubmodelImages();
 					if (layoutChoices.useMaxSteps) {

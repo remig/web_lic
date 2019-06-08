@@ -32,12 +32,6 @@
 			/>
 		</el-row>
 		<el-row>
-			<el-checkbox
-				v-model="newState.autoShrinkCSI"
-				:label="tr('dialog.import_model.auto_shrink_csi')"
-			/>
-		</el-row>
-		<el-row>
 			<el-dropdown
 				:hide-on-click="false"
 				trigger="click"

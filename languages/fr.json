@@ -606,7 +606,6 @@
 			"parts_per_step_2": "des pièces par étape",
 			"steps_per_page": "des étapes par page",
 			"use_max_steps": "Autant que possible tant que cela reste joli",
-			"auto_shrink_csi": "la réduction automatique des images des pièces pour tenir sur la page",
 			"include": {
 				"root": "Inclure...",
 				"titlePage": "Le titre de la page",
