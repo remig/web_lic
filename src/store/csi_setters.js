@@ -26,7 +26,7 @@ export default {
 	},
 	scale(opts) { // opts: {csi, scale, doLayout = false}
 		const csi = store.get.lookupToItem(opts.csi);
-		csi.scale = (opts.scale == null) ? null : _.clamp(opts.scale, 0.001, 5);
+		csi.scale = (opts.scale == null) ? null : _.clamp(opts.scale, 0.001, 20);
 		csi.isDirty = true;
 		if (opts.doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(csi)});

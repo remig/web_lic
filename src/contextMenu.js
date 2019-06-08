@@ -691,6 +691,7 @@ const contextMenu = {
 			text: 'action.csi.scale.name',
 			id: 'csi_scale_cmenu',
 			cb(selectedItem) {
+				const maxScale = 20;
 				const csi = store.get.csi(selectedItem.id);
 				const originalScale = csi.scale;
 				let initialScale = originalScale;
@@ -703,7 +704,7 @@ const contextMenu = {
 				}
 				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('update', newValues => {
-						csi.scale = _.clamp(newValues.value || 0, 0.001, 5);
+						csi.scale = _.clamp(newValues.value || 0, 0.001, maxScale);
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
@@ -723,7 +724,7 @@ const contextMenu = {
 					dialog.title = tr('dialog.scale_csi.title');
 					dialog.label = tr('dialog.scale_csi.label');
 					dialog.min = 0;
-					dialog.max = 10;
+					dialog.max = maxScale;
 					dialog.step = 0.1;
 					dialog.bodyText = '';
 					dialog.value = initialScale;
