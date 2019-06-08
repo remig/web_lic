@@ -28,7 +28,7 @@
 						</el-button>
 					</licTooltip>
 					<el-button v-else-if="!value.uploaded" @click="upload(filename)">
-						{{tr("import")}}
+						{{tr("glossary.import")}}
 					</el-button>
 				</td>
 			</tr>
