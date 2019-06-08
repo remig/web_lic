@@ -163,6 +163,7 @@ const api = {
 					}
 				});
 			});
+			api.missingParts = {};
 		},
 		get: {
 			// Return the total number of parts in this model, including parts in submodels
