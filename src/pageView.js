@@ -407,28 +407,7 @@ Vue.component('pageView', {
 				// Can't find canvas for this page; ignore draw.  Happens when changing between view modes
 				return;
 			}
-			const selectedPart = ((this.selectedItem || {}).type === 'part') ? this.selectedItem : null;
-			Draw.page(page, canvas, {selectedPart});
-
-			if (this.selectedItem == null) {
-				return;
-			}
-
-			// Draw highlight box around the selected page item, if any
-			let doHighlight = false;
-			const itemPage = store.get.pageForItem(this.selectedItem);
-			if (_.itemEq(itemPage, page)) {
-				doHighlight = true;
-			} else if (page.stretchedStep && this.selectedItem) {
-				const stretchedStep = store.get.step(page.stretchedStep.stepID);
-				if (store.get.isDescendent(this.selectedItem, stretchedStep)) {
-					doHighlight = true;
-				}
-			}
-			if (doHighlight) {
-				const box = itemHighlightBox(this.selectedItem, this.pageSize, page);
-				Draw.highlight(canvas, box.x, box.y, box.width, box.height);
-			}
+			Draw.page(page, canvas, {selectedItem: this.selectedItem});
 		},
 		pageCoordsToCanvasCoords(point) {
 			const canvas = getCanvasForPage(this.currentPageLookup);
@@ -493,52 +472,8 @@ function getCanvasForPage(page) {
 	return document.getElementById(getCanvasID(page));
 }
 
-function itemHighlightBox(selItem, pageSize, currentPage) {
-	selItem = store.get.lookupToItem(selItem);
-	if (!selItem || selItem.type === 'part') {
-		return {display: 'none'};
-	}
-	const type = selItem.type;
-	const page = store.get.pageForItem(selItem);
-	if (page.needsLayout) {
-		store.mutations.page.layout({page});
-	}
-	let box;
-	if (type && type.toLowerCase().endsWith('page')) {
-		box = {x: 5, y: 5, width: pageSize.width - 9, height: pageSize.height - 9};
-	} else if (type === 'divider') {
-		// TODO: when divider is rewritten to just a list of points, get rid of this
-		let pointBox = _.geom.bbox([selItem.p1, selItem.p2]);
-		pointBox = _.geom.expandBox(pointBox, 8, 8);
-		box = store.get.targetBox({...selItem, ...pointBox});
-	} else if (type === 'pliItem') {  // Special case: pliItem box should include its quantity label
-		box = store.get.targetBox(selItem);
-		const lbl = store.get.quantityLabel(selItem.quantityLabelID);
-		box = _.geom.bbox([box, store.get.targetBox(lbl)]);
-	} else {
-		box = store.get.targetBox(selItem);
-		if (type === 'point') {
-			box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
-		}
-	}
-	let dx = 0;
-	if (currentPage && currentPage.stretchedStep) {
-		const stretchedStep = store.get.step(currentPage.stretchedStep.stepID);
-		if (store.get.isDescendent(selItem, stretchedStep)) {
-			dx = currentPage.stretchedStep.leftOffset;
-		}
-	}
-	const pad = 2;
-	return {
-		x: box.x - pad + dx,
-		y: box.y - pad,
-		width: pad + box.width + pad - 1,
-		height: pad + box.height + pad - 1
-	};
-}
-
 function inHighlightBox(x, y, t, pageSize, page) {
-	const box = itemHighlightBox(t, pageSize, page);
+	const box = store.get.highlightBox(t, pageSize, page);
 	return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
 }
 

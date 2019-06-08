@@ -9,7 +9,7 @@ import uiState from './uiState';
 
 const api = {
 
-	page(page, canvas, config = {}) {  // config: {hiResScale, selectedPart, noCache}
+	page(page, canvas, config = {}) {  // config: {hiResScale, selectedItem, noCache}
 
 		const hiResScale = config.hiResScale = config.hiResScale || 1;
 		if (page.needsLayout) {
@@ -102,6 +102,24 @@ const api = {
 			api.annotation(store.get.annotation(id), ctx);
 		});
 		ctx.restore();
+
+		// Draw highlight box around the selected page item, if any
+		if (config.selectedItem) {
+			let doHighlight = false;
+			const itemPage = store.get.pageForItem(config.selectedItem);
+			if (_.itemEq(itemPage, page)) {
+				doHighlight = true;
+			} else if (page.stretchedStep) {
+				const stretchedStep = store.get.step(page.stretchedStep.stepID);
+				if (store.get.isDescendent(config.selectedItem, stretchedStep)) {
+					doHighlight = true;
+				}
+			}
+			if (doHighlight) {
+				const box = store.get.highlightBox(config.selectedItem, template, page);
+				api.highlight(ctx, box);
+			}
+		}
 	},
 
 	// TODO: Add support for a quantity label to a step. Useful on last step of a submodel built many times.
@@ -193,7 +211,7 @@ const api = {
 		ctx.restore();
 	},
 
-	csi(csi, ctx, {hiResScale, selectedPart, noCache}) {
+	csi(csi, ctx, {hiResScale, selectedItem, noCache}) {
 		csi = store.get.csi(csi);
 		const step = store.get.parent(csi);
 		const localModel = LDParse.model.get.abstractPart(step.model.filename);
@@ -201,8 +219,8 @@ const api = {
 		ctx.save();
 		ctx.translate(Math.floor(csi.x), Math.floor(csi.y));
 		ctx.scale(1 / hiResScale, 1 / hiResScale);
-		const haveSelectedParts = selectedPart && selectedPart.stepID === step.id;
-		const selectedPartIDs = haveSelectedParts ? [selectedPart.id] : null;
+		const havePart = selectedItem && selectedItem.type === 'part' && selectedItem.stepID === step.id;
+		const selectedPartIDs = havePart ? [selectedItem.id] : null;
 		const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
 		const res = store.render[renderer](localModel, step, csi, selectedPartIDs, hiResScale, noCache);
 		if (res) {
@@ -542,13 +560,12 @@ const api = {
 		});
 	},
 
-	highlight(canvas, x, y, w, h) {
-		const ctx = canvas.getContext('2d');
+	highlight(ctx, box) {
 		ctx.save();
 		ctx.strokeStyle = '#2eb9ce';
 		ctx.lineWidth = 3;
 		ctx.setLineDash([5, 3]);
-		ctx.strokeRect(x, y, w, h);
+		ctx.strokeRect(box.x, box.y, box.width, box.height);
 		ctx.restore();
 	},
 

@@ -476,5 +476,48 @@ export default {
 			}
 		}
 		return box;
+	},
+	highlightBox(item, pageSize, currentPage) {
+		item = store.get.lookupToItem(item);
+		if (!item || item.type === 'part') {
+			return {display: 'none'};
+		}
+		const type = item.type;
+		const page = store.get.pageForItem(item);
+		if (page.needsLayout) {
+			store.mutations.page.layout({page});
+		}
+		let box;
+		if (type && type.toLowerCase().endsWith('page')) {
+			box = {x: 5, y: 5, width: pageSize.width - 9, height: pageSize.height - 9};
+		} else if (type === 'divider') {
+			// TODO: when divider is rewritten to just a list of points, get rid of this
+			let pointBox = _.geom.bbox([item.p1, item.p2]);
+			pointBox = _.geom.expandBox(pointBox, 8, 8);
+			box = store.get.targetBox({...item, ...pointBox});
+		} else if (type === 'pliItem') {  // Special case: pliItem box should include its quantity label
+			box = store.get.targetBox(item);
+			const lbl = store.get.quantityLabel(item.quantityLabelID);
+			box = _.geom.bbox([box, store.get.targetBox(lbl)]);
+		} else {
+			box = store.get.targetBox(item);
+			if (type === 'point') {
+				box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
+			}
+		}
+		let dx = 0;
+		if (currentPage && currentPage.stretchedStep) {
+			const stretchedStep = store.get.step(currentPage.stretchedStep.stepID);
+			if (store.get.isDescendent(item, stretchedStep)) {
+				dx = currentPage.stretchedStep.leftOffset;
+			}
+		}
+		const pad = 2;
+		return {
+			x: box.x - pad + dx,
+			y: box.y - pad,
+			width: pad + box.width + pad - 1,
+			height: pad + box.height + pad - 1
+		};
 	}
 };
