@@ -2,18 +2,29 @@
 
 'use strict';
 
-import _ from '../util';
 import store from '../store';
 import LDRender from '../LDRender';
 import uiState from '../uiState';
 
-function getCanvas(domID) {
-	const container = document.createElement('canvas');
-	container.setAttribute('id', domID);
-	container.setAttribute('class', 'offscreen');
-	document.getElementById('canvasHolder').appendChild(container);
-	return container;
-}
+const canvasCache = (function() {
+	let cache = {};
+	const transientCanvas = document.createElement('canvas');
+	return {
+		create(domId) {
+			cache[domId] = document.createElement('canvas');
+			return cache[domId];
+		},
+		get(domId, bypass) {
+			if (bypass) {
+				return transientCanvas;
+			}
+			return cache[domId];
+		},
+		clear() {
+			cache = {};
+		}
+	};
+})();
 
 function getRotation(item) {
 	let rot = item.rotation;
@@ -51,24 +62,26 @@ function getScale(item) {
 export default {
 
 	csi(localModel, step, csi, selectedPartIDs, hiResScale = 1, bypassCache) {
-		const scale = (getScale(csi) || 1) * hiResScale;
+
 		if (csi.domID == null) {
 			csi.domID = `CSI_${step.csiID}`;
 			csi.isDirty = true;
 		}
-		let config;
-		let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : csi.domID);
+
+		let container = canvasCache.get(csi.domID, bypassCache);
 		if (csi.isDirty || container == null || bypassCache) {
+			let config;
+			const size = (getScale(csi) || 1) * hiResScale * 1000;
 			if (step.parts == null) {
 				// TODO: this only happens for title page; need better indicator for this non-step step
-				config = {size: 1000 * scale, resizeContainer: true};
+				config = {size, resizeContainer: true};
 			} else {
 				const partList = store.get.partList(step);
-				if (_.isEmpty(partList)) {
+				if (!partList.length) {
 					return null;
 				}
 				config = {
-					size: 1000 * scale,
+					size,
 					partList,
 					selectedPartIDs,
 					resizeContainer: true,
@@ -77,7 +90,7 @@ export default {
 					displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
 				};
 			}
-			container = container || getCanvas(csi.domID);
+			container = container || canvasCache.create(csi.domID);
 			LDRender.renderModel(localModel, container, config);
 			delete csi.isDirty;
 		}
@@ -93,7 +106,7 @@ export default {
 			rotation: getRotation(csi),
 			displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
 		};
-		const container = document.getElementById('generateImagesCanvas');
+		const container = canvasCache.get(null, true);
 		const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, config);
 		return {
 			width: container.width,
@@ -104,23 +117,27 @@ export default {
 		};
 	},
 	pli(colorCode, filename, item, hiResScale = 1, bypassCache) {
-		const scale = (getScale(item) || 1) * hiResScale;
+
 		if (item.domID == null) {
 			item.domID = `PLI_${filename}_${colorCode}`;
 			item.isDirty = true;
 		}
-		let container = document.getElementById(bypassCache ? 'generateImagesCanvas' : item.domID);
-		if ((item && item.isDirty) || container == null || bypassCache) {
+
+		let container = canvasCache.get(item.domID, bypassCache);
+		if (item.isDirty || container == null || bypassCache) {
 			const config = {
-				size: 1000 * scale,
+				size: (getScale(item) || 1) * hiResScale * 1000,
 				resizeContainer: true,
 				rotation: getRotation(item)
 			};
-			container = container || getCanvas(item.domID, bypassCache);
+			container = container || canvasCache.create(item.domID);
 			LDRender.renderPart(colorCode, filename, container, config);
 			delete item.isDirty;
 		}
 		return {width: container.width, height: container.height, container};
+	},
+	clearCanvasCache() {
+		canvasCache.clear();
 	},
 	removeCanvas(item) {
 		if (item.type === 'step') {
@@ -134,7 +151,7 @@ export default {
 	adjustCameraZoom() {
 		// Render the main model; if it's too big to fit in the default view, zoom out until it fits
 		const size = 1000, paddedContainerSize = size - 300, zoomStep = 30;
-		const container = getCanvas('cameraZoomTestCanvas');
+		const container = canvasCache.get(null, true);
 		container.width = container.height = size;
 
 		let zoom = zoomStep;
@@ -147,6 +164,5 @@ export default {
 			LDRender.renderPart(0, store.model.filename, container, config);
 		}
 		store.state.template.sceneRendering.zoom = zoom;
-		container.remove();
 	}
 };

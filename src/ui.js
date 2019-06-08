@@ -206,7 +206,7 @@ const app = new Vue({
 			undoStack.clear();
 			Storage.clear.model();
 			this.clearState();
-			_.dom.emptyNode(document.getElementById('canvasHolder'));
+			store.render.clearCanvasCache();
 			Vue.nextTick(() => {
 				this.clearSelected();
 			});
