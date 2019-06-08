@@ -189,6 +189,8 @@ Vue.component('pageView', {
 	},
 	watch: {
 		selectedItem(newItem) {
+			// TODO: consider drawing a second transparent canvas over the main canvas, that includes
+			// just the highlight box.  Saves redrawing the entire page on simple highlight change.
 			const currentPage = store.get.lookupToItem(this.currentPageLookup);
 			if (currentPage && currentPage.stretchedStep) {
 				// If selected item is in a stretched step on current page, scroll to current page

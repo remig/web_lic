@@ -544,6 +544,7 @@ const api = {
 	},
 
 	pliItem(pliItem) {
+		// TODO: auto shrink big pliItems, like we already do in submodelImages()
 		const pliSize = store.render.pli(pliItem.colorCode, pliItem.filename, pliItem);
 		pliItem.x = pliItem.y = 0;
 		pliItem.width = pliSize.width;
