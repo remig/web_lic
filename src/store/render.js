@@ -10,6 +10,7 @@ import uiState from '../uiState';
 function getCanvas(domID) {
 	const container = document.createElement('canvas');
 	container.setAttribute('id', domID);
+	container.setAttribute('class', 'offscreen');
 	document.getElementById('canvasHolder').appendChild(container);
 	return container;
 }
