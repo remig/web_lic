@@ -265,7 +265,10 @@ const api = {
 			if (lastSelectedId === id) {
 				return; // Selected item didn't actually change
 			}
-			document.getElementById(lastSelectedId).classList.remove('treeSelected');
+			const node = document.getElementById(lastSelectedId);
+			if (node) {
+				node.classList.remove('treeSelected');
+			}
 		}
 		const node = document.getElementById(id);
 		if (node) {
@@ -276,7 +279,10 @@ const api = {
 	},
 	clearSelected() {
 		if (lastSelectedId) {
-			document.getElementById(lastSelectedId).classList.remove('treeSelected');
+			const node = document.getElementById(lastSelectedId);
+			if (node) {
+				node.classList.remove('treeSelected');
+			}
 			lastSelectedId = null;
 		}
 	},
