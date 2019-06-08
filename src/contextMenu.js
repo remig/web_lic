@@ -1274,6 +1274,7 @@ const contextMenu = {
 						return store.get.prevStep(step) != null;
 					},
 					cb(selectedItem) {
+						app.clearSelected();
 						const srcStep = store.get.step(selectedItem.stepID);
 						const destStep = store.get.prevStep(srcStep);
 						undoStack.commit(
@@ -1292,6 +1293,7 @@ const contextMenu = {
 						return store.get.nextStep(step) != null;
 					},
 					cb(selectedItem) {
+						app.clearSelected();
 						const srcStep = store.get.step(selectedItem.stepID);
 						const destStep = store.get.nextStep(srcStep);
 						undoStack.commit(
