@@ -816,6 +816,31 @@ const contextMenu = {
 			}
 		},
 		{
+			text: 'action.pli_item.remove_part_list_image_rotate.name',
+			id: 'pli_remove_rotation_cmenu',
+			shown(selectedItem) {
+				const pliItem = store.get.pliItem(selectedItem.id);
+				return store.get.pliTransform(pliItem.filename).rotation != null;
+			},
+			cb(selectedItem) {
+				const pliItem = store.get.pliItem(selectedItem.id);
+				const filename = pliItem.filename;
+				store.mutations.pliTransform.set({filename, rotation: null});
+				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
+				const changes = dirtyItems.map(item => {
+					return {
+						mutation: 'page.layout',
+						opts: {page: store.get.pageForItem(item)}
+					};
+				});
+				undoStack.commit(
+					changes, null,
+					tr('action.pli_item.remove_part_list_image_rotate.undo'),
+					dirtyItems
+				);
+			}
+		},
+		{
 			text: 'action.pli_item.scale_part_list_image.name',
 			id: 'pli_scale_cmenu',
 			cb(selectedItem) {

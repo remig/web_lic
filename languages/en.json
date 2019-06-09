@@ -412,6 +412,10 @@
                 "name": "Rotate Part List Image...",
                 "undo": "Rotate Part List Image"
             },
+            "remove_part_list_image_rotate": {
+                "name": "Remove Rotation",
+                "undo": "Remove Part List Image Rotation"
+            },
             "scale_part_list_image": {
                 "name": "Scale Part List Image...",
                 "undo": "Scale Part List Image"
