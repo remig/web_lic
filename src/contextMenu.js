@@ -8,7 +8,6 @@ import LicGL from './webgl/licgl';
 import store from './store';
 import undoStack from './undoStack';
 import openFileHandler from './fileUploader';
-import uiState from './uiState';
 import DialogManager from './dialog';
 import LocaleManager from './components/translate.vue';
 
@@ -782,48 +781,37 @@ const contextMenu = {
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				const pliTransforms = uiState.get('pliTransforms');
-				const originalTransform = _.cloneDeep(pliTransforms[filename]);
-				const initialRotation = (originalTransform || {}).rotation;
-				const page = store.get.pageForItem(pliItem);
-				pliTransforms[filename] = pliTransforms[filename] || {};
+				const originalRotation = store.get.pliTransform(filename).rotation;
 
 				app.clearSelected();
 				DialogManager('rotatePartImageDialog', dialog => {
 					dialog.$on('update', newValues => {
-						pliTransforms[filename].rotation = newValues.rotation;
+						store.mutations.pliTransform.set({filename, rotation: newValues.rotation});
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
-					dialog.$on('ok', newValues => {
-						const path = `/${filename}/rotation`, root = pliTransforms;
-						const op = 'replace';
-						const change = [
-							{
-								redo: [{root, op, path, value: newValues.rotation}],
-								undo: [{root, op, path, value: initialRotation}]
-							},
-							{mutation: 'page.layout', opts: {page}}
-						];
+					dialog.$on('ok', () => {
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
+						const changes = dirtyItems.map(item => {
+							return {
+								mutation: 'page.layout',
+								opts: {page: store.get.pageForItem(item)}
+							};
+						});
 						undoStack.commit(
-							change, null,
+							changes, null,
 							tr('action.pli_item.rotate_part_list_image.undo'),
 							dirtyItems
 						);
 					});
 					dialog.$on('cancel', () => {
-						if (originalTransform == null) {
-							delete pliTransforms[filename];
-						} else {
-							pliTransforms[filename] = originalTransform;
-						}
+						store.mutations.pliTransform.set({filename, rotation: originalRotation});
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
 					dialog.title = tr('dialog.rotate_part_image.title_pli');
 					dialog.showRotateIconCheckbox = false;
-					dialog.setRotation(_.cloneDeep(initialRotation) || []);
+					dialog.setRotation(_.cloneDeep(originalRotation) || []);
 				});
 			}
 		},
@@ -833,75 +821,66 @@ const contextMenu = {
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				const pliTransforms = uiState.get('pliTransforms');
-				const originalTransform = _.cloneDeep(pliTransforms[filename]);
-				const page = store.get.pageForItem(pliItem);
-				pliTransforms[filename] = pliTransforms[filename] || {};
+				const originalScale = store.get.pliTransform(filename).scale;
 
 				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('update', newValues => {
-						pliTransforms[filename].scale = _.clamp(newValues.value || 0, 0.001, 5);
+						const scale = _.clamp(newValues.value || 0, 0.0001, 20);
+						store.mutations.pliTransform.set({filename, scale});
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
-					dialog.$on('ok', newValues => {
-						const value = _.clamp(newValues.value || 0, 0.001, 5);
-						const path = `/${filename}/scale`, root = pliTransforms;
-						const op = 'replace';
-						const change = [
-							{
-								redo: [{root, op, path, value}],
-								undo: [{root, op, path, value: (originalTransform || {}).scale || null}]
-							},
-							{mutation: 'page.layout', opts: {page}}
-						];
+					dialog.$on('ok', () => {
 						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						undoStack.commit(change, null, tr('action.pli_item.scale_part_list_image.undo'),
-							dirtyItems);
+						const changes = dirtyItems.map(item => {
+							return {
+								mutation: 'page.layout',
+								opts: {page: store.get.pageForItem(item)}
+							};
+						});
+						undoStack.commit(
+							changes, null,
+							tr('action.pli_item.scale_part_list_image.undo'),
+							dirtyItems
+						);
 					});
 					dialog.$on('cancel', () => {
-						if (originalTransform == null) {
-							delete pliTransforms[filename];
-						} else {
-							pliTransforms[filename] = originalTransform;
-						}
+						store.mutations.pliTransform.set({filename, scale: originalScale});
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
 					dialog.title = tr('dialog.scale_pli.title');
 					dialog.min = 0;
-					dialog.max = 10;
+					dialog.max = 20;
 					dialog.step = 0.1;
 					dialog.bodyText = '';
-					dialog.value = (originalTransform || {}).scale || 1;
+					dialog.value = originalScale || 1;
 				});
 			}
 		},
 		{
 			text: 'action.pli_item.remove_part_list_image_scale.name',
-			id: 'pli_remove_cmenu',
+			id: 'pli_remove_scale_cmenu',
 			shown(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
-				return uiState.getPLITransform(pliItem.filename).scale != null;
+				return store.get.pliTransform(pliItem.filename).scale != null;
 			},
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
-				const page = store.get.pageForItem(pliItem);
 				const filename = pliItem.filename;
-				const pliTransforms = uiState.get('pliTransforms');
-				const originalScale = pliTransforms[filename].scale;
-				const path = `/${filename}/scale`, root = pliTransforms;
-				const change = [
-					{
-						redo: [{root, op: 'remove', path}],
-						undo: [{root, op: 'add', path, value: originalScale}]
-					},
-					'clearCacheTargets',
-					{mutation: 'page.layout', opts: {page}}
-				];
+				store.mutations.pliTransform.set({filename, scale: null});
 				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-				undoStack.commit(change, null, tr('action.pli_item.remove_part_list_image_scale.undo'),
-					dirtyItems);
+				const changes = dirtyItems.map(item => {
+					return {
+						mutation: 'page.layout',
+						opts: {page: store.get.pageForItem(item)}
+					};
+				});
+				undoStack.commit(
+					changes, null,
+					tr('action.pli_item.remove_part_list_image_scale.undo'),
+					dirtyItems
+				);
 			}
 		}
 	],

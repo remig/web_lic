@@ -35,6 +35,7 @@ const emptyState = {
 	templatePage: null,
 	titlePage: null,
 	plisVisible: true,
+	pliTransforms: {},
 	pages: [],
 	inventoryPages: [],
 	dividers: [],
@@ -318,6 +319,32 @@ const store = {
 				let list = store.state.pliItems;
 				list = filename ? list.filter(item => item.filename === filename) : list;
 				list.forEach(item => (item.isDirty = true));
+			}
+		},
+		pliTransform: {
+			set(opts) {  // opts: {filename, rotation, scale}
+				// If rotation or scale is null, delete those entries.  If they're missing, ignore them.
+				let transform = store.state.pliTransforms[opts.filename];
+				if (!transform) {
+					transform = store.state.pliTransforms[opts.filename] = {};
+				}
+				if (opts.hasOwnProperty('rotation')) {
+					if (Array.isArray(opts.rotation)) {
+						transform.rotation = opts.rotation.filter(el => el.angle !== 0);
+					}
+					if (opts.rotation == null || _.isEmpty(transform.rotation)) {
+						delete transform.rotation;
+					}
+				}
+				if (opts.hasOwnProperty('scale')) {
+					transform.scale = opts.scale;
+					if (!transform.scale || transform.scale === 1) {
+						delete transform.scale;
+					}
+				}
+				if (_.isEmpty(transform)) {
+					delete store.state.pliTransforms[opts.filename];
+				}
 			}
 		},
 		renumber(itemList, start = 1) {

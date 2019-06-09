@@ -69,9 +69,7 @@ const defaultState = {
 	guideStyle: {  // NYI
 		width: 1,
 		color: 'black'
-	},
-	// TODO: If scale set back to 1, delete it, don't store it. Same for rotations x|y|z=0
-	pliTransforms: {}  // key: part filename, value: {rotation, scale}
+	}
 };
 
 Storage.initialize(defaultState);
@@ -92,9 +90,6 @@ const api = {
 		// Return clone so we don't accidentally modify it; default state is immutable
 		return _.cloneDeep(defaultState);
 	},
-	getPLITransform(filename) {
-		return currentState.pliTransforms[filename] || {};
-	},
 	resetUIState() {
 		currentState = _.cloneDeep(defaultState);
 	},
@@ -102,7 +97,7 @@ const api = {
 		currentState = _.cloneDeep(newState);
 	},
 	mutations: {
-		// TODO: Move more ui state mutations here (context menu pliTransforms, menu grid & guide bits, etc)
+		// TODO: Move more ui state mutations here (menu grid & guide bits, etc)
 		guides: {
 			setPosition(guideID, newPosition) {
 				const originalPosition = currentState.guides[guideID].position;

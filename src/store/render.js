@@ -4,7 +4,6 @@
 
 import store from '../store';
 import LDRender from '../LDRender';
-import uiState from '../uiState';
 
 const canvasCache = (function() {
 	let cache = {};
@@ -32,7 +31,7 @@ function getRotation(item) {
 		return rot;
 	}
 	if (item.filename) {
-		const transform = uiState.getPLITransform(item.filename);
+		const transform = store.get.pliTransform(item.filename);
 		if (transform.rotation) {
 			return transform.rotation;
 		}
@@ -48,7 +47,7 @@ function getScale(item) {
 	} else if (item.autoScale != null) {
 		scale = item.autoScale;
 	} else if (item.filename) {
-		const transform = uiState.getPLITransform(item.filename);
+		const transform = store.get.pliTransform(item.filename);
 		if (transform.scale != null) {
 			scale = transform.scale;
 		}

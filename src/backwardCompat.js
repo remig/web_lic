@@ -9,6 +9,9 @@ function fixState(state) {
 	if (state.inventoryPages == null) {
 		state.inventoryPages = [];
 	}
+	if (state.pliTransforms == null) {
+		state.pliTransforms = {};
+	}
 
 	state.pages.forEach(page => {
 		if (page.pliItems == null) {

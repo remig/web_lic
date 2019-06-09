@@ -211,6 +211,9 @@ export default {
 		pliItem = store.get.lookupToItem(pliItem);
 		return LDParse.model.isSubmodel(pliItem.filename);
 	},
+	pliTransform(filename) {
+		return store.state.pliTransforms[filename] || {};
+	},
 	isMoveable: (() => {
 		const moveableItems = [
 			'step', 'csi', 'pli', 'pliItem', 'quantityLabel', 'numberLabel', 'annotation',
