@@ -14,6 +14,16 @@ import LocaleManager from './components/translate.vue';
 let app;
 const tr = LocaleManager.translate;
 
+const clampScale = (() => {
+	const min = 0.0001, max = 20;
+	function clampScale(v) {
+		return _.clamp(v || 0, min, max);
+	}
+	clampScale.min = min;
+	clampScale.max = max;
+	return clampScale;
+})();
+
 const annotationMenu = {
 	text: 'action.annotation.add.name',
 	id: 'annotation_add_cmenu',
@@ -690,7 +700,6 @@ const contextMenu = {
 			text: 'action.csi.scale.name',
 			id: 'csi_scale_cmenu',
 			cb(selectedItem) {
-				const maxScale = 20;
 				const csi = store.get.csi(selectedItem.id);
 				const originalScale = csi.scale;
 				let initialScale = originalScale;
@@ -703,7 +712,7 @@ const contextMenu = {
 				}
 				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('update', newValues => {
-						csi.scale = _.clamp(newValues.value || 0, 0.001, maxScale);
+						csi.scale = clampScale(newValues.value);
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
@@ -723,7 +732,7 @@ const contextMenu = {
 					dialog.title = tr('dialog.scale_csi.title');
 					dialog.label = tr('dialog.scale_csi.label');
 					dialog.min = 0;
-					dialog.max = maxScale;
+					dialog.max = clampScale.max;
 					dialog.step = 0.1;
 					dialog.bodyText = '';
 					dialog.value = initialScale;
@@ -850,7 +859,7 @@ const contextMenu = {
 
 				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('update', newValues => {
-						const scale = _.clamp(newValues.value || 0, 0.0001, 20);
+						const scale = clampScale(newValues.value);
 						store.mutations.pliTransform.set({filename, scale});
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
@@ -876,7 +885,7 @@ const contextMenu = {
 					});
 					dialog.title = tr('dialog.scale_pli.title');
 					dialog.min = 0;
-					dialog.max = 20;
+					dialog.max = clampScale.max;
 					dialog.step = 0.1;
 					dialog.bodyText = '';
 					dialog.value = originalScale || 1;
