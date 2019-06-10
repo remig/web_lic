@@ -148,7 +148,7 @@ export default {
 	adjustCameraZoom() {
 
 		// Render the main model; if it's too big to fit in the default view, zoom out until it fits
-		const size = 1000, maxSize = size - 300, zoomStep = 30;
+		const size = 1000, maxSize = size - 150, zoomStep = 20;
 		const config = {size, resizeContainer: true};
 		const container = canvasCache.get(null, true);
 		let zoom = 0;
