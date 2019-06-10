@@ -132,7 +132,7 @@ const api = {
 		} else if (columns.length > 2) {
 			const lastCol = _.last(columns);
 			const remainingSpace = box.width - lastCol[0].x - Math.max(...(lastCol.map(el => el.width)));
-			const spaceToAdd = _.clamp(remainingSpace / (columns.length - 1), 0, margin);
+			const spaceToAdd = Math.max(0, remainingSpace / (columns.length - 1));
 			columns.forEach((col, idx) => {
 				col.forEach(item => {
 					item.x += spaceToAdd * idx;
@@ -142,15 +142,14 @@ const api = {
 
 		// Increase vertical space between items in the same column so they evenly fill the page height
 		columns.forEach(col => {
-			if (col.length < 2) {
-				return;
+			if (col.length > 1) {
+				const lastItem = _.last(col);
+				const remainingSpace = box.height - lastItem.y - lastItem.height;
+				const spaceToAdd = Math.max(0, remainingSpace / (col.length - 1));
+				col.forEach((item, idx) => {
+					item.y += spaceToAdd * idx;
+				});
 			}
-			const lastItem = _.last(col);
-			const remainingSpace = box.height - lastItem.y - lastItem.height;
-			const spaceToAdd = _.clamp(remainingSpace / (col.length - 1), 0, margin);
-			col.forEach((item, idx) => {
-				item.y += spaceToAdd * idx;
-			});
 		});
 
 		delete page.needsLayout;
