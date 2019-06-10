@@ -14,7 +14,7 @@ export default {
 		const itemList = [];  // index: colorCode, value: {filename: quantity}}
 
 		function buildPartList(model) {
-			model.parts.forEach(({filename, colorCode}) => {
+			(model.parts || []).forEach(({filename, colorCode}) => {
 				if (LDParse.model.isSubmodel(filename)) {
 					buildPartList(LDParse.model.get.abstractPart(filename));
 				} else {
