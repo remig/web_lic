@@ -124,12 +124,21 @@ const api = {
 		// Everything is in nice columns.
 		// Increase horizontal space between columns so they evenly fill the page width
 		columns = columns.filter(el => el.length);
-		colWidth = box.width / columns.length;
-		columns.slice(1).forEach((col, idx) => {
-			col.forEach(item => {
-				item.x = (colWidth * (idx + 1)) + margin;
+		if (columns.length === 2) {
+			// Special case: For two columns, position 2nd in the middle of the page
+			if (columns[1][0].x < box.width / 2) {
+				columns[1].forEach(item => (item.x = box.width / 2));
+			}
+		} else if (columns.length > 2) {
+			const lastCol = _.last(columns);
+			const remainingSpace = box.width - lastCol[0].x - Math.max(...(lastCol.map(el => el.width)));
+			const spaceToAdd = _.clamp(remainingSpace / (columns.length - 1), 0, margin);
+			columns.forEach((col, idx) => {
+				col.forEach(item => {
+					item.x += spaceToAdd * idx;
+				});
 			});
-		});
+		}
 
 		// Increase vertical space between items in the same column so they evenly fill the page height
 		columns.forEach(col => {
