@@ -183,11 +183,11 @@ const api = {
 				return api.partDictionary[filename];
 			},
 			partFromID(partID, filename) {
-				return api.partDictionary[filename].parts[partID];
+				return (api.partDictionary[filename].parts || [])[partID];
 			},
 			// Return an array of abstractParts, one for each submodel in this model.
 			submodels(model) {
-				return model.parts.map(p => {
+				return (model.parts || []).map(p => {
 					p = api.partDictionary[p.filename];
 					return p.isSubModel ? p : null;
 				}).filter(p => p != null);

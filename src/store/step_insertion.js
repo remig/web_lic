@@ -10,7 +10,7 @@ import _ from '../util';
 // config: {allowPartReorder, maxPartsPerStep}
 export default function(model, config) {
 	const partsPerStep = config.partsPerStep || 10;
-	const partIndices = model.parts.map((el, idx) => idx);
+	const partIndices = (model.parts || []).map((el, idx) => idx);
 	return _.chunk(partIndices, partsPerStep)
 		.map(el => ({parts: el}));
 }
