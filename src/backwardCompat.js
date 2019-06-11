@@ -88,6 +88,7 @@ function fixState(state) {
 			{axis: 'y', angle: 45}
 		];
 	}
+	state.template.useBlackStudFaces = true;
 }
 
 function fixColorTable(colorTable) {

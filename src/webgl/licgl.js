@@ -41,7 +41,10 @@ function generateObjectList(part, modelView, colorCode, config) {
 			let color;
 			if (colorCode === studFaceColorCode) {
 				// Custom stud face color logic
-				if (config.parentColorCode === 0) {
+				if (store.state.template.useBlackStudFaces) {
+					// Use old, backward compatible, always-black stud face color
+					color = [0.01961, 0.07451, 0.11373, 1.0];  // #05131D
+				} else if (config.parentColorCode === 0) {
 					// If base part is black, use black for stud face too
 					color = LDParse.getColor(0, 'rgba');
 				} else {
