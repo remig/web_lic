@@ -330,10 +330,10 @@ _.mixin({
 		color.hexToVec4 = (color, alpha) => {
 			color = color.replace('#', '');
 			return [
-				(parseInt(color.substr(0, 2), 16) / 255).toFixed(5),
-				(parseInt(color.substr(2, 2), 16) / 255).toFixed(5),
-				(parseInt(color.substr(4, 2), 16) / 255).toFixed(5),
-				((255 - alpha) / 255).toFixed(5)
+				_.round(parseInt(color.substr(0, 2), 16) / 255, 4),
+				_.round(parseInt(color.substr(2, 2), 16) / 255, 4),
+				_.round(parseInt(color.substr(4, 2), 16) / 255, 4),
+				_.round((255 - alpha) / 255, 4)
 			];
 		};
 		color.luma = (color, isUnitColor) => {
