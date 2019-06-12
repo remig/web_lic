@@ -35,17 +35,27 @@ function createArrowBuffers(gl) {
 	const tipIndices = [0, 1, 2, 0, 2, 3, 0, 3, 4];
 	const bodyIndices = [2, 3, 5, 2, 5, 6];
 
-	const tipData = {
-		position: {data: vertices, numComponents: 3},
-		indices: {data: tipIndices, numComponents: 3}
-	};
-	const bodyData = {
-		position: {data: vertices, numComponents: 3},
-		indices: {data: bodyIndices, numComponents: 3}
-	};
+	const tipVao = gl.createVertexArray();
+	gl.bindVertexArray(tipVao);
+	twgl.initBuffer(gl, 0, vertices, 3);
+	twgl.initIndexBuffer(gl, tipIndices);
+	gl.bindVertexArray(null);
+
+	const bodyVao = gl.createVertexArray();
+	gl.bindVertexArray(bodyVao);
+	twgl.initBuffer(gl, 0, vertices, 3);
+	twgl.initIndexBuffer(gl, bodyIndices);
+	gl.bindVertexArray(null);
+
 	return {
-		tip: twgl.createBufferInfoFromArrays(gl, tipData),
-		body: twgl.createBufferInfoFromArrays(gl, bodyData)
+		tip: {
+			vao: tipVao,
+			numElements: tipIndices.length
+		},
+		body: {
+			vao: bodyVao,
+			numElements: bodyIndices.length
+		}
 	};
 }
 

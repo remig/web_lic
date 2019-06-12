@@ -9,187 +9,7 @@ var error = (window.console && window.console.error && typeof window.console.err
   ? window.console.error.bind(window.console)
   : function() { };
 
-var typedArrays = (function() {
-
-  var BYTE                           = 0x1400;
-  var UNSIGNED_BYTE                  = 0x1401;
-  var SHORT                          = 0x1402;
-  var UNSIGNED_SHORT                 = 0x1403;
-  var INT                            = 0x1404;
-  var UNSIGNED_INT                   = 0x1405;
-  var FLOAT                          = 0x1406;
-
-  function getGLTypeForTypedArray(typedArray) {
-    if (typedArray instanceof Int8Array)         { return BYTE; }           // eslint-disable-line
-    if (typedArray instanceof Uint8Array)        { return UNSIGNED_BYTE; }  // eslint-disable-line
-    if (typedArray instanceof Uint8ClampedArray) { return UNSIGNED_BYTE; }  // eslint-disable-line
-    if (typedArray instanceof Int16Array)        { return SHORT; }          // eslint-disable-line
-    if (typedArray instanceof Uint16Array)       { return UNSIGNED_SHORT; } // eslint-disable-line
-    if (typedArray instanceof Int32Array)        { return INT; }            // eslint-disable-line
-    if (typedArray instanceof Uint32Array)       { return UNSIGNED_INT; }   // eslint-disable-line
-    if (typedArray instanceof Float32Array)      { return FLOAT; }          // eslint-disable-line
-    throw "unsupported typed array type";
-  }
-
-  function isArrayBuffer(a) {
-    return a && a.buffer && a.buffer instanceof ArrayBuffer;
-  }
-
-  return {
-    "getGLTypeForTypedArray": getGLTypeForTypedArray,
-    "isArrayBuffer": isArrayBuffer,
-  };
-})();
-
-var attributes = (function() {
-  
-  var gl = undefined;  // eslint-disable-line
-	  
-  function setBufferFromTypedArray(gl, type, buffer, array, drawType) {
-    gl.bindBuffer(type, buffer);
-    gl.bufferData(type, array, drawType || gl.STATIC_DRAW);
-  }
-
-  function createBufferFromTypedArray(gl, typedArray, type, drawType) {
-    if (typedArray instanceof WebGLBuffer) {
-      return typedArray;
-    }
-    type = type || gl.ARRAY_BUFFER;
-    var buffer = gl.createBuffer();
-    setBufferFromTypedArray(gl, type, buffer, typedArray, drawType);
-    return buffer;
-  }
-
-  function isIndices(name) {
-    return name === "indices";
-  }
-
-  function getNormalizationForTypedArray(typedArray) {
-    if (typedArray instanceof Int8Array)    { return true; }  // eslint-disable-line
-    if (typedArray instanceof Uint8Array)   { return true; }  // eslint-disable-line
-    return false;
-  }
-
-  function getArray(array) {
-    return array.length ? array : array.data;
-  }
-
-  function guessNumComponentsFromName(name, length) {
-    var numComponents;
-    if (name.indexOf("coord") >= 0) {
-      numComponents = 2;
-    } else if (name.indexOf("color") >= 0) {
-      numComponents = 4;
-    } else {
-      numComponents = 3;  // position, normals, indices ...
-    }
-
-    if (length % numComponents > 0) {
-      throw "can not guess numComponents. You should specify it.";
-    }
-
-    return numComponents;
-  }
-
-  function getNumComponents(array, arrayName) {
-    return array.numComponents || array.size || guessNumComponentsFromName(arrayName, getArray(array).length);
-  }
-
-  function makeTypedArray(array, name) {
-    if (typedArrays.isArrayBuffer(array)) {
-      return array;
-    }
-
-    if (typedArrays.isArrayBuffer(array.data)) {
-      return array.data;
-    }
-
-    if (Array.isArray(array)) {
-      array = {
-        data: array,
-      };
-    }
-
-    var Type = array.type;
-    if (!Type) {
-      if (name === "indices") {
-        Type = Uint16Array;
-      } else {
-        Type = Float32Array;
-      }
-    }
-    return new Type(array.data);
-  }
-
-  function createAttribsFromArrays(gl, arrays) {
-    var attribs = {};
-    Object.keys(arrays).forEach(function(arrayName) {
-      if (!isIndices(arrayName)) {
-        var array = arrays[arrayName];
-        var attribName = array.attrib || array.name || array.attribName || arrayName;
-        var typedArray = makeTypedArray(array, arrayName);
-        attribs[attribName] = {
-          buffer:        createBufferFromTypedArray(gl, typedArray, undefined, array.drawType),
-          numComponents: getNumComponents(array, arrayName),
-          type:          typedArrays.getGLTypeForTypedArray(typedArray),
-          normalize:     array.normalize !== undefined ? array.normalize : getNormalizationForTypedArray(typedArray),
-          stride:        array.stride || 0,
-          offset:        array.offset || 0,
-          drawType:      array.drawType,
-        };
-      }
-    });
-    return attribs;
-  }
-
-  var getNumElementsFromNonIndexedArrays = (function() {
-    var positionKeys = ['position', 'positions', 'a_position'];
-
-    return function getNumElementsFromNonIndexedArrays(arrays) {
-      var key;
-      for (var ii = 0; ii < positionKeys.length; ++ii) {
-        key = positionKeys[ii];
-        if (key in arrays) {
-          break;
-        }
-      }
-      if (ii === positionKeys.length) {
-        key = Object.keys(arrays)[0];
-      }
-      var array = arrays[key];
-      var length = getArray(array).length;
-      var numComponents = getNumComponents(array, key);
-      var numElements = length / numComponents;
-      if (length % numComponents > 0) {
-        throw "numComponents " + numComponents + " not correct for length " + length;
-      }
-      return numElements;
-    };
-  }());
-
-  function createBufferInfoFromArrays(gl, arrays) {
-    var bufferInfo = {
-      attribs: createAttribsFromArrays(gl, arrays),
-    };
-    var indices = arrays.indices;
-    if (indices) {
-      indices = makeTypedArray(indices, "indices");
-      bufferInfo.indices = createBufferFromTypedArray(gl, indices, gl.ELEMENT_ARRAY_BUFFER);
-      bufferInfo.numElements = indices.length;
-      bufferInfo.elementType = typedArrays.getGLTypeForTypedArray(indices);
-    } else {
-      bufferInfo.numElements = getNumElementsFromNonIndexedArrays(arrays);
-    }
-
-    return bufferInfo;
-  }
-
-  return {
-    "createBufferInfoFromArrays": createBufferInfoFromArrays
-  };
-})();
-
-var programs = (function() {
+var twgl = (function() {
   
   var FLOAT                         = 0x1406;
   var FLOAT_VEC2                    = 0x8B50;
@@ -206,48 +26,18 @@ var programs = (function() {
   var FLOAT_MAT2                    = 0x8B5A;
   var FLOAT_MAT3                    = 0x8B5B;
   var FLOAT_MAT4                    = 0x8B5C;
-  var SAMPLER_2D                    = 0x8B5E;
-  var SAMPLER_CUBE                  = 0x8B60;
-  var SAMPLER_3D                    = 0x8B5F;
-  var SAMPLER_2D_SHADOW             = 0x8B62;
   var FLOAT_MAT2x3                  = 0x8B65;
   var FLOAT_MAT2x4                  = 0x8B66;
   var FLOAT_MAT3x2                  = 0x8B67;
   var FLOAT_MAT3x4                  = 0x8B68;
   var FLOAT_MAT4x2                  = 0x8B69;
   var FLOAT_MAT4x3                  = 0x8B6A;
-  var SAMPLER_2D_ARRAY              = 0x8DC1;
-  var SAMPLER_2D_ARRAY_SHADOW       = 0x8DC4;
-  var SAMPLER_CUBE_SHADOW           = 0x8DC5;
   var UNSIGNED_INT                  = 0x1405;
   var UNSIGNED_INT_VEC2             = 0x8DC6;
   var UNSIGNED_INT_VEC3             = 0x8DC7;
   var UNSIGNED_INT_VEC4             = 0x8DC8;
-  var INT_SAMPLER_2D                = 0x8DCA;
-  var INT_SAMPLER_3D                = 0x8DCB;
-  var INT_SAMPLER_CUBE              = 0x8DCC;
-  var INT_SAMPLER_2D_ARRAY          = 0x8DCF;
-  var UNSIGNED_INT_SAMPLER_2D       = 0x8DD2;
-  var UNSIGNED_INT_SAMPLER_3D       = 0x8DD3;
-  var UNSIGNED_INT_SAMPLER_CUBE     = 0x8DD4;
-  var UNSIGNED_INT_SAMPLER_2D_ARRAY = 0x8DD7;
-
-  var TEXTURE_2D                    = 0x0DE1;
-  var TEXTURE_CUBE_MAP              = 0x8513;
-  var TEXTURE_3D                    = 0x806F;
-  var TEXTURE_2D_ARRAY              = 0x8C1A;
 
   var typeMap = {};
-
-  /**
-   * Returns the corresponding bind point for a given sampler type
-   */
-  function getBindPointForSamplerType(gl, type) {
-    return typeMap[type].bindPoint;
-  }
-
-  // This kind of sucks! If you could compose functions as in `var fn = gl[name];`
-  // this code could be a lot smaller but that is sadly really slow (T_T)
 
   function floatSetter(gl, location) {
     return function(v) {
@@ -393,204 +183,45 @@ var programs = (function() {
     };
   }
 
-  function samplerSetter(gl, type, unit, location) {
-    var bindPoint = getBindPointForSamplerType(gl, type);
-    return function(texture) {
-      gl.uniform1i(location, unit);
-      gl.activeTexture(gl.TEXTURE0 + unit);
-      gl.bindTexture(bindPoint, texture);
-    };
-  }
+  typeMap[FLOAT]             = { Type: Float32Array, size:  4, setter: floatSetter,      arraySetter: floatArraySetter};
+  typeMap[FLOAT_VEC2]        = { Type: Float32Array, size:  8, setter: floatVec2Setter,  };
+  typeMap[FLOAT_VEC3]        = { Type: Float32Array, size: 12, setter: floatVec3Setter,  };
+  typeMap[FLOAT_VEC4]        = { Type: Float32Array, size: 16, setter: floatVec4Setter,  };
+  typeMap[INT]               = { Type: Int32Array,   size:  4, setter: intSetter,        arraySetter: intArraySetter};
+  typeMap[INT_VEC2]          = { Type: Int32Array,   size:  8, setter: intVec2Setter,    };
+  typeMap[INT_VEC3]          = { Type: Int32Array,   size: 12, setter: intVec3Setter,    };
+  typeMap[INT_VEC4]          = { Type: Int32Array,   size: 16, setter: intVec4Setter,    };
+  typeMap[UNSIGNED_INT]      = { Type: Uint32Array,  size:  4, setter: uintSetter,       arraySetter: uintArraySetter};
+  typeMap[UNSIGNED_INT_VEC2] = { Type: Uint32Array,  size:  8, setter: uintVec2Setter,   };
+  typeMap[UNSIGNED_INT_VEC3] = { Type: Uint32Array,  size: 12, setter: uintVec3Setter,   };
+  typeMap[UNSIGNED_INT_VEC4] = { Type: Uint32Array,  size: 16, setter: uintVec4Setter,   };
+  typeMap[BOOL]              = { Type: Uint32Array,  size:  4, setter: intSetter,        arraySetter: intArraySetter};
+  typeMap[BOOL_VEC2]         = { Type: Uint32Array,  size:  8, setter: intVec2Setter,    };
+  typeMap[BOOL_VEC3]         = { Type: Uint32Array,  size: 12, setter: intVec3Setter,    };
+  typeMap[BOOL_VEC4]         = { Type: Uint32Array,  size: 16, setter: intVec4Setter,    };
+  typeMap[FLOAT_MAT2]        = { Type: Float32Array, size: 16, setter: floatMat2Setter,  };
+  typeMap[FLOAT_MAT3]        = { Type: Float32Array, size: 36, setter: floatMat3Setter,  };
+  typeMap[FLOAT_MAT4]        = { Type: Float32Array, size: 64, setter: floatMat4Setter,  };
+  typeMap[FLOAT_MAT2x3]      = { Type: Float32Array, size: 24, setter: floatMat23Setter, };
+  typeMap[FLOAT_MAT2x4]      = { Type: Float32Array, size: 32, setter: floatMat24Setter, };
+  typeMap[FLOAT_MAT3x2]      = { Type: Float32Array, size: 24, setter: floatMat32Setter, };
+  typeMap[FLOAT_MAT3x4]      = { Type: Float32Array, size: 48, setter: floatMat34Setter, };
+  typeMap[FLOAT_MAT4x2]      = { Type: Float32Array, size: 32, setter: floatMat42Setter, };
+  typeMap[FLOAT_MAT4x3]      = { Type: Float32Array, size: 48, setter: floatMat43Setter, };
 
-  function samplerArraySetter(gl, type, unit, location, size) {
-    var bindPoint = getBindPointForSamplerType(gl, type);
-    var units = new Int32Array(size);
-    for (var ii = 0; ii < size; ++ii) {
-      units[ii] = unit + ii;
-    }
-
-    return function(textures) {
-      gl.uniform1iv(location, units);
-      textures.forEach(function(texture, index) {
-        gl.activeTexture(gl.TEXTURE0 + units[index]);
-        gl.bindTexture(bindPoint, texture);
-      });
-    };
-  }
-
-  typeMap[FLOAT]                         = { Type: Float32Array, size:  4, setter: floatSetter,      arraySetter: floatArraySetter, };
-  typeMap[FLOAT_VEC2]                    = { Type: Float32Array, size:  8, setter: floatVec2Setter,  };
-  typeMap[FLOAT_VEC3]                    = { Type: Float32Array, size: 12, setter: floatVec3Setter,  };
-  typeMap[FLOAT_VEC4]                    = { Type: Float32Array, size: 16, setter: floatVec4Setter,  };
-  typeMap[INT]                           = { Type: Int32Array,   size:  4, setter: intSetter,        arraySetter: intArraySetter, };
-  typeMap[INT_VEC2]                      = { Type: Int32Array,   size:  8, setter: intVec2Setter,    };
-  typeMap[INT_VEC3]                      = { Type: Int32Array,   size: 12, setter: intVec3Setter,    };
-  typeMap[INT_VEC4]                      = { Type: Int32Array,   size: 16, setter: intVec4Setter,    };
-  typeMap[UNSIGNED_INT]                  = { Type: Uint32Array,  size:  4, setter: uintSetter,       arraySetter: uintArraySetter, };
-  typeMap[UNSIGNED_INT_VEC2]             = { Type: Uint32Array,  size:  8, setter: uintVec2Setter,   };
-  typeMap[UNSIGNED_INT_VEC3]             = { Type: Uint32Array,  size: 12, setter: uintVec3Setter,   };
-  typeMap[UNSIGNED_INT_VEC4]             = { Type: Uint32Array,  size: 16, setter: uintVec4Setter,   };
-  typeMap[BOOL]                          = { Type: Uint32Array,  size:  4, setter: intSetter,        arraySetter: intArraySetter, };
-  typeMap[BOOL_VEC2]                     = { Type: Uint32Array,  size:  8, setter: intVec2Setter,    };
-  typeMap[BOOL_VEC3]                     = { Type: Uint32Array,  size: 12, setter: intVec3Setter,    };
-  typeMap[BOOL_VEC4]                     = { Type: Uint32Array,  size: 16, setter: intVec4Setter,    };
-  typeMap[FLOAT_MAT2]                    = { Type: Float32Array, size: 16, setter: floatMat2Setter,  };
-  typeMap[FLOAT_MAT3]                    = { Type: Float32Array, size: 36, setter: floatMat3Setter,  };
-  typeMap[FLOAT_MAT4]                    = { Type: Float32Array, size: 64, setter: floatMat4Setter,  };
-  typeMap[FLOAT_MAT2x3]                  = { Type: Float32Array, size: 24, setter: floatMat23Setter, };
-  typeMap[FLOAT_MAT2x4]                  = { Type: Float32Array, size: 32, setter: floatMat24Setter, };
-  typeMap[FLOAT_MAT3x2]                  = { Type: Float32Array, size: 24, setter: floatMat32Setter, };
-  typeMap[FLOAT_MAT3x4]                  = { Type: Float32Array, size: 48, setter: floatMat34Setter, };
-  typeMap[FLOAT_MAT4x2]                  = { Type: Float32Array, size: 32, setter: floatMat42Setter, };
-  typeMap[FLOAT_MAT4x3]                  = { Type: Float32Array, size: 48, setter: floatMat43Setter, };
-  typeMap[SAMPLER_2D]                    = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_2D,       };
-  typeMap[SAMPLER_CUBE]                  = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_CUBE_MAP, };
-  typeMap[SAMPLER_3D]                    = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_3D,       };
-  typeMap[SAMPLER_2D_SHADOW]             = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_2D,       };
-  typeMap[SAMPLER_2D_ARRAY]              = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_2D_ARRAY, };
-  typeMap[SAMPLER_2D_ARRAY_SHADOW]       = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_2D_ARRAY, };
-  typeMap[SAMPLER_CUBE_SHADOW]           = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_CUBE_MAP, };
-  typeMap[INT_SAMPLER_2D]                = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_2D,       };
-  typeMap[INT_SAMPLER_3D]                = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_3D,       };
-  typeMap[INT_SAMPLER_CUBE]              = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_CUBE_MAP, };
-  typeMap[INT_SAMPLER_2D_ARRAY]          = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_2D_ARRAY, };
-  typeMap[UNSIGNED_INT_SAMPLER_2D]       = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_2D,       };
-  typeMap[UNSIGNED_INT_SAMPLER_3D]       = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_3D,       };
-  typeMap[UNSIGNED_INT_SAMPLER_CUBE]     = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_CUBE_MAP, };
-  typeMap[UNSIGNED_INT_SAMPLER_2D_ARRAY] = { Type: null,         size:  0, setter: samplerSetter,    arraySetter: samplerArraySetter, bindPoint: TEXTURE_2D_ARRAY, };
-
-  var attrTypeMap = {};
-  attrTypeMap[FLOAT_MAT2] = { size:  4, count: 2, };
-  attrTypeMap[FLOAT_MAT3] = { size:  9, count: 3, };
-  attrTypeMap[FLOAT_MAT4] = { size: 16, count: 4, };
-
-  // make sure we don't see a global gl
-  var gl = undefined;  // eslint-disable-line
-
-  function addLineNumbers(src, lineOffset) {
-    lineOffset = lineOffset || 0;
-    ++lineOffset;
-
-    return src.split("\n").map(function(line, ndx) {
-      return (ndx + lineOffset) + ": " + line;
-    }).join("\n");
-  }
-
-  var spaceRE = /^[ \t]*\n/;
-
-  function loadShader(gl, shaderSource, shaderType, opt_errorCallback) {
-    var errFn = opt_errorCallback || error;
-    var shader = gl.createShader(shaderType);
-
-    var lineOffset = 0;
-    if (spaceRE.test(shaderSource)) {
-      lineOffset = 1;
-      shaderSource = shaderSource.replace(spaceRE, '');
-    }
-
-    // Load the shader source
-    gl.shaderSource(shader, shaderSource);
-
-    // Compile the shader
-    gl.compileShader(shader);
-
-    // Check the compile status
-    var compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (!compiled) {
-      // Something went wrong during compilation; get the error
-      var lastError = gl.getShaderInfoLog(shader);
-      errFn(addLineNumbers(shaderSource, lineOffset) + "\n*** Error compiling shader: " + lastError);
-      gl.deleteShader(shader);
-      return null;
-    }
-
-    return shader;
-  }
-
-  function createProgram(
-      gl, shaders, opt_attribs, opt_locations, opt_errorCallback) {
-    if (typeof opt_locations === 'function') {
-      opt_errorCallback = opt_locations;
-      opt_locations = undefined;
-    }
-    if (typeof opt_attribs === 'function') {
-      opt_errorCallback = opt_attribs;
-      opt_attribs = undefined;
-    }
-    var errFn = opt_errorCallback || error;
-    var program = gl.createProgram();
-    shaders.forEach(function(shader) {
-      gl.attachShader(program, shader);
-    });
-    if (opt_attribs) {
-      opt_attribs.forEach(function(attrib,  ndx) {
-        gl.bindAttribLocation(
-            program,
-            opt_locations ? opt_locations[ndx] : ndx,
-            attrib);
-      });
-    }
-    gl.linkProgram(program);
-
-    // Check the link status
-    var linked = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (!linked) {
-        // something went wrong with the link
-        var lastError = gl.getProgramInfoLog(program);
-        errFn("Error in program linking:" + lastError);
-
-        gl.deleteProgram(program);
-        return null;
-    }
-    return program;
-  }
-
-  var defaultShaderType = [
-    "VERTEX_SHADER",
-    "FRAGMENT_SHADER",
-  ];
-
-  function createProgramFromSources(
-      gl, shaderSources, opt_attribs, opt_locations, opt_errorCallback) {
-    var shaders = [];
-    for (var ii = 0; ii < shaderSources.length; ++ii) {
-      var shader = loadShader(
-          gl, shaderSources[ii], gl[defaultShaderType[ii]], opt_errorCallback);
-      if (!shader) {
-        return null;
-      }
-      shaders.push(shader);
-    }
-    return createProgram(gl, shaders, opt_attribs, opt_locations, opt_errorCallback);
-  }
+  var gl = undefined;
 
   function createUniformSetters(gl, program) {
-    var textureUnit = 0;
 
     function createUniformSetter(program, uniformInfo) {
       var location = gl.getUniformLocation(program, uniformInfo.name);
       var isArray = (uniformInfo.size > 1 && uniformInfo.name.substr(-3) === "[0]");
       var type = uniformInfo.type;
       var typeInfo = typeMap[type];
-      if (!typeInfo) {
-        throw ("unknown type: 0x" + type.toString(16)); // we should never get here.
-      }
-      if (typeInfo.bindPoint) {
-        // it's a sampler
-        var unit = textureUnit;
-        textureUnit += uniformInfo.size;
-
-        if (isArray) {
-          return typeInfo.arraySetter(gl, type, unit, location, uniformInfo.size);
-        } else {
-          return typeInfo.setter(gl, type, unit, location, uniformInfo.size);
-        }
+      if (typeInfo.arraySetter && isArray) {
+        return typeInfo.arraySetter(gl, location);
       } else {
-        if (typeInfo.arraySetter && isArray) {
-          return typeInfo.arraySetter(gl, location);
-        } else {
-          return typeInfo.setter(gl, location);
-        }
+        return typeInfo.setter(gl, location);
       }
     }
 
@@ -613,59 +244,7 @@ var programs = (function() {
     return uniformSetters;
   }
 
-  function createUniformBlockSpecFromProgram(gl, program) {
-    var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-    var uniformData = [];
-    var uniformIndices = [];
-
-    for (var ii = 0; ii < numUniforms; ++ii) {
-      uniformIndices.push(ii);
-      uniformData.push({});
-      var uniformInfo = gl.getActiveUniform(program, ii);
-      if (!uniformInfo) {
-        break;
-      }
-      uniformData[ii].name = uniformInfo.name;
-    }
-
-    [
-      [ "UNIFORM_TYPE", "type" ],
-      [ "UNIFORM_SIZE", "size" ],  // num elements
-      [ "UNIFORM_BLOCK_INDEX", "blockNdx" ],
-      [ "UNIFORM_OFFSET", "offset", ],
-    ].forEach(function(pair) {
-      var pname = pair[0];
-      var key = pair[1];
-      gl.getActiveUniforms(program, uniformIndices, gl[pname]).forEach(function(value, ndx) {
-        uniformData[ndx][key] = value;
-      });
-    });
-
-    var blockSpecs = {};
-
-    var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
-    for (ii = 0; ii < numUniformBlocks; ++ii) {
-      var name = gl.getActiveUniformBlockName(program, ii);
-      var blockSpec = {
-        index: ii,
-        usedByVertexShader: gl.getActiveUniformBlockParameter(program, ii, gl.UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER),
-        usedByFragmentShader: gl.getActiveUniformBlockParameter(program, ii, gl.UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER),
-        size: gl.getActiveUniformBlockParameter(program, ii, gl.UNIFORM_BLOCK_DATA_SIZE),
-        uniformIndices: gl.getActiveUniformBlockParameter(program, ii, gl.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES),
-      };
-      blockSpec.used = blockSpec.usedByVertexSahder || blockSpec.usedByFragmentShader;
-      blockSpecs[name] = blockSpec;
-    }
-
-    return {
-      blockSpecs: blockSpecs,
-      uniformData: uniformData,
-    };
-  }
-
-  var arraySuffixRE = /\[\d+\]\.$/;  // better way to check?
-
-  function setUniforms(setters, values) {  // eslint-disable-line
+  function setUniforms(setters, values) {
     var actualSetters = setters.uniformSetters || setters;
     var numArgs = arguments.length;
     for (var andx = 1; andx < numArgs; ++andx) {
@@ -686,156 +265,54 @@ var programs = (function() {
     }
   }
 
-  function createAttributeSetters(gl, program) {
-    var attribSetters = {
-    };
-
-    function createAttribSetter(index) {
-      return function(b) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, b.buffer);
-        gl.enableVertexAttribArray(index);
-        gl.vertexAttribPointer(
-            index, b.numComponents || b.size, b.type || gl.FLOAT, b.normalize || false, b.stride || 0, b.offset || 0);
-      };
-    }
-
-    function createMatAttribSetter(index, typeInfo) {
-      var defaultSize = typeInfo.size;
-      var count = typeInfo.count;
-
-      return function(b) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, b.buffer);
-        var numComponents = b.size || b.numComponents || defaultSize;
-        var size = numComponents / count;
-        var type = b.type || gl.FLOAT;
-        var typeInfo = typeMap[type];
-        var stride = typeInfo.size * numComponents;
-        var normalize = b.normalize || false;
-        var offset = b.offset || 0;
-        var rowOffset = stride / count;
-        for (var i = 0; i < count; ++i) {
-          gl.enableVertexAttribArray(index + i);
-          gl.vertexAttribPointer(
-              index + i, size, type, normalize, stride, offset + rowOffset * i);
-        }
-      };
-    }
-
-    var numAttribs = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-    for (var ii = 0; ii < numAttribs; ++ii) {
-      var attribInfo = gl.getActiveAttrib(program, ii);
-      if (!attribInfo) {
-        break;
-      }
-      var index = gl.getAttribLocation(program, attribInfo.name);
-      var typeInfo = attrTypeMap[attribInfo.type];
-      if (typeInfo) {
-        attribSetters[attribInfo.name] = createMatAttribSetter(index, typeInfo);
-      } else {
-        attribSetters[attribInfo.name] = createAttribSetter(index);
-      }
-    }
-
-    return attribSetters;
+  function initBuffer(gl, attribIdx, data, numComponents) {
+    data = new Float32Array(data);
+    gl.enableVertexAttribArray(attribIdx);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(attribIdx, numComponents, gl.FLOAT, false, 0, 0);
   }
 
-  function setAttributes(setters, buffers) {
-    for (var name in buffers) {
-      var setter = setters[name];
-      if (setter) {
-        setter(buffers[name]);
-      }
-    }
+  function initIndexBuffer(gl, data) {
+    data = new Uint16Array(data);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STATIC_DRAW);
   }
 
-  function setBuffersAndAttributes(gl, programInfo, buffers) {
-    if (buffers.vertexArrayObject) {
-      gl.bindVertexArray(buffers.vertexArrayObject);
-    } else {
-      setAttributes(programInfo.attribSetters || programInfo, buffers.attribs);
-      if (buffers.indices) {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
-      }
+  function createShader(gl, source, type) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      gl.deleteShader(shader);
+      throw 'Failed to compile shader';
     }
+    return shader;
   }
 
-  function createProgramInfoFromProgram(gl, program) {
-    var uniformSetters = createUniformSetters(gl, program);
-    var attribSetters = createAttributeSetters(gl, program);
-    var programInfo = {
-      program: program,
-      uniformSetters: uniformSetters,
-      attribSetters: attribSetters,
-    };
-    programInfo.uniformBlockSpec = createUniformBlockSpecFromProgram(gl, program);
-    return programInfo;
-  }
-
-  function createProgramInfo(
-      gl, shaderSources, opt_attribs, opt_locations, opt_errorCallback) {
-    if (typeof opt_locations === 'function') {
-      opt_errorCallback = opt_locations;
-      opt_locations = undefined;
+  function createProgram(gl, vertexShader, fragShader, attribs) {
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragShader);
+    for (let i = 0; i < attribs.length; i++) {
+      gl.bindAttribLocation(program, i, attribs[i]);
     }
-    if (typeof opt_attribs === 'function') {
-      opt_errorCallback = opt_attribs;
-      opt_attribs = undefined;
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      gl.deleteProgram(program);
+      throw 'Failed to link program';
     }
-    var errFn = opt_errorCallback || error;
-    var good = true;
-    shaderSources = shaderSources.map(function(source) {
-      // Lets assume if there is no \n it's an id
-      if (source.indexOf("\n") < 0) {
-        var script = document.getElementById(source);
-        if (!script) {
-          errFn("no element with id: " + source);
-          good = false;
-        } else {
-          source = script.text;
-        }
-      }
-      return source;
-    });
-    if (!good) {
-      return null;
-    }
-    var program = createProgramFromSources(gl, shaderSources, opt_attribs, opt_locations, opt_errorCallback);
-    if (!program) {
-      return null;
-    }
-    return createProgramInfoFromProgram(gl, program);
+    return program;
   }
 
   return {
-    "createProgramInfo": createProgramInfo,
-    "setBuffersAndAttributes": setBuffersAndAttributes,
-    "setUniforms": setUniforms
+    createUniformSetters,
+	setUniforms,
+	initBuffer,
+	initIndexBuffer,
+	createShader,
+	createProgram
   };
-})();
-
-var twgl = (function() {
-
-  var api = {};
-
-  function copyPublicProperties(src, dst) {
-    Object.keys(src).forEach(function(key) {
-      dst[key] = src[key];
-    });
-    return dst;
-  }
-
-  var apis = {
-    attributes: attributes,
-    programs: programs,
-    typedArrays: typedArrays,
-  };
-  Object.keys(apis).forEach(function(name) {
-    var srcApi = apis[name];
-    copyPublicProperties(srcApi, api);
-    api[name] = copyPublicProperties(srcApi, {});
-  });
-
-  return api;
 })();
 
 var v3 = twgl.v3 = (function() {

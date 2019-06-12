@@ -8,7 +8,7 @@ import lineShaderSource from './lineShader.glsl';
 import condLineShaderSource from './condLineShader.glsl';
 import fragmentShaderSource from './fragmentShader.glsl';
 import twgl from './twgl';
-import arrows from './arrows';
+import Arrows from './arrows';
 
 import _ from '../util';
 import LDParse from '../LDParse';
@@ -120,8 +120,8 @@ function generateObjectList(part, modelView, colorCode, config) {
 					twgl.m4.translate(partMatrix, translation, partMatrix);
 
 					partBox = partBox || getPartBoundingBox(abstractPart, modelView);
-					const arrowMat = arrows.getArrowPosition(partBox, partMatrix, displacement);
-					const arrowRotMat = arrows.getArrowRotation(displacement);
+					const arrowMat = Arrows.getArrowPosition(partBox, partMatrix, displacement);
+					const arrowRotMat = Arrows.getArrowRotation(displacement);
 					twgl.m4.multiply(arrowRotMat, arrowMat, arrowRotMat);
 					addArrowObject(res.faces, arrowRotMat, (displacement.arrowLength || 60) - 15);
 				}
@@ -209,7 +209,7 @@ function drawScene(objectsToDraw, config) {
 	programs.faces.uniformSetters.projection(projectionMatrix);
 	for (let i = 0; i < objectsToDraw.faces.length; i++) {
 		const object = objectsToDraw.faces[i];
-		twgl.setBuffersAndAttributes(gl, programs.faces, object.buffers);
+		gl.bindVertexArray(object.buffers.vao);
 		twgl.setUniforms(programs.faces, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
@@ -221,7 +221,7 @@ function drawScene(objectsToDraw, config) {
 	programs.lines.uniformSetters.thickness(lineThickness);
 	for (let i = 0; i < objectsToDraw.lines.length; i++) {
 		const object = objectsToDraw.lines[i];
-		twgl.setBuffersAndAttributes(gl, programs.lines, object.buffers);
+		gl.bindVertexArray(object.buffers.vao);
 		twgl.setUniforms(programs.lines, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
@@ -232,7 +232,7 @@ function drawScene(objectsToDraw, config) {
 	programs.condLines.uniformSetters.thickness(lineThickness);
 	for (let i = 0; i < objectsToDraw.condLines.length; i++) {
 		const object = objectsToDraw.condLines[i];
-		twgl.setBuffersAndAttributes(gl, programs.condLines, object.buffers);
+		gl.bindVertexArray(object.buffers.vao);
 		twgl.setUniforms(programs.condLines, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
@@ -242,7 +242,7 @@ function drawScene(objectsToDraw, config) {
 	programs.faces.uniformSetters.projection(projectionMatrix);
 	for (let i = 0; i < objectsToDraw.alphaFaces.length; i++) {
 		const object = objectsToDraw.alphaFaces[i];
-		twgl.setBuffersAndAttributes(gl, programs.faces, object.buffers);
+		gl.bindVertexArray(object.buffers.vao);
 		twgl.setUniforms(programs.faces, object.uniforms);
 		gl.drawElements(gl.TRIANGLES, object.buffers.numElements, gl.UNSIGNED_SHORT, 0);
 	}
@@ -275,7 +275,7 @@ function addArrowObject(objectsToDraw, mat, length) {
 
 function addFace(faceData, points) {
 	const idx = faceData.indices.lastIndex;
-	faceData.position.data.push(...points);
+	faceData.position.push(...points);
 	faceData.indices.data.push(idx, idx + 1, idx + 2);
 	if (points.length === 12) {
 		faceData.indices.data.push(idx, idx + 2, idx + 3);
@@ -287,19 +287,19 @@ function addFace(faceData, points) {
 
 function addLine(lineData, p, cp) {
 	const idx = lineData.indices.lastIndex;
-	lineData.position.data.push(p[0], p[1], p[2], p[0], p[1], p[2], p[3], p[4], p[5], p[3], p[4], p[5]);
-	lineData.next.data.push(p[3], p[4], p[5], p[3], p[4], p[5], p[0], p[1], p[2], p[0], p[1], p[2]);
+	lineData.position.push(p[0], p[1], p[2], p[0], p[1], p[2], p[3], p[4], p[5], p[3], p[4], p[5]);
+	lineData.next.push(p[3], p[4], p[5], p[3], p[4], p[5], p[0], p[1], p[2], p[0], p[1], p[2]);
 	lineData.indices.data.push(
 		idx + 2, idx + 1, idx,
 		idx + 3, idx + 1, idx + 2
 	);
-	lineData.direction.data.push(-1, 1, -1, 1);
-	lineData.order.data.push(0, 0, 1, 1);
+	lineData.direction.push(-1, 1, -1, 1);
+	lineData.order.push(0, 0, 1, 1);
 	if (cp != null) {
-		lineData.condPointA.data.push(
+		lineData.condPointA.push(
 			cp[0], cp[1], cp[2], cp[0], cp[1], cp[2], cp[0], cp[1], cp[2], cp[0], cp[1], cp[2]
 		);
-		lineData.condPointB.data.push(
+		lineData.condPointB.push(
 			cp[3], cp[4], cp[5], cp[3], cp[4], cp[5], cp[3], cp[4], cp[5], cp[3], cp[4], cp[5]
 		);
 	}
@@ -361,11 +361,11 @@ function createBBoxBuffer(box) {
 	const [x1, y1, z1] = box.max;
 
 	const lineData = {
-		position: {data: [], numComponents: 3},
-		next: {data: [], numComponents: 3},
-		direction: {data: [], numComponents: 1},
-		order: {data: [], numComponents: 1},
-		indices: {data: [], numComponents: 3, lastIndex: 0}
+		position: [],
+		next: [],
+		direction: [],
+		order: [],
+		indices: {data: [], lastIndex: 0}
 	};
 
 	// Bottom face
@@ -386,32 +386,47 @@ function createBBoxBuffer(box) {
 	addLine(lineData, [x1, y0, z0, x1, y1, z0]);
 	addLine(lineData, [x1, y0, z1, x1, y1, z1]);
 
-	return twgl.createBufferInfoFromArrays(gl, lineData);
+	const vao = gl.createVertexArray();
+	gl.bindVertexArray(vao);
+
+	twgl.initBuffer(gl, 0, lineData.position, 3);
+	twgl.initBuffer(gl, 1, lineData.next, 3);
+	twgl.initBuffer(gl, 2, lineData.direction, 1);
+	twgl.initBuffer(gl, 3, lineData.order, 1);
+	twgl.initIndexBuffer(gl, lineData.indices.data);
+
+	gl.bindVertexArray(null);
+
+	return {
+		vao,
+		numElements: lineData.indices.data.length
+	};
 }
+
 function importPart(gl, part) {
 
 	if (partBufferCache[part.filename] == null && part.primitives && part.primitives.length) {
 
 		let coloredPrimitives;
 		const faceData = {
-			position: {data: [], numComponents: 3},
-			indices: {data: [], numComponents: 3, lastIndex: 0}
+			position: [],
+			indices: {data: [], lastIndex: 0}
 		};
 		const lineData = {
-			position: {data: [], numComponents: 3},
-			next: {data: [], numComponents: 3},
-			direction: {data: [], numComponents: 1},
-			order: {data: [], numComponents: 1},
-			indices: {data: [], numComponents: 3, lastIndex: 0}
+			position: [],
+			next: [],
+			direction: [],
+			order: [],
+			indices: {data: [], lastIndex: 0}
 		};
 		const condLineData = {
-			position: {data: [], numComponents: 3},
-			next: {data: [], numComponents: 3},
-			direction: {data: [], numComponents: 1},
-			order: {data: [], numComponents: 1},
-			condPointA: {data: [], numComponents: 3},
-			condPointB: {data: [], numComponents: 3},
-			indices: {data: [], numComponents: 3, lastIndex: 0}
+			position: [],
+			next: [],
+			direction: [],
+			order: [],
+			condPointA: [],
+			condPointB: [],
+			indices: {data: [], lastIndex: 0}
 		};
 
 		for (let i = 0; i < part.primitives.length; i++) {
@@ -429,8 +444,8 @@ function importPart(gl, part) {
 				coloredPrimitives = coloredPrimitives || {};
 				if (coloredPrimitives[colorCode] == null) {
 					coloredPrimitives[colorCode] = {
-						position: {data: [], numComponents: 3},
-						indices: {data: [], numComponents: 3, lastIndex: 0}
+						position: [],
+						indices: {data: [], lastIndex: 0}
 					};
 				}
 				addFace(coloredPrimitives[colorCode], p.p);
@@ -438,21 +453,74 @@ function importPart(gl, part) {
 		}
 
 		const partBuffer = partBufferCache[part.filename] = {};
-		if (faceData.position.data.length) {
-			partBuffer.faces = twgl.createBufferInfoFromArrays(gl, faceData);
+
+		if (faceData.position.length) {
+
+			const vao = gl.createVertexArray();
+			gl.bindVertexArray(vao);
+
+			twgl.initBuffer(gl, 0, faceData.position, 3);
+			twgl.initIndexBuffer(gl, faceData.indices.data);
+
+			gl.bindVertexArray(null);
+			partBuffer.faces = {
+				vao,
+				numElements: faceData.indices.data.length
+			};
 		}
-		if (lineData.position.data.length) {
-			partBuffer.lines = twgl.createBufferInfoFromArrays(gl, lineData);
+		if (lineData.position.length) {
+
+			const vao = gl.createVertexArray();
+			gl.bindVertexArray(vao);
+
+			twgl.initBuffer(gl, 0, lineData.position, 3);
+			twgl.initBuffer(gl, 1, lineData.next, 3);
+			twgl.initBuffer(gl, 2, lineData.direction, 1);
+			twgl.initBuffer(gl, 3, lineData.order, 1);
+			twgl.initIndexBuffer(gl, lineData.indices.data);
+
+			gl.bindVertexArray(null);
+			partBuffer.lines = {
+				vao,
+				numElements: lineData.indices.data.length
+			};
 		}
-		if (condLineData.position.data.length) {
-			partBuffer.condLines = twgl.createBufferInfoFromArrays(gl, condLineData);
+		if (condLineData.position.length) {
+
+			const vao = gl.createVertexArray();
+			gl.bindVertexArray(vao);
+
+			twgl.initBuffer(gl, 0, condLineData.position, 3);
+			twgl.initBuffer(gl, 1, condLineData.next, 3);
+			twgl.initBuffer(gl, 2, condLineData.direction, 1);
+			twgl.initBuffer(gl, 3, condLineData.order, 1);
+			twgl.initBuffer(gl, 4, condLineData.condPointA, 3);
+			twgl.initBuffer(gl, 5, condLineData.condPointB, 3);
+			twgl.initIndexBuffer(gl, condLineData.indices.data);
+
+			gl.bindVertexArray(null);
+			partBuffer.condLines = {
+				vao,
+				numElements: condLineData.indices.data.length
+			};
 		}
 		if (coloredPrimitives != null) {
 			partBuffer.coloredFaces = {};
 			for (const colorCode in coloredPrimitives) {
 				if (coloredPrimitives.hasOwnProperty(colorCode)) {
-					const buf = twgl.createBufferInfoFromArrays(gl, coloredPrimitives[colorCode]);
-					partBuffer.coloredFaces[colorCode] = buf;
+
+					const face = coloredPrimitives[colorCode];
+					const vao = gl.createVertexArray();
+					gl.bindVertexArray(vao);
+
+					twgl.initBuffer(gl, 0, face.position, 3);
+					twgl.initIndexBuffer(gl, face.indices.data);
+
+					gl.bindVertexArray(null);
+					partBuffer.coloredFaces[colorCode] = {
+						vao,
+						numElements: face.indices.data.length
+					};
 				}
 			}
 		}
@@ -513,13 +581,35 @@ export default {
 		// TODO: figure out why canvas has to be in the DOM to render anything into it
 		document.getElementById('offscreenCache').appendChild(canvas);
 
+		const faceShader = twgl.createShader(gl, faceShaderSource, gl.VERTEX_SHADER);
+		const lineShader = twgl.createShader(gl, lineShaderSource, gl.VERTEX_SHADER);
+		const condLineShader = twgl.createShader(gl, condLineShaderSource, gl.VERTEX_SHADER);
+		const fragShader = twgl.createShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+
+		const faceProgram = twgl.createProgram(gl, faceShader, fragShader, ['position']);
+		const lineProgram = twgl.createProgram(gl, lineShader, fragShader,
+			['position', 'next', 'direction', 'order']
+		);
+		const condLineProgram = twgl.createProgram(gl, condLineShader, fragShader,
+			['position', 'next', 'direction', 'order', 'condPointA', 'condPointB']
+		);
+
 		programs = {
-			faces: twgl.createProgramInfo(gl, [faceShaderSource, fragmentShaderSource]),
-			lines: twgl.createProgramInfo(gl, [lineShaderSource, fragmentShaderSource]),
-			condLines: twgl.createProgramInfo(gl, [condLineShaderSource, fragmentShaderSource])
+			faces: {
+				program: faceProgram,
+				uniformSetters: twgl.createUniformSetters(gl, faceProgram)
+			},
+			lines: {
+				program: lineProgram,
+				uniformSetters: twgl.createUniformSetters(gl, lineProgram)
+			},
+			condLines: {
+				program: condLineProgram,
+				uniformSetters: twgl.createUniformSetters(gl, condLineProgram)
+			}
 		};
 
-		partBufferCache[arrowPartName] = arrows.createArrowBuffers(gl);
+		partBufferCache[arrowPartName] = Arrows.createArrowBuffers(gl);
 
 		importPart(gl, LDParse.partDictionary['templateModel.ldr']);
 	},
