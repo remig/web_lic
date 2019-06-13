@@ -33,6 +33,9 @@ function nodeToItem(node) {
 	if (id.length > 3) {
 		res.stepID = parseInt(id[3], 10);
 	}
+	if (id.length > 4) {
+		res.filename = id[4];
+	}
 	return res;
 }
 
@@ -52,7 +55,7 @@ function niceColorName(colorCode) {
 }
 
 function getItemId(item) {
-	return item.type + '_' + item.id + ((item.stepID == null) ? '' : '_' + item.stepID);
+	return [item.type, item.id, item.stepID, item.filename].filter(el => el).join('_');
 }
 
 function getItemText(t) {
