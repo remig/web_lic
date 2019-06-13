@@ -1,7 +1,5 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-'use strict';
-
 import _ from '../util';
 
 // Given a model with no steps, return an array of arays of parts that make up each step

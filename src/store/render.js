@@ -1,7 +1,5 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-'use strict';
-
 import store from '../store';
 import LDRender from '../ld_render';
 

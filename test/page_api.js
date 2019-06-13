@@ -1,9 +1,8 @@
+/* Web Lic - Copyright (C) 2018 Remi Gagne */
+
 /* global module: false, __Web_lic_testScope: false */
 // To run tests, cd to lic_w/test folder then 'npm test'
 // To debug tests, add 'browser.debug()' anywhere in the test code
-'use strict';
-
-// TODO: run unit tests directly in mocha, not in webdriver for faster test runs.
 
 //const trivial_model = require('./trivial_model.json').model;
 

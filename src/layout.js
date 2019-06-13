@@ -1,7 +1,5 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-'use strict';
-
 import _ from './util';
 import LDParse from './ld_parse';
 import store from './store';

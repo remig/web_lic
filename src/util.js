@@ -1,7 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 /* global _: false */
-'use strict';
 
 // Add a handful of useful utility functions to lodash
 // TODO: A lot of these duplicate functionality in lodash; remove them

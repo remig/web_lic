@@ -1,7 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 /* global saveAs: false */
-'use strict';
 
 import _ from './util';
 import Layout from './layout';

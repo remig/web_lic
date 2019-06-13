@@ -1,7 +1,5 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-'use strict';
-
 import _ from './util';
 import InstructionExporter from './export';
 import store from './store';

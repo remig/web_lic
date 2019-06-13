@@ -1,7 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 /* global Vue: false */
-'use strict';
 
 // TODO: set focus to correct UI widget when showing each dialog
 // TODO: make dialogs draggable, so they can be moved out of the way & see stuff behind them

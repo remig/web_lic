@@ -26,8 +26,6 @@
 
 <script>
 
-'use strict';
-
 import _ from '../util';
 import uiState from '../ui_state';
 import DialogManager from '../dialog';

@@ -1,7 +1,5 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-'use strict';
-
 // fileType: 'text' or 'dataURL'
 export default function openChooser(acceptFileTypes, fileType, callback) {
 	const input = document.getElementById('openFileChooser');

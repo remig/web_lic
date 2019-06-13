@@ -1,7 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 /* global jsPDF: false, JSZip: false, saveAs: false */
-'use strict';
 
 import _ from './util';
 import Draw from './draw';

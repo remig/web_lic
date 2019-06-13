@@ -16,7 +16,6 @@
 </template>
 
 <script>
-'use strict';
 
 import _ from '../util';
 import store from '../store';
