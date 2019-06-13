@@ -5,26 +5,38 @@
 import store from '../store';
 
 export default {
-	convertToCallout(opts) {  // opts: {modelFilename, destStep, doLayout}
+	convertToCallout({modelFilename, destStep, doLayout}) {
+
 		// Create a new callout in the step that this submodel is added to
-		const destStep = store.get.lookupToItem(opts.destStep);
+		destStep = store.get.lookupToItem(destStep);
 		const callout = store.mutations.callout.add({parent: destStep});
+
+		const submodelSteps = store.state.steps.filter(step => step.model.filename === modelFilename);
+		const quantity = store.get.submodels().find(el => el.filename === modelFilename).quantity;
 		const destPLI = (destStep.pliID == null) ? null : store.get.pli(destStep.pliID);
-		if (destPLI) {
-			store.mutations.pli.empty({pli: destPLI});
+		const pagesToDelete = new Set();
+
+		// Remove submodel from destPLI (if any)
+		if (destPLI != null) {
+			const pliItem = destPLI.pliItems.map(store.get.pliItem)
+				.find(el => el.filename === modelFilename);
+			if (pliItem) {
+				store.mutations.pliItem.delete({pliItem});
+			}
 		}
 
 		// Move each step in the submodel into the new callout
-		const submodelSteps = store.state.steps.filter(step => step.model.filename === opts.modelFilename);
-
-		const pagesToDelete = new Set();
 		submodelSteps.forEach((step, stepIdx) => {
 			if (step.pliID != null) {
 				const oldPLI = store.get.pli(step.pliID);
 				if (destPLI != null) {
+					// Move each part from the old PLI into the new PLI
 					while (oldPLI.pliItems.length) {
 						const item = {id: oldPLI.pliItems[0], type: 'pliItem'};
 						store.mutations.item.reparent({item, newParent: destPLI});
+						if (quantity > 1) {
+							store.mutations.pliItem.changeQuantity({pliItem: item, quantity});
+						}
 					}
 				}
 				store.mutations.pli.delete({pli: oldPLI, deleteItems: true});
@@ -46,7 +58,7 @@ export default {
 			}
 		}
 		store.mutations.step.renumber();
-		if (opts.doLayout) {
+		if (doLayout) {
 			store.mutations.page.layout({page: destStep.parent});
 		}
 	}
