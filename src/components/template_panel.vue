@@ -18,6 +18,7 @@
 <script>
 'use strict';
 
+import _ from '../util';
 import store from '../store';
 import undoStack from '../undoStack';
 import borderPanel from './controlPanels/border.vue';
@@ -84,7 +85,8 @@ export default {
 					if (!this.lastEdit.noLayout) {
 						store.state.pages.forEach(page => (page.needsLayout = true));
 					}
-					const item = this.tr('glossary.' + this.lastEdit.type.toLowerCase());
+					let item = _.last(this.lastEdit.type.split('.'));
+					item = this.tr('glossary.' + item.toLowerCase());
 					const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 					undoStack.commit('', null, undoText);
 				}

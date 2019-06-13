@@ -126,7 +126,7 @@ export default {
 			this.updateValues();
 		},
 		newValues() {
-			this.$emit('new-values', 'Page');
+			this.$emit('new-values', 'page');
 		},
 		updatePagePreset(newPagePreset) {
 			this.sizePreset.format = newPagePreset;
@@ -171,7 +171,7 @@ export default {
 				haveChange = true;
 			}
 			if (haveChange) {
-				this.$emit('new-values', 'Page');
+				this.$emit('new-values', 'page');
 			}
 		},
 		printedSize(unit) {

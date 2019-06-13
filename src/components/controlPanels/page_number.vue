@@ -49,7 +49,7 @@ export default {
 			this.newValues();
 		},
 		newValues() {
-			this.$emit('new-values', 'Page Number');
+			this.$emit('new-values', 'pagenumber');
 		}
 	}
 };

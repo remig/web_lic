@@ -39,13 +39,13 @@ export default {
 	},
 	methods: {
 		newValues() {
-			this.$emit('new-values', 'PLI');
+			this.$emit('new-values', 'pli');
 		},
 		updateValues() {
 			const template = store.state.template.pli;
 			if (this.includeSubmodels !== template.includeSubmodels) {
 				template.includeSubmodels = this.includeSubmodels;
-				this.$emit('new-values', {type: 'PLI'});
+				this.$emit('new-values', 'pli');
 			}
 		}
 	}

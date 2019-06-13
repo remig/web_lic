@@ -30,11 +30,11 @@ export default {
 		},
 		newArrowStyle() {
 			store.get.csi(this.selectedItem).isDirty = true;
-			this.$emit('new-values', 'CSI');
+			this.$emit('new-values', 'csi');
 		},
 		newValues() {
 			store.get.csi(this.selectedItem).isDirty = true;
-			this.$emit('new-values', {type: 'CSI', noLayout: true});
+			this.$emit('new-values', {type: 'csi', noLayout: true});
 		}
 	}
 };

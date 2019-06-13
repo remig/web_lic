@@ -23,7 +23,7 @@ export default {
 		newValues() {
 			const pli = store.get.parent(this.selectedItem);
 			pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
-			this.$emit('new-values', 'PLIItem');
+			this.$emit('new-values', 'pliitem');
 		}
 	}
 };

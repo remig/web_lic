@@ -16,6 +16,7 @@
         "right": "Right",
         "page": "Page",
         "page_count_@c": "Page ${0}",
+        "pagenumber": "Page Number",
         "submodelimage": "Submodel Image",
         "step": "Step",
         "step_count_@c": "Step ${0}",

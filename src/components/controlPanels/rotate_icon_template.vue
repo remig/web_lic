@@ -27,7 +27,7 @@ export default {
 	components: {FillPanel, BorderPanel},
 	methods: {
 		newValues() {
-			this.$emit('new-values', 'Rotate Icon');
+			this.$emit('new-values', 'rotateicon');
 		}
 	}
 };
