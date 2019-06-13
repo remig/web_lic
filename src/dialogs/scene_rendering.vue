@@ -43,7 +43,7 @@
 
 import _ from '../util';
 import store from '../store';
-import undoStack from '../undoStack';
+import undoStack from '../undo_stack';
 import rotateBuilder from '../components/rotate.vue';
 
 export default{

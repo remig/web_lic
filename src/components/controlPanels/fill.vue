@@ -43,7 +43,7 @@
 
 import _ from '../../util';
 import store from '../../store';
-import openFileHandler from '../../fileUploader';
+import openFileHandler from '../../file_uploader';
 import PanelBase from './panel_base.vue';
 
 export default {

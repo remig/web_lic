@@ -23,8 +23,8 @@ import CalloutArrowSetters from './store/callout_arrow_setters';
 import StepInsertion from './store/step_insertion';
 import LocaleManager from './components/translate.vue';
 
-import LDParse from './LDParse';
-import LDRender from './LDRender';
+import LDParse from './ld_parse';
+import LDRender from './ld_render';
 import defaultTemplate from './template';
 import Storage from './storage';
 import packageInfo from '../package.json';

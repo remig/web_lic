@@ -5,7 +5,7 @@
 import _ from '../util';
 import store from '../store';
 import Layout from '../layout';
-import LDParse from '../LDParse';
+import LDParse from '../ld_parse';
 
 export default {
 	// opts: {dest, doLayout=false, model=null, stepNumber=null, renumber=false,

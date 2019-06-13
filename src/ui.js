@@ -10,23 +10,23 @@
 // - Add ability to upload a custom ldconfig file, to customize all colors in one shot
 
 import _ from './util';
-import uiState from './uiState';
+import uiState from './ui_state';
 import store from './store';
-import undoStack from './undoStack';
-import LDParse from './LDParse';
+import undoStack from './undo_stack';
+import LDParse from './ld_parse';
 import Menu from './menu';
-import ContextMenu from './contextMenu';
+import ContextMenu from './context_menu';
 import Storage from './storage';
 import LocaleManager from './components/translate.vue';
 import packageInfo from '../package.json';
-import backwardCompat from './backwardCompat';
+import backwardCompat from './backward_compat';
 import DialogManager from './dialog';
 import NavBar from './components/nav_bar.vue';
 import NavTree from './navtree';
 import NavTreeContainer from './components/nav_tree_container.vue';
 import PopupMenu from './components/popup_menu.vue';
 import TemplatePanel from './components/template_panel.vue';
-import './pageView';
+import './page_view';
 import './components/element_extensions.vue';
 import EventBus from './event_bus';
 

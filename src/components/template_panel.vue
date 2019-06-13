@@ -20,7 +20,7 @@
 
 import _ from '../util';
 import store from '../store';
-import undoStack from '../undoStack';
+import undoStack from '../undo_stack';
 import borderPanel from './controlPanels/border.vue';
 import fontPanel from './controlPanels/font.vue';
 import fillAndBorderTemplatePanel from './controlPanels/fill_border.vue';

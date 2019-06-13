@@ -54,7 +54,7 @@
 <script>
 
 import _ from '../util';
-import uiState from '../uiState';
+import uiState from '../ui_state';
 
 export default {
 	data: function() {

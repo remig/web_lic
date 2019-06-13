@@ -3,8 +3,8 @@
 <script>
 
 import _ from '../util';
-import undoStack from '../undoStack';
-import uiState from '../uiState';
+import undoStack from '../undo_stack';
+import uiState from '../ui_state';
 
 export default {
 

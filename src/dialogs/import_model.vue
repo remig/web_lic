@@ -60,7 +60,7 @@
 
 <script>
 
-import uiState from '../uiState';
+import uiState from '../ui_state';
 
 export default {
 	data: function() {

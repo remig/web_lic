@@ -3,7 +3,7 @@
 'use strict';
 
 import _ from './util';
-import uiState from './uiState';
+import uiState from './ui_state';
 
 const keys = {
 	model: 'lic_model',

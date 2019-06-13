@@ -2,9 +2,9 @@
 
 import _ from './util';
 import store from './store';
-import uiState from './uiState';
+import uiState from './ui_state';
 import EventBus from './event_bus';
-import LDParse from './LDParse';
+import LDParse from './ld_parse';
 import LocaleManager from './components/translate.vue';
 
 const tr = LocaleManager.translate;

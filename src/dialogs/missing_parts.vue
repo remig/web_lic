@@ -43,8 +43,8 @@
 
 /* global Vue: false */
 import _ from '../util';
-import LDParse from '../LDParse';
-import openFileHandler from '../fileUploader';
+import LDParse from '../ld_parse';
+import openFileHandler from '../file_uploader';
 
 function buildMissingPartsTable() {
 	const missingParts = _.cloneDeep(LDParse.missingParts);

@@ -40,7 +40,7 @@
 <script>
 
 
-import uiState from '../uiState';
+import uiState from '../ui_state';
 import store from '../store';
 import NavTree from '../navtree';
 

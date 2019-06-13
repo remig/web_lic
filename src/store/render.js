@@ -3,7 +3,7 @@
 'use strict';
 
 import store from '../store';
-import LDRender from '../LDRender';
+import LDRender from '../ld_render';
 
 const canvasCache = (function() {
 	let cache = {};

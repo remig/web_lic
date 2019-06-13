@@ -3,11 +3,11 @@
 'use strict';
 
 import _ from './util';
-import LDParse from './LDParse';
+import LDParse from './ld_parse';
 import LicGL from './webgl/licgl';
 import store from './store';
-import undoStack from './undoStack';
-import openFileHandler from './fileUploader';
+import undoStack from './undo_stack';
+import openFileHandler from './file_uploader';
 import DialogManager from './dialog';
 import LocaleManager from './components/translate.vue';
 

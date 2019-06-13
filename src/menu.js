@@ -5,11 +5,11 @@
 import _ from './util';
 import InstructionExporter from './export';
 import store from './store';
-import undoStack from './undoStack';
-import openFileHandler from './fileUploader';
+import undoStack from './undo_stack';
+import openFileHandler from './file_uploader';
 import Storage from './storage';
 import LocaleManager from './components/translate.vue';
-import uiState from './uiState';
+import uiState from './ui_state';
 import DialogManager from './dialog';
 
 let app;

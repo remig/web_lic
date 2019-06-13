@@ -6,8 +6,8 @@
 import _ from './util';
 import Draw from './draw';
 import store from './store';
-import undoStack from './undoStack';
-import uiState from './uiState';
+import undoStack from './undo_stack';
+import uiState from './ui_state';
 import Guide from './components/guide.vue';
 
 const multiPagePadding = 15;

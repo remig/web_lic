@@ -97,8 +97,8 @@
 
 import _ from '../util';
 import store from '../store';
-import undoStack from '../undoStack';
-import uiState from '../uiState';
+import undoStack from '../undo_stack';
+import uiState from '../ui_state';
 
 export default {
 	// TODO: Add option to draw grid above / below page elements

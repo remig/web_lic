@@ -4,8 +4,8 @@
 
 import _ from './util';
 import store from './store';
-import LDParse from './LDParse';
-import uiState from './uiState';
+import LDParse from './ld_parse';
+import uiState from './ui_state';
 
 const api = {
 

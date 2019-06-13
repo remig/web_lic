@@ -35,7 +35,7 @@
 <script>
 
 import _ from '../util';
-import LDParse from '../LDParse';
+import LDParse from '../ld_parse';
 import Storage from '../storage';
 const customColors = Storage.get.customBrickColors();
 

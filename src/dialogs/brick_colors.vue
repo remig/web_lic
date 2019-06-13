@@ -40,9 +40,9 @@
 
 import _ from '../util';
 import store from '../store';
-import LDParse from '../LDParse';
+import LDParse from '../ld_parse';
 import Storage from '../storage';
-import backwardCompat from '../backwardCompat';
+import backwardCompat from '../backward_compat';
 const customColors = Storage.get.customBrickColors();
 
 function buildColorTable() {

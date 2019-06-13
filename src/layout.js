@@ -3,7 +3,7 @@
 'use strict';
 
 import _ from './util';
-import LDParse from './LDParse';
+import LDParse from './ld_parse';
 import store from './store';
 import LocaleManager from './components/translate.vue';
 

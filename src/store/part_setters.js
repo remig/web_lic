@@ -4,7 +4,7 @@
 
 import _ from '../util';
 import store from '../store';
-import LDParse from '../LDParse';
+import LDParse from '../ld_parse';
 
 export default {
 	// opts: {partID, step, direction, partDistance=60, arrowOffset=0, arrowLength=60, arrowRotation=0}

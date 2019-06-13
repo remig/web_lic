@@ -11,7 +11,7 @@ import twgl from './twgl';
 import Arrows from './arrows';
 
 import _ from '../util';
-import LDParse from '../LDParse';
+import LDParse from '../ld_parse';
 import store from '../store';
 
 const selectedPartBoxColor = [1, 0, 0, 1];
