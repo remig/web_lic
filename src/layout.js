@@ -454,6 +454,7 @@ const api = {
 
 		// TODO: can only shrink multiple submodels in one step so much, might need to lay out horizontally
 		// TODO: make submodel boxes the same size as PLI boxes if new 'make PLIs same size' option is checked
+		// TODO: check if page's step falls off page with chosen submodel size; if so, shrink submodel
 		const template = store.state.template.submodelImage;
 
 		const margin = getMargin(store.state.template.submodelImage.innerMargin);

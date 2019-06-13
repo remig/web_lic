@@ -5,12 +5,9 @@
 
 // TODO:
 // - add 'culled' versions of popular parts, with their inside bits removed
-// - clone LDraw repro  to bugeyedmonkeys then optimize it
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
-// - Propagate the 'default' camera rotation to CSI && PLI rotation entries on the template page
 // - Undo / redo stack bakes action text into itself, which breaks translations
 // - Add ability to upload a custom ldconfig file, to customize all colors in one shot
-// - Add ability to switch between new nice ldconfig colors and old colors in brick color dialog
 
 import _ from './util';
 import uiState from './uiState';
