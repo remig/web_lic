@@ -1352,7 +1352,7 @@ const contextMenu = {
 					const callout = store.get.callout(calloutID);
 					const targetStep = store.get.step(_.last(callout.steps));
 					return {
-						text: 'action.position.' + callout.position + '.name',
+						text: 'action.callout.position.' + callout.position + '.name',
 						id: 'part_add_to_callout_' + callout.position + '_cmenu',
 						cb() {
 							undoStack.commit(
