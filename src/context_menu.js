@@ -608,7 +608,7 @@ const contextMenu = {
 								app.redrawUI(true);
 							});
 							dialog.title = tr('dialog.rotate_part_image.title_csi');
-							dialog.setRotation(_.cloneDeep(initialRotation));
+							dialog.rotation = initialRotation;
 						});
 					}
 				},
@@ -818,7 +818,7 @@ const contextMenu = {
 					});
 					dialog.title = tr('dialog.rotate_part_image.title_pli');
 					dialog.showRotateIconCheckbox = false;
-					dialog.setRotation(_.cloneDeep(originalRotation) || []);
+					dialog.rotation = originalRotation;
 				});
 			}
 		},

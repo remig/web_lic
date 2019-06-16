@@ -7,8 +7,8 @@
 		class="rotatePartImageDialog"
 	>
 		<el-form :inline="true" label-width="50px">
-			<rotateBuilder
-				ref="rotateBuilder"
+			<rotate-builder
+				:initial-rotation="rotation"
 				title=""
 				@new-values="updateValues"
 			/>
@@ -29,6 +29,7 @@
 
 <script>
 
+import _ from '../util';
 import rotateBuilder from '../components/rotate.vue';
 
 export default{
@@ -37,13 +38,11 @@ export default{
 		return {
 			title: '',
 			addRotateIcon: true,
-			showRotateIconCheckbox: true
+			showRotateIconCheckbox: true,
+			initialRotation: []
 		};
 	},
 	methods: {
-		setRotation(rotation) {
-			this.$refs.rotateBuilder.rotation = rotation;
-		},
 		updateValues(newRotation) {
 			if (newRotation && Array.isArray(newRotation)) {
 				this.$data.rotation = newRotation;
@@ -57,6 +56,16 @@ export default{
 		cancel() {
 			this.$emit('cancel', this.$data);
 			this.$emit('close');
+		}
+	},
+	computed: {
+		rotation: {
+			get() {
+				return this.initialRotation;
+			},
+			set(newRotation) {
+				this.initialRotation = _.cloneDeep(newRotation);
+			}
 		}
 	}
 };
