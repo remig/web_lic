@@ -789,6 +789,10 @@ const contextMenu = {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				const originalRotation = store.get.pliTransform(filename).rotation;
+				let initialRotation = originalRotation;
+				if (initialRotation == null) {
+					initialRotation = store.get.templateForItem(selectedItem).rotation;
+				}
 
 				app.clearSelected();
 				DialogManager('rotatePartImageDialog', dialog => {
@@ -818,7 +822,7 @@ const contextMenu = {
 					});
 					dialog.title = tr('dialog.rotate_part_image.title_pli');
 					dialog.showRotateIconCheckbox = false;
-					dialog.rotation = originalRotation;
+					dialog.rotation = initialRotation;
 				});
 			}
 		},
