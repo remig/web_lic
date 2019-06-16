@@ -2,6 +2,20 @@
 
 import _ from './util';
 
+function fixRotation(oldRotation) {
+	const newRotation = [];
+	if (oldRotation.x) {
+		newRotation.push({axis: 'x', angle: oldRotation.x});
+	}
+	if (oldRotation.y) {
+		newRotation.push({axis: 'y', angle: oldRotation.y});
+	}
+	if (oldRotation.z) {
+		newRotation.push({axis: 'z', angle: oldRotation.z});
+	}
+	return newRotation;
+}
+
 function fixState(state) {
 
 	if (state.inventoryPages == null) {
@@ -38,18 +52,8 @@ function fixState(state) {
 		if (csi.annotations == null) {
 			csi.annotations = [];
 		}
-		if (csi.rotation != null) {  // convert old {x, y, z} rotation to new [{axis, angle}]
-			const r = csi.rotation;
-			csi.rotation = [];
-			if (r.x) {
-				csi.rotation.push({axis: 'x', angle: r.x});
-			}
-			if (r.y) {
-				csi.rotation.push({axis: 'y', angle: r.y});
-			}
-			if (r.z) {
-				csi.rotation.push({axis: 'z', angle: r.z});
-			}
+		if (csi.rotation != null) {
+			csi.rotation = fixRotation(csi.rotation);
 		}
 	});
 
@@ -66,6 +70,15 @@ function fixState(state) {
 		delete pliItem.partNumbers;
 	});
 
+	if (state.template.pliItem.rotation != null) {
+		state.template.pliItem.rotation = fixRotation(state.template.pliItem.rotation);
+	}
+	if (state.template.step.csi.rotation != null) {
+		state.template.step.csi.rotation = fixRotation(state.template.step.csi.rotation);
+	}
+	if (state.template.submodelImage.csi.rotation != null) {
+		state.template.submodelImage.csi.rotation = fixRotation(state.template.submodelImage.csi.rotation);
+	}
 	if (state.template.submodelImage.maxHeight == null) {
 		state.template.submodelImage.maxHeight = 0.3;
 	}
