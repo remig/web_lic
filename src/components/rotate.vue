@@ -46,6 +46,11 @@ export default {
 			rotation: _.cloneDeep(this.initialRotation || [])
 		};
 	},
+	watch: {
+		initialRotation() {
+			this.rotation = _.cloneDeep(this.initialRotation || []);
+		}
+	},
 	methods: {
 		updateValues() {
 			this.$emit('new-values', _.cloneDeep(this.rotation));
