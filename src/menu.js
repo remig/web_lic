@@ -56,9 +56,7 @@ const menu = [
 		{
 			text: 'action.file.open_lic.name',
 			id: 'open_menu',
-			cb() {
-				openFileHandler('.lic', 'text', app.openLicFile);
-			}
+			cb: () => openFileHandler('.lic', 'text', app.openLicFile)
 		},
 		{
 			text: 'action.file.open_lic_recent.name',
@@ -70,34 +68,26 @@ const menu = [
 			text: 'action.file.close.name',
 			id: 'close_menu',
 			enabled: enableIfModel,
-			cb() {
-				app.closeModel();
-			}
+			cb: () => app.closeModel()
 		},
 		{
 			text: 'action.file.save.name',
 			id: 'save_menu',
 			shortcut: 'ctrl+s',
 			enabled: enableIfModel,
-			cb() {
-				app.save();
-			}
+			cb: () => app.save()
 		},
 		{
 			text: 'action.file.save_as.name',
 			id: 'save_as_menu',
 			enabled: enableIfModel,
-			cb() {
-				app.saveAs();
-			}
+			cb: () => app.saveAs()
 		},
 		{text: 'separator'},
 		{
 			text: 'action.file.import_model.name',
 			id: 'import_custom_model_menu',
-			cb() {
-				openFileHandler('.ldr, .mpd', 'text', app.importCustomModel);
-			}
+			cb: () => openFileHandler('.ldr, .mpd', 'text', app.importCustomModel)
 		},
 		{
 			text: 'action.file.import_builtin_model.name',
@@ -106,30 +96,22 @@ const menu = [
 				{
 					text: 'action.file.import_builtin_model.models.trivial',
 					id: 'import_trivial_model_menu',
-					cb() {
-						app.importBuiltInModel('trivial_model.ldr');
-					}
+					cb: () => app.importBuiltInModel('trivial_model.ldr')
 				},
 				{
 					text: 'action.file.import_builtin_model.models.alligator',
 					id: 'import_alligator_menu',
-					cb() {
-						app.importBuiltInModel('20015 - Alligator.mpd');
-					}
+					cb: () => app.importBuiltInModel('20015 - Alligator.mpd')
 				},
 				{
 					text: 'action.file.import_builtin_model.models.xwing',
 					id: 'import_xwing_menu',
-					cb() {
-						app.importBuiltInModel('7140 - X-Wing Fighter.mpd');
-					}
+					cb: () => app.importBuiltInModel('7140 - X-Wing Fighter.mpd')
 				},
 				{
 					text: 'action.file.import_builtin_model.models.lab',
 					id: 'import_mobile_lab_menu',
-					cb() {
-						app.importBuiltInModel('6901 - Mobile Lab.mpd');
-					}
+					cb: () => app.importBuiltInModel('6901 - Mobile Lab.mpd')
 				}
 			]
 		},
@@ -142,24 +124,17 @@ const menu = [
 				{
 					text: 'action.file.template.save.name',
 					id: 'save_template_menu',
-					cb() {
-						app.saveTemplate();
-					}
+					cb: () => app.saveTemplate()
 				},
 				{
 					text: 'action.file.template.save_as.name',
 					id: 'save_template_as_menu',
-					cb() {
-						app.saveTemplateAs();
-					}
+					cb: () => app.saveTemplateAs()
 				},
 				{
 					text: 'action.file.template.load.name',
 					id: 'load_template_menu',
-					cb() {
-						// TODO: Need to re-layout every page after loading a template
-						openFileHandler('.lit', 'text', app.importTemplate);
-					}
+					cb: () => openFileHandler('.lit', 'text', app.importTemplate)
 				},
 				{
 					text: 'action.file.template.load_builtin.name',
@@ -291,9 +266,7 @@ const menu = [
 		{
 			text: 'action.edit.brick_colors.name',
 			id: 'edit_brick_colors_menu',
-			cb() {
-				DialogManager('brickColorDialog');
-			}
+			cb: () => DialogManager('brickColorDialog')
 		}
 	]},
 	{text: 'action.view.name', id: 'view_menu', children: [
@@ -390,9 +363,7 @@ const menu = [
 			text: 'action.export.pdf.name',
 			id: 'export_pdf_menu',
 			enabled: enableIfModel,
-			cb() {
-				InstructionExporter.generatePDF(app, store);
-			}
+			cb: () => InstructionExporter.generatePDF(app, store)
 		},
 		{
 			text: 'action.export.hi_res_pdf.name',
@@ -411,9 +382,7 @@ const menu = [
 			text: 'action.export.png.name',
 			id: 'export_png_menu',
 			enabled: enableIfModel,
-			cb() {
-				InstructionExporter.generatePNGZip(app, store);
-			}
+			cb: () => InstructionExporter.generatePNGZip(app, store)
 		},
 		{
 			text: 'action.export.hi_res_png.name',
