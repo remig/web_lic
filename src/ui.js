@@ -12,6 +12,7 @@ import _ from './util';
 import uiState from './ui_state';
 import store from './store';
 import undoStack from './undo_stack';
+import openFileHandler from './file_uploader';
 import LDParse from './ld_parse';
 import Menu from './menu';
 import ContextMenu from './context_menu';
@@ -67,8 +68,11 @@ const app = new Vue({
 			url = './static/models/' + url;
 			this.importModel(() => LDParse.loadRemotePart(url, this.updateProgress));
 		},
-		importCustomModel(content, filename) {
-			this.importModel(() => LDParse.loadModelContent(content, filename, this.updateProgress));
+		importCustomModel() {
+			const importContent = (content, filename) => {
+				this.importModel(() => LDParse.loadModelContent(content, filename, this.updateProgress));
+			};
+			openFileHandler('.ldr, .mpd', 'text', importContent);
 		},
 		async importModel(modelGenerator) {
 
@@ -133,7 +137,10 @@ const app = new Vue({
 				});
 			});
 		},
-		openLicFile(content) {
+		openLicFile() {
+			openFileHandler('.lic', 'text', this.openLicFileFromContent);
+		},
+		openLicFileFromContent(content) {
 			const start = Date.now();
 			if (typeof content === 'string') {
 				content = JSON.parse(content);
@@ -189,13 +196,17 @@ const app = new Vue({
 				dialog.newString = this.filename;
 			});
 		},
-		importTemplate(result, filename) {
-			undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template');
-			this.statusText = this.tr('action.file.template.load.success_message_@mf', {filename});
-			Vue.nextTick(() => {
-				this.drawCurrentPage();
-				this.forceUIUpdate();
-			});
+		importTemplate() {
+			// TODO: Need to re-layout every page after loading a template
+			const importTemplate = (result, filename) => {
+				undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template');
+				this.statusText = this.tr('action.file.template.load.success_message_@mf', {filename});
+				Vue.nextTick(() => {
+					this.drawCurrentPage();
+					this.forceUIUpdate();
+				});
+			};
+			openFileHandler('.lit', 'text', importTemplate);
 		},
 		closeModel() {
 			store.resetState();
@@ -527,7 +538,7 @@ const app = new Vue({
 
 		const localModel = Storage.get.model();
 		if (!_.isEmpty(localModel)) {
-			this.openLicFile(localModel);
+			this.openLicFileFromContent(localModel);
 		}
 	}
 });

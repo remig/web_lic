@@ -4,7 +4,6 @@ import _ from './util';
 import InstructionExporter from './export';
 import store from './store';
 import undoStack from './undo_stack';
-import openFileHandler from './file_uploader';
 import Storage from './storage';
 import LocaleManager from './components/translate.vue';
 import uiState from './ui_state';
@@ -56,7 +55,7 @@ const menu = [
 		{
 			text: 'action.file.open_lic.name',
 			id: 'open_menu',
-			cb: () => openFileHandler('.lic', 'text', app.openLicFile)
+			cb: () => app.openLicFile()
 		},
 		{
 			text: 'action.file.open_lic_recent.name',
@@ -87,7 +86,7 @@ const menu = [
 		{
 			text: 'action.file.import_model.name',
 			id: 'import_custom_model_menu',
-			cb: () => openFileHandler('.ldr, .mpd', 'text', app.importCustomModel)
+			cb: () => app.importCustomModel()
 		},
 		{
 			text: 'action.file.import_builtin_model.name',
@@ -134,7 +133,7 @@ const menu = [
 				{
 					text: 'action.file.template.load.name',
 					id: 'load_template_menu',
-					cb: () => openFileHandler('.lit', 'text', app.importTemplate)
+					cb: () => app.importTemplate()
 				},
 				{
 					text: 'action.file.template.load_builtin.name',
