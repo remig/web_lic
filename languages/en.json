@@ -780,6 +780,19 @@
 			"title": "Rotations",
 			"axis": "Axis",
 			"angle": "Angle"
+		},
+		"welcome": {
+			"title": "Welcome to Lic",
+			"close_tooltip": "Hide this message",
+			"import": "Create a new Instruction book: Import a complete LDraw model",
+			"open": "Continue work on an existing Instruction Book: Open a previously saved Lic file",
+			"test": "Play with Lic, see what it can do: Import a sample LDraw model",
+			"models": {
+				"trivial": "Trivial little Model",
+				"alligator": "Creator Alligator",
+				"xwing": "Classic X-Wing"
+			},
+			"learn": "Learn more about Lic"
 		}
 	},
 	"template": {

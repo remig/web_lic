@@ -26,6 +26,7 @@ import NavTree from './navtree';
 import NavTreeContainer from './components/nav_tree_container.vue';
 import PopupMenu from './components/popup_menu.vue';
 import TemplatePanel from './components/template_panel.vue';
+import GettingStartedPanel from './components/getting_started.vue';
 import './page_view';
 import './components/element_extensions.vue';
 import EventBus from './event_bus';
@@ -44,7 +45,7 @@ Vue.use({
 
 const app = new Vue({
 	el: '#container',
-	components: {NavBar, NavTreeContainer, PopupMenu, TemplatePanel},
+	components: {NavBar, NavTreeContainer, PopupMenu, TemplatePanel, GettingStartedPanel},
 	data: {
 		// Store transient UI state data here.  Do *not* store state items here; Vue turns these
 		// into observers, which destroys performance for big stores like we have here
@@ -460,6 +461,9 @@ const app = new Vue({
 					this.$refs.pageView.drawVisiblePages();
 				});
 			}
+		},
+		haveModel() {
+			return store && store.model != null;
 		}
 	},
 	computed: {

@@ -67,6 +67,7 @@
 					:selected-item="selectedItemLookup"
 					:current-page-lookup="currentPageLookup"
 				></page-view>
+				<getting-started-panel v-if="!haveModel()" :app="this"></getting-started-panel>
 				<template-panel
 					v-if="currentPageLookup && currentPageLookup.type === 'templatePage'"
 					id="templatePanelContainer"
