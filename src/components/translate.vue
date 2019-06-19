@@ -4,7 +4,7 @@
 	<licDialog
 		id="locale_chooser_dialog"
 		:title="tr('dialog.locale_chooser.title')"
-		:modal="false"
+		:modal="true"
 		:show-close="false"
 		:visible="visible"
 		width="400px"
