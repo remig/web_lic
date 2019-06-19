@@ -20,6 +20,7 @@ div#container {
 .navbar {
 	margin-bottom: 0px;
 	min-height: 38px;
+	border-bottom: 1px solid #777;
 }
 
 .navbar-right {
@@ -431,8 +432,8 @@ ul {
 
 #statusBar {
 	background-color: #f8f8f8;
-	border: 1px solid #e7e7e7;
-	color: #777;
+	border-top: 1px solid #777;
+	color: #555;
 	position: fixed;
 	left: 0px;
 	bottom: 0px;
