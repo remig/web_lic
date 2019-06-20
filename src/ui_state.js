@@ -15,10 +15,10 @@ const defaultState = {
 			firstStepNumber: 1,
 			addStepsForSubmodels: true,
 			include: {
-				titlePage: false,
-				submodelBreakdown: false,
+				titlePage: true,
+				// submodelBreakdown: false,
 				pli: true,
-				partListPage: false
+				partListPage: true
 			}
 		},
 		'export': {
