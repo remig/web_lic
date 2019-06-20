@@ -12,7 +12,7 @@
 		</div>
 		<ul class="list-group">
 			<li class="list-group-item">
-				<a class="lineLink" @click.prevent="importModel">
+				<a class="lineLink" @click.prevent="importCustomModel">
 					<i class="far fa-edit fa-2x fa-pull-left" />
 					{{tr('dialog.welcome.import')}}
 				</a>
@@ -29,14 +29,10 @@
 					{{tr('dialog.welcome.test')}}
 				</span>
 				<ul class="list-inline">
-					<li>
-						<a @click.prevent="importTrivial">{{tr('dialog.welcome.models.trivial')}}</a>
-					</li>
-					<li>
-						<a @click.prevent="importAlligator">{{tr('dialog.welcome.models.alligator')}}</a>
-					</li>
-					<li>
-						<a @click.prevent="importXWing">{{tr('dialog.welcome.models.xwing')}}</a>
+					<li v-for="entry in demoModels" :key="entry.id">
+						<a @click.prevent="importModel(entry.fn)">
+							{{tr('dialog.welcome.models.' + entry.id)}}
+						</a>
 					</li>
 				</ul>
 			</li>
@@ -57,7 +53,7 @@ import DialogManager from '../dialog';
 export default {
 	props: ['app'],
 	methods: {
-		importModel() {
+		importCustomModel() {
 			this.hideMessage();
 			this.app.importCustomModel();
 		},
@@ -65,23 +61,24 @@ export default {
 			this.hideMessage();
 			this.app.openLicFile();
 		},
-		importTrivial() {
+		importModel(fn) {
 			this.hideMessage();
-			this.app.importBuiltInModel('trivial_model.ldr');
-		},
-		importAlligator() {
-			this.hideMessage();
-			this.app.importBuiltInModel('20015 - Alligator.mpd');
-		},
-		importXWing() {
-			this.hideMessage();
-			this.app.importBuiltInModel('7140 - X-Wing Fighter.mpd');
+			this.app.importBuiltInModel(fn);
 		},
 		showAbout() {
 			DialogManager('aboutLicDialog');
 		},
 		hideMessage() {
 			document.querySelector('.gettingStarted').classList.add('hidden');
+		}
+	},
+	computed: {
+		demoModels() {
+			return [
+				{id: 'trivial', fn: 'trivial_model.ldr'},
+				{id: 'alligator', fn: '20015 - Alligator.mpd'},
+				{id: 'xwing', fn: '7140 - X-Wing Fighter.mpd'}
+			];
 		}
 	}
 };
