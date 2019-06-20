@@ -65,8 +65,8 @@ const api = {
 					color: line[6],
 					edge: line[8],
 					alpha,
-					rgba: _.color.hexToVec4(line[6], alpha),
-					edgeRgba: _.color.hexToVec4(line[8], 0)
+					rgba: _.color.toVec4(line[6], alpha),
+					edgeRgba: _.color.toVec4(line[8], 0)
 				};
 			}
 		}

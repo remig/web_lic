@@ -260,17 +260,19 @@ function addObject(objectsToDraw, buffers, modelView, color) {
 function addArrowObject(objectsToDraw, mat, length) {
 
 	const arrowBuffers = partBufferCache[arrowPartName];
+	let arrowColor = store.state.template.step.csi.displacementArrow.fill.color;
+	arrowColor = _.color.toVec4(arrowColor);
 
 	// Arrows have their base at [0, 0, 0]
 	// Scale arrow body to correct length, then draw it
 	const bodyMat = twgl.m4.scaling([1, length, 1]);
 	twgl.m4.multiply(bodyMat, mat, bodyMat);
-	addObject(objectsToDraw, arrowBuffers.body, bodyMat, [1, 0, 0, 1]);
+	addObject(objectsToDraw, arrowBuffers.body, bodyMat, arrowColor);
 
 	// Translate arrow tip to end of arrow body, then draw it
 	const tipMat = twgl.m4.translation([0, length - 1, 0]);
 	twgl.m4.multiply(tipMat, mat, tipMat);
-	addObject(objectsToDraw, arrowBuffers.tip, tipMat, [1, 0, 0, 1]);
+	addObject(objectsToDraw, arrowBuffers.tip, tipMat, arrowColor);
 }
 
 function addFace(faceData, points) {

@@ -326,14 +326,27 @@ _.mixin({
 				return res;
 			};
 		})();
-		color.hexToVec4 = (color, alpha) => {
-			color = color.replace('#', '');
-			return [
-				_.round(parseInt(color.substr(0, 2), 16) / 255, 4),
-				_.round(parseInt(color.substr(2, 2), 16) / 255, 4),
-				_.round(parseInt(color.substr(4, 2), 16) / 255, 4),
-				_.round((255 - alpha) / 255, 4)
-			];
+		color.toVec4 = (color, alpha) => {
+			if (!color || typeof color !== 'string') {
+				return [0, 0, 0, 0];
+			}
+			let r, g, b, a;
+			if (color.startsWith('#')) {
+				color = color.replace('#', '');
+				r = parseInt(color.substr(0, 2), 16) / 255;
+				g = parseInt(color.substr(2, 2), 16) / 255;
+				b = parseInt(color.substr(4, 2), 16) / 255;
+				a = (255 - (alpha || 0)) / 255;
+			} else {
+				color = _.color.toRGB(color);
+				r = color.r / 255;
+				g = color.g / 255;
+				b = color.b / 255;
+				a = (alpha == null)
+					? (color.a == null ? 1 : color.a)
+					: alpha;
+			}
+			return [_.round(r, 4), _.round(g, 4), _.round(b, 4), _.round(a, 4)];
 		};
 		color.luma = (color, isUnitColor) => {
 			if (!Array.isArray(color)) {

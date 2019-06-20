@@ -118,10 +118,10 @@ function fixColorTable(colorTable) {
 				entry.edge = '#' + (entry.edge).toString(16).padStart(6, '0');
 			}
 			if (entry.rgba == null && entry.color != null) {
-				entry.rgba = _.color.hexToVec4(entry.color, entry.alpha || 0);
+				entry.rgba = _.color.toVec4(entry.color, entry.alpha);
 			}
 			if (entry.edgeRgba == null && entry.edge != null) {
-				entry.edgeRgba = _.color.hexToVec4(entry.edge, 0);
+				entry.edgeRgba = _.color.toVec4(entry.edge, 0);
 			}
 		}
 	}
