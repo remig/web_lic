@@ -32,6 +32,11 @@ import RotateBuilder from '../rotate.vue';
 export default {
 	components: {PanelBase, RotateBuilder},
 	props: ['templateEntry'],
+	data() {
+		return {
+			scale: _.get(store.state.template, this.templateEntry).scale
+		};
+	},
 	methods: {
 		updateValues(newRotation) {
 			// TODO: only emit if something actually changed
@@ -46,9 +51,6 @@ export default {
 	computed: {
 		rotation() {
 			return _.get(store.state.template, this.templateEntry).rotation;
-		},
-		scale() {
-			return _.get(store.state.template, this.templateEntry).scale;
 		}
 	}
 };
