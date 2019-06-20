@@ -1,5 +1,30 @@
 [
 	{
+		"version": "0.45.0",
+		"date": "June 19, 2019",
+		"features": [
+			"Completely rewrite the 3D rendering engine, so it runs much faster and uses up less memory",
+			"Completely rewrite the Navigation Tree to perform better",
+			"Reorganize the part library so it loads much faster",
+			"Add every LDraw part I could find to Lic's part library, including every unofficial part, so you should see the 'Missing Part' prompt less",
+			"Show a new 'Getting Started' page when there is no open model",
+			"Change the default view angle so it's more 'on top' of the model, so it's easier to see the build steps",
+			"Change the UI used to create 3D rotations.  Instead of static 'X, Y, Z' input boxes, rotations are now a list of {axis, angle} entries, which are applied to the model in order.  This makes it much easier to create arbitrarily complex rotations, as the overall rotation can now be broken up arbitrarily",
+			"Add a new 'Scene Rotation' entry to '3D part Rendering', which allows you to override the default scene rotation used for all 3D rendering",
+			"Save nav tree expanded state so it's restored on page reload",
+			"Dialogs will open with keyboard focus in the right spot now, for easier keyboard navigation",
+			"'Enter' key will trigger 'Ok' on any dialog, and 'Esc' key will trigger 'Cancel'",
+			"Better styling everywhere for longer non-English text"
+		],
+		"bug_fixes": [
+			"Fix inventory page layout when one column was much wider than the others",
+			"Now that 3D rendering is much faster, always shrink the model to fit nicely in the chosen page size",
+			"When converting a submodel to callout, add the correct number of parts to the step's part list",
+			"Use the correct edge color when coloring the side of stud outlines",
+			"Avoid reloading entire page if 'Enter' is hit while any dialog is open"
+		]
+	},
+	{
 		"version": "0.44.0",
 		"date": "May 11, 2019",
 		"features": [
