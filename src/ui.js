@@ -198,9 +198,8 @@ const app = new Vue({
 			});
 		},
 		importTemplate() {
-			// TODO: Need to re-layout every page after loading a template
 			const importTemplate = (result, filename) => {
-				undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template');
+				undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template', ['page']);
 				this.statusText = this.tr('action.file.template.load.success_message_@mf', {filename});
 				Vue.nextTick(() => {
 					this.drawCurrentPage();
