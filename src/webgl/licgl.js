@@ -117,7 +117,8 @@ function generateObjectList(part, modelView, colorCode, config) {
 				const displacement = displacedParts[localPartList[i]];
 				if (displacement) {
 					const translation = getPartDisplacement(displacement);
-					twgl.m4.translate(partMatrix, translation, partMatrix);
+					const translateMat = twgl.m4.translation(translation);
+					twgl.m4.multiply(partMatrix, translateMat, partMatrix);
 
 					partBox = partBox || getPartBoundingBox(abstractPart, modelView);
 					const arrowMat = Arrows.getArrowPosition(partBox, partMatrix, displacement);
