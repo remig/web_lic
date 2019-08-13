@@ -60,7 +60,12 @@ export default {
 		store.mutations.renumber(store.state.inventoryPages, lastPageNumber + 1);
 	},
 	markAllDirty() {
+		store.state.templatePage.needsLayout = true;
+		if (store.state.titlePage) {
+			store.state.titlePage.needsLayout = true;
+		}
 		store.state.pages.forEach(page => (page.needsLayout = true));
+		store.state.inventoryPages.forEach(page => (page.needsLayout = true));
 	},
 	layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
 		const page = store.get.lookupToItem(opts.page);

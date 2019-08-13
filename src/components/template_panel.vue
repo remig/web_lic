@@ -82,7 +82,7 @@ export default {
 					this.$refs.currentTemplatePanel.apply();
 				} else {
 					if (!this.lastEdit.noLayout) {
-						store.state.pages.forEach(page => (page.needsLayout = true));
+						store.mutations.page.markAllDirty();
 					}
 					let item = _.last(this.lastEdit.type.split('.'));
 					item = this.tr('glossary.' + item.toLowerCase());
@@ -94,8 +94,7 @@ export default {
 		},
 		applyDirtyAction(entryType) {
 			store.mutations[entryType].markAllDirty();
-			store.state.pages.forEach(page => (page.needsLayout = true));
-			store.state.templatePage.needsLayout = true;
+			store.mutations.page.markAllDirty();
 			const item = this.tr('glossary.' + entryType.toLowerCase());
 			const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
 			undoStack.commit('', null, undoText, [entryType]);
