@@ -93,11 +93,9 @@ export default {
 			}
 		},
 		applyDirtyAction(entryType) {
-			store.mutations[entryType].markAllDirty();
-			store.mutations.page.markAllDirty();
 			const item = this.tr('glossary.' + entryType.toLowerCase());
 			const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
-			undoStack.commit('', null, undoText, [entryType]);
+			undoStack.commit('', null, undoText, [entryType, 'page']);
 		},
 		title() {
 			return this.selectedItem

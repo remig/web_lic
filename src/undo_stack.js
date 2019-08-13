@@ -189,8 +189,8 @@ function performClearCacheTargets(prevIndex, newIndex) {
 		if (typeof item === 'string') {
 			if (item === 'renderer') {  // Special case: refresh renderer settings
 				store.mutations.sceneRendering.refreshAll();
-			} else {
-				store.state[item + 's'].forEach(item => (item.isDirty = true));
+			} else {  // item = 'pliItem', 'csi', 'page'
+				store.mutations[item].markAllDirty();
 			}
 		} else {
 			// Some cache items were cloned from previous states;
