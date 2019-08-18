@@ -199,7 +199,9 @@ const app = new Vue({
 		},
 		importTemplate() {
 			const importTemplate = (result, filename) => {
-				undoStack.commit('templatePage.load', JSON.parse(result), 'Load Template', ['page']);
+				const content = JSON.parse(result);
+				backwardCompat.fixLicTemplate(content);
+				undoStack.commit('templatePage.load', content, 'Load Template', ['page']);
 				this.statusText = this.tr('action.file.template.load.success_message_@mf', {filename});
 				Vue.nextTick(() => {
 					this.drawCurrentPage();

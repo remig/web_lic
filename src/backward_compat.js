@@ -16,6 +16,40 @@ function fixRotation(oldRotation) {
 	return newRotation;
 }
 
+function fixTemplate(template) {
+
+	if (template.pliItem.rotation != null) {
+		template.pliItem.rotation = fixRotation(template.pliItem.rotation);
+	}
+	if (template.step.csi.rotation != null) {
+		template.step.csi.rotation = fixRotation(template.step.csi.rotation);
+	}
+	if (template.submodelImage.csi.rotation != null) {
+		template.submodelImage.csi.rotation = fixRotation(template.submodelImage.csi.rotation);
+	}
+	if (template.submodelImage.maxHeight == null) {
+		template.submodelImage.maxHeight = 0.3;
+	}
+
+	if (template.sceneRendering == null) {
+		template.sceneRendering = {};
+	}
+	if (template.sceneRendering.zoom == null) {
+		template.sceneRendering.zoom = 0;
+	}
+	if (template.sceneRendering.edgeWidth == null) {
+		template.sceneRendering.edgeWidth = 4;
+	}
+	if (template.sceneRendering.rotation == null) {
+		template.sceneRendering.rotation = [
+			// These are the camera rotations used in older versions of lic.
+			{axis: 'x', angle: 26.33},
+			{axis: 'y', angle: 45}
+		];
+	}
+	template.useBlackStudFaces = true;
+}
+
 function fixState(state) {
 
 	if (state.inventoryPages == null) {
@@ -69,37 +103,6 @@ function fixState(state) {
 	state.pliItems.forEach(pliItem => {
 		delete pliItem.partNumbers;
 	});
-
-	if (state.template.pliItem.rotation != null) {
-		state.template.pliItem.rotation = fixRotation(state.template.pliItem.rotation);
-	}
-	if (state.template.step.csi.rotation != null) {
-		state.template.step.csi.rotation = fixRotation(state.template.step.csi.rotation);
-	}
-	if (state.template.submodelImage.csi.rotation != null) {
-		state.template.submodelImage.csi.rotation = fixRotation(state.template.submodelImage.csi.rotation);
-	}
-	if (state.template.submodelImage.maxHeight == null) {
-		state.template.submodelImage.maxHeight = 0.3;
-	}
-
-	if (state.template.sceneRendering == null) {
-		state.template.sceneRendering = {};
-	}
-	if (state.template.sceneRendering.zoom == null) {
-		state.template.sceneRendering.zoom = 0;
-	}
-	if (state.template.sceneRendering.edgeWidth == null) {
-		state.template.sceneRendering.edgeWidth = 4;
-	}
-	if (state.template.sceneRendering.rotation == null) {
-		state.template.sceneRendering.rotation = [
-			// These are the camera rotations used in older versions of lic.
-			{axis: 'x', angle: 26.33},
-			{axis: 'y', angle: 45}
-		];
-	}
-	state.template.useBlackStudFaces = true;
 }
 
 function fixColorTable(colorTable) {
@@ -165,21 +168,30 @@ function fixPartDictionary(partDictionary) {
 	}
 }
 
+function isOld(content) {
+	const version = _.version.parse(content.version);
+	return version.major < 1 && version.minor < 45;
+}
+
+function fixLicTemplate(content) {
+	if (isOld(content)) {
+		fixTemplate(content.template);
+	}
+}
+
 function fixLicSaveFile(content) {
 
-	const version = _.version.parse(content.version);
-	const isOld = version.major < 1 && version.minor < 45;
-
-	if (isOld) {
+	if (isOld(content)) {
 
 		if (_.isEmpty(content.state.licFilename)) {
 			content.state.licFilename = content.modelFilename.split('.')[0];
 		}
 
 		fixState(content.state);
+		fixTemplate(content.state.template);
 		fixColorTable(content.colorTable);
 		fixPartDictionary(content.partDictionary);
 	}
 }
 
-export default {fixLicSaveFile, fixColorTable};
+export default {fixLicSaveFile, fixLicTemplate, fixColorTable};
