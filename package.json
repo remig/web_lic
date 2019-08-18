@@ -1,6 +1,6 @@
 {
 	"name": "web_lic",
-	"version": "0.45.0",
+	"version": "0.46.0",
 	"description": "Create an instruction book from a 3D model",
 	"main": "src/ui.js",
 	"scripts": {

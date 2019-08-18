@@ -1,5 +1,16 @@
 [
 	{
+		"version": "0.46.0",
+		"date": "",
+		"features": [],
+		"bug_fixes": [
+			"Correctly import old Templates",
+			"Correctly displace parts that have already been rotated. Fixes #28",
+			"Redo title and inventory page layout when template page is changed",
+			"Redo layout of all pages after loading a new template"
+		]
+	},
+	{
 		"version": "0.45.0",
 		"date": "June 19, 2019",
 		"features": [
