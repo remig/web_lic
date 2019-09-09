@@ -15,13 +15,17 @@
 				<span class="date">{{niceDate(entry.date)}}</span>
 			</h4>
 			<div class="innerContent">
-				<h5 v-if="entry.features">{{tr('dialog.whats_new.features')}}</h5>
+				<h5 v-if="entry.features && entry.features.length">
+					{{tr('dialog.whats_new.features')}}
+				</h5>
 				<ul>
 					<li v-for="(feature, fID) in entry.features" :key="`feature_${eID}_${fID}`">
 						{{feature}}
 					</li>
 				</ul>
-				<h5 v-if="entry.bug_fixes">{{tr('dialog.whats_new.bug_fixes')}}</h5>
+				<h5 v-if="entry.bug_fixes && entry.bug_fixes.length">
+					{{tr('dialog.whats_new.bug_fixes')}}
+				</h5>
 				<ul>
 					<li v-for="(bug, bID) in entry.bug_fixes" :key="`feature_${eID}_${bID}`">
 						{{bug}}
