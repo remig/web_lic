@@ -83,6 +83,10 @@ Vue.component('dialogManager', {
 		aboutLicDialog: () => import(
 			/* webpackChunkName: "aboutLicDialog" */
 			'./dialogs/about_lic.vue'
+		),
+		resizeImageDialog: () => import(
+			/* webpackChunkName: "resizeImageDialog" */
+			'./dialogs/resize_image.vue'
 		)
 	},
 	data() {

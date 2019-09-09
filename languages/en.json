@@ -793,6 +793,28 @@
 				"xwing": "Classic X-Wing"
 			},
 			"learn": "Learn more about Lic"
+		},
+		"resize_image": {
+			"title": "Resize Image",
+			"high_dpi_@mf": "This image's high resolution (${dpi} DPI) will be preserved, even if you shrink it to fit. This high resolution will be used if you export this instruction book at a high resolution.",
+			"preserve_aspect_ratio": "Preserve Image Aspect Ratio",
+			"too_big": "This image is bigger than the instructions page size.",
+			"too_small": "This image is smaller than the instruction page size.",
+			"do_nothing": "Preserve Image Size",
+			"shrink": "Shrink Image To Fit",
+			"stretch": "Stretch Image To Fit",
+			"anchor_text": "Image Position",
+			"anchors": {
+				"top_left": "Top Left",
+				"top": "Top",
+				"top_right": "Top Right",
+				"left": "Left",
+				"center": "Center",
+				"right": "Right",
+				"bottom_left": "Bottom Left",
+				"bottom": "Bottom",
+				"bottom_right": "Bottom Right"
+			}
 		}
 	},
 	"template": {

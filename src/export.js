@@ -4,7 +4,7 @@
 
 import _ from './util';
 import Draw from './draw';
-import {changeDpiDataUrl} from 'changedpi';
+import {changeDpiDataUrl} from './changedpi';
 import LocaleManager from './components/translate.vue';
 
 function exportInstructions(app, store, exportType, hiResScale, drawPageCallback, doneCallback) {
@@ -59,7 +59,7 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 
 function generatePDF(app, store, config) {
 
-	// draw PDF in points so it comes out the exactsame size as the current page, with images at 96 dpi
+	// draw PDF in points so it comes out the exact same size as the current page, with images at 96 dpi
 	let hiResScale = 1;
 	const pageSize = {
 		width: store.state.template.page.width * 0.75,  // 0.75 = 72 / 96

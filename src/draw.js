@@ -37,7 +37,7 @@ const api = {
 		if (template.fill.image) {
 			const cachedImage = store.cache.get('page', 'backgroundImage');
 			if (cachedImage) {
-				ctx.drawImage(cachedImage, 0, 0);
+				api.pageBackground(cachedImage, template.fill.image, ctx);
 			} else {
 				const image = new Image();
 				image.onload = () => {
@@ -516,10 +516,10 @@ const api = {
 			},
 
 			image(annotation, ctx) {
-				const x = Math.floor(annotation.x);
-				const y = Math.floor(annotation.y);
 				const cachedImage = store.cache.get(annotation, 'rawImage');
 				if (cachedImage && cachedImage !== 'pending') {
+					const x = Math.floor(annotation.x);
+					const y = Math.floor(annotation.y);
 					ctx.drawImage(cachedImage, x, y);
 				} else if (cachedImage == null) {
 					store.cache.set(annotation, 'rawImage', 'pending');  // Avoid caching multiple times
@@ -540,6 +540,18 @@ const api = {
 			drawLookup[annotation.annotationType](annotation, ctx);
 		};
 	})(),
+
+	pageBackground(cachedImage, imageInfo = {}, ctx) {
+		if (imageInfo.x != null && imageInfo.y != null) {
+			ctx.drawImage(cachedImage,
+				imageInfo.x, imageInfo.y,
+				imageInfo.width, imageInfo.height
+			);
+		} else {
+			ctx.drawImage(cachedImage, 0, 0);
+		}
+	},
+
 	dividers(dividerList, ctx) {
 		const template = store.state.template.divider.border;
 		if (!_.isBorderVisible(template)) {

@@ -5,6 +5,9 @@
 // Add a handful of useful utility functions to lodash
 // TODO: A lot of these duplicate functionality in lodash; remove them
 _.mixin({
+	eq(a, b, e = 0.0001) {
+		return Math.abs(a - b) < e;
+	},
 	isEven(n) {
 		return (typeof n === 'number') && isFinite(n) && !(n % 2);
 	},

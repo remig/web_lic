@@ -34,7 +34,5 @@
 		"webpack-dev-server": "3.1.10",
 		"webpack-glsl-loader": "^1.0.1"
 	},
-	"dependencies": {
-		"changedpi": "1.0.4"
-	}
+	"dependencies": {}
 }

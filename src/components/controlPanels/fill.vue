@@ -44,7 +44,9 @@
 import _ from '../../util';
 import store from '../../store';
 import openFileHandler from '../../file_uploader';
+import DialogManager from '../../dialog';
 import PanelBase from './panel_base.vue';
+import {readDpi} from '../../changedpi';
 
 export default {
 	components: {PanelBase},
@@ -64,12 +66,41 @@ export default {
 		pickImage() {
 			openFileHandler('.png', 'dataURL', (src, filename) => {
 
-				const template = _.get(store.state.template, this.templateEntry).fill;
-				template.image = {filename, src};
-				this.imageFilename = filename;
+				const template = _.get(store.state.template, this.templateEntry);
+				const dpi = Math.round(readDpi(src) || 96);
+				const originalFillImage = _.cloneDeep(template.fill.image);
+				if (_.isEmpty(template.fill.image)) {
+					template.fill.image = {};
+				}
+				template.fill.image.filename = filename;
+				template.fill.image.src = src;
+				template.fill.image.dpi = dpi;
 
 				const image = new Image();
 				image.onload = () => {
+					if (this.templateEntry === 'page') {
+						if (image.width !== template.width || image.height !== template.height) {
+							DialogManager('resizeImageDialog', dialog => {
+								dialog.$on('update', (newImageInfo) => {
+									template.fill.image = newImageInfo;
+									this.updateValues();
+								});
+								dialog.$on('ok', (newImageInfo) => {
+									template.fill.image = newImageInfo;
+									this.updateValues();
+								});
+								dialog.$on('cancel', () => {
+									template.fill.image = originalFillImage;
+									this.updateValues();
+								});
+								const imgInfo = template.fill.image;
+								imgInfo.width = imgInfo.originalWidth = image.width;
+								imgInfo.height = imgInfo.originalHeight = image.height;
+								_.assign(dialog.imageInfo, template.fill.image);
+								dialog.updateImageInfo();
+							});
+						}
+					}
 					store.cache.set('page', 'backgroundImage', image);
 					this.updateValues();
 				};
