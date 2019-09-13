@@ -87,6 +87,10 @@ Vue.component('dialogManager', {
 		resizeImageDialog: () => import(
 			/* webpackChunkName: "resizeImageDialog" */
 			'./dialogs/resize_image.vue'
+		),
+		multiBookDialog: () => import(
+			/* webpackChunkName: "multiBookDialog" */
+			'./dialogs/multi_book.vue'
 		)
 	},
 	data() {

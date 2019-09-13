@@ -8,6 +8,11 @@ export default {
 	pageCount(includeTitlePage) {
 		return store.state.pages.length + (includeTitlePage && store.state.titlePage ? 1 : 0);
 	},
+	totalPageCount() {
+		return store.state.pages.length
+			+ (store.state.titlePage ? 1 : 0)
+			+ store.state.inventoryPages.length;
+	},
 	modelName(nice) {
 		if (!store.model) {
 			return '';
@@ -373,6 +378,13 @@ export default {
 			return 0;
 		}
 		return Math.max.apply(null, itemList.map(el => el.id)) + 1;
+	},
+	itemByNumber(type, number) {
+		const itemList = store.state[type + 's'];
+		if (itemList) {
+			return itemList.find(el => el.number === number) || null;
+		}
+		return null;
 	},
 	lookupToItem(lookup, type) {  // Convert a {type, id} lookup object into the actual item it refers to
 		if (lookup == null || (!lookup.type && type == null)) {

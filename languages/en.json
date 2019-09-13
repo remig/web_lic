@@ -137,7 +137,10 @@
                 "remove": {
                     "name": "Remove Part List Pages"
                 }
-            },
+			},
+			"multi_book": {
+				"name": "Multiple Books..."
+			},
             "snap": {
                 "name": "Snap To (NYI)"
             },
@@ -814,6 +817,34 @@
 				"bottom_left": "Bottom Left",
 				"bottom": "Bottom",
 				"bottom_right": "Bottom Right"
+			}
+		},
+		"multi_book" : {
+			"title": "Multiple Books",
+			"split_count": "Divide Instructions into how many Books?",
+			"book_n_@mf": "Book ${n}",
+			"pages_n_@mf": "Pages ${start} - ${end}",
+			"steps_n_@mf": "Steps ${start} - ${end}",
+			"include_title_page": "Include Title Page with each Book",
+			"page_numbering": {
+				"start_page_1": {
+					"text": "Start each Book on Page 1",
+					"tooltip": "Use this if you plan to keep your<br/>final instructions as separate books"
+				},
+				"preserve_page_count": {
+					"text": "Preserve existing Page numbers across Books",
+					"tooltip": "Use this if you plan to recombine the final books back into<br/>one book, and are splitting for performance reasons"
+				}
+			},
+			"file_split": {
+				"one_file": {
+					"text": "Keep all books in one Lic file",
+					"tooltip": "Each book will be listed in the nav tree, and you can continue to move pages<br/>and steps from book to book. Lic file size and performance will remain unchanged.<br />Use this if performance is not a concern, and you just want to split up large<br/>instructions for easier reading and printing."
+				},
+				"separate_files": {
+					"text": "Split instructions into separate Lic files, one per book",
+					"tooltip": "With this, Lic will split your instruction book into separate Lic files, one<br />per book. Each Lic file will contain *only* the pages and steps for that book.<br />The first book will remain open in your browser, and your browser will download<br/>a zip file containing every book / Lic file. You will not be able to move pages or<br/>anything between books, so choose your book divisions carefully. Use this if<br/>you're having performance problems with large books."
+				}
 			}
 		}
 	},
