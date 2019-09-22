@@ -12,7 +12,7 @@
 			</span>
 			<input
 				v-model.number="bookCount"
-				:min="1"
+				:min="2"
 				type="number"
 				class="form-control"
 				@input="updateValues"
@@ -22,20 +22,20 @@
 			<table class="book-split-table">
 				<thead>
 					<tr>
-						<th v-for="n in bookCount" :key="`book_${n}`">
-							{{tr('dialog.multi_book.book_n_@mf', {n})}}
+						<th v-for="book in bookDivisions" :key="`book_${book.bookNumber}`">
+							{{tr('dialog.multi_book.book_n_@c', book.bookNumber)}}
 						</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td v-for="n in pageDivisions" :key="`page_${n.start}`">
-							{{tr('dialog.multi_book.pages_n_@mf', n)}}
+						<td v-for="book in bookDivisions" :key="`page_${book.pages.start}`">
+							{{tr('dialog.multi_book.pages_n_@mf', book.pages)}}
 						</td>
 					</tr>
 					<tr>
-						<td v-for="n in stepDivisions" :key="`step_${n.start}`">
-							{{tr('dialog.multi_book.steps_n_@mf', n)}}
+						<td v-for="book in bookDivisions" :key="`step_${book.steps.start}`">
+							{{tr('dialog.multi_book.steps_n_@mf', book.steps)}}
 						</td>
 					</tr>
 				</tbody>
@@ -116,11 +116,31 @@ function pageSpreadToStepSpread(pageSpread) {
 	return {start: startStep.number, end: endStep.number};
 }
 
+function calculateBookSplits(bookCount, pageCount) {
+	const bookDivisions = [];
+	const pagesPerBook = Math.ceil(pageCount / bookCount);
+
+	for (let i = 0; i < bookCount; i++) {
+		const pages = {
+			start: (i * pagesPerBook) + 1,
+			end: ((i + 1) * pagesPerBook)
+		};
+		const steps = pageSpreadToStepSpread(pages);
+		bookDivisions.push({bookNumber: i + 1, pages, steps});
+	}
+	_.last(bookDivisions).pages.end = pageCount;
+	return bookDivisions;
+}
+
 export default {
 	data: function() {
+		const bookCount = 2;
+		const pageCount = store.get.totalPageCount();
+		const bookDivisions = calculateBookSplits(bookCount, pageCount);
 		return {
-			bookCount: 2,
-			pageCount: store.get.totalPageCount(),
+			bookCount,
+			pageCount,
+			bookDivisions,
 			includeTitlePages: true,
 			firstPageNumber: 'start_page_1',  // or preserve_page_count
 			fileSplit: 'one_file'  // or separate_files
@@ -128,6 +148,7 @@ export default {
 	},
 	methods: {
 		updateValues() {
+			this.bookDivisions = calculateBookSplits(this.bookCount, this.pageCount);
 			this.$emit('update', {});
 		},
 		ok() {
@@ -142,22 +163,6 @@ export default {
 	computed: {
 		dialogWidth() {
 			return Math.max(450, this.bookCount * 115) + 'px';
-		},
-		pageDivisions() {
-			const pagesPerBook = Math.ceil(this.pageCount / this.bookCount);
-			const res = [];
-			for (let i = 0; i < this.bookCount; i++) {
-				res.push({start: (i * pagesPerBook) + 1, end: ((i + 1) * pagesPerBook)});
-			}
-			_.last(res).end = this.pageCount;
-			return res;
-		},
-		stepDivisions() {
-			const pageDivisions = this.pageDivisions;
-			const res = pageDivisions.map(pageSpread => {
-				return pageSpreadToStepSpread(pageSpread);
-			});
-			return res;
 		}
 	}
 };
