@@ -2,7 +2,11 @@
 
 import _ from './util';
 
-function fixRotation(oldRotation) {
+// 'fixOldFoo' state is anything before the big version 0.45
+// Anything older than the latest version but newer than 0.44 must still
+// be upgraded, but by regular 'fixFoo' logic
+
+function fixOldRotation(oldRotation) {
 	const newRotation = [];
 	if (oldRotation.x) {
 		newRotation.push({axis: 'x', angle: oldRotation.x});
@@ -16,16 +20,16 @@ function fixRotation(oldRotation) {
 	return newRotation;
 }
 
-function fixTemplate(template) {
+function fixOldTemplate(template) {
 
 	if (template.pliItem.rotation != null) {
-		template.pliItem.rotation = fixRotation(template.pliItem.rotation);
+		template.pliItem.rotation = fixOldRotation(template.pliItem.rotation);
 	}
 	if (template.step.csi.rotation != null) {
-		template.step.csi.rotation = fixRotation(template.step.csi.rotation);
+		template.step.csi.rotation = fixOldRotation(template.step.csi.rotation);
 	}
 	if (template.submodelImage.csi.rotation != null) {
-		template.submodelImage.csi.rotation = fixRotation(template.submodelImage.csi.rotation);
+		template.submodelImage.csi.rotation = fixOldRotation(template.submodelImage.csi.rotation);
 	}
 	if (template.submodelImage.maxHeight == null) {
 		template.submodelImage.maxHeight = 0.3;
@@ -51,6 +55,12 @@ function fixTemplate(template) {
 }
 
 function fixState(state) {
+	if (state.books == null) {
+		state.books = [];
+	}
+}
+
+function fixOldState(state) {
 
 	if (state.inventoryPages == null) {
 		state.inventoryPages = [];
@@ -87,7 +97,7 @@ function fixState(state) {
 			csi.annotations = [];
 		}
 		if (csi.rotation != null) {
-			csi.rotation = fixRotation(csi.rotation);
+			csi.rotation = fixOldRotation(csi.rotation);
 		}
 	});
 
@@ -131,7 +141,7 @@ function fixColorTable(colorTable) {
 	return colorTable;
 }
 
-function fixPartDictionary(partDictionary) {
+function fixOldPartDictionary(partDictionary) {
 
 	for (const partFn in partDictionary) {
 		if (partDictionary.hasOwnProperty(partFn)) {
@@ -175,7 +185,7 @@ function isOld(content) {
 
 function fixLicTemplate(content) {
 	if (isOld(content)) {
-		fixTemplate(content.template);
+		fixOldTemplate(content.template);
 	}
 }
 
@@ -187,11 +197,13 @@ function fixLicSaveFile(content) {
 			content.state.licFilename = content.modelFilename.split('.')[0];
 		}
 
-		fixState(content.state);
-		fixTemplate(content.state.template);
+		fixOldState(content.state);
+		fixOldTemplate(content.state.template);
 		fixColorTable(content.colorTable);
-		fixPartDictionary(content.partDictionary);
+		fixOldPartDictionary(content.partDictionary);
 	}
+
+	fixState(content.state);
 }
 
 export default {fixLicSaveFile, fixLicTemplate, fixColorTable};
