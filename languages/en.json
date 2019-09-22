@@ -824,6 +824,7 @@
 			"split_count": "Divide Instructions into how many Books?",
 			"book_n_@c": "Book ${0}",
 			"pages_n_@mf": "Pages ${start} - ${end}",
+			"pages_n_start_@c": "Pages ${0} - ",
 			"steps_n_@mf": "Steps ${start} - ${end}",
 			"include_title_page": "Include Title Page with each Book",
 			"page_numbering": {

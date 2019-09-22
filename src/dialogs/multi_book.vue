@@ -15,7 +15,7 @@
 				:min="2"
 				type="number"
 				class="form-control"
-				@input="updateValues"
+				@input="updateBookCount"
 			>
 		</div>
 		<div>
@@ -29,8 +29,20 @@
 				</thead>
 				<tbody>
 					<tr>
-						<td v-for="book in bookDivisions" :key="`page_${book.pages.start}`">
-							{{tr('dialog.multi_book.pages_n_@mf', book.pages)}}
+						<td v-for="(book, idx) in bookDivisions" :key="`page_${book.pages.start}`">
+							<template v-if="idx === bookDivisions.length - 1">
+								{{tr('dialog.multi_book.pages_n_@mf', book.pages)}}
+							</template>
+							<template v-else>
+								{{tr('dialog.multi_book.pages_n_start_@c', book.pages.start)}}
+								<input
+									v-model.number="book.pages.end"
+									:min="book.pages.start"
+									type="number"
+									class="form-control page-number-input"
+									@input="updatePageStart"
+								>
+							</template>
 						</td>
 					</tr>
 					<tr>
@@ -45,14 +57,14 @@
 		<div>
 			<el-checkbox
 				v-model="includeTitlePages"
-				@change="updateValues"
+				@change="updateTitlePages"
 			>
 				{{tr('dialog.multi_book.include_title_page')}}
 			</el-checkbox>
 		</div>
 
 		<div>
-			<el-radio-group v-model="firstPageNumber" @change="updateValues">
+			<el-radio-group v-model="firstPageNumber" @change="updateFirstPage">
 				<licTooltip>
 					<div
 						slot="content"
@@ -75,7 +87,7 @@
 		</div>
 
 		<div>
-			<el-radio-group v-model="fileSplit" @change="updateValues">
+			<el-radio-group v-model="fileSplit" @change="updateFileSplit">
 				<licTooltip>
 					<div
 						slot="content"
@@ -118,7 +130,7 @@ function pageSpreadToStepSpread(pageSpread) {
 
 function calculateBookSplits(bookCount, pageCount) {
 	const bookDivisions = [];
-	const pagesPerBook = Math.ceil(pageCount / bookCount);
+	const pagesPerBook = Math.floor(pageCount / bookCount);
 
 	for (let i = 0; i < bookCount; i++) {
 		const pages = {
@@ -147,12 +159,29 @@ export default {
 		};
 	},
 	methods: {
-		updateValues() {
+		updatePageStart() {
+			for (let i = 0; i < this.bookDivisions.length - 1; i++) {
+				const pageEnd = this.bookDivisions[i].pages.end;
+				this.bookDivisions[i + 1].pages.start = pageEnd + 1;
+			}
+			for (let i = 0; i < this.bookDivisions.length; i++) {
+				const division = this.bookDivisions[i];
+				division.steps = pageSpreadToStepSpread(division.pages);
+			}
+			this.$emit('update', this.bookDivisions);
+		},
+		updateBookCount() {
 			this.bookDivisions = calculateBookSplits(this.bookCount, this.pageCount);
-			this.$emit('update', {});
+			this.$emit('update', this.bookDivisions);
+		},
+		updateTitlePages() {
+		},
+		updateFirstPage() {
+		},
+		updateFileSplit() {
 		},
 		ok() {
-			this.$emit('ok', {});
+			this.$emit('ok', this.bookDivisions);
 			this.$emit('close');
 		},
 		cancel() {
@@ -162,7 +191,7 @@ export default {
 	},
 	computed: {
 		dialogWidth() {
-			return Math.max(450, this.bookCount * 115) + 'px';
+			return Math.max(450, this.bookCount * 150) + 'px';
 		}
 	}
 };
@@ -179,7 +208,8 @@ export default {
 .multiBookDialog input {
 	display: inline-block;
 	width: 75px;
-	margin-left: 20px;
+	height: 30px;
+	margin-left: 10px;
 }
 
 .multiBookDialog .book-split-table {
@@ -193,6 +223,12 @@ export default {
 
 .multiBookDialog .el-radio {
 	margin-bottom: 10px;
+}
+
+.multiBookDialog .page-number-input {
+	margin-left: 0;
+	width: 56px;
+	padding: 6px;
 }
 
 </style>
