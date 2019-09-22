@@ -15,6 +15,8 @@ import PageSetters from './store/page_setters';
 import InventoryPageSetters from './store/inventory_page_setters';
 import StepSetters from './store/step_setters';
 import CSISetters from './store/csi_setters';
+import PLISetters from './store/pli_setters';
+import PLIItemSetters from './store/pli_item_setters';
 import SubmodelImageSetters from './store/submodel_image_setters';
 import AnnotationSetters from './store/annotation_setters';
 import CalloutSetters from './store/callout_setters';
@@ -161,6 +163,8 @@ const store = {
 		inventoryPage: InventoryPageSetters,
 		step: StepSetters,
 		csi: CSISetters,
+		pli: PLISetters,
+		pliItem: PLIItemSetters,
 		submodelImage: SubmodelImageSetters,
 		annotation: AnnotationSetters,
 		callout: CalloutSetters,
@@ -217,107 +221,6 @@ const store = {
 				store.mutations.csi.markAllDirty();
 				store.mutations.pliItem.markAllDirty();
 				store.mutations.page.markAllDirty();
-			}
-		},
-		pli: {
-			add(opts) {  // opts: {parent}
-				return store.mutations.item.add({item: {
-					type: 'pli',
-					pliItems: [],
-					x: null, y: null, width: null, height: null,
-					innerContentOffset: {x: 0, y: 0},
-					borderOffset: {x: 0, y: 0}
-				}, parent: opts.parent});
-			},
-			delete(opts) {  // opts: {pli, deleteItem: false}
-				const pli = store.get.lookupToItem(opts.pli);
-				if (!opts.deleteItems && pli.pliItems && pli.pliItems.length) {
-					throw 'Cannot delete a PLI with items';
-				}
-				store.mutations.item.deleteChildList({item: pli, listType: 'pliItem'});
-				store.mutations.item.delete({item: pli});
-			},
-			empty(opts) {  // opts: {pli}
-				const pli = store.get.lookupToItem(opts.pli);
-				store.mutations.item.deleteChildList({item: pli, listType: 'pliItem'});
-			},
-			addPart(opts) {  // opts: {pli, part: {filename, color}}
-				const pli = store.get.lookupToItem(opts.pli);
-				const pliItem = store.get.matchingPLIItem(pli, opts.part);
-				if (pliItem) {
-					pliItem.quantity++;
-				} else {
-					store.mutations.pliItem.add({
-						parent: pli,
-						filename: opts.part.filename,
-						colorCode: opts.part.colorCode
-					});
-				}
-			},
-			removePart(opts) {  // opts: {pli, part: {filename, color}}
-				const pli = store.get.lookupToItem(opts.pli);
-				const pliItem = store.get.matchingPLIItem(pli, opts.part);
-				if (pliItem) {
-					if (pliItem.quantity === 1) {
-						store.mutations.pliItem.delete({pliItem});
-					} else {
-						pliItem.quantity--;
-					}
-				}
-			},
-			toggleVisibility(opts) {  // opts: {visible}
-				store.state.plisVisible = opts.visible;
-				store.mutations.page.markAllDirty();
-			},
-			syncContent(opts) {  // opts: {pli, doLayout}
-				// Ensure the list of children pliItems matches the content of the parent step
-				// Slow but simple solution: delete all pliItems then re-add one for each part
-				const pli = store.get.lookupToItem(opts.pli);
-				const step = store.get.parent(pli);
-				const parts = store.get.partsInStep(step);
-				store.mutations.pli.empty({pli});
-				parts.forEach(part => store.mutations.pli.addPart({pli, part}));
-				if (opts.doLayout) {
-					store.mutations.page.layout({page: store.get.pageForItem(pli)});
-				}
-			}
-		},
-		pliItem: {
-			add(opts) { // opts: {parent, filename, colorCode, quantity = 1}
-				const pliItem = store.mutations.item.add({item: {
-					type: 'pliItem', domID: null,
-					filename: opts.filename,
-					colorCode: opts.colorCode,
-					quantity: (opts.quantity == null) ? 1 : opts.quantity,
-					quantityLabelID: null,
-					x: null, y: null, width: null, height: null
-				}, parent: opts.parent});
-
-				store.mutations.item.add({item: {
-					type: 'quantityLabel',
-					align: 'left', valign: 'top',
-					x: null, y: null, width: null, height: null
-				}, parent: pliItem});
-
-				return pliItem;
-			},
-			delete(opts) {  // opts: {pliItem}
-				const pliItem = store.get.lookupToItem(opts.pliItem);
-				store.mutations.item.delete({item: {type: 'quantityLabel', id: pliItem.quantityLabelID}});
-				store.mutations.item.delete({item: pliItem});
-			},
-			changeQuantity(opts) {  // opts: {pliItem, quantity}
-				const pliItem = store.get.lookupToItem(opts.pliItem);
-				pliItem.quantity = opts.quantity;
-				// New label might be bigger / smaller than before; calculate new size
-				const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-				const font = store.state.template.pliItem.quantityLabel.font;
-				Layout.label(quantityLabel, font, 'x' + pliItem.quantity);
-			},
-			markAllDirty(filename) {
-				let list = store.state.pliItems;
-				list = filename ? list.filter(item => item.filename === filename) : list;
-				list.forEach(item => (item.isDirty = true));
 			}
 		},
 		pliTransform: {
