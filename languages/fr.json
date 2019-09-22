@@ -18,7 +18,7 @@
         "page_count_@c": "Page ${0}",
         "submodelimage": "Image de sous modèle",
         "step": "Etape",
-        "step_count_@c": "Etape ${count}",
+        "step_count_@c": "Etape ${0}",
         "csi": "Image de l'étape",
         "pli": "Image de la liste des pièces",
         "pliitem": "Part Image",

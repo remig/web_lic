@@ -18,7 +18,7 @@
         "page_count_@c": "Seite ${0}",
         "submodelimage": "Untermodellbild",
         "step": "Schritt",
-        "step_count_@c": "Schritt ${count}",
+        "step_count_@c": "Schritt ${0}",
         "csi": "Schrittbild",
         "pli": "Teileliste",
         "pliitem": "Teil der Teileliste",
