@@ -48,7 +48,7 @@ const api = {
 	},
 	reparent(opts) {  // opts: {item, newParent, parentInsertionIndex = -1}
 		const item = store.get.lookupToItem(opts.item);
-		const oldParent = store.get.parent(item);
+		const oldParent = store.get.parent(item) || {};
 		const newParent = store.get.lookupToItem(opts.newParent);
 		item.parent.id = newParent.id;
 		item.parent.type = newParent.type;

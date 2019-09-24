@@ -267,7 +267,7 @@ export default {
 	},
 	childList() {
 		const children = [
-			'numberLabel', 'divider', 'annotation', 'callout', 'csi',
+			'page', 'numberLabel', 'divider', 'annotation', 'callout', 'csi',
 			'pliItem', 'quantityLabel', 'rotateIcon', 'step', 'submodelImage'
 		];
 		if (store.state.plisVisible) {
@@ -300,11 +300,13 @@ export default {
 		}
 		childTypeList.forEach(childType => {
 			const childList = item[childType + 's'];
-			const childID = item[childType + 'ID'];
 			if (childList && childList.length) {
 				children.push(... childList.map(id => store.get[childType](id)));
-			} else if (childID != null) {
-				children.push(store.get[childType](childID));
+			} else {
+				const childID = item[childType + 'ID'];
+				if (childID != null) {
+					children.push(store.get[childType](childID));
+				}
 			}
 		});
 		return children;
@@ -359,15 +361,22 @@ export default {
 		return submodels;
 	},
 	topLevelTreeNodes() {  // Return list of pages & submodels to be drawn in the nav tree
-		const nodes = store.get.pageList();
-		store.get.submodels().forEach(submodel => {
-			const page = store.get.pageForItem({id: submodel.stepID, type: 'step'});
-			const pageIndex = nodes.indexOf(page);
-			submodel.type = 'submodel';
-			submodel.id = nodes.length;
-			_.insert(nodes, submodel, pageIndex);
-		});
-		return nodes.filter(el => el);
+		if (store.state.books.length) {
+			return [
+				store.state.templatePage,
+				...store.state.books
+			].filter(el => el);
+		} else {
+			const nodes = store.get.pageList();
+			store.get.submodels().forEach(submodel => {
+				const page = store.get.pageForItem({id: submodel.stepID, type: 'step'});
+				const pageIndex = nodes.indexOf(page);
+				submodel.type = 'submodel';
+				submodel.id = nodes.length;
+				_.insert(nodes, submodel, pageIndex);
+			});
+			return nodes.filter(el => el);
+		}
 	},
 	nextItemID(item) {  // Get the next unused ID in this item's list
 		if (item && item.type) {
@@ -382,7 +391,16 @@ export default {
 	itemByNumber(type, number) {
 		const itemList = store.state[type + 's'];
 		if (itemList) {
-			return itemList.find(el => el.number === number) || null;
+			const res = itemList.find(el => el.number === number) || null;
+			if (res == null && type === 'page') {
+				// Special case: check if page number is title or inventory page
+				if (store.state.titlePage.number === number) {
+					return store.state.titlePage;
+				} else if (store.state.inventoryPages.length) {
+					return store.state.inventoryPages.find(el => el.number === number) || null;
+				}
+			}
+			return res;
 		}
 		return null;
 	},

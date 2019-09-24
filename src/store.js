@@ -11,6 +11,7 @@ import ItemSetters from './store/item_setters';
 import PartSetters from './store/part_setters';
 import SubmodelSetters from './store/submodel_setters';
 import TemplatePageSetters from './store/template_page_setters';
+import BookSetters from './store/book_setters';
 import PageSetters from './store/page_setters';
 import InventoryPageSetters from './store/inventory_page_setters';
 import StepSetters from './store/step_setters';
@@ -37,6 +38,7 @@ const emptyState = {
 	titlePage: null,
 	plisVisible: true,
 	pliTransforms: {},
+	books: [],
 	pages: [],
 	inventoryPages: [],
 	dividers: [],
@@ -158,6 +160,7 @@ const store = {
 		item: ItemSetters,
 		part: PartSetters,
 		submodel: SubmodelSetters,
+		book: BookSetters,
 		templatePage: TemplatePageSetters,
 		page: PageSetters,
 		inventoryPage: InventoryPageSetters,

@@ -14,6 +14,8 @@
         "bottom": "Bottom",
         "left": "Left",
         "right": "Right",
+        "book": "Book",
+        "book_count_@c": "Book ${0}",
         "page": "Page",
         "page_count_@c": "Page ${0}",
         "pagenumber": "Page Number",
@@ -137,10 +139,11 @@
                 "remove": {
                     "name": "Remove Part List Pages"
                 }
-			},
-			"multi_book": {
-				"name": "Multiple Books..."
-			},
+            },
+            "multi_book": {
+                "name": "Multiple Books...",
+                "undo": "Divide Instructions into Books"
+            },
             "snap": {
                 "name": "Snap To (NYI)"
             },

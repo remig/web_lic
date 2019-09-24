@@ -61,6 +61,8 @@ function getItemId(item) {
 function getItemText(t) {
 	if (!t) {
 		return '';
+	} else if (t.type === 'book') {
+		return tr('glossary.book_count_@c', t.number);
 	} else if (t.type === 'page') {
 		return tr('glossary.page_count_@c', t.number);
 	} else if (t.type === 'inventoryPage') {

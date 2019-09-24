@@ -168,11 +168,9 @@ export default {
 				const division = this.bookDivisions[i];
 				division.steps = pageSpreadToStepSpread(division.pages);
 			}
-			this.$emit('update', this.bookDivisions);
 		},
 		updateBookCount() {
 			this.bookDivisions = calculateBookSplits(this.bookCount, this.pageCount);
-			this.$emit('update', this.bookDivisions);
 		},
 		updateTitlePages() {
 		},
@@ -181,7 +179,7 @@ export default {
 		updateFileSplit() {
 		},
 		ok() {
-			this.$emit('ok', this.bookDivisions);
+			this.$emit('ok', _.cloneDeep(this.bookDivisions));
 			this.$emit('close');
 		},
 		cancel() {

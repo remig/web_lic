@@ -11,6 +11,13 @@ const qtyLabelOffset = 5;  // TODO: this belongs in the template
 
 const api = {
 
+	book(book) {
+		book = store.get.lookupToItem(book);
+		for (let i = 0; i < book.pages.length; i++) {
+			const page = store.get.lookupToItem('page', book.pages[i]);
+			api.page(page);
+		}
+	},
 	titlePage(page) {
 		page = store.get.lookupToItem(page);
 		const pageSize = store.state.template.page;

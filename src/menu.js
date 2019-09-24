@@ -251,6 +251,22 @@ const menu = [
 				app.setCurrentPage(store.get.lastPage());
 			}
 		},
+		{
+			text: 'action.edit.multi_book.name',
+			id: 'multi_book_menu',
+			shown: enableIfModel,
+			cb() {
+				DialogManager('multiBookDialog', dialog => {
+					dialog.$on('ok', bookDivisions => {
+						undoStack.commit(
+							'book.divideInstructions',
+							{bookDivisions},
+							'action.edit.multi_book.undo'
+						);
+					});
+				});
+			}
+		},
 		{text: 'action.edit.snap.name', id: 'edit_snap_menu', enabled: () => false, cb() {}},
 		{
 			text: 'action.edit.scene_rendering.name',
