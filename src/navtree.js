@@ -55,11 +55,13 @@ function niceColorName(colorCode) {
 }
 
 function getItemId(item) {
-	return [item.type, item.id, item.stepID, item.filename].filter(el => el).join('_');
+	return [item.type, item.id, item.stepID, item.filename]
+		.filter(el => el != null)
+		.join('_');
 }
 
 function getItemText(t) {
-	if (!t) {
+	if (!t || !t.type) {
 		return '';
 	} else if (t.type === 'book') {
 		return tr('glossary.book_count_@c', t.number);
@@ -68,7 +70,9 @@ function getItemText(t) {
 	} else if (t.type === 'inventoryPage') {
 		return tr('glossary.inventorypage', t.number);
 	} else if (t.type === 'step') {
-		return tr('glossary.step_count_@c', t.number);
+		return (t.number == null)
+			? tr('glossary.step')
+			: tr('glossary.step_count_@c', t.number);
 	} else if (t.type === 'submodel') {
 		return t.filename;
 	} else if (t.type === 'annotation') {
