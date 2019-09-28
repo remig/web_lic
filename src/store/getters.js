@@ -331,9 +331,10 @@ export default {
 		const mainModelFilename = store.model.filename;
 		const addedModelNames = new Set([mainModelFilename]);
 		store.state.steps.filter(step => {
-			return step.parent.type === 'page'
-				&& step.parent.subtype === 'page'
-				&& step.model.filename !== mainModelFilename;
+			if (step.parent.type === 'page' && step.model.filename !== mainModelFilename) {
+				return store.get.page(step.parent).subtype === 'page';
+			}
+			return false;
 		}).forEach(step => {
 
 			if (!addedModelNames.has(step.model.filename)) {
