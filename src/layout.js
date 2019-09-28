@@ -48,7 +48,7 @@ const api = {
 		// If we're laying out the first inventory page, delete all but the first page and redo layout
 		// across entire part list, adding new pages back if necessary
 		let pliItems = page.pliItems;
-		const pages = store.state.inventoryPages;
+		const pages = store.get.inventoryPages();
 		if (page === pages[0]) {
 			// Delete all but first inventory page
 			while (pages.length > 1) {
@@ -110,7 +110,7 @@ const api = {
 			if (x + pliItem.width > box.width) {
 				// New item overflowed over the right edge of the page.  Create a new page and
 				// pass it the remaining parts.
-				const opts = {pageType: 'inventoryPage', pageNumber: page.number + 1};
+				const opts = {subtype: 'inventoryPage', pageNumber: page.number + 1};
 				const newPage = store.mutations.page.add(opts);
 				pliItems.slice(i).forEach(item => {
 					store.mutations.item.reparent({item, newParent: newPage});
@@ -162,7 +162,7 @@ const api = {
 
 	page(page, layout = 'horizontal') {
 
-		if (page.type === 'titlePage') {
+		if (page.subtype === 'titlePage') {
 			api.titlePage(page);
 			return;
 		}
@@ -183,7 +183,7 @@ const api = {
 			pageSize.height -= lbl.height + (margin / 2);
 		}
 
-		if (page.type === 'inventoryPage') {
+		if (page.subtype === 'inventoryPage') {
 			api.inventoryPage(page, pageSize);
 			return;
 		}

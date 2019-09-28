@@ -34,13 +34,10 @@ import packageInfo from '../package.json';
 const emptyState = {
 	template: _.cloneDeep(defaultTemplate),
 	licFilename: null,  // user-visible filename (without extension) used to load / save lic file
-	templatePage: null,
-	titlePage: null,
 	plisVisible: true,
 	pliTransforms: {},
 	books: [],
 	pages: [],
-	inventoryPages: [],
 	dividers: [],
 	steps: [],
 	csis: [],
@@ -273,7 +270,7 @@ const store = {
 		addTitlePage() {
 
 			// TODO: need submodel + bag breakdown page and final 'no step' complete model page
-			const page = store.state.titlePage = store.mutations.page.add({pageType: 'titlePage'});
+			const page = store.mutations.page.add({subtype: 'titlePage', insertionIndex: 1});
 			page.number = 1;
 			store.mutations.page.renumber();  // TODO: this doesn't update the page numbers in the tree
 

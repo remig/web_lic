@@ -30,8 +30,11 @@ import pliItemTemplatePanel from './controlPanels/pli_item_template.vue';
 import pageNumberTemplatePanel from './controlPanels/page_number.vue';
 import rotateIconTemplatePanel from './controlPanels/rotate_icon_template.vue';
 
+// Top level keys match the basic type of the selected item
+// First level child keys match the basic type of the selected item's parent
+// Second level child keys match the basic type of the selected item's parent's parent (grandparent)
 const componentLookup = {
-	templatePage: pageTemplatePanel,
+	page: pageTemplatePanel,
 	csi: {
 		step: [csiTemplatePanel, 'step.csi'],
 		submodelImage: [csiTemplatePanel, 'submodelImage.csi']
@@ -44,7 +47,7 @@ const componentLookup = {
 	divider: [borderPanel, 'divider'],
 	rotateIcon: rotateIconTemplatePanel,
 	numberLabel: {
-		templatePage: pageNumberTemplatePanel,
+		page: pageNumberTemplatePanel,
 		step: {
 			callout: [fontPanel, 'callout.step.numberLabel'],
 			'default': [fontPanel, 'step.numberLabel']
@@ -70,7 +73,7 @@ export default {
 		newValues(opts) {
 			this.lastEdit = (typeof opts === 'string') ? {type: opts} : opts;
 			if (!opts.noLayout) {
-				store.state.templatePage.needsLayout = true;
+				store.get.templatePage().needsLayout = true;
 			}
 			this.app.redrawUI(false);
 		},

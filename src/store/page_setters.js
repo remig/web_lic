@@ -1,15 +1,14 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from '../util';
 import store from '../store';
 import Layout from '../layout';
 
 export default {
-	add(opts = {}) {  // opts: {pageNumber, pageType = 'page', insertionIndex = -1}
+	add(opts = {}) {  // opts: {pageNumber, subtype = 'page', insertionIndex = -1}
 		const pageSize = store.state.template.page;
-		const pageType = opts.pageType || 'page';
 		const page = store.mutations.item.add({item: {
-			type: pageType,
+			type: 'page',
+			subtype: opts.subtype || 'page',
 			steps: [], dividers: [], annotations: [], pliItems: [],
 			needsLayout: true, locked: false, stretchedStep: null,
 			innerContentOffset: {x: 0, y: 0},
@@ -19,7 +18,7 @@ export default {
 		}, insertionIndex: opts.insertionIndex});
 
 		if (opts.pageNumber === 'id') {  // Special flag to say 'use page ID as page number'
-			page.number = page.id + 1;
+			page.number = page.id;
 		}
 
 		if (opts.pageNumber != null) {
@@ -30,9 +29,7 @@ export default {
 			}, parent: page});
 		}
 
-		if (pageType === 'page') {
-			store.mutations.page.renumber();
-		}
+		store.mutations.page.renumber();
 		return page;
 	},
 	delete(opts) {  // opts: {page}
@@ -55,17 +52,10 @@ export default {
 		}
 	},
 	renumber() {
-		store.mutations.renumber(store.state.pages, store.state.titlePage ? 2 : 1);
-		const lastPageNumber = _.last(store.state.pages).number;
-		store.mutations.renumber(store.state.inventoryPages, lastPageNumber + 1);
+		store.mutations.renumber(store.state.pages, 0);
 	},
 	markAllDirty() {
-		store.state.templatePage.needsLayout = true;
-		if (store.state.titlePage) {
-			store.state.titlePage.needsLayout = true;
-		}
 		store.state.pages.forEach(page => (page.needsLayout = true));
-		store.state.inventoryPages.forEach(page => (page.needsLayout = true));
 	},
 	layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
 		const page = store.get.lookupToItem(opts.page);

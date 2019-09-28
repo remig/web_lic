@@ -247,7 +247,7 @@ const contextMenu = {
 			},
 			cb(selectedItem) {
 				const page = store.get.lookupToItem(selectedItem);
-				const nextPage = store.get.isLastPage(page)
+				const nextPage = store.get.isLastBasicPage(page)
 					? store.get.prevPage(page)
 					: store.get.nextPage(page);
 				undoStack.commit('page.delete', {page}, tr('action.page.delete_this_blank_page.undo'));
@@ -1607,7 +1607,12 @@ export default function ContextMenu(selectedItem, localApp) {
 
 	app = localApp;
 
-	let menu = contextMenu[selectedItem.type];
+	let subtype;
+	if (selectedItem.type === 'page') {
+		subtype = store.get.lookupToItem(selectedItem).subtype;
+	}
+
+	let menu = contextMenu[subtype || selectedItem.type];
 	menu = (typeof menu === 'function') ? menu(selectedItem) : menu;
 
 	if (!Array.isArray(menu)) {

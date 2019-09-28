@@ -47,7 +47,7 @@ Vue.component('pageView', {
 			);
 
 			let lockIcon, lockSwitch, guides = [];
-			if (pageLookup && pageLookup.type === 'page') {
+			if (pageLookup && pageLookup.subtype !== 'templatePage') {
 				lockIcon = createElement(
 					'i',
 					{'class': ['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}]}
@@ -60,9 +60,6 @@ Vue.component('pageView', {
 						on: {input: setPageLocked(pageLookup.id)}
 					}
 				);
-
-			}
-			if (pageLookup && pageLookup.type !== 'templatePage') {
 
 				guides = uiState.get('guides').map((props, guideID) => {
 					const offset = {left: 0, top: 0};
@@ -112,13 +109,13 @@ Vue.component('pageView', {
 			);
 		}
 
-		if (this.currentPageLookup && this.currentPageLookup.type === 'templatePage') {
+		if (this.currentPageLookup && store.get.isTemplatePage(this.currentPageLookup)) {
 			pageIDsToDraw = [this.currentPageLookup];
 		} else if (scrolling) {
 			pageIDsToDraw = store.get.pageList().map(p => ({type: p.type, id: p.id}));
 			pageIDsToDraw.shift();  // Don't include template page
 			if (facing) {
-				pageIDsToDraw.unshift(null);
+				pageIDsToDraw.unshift(null);  // Add empty placeholder to the left of title page
 			}
 		} else if (facing) {
 			pageIDsToDraw = getPairedPages(this.currentPageLookup)
@@ -329,7 +326,7 @@ Vue.component('pageView', {
 			let nextPage = store.get.nextPage(this.currentPageLookup);
 			if (this.isFacingView) {
 				const page = store.get.page(this.currentPageLookup);
-				if (_.isEven(page.number)) {
+				if (page.number > 0 && _.isEven(page.number)) {
 					const nextNextPage = store.get.nextPage(nextPage);
 					if (nextNextPage) {
 						nextPage = nextNextPage;
@@ -435,13 +432,13 @@ function getPairedPages(page) {
 	page = store.get.lookupToItem(page);
 	if (!page) {
 		return [];
-	} else if (page.type === 'titlePage') {
+	} else if (page.subtype === 'titlePage') {
 		return [null, page];
 	} else if (_.isEven(page.number)) {
 		return [page, store.get.nextPage(page)];
 	}
 	const prevPage = store.get.prevPage(page);
-	return [prevPage.type === 'templatePage' ? null : prevPage, page];
+	return [prevPage.subtype === 'templatePage' ? null : prevPage, page];
 }
 
 function setPageLocked(pageID) {

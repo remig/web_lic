@@ -7,7 +7,7 @@ import LDParse from '../ld_parse';
 export default {
 	add() {
 		const pageNumber = store.get.lastPage().number + 1;
-		const opts = {pageType: 'inventoryPage', pageNumber};
+		const opts = {subtype: 'inventoryPage', pageNumber};
 		const page = store.mutations.page.add(opts);
 		const itemList = [];  // index: colorCode, value: {filename: quantity}}
 
@@ -43,15 +43,15 @@ export default {
 		store.mutations.item.delete({item: page});
 	},
 	deleteAll() {
-		const pages = store.state.inventoryPages;
-		while (pages.length) {
-			store.mutations.inventoryPage.delete({page: pages[0]});
-		}
+		const pages = store.get.inventoryPages();
+		pages.forEach(page => {
+			store.mutations.inventoryPage.delete({page});
+		});
 	},
 	removePart(opts) {  // opts: {filename & colorCode or part, doLayout: false}
 		const filename = opts.filename || opts.part.filename;
 		const colorCode = opts.colorCode || opts.part.colorCode;
-		store.state.inventoryPages.forEach(page => {
+		store.get.inventoryPages().forEach(page => {
 			page.pliItems.forEach(id => {
 				const pliItem = store.get.pliItem(id);
 				if (pliItem.filename === filename && pliItem.colorCode === colorCode) {
@@ -64,7 +64,7 @@ export default {
 			});
 		});
 		if (opts.doLayout) {
-			store.state.inventoryPages.forEach(page => {
+			store.get.inventoryPages().forEach(page => {
 				store.mutations.page.layout({page});
 			});
 		}

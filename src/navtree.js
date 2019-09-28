@@ -66,9 +66,12 @@ function getItemText(t) {
 	} else if (t.type === 'book') {
 		return tr('glossary.book_count_@c', t.number);
 	} else if (t.type === 'page') {
-		return tr('glossary.page_count_@c', t.number);
-	} else if (t.type === 'inventoryPage') {
-		return tr('glossary.inventorypage', t.number);
+		if (t.subtype === 'page') {
+			return tr('glossary.page_count_@c', t.number);
+		} else if (t.subtype === 'inventoryPage') {
+			return tr('glossary.inventorypage', t.number);
+		}
+		return tr('glossary.' + t.subtype.toLowerCase());
 	} else if (t.type === 'step') {
 		return (t.number == null)
 			? tr('glossary.step')

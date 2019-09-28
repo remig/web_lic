@@ -7,6 +7,15 @@
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
 // - Undo / redo stack bakes action text into itself, which breaks translations
 // - Add ability to upload a custom ldconfig file, to customize all colors in one shot
+// - Put submodels inline then move submodel merge step to previous page
+//		as the only step on row 2; arrow is wrong
+// - Shrunken submodel images need to be centered (move lots of steps onto alligator head step to see)
+// - Add an image to the background then undo: image still listed in page panel image picker
+// - Title page's step is 'Step undefined' in the nav tree
+// - Switch to two page view then close model; 'getting started' is half paged
+// - Change page numbers to 'even left odd right' (or 'odd left even right') then append a page:
+//     pages after new page have badly positioned page numbers
+// - Part list page is inaccurate: xwing is missing a ton of parts. redo part list layout fixes
 
 import _ from './util';
 import uiState from './ui_state';
@@ -124,7 +133,7 @@ const app = new Vue({
 					}
 					store.save({mode: 'local'});
 
-					const firstPage = store.get.titlePage() || store.get.firstPage();
+					const firstPage = store.get.titlePage() || store.get.firstBasicPage();
 					this.currentPageLookup = store.get.itemToLookup(firstPage);
 					undoStack.saveBaseState();
 					this.forceUIUpdate();
@@ -473,6 +482,9 @@ const app = new Vue({
 		},
 		navBarContent() {
 			return Menu(this);
+		},
+		isTemplatePageCurrent() {
+			return store.get.isTemplatePage(this.currentPageLookup);
 		}
 	},
 	async mounted() {

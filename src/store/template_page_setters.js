@@ -17,8 +17,8 @@ export default {
 		if (!(modelData.part2.filename in LDParse.partDictionary)) {
 			await LDParse.loadRemotePart(modelData.part2.filename);
 		}
-		const page = store.state.templatePage = store.mutations.page.add(
-			{pageType: 'templatePage', pageNumber: 0}
+		const page = store.mutations.page.add(
+			{subtype: 'templatePage', pageNumber: 0}
 		);
 
 		const step = store.mutations.step.add({stepNumber: 1, dest: page});

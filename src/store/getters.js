@@ -9,9 +9,7 @@ export default {
 		return store.state.pages.length + (includeTitlePage && store.state.titlePage ? 1 : 0);
 	},
 	totalPageCount() {
-		return store.state.pages.length
-			+ (store.state.titlePage ? 1 : 0)
-			+ store.state.inventoryPages.length;
+		return store.state.pages.length - 1;
 	},
 	modelName(nice) {
 		if (!store.model) {
@@ -38,71 +36,68 @@ export default {
 		return store.model.filename.split('.')[0] + (ext || '');
 	},
 	isTitlePage(page) {
-		return (page || {}).type === 'titlePage';
+		page = store.get.lookupToItem(page);
+		return (page || {}).subtype === 'titlePage';
 	},
-	isFirstBasicPage(page) {
-		return page && (page.id === store.state.pages[0].id);
+	titlePage() {
+		return store.state.pages.find(store.get.isTitlePage);
 	},
-	isFirstPage(page) {
-		if (!page || page.id == null) {
-			return false;
-		} else if (page.type === 'templatePage') {
-			return true;
-		}
-		return store.get.isFirstBasicPage(page);
+	isBasicPage(page) {
+		page = store.get.lookupToItem(page);
+		return (page || {}).subtype === 'page';
 	},
-	isLastBasicPage(page) {
-		return page && (page.id === _.last(store.state.pages).id);
-	},
-	isLastPage(page) {
-		if (!page || page.id == null || page.type === 'templatePage') {
-			return false;
-		} else if (page.type === 'titlePage') {
-			return store.state.pages.length < 1 && store.state.inventoryPages.length < 1;
-		} else if (page.type === 'page') {
-			if (store.state.inventoryPages.length > 0) {
-				return false;
-			}
-			return store.get.isLastBasicPage(page);
-		} else if (page.type === 'inventoryPage') {
-			return page.id === _.last(store.state.inventoryPages).id;
-		}
-		return false;
+	basicPages() {
+		return store.state.pages.filter(store.get.isBasicPage);
 	},
 	isInventoryPage(page) {
-		return (page || {}).type === 'inventoryPage';
+		page = store.get.lookupToItem(page);
+		return (page || {}).subtype === 'inventoryPage';
 	},
-	pageList() {
-		const s = store.state;
-		return [
-			s.templatePage,
-			s.titlePage,
-			...s.pages,
-			...s.inventoryPages
-		].filter(el => el);
+	inventoryPages() {
+		return store.state.pages.filter(store.get.isInventoryPage);
 	},
-	nextBasicPage(item) {
-		const nextPage = store.get.nextPage(item);
-		return (!nextPage || nextPage.type !== 'page') ? null : nextPage;
+	isFirstBasicPage(page) {
+		const basicPages = store.get.basicPages();
+		return page && (page.id === basicPages[0].id);
 	},
-	nextPage(item) {
-		const page = store.get.pageForItem(item);
-		const pageList = store.get.pageList();
-		const idx = pageList.indexOf(page);
-		return pageList[idx + 1];
+	isLastBasicPage(page) {
+		const basicPages = store.get.basicPages();
+		return page && (page.id === _.last(basicPages).id);
+	},
+	isLastPage(page) {
+		return (page || {}).id === _.last(store.state.pages).id;
+	},
+	firstBasicPage() {
+		return store.get.basicPages()[0];
+	},
+	lastBasicPage() {
+		return _.last(store.get.basicPages());
 	},
 	prevBasicPage(item) {
 		const prevPage = store.get.prevPage(item);
-		return (!prevPage || prevPage.type !== 'page') ? null : prevPage;
+		return (prevPage || {}).subtype === 'page' ? prevPage : null;
+	},
+	nextBasicPage(item) {
+		const nextPage = store.get.nextPage(item);
+		return (nextPage || {}).subtype === 'page' ? nextPage : null;
 	},
 	prevPage(item) {
 		const page = store.get.pageForItem(item);
 		const pageList = store.get.pageList();
 		const idx = pageList.indexOf(page);
-		return pageList[idx - 1];
+		return pageList[idx - 1] || null;
+	},
+	nextPage(item) {
+		const page = store.get.pageForItem(item);
+		const pageList = store.get.pageList();
+		const idx = pageList.indexOf(page);
+		return pageList[idx + 1] || null;
+	},
+	pageList() {
+		return store.state.pages.filter(el => el);
 	},
 	templatePage() {
-		return store.state.templatePage;
+		return store.state.pages[0];
 	},
 	templateForItem(item) {
 		const template = store.state.template;
@@ -131,10 +126,8 @@ export default {
 		return null;
 	},
 	isTemplatePage(page) {
-		return (page || {}).type === 'templatePage';
-	},
-	titlePage() {
-		return store.state.titlePage;
+		page = store.get.lookupToItem(page);
+		return (page || {}).subtype === 'templatePage';
 	},
 	firstPage() {
 		return store.state.pages[0];
@@ -234,7 +227,15 @@ export default {
 		item = store.get.lookupToItem(item);
 		itemList = itemList || store.state[item.type + 's'];
 		const idx = itemList.findIndex(el => {
-			return el.number === item.number - 1 && el.parent.type === item.parent.type;
+			if (el.number === item.number - 1 && el.parent.type === item.parent.type) {
+				if (el.parent.type === 'page') {
+					const page = store.get.page(item.parent);
+					const elPage = store.get.page(el.parent);
+					return page.subtype === elPage.subtype;
+				}
+				return true;
+			}
+			return false;
 		});
 		return (idx < 0) ? null : itemList[idx];
 	},
@@ -330,7 +331,9 @@ export default {
 		const mainModelFilename = store.model.filename;
 		const addedModelNames = new Set([mainModelFilename]);
 		store.state.steps.filter(step => {
-			return step.parent.type === 'page' && step.model.filename !== mainModelFilename;
+			return step.parent.type === 'page'
+				&& step.parent.subtype === 'page'
+				&& step.model.filename !== mainModelFilename;
 		}).forEach(step => {
 
 			if (!addedModelNames.has(step.model.filename)) {
@@ -363,7 +366,7 @@ export default {
 	topLevelTreeNodes() {  // Return list of pages & submodels to be drawn in the nav tree
 		if (store.state.books.length) {
 			return [
-				store.state.templatePage,
+				store.get.templatePage(),
 				...store.state.books
 			].filter(el => el);
 		} else {

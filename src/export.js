@@ -42,7 +42,7 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 		canvas.width = store.state.template.page.width * hiResScale;
 		canvas.height = store.state.template.page.height * hiResScale;
 
-		const pages = [store.get.titlePage(), ...store.state.pages, ...store.state.inventoryPages];
+		const pages = store.state.pages.slice(1);  // Skip template page
 		app.updateProgress({stepCount: pages.length, text: 'Page 0'});
 		exportPages(pages, canvas).then(() => {
 			doneCallback(() => {

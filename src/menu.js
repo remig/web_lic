@@ -202,7 +202,7 @@ const menu = [
 			cb() {
 				undoStack.commit('addTitlePage', null, tr(this.text));
 				app.clearSelected();
-				app.setCurrentPage({type: 'titlePage', id: 0});
+				app.setCurrentPage(store.get.titlePage());
 			}
 		},
 		{
@@ -210,9 +210,9 @@ const menu = [
 			id: 'remove_title_page_menu',
 			shown: () => enableIfModel() && store.get.titlePage() != null,
 			cb() {
-				app.clearSelected();
-				app.setCurrentPage({type: 'page', id: 0});
 				undoStack.commit('removeTitlePage', null, tr(this.text));
+				app.clearSelected();
+				app.setCurrentPage(store.get.firstBasicPages());
 			}
 		},
 		{
@@ -234,21 +234,21 @@ const menu = [
 		{
 			text: 'action.edit.inventory_page.add.name',
 			id: 'add_inventory_page_menu',
-			shown: () => enableIfModel() && !store.state.inventoryPages.length,
+			shown: () => enableIfModel() && !store.get.inventoryPages().length,
 			cb() {
 				app.clearSelected();
 				undoStack.commit('inventoryPage.add', null, tr(this.text));
-				app.setCurrentPage({type: 'inventoryPage', id: 0});
+				app.setCurrentPage(store.get.inventoryPages()[0]);
 			}
 		},
 		{
 			text: 'action.edit.inventory_page.remove.name',
 			id: 'hide_inventory_page_menu',
-			shown: () => enableIfModel() && store.state.inventoryPages.length,
+			shown: () => enableIfModel() && store.get.inventoryPages().length,
 			cb() {
 				app.clearSelected();
 				undoStack.commit('inventoryPage.deleteAll', null, tr(this.text));
-				app.setCurrentPage(store.get.lastPage());
+				app.setCurrentPage(store.get.lastBasicPage());
 			}
 		},
 		{
