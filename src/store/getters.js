@@ -126,6 +126,17 @@ export default {
 		page = store.get.lookupToItem(page);
 		return (page || {}).subtype === 'templatePage';
 	},
+	firstBookPage(book) {
+		book = store.get.lookupToItem(book);
+		if (book) {
+			const firstPage = store.get.page(book.pages[0]);
+			if (firstPage.subtype === 'templatePage') {
+				return store.get.page(book.pages[1]);
+			}
+			return firstPage;
+		}
+		return null;
+	},
 	firstPage() {
 		return store.state.pages[1];  // first page should still ignore template page
 	},

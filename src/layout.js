@@ -31,6 +31,7 @@ const api = {
 		step.y = (pageSize.height - step.height) / 2;
 		csi.x = csi.y = 20;
 
+		// TODO: If an annotation was changed / deleted, need to fix it before setting it
 		const title = store.get.annotation(page.annotations[0]);
 		api.label(title);
 		title.x = (pageSize.width - title.width) / 2;
@@ -39,7 +40,8 @@ const api = {
 		const modelInfo = store.get.annotation(page.annotations[1]);
 		api.label(modelInfo);
 		modelInfo.x = (pageSize.width - modelInfo.width) / 2;
-		modelInfo.y = ((step.y - modelInfo.height) / 2) + step.y + step.height;
+		modelInfo.y = step.y + step.height + ((step.y - modelInfo.height) / 2);
+
 		delete page.needsLayout;
 	},
 

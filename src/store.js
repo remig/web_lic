@@ -31,6 +31,8 @@ import defaultTemplate from './template';
 import Storage from './storage';
 import packageInfo from '../package.json';
 
+const tr = LocaleManager.translate;
+
 const emptyState = {
 	template: _.cloneDeep(defaultTemplate),
 	licFilename: null,  // user-visible filename (without extension) used to load / save lic file
@@ -267,10 +269,16 @@ const store = {
 		layoutTitlePage(page) {
 			Layout.titlePage(page);
 		},
-		addTitlePage() {
+		addTitlePage(opts = {}) {  // opts: {book (optional)}
 
 			// TODO: need submodel + bag breakdown page and final 'no step' complete model page
-			const page = store.mutations.page.add({subtype: 'titlePage', insertionIndex: 1});
+			let insertionIndex = 1;
+			if (opts.book) {
+				insertionIndex = store.state.pages.findIndex(
+					page => page.id === opts.book.pages[0]
+				);
+			}
+			const page = store.mutations.page.add({subtype: 'titlePage', insertionIndex});
 			page.number = 1;
 			store.mutations.page.renumber();  // TODO: this doesn't update the page numbers in the tree
 
@@ -290,14 +298,20 @@ const store = {
 			// TODO: This part & page count gets out of sync with the doc as pages are added / removed
 			const partCount = LDParse.model.get.partCount(store.model);
 			const pageCount = store.get.pageCount();
+			let text;
+			if (opts.book) {
+				const bookNumber = store.get.book(opts.book).number;
+				text = tr('title_page.book_model_info_@mf', {bookNumber, partCount, pageCount});
+			} else {
+				text = tr('title_page.model_info_@mf', {partCount, pageCount});
+			}
+
 			store.mutations.annotation.add({
 				annotationType: 'label',
-				properties: {
-					text: `${partCount} Parts, ${pageCount} Pages`,
-					font: '16pt Helvetica'
-				},
+				properties: {text, font: '16pt Helvetica'},
 				parent: page
 			});
+			return page;
 		},
 		removeTitlePage() {
 			const item = store.get.titlePage();
@@ -397,7 +411,7 @@ const store = {
 					});
 					progressCallback({
 						stepCount: steps.length,
-						text: LocaleManager.translate('glossary.step_count_@c', 0)
+						text: tr('glossary.step_count_@c', 0)
 					});
 					for (let i = 0; i < steps.length; i++) {
 						const step = steps[i];

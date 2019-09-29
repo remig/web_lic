@@ -37,9 +37,23 @@ export default {
 		store.mutations.item.delete({item: page});
 		store.mutations.page.renumber();
 	},
-	divideInstructions(opts) {  // opts: {bookDivisions}
+	addTitlePage(opts) {  // opts: {book}
+		const book = store.get.lookupToItem(opts.book);
+		const firstPage = store.get.firstBookPage(book);
+		if (firstPage.subtype !== 'titlePage') {
+			const titlePage = store.mutations.addTitlePage({book});
+			titlePage.parent = {type: 'book', id: book.id};
+			book.pages.unshift(titlePage.id);
+		}
+	},
+	divideInstructions(opts) {  // opts: {bookDivisions, firstPageNumber, includeTitlePages, fileSplit}
 		//  bookDivisions: [{bookNumber: 1, pages: {start, end}, steps: {start, end}}]}
-		opts.bookDivisions.forEach(store.mutations.book.add);
+		opts.bookDivisions.forEach(book => {
+			book = store.mutations.book.add(book);
+			if (opts.includeTitlePages) {
+				store.mutations.book.addTitlePage({book});
+			}
+		});
 	},
 	layout(opts) {  // opts: {book}
 		const book = store.get.lookupToItem(opts.book);

@@ -187,7 +187,12 @@ export default {
 		updateFileSplit() {
 		},
 		ok() {
-			this.$emit('ok', _.cloneDeep(this.bookDivisions));
+			this.$emit('ok', {
+				bookDivisions: _.cloneDeep(this.bookDivisions),
+				includeTitlePages: this.includeTitlePages,
+				firstPageNumber: this.firstPageNumber,
+				fileSplit: this.fileSplit
+			});
 			this.$emit('close');
 		},
 		cancel() {

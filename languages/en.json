@@ -142,7 +142,7 @@
             },
             "multi_book": {
                 "name": "Multiple Books...",
-                "undo": "Divide Instructions into Books"
+                "undo": "Divide into Books"
             },
             "snap": {
                 "name": "Snap To (NYI)"
@@ -935,5 +935,9 @@
         "quantity_labels": "Quantity Labels",
         "dividers": "Dividers",
         "group_parts": "Group Parts By Type (NYI)"
-    }
+	},
+	"title_page": {
+		"model_info_@mf": "${partCount} Parts, ${pageCount} Pages",
+		"book_model_info_@mf": "Book ${bookNumber}, ${partCount} Parts, ${pageCount} Pages"
+	}
 }

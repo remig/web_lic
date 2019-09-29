@@ -257,11 +257,11 @@ const menu = [
 			shown: enableIfModel,
 			cb() {
 				DialogManager('multiBookDialog', dialog => {
-					dialog.$on('ok', bookDivisions => {
+					dialog.$on('ok', opts => {
 						undoStack.commit(
 							'book.divideInstructions',
-							{bookDivisions},
-							'action.edit.multi_book.undo'
+							opts,
+							tr('action.edit.multi_book.undo')
 						);
 					});
 				});
