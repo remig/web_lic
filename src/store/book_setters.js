@@ -12,7 +12,7 @@ export default {
 		});
 		const book = store.mutations.item.add({item: {
 			type: 'book',
-			pages: pages.map(page => ({type: page.type, id: page.id})),
+			pages: [],
 			number: opts.bookNumber
 		}});
 		pages.map(page => {
