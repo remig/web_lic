@@ -104,7 +104,9 @@ function generatePNGZip(app, store, hiResScale = 1, dpi = 96) {
 	const imgFolder = zip.folder(fn);
 
 	function drawPage(page, canvas) {
-		const pageName = (page.type === 'titlePage') ? 'Page 1 Title Page.png' : `Page ${page.number}.png`;
+		const pageName = (page.subtype === 'titlePage')
+			? 'Page 1 Title Page.png'
+			: `Page ${page.number}.png`;
 		let data = canvas.toDataURL();
 		if (dpi !== 96) {
 			data = changeDpiDataUrl(data, dpi);

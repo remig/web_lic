@@ -211,7 +211,7 @@ Vue.component('pageView', {
 				this.pageSize.width = store.state.template.page.width;
 				this.pageSize.height = store.state.template.page.height;
 			}
-			const latestPageCount = store.get.pageCount(true);
+			const latestPageCount = store.get.pageCount();
 			if (this.pageCount !== latestPageCount) {
 				this.pageCount = latestPageCount;
 			}

@@ -41,9 +41,9 @@ const api = {
 		const parent = store.get.lookupToItem(opts.item);
 		const list = parent[opts.listType + 's'] || [];
 		while (list.length) {
-			const arg = {};
-			arg[itemType] = {type: opts.listType, id: list[0]};
-			store.mutations[itemType].delete(arg);
+			store.mutations[itemType].delete({
+				[itemType]: {type: opts.listType, id: list[0]}
+			});
 		}
 	},
 	reparent(opts) {  // opts: {item, newParent, parentInsertionIndex = -1}

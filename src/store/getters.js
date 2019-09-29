@@ -5,12 +5,6 @@ import LDParse from '../ld_parse';
 import store from '../store';
 
 export default {
-	pageCount(includeTitlePage) {
-		return store.state.pages.length + (includeTitlePage && store.state.titlePage ? 1 : 0);
-	},
-	totalPageCount() {
-		return store.state.pages.length - 1;
-	},
 	modelName(nice) {
 		if (!store.model) {
 			return '';
@@ -34,6 +28,9 @@ export default {
 			return '';
 		}
 		return store.model.filename.split('.')[0] + (ext || '');
+	},
+	pageCount() {
+		return store.state.pages.length - 1;  // never want to include template page here
 	},
 	isTitlePage(page) {
 		page = store.get.lookupToItem(page);
@@ -130,7 +127,7 @@ export default {
 		return (page || {}).subtype === 'templatePage';
 	},
 	firstPage() {
-		return store.state.pages[0];
+		return store.state.pages[1];  // first page should still ignore template page
 	},
 	lastPage() {
 		return _.last(store.state.pages);
@@ -395,16 +392,7 @@ export default {
 	itemByNumber(type, number) {
 		const itemList = store.state[type + 's'];
 		if (itemList) {
-			const res = itemList.find(el => el.number === number) || null;
-			if (res == null && type === 'page') {
-				// Special case: check if page number is title or inventory page
-				if (store.state.titlePage.number === number) {
-					return store.state.titlePage;
-				} else if (store.state.inventoryPages.length) {
-					return store.state.inventoryPages.find(el => el.number === number) || null;
-				}
-			}
-			return res;
+			return itemList.find(el => el.number === number) || null;
 		}
 		return null;
 	},

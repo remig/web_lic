@@ -121,21 +121,29 @@ import _ from '../util';
 import store from '../store';
 
 function pageSpreadToStepSpread(pageSpread) {
-	const startPage = store.get.itemByNumber('page', pageSpread.start) || store.get.firstPage();
+	let startPage = store.get.itemByNumber('page', pageSpread.start);
+	while (startPage.subtype !== 'page') {
+		startPage = store.get.nextPage(startPage);
+	}
 	const startStep = store.get.step(startPage.steps[0]);
-	const endPage = store.get.itemByNumber('page', pageSpread.end) || store.get.lastPage();
+
+	let endPage = store.get.itemByNumber('page', pageSpread.end);
+	while (endPage.subtype !== 'page') {
+		endPage = store.get.prevPage(endPage);
+	}
 	const endStep = store.get.step(_.last(endPage.steps));
+
 	return {start: startStep.number, end: endStep.number};
 }
 
 function calculateBookSplits(bookCount, pageCount) {
 	const bookDivisions = [];
-	const pagesPerBook = Math.floor(pageCount / bookCount);
+	const pagesPerBook = Math.ceil(pageCount / bookCount);
 
 	for (let i = 0; i < bookCount; i++) {
 		const pages = {
 			start: (i * pagesPerBook) + 1,
-			end: ((i + 1) * pagesPerBook)
+			end: Math.min(((i + 1) * pagesPerBook), pageCount)
 		};
 		const steps = pageSpreadToStepSpread(pages);
 		bookDivisions.push({bookNumber: i + 1, pages, steps});
@@ -147,7 +155,7 @@ function calculateBookSplits(bookCount, pageCount) {
 export default {
 	data: function() {
 		const bookCount = 2;
-		const pageCount = store.get.totalPageCount();
+		const pageCount = store.get.pageCount();
 		const bookDivisions = calculateBookSplits(bookCount, pageCount);
 		return {
 			bookCount,

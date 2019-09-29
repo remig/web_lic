@@ -133,7 +133,7 @@ const app = new Vue({
 					}
 					store.save({mode: 'local'});
 
-					const firstPage = store.get.titlePage() || store.get.firstBasicPage();
+					const firstPage = store.get.firstPage();
 					this.currentPageLookup = store.get.itemToLookup(firstPage);
 					undoStack.saveBaseState();
 					this.forceUIUpdate();
@@ -163,7 +163,7 @@ const app = new Vue({
 			}
 			store.load(content);
 			this.filename = store.state.licFilename;
-			const firstPage = store.get.titlePage() || store.get.firstPage();
+			const firstPage = store.get.firstPage();
 			this.currentPageLookup = store.get.itemToLookup(firstPage);
 			store.save({mode: 'local'});
 			undoStack.saveBaseState();
@@ -464,7 +464,7 @@ const app = new Vue({
 				if (page == null) {
 					// This happens if, say, the current page is deleted without
 					// updating the current page first, like during undo / redo
-					page = store.get.firstPage();
+					page = store.get.firstBasicPage();
 					this.currentPageLookup = store.get.itemToLookup(page);
 				}
 				Vue.nextTick(() => {

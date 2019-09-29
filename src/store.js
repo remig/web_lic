@@ -301,13 +301,10 @@ const store = {
 		},
 		removeTitlePage() {
 			const item = store.get.titlePage();
-			if (item == null) {
-				return;
+			if (item != null) {
+				store.mutations.item.deleteChildList({item, listType: 'step'});
+				store.mutations.page.delete({page: item});
 			}
-			store.mutations.item.deleteChildList({item, listType: 'annotation'});
-			store.mutations.item.deleteChildList({item, listType: 'step'});
-			store.state.titlePage = null;
-			store.mutations.page.renumber();
 		},
 		addInitialPages(opts) {  // opts: {modelFilename,  lastStepNumber, partsPerStep}
 

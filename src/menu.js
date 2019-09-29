@@ -212,7 +212,7 @@ const menu = [
 			cb() {
 				undoStack.commit('removeTitlePage', null, tr(this.text));
 				app.clearSelected();
-				app.setCurrentPage(store.get.firstBasicPages());
+				app.setCurrentPage(store.get.firstBasicPage());
 			}
 		},
 		{
