@@ -40,18 +40,32 @@ export default {
 	addTitlePage(opts) {  // opts: {book}
 		const book = store.get.lookupToItem(opts.book);
 		const firstPage = store.get.firstBookPage(book);
-		if (firstPage.subtype !== 'titlePage') {
-			const titlePage = store.mutations.addTitlePage({book});
-			titlePage.parent = {type: 'book', id: book.id};
-			book.pages.unshift(titlePage.id);
+		if (firstPage.subtype === 'titlePage') {
+			store.mutations.removeTitlePage();
+		}
+		const titlePage = store.mutations.addTitlePage({book});
+		titlePage.parent = {type: 'book', id: book.id};
+		book.pages.unshift(titlePage.id);
+	},
+	setBookPageNumbers(opts) { // opts: {book, firstPageNumber: 'start_page_1' or 'preserve_page_count'}
+		const book = store.get.lookupToItem(opts.book);
+		if (opts.firstPageNumber === 'start_page_1') {
+			const pages = book.pages.map(store.get.page);
+			store.mutations.renumber(pages, 1);
+		} else {  // vs 'preserve_page_count'
+			store.mutations.page.renumber();
 		}
 	},
-	divideInstructions(opts) {  // opts: {bookDivisions, firstPageNumber, includeTitlePages, fileSplit}
+	divideInstructions(opts) {
+		// opts: {bookDivisions, firstPageNumber, includeTitlePages, fileSplit, noSplitSubmodels}
 		//  bookDivisions: [{bookNumber: 1, pages: {start, end}, steps: {start, end}}]}
 		opts.bookDivisions.forEach(book => {
 			book = store.mutations.book.add(book);
 			if (opts.includeTitlePages) {
 				store.mutations.book.addTitlePage({book});
+			}
+			store.mutations.book.setBookPageNumbers({book, firstPageNumber: opts.firstPageNumber});
+			if (opts.fileSplit === 'separate_files') {  // vs 'one_file'
 			}
 		});
 	},
