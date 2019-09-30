@@ -829,7 +829,8 @@
 			"pages_n_@mf": "Pages ${start} - ${end}",
 			"pages_n_start_@c": "Pages ${0} - ",
 			"steps_n_@mf": "Steps ${start} - ${end}",
-			"include_title_page": "Include Title Page with each Book",
+			"include_title_page": "Add Title Page to each Book",
+			"split_submodels": "Do not split Sub Models across Books",
 			"page_numbering": {
 				"start_page_1": {
 					"text": "Start each Book on Page 1",

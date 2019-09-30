@@ -55,16 +55,16 @@
 		</div>
 
 		<div>
-			<el-checkbox
-				v-model="includeTitlePages"
-				@change="updateTitlePages"
-			>
+			<el-checkbox v-model="includeTitlePages">
 				{{tr('dialog.multi_book.include_title_page')}}
+			</el-checkbox>
+			<el-checkbox v-model="noSplitSubmodels">
+				{{tr('dialog.multi_book.split_submodels')}}
 			</el-checkbox>
 		</div>
 
 		<div>
-			<el-radio-group v-model="firstPageNumber" @change="updateFirstPage">
+			<el-radio-group v-model="firstPageNumber">
 				<licTooltip>
 					<div
 						slot="content"
@@ -87,7 +87,7 @@
 		</div>
 
 		<div>
-			<el-radio-group v-model="fileSplit" @change="updateFileSplit">
+			<el-radio-group v-model="fileSplit">
 				<licTooltip>
 					<div
 						slot="content"
@@ -162,6 +162,7 @@ export default {
 			pageCount,
 			bookDivisions,
 			includeTitlePages: true,
+			noSplitSubmodels: true,
 			firstPageNumber: 'start_page_1',  // or preserve_page_count
 			fileSplit: 'one_file'  // or separate_files
 		};
@@ -180,16 +181,11 @@ export default {
 		updateBookCount() {
 			this.bookDivisions = calculateBookSplits(this.bookCount, this.pageCount);
 		},
-		updateTitlePages() {
-		},
-		updateFirstPage() {
-		},
-		updateFileSplit() {
-		},
 		ok() {
 			this.$emit('ok', {
 				bookDivisions: _.cloneDeep(this.bookDivisions),
 				includeTitlePages: this.includeTitlePages,
+				noSplitSubmodels: this.noSplitSubmodels,
 				firstPageNumber: this.firstPageNumber,
 				fileSplit: this.fileSplit
 			});
