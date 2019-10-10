@@ -56,7 +56,29 @@ export default {
 		const zip = new JSZip();
 		const fileFolder = zip.folder(fn);
 
+		function addPartsFromPreviousSteps(book) {
+			const visitedModels = new Set();
+			book.pages
+				.map(store.get.page)
+				.map(page => page.steps)
+				.flat()
+				.map(store.get.step)
+				.forEach(step => {
+					if (!visitedModels.has(step.model.filename) && step.parts) {
+						step.prevBookParts = store.get.partList(step);
+						visitedModels.add(step.model.filename);
+					}
+				});
+		}
+
 		function getStateForBook(book) {
+
+			// If this isn't the first book, add parts from all previous books
+			// to the first step of each model in this book
+			if (book.id !== store.state.books[0].id) {
+				addPartsFromPreviousSteps(book);
+			}
+
 			// Retrieve the subset of store.state that lives only in the chosen book
 			// Start with a clone of the original state, then delete each page,
 			// and all children, that are not in this book
@@ -77,17 +99,22 @@ export default {
 			modelFilename: store.model.filename,
 			version: packageInfo.version
 		};
+		let firstBookState;
 		const books = _.cloneDeep(store.state.books);  // Need to clone because loop hoses state
-		books.forEach(book => {
+		books.forEach((book, idx) => {
 			book = store.get.lookupToItem(book);
 			const res = getStateForBook(book);
 			content.state = res.newState;
+			if (idx === 0) {
+				firstBookState = content.state;
+			}
 			store.replaceState(res.originalState);
 			const json = JSON.stringify(content);
 			fileFolder.file(`${modelName}_book_${book.number}.lic`, json);
 		});
 		zip.generateAsync({type: 'blob'})
 			.then(content => saveAs(content, fn + '.zip'));
+		store.replaceState(firstBookState);
 	},
 	divideInstructions(opts) {
 		// opts: {bookDivisions, firstPageNumber, includeTitlePages, fileSplit, noSplitSubmodels}

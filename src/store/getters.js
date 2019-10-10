@@ -199,7 +199,12 @@ export default {
 			if (step.parts) {
 				partList = partList.concat(step.parts);
 			}
-			step = store.get.prevStep(step, true);
+			if (step.prevBookParts) {
+				partList = partList.concat(step.prevBookParts);
+				step = null;
+			} else {
+				step = store.get.prevStep(step, true);
+			}
 		}
 		return partList;
 	},
