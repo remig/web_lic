@@ -47,10 +47,16 @@ export default {
 		}
 		return step;
 	},
-	delete(opts) { // opts: {step, doLayout}
+	delete(opts) { // opts: {step, doNotRenumber: false, deleteParts: false, doLayout}
 		const step = store.get.lookupToItem(opts.step);
 		if (step.parts && step.parts.length) {
-			throw 'Cannot delete a step with parts';
+			if (opts.deleteParts) {
+				while (step.parts.length) {
+					store.mutations.step.removePart({step, partID: step.parts[0]});
+				}
+			} else {
+				throw 'Cannot delete a step with parts';
+			}
 		}
 		if (step.numberLabelID != null) {
 			store.mutations.item.delete({item: store.get.numberLabel(step.numberLabelID)});
@@ -64,7 +70,9 @@ export default {
 		}
 		store.mutations.item.deleteChildList({item: step, listType: 'callout'});
 		store.mutations.item.delete({item: step});
-		store.mutations.step.renumber(step);
+		if (!opts.doNotRenumber) {
+			store.mutations.step.renumber(step);
+		}
 		if (step.parent.type === 'callout') {
 			// If we delete the 2nd last step from a callout, remove step number from last remaining step
 			const callout = store.get.parent(step);

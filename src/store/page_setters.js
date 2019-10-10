@@ -32,10 +32,20 @@ export default {
 		store.mutations.page.renumber();
 		return page;
 	},
-	delete(opts) {  // opts: {page}
+	delete(opts) {  // opts: {page, doNotRenumber: false, deleteSteps: false}
 		const page = store.get.lookupToItem(opts.page);
 		if (page.steps && page.steps.length) {
-			throw 'Cannot delete a page with steps';
+			if (opts.deleteSteps) {
+				while (page.steps.length) {
+					store.mutations.step.delete({
+						step: {type: 'step', id: page.steps[0]},
+						doNotRenumber: opts.doNotRenumber,
+						deleteParts: true
+					});
+				}
+			} else {
+				throw 'Cannot delete a page with steps';
+			}
 		}
 		if (page.numberLabelID != null) {
 			store.mutations.item.delete({item: store.get.numberLabel(page.numberLabelID)});
@@ -43,7 +53,9 @@ export default {
 		store.mutations.item.deleteChildList({item: page, listType: 'divider'});
 		store.mutations.item.deleteChildList({item: page, listType: 'annotation'});
 		store.mutations.item.delete({item: page});
-		store.mutations.page.renumber();
+		if (!opts.doNotRenumber) {
+			store.mutations.page.renumber();
+		}
 	},
 	setLocked(opts) {  // opts: {page, locked}
 		const page = store.get.lookupToItem(opts.page);

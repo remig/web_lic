@@ -1,8 +1,12 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
+/* global JSZip: false, saveAs: false */
+
 import _ from '../util';
 import store from '../store';
 import Layout from '../layout';
+import LDParse from '../ld_parse';
+import packageInfo from '../../package.json';
 
 export default {
 	add(opts = {}) {  // opts: {bookNumber, pages: {start, end}}
@@ -24,18 +28,7 @@ export default {
 		});
 		return book;
 	},
-	delete(opts) {  // opts: {book}
-		const page = store.get.lookupToItem(opts.page);
-		if (page.steps && page.steps.length) {
-			throw 'Cannot delete a page with steps';
-		}
-		if (page.numberLabelID != null) {
-			store.mutations.item.delete({item: store.get.numberLabel(page.numberLabelID)});
-		}
-		store.mutations.item.deleteChildList({item: page, listType: 'divider'});
-		store.mutations.item.deleteChildList({item: page, listType: 'annotation'});
-		store.mutations.item.delete({item: page});
-		store.mutations.page.renumber();
+	delete() {
 	},
 	addTitlePage(opts) {  // opts: {book}
 		const book = store.get.lookupToItem(opts.book);
@@ -56,6 +49,45 @@ export default {
 			store.mutations.page.renumber();
 		}
 	},
+	splitFileByBook() {
+		// Create a seperate, unique Lic file for each Book in these instructions, then trigger a zip download
+		const modelName = store.get.modelFilenameBase();
+		const fn = modelName + '_instruction_books';
+		const zip = new JSZip();
+		const fileFolder = zip.folder(fn);
+
+		function getStateForBook(book) {
+			// Retrieve the subset of store.state that lives only in the chosen book
+			// Start with a clone of the original state, then delete each page,
+			// and all children, that are not in this book
+			const originalState = _.cloneDeep(store.state);
+			const pagesToDelete = store.state.pages.filter(page => {
+				return page.parent != null && page.parent.id !== book.id;
+			});
+			pagesToDelete.forEach(page => {
+				store.mutations.page.delete({page, deleteSteps: true, doNotRenumber: true});
+			});
+			store.state.books = [book];
+			return {originalState, newState: store.state};
+		}
+
+		const content = {
+			partDictionary: LDParse.partDictionary,
+			colorTable: LDParse.colorTable,
+			modelFilename: store.model.filename,
+			version: packageInfo.version
+		};
+		store.state.books.forEach(book => {
+			book = store.get.lookupToItem(book);
+			const res = getStateForBook(book);
+			content.state = res.newState;
+			store.replaceState(res.originalState);
+			const json = JSON.stringify(content);
+			fileFolder.file(`${modelName}_book_${book.number}.lic`, json);
+		});
+		zip.generateAsync({type: 'blob'})
+			.then(content => saveAs(content, fn + '.zip'));
+	},
 	divideInstructions(opts) {
 		// opts: {bookDivisions, firstPageNumber, includeTitlePages, fileSplit, noSplitSubmodels}
 		//  bookDivisions: [{bookNumber: 1, pages: {start, end}, steps: {start, end}}]}
@@ -65,9 +97,10 @@ export default {
 				store.mutations.book.addTitlePage({book});
 			}
 			store.mutations.book.setBookPageNumbers({book, firstPageNumber: opts.firstPageNumber});
-			if (opts.fileSplit === 'separate_files') {  // vs 'one_file'
-			}
 		});
+		if (opts.fileSplit === 'separate_files') {  // vs 'one_file'
+			store.mutations.book.splitFileByBook();
+		}
 	},
 	layout(opts) {  // opts: {book}
 		const book = store.get.lookupToItem(opts.book);

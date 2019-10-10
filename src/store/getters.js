@@ -189,7 +189,7 @@ export default {
 		const parts = store.get.abstractPartsInStep(step);
 		return parts.some(part => part.isSubModel);
 	},
-	partList(step) {  // Return a list of part IDs for every part in this (and previous) step.
+	partList(step) {  // Return a list of part IDs for every part in this (and previous) step
 		step = store.get.lookupToItem(step);
 		if (step.parts == null) {
 			return null;
@@ -252,7 +252,15 @@ export default {
 		item = store.get.lookupToItem(item);
 		itemList = itemList || store.state[item.type + 's'];
 		const idx = itemList.findIndex(el => {
-			return el.number === item.number + 1 && el.parent.type === item.parent.type;
+			if (el.number === item.number + 1 && el.parent.type === item.parent.type) {
+				if (el.parent.type === 'page') {
+					const page = store.get.page(item.parent);
+					const elPage = store.get.page(el.parent);
+					return page.subtype === elPage.subtype;
+				}
+				return true;
+			}
+			return false;
 		});
 		return (idx < 0) ? null : itemList[idx];
 	},
