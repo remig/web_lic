@@ -77,7 +77,8 @@ export default {
 			modelFilename: store.model.filename,
 			version: packageInfo.version
 		};
-		store.state.books.forEach(book => {
+		const books = _.cloneDeep(store.state.books);  // Need to clone because loop hoses state
+		books.forEach(book => {
 			book = store.get.lookupToItem(book);
 			const res = getStateForBook(book);
 			content.state = res.newState;
