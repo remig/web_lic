@@ -120,10 +120,16 @@ export default {
 		// opts: {bookDivisions, firstPageNumber, includeTitlePages, fileSplit, noSplitSubmodels}
 		//  bookDivisions: [{bookNumber: 1, pages: {start, end}, steps: {start, end}}]}
 		opts.bookDivisions.forEach(book => {
-			book = store.mutations.book.add(book);
-			if (opts.includeTitlePages) {
+			store.mutations.book.add(book);
+		});
+		if (opts.includeTitlePages) {
+			opts.bookDivisions.forEach(book => {
+				book = store.get.itemByNumber('book', book.bookNumber);
 				store.mutations.book.addTitlePage({book});
-			}
+			});
+		}
+		opts.bookDivisions.forEach(book => {
+			book = store.get.itemByNumber('book', book.bookNumber);
 			store.mutations.book.setBookPageNumbers({book, firstPageNumber: opts.firstPageNumber});
 		});
 		if (opts.fileSplit === 'separate_files') {  // vs 'one_file'
