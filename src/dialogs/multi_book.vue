@@ -121,22 +121,58 @@ import _ from '../util';
 import store from '../store';
 
 function pageSpreadToStepSpread(pageSpread) {
+	if (pageSpread.start === pageSpread.end) {
+		const page = store.get.itemByNumber('page', pageSpread.start);
+		const startStep = store.get.step(page.steps[0]);
+		const endStep = store.get.step(_.last(page.steps));
+		if (startStep == null || endStep == null) {
+			return null;
+		}
+	}
 	let startPage = store.get.itemByNumber('page', pageSpread.start);
-	while (startPage.subtype !== 'page') {
+	while (startPage && startPage.subtype !== 'page') {
 		startPage = store.get.nextPage(startPage);
+	}
+	if (startPage == null) {
+		return null;
 	}
 	const startStep = store.get.step(startPage.steps[0]);
 
 	let endPage = store.get.itemByNumber('page', pageSpread.end);
-	while (endPage.subtype !== 'page') {
+	while (endPage && endPage.subtype !== 'page') {
 		endPage = store.get.prevPage(endPage);
+	}
+	if (endPage == null) {
+		return null;
 	}
 	const endStep = store.get.step(_.last(endPage.steps));
 
 	return {start: startStep.number, end: endStep.number};
 }
 
-function calculateBookSplits(bookCount, pageCount) {
+// Can't split in the middle of a sub model, and can't split between
+// the last step of a submodel and its placement in its parent model
+// So, given a page number, return true if the last step on that page is in the
+// main model or in a different submodel than the first step in the next page
+function isPageSplitValid(pageNumber) {
+	const page = store.get.itemByNumber('page', pageNumber);
+	const lastStep = store.get.step(_.last(page.steps));
+	if (lastStep.model.parentStepID == null) {
+		return true;
+	}
+	const nextPage = store.get.nextPage(page);
+	const firstStep = store.get.step(nextPage.steps[0]);
+	if (lastStep.model.parentStepID === firstStep.model.parentStepID) {
+		return false;  // split steps are in same submodel
+	}
+	// Check if last step is the last step in the submodel, and next step places it in its parent
+	if (lastStep.model.parentStepID === firstStep.id) {
+		return false;
+	}
+	return true;
+}
+
+function calculateBookSplits(bookCount, pageCount, noSplitSubmodels) {
 	const bookDivisions = [];
 	const pagesPerBook = Math.ceil(pageCount / bookCount);
 
@@ -149,14 +185,68 @@ function calculateBookSplits(bookCount, pageCount) {
 		bookDivisions.push({bookNumber: i + 1, pages, steps});
 	}
 	_.last(bookDivisions).pages.end = pageCount;
-	return bookDivisions;
+
+	function splitOffset(i) {
+		return Math.ceil(i / 2) * (_.isEven(i) ? 1 : -1);
+	}
+
+	// TODO: with a lot of books, this doesn't always work
+	if (noSplitSubmodels) {
+		// Move each step division forward / backward to nearest submodel completion step
+		for (let i = 0; i < bookDivisions.length - 1; i++) {
+			let firstValidPage = 1;
+			if (i > 0) {
+				firstValidPage = bookDivisions[i - 1].pages.end + 1;
+			}
+			let lastPageNumber = store.get.lastPage().number;
+			if (i < bookDivisions.length - 2) {
+				lastPageNumber = bookDivisions[i + 1].pages.start - 1;
+			}
+
+			const pageSplitNumber = bookDivisions[i].pages.end;
+			let split = 0, newPageSplit = pageSplitNumber + splitOffset(split);
+			while (
+				(newPageSplit >= firstValidPage)
+				&& (newPageSplit <= lastPageNumber)
+				&& !isPageSplitValid(newPageSplit)
+			) {
+				split += 1;
+				newPageSplit = pageSplitNumber + splitOffset(split);
+			}
+			if (newPageSplit !== pageSplitNumber) {
+				bookDivisions[i].pages.end = newPageSplit;
+				bookDivisions[i].steps = pageSpreadToStepSpread(bookDivisions[i].pages);
+
+				bookDivisions[i + 1].pages.start = newPageSplit + 1;
+				bookDivisions[i + 1].steps = pageSpreadToStepSpread(bookDivisions[i + 1].pages);
+			}
+		}
+	}
+
+	// Merge any invalid divisions into the previous (or next) division
+	for (let i = 0; i < bookDivisions.length; i++) {
+		const division = bookDivisions[i];
+		if (division.pages.start === division.pages.end) {
+			if (i === 0) {
+				bookDivisions[1].pages.start = division.pages.start;
+				bookDivisions[1].steps = pageSpreadToStepSpread(bookDivisions[1].pages);
+			} else {
+				bookDivisions[i - 1].pages.end = division.pages.start;
+				bookDivisions[i - 1].steps = pageSpreadToStepSpread(bookDivisions[i - 1].pages);
+			}
+		}
+	}
+
+	return bookDivisions.filter(division => {
+		return division.pages.start !== division.pages.end;
+	});
 }
 
 export default {
 	data: function() {
 		const bookCount = 2;
 		const pageCount = store.get.pageCount();
-		const bookDivisions = calculateBookSplits(bookCount, pageCount);
+		const bookDivisions = calculateBookSplits(bookCount, pageCount, true);
 		return {
 			bookCount,
 			pageCount,
@@ -179,7 +269,7 @@ export default {
 			}
 		},
 		updateBookCount() {
-			this.bookDivisions = calculateBookSplits(this.bookCount, this.pageCount);
+			this.bookDivisions = calculateBookSplits(this.bookCount, this.pageCount, this.noSplitSubmodels);
 		},
 		ok() {
 			this.$emit('ok', {
@@ -198,7 +288,7 @@ export default {
 	},
 	computed: {
 		dialogWidth() {
-			return Math.max(450, this.bookCount * 150) + 'px';
+			return Math.max(450, this.bookDivisions.length * 150) + 'px';
 		}
 	}
 };
