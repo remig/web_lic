@@ -194,16 +194,14 @@ function calculateBookSplits(bookCount, pageCount, noSplitSubmodels) {
 	if (noSplitSubmodels) {
 		// Move each step division forward / backward to nearest submodel completion step
 		for (let i = 0; i < bookDivisions.length - 1; i++) {
-			let firstValidPage = 1;
-			if (i > 0) {
-				firstValidPage = bookDivisions[i - 1].pages.end + 1;
+			const division = bookDivisions[i];
+			if (division.isInvalid) {
+				continue;
 			}
-			let lastPageNumber = store.get.lastPage().number;
-			if (i < bookDivisions.length - 2) {
-				lastPageNumber = bookDivisions[i + 1].pages.start - 1;
-			}
+			const firstValidPage = division.pages.start;
+			const lastPageNumber = store.get.lastPage().number;
 
-			const pageSplitNumber = bookDivisions[i].pages.end;
+			const pageSplitNumber = division.pages.end;
 			let split = 0, newPageSplit = pageSplitNumber + splitOffset(split);
 			while (
 				(newPageSplit >= firstValidPage)
@@ -214,11 +212,21 @@ function calculateBookSplits(bookCount, pageCount, noSplitSubmodels) {
 				newPageSplit = pageSplitNumber + splitOffset(split);
 			}
 			if (newPageSplit !== pageSplitNumber) {
-				bookDivisions[i].pages.end = newPageSplit;
-				bookDivisions[i].steps = pageSpreadToStepSpread(bookDivisions[i].pages);
+				if (newPageSplit <= division.pages.start) {
+					// split went all the way to the begining of this book; mark it for deletion
+					division.isInvalid = true;
+				} else {
+					division.pages.end = newPageSplit;
+					division.steps = pageSpreadToStepSpread(division.pages);
 
-				bookDivisions[i + 1].pages.start = newPageSplit + 1;
-				bookDivisions[i + 1].steps = pageSpreadToStepSpread(bookDivisions[i + 1].pages);
+					const nextDivision = bookDivisions[i + 1];
+					nextDivision.pages.start = newPageSplit + 1;
+					if (nextDivision.pages.end <= nextDivision.pages.start) {
+						// split went past the entire next book; mark next book for deletion
+						nextDivision.isInvalid = true;
+					}
+					nextDivision.steps = pageSpreadToStepSpread(nextDivision.pages);
+				}
 			}
 		}
 	}
@@ -226,7 +234,7 @@ function calculateBookSplits(bookCount, pageCount, noSplitSubmodels) {
 	// Merge any invalid divisions into the previous (or next) division
 	for (let i = 0; i < bookDivisions.length; i++) {
 		const division = bookDivisions[i];
-		if (division.pages.start === division.pages.end) {
+		if (division.isInvalid) {
 			if (i === 0) {
 				bookDivisions[1].pages.start = division.pages.start;
 				bookDivisions[1].steps = pageSpreadToStepSpread(bookDivisions[1].pages);
@@ -238,7 +246,7 @@ function calculateBookSplits(bookCount, pageCount, noSplitSubmodels) {
 	}
 
 	return bookDivisions.filter(division => {
-		return division.pages.start !== division.pages.end;
+		return !division.isInvalid;
 	});
 }
 
