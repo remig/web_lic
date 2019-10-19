@@ -54,8 +54,8 @@
 			</table>
 		</div>
 
-		<div>
-			<el-checkbox v-model="includeTitlePages">
+		<div class="form-row">
+			<el-checkbox v-model="includeTitlePages" class="check-row">
 				{{tr('dialog.multi_book.include_title_page')}}
 			</el-checkbox>
 			<el-checkbox v-model="noSplitSubmodels">
@@ -63,7 +63,7 @@
 			</el-checkbox>
 		</div>
 
-		<div>
+		<div class="form-row">
 			<el-radio-group v-model="firstPageNumber">
 				<licTooltip>
 					<div
@@ -86,7 +86,7 @@
 			</el-radio-group>
 		</div>
 
-		<div>
+		<div class="form-row">
 			<el-radio-group v-model="fileSplit">
 				<licTooltip>
 					<div
@@ -326,6 +326,14 @@ export default {
 	margin-left: 0;
 	width: 56px;
 	padding: 6px;
+}
+
+.multiBookDialog .form-row {
+	max-width: 400px;
+}
+
+.multiBookDialog .check-row {
+	margin-bottom: 10px;
 }
 
 </style>
