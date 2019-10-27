@@ -118,10 +118,12 @@
             },
             "title_page": {
                 "add": {
-                    "name": "Add Title Page"
-                },
+					"name": "Add Title Page",
+					"name_plural": "Add Title Pages"
+				},
                 "remove": {
-                    "name": "Remove Title Page"
+                    "name": "Remove Title Page",
+                    "name_plural": "Remove Title Pages"
                 }
             },
             "pli": {

@@ -196,21 +196,27 @@ const menu = [
 		},
 		{text: 'separator'},
 		{
-			text: 'action.edit.title_page.add.name',
+			text() {
+				const plural = store.state.books.length > 1;
+				return `action.edit.title_page.add.name${plural ? '_plural' : ''}`;
+			},
 			id: 'add_title_page_menu',
 			shown: () => enableIfModel() && store.get.titlePage() == null,
 			cb() {
-				undoStack.commit('addTitlePage', null, tr(this.text));
+				undoStack.commit('addTitlePage', {}, tr(this.text()));
 				app.clearSelected();
-				app.setCurrentPage(store.get.titlePage());
+				app.setCurrentPage(store.get.firstPage());
 			}
 		},
 		{
-			text: 'action.edit.title_page.remove.name',
+			text() {
+				const plural = store.state.books.length > 1;
+				return `action.edit.title_page.remove.name${plural ? '_plural' : ''}`;
+			},
 			id: 'remove_title_page_menu',
 			shown: () => enableIfModel() && store.get.titlePage() != null,
 			cb() {
-				undoStack.commit('removeTitlePage', null, tr(this.text));
+				undoStack.commit('removeTitlePage', {}, tr(this.text()));
 				app.clearSelected();
 				app.setCurrentPage(store.get.firstBasicPage());
 			}
@@ -263,7 +269,7 @@ const menu = [
 							opts,
 							tr('action.edit.multi_book.undo')
 						);
-						app.setCurrentPage(store.get.titlePage());
+						app.setCurrentPage(store.get.firstPage());
 					});
 				});
 			}
