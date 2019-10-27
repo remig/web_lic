@@ -1,4 +1,4 @@
-{
+module.exports = {
 	"parserOptions": {
 		"ecmaVersion": 9,
 		"sourceType": "module"
@@ -96,4 +96,4 @@
         "vue/html-indent": ["warn", "tab"],
         "vue/html-self-closing": "warn"
     }
-}
+};
