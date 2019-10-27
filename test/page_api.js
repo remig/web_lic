@@ -49,10 +49,7 @@ export default {
 				loadBuiltInTemplate: '#load_builtin_template_menu',
 				resetTemplate: '#reset_template_menu',
 				setLanguage: '#set_language',
-				clearCache: '#clear_cache_menu',
-				clearCacheModel: '#clear_cache_model_menu',
-				clearCacheUI: '#clear_cache_ui_menu',
-				clearCacheEverything: '#clear_cache_everything_menu',
+				clearCache: '#clear_cache_menu'
 			},
 			edit: {
 				undo: '#undo_menu',

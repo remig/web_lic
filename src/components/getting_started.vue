@@ -10,15 +10,15 @@
 			</div>
 			<h4>{{tr('dialog.welcome.title')}}</h4>
 		</div>
-		<ul class="list-group">
+		<ul class="list-group" data-testid="get-started-list">
 			<li class="list-group-item">
-				<a class="lineLink" @click.prevent="importCustomModel">
+				<a class="lineLink" data-testid="get-started-import" @click.prevent="importCustomModel">
 					<i class="far fa-edit fa-2x fa-pull-left" />
 					{{tr('dialog.welcome.import')}}
 				</a>
 			</li>
 			<li class="list-group-item">
-				<a class="lineLink" @click.prevent="open">
+				<a class="lineLink" data-testid="get-started-open" @click.prevent="open">
 					<i class="far fa-save fa-2x fa-pull-left" />
 					{{tr('dialog.welcome.open')}}
 				</a>
@@ -37,7 +37,7 @@
 				</ul>
 			</li>
 			<li class="list-group-item">
-				<a class="lineLink" @click.prevent="showAbout">
+				<a class="lineLink" data-testid="get-started-learn" @click.prevent="showAbout">
 					<i class="fas fa-question-circle fa-2x fa-pull-left" />
 					{{tr('dialog.welcome.learn')}}
 				</a>

@@ -4,6 +4,7 @@ module.exports = {
 	},
 	"globals": {
 		"Cypress": "readonly",
-		"cy": "readonly"
+		"cy": "readonly",
+		"expect": "readonly"
 	}
 };

@@ -19,7 +19,7 @@ describe('Launch initial empty page', () => {
 		cy.clearLocalStorage().then(() => {
 			localStorage.clear();  // Need this because we overwrote cy.clearLocalStorage() to do nothing
 		});
-		cy.visit('http://192.168.1.131:9988/web_lic');
+		cy.visit('http://localhost:8080');
 	});
 
 	it('Load basic page', () => {
@@ -83,6 +83,17 @@ describe('Launch initial empty page', () => {
 		});
 	});
 
+	it('Welcome box should exist with some content', () => {
+		cy.get('.gettingStarted').then(el => {
+			expect(el.outerWidth()).to.be.closeTo(1100, 5);
+			expect(el.outerHeight()).to.be.closeTo(737, 5);
+		});
+		cy.getByTestId('get-started-list').children().should('have.length', 4);
+		cy.getByTestId('get-started-import');
+		cy.getByTestId('get-started-open');
+		cy.getByTestId('get-started-learn');
+	});
+
 	it('Menus should exist and be clickable, with appropriately enabled / disabled content', () => {
 
 		cy.get(page.ids.filenameContainer).should('not.exist');
@@ -110,10 +121,7 @@ describe('Launch initial empty page', () => {
 		isMenuClosed(page.ids.menu.edit);
 
 		cy.get(page.ids.menu.file).click();
-		cy.get(page.ids.subMenu.file.clearCache).click();
-		cy.get(page.ids.subMenu.file.clearCacheModel)
-			.should('be.visible')
-			.should('have.class', page.classes.menu.enabled);
+		cy.get(page.ids.subMenu.file.clearCache).should('exist');
 
 		cy.get(page.ids.rightPane).click();
 		isMenuClosed(page.ids.menu.file);
