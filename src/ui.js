@@ -16,6 +16,10 @@
 // - Change page numbers to 'even left odd right' (or 'odd left even right') then append a page:
 //     pages after new page have badly positioned page numbers
 // - Part list page is inaccurate: xwing is missing a ton of parts. redo part list layout fixes
+// - On intro page, click 'Create new book' or 'Continue book', then cancel; intro is gone
+// - Change part color but inventory page doesn't update
+// - Fix import progress bar for models with one base model like basic x-wing
+// - Check localStorage.set to ensure it doesn't go over browser limit. Ifit does, use lzstring to compress
 
 import _ from './util';
 import uiState from './ui_state';
@@ -464,7 +468,7 @@ const app = new Vue({
 				if (page == null) {
 					// This happens if, say, the current page is deleted without
 					// updating the current page first, like during undo / redo
-					page = store.get.firstBasicPage();
+					page = store.get.firstPage();
 					this.currentPageLookup = store.get.itemToLookup(page);
 				}
 				Vue.nextTick(() => {
