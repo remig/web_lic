@@ -30,7 +30,14 @@ _.forOwn(keys, (v, k) => {
 		return JSON.parse(localStorage.getItem(v));
 	};
 	api.replace[k] = function(json) {  // Replace entire object in cache with passed in object
-		localStorage.setItem(v, JSON.stringify(json));
+		try {
+			localStorage.setItem(v, JSON.stringify(json));
+		} catch (e) {
+			if (e && e.name === 'QuotaExceededError') {
+				// TODO: use compression to save this giant state
+				return json;
+			}
+		}
 		return json;
 	};
 	api.clear[k] = function() {
