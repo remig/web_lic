@@ -4,12 +4,7 @@
 		"sourceType": "module"
 	},
     "env": {
-        "commonjs": true,
-        "mocha": true
-    },
-    "globals": {
-		"cy": false,
-		"expect": false
+        "commonjs": true
     },
     "extends": [
         "eslint:recommended",

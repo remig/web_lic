@@ -2,6 +2,10 @@
 
 /* global JSZip: false, saveAs: false */
 
+// TODO: In 'File' menu, add "Save each book as a separate file" which
+// will divide multi-book instruction file into separate smaller instruction
+// files, one per book, and download them in a zip file
+
 import _ from '../util';
 import store from '../store';
 import Layout from '../layout';

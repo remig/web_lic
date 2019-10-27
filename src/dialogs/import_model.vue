@@ -29,11 +29,13 @@
 			<el-checkbox
 				v-model="newState.useMaxSteps"
 				:label="tr('dialog.import_model.use_max_steps')"
+				data-testid="import-use-max-steps"
 			/>
 		</el-row>
 		<el-row>
 			<el-dropdown
 				:hide-on-click="false"
+				data-testid="import-include-dropdown"
 				trigger="click"
 				placement="bottom-start"
 				@command="checkIncludeItem"
@@ -44,6 +46,7 @@
 						<el-dropdown-item
 							:key="`include_${item}`"
 							:command="item"
+							:data-testid="`include-${item}`"
 						>
 							{{tr(`dialog.import_model.include.${item}`)}}
 							<i v-if="checked" class="fas fa-check"/>
@@ -53,7 +56,13 @@
 			</el-dropdown>
 		</el-row>
 		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
+			<el-button
+				type="primary"
+				data-testid="import-ok"
+				@click="ok()"
+			>
+				{{tr("dialog.ok")}}
+			</el-button>
 		</span>
 	</licDialog>
 </template>

@@ -55,10 +55,10 @@
 		</div>
 
 		<div class="form-row">
-			<el-checkbox v-model="includeTitlePages" class="check-row">
+			<el-checkbox v-model="includeTitlePages" class="check-row" data-testid="multi-book-title-pages">
 				{{tr('dialog.multi_book.include_title_page')}}
 			</el-checkbox>
-			<el-checkbox v-model="noSplitSubmodels">
+			<el-checkbox v-model="noSplitSubmodels" data-testid="multi-book-no-split-submodels">
 				{{tr('dialog.multi_book.split_submodels')}}
 			</el-checkbox>
 		</div>
@@ -109,8 +109,19 @@
 			</el-radio-group>
 		</div>
 		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
+			<el-button
+				data-testid="multi-book-cancel"
+				@click="cancel"
+			>
+				{{tr("dialog.cancel")}}
+			</el-button>
+			<el-button
+				type="primary"
+				data-testid="multi-book-ok"
+				@click="ok()"
+			>
+				{{tr("dialog.ok")}}
+			</el-button>
 		</span>
 	</licDialog>
 </template>

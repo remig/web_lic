@@ -30,7 +30,7 @@
 				</span>
 				<ul class="list-inline">
 					<li v-for="entry in demoModels" :key="entry.id">
-						<a @click.prevent="importModel(entry.fn)">
+						<a :data-testid="`import-${entry.id}`" @click.prevent="importModel(entry.fn)">
 							{{tr('dialog.welcome.models.' + entry.id)}}
 						</a>
 					</li>
