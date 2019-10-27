@@ -271,6 +271,15 @@ const store = {
 		},
 		addTitlePage(opts = {}) {  // opts: {book (optional)}
 
+			if (opts.book == null && store.state.books.length > 1) {
+				// If no book is provided but we have multiple books, add a title page to each book
+				store.state.books.forEach(book => {
+					store.mutations.book.addTitlePage({book});
+				});
+				return null;
+			}
+
+			// TODO: mutations.addTitlePage and mutations.book.addTitlePage are a mess
 			// TODO: need submodel + bag breakdown page and final 'no step' complete model page
 			let insertionIndex = 1;
 			if (opts.book) {
@@ -279,8 +288,8 @@ const store = {
 				);
 			}
 			const page = store.mutations.page.add({subtype: 'titlePage', insertionIndex});
-			page.number = 1;
-			store.mutations.page.renumber();  // TODO: this doesn't update the page numbers in the tree
+			page.number = opts.book ? store.get.page(opts.book.pages[0]).number : 1;
+			store.mutations.page.renumber();
 
 			const step = store.mutations.step.add({dest: page});
 			step.model.filename = store.model.filename;
@@ -297,7 +306,7 @@ const store = {
 
 			// TODO: This part & page count gets out of sync with the doc as pages are added / removed
 			const partCount = LDParse.model.get.partCount(store.model);
-			const pageCount = store.get.pageCount();
+			const pageCount = store.get.pageCount();  // TODO: count only pages in the current book
 			let text;
 			if (opts.book) {
 				const bookNumber = store.get.book(opts.book).number;
@@ -314,11 +323,13 @@ const store = {
 			return page;
 		},
 		removeTitlePage() {
-			const item = store.get.titlePage();
-			if (item != null) {
-				store.mutations.item.deleteChildList({item, listType: 'step'});
-				store.mutations.page.delete({page: item});
-			}
+			store.state.pages
+				.map(store.get.page)
+				.filter(page => page.subtype === 'titlePage')
+				.forEach(page => {
+					store.mutations.item.deleteChildList({item: page, listType: 'step'});
+					store.mutations.page.delete({page});
+				});
 		},
 		addInitialPages(opts) {  // opts: {modelFilename,  lastStepNumber, partsPerStep}
 
