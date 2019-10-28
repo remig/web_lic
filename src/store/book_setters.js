@@ -117,6 +117,7 @@ export default {
 			store.mutations.book.add(book);
 		});
 		if (opts.includeTitlePages) {
+			store.mutations.removeTitlePage();  // Remove any existing title pages first
 			store.mutations.addTitlePage();
 		}
 		opts.bookDivisions.forEach(book => {
