@@ -56,13 +56,6 @@ export default {
 				redo: '#redo_menu',
 				snapTo: '#snap_to_menu',
 				brickColors: '#brick_colors_menu'
-			},
-			view: {
-				addHorizontalGuide: '#add_horizontal_guide_menu'
-			},
-			'export': {
-				generatePdf: '#generate_pdf_menu',
-				generatePngImages: '#generate_png_images_menu'
 			}
 		},
 		dialog: {
