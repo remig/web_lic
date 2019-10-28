@@ -34,16 +34,6 @@ export default {
 	},
 	delete() {
 	},
-	addTitlePage(opts) {  // opts: {book}
-		const book = store.get.lookupToItem(opts.book);
-		const firstPage = store.get.firstBookPage(book);
-		if (firstPage.subtype === 'titlePage') {
-			store.mutations.removeTitlePage();
-		}
-		const titlePage = store.mutations.addTitlePage({book});
-		titlePage.parent = {type: 'book', id: book.id};
-		book.pages.unshift(titlePage.id);
-	},
 	setBookPageNumbers(opts) { // opts: {book, firstPageNumber: 'start_page_1' or 'preserve_page_count'}
 		const book = store.get.lookupToItem(opts.book);
 		if (opts.firstPageNumber === 'start_page_1') {
@@ -127,10 +117,7 @@ export default {
 			store.mutations.book.add(book);
 		});
 		if (opts.includeTitlePages) {
-			opts.bookDivisions.forEach(book => {
-				book = store.get.itemByNumber('book', book.bookNumber);
-				store.mutations.book.addTitlePage({book});
-			});
+			store.mutations.addTitlePage();
 		}
 		opts.bookDivisions.forEach(book => {
 			book = store.get.itemByNumber('book', book.bookNumber);

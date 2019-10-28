@@ -269,58 +269,61 @@ const store = {
 		layoutTitlePage(page) {
 			Layout.titlePage(page);
 		},
-		addTitlePage(opts = {}) {  // opts: {book (optional)}
+		addTitlePage() {
 
-			if (opts.book == null && store.state.books.length > 1) {
-				// If no book is provided but we have multiple books, add a title page to each book
-				store.state.books.forEach(book => {
-					store.mutations.book.addTitlePage({book});
+			function addOneTitlePage(parent) {
+				let insertionIndex = 1;
+				if (parent) {
+					insertionIndex = store.state.pages.findIndex(
+						page => page.id === parent.pages[0]
+					);
+				}
+				const page = store.mutations.page.add({
+					subtype: 'titlePage',
+					parent,
+					insertionIndex,
+					parentInsertionIndex: 0,
+					doNotRenumber: true
 				});
-				return null;
+				page.number = parent ? store.get.page(parent.pages[1]).number : 1;
+				store.mutations.page.renumber();
+
+				const step = store.mutations.step.add({dest: page});
+				step.model.filename = store.model.filename;
+				step.parts = null;
+
+				store.mutations.annotation.add({
+					annotationType: 'label',
+					properties: {
+						text: store.get.modelName(true),
+						font: '20pt Helvetica'
+					},
+					parent: page
+				});
+
+				// TODO: This part & page count gets out of sync with the doc as pages are added / removed
+				const partCount = LDParse.model.get.partCount(store.model);
+				const pageCount = store.get.pageCount();  // TODO: count only pages in the current book
+				let text;
+				if (parent) {
+					const bookNumber = store.get.book(parent).number;
+					text = tr('title_page.book_model_info_@mf', {bookNumber, partCount, pageCount});
+				} else {
+					text = tr('title_page.model_info_@mf', {partCount, pageCount});
+				}
+
+				store.mutations.annotation.add({
+					annotationType: 'label',
+					properties: {text, font: '16pt Helvetica'},
+					parent: page
+				});
 			}
 
-			// TODO: mutations.addTitlePage and mutations.book.addTitlePage are a mess
-			// TODO: need submodel + bag breakdown page and final 'no step' complete model page
-			let insertionIndex = 1;
-			if (opts.book) {
-				insertionIndex = store.state.pages.findIndex(
-					page => page.id === opts.book.pages[0]
-				);
-			}
-			const page = store.mutations.page.add({subtype: 'titlePage', insertionIndex});
-			page.number = opts.book ? store.get.page(opts.book.pages[0]).number : 1;
-			store.mutations.page.renumber();
-
-			const step = store.mutations.step.add({dest: page});
-			step.model.filename = store.model.filename;
-			step.parts = null;
-
-			store.mutations.annotation.add({
-				annotationType: 'label',
-				properties: {
-					text: store.get.modelName(true),
-					font: '20pt Helvetica'
-				},
-				parent: page
-			});
-
-			// TODO: This part & page count gets out of sync with the doc as pages are added / removed
-			const partCount = LDParse.model.get.partCount(store.model);
-			const pageCount = store.get.pageCount();  // TODO: count only pages in the current book
-			let text;
-			if (opts.book) {
-				const bookNumber = store.get.book(opts.book).number;
-				text = tr('title_page.book_model_info_@mf', {bookNumber, partCount, pageCount});
+			if (store.state.books.length > 1) {
+				store.state.books.forEach(addOneTitlePage);
 			} else {
-				text = tr('title_page.model_info_@mf', {partCount, pageCount});
+				addOneTitlePage();
 			}
-
-			store.mutations.annotation.add({
-				annotationType: 'label',
-				properties: {text, font: '16pt Helvetica'},
-				parent: page
-			});
-			return page;
 		},
 		removeTitlePage() {
 			store.state.pages

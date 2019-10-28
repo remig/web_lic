@@ -1,21 +1,28 @@
-/* Web Lic - Copyright (C) 2018 Remi Gagne */
+/* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import store from '../store';
 import Layout from '../layout';
 
 export default {
-	add(opts = {}) {  // opts: {pageNumber, subtype = 'page', insertionIndex = -1}
+	// opts: {pageNumber, subtype = 'page', doNotRenumber: false,
+	// parent = null, insertionIndex = -1, parentInsertionIndex = null}
+	add(opts = {}) {
 		const pageSize = store.state.template.page;
-		const page = store.mutations.item.add({item: {
-			type: 'page',
-			subtype: opts.subtype || 'page',
-			steps: [], dividers: [], annotations: [], pliItems: [],
-			needsLayout: true, locked: false, stretchedStep: null,
-			innerContentOffset: {x: 0, y: 0},
-			number: opts.pageNumber,
-			numberLabelID: null,
-			layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
-		}, insertionIndex: opts.insertionIndex});
+		const page = store.mutations.item.add({
+			item: {
+				type: 'page',
+				subtype: opts.subtype || 'page',
+				steps: [], dividers: [], annotations: [], pliItems: [],
+				needsLayout: true, locked: false, stretchedStep: null,
+				innerContentOffset: {x: 0, y: 0},
+				number: opts.pageNumber,
+				numberLabelID: null,
+				layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
+			},
+			parent: opts.parent,
+			insertionIndex: opts.insertionIndex,
+			parentInsertionIndex: opts.parentInsertionIndex
+		});
 
 		if (opts.pageNumber === 'id') {  // Special flag to say 'use page ID as page number'
 			page.number = page.id;
@@ -29,7 +36,9 @@ export default {
 			}, parent: page});
 		}
 
-		store.mutations.page.renumber();
+		if (!opts.doNotRenumber) {
+			store.mutations.page.renumber();
+		}
 		return page;
 	},
 	delete(opts) {  // opts: {page, doNotRenumber: false, deleteSteps: false}
@@ -64,7 +73,15 @@ export default {
 		}
 	},
 	renumber() {
-		store.mutations.renumber(store.state.pages, 0);
+		if (store.state.books.length) {
+			store.state.books.forEach(book => {
+				// TODO: need to store whether books start from 1 or preserve numbering
+				const pages = book.pages.map(store.get.page);
+				store.mutations.renumber(pages, 1);
+			});
+		} else {
+			store.mutations.renumber(store.state.pages, 0);
+		}
 	},
 	markAllDirty() {
 		store.state.pages.forEach(page => (page.needsLayout = true));

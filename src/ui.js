@@ -20,6 +20,7 @@
 // - Change part color but inventory page doesn't update
 // - Fix import progress bar for models with one base model like basic x-wing
 // - Check localStorage.set to ensure it doesn't go over browser limit. Ifit does, use lzstring to compress
+// - Need submodel + bag breakdown page and final 'no step' complete model page
 
 import _ from './util';
 import uiState from './ui_state';
@@ -565,6 +566,6 @@ const app = new Vue({
 });
 
 window.__lic = {  // store a global reference to these for easier testing
-	// TODO: only generate this in the debug build.
+	// TODO: only generate this in the debug build and in Cypress
 	_, app, store, undoStack, LDParse, Storage, uiState
 };
