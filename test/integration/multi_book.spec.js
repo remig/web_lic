@@ -1,5 +1,6 @@
 /* eslint-disable max-len, no-unreachable */
 import page from '../page_api';
+import JSZip from 'jszip';
 
 describe('Test multi book ', () => {
 
@@ -13,6 +14,30 @@ describe('Test multi book ', () => {
 			cy.getByTestId('include-titlePage').click();
 		}
 		cy.getByTestId('import-ok').click();
+		cy.spy();
+	}
+
+	function localSaveAs(blob, filename) {
+		assert.strictEqual(filename, '20015 - Alligator_instruction_books.zip');
+		JSZip.loadAsync(blob)
+			.then(zip => {
+				const folderName = filename.split('.')[0] + '/';
+				const fileBaseName = folderName + '20015 - Alligator_book_';
+				assert.strictEqual(folderName, '20015 - Alligator_instruction_books/');
+				assert.property(zip.files, folderName);
+				assert.property(zip.files, fileBaseName + '1.lic');
+				assert.property(zip.files, fileBaseName + '2.lic');
+
+				zip.files[fileBaseName + '1.lic'].async('string')
+					.then(content => {
+						const file = JSON.parse(content);
+						assert.equal(file.state.books.length, 1);
+						assert.deepEqual(
+							file.state.books[0].pages,
+							file.state.pages.map(p => p.id).slice(1)
+						);
+					});
+			});
 	}
 
 	beforeEach(() => {
@@ -22,6 +47,7 @@ describe('Test multi book ', () => {
 		cy.get(page.ids.dialog.localeChooser.container + ' .el-button').click();
 		cy.window().then(win => {
 			win.__lic.app.disableLocalStorage = true;
+			cy.stub(win, 'saveAs', localSaveAs);
 		});
 	});
 
@@ -151,7 +177,7 @@ describe('Test multi book ', () => {
 		cy.get('#treeParent_book_1 > .treeChildren').children().should('have.length', 24);
 	});
 
-	it.only('Split Alligator preserve page numbers', () => {
+	it('Split Alligator preserve page numbers', () => {
 
 		importAlligator(true);
 
@@ -206,5 +232,33 @@ describe('Test multi book ', () => {
 		cy.get('#nav-tree > ul').children().should('have.length', 3);
 		cy.get('#treeParent_book_0 > .treeChildren').children().should('have.length', 19);
 		cy.get('#treeParent_book_1 > .treeChildren').children().should('have.length', 25);
+	});
+
+	it('Split Alligator into separate files', () => {
+
+		importAlligator();
+
+		// Split into multiple books with default multi-book settings
+		cy.get('#edit_menu').click();
+		cy.get('#multi_book_menu').click();
+		cy.getByTestId('multi-book-many-lic-files', ' input').should('not.be.checked');
+		cy.getByTestId('multi-book-many-lic-files').click();
+		cy.getByTestId('multi-book-ok').click();
+
+		cy.window().its('__lic.store.state').then((state) => {
+			assert.strictEqual(state.pages.length, 20, 'Page count is correct');
+			assert.deepEqual(
+				state.pages.map(p => p.number),
+				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+				'Page Numbers are correct'
+			);
+			assert.equal(state.pages.filter(p => p.subtype === 'titlePage').length, 1, 'Have 1 title page');
+		});
+
+		cy.get('#nav-tree > ul').children().should('have.length', 2);
+		cy.get('#treeParent_book_0').should('exist');
+		cy.get('#treeParent_book_0').click();
+		cy.get('#treeParent_book_0 > .treeChildren').children().should('have.length', 19);
+		cy.get('#treeParent_book_1').should('not.exist');
 	});
 });
