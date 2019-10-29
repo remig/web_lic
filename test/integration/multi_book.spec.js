@@ -37,6 +37,15 @@ describe('Test multi book ', () => {
 							file.state.pages.map(p => p.id).slice(1)
 						);
 					});
+				zip.files[fileBaseName + '2.lic'].async('string')
+					.then(content => {
+						const file = JSON.parse(content);
+						assert.equal(file.state.books.length, 1);
+						assert.deepEqual(
+							file.state.books[0].pages,
+							file.state.pages.map(p => p.id).slice(1)
+						);
+					});
 			});
 	}
 
