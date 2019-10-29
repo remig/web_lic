@@ -21,6 +21,8 @@
 // - Fix import progress bar for models with one base model like basic x-wing
 // - Check localStorage.set to ensure it doesn't go over browser limit. Ifit does, use lzstring to compress
 // - Need submodel + bag breakdown page and final 'no step' complete model page
+// - Part list pages are borked: on import, if we need mulitple pages still get just one
+//   - And redoing layout when we have many part list pages loops forever
 
 import _ from './util';
 import uiState from './ui_state';
@@ -76,7 +78,8 @@ const app = new Vue({
 		lastRightClickPos: {
 			x: null,
 			y: null
-		}
+		},
+		disableLocalStorage: false
 	},
 	methods: {
 		importBuiltInModel(url) {
@@ -515,12 +518,14 @@ const app = new Vue({
 
 		window.addEventListener('beforeunload', e => {
 
-			const splitStyle = document.getElementById('leftPane').style;
-			uiState.set('splitter', parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]));
+			if (!this.disableLocalStorage) {
+				const splitStyle = document.getElementById('leftPane').style;
+				uiState.set('splitter', parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]));
 
-			uiState.set('lastUsedVersion', packageInfo.version);
+				uiState.set('lastUsedVersion', packageInfo.version);
 
-			Storage.replace.ui(uiState.getCurrentState());
+				Storage.replace.ui(uiState.getCurrentState());
+			}
 
 			if (this && this.isDirty) {
 				const msg = 'You have unsaved changes. Leave anyway?';

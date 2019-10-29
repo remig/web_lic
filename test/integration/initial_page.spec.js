@@ -16,9 +16,6 @@ function isMenuOpen(id) {
 describe('Launch initial empty page', () => {
 
 	before(() => {
-		cy.clearLocalStorage().then(() => {
-			localStorage.clear();  // Need this because we overwrote cy.clearLocalStorage() to do nothing
-		});
 		cy.visit('http://localhost:8080');
 	});
 

@@ -15,6 +15,7 @@
 				:min="2"
 				type="number"
 				class="form-control"
+				data-testid="multi-book-book-count"
 				@input="updateBookCount"
 			>
 		</div>
@@ -70,7 +71,7 @@
 						slot="content"
 						v-html="tr('dialog.multi_book.page_numbering.start_page_1.tooltip')"
 					/>
-					<el-radio label="start_page_1">
+					<el-radio label="start_page_1" data-testid="multi-book-page-start-1">
 						{{tr('dialog.multi_book.page_numbering.start_page_1.text')}}
 					</el-radio>
 				</licTooltip>
@@ -79,7 +80,7 @@
 						slot="content"
 						v-html="tr('dialog.multi_book.page_numbering.preserve_page_count.tooltip')"
 					/>
-					<el-radio label="preserve_page_count">
+					<el-radio label="preserve_page_count" data-testid="multi-book-page-start-old">
 						{{tr('dialog.multi_book.page_numbering.preserve_page_count.text')}}
 					</el-radio>
 				</licTooltip>
@@ -93,7 +94,7 @@
 						slot="content"
 						v-html="tr('dialog.multi_book.file_split.one_file.tooltip')"
 					/>
-					<el-radio label="one_file">
+					<el-radio label="one_file" data-testid="multi-book-one-lic-file">
 						{{tr('dialog.multi_book.file_split.one_file.text')}}
 					</el-radio>
 				</licTooltip>
@@ -102,7 +103,7 @@
 						slot="content"
 						v-html="tr('dialog.multi_book.file_split.separate_files.tooltip')"
 					/>
-					<el-radio label="separate_files">
+					<el-radio label="separate_files" data-testid="multi-book-many-lic-files">
 						{{tr('dialog.multi_book.file_split.separate_files.text')}}
 					</el-radio>
 				</licTooltip>
