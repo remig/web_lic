@@ -32,6 +32,9 @@ const defaultState = {
 				dpi: 96,
 				units: 'point'  // One of 'point', 'mm', 'cm', 'in'
 			}
+		},
+		multiBook: {
+			firstPageNumber: 'start_page_1'  // or preserve_page_count
 		}
 	},
 	template: null,  // NYI
