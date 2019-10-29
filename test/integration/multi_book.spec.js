@@ -80,7 +80,7 @@ describe('Test multi book ', () => {
 		// Split into multiple books without title pages
 		cy.get('#edit_menu').click();
 		cy.get('#multi_book_menu').click();
-		cy.getByTestId('multi-book-title-pages').should('have.class', 'is-checked');
+		cy.getByTestId('multi-book-title-pages', ' input').should('be.checked');
 		cy.getByTestId('multi-book-title-pages').click();
 		cy.getByTestId('multi-book-ok').click();
 
@@ -149,5 +149,62 @@ describe('Test multi book ', () => {
 		cy.get('#nav-tree > ul').children().should('have.length', 3);
 		cy.get('#treeParent_book_0 > .treeChildren').children().should('have.length', 18);
 		cy.get('#treeParent_book_1 > .treeChildren').children().should('have.length', 24);
+	});
+
+	it.only('Split Alligator preserve page numbers', () => {
+
+		importAlligator(true);
+
+		// Split into multiple books and preserves page numbers
+		cy.get('#edit_menu').click();
+		cy.get('#multi_book_menu').click();
+		cy.getByTestId('multi-book-title-pages', ' input').should('be.checked');
+		cy.getByTestId('multi-book-title-pages').click();
+		cy.getByTestId('multi-book-page-start-old', ' input').should('not.be.checked');
+		cy.getByTestId('multi-book-page-start-old').click();
+		cy.getByTestId('multi-book-ok').click();
+
+		// Verify state
+		cy.window().its('__lic.store.state').then((state) => {
+			assert.strictEqual(state.pages.length, 43, 'Page count is correct');
+			assert.deepEqual(
+				state.pages.map(p => p.number),
+				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42],
+				'Page Numbers are correct'
+			);
+			assert.equal(state.pages.filter(p => p.subtype === 'titlePage').length, 0, 'No title pages');
+		});
+
+		cy.get('#nav-tree > ul').children().should('have.length', 3);
+		cy.get('#treeParent_book_0').should('exist');
+		cy.get('#treeParent_book_0').click();
+		cy.get('#treeParent_book_0 > .treeChildren').children().should('have.length', 18);
+
+		cy.get('#treeParent_book_1').should('exist');
+		cy.get('#treeParent_book_1').click();
+		cy.get('#treeParent_book_1 > .treeChildren').children().should('have.length', 24);
+
+		// Now add title pages
+		cy.get('#edit_menu').click();
+		cy.get('#add_title_page_menu').click();
+
+		cy.window().its('__lic').then((lic) => {
+			const state = lic.store.state;
+			assert.strictEqual(state.pages.length, 45, 'Page count is correct');
+			assert.deepEqual(
+				state.pages.map(p => p.number),
+				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44],
+				'Page Numbers are correct'
+			);
+			assert.equal(state.pages.filter(p => p.subtype === 'titlePage').length, 2, 'Two title pages');
+			assert.equal(lic.app.currentPageLookup.id, 43, 'Selected page is the first title page');
+			const firstPage = lic.store.get.page(lic.app.currentPageLookup.id);
+			assert.equal(firstPage.subtype, 'titlePage');
+			assert.equal(firstPage.number, 1);
+		});
+
+		cy.get('#nav-tree > ul').children().should('have.length', 3);
+		cy.get('#treeParent_book_0 > .treeChildren').children().should('have.length', 19);
+		cy.get('#treeParent_book_1 > .treeChildren').children().should('have.length', 25);
 	});
 });

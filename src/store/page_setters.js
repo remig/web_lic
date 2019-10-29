@@ -1,6 +1,8 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
+import _ from '../util';
 import store from '../store';
+import uiState from '../ui_state';
 import Layout from '../layout';
 
 export default {
@@ -74,10 +76,20 @@ export default {
 	},
 	renumber() {
 		if (store.state.books.length) {
+			const firstPageNumber = uiState.get('dialog.multiBook.firstPageNumber');
 			store.state.books.forEach(book => {
-				// TODO: need to store whether books start from 1 or preserve numbering
 				const pages = book.pages.map(store.get.page);
-				store.mutations.renumber(pages, 1);
+				if (firstPageNumber === 'start_page_1') {
+					store.mutations.renumber(pages, 1);
+				} else if (firstPageNumber === 'preserve_page_count') {
+					const prevBook = store.get.prev(book);
+					if (prevBook) {
+						const lastPageNumber = store.get.page(_.last(prevBook.pages)).number;
+						store.mutations.renumber(pages, lastPageNumber + 1);
+					} else {
+						store.mutations.renumber(pages, 1);
+					}
+				}
 			});
 		} else {
 			store.mutations.renumber(store.state.pages, 0);

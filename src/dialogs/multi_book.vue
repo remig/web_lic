@@ -131,6 +131,7 @@
 
 import _ from '../util';
 import store from '../store';
+import uiState from '../ui_state';
 
 function pageSpreadToStepSpread(pageSpread) {
 	if (pageSpread.start === pageSpread.end) {
@@ -273,7 +274,8 @@ export default {
 			bookDivisions,
 			includeTitlePages: true,
 			noSplitSubmodels: true,
-			firstPageNumber: 'start_page_1',  // or preserve_page_count
+			// firstPageNumber: start_page_1 or preserve_page_count
+			firstPageNumber: uiState.get('dialog.multiBook.firstPageNumber'),
 			fileSplit: 'one_file'  // or separate_files
 		};
 	},
@@ -292,6 +294,7 @@ export default {
 			this.bookDivisions = calculateBookSplits(this.bookCount, this.pageCount, this.noSplitSubmodels);
 		},
 		ok() {
+			uiState.set('dialog.multiBook.firstPageNumber', this.firstPageNumber);
 			this.$emit('ok', {
 				bookDivisions: _.cloneDeep(this.bookDivisions),
 				includeTitlePages: this.includeTitlePages,

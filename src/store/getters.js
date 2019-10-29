@@ -240,8 +240,8 @@ export default {
 		item = store.get.lookupToItem(item);
 		itemList = itemList || store.state[item.type + 's'];
 		const idx = itemList.findIndex(el => {
-			if (el.number === item.number - 1 && el.parent.type === item.parent.type) {
-				if (el.parent.type === 'page') {
+			if (el.number === item.number - 1 && (el.parent || {}).type === (item.parent || {}).type) {
+				if ((el.parent || {}).type === 'page') {
 					const page = store.get.page(item.parent);
 					const elPage = store.get.page(el.parent);
 					return page.subtype === elPage.subtype;
