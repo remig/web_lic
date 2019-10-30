@@ -524,13 +524,14 @@ const app = new Vue({
 				uiState.set('lastUsedVersion', packageInfo.version);
 
 				Storage.replace.ui(uiState.getCurrentState());
+
+				if (this && this.isDirty) {
+					const msg = 'You have unsaved changes. Leave anyway?';
+					e.returnValue = msg;
+					return msg;
+				}
 			}
 
-			if (this && this.isDirty) {
-				const msg = 'You have unsaved changes. Leave anyway?';
-				e.returnValue = msg;
-				return msg;
-			}
 			return null;
 		});
 
