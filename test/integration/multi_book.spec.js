@@ -1,21 +1,7 @@
 /* eslint-disable max-len, no-unreachable */
-import page from '../page_api';
 import JSZip from 'jszip';
 
 describe('Test multi book ', () => {
-
-	function importAlligator(excludeTitlePage) {
-		cy.getByTestId('import-alligator').click();
-		cy.getByTestId('import-use-max-steps').find('input').should('be.checked');
-		cy.getByTestId('import-use-max-steps').click();
-		if (excludeTitlePage) {
-			cy.getByTestId('import-include-dropdown').click();
-			cy.getByTestId('include-titlePage').find('i').should('exist');
-			cy.getByTestId('include-titlePage').click();
-		}
-		cy.getByTestId('import-ok').click();
-		cy.spy();
-	}
 
 	function localSaveAs(blob, filename) {
 		assert.strictEqual(filename, '20015 - Alligator_instruction_books.zip');
@@ -50,18 +36,14 @@ describe('Test multi book ', () => {
 	}
 
 	beforeEach(() => {
-		cy.clearLocalStorage();
-		cy.visit('http://localhost:8080');
-		cy.get(page.ids.dialog.whatsNew + ' .el-button').click();
-		cy.get(page.ids.dialog.localeChooser.container + ' .el-button').click();
+		cy.reloadLicPage();
 		cy.window().then(win => {
-			win.__lic.app.disableLocalStorage = true;
 			cy.stub(win, 'saveAs', localSaveAs);
 		});
 	});
 
 	it('Multi-book dialog shows up with correct defaults', () => {
-		importAlligator();
+		cy.importAlligator();
 
 		cy.get('#edit_menu').click();
 		cy.get('#multi_book_menu').click();
@@ -81,14 +63,15 @@ describe('Test multi book ', () => {
 
 	it('Split Alligator with default Multi-book settings', () => {
 
-		importAlligator();
+		cy.importAlligator();
 
 		// Split into multiple books with default multi-book settings
 		cy.get('#edit_menu').click();
 		cy.get('#multi_book_menu').click();
 		cy.getByTestId('multi-book-ok').click();
 
-		cy.window().its('__lic.store.state').then((state) => {
+		cy.queryLic(lic => {
+			const state = lic.store.state;
 			assert.strictEqual(state.pages.length, 45, 'Page count is correct');
 			assert.deepEqual(
 				state.pages.map(p => p.number),
@@ -110,7 +93,7 @@ describe('Test multi book ', () => {
 
 	it('Split Alligator with no title pages', () => {
 
-		importAlligator(true);
+		cy.importAlligator(true);
 
 		// Split into multiple books without title pages
 		cy.get('#edit_menu').click();
@@ -120,7 +103,8 @@ describe('Test multi book ', () => {
 		cy.getByTestId('multi-book-ok').click();
 
 		// Verify state
-		cy.window().its('__lic.store.state').then((state) => {
+		cy.queryLic(lic => {
+			const state = lic.store.state;
 			assert.strictEqual(state.pages.length, 43, 'Page count is correct');
 			assert.deepEqual(
 				state.pages.map(p => p.number),
@@ -143,7 +127,7 @@ describe('Test multi book ', () => {
 		cy.get('#edit_menu').click();
 		cy.get('#add_title_page_menu').click();
 
-		cy.window().its('__lic').then(lic => {
+		cy.queryLic(lic => {
 			const state = lic.store.state;
 			assert.strictEqual(state.pages.length, 45, 'Page count is correct');
 			assert.deepEqual(
@@ -166,7 +150,7 @@ describe('Test multi book ', () => {
 		cy.get('#edit_menu').click();
 		cy.get('#remove_title_page_menu').click();
 
-		cy.window().its('__lic').then((lic) => {
+		cy.queryLic(lic => {
 			const state = lic.store.state;
 			assert.strictEqual(state.pages.length, 43, 'Page count is correct');
 			assert.deepEqual(
@@ -188,7 +172,7 @@ describe('Test multi book ', () => {
 
 	it('Split Alligator preserve page numbers', () => {
 
-		importAlligator(true);
+		cy.importAlligator(true);
 
 		// Split into multiple books and preserves page numbers
 		cy.get('#edit_menu').click();
@@ -200,7 +184,8 @@ describe('Test multi book ', () => {
 		cy.getByTestId('multi-book-ok').click();
 
 		// Verify state
-		cy.window().its('__lic.store.state').then((state) => {
+		cy.queryLic(lic => {
+			const state = lic.store.state;
 			assert.strictEqual(state.pages.length, 43, 'Page count is correct');
 			assert.deepEqual(
 				state.pages.map(p => p.number),
@@ -223,7 +208,7 @@ describe('Test multi book ', () => {
 		cy.get('#edit_menu').click();
 		cy.get('#add_title_page_menu').click();
 
-		cy.window().its('__lic').then((lic) => {
+		cy.queryLic(lic => {
 			const state = lic.store.state;
 			assert.strictEqual(state.pages.length, 45, 'Page count is correct');
 			assert.deepEqual(
@@ -245,7 +230,7 @@ describe('Test multi book ', () => {
 
 	it('Split Alligator into separate files', () => {
 
-		importAlligator();
+		cy.importAlligator();
 
 		// Split into multiple books with default multi-book settings
 		cy.get('#edit_menu').click();
@@ -254,7 +239,8 @@ describe('Test multi book ', () => {
 		cy.getByTestId('multi-book-many-lic-files').click();
 		cy.getByTestId('multi-book-ok').click();
 
-		cy.window().its('__lic.store.state').then((state) => {
+		cy.queryLic(lic => {
+			const state = lic.store.state;
 			assert.strictEqual(state.pages.length, 20, 'Page count is correct');
 			assert.deepEqual(
 				state.pages.map(p => p.number),

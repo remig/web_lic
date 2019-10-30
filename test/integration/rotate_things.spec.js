@@ -2,31 +2,10 @@
 
 describe('Test rotate things ', () => {
 
-	function importAlligator(excludeTitlePage) {
-		cy.getByTestId('import-alligator').click();
-		cy.getByTestId('import-use-max-steps').find('input').should('be.checked');
-		cy.getByTestId('import-use-max-steps').click();
-		if (excludeTitlePage) {
-			cy.getByTestId('import-include-dropdown').click();
-			cy.getByTestId('include-titlePage').find('i').should('exist');
-			cy.getByTestId('include-titlePage').click();
-		}
-		cy.getByTestId('import-ok').click();
-		cy.spy();
-	}
-
-	beforeEach(() => {
-		cy.clearLocalStorage();
-		cy.visit('http://localhost:8080');
-		cy.get('#whats_new_dialog .el-button').click();
-		cy.get('#locale_chooser_dialog .el-button').click();
-		cy.window().then(win => {
-			win.__lic.app.disableLocalStorage = true;
-		});
-	});
+	beforeEach(cy.reloadLicPage);
 
 	it.only('Custom Rotation on CSI, with correct Rotate Icon', () => {
-		importAlligator(true);
+		cy.importAlligator(true);
 
 		cy.get('#pageCanvas_page_1').click(450, 400).rightclick();
 		cy.get('#csi_rotate_cmenu').click();
@@ -38,7 +17,7 @@ describe('Test rotate things ', () => {
 		cy.getByTestId('rotate-add-icon', ' input').should('not.be.checked');
 		cy.getByTestId('rotate-add-icon').click();
 		cy.getByTestId('rotate-ok').click();
-		cy.window().its('__lic').then(lic => {
+		cy.queryLic(lic => {
 			assert.deepEqual(lic.store.get.csi(4).rotation, [{axis: 'x', angle: 90}]);
 			assert.equal(lic.store.get.step(3).rotateIconID, 1);
 		});
@@ -50,7 +29,7 @@ describe('Test rotate things ', () => {
 		cy.getByTestId('rotate-add-icon', ' input').should('be.checked');
 		cy.getByTestId('rotate-add-icon').click();
 		cy.getByTestId('rotate-ok').click();
-		cy.window().its('__lic').then(lic => {
+		cy.queryLic(lic => {
 			assert.deepEqual(lic.store.get.csi(4).rotation, [{axis: 'x', angle: 90}]);
 			assert.isNull(lic.store.get.step(3).rotateIconID);
 		});
