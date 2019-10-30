@@ -143,7 +143,7 @@ describe('Test multi book ', () => {
 		cy.get('#edit_menu').click();
 		cy.get('#add_title_page_menu').click();
 
-		cy.window().its('__lic').then((lic) => {
+		cy.window().its('__lic').then(lic => {
 			const state = lic.store.state;
 			assert.strictEqual(state.pages.length, 45, 'Page count is correct');
 			assert.deepEqual(

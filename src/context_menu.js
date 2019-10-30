@@ -580,6 +580,7 @@ const contextMenu = {
 					id: 'csi_rotate_custom_cmenu',
 					cb(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
+						const parent = store.get.lookupToItem(csi.parent);
 						const originalRotation = _.cloneDeep(csi.rotation);
 						let initialRotation = originalRotation;
 						if (initialRotation == null) {
@@ -609,6 +610,7 @@ const contextMenu = {
 							});
 							dialog.title = tr('dialog.rotate_part_image.title_csi');
 							dialog.rotation = initialRotation;
+							dialog.addRotateIcon = parent.rotateIconID != null;
 						});
 					}
 				},

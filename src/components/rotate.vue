@@ -6,7 +6,7 @@
 		<div class="rotationListBox">
 			<el-form v-for="(rot, idx) in rotation" :key="'rotation_' + idx" :inline="true">
 				<el-form-item :label="includeLabels ? tr('dialog.rotation.axis') : ''" class="axisInput">
-					<el-select v-model="rot.axis" @change="updateValues">
+					<el-select v-model="rot.axis" data-testid="rotate-axis-select" @change="updateValues">
 						<el-option key="x" label="X" value="x" />
 						<el-option key="y" label="Y" value="y" />
 						<el-option key="z" label="Z" value="z" />
@@ -19,6 +19,7 @@
 						min="-360"
 						max="360"
 						class="form-control"
+						data-testid="rotate-angle-input"
 						@input="updateValues"
 					>
 				</el-form-item>

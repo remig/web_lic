@@ -15,14 +15,18 @@
 		</el-form>
 		<el-form v-if="showRotateIconCheckbox" :inline="true" label-width="180px">
 			<el-form-item>
-				<el-checkbox v-model="addRotateIcon" @change="updateValues">
+				<el-checkbox
+					v-model="addRotateIcon"
+					data-testid="rotate-add-icon"
+					@change="updateValues"
+				>
 					{{tr('dialog.rotate_part_image.add_rotate_icon')}}
 				</el-checkbox>
 			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
+			<el-button data-testid="rotate-cancel" @click="cancel">{{tr("dialog.cancel")}}</el-button>
+			<el-button type="primary" data-testid="rotate-ok" @click="ok()">{{tr("dialog.ok")}}</el-button>
 		</span>
 	</licDialog>
 </template>
@@ -64,7 +68,7 @@ export default{
 				return this.initialRotation;
 			},
 			set(newRotation) {
-				this.initialRotation = _.cloneDeep(newRotation);
+				this.$data.rotation = this.initialRotation = _.cloneDeep(newRotation);
 			}
 		}
 	}

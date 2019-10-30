@@ -361,7 +361,7 @@
         },
         "rotate_icon": {
             "add": {
-                "name": "Add Rotate Icon"
+                "name": "Include Rotate Icon"
             },
             "delete": {
                 "name": "Delete Rotate Icon"
@@ -740,7 +740,7 @@
 		"rotate_part_image": {
 			"title_pli": "Rotate Part List Image",
 			"title_csi": "Rotate Step Image",
-			"add_rotate_icon": "Add Rotation Icon"
+			"add_rotate_icon": "Include Rotation Icon"
 		},
         "copy_csi_rotation": {
             "title": "Copy Rotation",
