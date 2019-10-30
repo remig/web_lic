@@ -24,7 +24,7 @@
 		"eslint-loader": "2.1.0",
 		"eslint-plugin-vue": "4.7.0",
 		"jszip": "3.2.2",
-		"lodash": "4.17.11",
+		"lodash": "4.17.15",
 		"uglifyjs-webpack-plugin": "1.2.4",
 		"vue-loader": "15.2.4",
 		"vue-style-loader": "4.1.0",
