@@ -483,14 +483,25 @@ const contextMenu = {
 			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
-				const opts = {
-					dest, stepNumber: step.number,
-					doLayout: true, renumber: true,
-					model: _.cloneDeep(step.model),
-					insertionIndex: store.state.steps.indexOf(step),
-					parentInsertionIndex: dest.steps.indexOf(step.id)
-				};
-				undoStack.commit('step.add', opts, tr(this.text));
+				if (dest.type === 'callout') {
+					const opts = {
+						callout: dest,
+						doLayout: true,
+						insertionIndex: dest.steps.indexOf(step.id)
+					};
+					undoStack.commit('callout.addStep', opts, tr(this.text));
+				} else {
+					const opts = {
+						dest,
+						stepNumber: step.number,
+						doLayout: true,
+						renumber: true,
+						model: _.cloneDeep(step.model),
+						insertionIndex: store.state.steps.indexOf(step),
+						parentInsertionIndex: dest.steps.indexOf(step.id)
+					};
+					undoStack.commit('step.add', opts, tr(this.text));
+				}
 			}
 		},
 		{
@@ -501,12 +512,18 @@ const contextMenu = {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
 				if (dest.type === 'callout') {
-					const opts = {callout: dest, doLayout: true};
+					const opts = {
+						callout: dest,
+						doLayout: true,
+						insertionIndex: dest.steps.indexOf(step.id) + 1
+					};
 					undoStack.commit('callout.addStep', opts, tr(this.text));
 				} else {
 					const opts = {
-						dest, stepNumber: step.number + 1,
-						doLayout: true, renumber: true,
+						dest,
+						stepNumber: step.number + 1,
+						doLayout: true,
+						renumber: true,
 						model: _.cloneDeep(step.model),
 						insertionIndex: store.state.steps.indexOf(step) + 1,
 						parentInsertionIndex: dest.steps.indexOf(step.id) + 1

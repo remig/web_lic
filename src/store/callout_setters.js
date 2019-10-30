@@ -17,7 +17,7 @@ export default {
 		}, parent: opts.parent});
 
 		if (opts.includeEmptyStep) {
-			store.mutations.callout.addStep({callout, doLayout: false});
+			store.mutations.callout.addFirstStep({callout, doLayout: false});
 		}
 
 		store.mutations.calloutArrow.add({parent: callout});
@@ -32,26 +32,45 @@ export default {
 			store.mutations.page.layout({page: store.get.pageForItem(item)});
 		}
 	},
-	addStep(opts) {  // opts: {callout, doLayout = false}
+	addFirstStep(opts) {  // opts: {callout, doLayout = false}
 		const callout = store.get.lookupToItem(opts.callout);
-		const stepNumber = callout.steps.length > 0 ? callout.steps.length + 1 : null;
-		const newStep = store.mutations.step.add({dest: callout, stepNumber});
-		if (callout.steps.length > 1) {
-			newStep.model = _.cloneDeep(store.get.step(callout.steps[0])).model;
-		} else {
-			newStep.model = _.cloneDeep(store.get.step(callout.parent)).model;
+		const newStep = store.mutations.step.add({dest: callout});
+		newStep.model = _.cloneDeep(store.get.step(callout.parent)).model;
+		if (opts.doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(callout)});
 		}
-		if (stepNumber === 2) {
-			// Special case: callouts with one step have no step numbers;
-			// turn on step numbers when adding a 2nd step
-			const firstStep = store.get.step(callout.steps[0]);
-			firstStep.number = 1;
-			store.mutations.item.add({item: {
-				type: 'numberLabel',
-				align: 'left', valign: 'top',
-				x: null, y: null, width: null, height: null
-			}, parent: firstStep});
+	},
+	addStep(opts) {  // opts: {callout, insertionIndex, doLayout = false}
+		const callout = store.get.lookupToItem(opts.callout);
+		if (callout.steps.length < 1) {
+			store.mutations.callout.addFirstStep(opts);
+			return;
 		}
+
+		const model = _.cloneDeep(store.get.step(callout.steps[0]).model);
+		const destStep = store.get.step(callout.steps[opts.insertionIndex]);
+		const stepNumber = destStep
+			? destStep.number || 1
+			: store.get.step(_.last(callout.steps)).number + 1;
+
+		const newStep = store.mutations.step.add({
+			dest: callout,
+			stepNumber,
+			parentInsertionIndex: opts.insertionIndex
+		});
+		newStep.model = model;
+
+		callout.steps.map(store.get.step)
+			.forEach((step, idx) => {
+				step.number = idx + 1;
+				if (step.numberLabelID == null) {
+					store.mutations.item.add({item: {
+						type: 'numberLabel',
+						align: 'left', valign: 'top',
+						x: null, y: null, width: null, height: null
+					}, parent: step});
+				}
+			});
 		if (opts.doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(callout)});
 		}
