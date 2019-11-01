@@ -157,18 +157,18 @@ _.mixin({
 			cm: 0.75 / 72 * 2.54
 		};
 		function units() {}
-		units.pixelsToUnits = function(pixelCount, units) {
-			return pixelCount * unitConversions[units];
+		units.pixelsToUnits = function(pixelCount, newUnits) {
+			return pixelCount * unitConversions[newUnits];
 		};
-		units.unitsToPixels = function(unitCount, units) {
-			return unitCount / unitConversions[units];
+		units.unitsToPixels = function(unitCount, newUnits) {
+			return unitCount / unitConversions[newUnits];
 		};
-		units.pointsToUnits = function(pointCount, units) {
+		units.pointsToUnits = function(pointCount, newUnits) {
 			const pixels = _.units.unitsToPixels(pointCount, 'point');
-			return _.units.pixelsToUnits(pixels, units);
+			return _.units.pixelsToUnits(pixels, newUnits);
 		};
-		units.unitToPoints = function(unitCount, units) {
-			const pixels = _.units.unitsToPixels(unitCount, units);
+		units.unitToPoints = function(unitCount, newUnits) {
+			const pixels = _.units.unitsToPixels(unitCount, newUnits);
 			return _.units.pixelsToUnits(pixels, 'point');
 		};
 		return units;
@@ -250,8 +250,8 @@ _.mixin({
 	})(),
 	version: (() => {
 		function version() {}
-		version.parse = (v) => {
-			v = (v || '').split('.').map(v => parseInt(v, 10));
+		version.parse = v => {
+			v = (v || '').split('.').map(w => parseInt(w, 10));
 			return {major: v[0] || 0, minor: v[1] || 0, revision: v[2] || 0};
 		};
 		version.nice = (v) => {
@@ -297,10 +297,10 @@ _.mixin({
 			const rgbLookupCache = {
 				'#000000': [0, 0, 0]
 			};
-			return function(color) {
+			return function(colorString) {
 				let rgb;
-				if (rgbLookupCache[color]) {
-					rgb = rgbLookupCache[color];
+				if (rgbLookupCache[colorString]) {
+					rgb = rgbLookupCache[colorString];
 				} else {
 					// Browser quirk: set an element's color to any color string at all,
 					// then getComputedStyle.color will return that same color as rgb() or rgba().
@@ -311,10 +311,10 @@ _.mixin({
 					parent.setAttribute('style', 'color: black;');
 
 					const div = document.getElementById('openFileChooser');
-					div.setAttribute('style', 'color: ' + color);
+					div.setAttribute('style', 'color: ' + colorString);
 					rgb = window.getComputedStyle(div).color;
 					rgb = rgb.match(/[a-z]+\((.*)\)/i)[1].split(',').map(parseFloat);
-					rgbLookupCache[color] = rgb;
+					rgbLookupCache[colorString] = rgb;
 				}
 
 				const res = {r: rgb[0], g: rgb[1], b: rgb[2]};
@@ -329,47 +329,47 @@ _.mixin({
 				return res;
 			};
 		})();
-		color.toVec4 = (color, alpha) => {
-			if (!color || typeof color !== 'string') {
+		color.toVec4 = (colorString, alpha) => {
+			if (!colorString || typeof colorString !== 'string') {
 				return [0, 0, 0, 0];
 			}
 			let r, g, b, a;
-			if (color.startsWith('#')) {
-				color = color.replace('#', '');
-				r = parseInt(color.substr(0, 2), 16) / 255;
-				g = parseInt(color.substr(2, 2), 16) / 255;
-				b = parseInt(color.substr(4, 2), 16) / 255;
+			if (colorString.startsWith('#')) {
+				colorString = colorString.replace('#', '');
+				r = parseInt(colorString.substr(0, 2), 16) / 255;
+				g = parseInt(colorString.substr(2, 2), 16) / 255;
+				b = parseInt(colorString.substr(4, 2), 16) / 255;
 				a = (255 - (alpha || 0)) / 255;
 			} else {
-				color = _.color.toRGB(color);
-				r = color.r / 255;
-				g = color.g / 255;
-				b = color.b / 255;
+				colorString = _.color.toRGB(colorString);
+				r = colorString.r / 255;
+				g = colorString.g / 255;
+				b = colorString.b / 255;
 				a = (alpha == null)
-					? (color.a == null ? 1 : color.a)
+					? (colorString.a == null ? 1 : colorString.a)
 					: alpha;
 			}
 			return [_.round(r, 4), _.round(g, 4), _.round(b, 4), _.round(a, 4)];
 		};
-		color.luma = (color, isUnitColor) => {
-			if (!Array.isArray(color)) {
-				color = _.color.toRGB(color);
-				color = [color.r, color.g, color.b];
+		color.luma = (colorString, isUnitColor) => {
+			if (!Array.isArray(colorString)) {
+				const colorObj = _.color.toRGB(colorString);
+				colorString = [colorObj.r, colorObj.g, colorObj.b];
 			}
 			const scale = isUnitColor ? 1 : 255;
-			return (0.2126 * Math.pow(color[0] / scale, 2.2))
-				+ (0.7151 * Math.pow(color[1] / scale, 2.2))
-				+ (0.0721 * Math.pow(color[2] / scale, 2.2));
+			return (0.2126 * (colorString[0] / scale ** 2.2))
+				+ (0.7151 * (colorString[1] / scale ** 2.2))
+				+ (0.0721 * (colorString[2] / scale ** 2.2));
 		};
-		color.opposite = (color) => {
-			return (_.color.luma(color) < 0.18) ? 'white' : 'black';
+		color.opposite = (colorString) => {
+			return (_.color.luma(colorString) < 0.18) ? 'white' : 'black';
 		};
-		color.isVisible = (color) => {
-			if (!color || typeof color !== 'string') {
+		color.isVisible = (colorString) => {
+			if (!colorString || typeof colorString !== 'string') {
 				return false;
 			}
-			color = _.color.toRGB(color);
-			if (color.hasOwnProperty('a') && color.a === 0) {
+			const colorObj = _.color.toRGB(colorString);
+			if (colorObj.hasOwnProperty('a') && colorObj.a === 0) {
 				return false;
 			}
 			return true;

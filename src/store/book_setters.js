@@ -107,7 +107,7 @@ export default {
 			fileFolder.file(`${modelName}_book_${book.number}.lic`, json);
 		});
 		zip.generateAsync({type: 'blob'})
-			.then(content => saveAs(content, fn + '.zip'));
+			.then(zipContent => saveAs(zipContent, fn + '.zip'));
 		store.replaceState(firstBookState);
 	},
 	divideInstructions(opts) {

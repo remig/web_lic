@@ -14,12 +14,12 @@ const tr = LocaleManager.translate;
 
 const clampScale = (() => {
 	const min = 0.0001, max = 20;
-	function clampScale(v) {
+	function clamp(v) {
 		return _.clamp(v || 0, min, max);
 	}
-	clampScale.min = min;
-	clampScale.max = max;
-	return clampScale;
+	clamp.min = min;
+	clamp.max = max;
+	return clamp;
 })();
 
 const annotationMenu = {
@@ -658,9 +658,9 @@ const contextMenu = {
 				// TODO: this doesn't re-layout pages after applying changes. Must check all affected pages.
 				// TODO: If next step spinner is spun up then back down, need to undo some rotations
 				// TODO: If selected csi step has a rotate icon, add one to the last rotated csi too
-				const csi = store.get.csi(selectedItem.id);
-				const rotation = _.cloneDeep(csi.rotation);
-				const step = store.get.step(csi.parent.id);
+				const selectedCSI = store.get.csi(selectedItem.id);
+				const rotation = _.cloneDeep(selectedCSI.rotation);
+				const step = store.get.step(selectedCSI.parent.id);
 				const originalRotations = [];
 
 				app.clearSelected();
@@ -669,7 +669,7 @@ const contextMenu = {
 				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('ok', newValues => {
 						const csiList = originalRotations
-							.map((rotation, id) => ({type: 'csi', id})).filter(el => el);
+							.map((unused, id) => ({type: 'csi', id})).filter(el => el);
 						undoStack.commit(
 							'step.copyRotation',
 							{step, rotation, nextXSteps: newValues.value},
@@ -678,10 +678,10 @@ const contextMenu = {
 						);
 					});
 					dialog.$on('cancel', () => {
-						originalRotations.forEach((rotation, csiID) => {
+						originalRotations.forEach((rot, csiID) => {
 							const csi = store.get.csi(csiID);
 							if (csi) {
-								csi.rotation = (rotation === 'none') ? null : rotation;
+								csi.rotation = (rot === 'none') ? null : rot;
 								csi.isDirty = true;
 							}
 						});
@@ -948,8 +948,8 @@ const contextMenu = {
 					{
 						text: 'action.quantity_label.change_count.name',
 						id: 'qtylabel_change_cmenu',
-						cb(selectedItem) {
-							const pliItem = store.get.parent(selectedItem);
+						cb(selItem) {
+							const pliItem = store.get.parent(selItem);
 							DialogManager('numberChooserDialog', dialog => {
 								dialog.$on('ok', newValues => {
 									undoStack.commit(
@@ -978,7 +978,7 @@ const contextMenu = {
 			}
 		}
 	],
-	annotation(selectedItem) {
+	annotation(selItem) {
 		const deleteMenu = {
 			text: 'action.annotation.delete.name',
 			id: 'annotation_delete_cmenu',
@@ -1013,7 +1013,7 @@ const contextMenu = {
 			}
 		};
 
-		const annotation = store.get.annotation(selectedItem);
+		const annotation = store.get.annotation(selItem);
 		switch (annotation.annotationType) {
 			case 'label':
 				return [setStyleMenu, deleteMenu];
@@ -1032,15 +1032,15 @@ const contextMenu = {
 				return {
 					text: 'action.callout.position.' + position + '.name',
 					id: 'callout_position' + position + '_cmenu',
-					shown: (function(position) {
+					shown: (function(pos) {
 						return function(selectedItem) {
 							const callout = store.get.lookupToItem(selectedItem);
-							return callout.position !== position;
+							return callout.position !== pos;
 						};
 					})(position),
-					cb: (function(position) {
+					cb: (function(pos) {
 						return function(selectedItem) {
-							const opts = {callout: selectedItem, position, doLayout: true};
+							const opts = {callout: selectedItem, pos, doLayout: true};
 							undoStack.commit('callout.layout', opts, tr('action.callout.position.undo'));
 						};
 					})(position)

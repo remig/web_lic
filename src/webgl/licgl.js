@@ -406,7 +406,7 @@ function createBBoxBuffer(box) {
 	};
 }
 
-function importPart(gl, part) {
+function importPart(part) {
 
 	if (partBufferCache[part.filename] == null && part.primitives && part.primitives.length) {
 
@@ -531,7 +531,7 @@ function importPart(gl, part) {
 
 	if (part.parts) {
 		for (let i = 0; i < part.parts.length; i++) {
-			importPart(gl, LDParse.partDictionary[part.parts[i].filename]);
+			importPart(LDParse.partDictionary[part.parts[i].filename]);
 		}
 	}
 }
@@ -614,7 +614,7 @@ export default {
 
 		partBufferCache[arrowPartName] = Arrows.createArrowBuffers(gl);
 
-		importPart(gl, LDParse.partDictionary['templateModel.ldr']);
+		importPart(LDParse.partDictionary['templateModel.ldr']);
 	},
 	initModel: function(model) {
 		if (model == null) {
@@ -624,11 +624,11 @@ export default {
 				.then(function() {
 					// const model = LDParse.partDictionary['3004.dat'];
 					// const model = LDParse.partDictionary['20015 - Alligator.mpd'];
-					const model = LDParse.partDictionary['7140 - Main Model.ldr'];
-					importPart(gl, model);
+					const localModel = LDParse.partDictionary['7140 - Main Model.ldr'];
+					importPart(localModel);
 				});
 		} else {
-			importPart(gl, model);
+			importPart(model);
 		}
 	},
 	// config: {size, rotation, partList, selectedPartIDs, displacedParts}

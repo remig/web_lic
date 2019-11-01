@@ -45,8 +45,8 @@ _.forOwn(keys, (v, k) => {
 	};
 	api.save[k] = function(json) {  //  Set only the properties in json in the cached object
 		const target = api.get[k](v);
-		_.forOwn(json, (v, k) => {
-			target[k] = v;
+		_.forOwn(json, (value, key) => {
+			target[key] = value;
 		});
 		api.replace[k](target);
 	};

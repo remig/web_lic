@@ -19,9 +19,9 @@ const api = {
 
 		function fixPartColors(part) {
 			if (part.parts) {
-				part.parts.forEach(part => {
-					if (!(part.colorCode in api.colorTable)) {
-						part.colorCode = 0;
+				part.parts.forEach(innerPart => {
+					if (!(innerPart.colorCode in api.colorTable)) {
+						innerPart.colorCode = 0;
 					}
 				});
 			}
@@ -39,7 +39,7 @@ const api = {
 		// Force all base parts with invalid colors to be black instead of undefined and render badly
 		fixPartColors(part);
 		Object.values(api.partDictionary)
-			.filter(part => part && part.isSubModel)
+			.filter(innerPart => innerPart && innerPart.isSubModel)
 			.forEach(fixPartColors);
 
 		return part;
@@ -127,8 +127,8 @@ const api = {
 			function removeOnePartFromPart(part, missingFilename) {
 
 				const indicesToDelete = [];
-				part.parts.forEach((part, idx) => {
-					if (part.filename === missingFilename) {
+				part.parts.forEach((innerPart, idx) => {
+					if (innerPart.filename === missingFilename) {
 						indicesToDelete.push(idx);
 					}
 				});

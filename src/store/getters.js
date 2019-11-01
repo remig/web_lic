@@ -411,7 +411,7 @@ export default {
 		if (_.isEmpty(itemList)) {
 			return 0;
 		}
-		return Math.max.apply(null, itemList.map(el => el.id)) + 1;
+		return Math.max(...itemList.map(el => el.id)) + 1;
 	},
 	itemByNumber(type, number) {
 		const itemList = store.state[type + 's'];

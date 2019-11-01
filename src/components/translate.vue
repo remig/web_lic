@@ -60,8 +60,8 @@ function __tr(locale, key, args) {
 		if (v.includes('@')) {
 			if (v.endsWith('_@c')) {
 				lookup = lookup[v];
-				for (let i = 0; i < args.length; i++) {
-					lookup = lookup.replace('${' + i + '}', args[i]);
+				for (let j = 0; j < args.length; j++) {
+					lookup = lookup.replace('${' + j + '}', args[j]);
 				}
 				return lookup;
 			} else if (v.endsWith('_@mf')) {

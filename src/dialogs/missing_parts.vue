@@ -74,9 +74,9 @@ export default {
 				LDParse.loadPartContent(content).then(() => {
 					this.loadedPartContent[filename] = content;
 					this.missingPartsData[filename].uploaded = true;
-					_.each(LDParse.missingParts, (count, filename) => {
-						if (!(filename in this.missingPartsData)) {
-							Vue.set(this.missingPartsData, filename, {uploaded: false, count});
+					_.each(LDParse.missingParts, (count, fn) => {
+						if (!(fn in this.missingPartsData)) {
+							Vue.set(this.missingPartsData, fn, {uploaded: false, count});
 						}
 					});
 				});

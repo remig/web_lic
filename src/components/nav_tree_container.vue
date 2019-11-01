@@ -87,10 +87,10 @@ export default {
 		},
 		updateCheckState() {
 
-			const checkedItems = this.checkedElements
+			const checkedItemList = this.checkedElements
 				.filter(el => !el.checked && el.child)
 				.map(el => el.value);
-			NavTree.setInvisibleNodeTypes(checkedItems);
+			NavTree.setInvisibleNodeTypes(checkedItemList);
 
 			this.checkedElements.forEach(el => {
 				uiState.set('navTree.checkedItems.' + el.value, el.checked);

@@ -218,7 +218,7 @@ function changeItemId(item, newId, state) {
 	function fixChildList(listType) {
 		(item[listType] || []).forEach(itemId => {
 			state[listType]
-				.find(item => item.id === itemId)
+				.find(child => child.id === itemId)
 				.parent = {type: item.type, id: newId};
 		});
 	}

@@ -22,6 +22,7 @@
 // - Part list pages are borked: on import, if we need mulitple pages still get just one
 //   - Part list page is inaccurate: xwing is missing a ton of parts. redo part list layout fixes
 //   - And redoing layout when we have many part list pages loops forever
+// - Can right click stuff on the template page, but shouldn't be able to
 
 import _ from './util';
 import uiState from './ui_state';
@@ -384,7 +385,7 @@ const app = new Vue({
 					try {
 						this.clearSelected();
 						undoStack.commit(`${selItem.type}.delete`, opts, undoText);
-					} catch (e) {  // eslint-disable-line no-empty
+					} catch (error) {  // eslint-disable-line no-empty
 						// TODO: Intentionally empty; need to change each store.mutation.foo.delete that
 						// throws an error if delete can't happen to just returning instead.
 					}

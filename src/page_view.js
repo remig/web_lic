@@ -545,8 +545,8 @@ function findClickTargetInStep(step, mx, my) {
 			const callout = store.get.callout(step.callouts[i]);
 			if (inBox(mx, my, callout)) {
 				for (let j = 0; j < callout.steps.length; j++) {
-					const step = store.get.step(callout.steps[j]);
-					const innerTarget = findClickTargetInStep(step, mx, my);
+					const calloutStep = store.get.step(callout.steps[j]);
+					const innerTarget = findClickTargetInStep(calloutStep, mx, my);
 					if (innerTarget) {
 						return innerTarget;
 					}

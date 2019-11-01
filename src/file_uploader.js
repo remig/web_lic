@@ -6,8 +6,8 @@ export default function openChooser(acceptFileTypes, fileType, callback) {
 	input.onchange = function(e) {
 		const reader = new FileReader();
 		reader.onload = (filename => {
-			return e => {
-				callback(e.target.result, filename);
+			return evt => {
+				callback(evt.target.result, filename);
 			};
 		})(e.target.files[0].name);
 		if (fileType === 'text') {
