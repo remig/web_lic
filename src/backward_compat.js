@@ -58,6 +58,41 @@ function fixState(state) {
 	if (state.books == null) {
 		state.books = [];
 	}
+
+	state.pages.forEach(page => {
+		if (page.subtype == null) {
+			page.subtype = 'page';
+		}
+	});
+
+	if (state.titlePage) {
+		state.titlePage.type = 'page';
+		state.titlePage.subtype = 'titlePage';
+		const newId = Math.max(...state.pages.map(el => el.id)) + 1;
+		changeItemId(state.titlePage, newId, state);
+		state.pages.unshift(state.titlePage);
+	}
+	if (state.templatePage) {
+		state.templatePage.type = 'page';
+		state.templatePage.subtype = 'templatePage';
+		state.templatePage.number = 0;
+		const newId = Math.max(...state.pages.map(el => el.id)) + 1;
+		changeItemId(state.templatePage, newId, state);
+		state.pages.unshift(state.templatePage);
+	}
+	if (state.inventoryPages) {
+		const newId = Math.max(...state.pages.map(el => el.id)) + 1;
+		state.inventoryPages.forEach((page, idx) => {
+			page.type = 'page';
+			page.subtype = 'inventoryPage';
+			changeItemId(page, newId + idx, state);
+		});
+		state.pages = state.pages.concat(state.inventoryPages);
+	}
+
+	delete state.titlePage;
+	delete state.templatePage;
+	delete state.inventoryPages;
 }
 
 function fixOldState(state) {
@@ -176,6 +211,36 @@ function fixOldPartDictionary(partDictionary) {
 			}
 		}
 	}
+}
+
+function changeItemId(item, newId, state) {
+
+	function fixChildList(listType) {
+		(item[listType] || []).forEach(itemId => {
+			state[listType]
+				.find(item => item.id === itemId)
+				.parent = {type: item.type, id: newId};
+		});
+	}
+
+	function fixChild(childType) {
+		if (item[childType + 'ID'] != null) {
+			const child = state[childType + 's']
+				.find(el => el.id === item[childType + 'ID']);
+			if (child) {
+				child.parent = {type: item.type, id: newId};
+			}
+		}
+	}
+
+	fixChildList('steps');
+	fixChildList('annotations');
+	fixChildList('dividers');
+	fixChildList('pliItems');
+
+	fixChild('numberLabel');
+
+	item.id = newId;
 }
 
 function isOld(content) {
