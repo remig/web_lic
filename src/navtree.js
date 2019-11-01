@@ -110,9 +110,10 @@ function getChildItems(item) {
 	if (item.type === 'csi') {
 		const parent = store.get.parent(item);
 		if (parent && Array.isArray(parent.parts)) {
-			children = parent.parts.map(part => {
+			const parts = parent.parts.map(part => {
 				return {id: part, stepID: parent.id, type: 'part'};
 			});
+			children = children.concat(parts);
 		}
 	}
 	return children;
