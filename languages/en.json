@@ -249,6 +249,11 @@
             }
         },
         "annotation": {
+			"types": {
+				"arrow": "Arrow Annotation",
+				"label": "Label Annotation",
+				"image": "Image Annotation"
+			},
             "add": {
                 "name": "Add Annotation",
                 "label": {

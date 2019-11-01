@@ -79,10 +79,7 @@ function getItemText(t) {
 	} else if (t.type === 'submodel') {
 		return t.filename;
 	} else if (t.type === 'annotation') {
-		switch (t.annotationType) {
-			case 'label':
-				return t.text;
-		}
+		return tr(`action.annotation.types.${t.annotationType}`);
 	} else if (t.type === 'callout') {
 		return tr('glossary.callout') + ' ' + tr('glossary.' + t.position);
 	} else if (t.type === 'pliItem') {
