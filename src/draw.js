@@ -216,6 +216,8 @@ const api = {
 
 		ctx.save();
 		ctx.translate(Math.floor(csi.x), Math.floor(csi.y));
+
+		ctx.save();
 		ctx.scale(1 / hiResScale, 1 / hiResScale);
 		const havePart = selectedItem && selectedItem.type === 'part' && selectedItem.stepID === step.id;
 		const selectedPartIDs = havePart ? [selectedItem.id] : null;
@@ -224,6 +226,7 @@ const api = {
 		if (res) {
 			ctx.drawImage(res.container, Math.floor(-res.dx), Math.floor(-res.dy));
 		}
+		ctx.restore();
 
 		csi.annotations.forEach(id => {
 			api.annotation(store.get.annotation(id), ctx);
