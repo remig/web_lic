@@ -4,6 +4,18 @@ import _ from '../util';
 import store from '../store';
 import LDParse from '../ld_parse';
 
+function findPLIItem(filename, colorCode) {
+	return store.state.pliItems.find(pliItem => {
+		if (pliItem.filename === filename && pliItem.colorCode === colorCode) {
+			const parent = store.get.parent(pliItem);
+			if (parent.subtype === 'inventoryPage') {
+				return true;
+			}
+		}
+		return false;
+	});
+}
+
 export default {
 	add() {  // Add as many inventory pages as needed to fit all parts
 		const pageNumber = store.get.lastPage().number + 1;
@@ -50,24 +62,46 @@ export default {
 			store.mutations.inventoryPage.delete({page});
 		});
 	},
-	removePart(opts) {  // opts: {filename & colorCode or part, doLayout: false}
+	addPart(opts) {  // opts: {filename & colorCode or part, doLayout: false}
+
 		const filename = opts.filename || opts.part.filename;
 		const colorCode = opts.colorCode || opts.part.colorCode;
-		store.get.inventoryPages().forEach(page => {
-			page.pliItems.forEach(id => {
-				const pliItem = store.get.pliItem(id);
-				if (pliItem.filename === filename && pliItem.colorCode === colorCode) {
-					if (pliItem.quantity === 1) {
-						store.mutations.pliItem.delete({pliItem});
-					} else {
-						pliItem.quantity--;
-					}
-				}
+		const firstPage = store.get.inventoryPages()[0];
+
+		const pliItem = findPLIItem(filename, colorCode);
+		if (pliItem) {
+			pliItem.quantity += 1;
+		} else {
+			store.mutations.pliItem.add({
+				parent: firstPage,
+				filename,
+				colorCode,
+				quantity: 1
 			});
-		});
+		}
 		if (opts.doLayout) {
-			store.get.inventoryPages().forEach(page => {
-				store.mutations.page.layout({page});
+			store.mutations.page.layout({
+				page: firstPage  // Only need to layout first page; layout logic will recreate the rest
+			});
+		}
+	},
+	removePart(opts) {  // opts: {filename & colorCode or part, doLayout: false}
+
+		const filename = opts.filename || opts.part.filename;
+		const colorCode = opts.colorCode || opts.part.colorCode;
+		const pliItem = findPLIItem(filename, colorCode);
+		if (pliItem) {
+			if (pliItem.quantity === 1) {
+				store.mutations.pliItem.delete({pliItem});
+			} else {
+				pliItem.quantity--;
+			}
+		}
+
+		if (opts.doLayout) {
+			store.mutations.page.layout({
+				// Only need to layout first page; layout logic will recreate the rest
+				page: store.get.inventoryPages()[0]
 			});
 		}
 	}

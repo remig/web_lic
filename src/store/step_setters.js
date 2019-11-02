@@ -240,8 +240,8 @@ export default {
 	removePart(opts) {  // opts: {step, partID, doLayout: false}
 		const step = store.get.lookupToItem(opts.step);
 		_.deleteItem(step.parts, opts.partID);
-		const part = LDParse.model.get.partFromID(opts.partID, step.model.filename);
 		if (step.pliID != null) {
+			const part = LDParse.model.get.partFromID(opts.partID, step.model.filename);
 			const pli = {type: 'pli', id: step.pliID};
 			store.mutations.pli.removePart({pli, part});
 		}

@@ -209,12 +209,13 @@ export default {
 		return partList;
 	},
 
-	// Given a pli and a part, find a pliItem in the pli that matches the part's filename & color (if any)
-	matchingPLIItem(pli, part) {
-		pli = store.get.lookupToItem(pli);
-		const targets = pli.pliItems.map(store.get.pliItem)
-			.filter(i => i.filename === part.filename && i.colorCode === part.colorCode);
-		return targets[0];
+	// Given a parent and a part, find a pliItem in the parent that matches the part filename & color (if any)
+	matchingPLIItem(parent, part) {
+		parent = store.get.lookupToItem(parent);
+		return (parent.pliItems || []).map(store.get.pliItem)
+			.find(i => {
+				return i.filename === part.filename && i.colorCode === part.colorCode;
+			});
 	},
 	pliItemIsSubmodel(pliItem) {
 		pliItem = store.get.lookupToItem(pliItem);
