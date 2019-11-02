@@ -1470,7 +1470,7 @@ const contextMenu = {
 									[action, mutation],
 									null,
 									tr('dialog.ld_color_picker.action'),
-									['csi']
+									['csi', 'pliItem']
 								);
 							});
 						});
