@@ -5,7 +5,7 @@ import store from '../store';
 import LDParse from '../ld_parse';
 
 export default {
-	add() {
+	add() {  // Add as many inventory pages as needed to fit all parts
 		const pageNumber = store.get.lastPage().number + 1;
 		const opts = {subtype: 'inventoryPage', pageNumber};
 		const page = store.mutations.page.add(opts);
@@ -33,6 +33,8 @@ export default {
 				store.mutations.pliItem.add({parent: page, filename, colorCode, quantity});
 			});
 		});
+
+		store.mutations.page.layout({page});
 	},
 	delete(opts) {  // opts: {page}
 		const page = store.get.lookupToItem(opts.page);
