@@ -81,7 +81,8 @@ export default {
 		store.mutations.step.removePart(opts);
 		store.mutations.inventoryPage.removePart({part, doLayout: opts.doLayout});
 		store.state.steps.filter(step => {
-			return step.model.filename === model.filename;
+			return step.model.filename === model.filename
+				&& !_.isEmpty(step.parts);
 		}).map(step => {
 			step.parts.forEach((partID, idx) => {
 				if (partID > opts.partID) {
