@@ -4,7 +4,7 @@ describe('Test rotate things ', () => {
 
 	beforeEach(cy.reloadLicPage);
 
-	it.only('Custom Rotation on CSI, with correct Rotate Icon', () => {
+	it('Custom Rotation on CSI, with correct Rotate Icon', () => {
 		cy.importAlligator(true);
 
 		cy.get('#pageCanvas_page_1').click(450, 400).rightclick();

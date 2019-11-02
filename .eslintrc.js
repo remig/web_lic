@@ -9,7 +9,10 @@ module.exports = {
     "extends": [
         "eslint:recommended",
         "plugin:vue/recommended"
-    ],
+	],
+	"plugins": [
+		"no-only-tests"
+	],
     "rules": {
         "array-bracket-spacing": ["error", "never"],
         "block-scoped-var": "error",
@@ -51,7 +54,8 @@ module.exports = {
         "no-new-func": "error",
         "no-new-wrappers": "error",
         "no-octal": "error",
-        "no-octal-escape": "error",
+		"no-octal-escape": "error",
+		"no-only-tests/no-only-tests": "error",
         "no-proto": "error",
         "no-redeclare": "error",
         "no-return-assign": "error",

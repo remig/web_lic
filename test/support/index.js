@@ -6,17 +6,30 @@ Cypress.Commands.add('queryLic', cb => {
 	cy.window().its('__lic').then(cb);
 });
 
-Cypress.Commands.add('importAlligator', excludeTitlePage => {
-	cy.getByTestId('import-alligator').click();
+function importModel(name, excludeTitlePage, useMaxSteps = false) {
+	cy.getByTestId(`import-${name}`).click();
 	cy.getByTestId('import-use-max-steps').find('input').should('be.checked');
-	cy.getByTestId('import-use-max-steps').click();
+	if (!useMaxSteps) {
+		cy.getByTestId('import-use-max-steps').click();
+	}
 	if (excludeTitlePage) {
 		cy.getByTestId('import-include-dropdown').click();
 		cy.getByTestId('include-titlePage').find('i').should('exist');
 		cy.getByTestId('include-titlePage').click();
 	}
 	cy.getByTestId('import-ok').click();
-	cy.spy();
+}
+
+Cypress.Commands.add('importAlligator', (...args) => {
+	importModel('alligator', ...args);
+});
+
+Cypress.Commands.add('importTrivial', (...args) => {
+	importModel('trivial', ...args);
+});
+
+Cypress.Commands.add('importXWing', (...args) => {
+	importModel('xwing', ...args);
 });
 
 Cypress.Commands.add('reloadLicPage', () => {
