@@ -57,36 +57,42 @@ export default {
 		store.mutations.item.delete({item: page});
 	},
 	deleteAll() {
-		const pages = store.get.inventoryPages();
+		const pages = store.get.inventoryPages() || [];
 		pages.forEach(page => {
 			store.mutations.inventoryPage.delete({page});
 		});
 	},
 	addPart(opts) {  // opts: {filename & colorCode or part, doLayout: false}
 
+		const page = store.get.inventoryPages()[0];
+		if (!page) {
+			return;
+		}
 		const filename = opts.filename || opts.part.filename;
 		const colorCode = opts.colorCode || opts.part.colorCode;
-		const firstPage = store.get.inventoryPages()[0];
 
 		const pliItem = findPLIItem(filename, colorCode);
 		if (pliItem) {
 			pliItem.quantity += 1;
 		} else {
 			store.mutations.pliItem.add({
-				parent: firstPage,
+				parent: page,
 				filename,
 				colorCode,
 				quantity: 1
 			});
 		}
 		if (opts.doLayout) {
-			store.mutations.page.layout({
-				page: firstPage  // Only need to layout first page; layout logic will recreate the rest
-			});
+			// Only need to layout first page; layout logic will recreate the rest
+			store.mutations.page.layout({page});
 		}
 	},
 	removePart(opts) {  // opts: {filename & colorCode or part, doLayout: false}
 
+		const page = store.get.inventoryPages()[0];
+		if (!page) {
+			return;
+		}
 		const filename = opts.filename || opts.part.filename;
 		const colorCode = opts.colorCode || opts.part.colorCode;
 		const pliItem = findPLIItem(filename, colorCode);
@@ -99,10 +105,8 @@ export default {
 		}
 
 		if (opts.doLayout) {
-			store.mutations.page.layout({
-				// Only need to layout first page; layout logic will recreate the rest
-				page: store.get.inventoryPages()[0]
-			});
+			// Only need to layout first page; layout logic will recreate the rest
+			store.mutations.page.layout({page});
 		}
 	}
 };
