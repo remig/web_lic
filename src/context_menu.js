@@ -1518,9 +1518,12 @@ const contextMenu = {
 						const filename = step.model.filename;
 						const part = _.cloneDeep(store.get.part(selectedItem.id, step));
 						const partID = LDParse.partDictionary[filename].parts.length;
-						const action = LDParse.getAction.addPart({filename, part});
-						const mutation = {mutation: 'step.addPart', opts: {step, partID}};
-						undoStack.commit([action, mutation], null,
+						const changes = [
+							LDParse.getAction.addPart({filename, part}),
+							{mutation: 'step.addPart', opts: {step, partID}},
+							{mutation: 'inventoryPage.addPart', opts: {part, doLayout: true}}
+						];
+						undoStack.commit(changes, null,
 							tr('action.part.change_part.duplicate.undo'), ['csi']);
 					}
 				},
