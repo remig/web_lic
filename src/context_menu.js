@@ -1538,6 +1538,7 @@ const contextMenu = {
 						const mutation = {mutation: 'part.delete', opts};
 						undoStack.commit([mutation, action], null,
 							tr('action.part.change_part.delete.undo'), ['csi']);
+						app.clearSelected();
 					}
 				}
 			]
