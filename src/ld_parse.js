@@ -31,8 +31,8 @@ const api = {
 		if (part && fn && part.filename == null) {
 			part.filename = fn;
 			api.partDictionary[fn] = part;
-			if (api.partDictionary[null]) {
-				delete api.partDictionary[null];
+			if (api.partDictionary.null) {
+				delete api.partDictionary.null;
 			}
 		}
 
@@ -276,8 +276,8 @@ async function requestPart(fn) {
 const unloadedSubModels = {};
 
 function forceBlack(colorCode, abstractPartName, partName) {
-	partName = (partName + '').toLowerCase();
-	abstractPartName = (abstractPartName + '').toLowerCase();
+	partName = String(partName).toLowerCase();
+	abstractPartName = String(abstractPartName).toLowerCase();
 	if (partName === '4-4cyli.dat') {
 		if (abstractPartName === 'stud.dat' || abstractPartName === 'stud2.dat' ||
 				abstractPartName === 'stud2a.dat' || abstractPartName === 'stod3.dat') {

@@ -83,7 +83,7 @@ export default {
 		store.state.steps.filter(step => {
 			return step.model.filename === model.filename
 				&& !_.isEmpty(step.parts);
-		}).map(step => {
+		}).forEach(step => {
 			step.parts.forEach((partID, idx) => {
 				if (partID > opts.partID) {
 					step.parts[idx] -= 1;

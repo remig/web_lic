@@ -392,17 +392,16 @@ export default {
 				store.get.templatePage(),
 				...store.state.books
 			].filter(el => el);
-		} else {
-			const nodes = store.get.pageList();
-			store.get.submodels().forEach(submodel => {
-				const page = store.get.pageForItem({id: submodel.stepID, type: 'step'});
-				const pageIndex = nodes.indexOf(page);
-				submodel.type = 'submodel';
-				submodel.id = nodes.length;
-				_.insert(nodes, submodel, pageIndex);
-			});
-			return nodes.filter(el => el);
 		}
+		const nodes = store.get.pageList();
+		store.get.submodels().forEach(submodel => {
+			const page = store.get.pageForItem({id: submodel.stepID, type: 'step'});
+			const pageIndex = nodes.indexOf(page);
+			submodel.type = 'submodel';
+			submodel.id = nodes.length;
+			_.insert(nodes, submodel, pageIndex);
+		});
+		return nodes.filter(el => el);
 	},
 	nextItemID(item) {  // Get the next unused ID in this item's list
 		if (item && item.type) {

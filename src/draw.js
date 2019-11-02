@@ -154,7 +154,7 @@ const api = {
 			ctx.font = template.numberLabel.font;
 			ctx.textAlign = lbl.align || 'start';
 			ctx.textBaseline = lbl.valign || 'alphabetic';
-			ctx.fillText(step.number + '', lbl.x, lbl.y);
+			ctx.fillText(String(step.number), lbl.x, lbl.y);
 		}
 
 		if (step.rotateIconID != null) {

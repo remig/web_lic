@@ -205,7 +205,7 @@ function createNode(item) {
 
 	const container = document.createElement('li');
 	const children = getChildItems(item);
-	const childNodes = children.map(createNode).filter(el => !!el);
+	const childNodes = children.map(createNode).filter(Boolean);
 
 	const textNode = _.dom.createElement('span', {
 		id: 'treeRow_' + getItemId(item),

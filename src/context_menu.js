@@ -1407,7 +1407,7 @@ const contextMenu = {
 		{
 			text: 'action.part.remove_from_pli.name',
 			id: 'part_remove_from_pli_cmenu',
-			enabled() { return false;},
+			enabled() {return false;},
 			cb() {}
 		},
 		{
@@ -1586,11 +1586,10 @@ function showDisplacement(direction) {
 		if (step.displacedParts) {
 			if (direction == null) {
 				return step.displacedParts.some(p => p.partID === selectedItem.id);
-			} else {
-				return step.displacedParts.every(p => {
-					return p.partID !== selectedItem.id || p.direction !== direction;
-				});
 			}
+			return step.displacedParts.every(p => {
+				return p.partID !== selectedItem.id || p.direction !== direction;
+			});
 		}
 		return direction != null;
 	};

@@ -318,12 +318,12 @@ function getPartBoundingBox(part, modelView) {
 			if (Array.isArray(p) && (p.length === 9 || p.length === 12)) {
 				for (let j = 0; j < p.length; j += 3) {
 					const pt = twgl.m4.transformPoint(modelView, [p[j], p[j + 1], p[j + 2]]);
-					if (pt[0] < minX) { minX = pt[0]; }
-					if (pt[1] < minY) { minY = pt[1]; }
-					if (pt[2] < minZ) { minZ = pt[2]; }
-					if (pt[0] > maxX) { maxX = pt[0]; }
-					if (pt[1] > maxY) { maxY = pt[1]; }
-					if (pt[2] > maxZ) { maxZ = pt[2]; }
+					if (pt[0] < minX) {minX = pt[0];}
+					if (pt[1] < minY) {minY = pt[1];}
+					if (pt[2] < minZ) {minZ = pt[2];}
+					if (pt[0] > maxX) {maxX = pt[0];}
+					if (pt[1] > maxY) {maxY = pt[1];}
+					if (pt[2] > maxZ) {maxZ = pt[2];}
 				}
 			}
 		}
@@ -335,12 +335,12 @@ function getPartBoundingBox(part, modelView) {
 			twgl.m4.multiply(partMatrix, modelView, partMatrix);
 			const abstractPart = LDParse.partDictionary[subPart.filename];
 			const subBox = getPartBoundingBox(abstractPart, partMatrix);
-			if (subBox.min[0] < minX) { minX = subBox.min[0]; }
-			if (subBox.min[1] < minY) { minY = subBox.min[1]; }
-			if (subBox.min[2] < minZ) { minZ = subBox.min[2]; }
-			if (subBox.max[0] > maxX) { maxX = subBox.max[0]; }
-			if (subBox.max[1] > maxY) { maxY = subBox.max[1]; }
-			if (subBox.max[2] > maxZ) { maxZ = subBox.max[2]; }
+			if (subBox.min[0] < minX) {minX = subBox.min[0];}
+			if (subBox.min[1] < minY) {minY = subBox.min[1];}
+			if (subBox.min[2] < minZ) {minZ = subBox.min[2];}
+			if (subBox.max[0] > maxX) {maxX = subBox.max[0];}
+			if (subBox.max[1] > maxY) {maxY = subBox.max[1];}
+			if (subBox.max[2] > maxZ) {maxZ = subBox.max[2];}
 		}
 	}
 	return {

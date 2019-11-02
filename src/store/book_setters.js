@@ -23,7 +23,7 @@ export default {
 			pages: [],
 			number: opts.bookNumber
 		}});
-		pages.map(page => {
+		pages.forEach(page => {
 			page.parent = {};
 			store.mutations.item.reparent({
 				item: page,

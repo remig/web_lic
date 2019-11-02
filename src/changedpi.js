@@ -203,26 +203,25 @@ function changeDpiOnArray(dataArray, dpi, format, overwritepHYs) {
 			dataArray.set(physChunk, startingIndex);
 			dataArray.set(crcChunk, startingIndex + 13);
 			return dataArray;
-		} else {
-			// i need to give back an array of data that is divisible by 3 so that
-			// dataurl encoding gives me integers, for luck this chunk is 17 + 4 = 21
-			// if it was we could add a text chunk contaning some info, untill desired
-			// length is met.
-
-			// chunk structur 4 bytes for length is 9
-			const chunkLength = new Uint8Array(4);
-			chunkLength[0] = 0;
-			chunkLength[1] = 0;
-			chunkLength[2] = 0;
-			chunkLength[3] = 9;
-
-			const finalHeader = new Uint8Array(54);
-			finalHeader.set(dataArray, 0);
-			finalHeader.set(chunkLength, 33);
-			finalHeader.set(physChunk, 37);
-			finalHeader.set(crcChunk, 50);
-			return finalHeader;
 		}
+		// i need to give back an array of data that is divisible by 3 so that
+		// dataurl encoding gives me integers, for luck this chunk is 17 + 4 = 21
+		// if it was we could add a text chunk contaning some info, untill desired
+		// length is met.
+
+		// chunk structur 4 bytes for length is 9
+		const chunkLength = new Uint8Array(4);
+		chunkLength[0] = 0;
+		chunkLength[1] = 0;
+		chunkLength[2] = 0;
+		chunkLength[3] = 9;
+
+		const finalHeader = new Uint8Array(54);
+		finalHeader.set(dataArray, 0);
+		finalHeader.set(chunkLength, 33);
+		finalHeader.set(physChunk, 37);
+		finalHeader.set(crcChunk, 50);
+		return finalHeader;
 	}
 	return null;
 }

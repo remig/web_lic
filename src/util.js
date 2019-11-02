@@ -66,10 +66,10 @@ _.mixin({
 				fontStretch: '', fontSize: '', fontFamily: []
 			};
 			let haveFontSize = false;
-			font = (font || '') + '';
+			font = String(font || '');
 
 			const fontParts = font.split(/ (?=(?:[^'"]|'[^']*'|"[^"]*")*$)/);
-			fontParts.map(el => {
+			fontParts.forEach(el => {
 				if (!el || typeof el !== 'string') {
 					return;
 				}
