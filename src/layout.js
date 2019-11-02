@@ -47,8 +47,9 @@ const api = {
 
 	inventoryPage(page, box) {
 
-		// If we're laying out the first inventory page, delete all but the first page and redo layout
-		// across entire part list, adding new pages back if necessary
+		// If we're laying out the first inventory page, move all pliItems to the first page,
+		// then delete all but the first page and redo layout across entire part list,
+		// adding new pages back as necessary
 		let pliItems = page.pliItems;
 		const pages = store.get.inventoryPages();
 		if (page === pages[0]) {

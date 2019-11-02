@@ -23,6 +23,13 @@
 //   - Part list page is inaccurate: xwing is missing a ton of parts. redo part list layout fixes
 //   - And redoing layout when we have many part list pages loops forever
 // - Can right click stuff on the template page, but shouldn't be able to
+// - If grid is visible, does it show in exported images?
+// - Add double click on annotation support: pop up the 'edit annotation' dialog
+// - When edit annotation dialogs open, set focus somewhere useful
+// - Try moving a point on a line annotation; crash in glossary.point lookup
+
+// next up:
+// Change color of a part in a submodel; PLIItem that places submodel doesn't update, nor part list page
 
 import _ from './util';
 import uiState from './ui_state';
@@ -539,6 +546,10 @@ const app = new Vue({
 		EventBus.$on('set-selected', item => {
 			this.setSelected(item);
 		});
+
+		// EventBus.$on('state-change', () => {
+		// 	Vue.nextTick(NavTree.update);
+		// });
 
 		undoStack.onChange(() => {
 			this.dirtyState.undoIndex = undoStack.getIndex();
