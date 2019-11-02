@@ -1465,9 +1465,25 @@ const contextMenu = {
 									partID: selectedItem.id,
 									color: newColorCode
 								});
-								const mutation = {mutation: 'pli.syncContent', opts: {pli, doLayout: true}};
+								const change = [
+									action,
+									{mutation: 'pli.syncContent', opts: {pli, doLayout: true}}
+								];
+								if (store.get.inventoryPages().length) {
+									const part = store.get.part(selectedItem.id, step);
+									change.push({mutation: 'inventoryPage.removePart', opts: {
+										filename: part.filename,
+										colorCode: part.colorCode,
+										doLayout: false
+									}});
+									change.push({mutation: 'inventoryPage.addPart', opts: {
+										filename: part.filename,
+										colorCode: newColorCode,
+										doLayout: true
+									}});
+								}
 								undoStack.commit(
-									[action, mutation],
+									change,
 									null,
 									tr('dialog.ld_color_picker.action'),
 									['csi', 'pliItem']

@@ -6,31 +6,29 @@ Cypress.Commands.add('queryLic', cb => {
 	cy.window().its('__lic').then(cb);
 });
 
-function importModel(name, excludeTitlePage, useMaxSteps = false) {
+function importModel(name, excludeTitlePage, useMaxSteps, includePartList) {
 	cy.getByTestId(`import-${name}`).click();
 	cy.getByTestId('import-use-max-steps').find('input').should('be.checked');
 	if (!useMaxSteps) {
 		cy.getByTestId('import-use-max-steps').click();
 	}
-	if (excludeTitlePage) {
+	if (excludeTitlePage || !includePartList) {
 		cy.getByTestId('import-include-dropdown').click();
+	}
+	if (excludeTitlePage) {
 		cy.getByTestId('include-titlePage').find('i').should('exist');
 		cy.getByTestId('include-titlePage').click();
+	}
+	if (!includePartList) {
+		cy.getByTestId('include-partListPage').find('i').should('exist');
+		cy.getByTestId('include-partListPage').click();
 	}
 	cy.getByTestId('import-ok').click();
 }
 
-Cypress.Commands.add('importAlligator', (...args) => {
-	importModel('alligator', ...args);
-});
-
-Cypress.Commands.add('importTrivial', (...args) => {
-	importModel('trivial', ...args);
-});
-
-Cypress.Commands.add('importXWing', (...args) => {
-	importModel('xwing', ...args);
-});
+Cypress.Commands.add('importTrivial', importModel.bind(null, 'trivial'));
+Cypress.Commands.add('importAlligator', importModel.bind(null, 'alligator'));
+Cypress.Commands.add('importXWing', importModel.bind(null, 'xwing'));
 
 Cypress.Commands.add('reloadLicPage', () => {
 	cy.clearLocalStorage();
