@@ -419,11 +419,13 @@ Vue.component('pageView', {
 	computed: {
 		isFacingView() {
 			return this.facingPage
-				&& (this.currentPageLookup == null || this.currentPageLookup.type !== 'templatePage');
+				&& (this.currentPageLookup == null
+					|| !store.get.isTemplatePage(this.currentPageLookup));
 		},
 		isScrollingView() {
 			return this.scroll && this.pageCount > 1
-				&& (this.currentPageLookup == null || this.currentPageLookup.type !== 'templatePage');
+				&& (this.currentPageLookup == null
+					|| !store.get.isTemplatePage(this.currentPageLookup));
 		}
 	}
 });
@@ -432,13 +434,13 @@ function getPairedPages(page) {
 	page = store.get.lookupToItem(page);
 	if (!page) {
 		return [];
-	} else if (page.subtype === 'titlePage') {
+	} else if (store.get.isTitlePage(page)) {
 		return [null, page];
 	} else if (_.isEven(page.number)) {
 		return [page, store.get.nextPage(page)];
 	}
 	const prevPage = store.get.prevPage(page);
-	return [prevPage.subtype === 'templatePage' ? null : prevPage, page];
+	return [store.get.isTemplatePage(prevPage) ? null : prevPage, page];
 }
 
 function setPageLocked(pageID) {
