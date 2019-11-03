@@ -45,27 +45,52 @@ const api = {
 		delete page.needsLayout;
 	},
 
-	inventoryPage(page, box) {
+	allInventoryPages() {
 
-		// If we're laying out the first inventory page, move all pliItems to the first page,
+		// If we already have multiple inventory pages, move all pliItems to the first page,
 		// then delete all but the first page and redo layout across entire part list,
 		// adding new pages back as necessary
-		let pliItems = page.pliItems;
 		const pages = store.get.inventoryPages();
-		if (page === pages[0]) {
+		const firstPage = pages[0];
+		if (pages.length > 1) {
 			// Delete all but first inventory page
-			while (pages.length > 1) {
-				const pageToRemove = _.last(pages);
+			for (let i = 1; i < pages.length; i++) {
+				const pageToRemove = pages[i];
 				while (pageToRemove.pliItems.length) {
 					const id = pageToRemove.pliItems[0];
-					store.mutations.item.reparent({item: {type: 'pliItem', id}, newParent: page});
+					store.mutations.item.reparent(
+						{item: {type: 'pliItem', id}, newParent: firstPage}
+					);
 				}
 				store.mutations.inventoryPage.delete({page: pageToRemove});
 			}
 		}
 
+		const allPLIItems = firstPage.pliItems.map(store.get.pliItem);
+		api.page(firstPage);
+		let nextPage = firstPage;
+		const unplaced = item => {
+			return !nextPage.pliItems.includes(item.id);
+		};
+		const reparent = item => {
+			store.mutations.item.reparent({item, newParent: nextPage});
+		};
+		let unplacedPLIItems = allPLIItems.filter(unplaced);
+		while (unplacedPLIItems.length > 0) {
+			// Create a new inventory page and add all remaining pli items to it
+			const opts = {subtype: 'inventoryPage', pageNumber: nextPage.number + 1};
+			nextPage = store.mutations.page.add(opts);
+			unplacedPLIItems.forEach(reparent);
+			api.page(nextPage);
+			unplacedPLIItems = unplacedPLIItems.filter(unplaced);
+		}
+	},
+
+	// Lays out a single inventory page. Any pli items on the page that don't fit are ignored
+	inventoryPage(page, box) {
+
 		// Start with a big list of unsorted pli items with no size or position info.
-		pliItems = page.pliItems.map(store.get.pliItem);
+		const pliItems = page.pliItems.map(store.get.pliItem);
 
 		// Layout each pli; this sets its size info and positions its quantity label.
 		pliItems.forEach(pliItem => {
@@ -101,7 +126,7 @@ const api = {
 		// Start placing items on the page.  First item goes top left, next below that then on
 		// until we hit the bottom of the page.  That's one column.  Track the widest label
 		// placed in that column, then place next item at top of page again, max column width over.
-		// If new column exceeds page width, add a new page and do its layout separately
+		// If new column exceeds page width, store plis that don't fit and return them
 		for (let i = 0; i < pliItems.length; i++) {
 			const pliItem = pliItems[i];
 			if (y + pliItem.height > box.height) {  // Check if new item fits below current item
@@ -111,14 +136,10 @@ const api = {
 				columns.push([]);
 			}
 			if (x + pliItem.width > box.width) {
-				// New item overflowed over the right edge of the page.  Create a new page and
-				// pass it the remaining parts.
-				const opts = {subtype: 'inventoryPage', pageNumber: page.number + 1};
-				const newPage = store.mutations.page.add(opts);
-				pliItems.slice(i).forEach(item => {
-					store.mutations.item.reparent({item, newParent: newPage});
-				});
-				api.page(newPage);
+				// Remove any pli items that didn't fit on this page
+				// They'll be re-added to a different page later
+				// This should only happen during overall inventory page creation
+				page.pliItems = page.pliItems.slice(0, i);
 				break;
 			}
 

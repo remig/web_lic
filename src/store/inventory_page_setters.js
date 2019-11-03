@@ -3,6 +3,7 @@
 import _ from '../util';
 import store from '../store';
 import LDParse from '../ld_parse';
+import Layout from '../layout';
 
 function findPLIItem(filename, colorCode) {
 	return store.state.pliItems.find(pliItem => {
@@ -46,7 +47,7 @@ export default {
 			});
 		});
 
-		store.mutations.page.layout({page});
+		Layout.allInventoryPages();
 	},
 	delete(opts) {  // opts: {page}
 		const page = store.get.lookupToItem(opts.page);

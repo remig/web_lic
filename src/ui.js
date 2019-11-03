@@ -15,16 +15,13 @@
 // - Change page numbers to 'even left odd right' (or 'odd left even right') then append a page:
 //     pages after new page have badly positioned page numbers
 // - On intro page, click 'Create new book' or 'Continue book', then cancel; intro is gone
-// - Change part color but inventory page doesn't update
 // - Fix import progress bar for models with one base model like basic x-wing
 // - Check localStorage.set to ensure it doesn't go over browser limit. Ifit does, use lzstring to compress
 // - Need submodel + bag breakdown page and final 'no step' complete model page
-// - Part list pages are borked: on import, if we need mulitple pages still get just one
-//   - Part list page is inaccurate: xwing is missing a ton of parts. redo part list layout fixes
-//   - And redoing layout when we have many part list pages loops forever
 // - Add double click on annotation support: pop up the 'edit annotation' dialog
 // - When edit annotation dialogs open, set focus somewhere useful
 // - Try moving a point on a line annotation; crash in glossary.point lookup
+// - Grid config dialog is atrociously ugly
 
 import _ from './util';
 import uiState from './ui_state';
