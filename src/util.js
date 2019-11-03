@@ -357,9 +357,9 @@ _.mixin({
 				colorString = [colorObj.r, colorObj.g, colorObj.b];
 			}
 			const scale = isUnitColor ? 1 : 255;
-			return (0.2126 * (colorString[0] / scale ** 2.2))
-				+ (0.7151 * (colorString[1] / scale ** 2.2))
-				+ (0.0721 * (colorString[2] / scale ** 2.2));
+			return (0.2126 * ((colorString[0] / scale) ** 2.2))
+				+ (0.7151 * ((colorString[1] / scale) ** 2.2))
+				+ (0.0721 * ((colorString[2] / scale) ** 2.2));
 		};
 		color.opposite = (colorString) => {
 			return (_.color.luma(colorString) < 0.18) ? 'white' : 'black';
