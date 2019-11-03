@@ -43,7 +43,7 @@ describe('Test multi book ', () => {
 	});
 
 	it('Multi-book dialog shows up with correct defaults', () => {
-		cy.importAlligator();
+		cy.importAlligator({use1Step: true});
 
 		cy.get('#edit_menu').click();
 		cy.get('#multi_book_menu').click();
@@ -62,8 +62,7 @@ describe('Test multi book ', () => {
 	});
 
 	it('Split Alligator with default Multi-book settings', () => {
-
-		cy.importAlligator();
+		cy.importAlligator({use1Step: true});
 
 		// Split into multiple books with default multi-book settings
 		cy.get('#edit_menu').click();
@@ -92,8 +91,7 @@ describe('Test multi book ', () => {
 	});
 
 	it('Split Alligator with no title pages', () => {
-
-		cy.importAlligator(true);
+		cy.importAlligator({excludeTitlePage: true, use1Step: true});
 
 		// Split into multiple books without title pages
 		cy.get('#edit_menu').click();
@@ -171,8 +169,7 @@ describe('Test multi book ', () => {
 	});
 
 	it('Split Alligator preserve page numbers', () => {
-
-		cy.importAlligator(true);
+		cy.importAlligator({excludeTitlePage: true, use1Step: true});
 
 		// Split into multiple books and preserves page numbers
 		cy.get('#edit_menu').click();
@@ -229,8 +226,7 @@ describe('Test multi book ', () => {
 	});
 
 	it('Split Alligator into separate files', () => {
-
-		cy.importAlligator();
+		cy.importAlligator({use1Step: true});
 
 		// Split into multiple books with default multi-book settings
 		cy.get('#edit_menu').click();

@@ -5,7 +5,7 @@ describe('Test Callouts', () => {
 	beforeEach(cy.reloadLicPage);
 
 	it('Custom Rotation on CSI, with correct Rotate Icon', () => {
-		cy.importAlligator(true);
+		cy.importAlligator({excludeTitlePage: true, use1Step: true});
 
 		cy.get('#pageCanvas_page_1').click(200, 350).rightclick();
 		cy.queryLic(lic => {

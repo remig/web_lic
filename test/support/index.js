@@ -6,20 +6,21 @@ Cypress.Commands.add('queryLic', cb => {
 	cy.window().its('__lic').then(cb);
 });
 
-function importModel(name, excludeTitlePage, useMaxSteps, includePartList) {
+// opts: {excludeTitlePage, use1Step, excludePartListPage}
+function importModel(name, opts) {
 	cy.getByTestId(`import-${name}`).click();
 	cy.getByTestId('import-use-max-steps').find('input').should('be.checked');
-	if (!useMaxSteps) {
+	if (opts.use1Step) {
 		cy.getByTestId('import-use-max-steps').click();
 	}
-	if (excludeTitlePage || !includePartList) {
+	if (opts.excludeTitlePage || opts.excludePartListPage) {
 		cy.getByTestId('import-include-dropdown').click();
 	}
-	if (excludeTitlePage) {
+	if (opts.excludeTitlePage) {
 		cy.getByTestId('include-titlePage').find('i').should('exist');
 		cy.getByTestId('include-titlePage').click();
 	}
-	if (!includePartList) {
+	if (opts.excludePartListPage) {
 		cy.getByTestId('include-partListPage').find('i').should('exist');
 		cy.getByTestId('include-partListPage').click();
 	}

@@ -5,7 +5,7 @@ describe('Test rotate things ', () => {
 	beforeEach(cy.reloadLicPage);
 
 	it('Custom Rotation on CSI, with correct Rotate Icon', () => {
-		cy.importAlligator(true);
+		cy.importAlligator({excludeTitlePage: true, use1Step: true});
 
 		cy.get('#pageCanvas_page_1').click(450, 400).rightclick();
 		cy.get('#csi_rotate_cmenu').click();
