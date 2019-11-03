@@ -55,12 +55,11 @@ export default {
 	},
 	load(opts) {  // opts: {template}
 		store.state.template = opts.template;
+		store.mutations.sceneRendering.refreshAll();
 	},
 	reset() {
 		store.state.template = _.cloneDeep(defaultTemplate);
-		store.mutations.page.markAllDirty();
-		store.mutations.csi.markAllDirty();
-		store.mutations.pliItem.markAllDirty();
+		store.mutations.sceneRendering.refreshAll();
 	},
 	setPageSize(opts) {  // opts: {width, height}
 		store.state.template.page.width = opts.width;
