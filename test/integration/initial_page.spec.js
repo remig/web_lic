@@ -65,6 +65,7 @@ describe('Launch initial empty page', () => {
 		cy.get(page.ids.dialog.localeChooser.select).should('be.visible');
 		cy.get(page.ids.dialog.localeChooser.container + ' .el-button')
 			.click();
+		cy.get(page.ids.dialog.localeChooser.container).should('not.exist');
 	});
 
 	it('General page layout is right', () => {
