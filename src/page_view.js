@@ -31,6 +31,11 @@ Vue.component('pageView', {
 		const pageHeight = this.pageSize.height;
 		const scrolling = this.isScrollingView;
 		const facing = this.isFacingView;
+		const currentPageLookup = this.currentPageLookup;
+
+		if (!store || !store.model) {
+			return null;
+		}
 
 		function renderOnePage(idx, pageLookup, locked) {
 
@@ -109,8 +114,8 @@ Vue.component('pageView', {
 			);
 		}
 
-		if (this.currentPageLookup && store.get.isTemplatePage(this.currentPageLookup)) {
-			pageIDsToDraw = [this.currentPageLookup];
+		if (currentPageLookup && store.get.isTemplatePage(currentPageLookup)) {
+			pageIDsToDraw = [_.clone(currentPageLookup)];
 		} else if (scrolling) {
 			pageIDsToDraw = store.get.pageList().map(p => ({type: p.type, id: p.id}));
 			pageIDsToDraw.shift();  // Don't include template page
@@ -118,10 +123,10 @@ Vue.component('pageView', {
 				pageIDsToDraw.unshift(null);  // Add empty placeholder to the left of title page
 			}
 		} else if (facing) {
-			pageIDsToDraw = getPairedPages(this.currentPageLookup)
+			pageIDsToDraw = getPairedPages(currentPageLookup)
 				.map(p => (p ? {type: p.type, id: p.id} : null));
-		} else if (this.currentPageLookup) {
-			pageIDsToDraw = [this.currentPageLookup];
+		} else if (currentPageLookup) {
+			pageIDsToDraw = [_.clone(currentPageLookup)];
 		} else {
 			return null;  // No pages, nothing to render
 		}
