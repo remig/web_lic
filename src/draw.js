@@ -7,7 +7,7 @@ import uiState from './ui_state';
 
 const api = {
 
-	page(page, canvas, config = {}) {  // config: {hiResScale, selectedItem, noCache}
+	page(page, canvas, config = {}) {  // config: {hiResScale, selectedItem, noCache, noGrid}
 
 		const hiResScale = config.hiResScale = config.hiResScale || 1;
 		if (page.needsLayout) {
@@ -66,7 +66,7 @@ const api = {
 			template.border.cornerRadius + template.border.width, rectStyle
 		);
 
-		if (uiState.get('grid').enabled) {
+		if (!config.noGrid && uiState.get('grid').enabled) {
 			api.grid(ctx, template.width, template.height);
 		}
 

@@ -20,7 +20,7 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 			if (page.needsLayout) {
 				store.mutations.page.layout({page});
 			}
-			Draw.page(page, canvas, {hiResScale, noCache: true});
+			Draw.page(page, canvas, {hiResScale, noCache: true, noGrid: true});
 
 			drawPageCallback(page, canvas);
 
