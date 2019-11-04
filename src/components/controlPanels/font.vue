@@ -20,25 +20,27 @@
 			</el-select>
 		</el-form-item>
 		<el-form-item label-width="0px">
-			<el-button
-				type="primary"
+			<el-checkbox-button
+				v-model="bold"
 				class="fontStyleButton"
-				@click.stop.prevent="toggleProp('bold')"
+				@change="updateValues()"
 			>
 				<strong>{{tr('template.font.bold_character')}}</strong>
-			</el-button>
-			<el-button
+			</el-checkbox-button>
+			<el-checkbox-button
+				v-model="italic"
 				class="fontStyleButton"
-				@click.stop.prevent="toggleProp('italic')"
+				@change="updateValues()"
 			>
 				<em>{{tr('template.font.italic_character')}}</em>
-			</el-button>
-			<el-button
+			</el-checkbox-button>
+			<el-checkbox-button
+				v-model="underline"
 				class="fontStyleButton"
-				@click.stop.prevent="toggleProp('underline')"
+				@change="updateValues()"
 			>
 				<u>{{tr('template.font.underline_character')}}</u>
-			</el-button>
+			</el-checkbox-button>
 		</el-form-item>
 		<el-form-item :label="tr('glossary.size')">
 			<input
@@ -72,7 +74,6 @@ const getFamilyNames = fontNameDialog.methods.getFamilyNames;
 const addCustomFont = fontNameDialog.methods.addCustomFont;
 
 // TODO: support underlining fonts in general
-// TODO: font styling buttons (bold, italic, underline) need to toggle
 export default {
 	components: {PanelBase},
 	props: ['templateEntry'],
@@ -91,10 +92,6 @@ export default {
 		};
 	},
 	methods: {
-		toggleProp(prop) {
-			this[prop] = !this[prop];
-			this.updateValues();
-		},
 		cacheFontName(show) {
 			if (show) {
 				this._lastFontFamily = this.family;

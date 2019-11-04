@@ -28,19 +28,24 @@
 						</el-option>
 					</el-option-group>
 				</el-select>
-				<el-button
-					type="primary"
+				<el-checkbox-button
+					v-model="bold"
 					class="fontStyleButton"
-					@click.stop.prevent="toggleProp('bold')"
 				>
 					<strong>B</strong>
-				</el-button>
-				<el-button
+				</el-checkbox-button>
+				<el-checkbox-button
+					v-model="italic"
 					class="fontStyleButton"
-					@click.stop.prevent="toggleProp('italic')"
 				>
 					<em>I</em>
-				</el-button>
+				</el-checkbox-button>
+				<el-checkbox-button
+					v-model="underline"
+					class="fontStyleButton"
+				>
+					<u>U</u>
+				</el-checkbox-button>
 			</el-form-item>
 			<el-form-item :label="tr('glossary.font_size')">
 				<input
@@ -93,9 +98,6 @@ export default {
 			this.bold = fontParts.fontWeight === 'bold';
 			this.italic = fontParts.fontStyle === 'italic';
 			this.underline = false;
-		},
-		toggleProp(prop) {
-			this[prop] = !this[prop];
 		},
 		ok() {
 			this.$emit('ok', {
