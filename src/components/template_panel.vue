@@ -5,7 +5,7 @@
 		<h4>{{title()}}</h4>
 		<div class="panel-group">
 			<component
-				ref="currentTemplatePanel"
+				ref="currentTemplateRef"
 				:is="currentTemplatePanel"
 				:selected-item="selectedItem"
 				:template-entry="templateEntry"
@@ -17,6 +17,7 @@
 
 <script>
 
+/* global Vue: false */
 import _ from '../util';
 import store from '../store';
 import undoStack from '../undo_stack';
@@ -34,20 +35,20 @@ import rotateIconTemplatePanel from './controlPanels/rotate_icon_template.vue';
 // First level child keys match the basic type of the selected item's parent
 // Second level child keys match the basic type of the selected item's parent's parent (grandparent)
 const componentLookup = {
-	page: pageTemplatePanel,
+	page: [pageTemplatePanel, ''],
 	csi: {
 		step: [csiTemplatePanel, 'step.csi'],
 		submodelImage: [csiTemplatePanel, 'submodelImage.csi']
 	},
-	pliItem: pliItemTemplatePanel,
-	pli: pliTemplatePanel,
+	pliItem: [pliItemTemplatePanel, ''],
+	pli: [pliTemplatePanel, ''],
 	callout: [fillAndBorderTemplatePanel, 'callout'],
 	calloutArrow: [borderPanel, 'callout.arrow'],
 	submodelImage: [fillAndBorderTemplatePanel, 'submodelImage'],
 	divider: [borderPanel, 'divider'],
-	rotateIcon: rotateIconTemplatePanel,
+	rotateIcon: [rotateIconTemplatePanel, ''],
 	numberLabel: {
-		page: pageNumberTemplatePanel,
+		page: [pageNumberTemplatePanel, ''],
 		step: {
 			callout: [fontPanel, 'callout.step.numberLabel'],
 			'default': [fontPanel, 'step.numberLabel']
@@ -59,14 +60,42 @@ const componentLookup = {
 	}
 };
 
+function getCurrentTemplate(selectedItem) {
+	if (!selectedItem) {
+		return null;
+	}
+	const type = selectedItem.type;
+	if (type in componentLookup) {
+		const lookup = componentLookup[type];
+		const parent = store.get.parent(selectedItem);
+		const grandparent = store.get.parent(parent);
+		if (parent && parent.type in lookup) {
+			if (grandparent && grandparent.type in lookup[parent.type]) {
+				return lookup[parent.type][grandparent.type];
+			} else if (lookup[parent.type].default) {
+				return lookup[parent.type].default;
+			}
+			return lookup[parent.type];
+		}
+		return lookup;
+	}
+	return null;
+}
+
 export default {
 	props: ['selectedItem', 'app'],
 	data() {
-		return {lastEdit: null, templateEntry: null};
+		const res = getCurrentTemplate(this.selectedItem) || [];
+		return {
+			currentTemplatePanel: res[0],
+			templateEntry: res[1],
+			lastEdit: null
+		};
 	},
 	watch: {
 		selectedItem() {
 			this.applyChanges();
+			this.setCurrentTemplate(this.selectedItem);
 		}
 	},
 	methods: {
@@ -75,14 +104,14 @@ export default {
 			if (!opts.noLayout) {
 				store.get.templatePage().needsLayout = true;
 			}
-			this.app.redrawUI(false);
+			this.app.drawCurrentPage();
 		},
 		applyChanges() {
 			// TODO: Make sure something actually changed before pushing to the undo stack
 			// eg: add then immediately remove an image...
 			if (this.lastEdit) {
-				if (typeof this.$refs.currentTemplatePanel.apply === 'function') {
-					this.$refs.currentTemplatePanel.apply();
+				if (typeof this.$refs.currentTemplateRef.apply === 'function') {
+					this.$refs.currentTemplateRef.apply();
 				} else {
 					if (!this.lastEdit.noLayout) {
 						store.mutations.page.markAllDirty();
@@ -106,41 +135,22 @@ export default {
 				: this.tr('template.select_page_item');
 		},
 		forceUpdate() {
+			this.setCurrentTemplate();
 			this.$forceUpdate();
-			if (this.$refs.currentTemplatePanel) {
-				this.$refs.currentTemplatePanel.$forceUpdate();
-				this.$refs.currentTemplatePanel.$children.forEach(el => el.$forceUpdate());
+			if (this.$refs.currentTemplateRef) {
+				this.$refs.currentTemplateRef.$forceUpdate();
+				this.$refs.currentTemplateRef.$children.forEach(el => el.$forceUpdate());
 			}
-		}
-	},
-	computed: {
-		currentTemplatePanel: function() {
-			if (!this.selectedItem) {
-				return null;
+		},
+		setCurrentTemplate() {
+			this.currentTemplatePanel = this.templateEntry = null;
+			const res = getCurrentTemplate(this.selectedItem);
+			if (res) {
+				Vue.nextTick(() => {
+					this.currentTemplatePanel = res[0];
+					this.templateEntry = res[1];
+				});
 			}
-			let res;
-			const type = this.selectedItem.type;
-			if (type in componentLookup) {
-				const parent = store.get.parent(this.selectedItem);
-				const grandparent = store.get.parent(parent);
-				if (parent && parent.type in componentLookup[type]) {
-					if (grandparent && grandparent.type in componentLookup[type][parent.type]) {
-						res = componentLookup[type][parent.type][grandparent.type];
-					} else if (componentLookup[type][parent.type].default) {
-						res = componentLookup[type][parent.type].default;
-					} else {
-						res = componentLookup[type][parent.type];
-					}
-				} else {
-					res = componentLookup[type];
-				}
-				if (Array.isArray(res)) {
-					this.templateEntry = res[1];  // eslint-disable-line vue/no-side-effects-in-computed-properties, max-len
-					return res[0];
-				}
-				return res;
-			}
-			return null;
 		}
 	},
 	beforeDestroy() {
