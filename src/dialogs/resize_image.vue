@@ -177,11 +177,6 @@ export default {
 				'bottom_left', 'bottom', 'bottom_right'
 			];
 		},
-		isShrunkImageExactFit() {
-			this.updateImageInfo();
-			const info = this.imageInfo;
-			return info.width === info.pageWidth && info.height === info.pageHeight;
-		},
 		isImageTooBig() {
 			const info = this.imageInfo;
 			return info.originalWidth > info.pageWidth
@@ -194,23 +189,22 @@ export default {
 			return tr(`dialog.resize_image.${this.isImageTooBig ? 'shrink' : 'stretch'}`);
 		},
 		needAspectRatioUI() {
-			if (this.isShrunkImageExactFit) {
+			if (this.imageInfo.preserveSize || this.aspectRatiosMatch) {
 				return false;
 			}
-			return !this.imageInfo.preserveSize && !this.imageInfo.aspectRatiosMatch;
+			return true;
 		},
 		needPositionUI() {
-			if (this.isShrunkImageExactFit) {
-				return false;
-			}
-			this.updateImageInfo();
 			const info = this.imageInfo;
-			return info.preserveSize || info.aspectRatiosMatch || info.preserveAspectRatio;
+			if (info.preserveSize || this.aspectRatiosMatch || info.preserveAspectRatio) {
+				return true;
+			}
+			return false;
 		},
 		aspectRatiosMatch() {
 			const info = this.imageInfo;
 			return _.eq(
-				info.width / info.height,
+				info.originalWidth / info.originalHeight,
 				info.pageWidth / info.pageHeight
 			);
 		}
