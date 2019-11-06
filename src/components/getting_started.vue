@@ -54,15 +54,12 @@ export default {
 	props: ['app'],
 	methods: {
 		importCustomModel() {
-			this.hideMessage();
 			this.app.importCustomModel();
 		},
 		open() {
-			this.hideMessage();
 			this.app.openLicFile();
 		},
 		importModel(fn) {
-			this.hideMessage();
 			this.app.importBuiltInModel(fn);
 		},
 		showAbout() {

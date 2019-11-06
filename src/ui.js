@@ -10,11 +10,8 @@
 // - Put submodels inline then move submodel merge step to previous page
 //		as the only step on row 2; arrow is wrong
 // - Shrunken submodel images need to be centered (move lots of steps onto alligator head step to see)
-// - Add an image to the background then undo: image still listed in page panel image picker
-// - Switch to two page view then close model; 'getting started' is half paged
 // - Change page numbers to 'even left odd right' (or 'odd left even right') then append a page:
 //     pages after new page have badly positioned page numbers
-// - On intro page, click 'Create new book' or 'Continue book', then cancel; intro is gone
 // - Fix import progress bar for models with one base model like basic x-wing
 // - Check localStorage.set to ensure it doesn't go over browser limit. Ifit does, use lzstring to compress
 // - Need submodel + bag breakdown page and final 'no step' complete model page
