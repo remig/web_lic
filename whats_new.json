@@ -1,5 +1,27 @@
 [
 	{
+		"version": "0.48.0",
+		"date": "November 5, 2019",
+		"features": [
+			"Add support for splitting instructions into multiple books. Accessed with 'Edit -> Multiple Books'. This can be used to divide up really big models into smaller, manageable instruction files."
+		],
+		"bug_fixes": [
+			"Make first page in nav tree selectable",
+			"Many small translation lookup fixes",
+			"Keep step rotate icon and UI in sync (#29)",
+			"Correctly scale Step Annotations during hi-res export (#30)",
+			"Make prepend and append step work correctly in Callouts (#31)",
+			"Make 'Bold' and 'Italic' icons on Template Page toggle correctly (#35)",
+			"Include CSI annotations in the nav tree",
+			"After a part is altered, redraw PLI, Submodel and Title page so they accurately reflect change",
+			"Keep Part List pages in sync with any parts changes (add | delete | change color)",
+			"Add correct number of Part List Pages during model import",
+			"Don't crash when deleting last Part in a Step",
+			"Refresh all cached renderings when a new Template is loaded, to ensure all 3D image scales are drawn correctly",
+			"Don't draw the Grid during export"
+		]
+	},
+	{
 		"version": "0.47.0",
 		"date": "September 8, 2019",
 		"features": [
