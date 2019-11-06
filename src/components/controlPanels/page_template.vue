@@ -90,6 +90,7 @@ import store from '../../store';
 import FillPanel from './fill.vue';
 import BorderPanel from './border.vue';
 import PanelBase from './panel_base.vue';
+import EventBus from '../../event_bus';
 
 const pageSizeLookups = {  // [width, height] in pixels
 	a3: [1123, 1587],
@@ -126,6 +127,7 @@ export default {
 			this.updateValues();
 		},
 		newValues() {
+			EventBus.$emit('page-resize');
 			this.$emit('new-values', 'page');
 		},
 		updatePagePreset(newPagePreset) {
@@ -171,7 +173,7 @@ export default {
 				haveChange = true;
 			}
 			if (haveChange) {
-				this.$emit('new-values', 'page');
+				this.newValues();
 			}
 		},
 		printedSize(unit) {

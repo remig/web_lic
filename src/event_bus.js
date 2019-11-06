@@ -7,3 +7,4 @@ export default EventBus;
 // supported events:
 // set-selected(item)
 // state-change
+// page-resize

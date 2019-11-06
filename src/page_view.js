@@ -8,11 +8,17 @@ import store from './store';
 import undoStack from './undo_stack';
 import uiState from './ui_state';
 import Guide from './components/guide.vue';
+import EventBus from './event_bus';
 
 const multiPagePadding = 15;
 Vue.component('pageView', {
 	props: ['app', 'selectedItem', 'currentPageLookup'],
 	data() {
+
+		EventBus.$on('page-resize', () => {
+			this.forceUpdate();
+		});
+
 		return {
 			pageSize: {
 				width: store.state.template.page.width,
