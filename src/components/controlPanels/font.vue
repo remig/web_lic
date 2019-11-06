@@ -34,13 +34,13 @@
 			>
 				<em>{{tr('template.font.italic_character')}}</em>
 			</el-checkbox-button>
-			<el-checkbox-button
+			<!-- <el-checkbox-button
 				v-model="underline"
 				class="fontStyleButton"
 				@change="updateValues()"
 			>
 				<u>{{tr('template.font.underline_character')}}</u>
-			</el-checkbox-button>
+			</el-checkbox-button> -->
 		</el-form-item>
 		<el-form-item :label="tr('glossary.size')">
 			<input

@@ -40,12 +40,12 @@
 				>
 					<em>I</em>
 				</el-checkbox-button>
-				<el-checkbox-button
+				<!-- <el-checkbox-button
 					v-model="underline"
 					class="fontStyleButton"
 				>
 					<u>U</u>
-				</el-checkbox-button>
+				</el-checkbox-button> -->
 			</el-form-item>
 			<el-form-item :label="tr('glossary.font_size')">
 				<input
