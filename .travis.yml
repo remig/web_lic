@@ -12,4 +12,6 @@ cache:
 install:
   - npm i
 script:
-  - npm run start & $(npm bin)/cypress run --record
+  - npm run start &
+  - $(npm bin)/cypress run
+  - kill $(jobs -p) || true
