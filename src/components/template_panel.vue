@@ -5,8 +5,8 @@
 		<h4>{{title()}}</h4>
 		<div class="panel-group">
 			<component
-				ref="currentTemplateRef"
 				:is="currentTemplatePanel"
+				ref="currentTemplateRef"
 				:selected-item="selectedItem"
 				:template-entry="templateEntry"
 				@new-values="newValues"

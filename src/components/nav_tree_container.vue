@@ -27,7 +27,7 @@
 							:command="el"
 						>
 							{{tr(el.name)}}
-							<i v-if="el.checked" class="fas fa-check"/>
+							<i v-if="el.checked" class="fas fa-check" />
 						</el-dropdown-item>
 					</template>
 				</el-dropdown-menu>

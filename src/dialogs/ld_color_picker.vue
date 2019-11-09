@@ -9,15 +9,21 @@
 		<table class="el-table brickColorTable">
 			<tr>
 				<th>{{tr('dialog.ld_color_picker.ld_code')}}</th>
-				<th style="text-align: left;">{{tr('dialog.ld_color_picker.name')}}</th>
-				<th style="text-align: left;">{{tr('dialog.ld_color_picker.choose')}}</th>
+				<th style="text-align: left;">
+					{{tr('dialog.ld_color_picker.name')}}
+				</th>
+				<th style="text-align: left;">
+					{{tr('dialog.ld_color_picker.choose')}}
+				</th>
 			</tr>
 		</table>
 		<div class="brickColorTableScroll">
 			<table class="el-table brickColorTable">
-				<tr v-for="row in colorData" v-if="row" :key="row.id" class="brickColorRow">
+				<tr v-for="row in colorData" :key="row.id" class="brickColorRow">
 					<td>{{row.id}}</td>
-					<td style="text-align: left;">{{_.startCase(row.name)}}</td>
+					<td style="text-align: left;">
+						{{_.startCase(row.name)}}
+					</td>
 					<td>
 						<div class="swatch" @click="pick(row.id)">
 							<div :style="{'background-color': row.color}" class="inner_swatch" />
@@ -54,7 +60,7 @@ function buildColorTable() {
 			edge: customColor.edge || v.edge
 		};
 	});
-	return colors;
+	return colors.filter(el => el != null);
 }
 
 export default {

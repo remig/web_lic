@@ -4,8 +4,8 @@
 	<ul class="dropdown-menu">
 		<li
 			v-for="entry in visibleMenuEntries()"
-			:key="entry.id"
 			:id="entry.id"
+			:key="entry.id"
 			:class="entryClasses(entry)"
 		>
 			<a

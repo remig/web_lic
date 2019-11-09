@@ -14,8 +14,8 @@
 			</el-form-item>
 			<el-form-item>
 				<input
-					:disabled="autoRows"
 					v-model.number="values.rows"
+					:disabled="autoRows"
 					type="number"
 					min="1"
 					class="form-control"
@@ -31,8 +31,8 @@
 			</el-form-item>
 			<el-form-item>
 				<input
-					:disabled="autoCols"
 					v-model.number="values.cols"
+					:disabled="autoCols"
 					type="number"
 					min="1"
 					class="form-control"

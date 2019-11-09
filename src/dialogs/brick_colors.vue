@@ -9,16 +9,24 @@
 		<table class="el-table brickColorTable">
 			<tr>
 				<th>{{tr('dialog.brick_colors.ld_code')}}</th>
-				<th style="text-align: left;">{{tr('dialog.brick_colors.name')}}</th>
-				<th>{{tr('glossary.color')}}</th>
-				<th>{{tr('dialog.brick_colors.edge_color')}}</th>
+				<th style="text-align: left;">
+					{{tr('dialog.brick_colors.name')}}
+				</th>
+				<th>
+					{{tr('glossary.color')}}
+				</th>
+				<th>
+					{{tr('dialog.brick_colors.edge_color')}}
+				</th>
 			</tr>
 		</table>
 		<div class="brickColorTableScroll">
 			<table class="el-table brickColorTable">
 				<tr v-for="row in colorData" :key="row.id" class="brickColorRow">
 					<td>{{row.id}}</td>
-					<td style="text-align: left;">{{_.startCase(row.name)}}</td>
+					<td style="text-align: left;">
+						{{_.startCase(row.name)}}
+					</td>
 					<td>
 						<el-color-picker v-model="row.color" color-format="hex" />
 					</td>

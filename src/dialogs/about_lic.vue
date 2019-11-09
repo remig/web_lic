@@ -20,21 +20,29 @@
 			<p v-html="tr('dialog.about_lic.contact_@link', 'https://github.com/remig/web_lic/issues')" />
 			<!-- eslint-disable-next-line max-len -->
 			<p v-html="tr('dialog.about_lic.lang_@link', 'https://github.com/remig/web_lic/wiki/Translating-Lic')" />
-			<p><strong>{{tr('dialog.about_lic.thanks')}}</strong>
+			<p>
+				<strong>
+					{{tr('dialog.about_lic.thanks')}}
+				</strong>
 				<ul>
-					<li>{{tr('dialog.about_lic.feedback')}}
+					<li>
+						{{tr('dialog.about_lic.feedback')}}
 						<a href="https://www.flickr.com/photos/legohaulic/" target="_blank">Tyler Clites</a>
 						{{tr('dialog.about_lic.and')}}
 						<a href="http://constructibles.net/" target="_blank">Jason Petrasich</a>
 					</li>
-					<li>{{tr('dialog.about_lic.german')}}
+					<li>
+						{{tr('dialog.about_lic.german')}}
 						<a href="https://github.com/mried" target="_blank">mried</a>
 					</li>
 					<li>{{tr('dialog.about_lic.french')}}Jean-Philippe Lechêne</li>
 				</ul>
 			</p>
 			<br>
-			<p>{{tr('dialog.about_lic.copyright')}} <a href="mailto:lic@bugeyedmonkeys.com">Remi Gagne</a></p>
+			<p>
+				{{tr('dialog.about_lic.copyright')}}
+				<a href="mailto:lic@bugeyedmonkeys.com">Remi Gagne</a>
+			</p>
 		</div>
 		<span slot="footer" class="dialog-footer">
 			<el-button type="primary" @click="cancel">{{tr("dialog.ok")}}</el-button>

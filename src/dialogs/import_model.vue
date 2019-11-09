@@ -49,7 +49,7 @@
 							:data-testid="`include-${item}`"
 						>
 							{{tr(`dialog.import_model.include.${item}`)}}
-							<i v-if="checked" class="fas fa-check"/>
+							<i v-if="checked" class="fas fa-check" />
 						</el-dropdown-item>
 					</template>
 				</el-dropdown-menu>

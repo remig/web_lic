@@ -32,37 +32,55 @@
 				<table class="anchor-table">
 					<tbody>
 						<tr>
-							<td><el-radio-button label="top_left">
-								{{tr('dialog.resize_image.anchors.top_left')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="top">
-								{{tr('dialog.resize_image.anchors.top')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="top_right">
-								{{tr('dialog.resize_image.anchors.top_right')}}
-							</el-radio-button></td>
+							<td>
+								<el-radio-button label="top_left">
+									{{tr('dialog.resize_image.anchors.top_left')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="top">
+									{{tr('dialog.resize_image.anchors.top')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="top_right">
+									{{tr('dialog.resize_image.anchors.top_right')}}
+								</el-radio-button>
+							</td>
 						</tr>
 						<tr>
-							<td><el-radio-button label="left">
-								{{tr('dialog.resize_image.anchors.left')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="center">
-								{{tr('dialog.resize_image.anchors.center')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="right">
-								{{tr('dialog.resize_image.anchors.right')}}
-							</el-radio-button></td>
+							<td>
+								<el-radio-button label="left">
+									{{tr('dialog.resize_image.anchors.left')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="center">
+									{{tr('dialog.resize_image.anchors.center')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="right">
+									{{tr('dialog.resize_image.anchors.right')}}
+								</el-radio-button>
+							</td>
 						</tr>
 						<tr>
-							<td><el-radio-button label="bottom_left">
-								{{tr('dialog.resize_image.anchors.bottom_left')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="bottom">
-								{{tr('dialog.resize_image.anchors.bottom')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="bottom_right">
-								{{tr('dialog.resize_image.anchors.bottom_right')}}
-							</el-radio-button></td>
+							<td>
+								<el-radio-button label="bottom_left">
+									{{tr('dialog.resize_image.anchors.bottom_left')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="bottom">
+									{{tr('dialog.resize_image.anchors.bottom')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="bottom_right">
+									{{tr('dialog.resize_image.anchors.bottom_right')}}
+								</el-radio-button>
+							</td>
 						</tr>
 					</tbody>
 				</table>

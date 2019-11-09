@@ -9,11 +9,11 @@
 					@change="updatePosition"
 				>
 					<el-option
-						v-for="position in positions"
-						:key="position"
-						:value="position"
+						v-for="positionItem in positions"
+						:key="positionItem"
+						:value="positionItem"
 					>
-						{{tr('template.page_number.positions.' + position)}}
+						{{tr('template.page_number.positions.' + positionItem)}}
 					</el-option>
 				</el-select>
 			</el-form-item>

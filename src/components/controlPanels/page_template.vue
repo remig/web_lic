@@ -20,16 +20,16 @@
 			</el-form-item>
 			<el-form-item label-width="0">
 				<el-radio
-					:disabled="haveCustomFormat"
 					v-model="sizePreset.orientation"
+					:disabled="haveCustomFormat"
 					label="horizontal"
 					@change="updateOrientation"
 				>
 					{{tr('template.page.orientation.landscape')}}
 				</el-radio>
 				<el-radio
-					:disabled="haveCustomFormat"
 					v-model="sizePreset.orientation"
+					:disabled="haveCustomFormat"
 					label="vertical"
 					@change="updateOrientation"
 				>
@@ -38,8 +38,8 @@
 			</el-form-item>
 			<el-form-item :label="tr('template.page.width')">
 				<input
-					:disabled="!haveCustomFormat"
 					v-model.number="width"
+					:disabled="!haveCustomFormat"
 					type="number"
 					min="0"
 					class="form-control"
@@ -48,8 +48,8 @@
 			</el-form-item>
 			<el-form-item :label="tr('template.page.height')">
 				<input
-					:disabled="!haveCustomFormat"
 					v-model.number="height"
+					:disabled="!haveCustomFormat"
 					type="number"
 					min="0"
 					class="form-control col-sm-10"
@@ -58,8 +58,8 @@
 			</el-form-item>
 			<el-form-item label-width="0px">
 				<el-checkbox
-					:disabled="!haveCustomFormat"
 					v-model="maintainAspectRatio"
+					:disabled="!haveCustomFormat"
 					class="wrap-checkbox"
 					@change="changeAspectRatio"
 				>

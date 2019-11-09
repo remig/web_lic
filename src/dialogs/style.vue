@@ -9,8 +9,8 @@
 		<el-form label-width="100px">
 			<el-form-item :label="tr('dialog.style.label_text')">
 				<el-input
-					:rows="2"
 					v-model="text"
+					:rows="2"
 					type="textarea"
 				/>
 			</el-form-item>
@@ -20,11 +20,11 @@
 				>
 					<el-option-group v-for="group in familyNames" :key="group.label">
 						<el-option
-							v-for="font in group.options"
-							:key="font"
-							:value="font"
+							v-for="fontItem in group.options"
+							:key="fontItem"
+							:value="fontItem"
 						>
-							{{font}}
+							{{fontItem}}
 						</el-option>
 					</el-option-group>
 				</el-select>

@@ -7,7 +7,7 @@
 		class="transformPartDialog"
 	>
 		<el-form :inline="true" label-width="40px">
-			<el-form-item :label="tr('dialog.transform_part.position')" label-width="90px"/>
+			<el-form-item :label="tr('dialog.transform_part.position')" label-width="90px" />
 			<el-form-item :label="tr('glossary.x')">
 				<input
 					ref="set_focus"
@@ -35,7 +35,7 @@
 			</el-form-item>
 		</el-form>
 		<el-form :inline="true" label-width="40px">
-			<el-form-item :label="tr('dialog.transform_part.rotation')" label-width="90px"/>
+			<el-form-item :label="tr('dialog.transform_part.rotation')" label-width="90px" />
 			<el-form-item :label="tr('glossary.x')">
 				<input
 					v-model.number="rotation.x"

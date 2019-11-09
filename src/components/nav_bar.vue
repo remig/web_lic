@@ -5,8 +5,8 @@
 		<ul class="nav navbar-nav">
 			<li
 				v-for="menu in menuEntryList"
-				:key="menu.id"
 				:id="menu.id"
+				:key="menu.id"
 				class="dropdown"
 			>
 				<a
