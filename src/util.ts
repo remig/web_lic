@@ -5,51 +5,54 @@ declare const _: any;
 // Add a handful of useful utility functions to lodash
 // TODO: A lot of these duplicate functionality in lodash; remove them
 _.mixin({
-	eq(a, b, e = 0.0001) {
+	eq(a: number, b: number, e:number = 0.0001): boolean {
 		return Math.abs(a - b) < e;
 	},
-	isEven(n) {
+	isEven(n: number): boolean {
 		return (typeof n === 'number') && isFinite(n) && !(n % 2);
 	},
-	insert(array, item, idx) {
+	insert<T>(array: T[], item: T, idx: number): void {
 		if (idx == null || idx === -1) {
 			array.push(item);
 		} else {
 			array.splice(idx, 0, item);
 		}
 	},
-	deleteItem(array, item) {
+	deleteItem<T>(array: T[], item: T): void {
 		const idx = array.indexOf(item);
 		if (idx >= 0) {
 			array.splice(idx, 1);
 		}
 	},
-	count(array, serach) {
+	count<T>(array: T[], search: T): number {
 		let count = 0;
 		for (let i = 0; i < array.length; i++) {
-			if (array[i] === serach) {
+			if (array[i] === search) {
 				count++;
 			}
 		}
 		return count;
 	},
-	itemEq(a, b) {
+	itemEq(a: any, b: any): boolean {
 		return a && b && a.id === b.id && a.type === b.type && a.stepID === b.stepID;
 	},
 	measureLabel: (() => {
-		const labelSizeCache = {};  // {font: {text: {width: 10, height: 20}}}
-		return function(font, text) {
+		const labelSizeCache: CacheType = {};  // {font: {text: {width: 10, height: 20}}}
+		return function(font: string, text: string) {
 			if (labelSizeCache[font] && labelSizeCache[font][text]) {
 				return _.cloneDeep(labelSizeCache[font][text]);
 			}
 			const container = document.getElementById('fontMeasureContainer');
-			container.style.font = font;
-			container.firstChild.textContent = text;
-			let res = (container as any).getBBox();
-			res = {width: Math.ceil(res.width), height: Math.ceil(res.height)};
-			labelSizeCache[font] = labelSizeCache[font] || {};
-			labelSizeCache[font][text] = res;
-			return _.cloneDeep(res);  // Always return a clone so we don't accidentally alter cached values
+			if (container && container.firstChild) {
+				container.style.font = font;
+				container.firstChild.textContent = text;
+				let res = (container as any).getBBox();
+				res = {width: Math.ceil(res.width), height: Math.ceil(res.height)};
+				labelSizeCache[font] = labelSizeCache[font] || {};
+				labelSizeCache[font][text] = res;
+				return _.cloneDeep(res);  // Always return a clone so we don't accidentally alter cached values
+			}
+			return null;
 		};
 	})(),
 	fontToFontParts: (() => {
@@ -65,7 +68,7 @@ _.mixin({
 				fontStyle: '', fontVariant: '', fontWeight: '',
 				fontStretch: '', fontSize: '', fontFamily: ''
 			};
-			let fontFamily = [];
+			let fontFamily: string[] = [];
 			let haveFontSize = false;
 			font = String(font || '');
 
@@ -107,7 +110,10 @@ _.mixin({
 			fontStyle, fontVariant, fontWeight, fontStretch, fontSize, fontFamily.trim()
 		].filter(el => el !== '').join(' ').trim();
 	},
-	fontString({size, family, bold, italic}) {
+	fontString(
+		{size, family, bold, italic}:
+		{size: number, family: string, bold: string, italic: string}
+	) {
 		return _.fontPartsToFont({
 			fontSize: size + 'pt',
 			fontFamily: family,
@@ -115,17 +121,17 @@ _.mixin({
 			fontStyle: italic ? 'italic' : null
 		});
 	},
-	degrees(radians) {
+	degrees(radians: number): number {
 		return radians * 180 / Math.PI;
 	},
-	radians(degrees) {
+	radians(degrees: number): number {
 		return degrees * Math.PI / 180;
 	},
 	dom: (() => {
 
 		function dom() {}
 
-		dom.createElement = function(type, attrs, parent, text) {
+		dom.createElement = function(type: string, attrs: any, parent: any, text: string) {
 			const node = document.createElement(type);
 			for (const key in attrs) {
 				if (attrs.hasOwnProperty(key)) {
@@ -141,7 +147,7 @@ _.mixin({
 			return node;
 		};
 
-		dom.emptyNode = function(node) {
+		dom.emptyNode = function(node: HTMLElement) {
 			if (node) {
 				while (node.firstChild) {
 					node.removeChild(node.firstChild);
@@ -151,6 +157,7 @@ _.mixin({
 		return dom;
 	})(),
 	units: (() => {
+		type UnitTypes = 'point' | 'in' | 'mm' | 'cm';
 		const unitConversions = {  // this conversion factor * pixel count = units
 			point: 0.75,
 			'in': 0.75 / 72,
@@ -158,23 +165,35 @@ _.mixin({
 			cm: 0.75 / 72 * 2.54
 		};
 		function units() {}
-		units.pixelsToUnits = function(pixelCount, newUnits) {
+		units.pixelsToUnits = function(pixelCount: number, newUnits: UnitTypes) {
 			return pixelCount * unitConversions[newUnits];
 		};
-		units.unitsToPixels = function(unitCount, newUnits) {
+		units.unitsToPixels = function(unitCount: number, newUnits: UnitTypes) {
 			return unitCount / unitConversions[newUnits];
 		};
-		units.pointsToUnits = function(pointCount, newUnits) {
+		units.pointsToUnits = function(pointCount: number, newUnits: UnitTypes) {
 			const pixels = _.units.unitsToPixels(pointCount, 'point');
 			return _.units.pixelsToUnits(pixels, newUnits);
 		};
-		units.unitToPoints = function(unitCount, newUnits) {
+		units.unitToPoints = function(unitCount: number, newUnits: UnitTypes) {
 			const pixels = _.units.unitsToPixels(unitCount, newUnits);
 			return _.units.pixelsToUnits(pixels, 'point');
 		};
 		return units;
 	})(),
 	geom: (() => {
+		interface PointInterface {
+			x: number;
+			y: number;
+		}
+
+		interface BoxInterface {
+			x: number;
+			y: number;
+			width: number;
+			height: number;
+		}
+
 		function geom() {}
 		geom.bbox = function(points) {
 			let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -196,7 +215,7 @@ _.mixin({
 				width: maxX - minX, height: maxY - minY
 			};
 		};
-		geom.expandBox = function(box, minWidth, minHeight) {
+		geom.expandBox = function(box: BoxInterface, minWidth: number, minHeight: number) {
 			box = _.cloneDeep(box);
 			if (Math.floor(box.width) < 1) {
 				box.width = minWidth;
@@ -208,7 +227,11 @@ _.mixin({
 			}
 			return box;
 		};
-		geom.moveBoxEdge = function(box, edge, dt) {
+		geom.moveBoxEdge = function(
+			box: BoxInterface,
+			edge: 'top' | 'right' | 'bottom' | 'left',
+			dt: number
+		) {
 			switch (edge) {
 				case 'top':
 					box.y += dt;
@@ -232,7 +255,7 @@ _.mixin({
 			}
 			return Math.sqrt(((p1.x - p2.x) ** 2) + ((p1.y - p2.y) ** 2));
 		};
-		geom.midpoint = (p1, p2) => {
+		geom.midpoint = (p1: PointInterface, p2: PointInterface) => {
 			return {x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2};
 		};
 		geom.arrow = () => {
@@ -250,24 +273,34 @@ _.mixin({
 		return geom;
 	})(),
 	version: (() => {
+		interface VersionInterface {
+			major: number;
+			minor: number;
+			revision: number;
+		}
+
 		function version() {}
-		version.parse = v => {
-			v = (v || '').split('.').map(w => parseInt(w, 10));
-			return {major: v[0] || 0, minor: v[1] || 0, revision: v[2] || 0};
+		version.parse = (v: string): VersionInterface => {
+			const revs: number[] = (v || '').split('.').map(w => parseInt(w, 10));
+			return {
+				major: revs[0] || 0,
+				minor: revs[1] || 0,
+				revision: revs[2] || 0
+			};
 		};
-		version.nice = (v) => {
-			v = _.version.parse(v);
-			return `${v.major}.${v.minor}`;
+		version.nice = (v: string): string => {
+			const version = _.version.parse(v);
+			return `${version.major}.${version.minor}`;
 		};
-		version.isOldVersion = (prev, current) => {
-			prev = _.version.parse(prev);
-			current = _.version.parse(current);
-			if (prev.major !== current.major) {
-				return prev.major < current.major;
-			} else if (prev.minor !== current.minor) {
-				return prev.minor < current.minor;
+		version.isOldVersion = (prev: string, current: string) => {
+			const prevRev = _.version.parse(prev);
+			const curRev = _.version.parse(current);
+			if (prevRev.major !== curRev.major) {
+				return prevRev.major < curRev.major;
+			} else if (prevRev.minor !== curRev.minor) {
+				return prevRev.minor < curRev.minor;
 			}
-			return prev.revision < current.revision;
+			return prevRev.revision < curRev.revision;
 		};
 		return version;
 	})(),
@@ -275,17 +308,17 @@ _.mixin({
 		function sort() {}
 		sort.numeric = () => {
 			function numeric() {}
-			numeric.ascending = (a, b) => {
+			numeric.ascending = (a: any, b: any) => {
 				return a - b;
 			};
-			numeric.descending = (a, b) => {
+			numeric.descending = (a: any, b: any) => {
 				return b - a;
 			};
 			return numeric;
 		};
 		return sort;
 	})(),
-	formatTime(start, end) {
+	formatTime(start: number, end: number): string {
 		const t = end - start;
 		if (t >= 1000) {
 			return (t / 1000).toFixed(2) + 's';
@@ -295,10 +328,10 @@ _.mixin({
 	color: (() => {
 		function color() {}
 		color.toRGB = (() => {
-			const rgbLookupCache = {
+			const rgbLookupCache: CacheType = {
 				'#000000': [0, 0, 0]
 			};
-			return function(colorString) {
+			return function(colorString: string) {
 				let rgb;
 				if (rgbLookupCache[colorString]) {
 					rgb = rgbLookupCache[colorString];
@@ -307,15 +340,25 @@ _.mixin({
 					// then getComputedStyle.color will return that same color as rgb() or rgba().
 					// Greatly reduces the number of color strings to parse.
 					const parent = document.getElementById('offscreenCache');
+					if (!parent) {
+						throw 'Could not locate #offscreenCache';
+					}
 
 					// Set parent to black so that any invalid colors set on child will inherit this color
 					parent.setAttribute('style', 'color: black;');
 
 					const div = document.getElementById('openFileChooser');
-					div.setAttribute('style', 'color: ' + colorString);
-					rgb = window.getComputedStyle(div).color;
-					rgb = rgb.match(/[a-z]+\((.*)\)/i)[1].split(',').map(parseFloat);
-					rgbLookupCache[colorString] = rgb;
+					if (div != null) {
+						div.setAttribute('style', 'color: ' + colorString);
+						rgb = window.getComputedStyle(div).color;
+						if (rgb) {
+							const match = rgb.match(/[a-z]+\((.*)\)/i);
+							if (match && match.length > 0) {
+								rgb = match[1].split(',').map(parseFloat);
+							}
+							rgbLookupCache[colorString] = rgb;
+						}
+					}
 				}
 
 				const res = {r: rgb[0], g: rgb[1], b: rgb[2], a: null};
@@ -330,7 +373,7 @@ _.mixin({
 				return res;
 			};
 		})();
-		color.toVec4 = (colorString, alpha) => {
+		color.toVec4 = (colorString: string, alpha: number) => {
 			if (!colorString || typeof colorString !== 'string') {
 				return [0, 0, 0, 0];
 			}
@@ -342,17 +385,17 @@ _.mixin({
 				b = parseInt(colorString.substr(4, 2), 16) / 255;
 				a = (255 - (alpha || 0)) / 255;
 			} else {
-				colorString = _.color.toRGB(colorString);
-				r = colorString.r / 255;
-				g = colorString.g / 255;
-				b = colorString.b / 255;
+				const color = _.color.toRGB(colorString);
+				r = color.r / 255;
+				g = color.g / 255;
+				b = color.b / 255;
 				a = (alpha == null)
-					? (colorString.a == null ? 1 : colorString.a)
+					? (color.a == null ? 1 : color.a)
 					: alpha;
 			}
 			return [_.round(r, 4), _.round(g, 4), _.round(b, 4), _.round(a, 4)];
 		};
-		color.luma = (colorString, isUnitColor) => {
+		color.luma = (colorString: any, isUnitColor: boolean) => {
 			if (!Array.isArray(colorString)) {
 				const colorObj = _.color.toRGB(colorString);
 				colorString = [colorObj.r, colorObj.g, colorObj.b];
@@ -362,10 +405,10 @@ _.mixin({
 				+ (0.7151 * ((colorString[1] / scale) ** 2.2))
 				+ (0.0721 * ((colorString[2] / scale) ** 2.2));
 		};
-		color.opposite = (colorString) => {
+		color.opposite = (colorString: string) => {
 			return (_.color.luma(colorString) < 0.18) ? 'white' : 'black';
 		};
-		color.isVisible = (colorString) => {
+		color.isVisible = (colorString: string) => {
 			if (!colorString || typeof colorString !== 'string') {
 				return false;
 			}
@@ -377,7 +420,7 @@ _.mixin({
 		};
 		return color;
 	})(),
-	isBorderVisible(border) {
+	isBorderVisible(border: BorderType) {
 		if (!border || !border.width || border.width < 1 ||
 			!border.color || typeof border.color !== 'string'
 		) {
@@ -386,5 +429,15 @@ _.mixin({
 		return _.color.isVisible(border.color);
 	}
 });
+
+interface CacheType {
+	[key: string]: any
+}
+
+interface BorderType {
+	width?: number;
+	color?: string;
+}
+
 
 export default _;
