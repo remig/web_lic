@@ -25,7 +25,7 @@ const rules = [
 	},
 	{
 		test: /\.(js|vue)$/,
-		exclude: [/node_modules/, /dialog\.js/],
+		exclude: [/node_modules/],
 		loader: 'eslint-loader',
 		options: {
 			failOnWarning: false,
