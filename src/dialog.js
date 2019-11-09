@@ -20,10 +20,6 @@ Vue.component('dialogManager', {
 			/* webpackChunkName: "numberChooserDialog" */
 			'./dialogs/number_chooser.vue'
 		),
-		brickColorDialog: () => import(
-			/* webpackChunkName: "brickColorDialog" */
-			'./dialogs/brick_colors.vue'
-		),
 		missingPartsDialog: () => import(
 			/* webpackChunkName: "missingPartsDialog" */
 			'./dialogs/missing_parts.vue'

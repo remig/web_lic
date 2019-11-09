@@ -53,14 +53,14 @@ function buildColorTable() {
 		}
 		k = parseInt(k, 10);
 		const customColor = customColors[k] || {};
-		colors[k] = {
+		colors.push({
 			id: k,
 			name: v.name,
 			color: customColor.color || v.color,
 			edge: customColor.edge || v.edge
-		};
+		});
 	});
-	return colors.filter(el => el != null);
+	return colors;
 }
 
 export default {

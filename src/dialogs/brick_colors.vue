@@ -44,7 +44,7 @@
 	</licDialog>
 </template>
 
-<script>
+<script lang="ts">
 
 import _ from '../util';
 import store from '../store';
@@ -53,8 +53,15 @@ import Storage from '../storage';
 import backwardCompat from '../backward_compat';
 const customColors = Storage.get.customBrickColors();
 
-function buildColorTable() {
-	const colors = [];
+interface colorRow {
+	id: number,
+	name: string,
+	color: string,
+	edge: string
+}
+
+function buildColorTable(): colorRow[] {
+	const colors: colorRow[] = [];
 	_.forOwn(LDParse.colorTable, (v, k) => {
 		if (v.color < 0 || v.edge < 0) {
 			return;

@@ -13,12 +13,15 @@ const rules = [
 	},
 	{
 		test: /\.tsx?$/,
-		use: 'ts-loader',
+		loader: 'ts-loader',
 		exclude: /node_modules/,
+		options: {
+			appendTsSuffixTo: [/\.vue$/]
+		}
 	},
 	{
 		test: /\.css$/,
-		use: [
+		loader: [
 			'vue-style-loader',
 			'css-loader'
 		]
@@ -52,7 +55,7 @@ module.exports = [{
 	plugins: [new VueLoaderPlugin()],
 	devtool: 'source-map',
 	resolve: {
-		extensions: ['.ts', '.js']
+		extensions: ['.ts', '.js', '.vue']
 	}
 }, {
 	name: 'prod',
@@ -72,6 +75,6 @@ module.exports = [{
 		})
 	],
 	resolve: {
-		extensions: ['.ts', '.js']
+		extensions: ['.ts', '.js', '.vue']
 	}
 }];
