@@ -5,7 +5,16 @@
         "allowJs": true,
         "target": "es5",
 		"module": "esnext",
-		"isolatedModules": true
+		"isolatedModules": true,
+
+		// "strict": true,
+		// "noImplicitAny": true,
+		// "noImplicitThis": true,
+		// "strictNullChecks": true,
+		// "alwaysStrict": true,
+		// "strictBindCallApply": true,
+		// "strictFunctionTypes": true,
+		// "strictPropertyInitialization": true,
     },
     "include": [
         "./src/**/*"

@@ -449,19 +449,4 @@ const store = {
 	}
 };
 
-function getter(s) {
-	return (item) => {
-		item = (typeof item === 'number') ? {type: s, id: item} : item;
-		return store.get.lookupToItem(item);
-	};
-}
-
-// Add store.get.page, store.get.step, etc; one getter for each state list
-for (let el in store.state) {
-	if (store.state.hasOwnProperty(el) && Array.isArray(store.state[el])) {
-		el = el.slice(0, -1);  // trim trailing 's' (steps -> step)
-		store.get[el] = getter(el);
-	}
-}
-
 export default store;

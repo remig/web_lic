@@ -4,7 +4,33 @@ import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
 
-export default {
+interface GetterInterface {
+	[key: string]: any
+}
+
+function getter(s: string) {
+	return item => {
+		item = (typeof item === 'number') ? {type: s, id: item} : item;
+		return store.get.lookupToItem(item);
+	};
+}
+
+const Getters = {
+	book: getter('book'),
+	page: getter('page'),
+	divider: getter('divider'),
+	step: getter('step'),
+	csi: getter('csi'),
+	pli: getter('pli'),
+	pliItem: getter('pliItem'),
+	quantityLabel: getter('quantityLabel'),
+	numberLabel: getter('numberLabel'),
+	submodelImage: getter('submodelImage'),
+	annotation: getter('annotation'),
+	callout: getter('callout'),
+	calloutArrow: getter('calloutArrow'),
+	point: getter('point'),
+	rotateIcon: getter('rotateIcon'),
 	modelName(nice) {
 		if (!store.model) {
 			return '';
@@ -23,11 +49,11 @@ export default {
 		}
 		return store.model.filename;
 	},
-	modelFilenameBase(ext) {
+	modelFilenameBase(ext = '') {
 		if (!store.model || !store.model.filename) {
 			return '';
 		}
-		return store.model.filename.split('.')[0] + (ext || '');
+		return store.model.filename.split('.')[0] + ext;
 	},
 	pageCount() {
 		return store.state.pages.length - 1;  // never want to include template page here
@@ -394,7 +420,7 @@ export default {
 			].filter(el => el);
 		}
 		const nodes = store.get.pageList();
-		store.get.submodels().forEach(submodel => {
+		store.get.submodels().forEach((submodel: any) => {
 			const page = store.get.pageForItem({id: submodel.stepID, type: 'step'});
 			const pageIndex = nodes.indexOf(page);
 			submodel.type = 'submodel';
@@ -420,7 +446,8 @@ export default {
 		}
 		return null;
 	},
-	lookupToItem(lookup, type) {  // Convert a {type, id} lookup object into the actual item it refers to
+	lookupToItem(lookup, type = null) {
+		// Convert a {type, id} lookup object into the actual item it refers to
 		if (lookup == null || (!lookup.type && type == null)) {
 			return null;
 		}
@@ -568,3 +595,5 @@ export default {
 		};
 	}
 };
+
+export default Getters;
