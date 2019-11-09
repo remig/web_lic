@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outDir": "./built",
+        "allowJs": false,
+        "target": "esnext",
+        "module": "es2015"
+    },
+    "include": [
+        "./src/**/*"
+    ]
+}

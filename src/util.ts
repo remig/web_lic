@@ -1,6 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-/* global _: false */
+declare const _: any;
 
 // Add a handful of useful utility functions to lodash
 // TODO: A lot of these duplicate functionality in lodash; remove them
@@ -42,7 +42,7 @@ _.mixin({
 			if (labelSizeCache[font] && labelSizeCache[font][text]) {
 				return _.cloneDeep(labelSizeCache[font][text]);
 			}
-			const container = document.getElementById('fontMeasureContainer');
+			const container = <SVGTextElement> document.getElementById('fontMeasureContainer');
 			container.style.font = font;
 			container.firstChild.textContent = text;
 			let res = container.getBBox();

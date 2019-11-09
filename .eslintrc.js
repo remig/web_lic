@@ -1,7 +1,11 @@
 module.exports = {
+    "parser": "vue-eslint-parser",
 	"parserOptions": {
+        "parser": "@typescript-eslint/parser",
+        "project": "./tsconfig.json",
 		"ecmaVersion": 9,
-		"sourceType": "module"
+        "sourceType": "module",
+        "extraFileExtensions": [".vue"]
 	},
 	"env": {
 		"commonjs": true
@@ -11,7 +15,8 @@ module.exports = {
 		"plugin:vue/recommended"
 	],
 	"plugins": [
-		"no-only-tests"
+        "@typescript-eslint",
+        "no-only-tests"
 	],
 	"rules": {
 		"accessor-pairs": "error",
