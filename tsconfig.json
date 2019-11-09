@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
-        "outDir": "./built",
-        "allowJs": false,
+        "outDir": "./dist",
+        "sourceMap": true,
+        "allowJs": true,
         "target": "esnext",
         "module": "es2015"
     },

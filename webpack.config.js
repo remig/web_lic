@@ -12,6 +12,11 @@ const rules = [
 		options: {hotReload: false}
 	},
 	{
+		test: /\.tsx?$/,
+		use: 'ts-loader',
+		exclude: /node_modules/,
+	},
+	{
 		test: /\.css$/,
 		use: [
 			'vue-style-loader',
@@ -46,8 +51,9 @@ module.exports = [{
 	module: {rules},
 	plugins: [new VueLoaderPlugin()],
 	devtool: 'source-map',
-	watch: true,
-	devServer: {contentBase: './'}
+	resolve: {
+		extensions: ['.ts', '.js']
+	}
 }, {
 	name: 'prod',
 	entry: './src/ui.js',
@@ -64,5 +70,8 @@ module.exports = [{
 		new webpack.DefinePlugin({
 			'process.env.NODE_ENV': JSON.stringify('production')
 		})
-	]
+	],
+	resolve: {
+		extensions: ['.ts', '.js']
+	}
 }];

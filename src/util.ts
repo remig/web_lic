@@ -42,10 +42,10 @@ _.mixin({
 			if (labelSizeCache[font] && labelSizeCache[font][text]) {
 				return _.cloneDeep(labelSizeCache[font][text]);
 			}
-			const container = <SVGTextElement> document.getElementById('fontMeasureContainer');
+			const container = document.getElementById('fontMeasureContainer');
 			container.style.font = font;
 			container.firstChild.textContent = text;
-			let res = container.getBBox();
+			let res = (container as any).getBBox();
 			res = {width: Math.ceil(res.width), height: Math.ceil(res.height)};
 			labelSizeCache[font] = labelSizeCache[font] || {};
 			labelSizeCache[font][text] = res;
@@ -63,8 +63,9 @@ _.mixin({
 		return function(font = '') {
 			const fullFontParts = {
 				fontStyle: '', fontVariant: '', fontWeight: '',
-				fontStretch: '', fontSize: '', fontFamily: []
+				fontStretch: '', fontSize: '', fontFamily: ''
 			};
+			let fontFamily = [];
 			let haveFontSize = false;
 			font = String(font || '');
 
@@ -90,11 +91,11 @@ _.mixin({
 						fullFontParts.fontSize = el;
 						haveFontSize = true;
 					} else {
-						fullFontParts.fontFamily.push(el);
+						fontFamily.push(el);
 					}
 				}
 			});
-			fullFontParts.fontFamily = fullFontParts.fontFamily.join(' ');
+			fullFontParts.fontFamily = fontFamily.join(' ');
 			return fullFontParts;
 		};
 	})(),
@@ -317,7 +318,7 @@ _.mixin({
 					rgbLookupCache[colorString] = rgb;
 				}
 
-				const res = {r: rgb[0], g: rgb[1], b: rgb[2]};
+				const res = {r: rgb[0], g: rgb[1], b: rgb[2], a: null};
 				if (rgb.length > 3) {
 					res.a = rgb[3];
 				}

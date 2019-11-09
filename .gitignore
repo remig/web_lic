@@ -4,7 +4,6 @@ package-lock.json
 ldraw
 ldraw_flat
 dist
-built
 lib
 test/errorShots
 test/chromeDownloads

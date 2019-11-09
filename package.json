@@ -5,8 +5,8 @@
 	"main": "src/ui.js",
 	"scripts": {
 		"build": "webpack --config webpack.config.js --config-name local",
-		"prod": "webpack --config webpack.config.js --config-name prod",
 		"start": "webpack-dev-server --config webpack.config.js --config-name local",
+		"prod": "webpack --config webpack.config.js --config-name prod",
 		"test": "npx cypress open",
 		"deploy": "npm run prod && python deploy.py",
 		"stats": "webpack --config webpack.prod.js --profile --json > stats.json",
@@ -28,6 +28,7 @@
 		"eslint-plugin-vue": "6.0.0",
 		"jszip": "3.2.2",
 		"lodash": "4.17.15",
+		"ts-loader": "6.2.1",
 		"typescript": "3.7.2",
 		"uglifyjs-webpack-plugin": "1.2.4",
 		"vue-loader": "15.2.4",

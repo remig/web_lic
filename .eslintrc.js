@@ -144,6 +144,7 @@ module.exports = {
 		"vue/attribute-hyphenation": ["warn", "always", {"ignore": ["onSubmit"]}],
 		"vue/mustache-interpolation-spacing": [2, "never"],
 		"vue/max-attributes-per-line": [2, {"singleline": 20}],
+		"vue/no-use-v-if-with-v-for": "warn",
 		"vue/require-prop-types": "off",
 		"vue/require-default-prop": "off",
 		"vue/order-in-components": ["error", {"order": ["el", "name", "parent", "template", "functional", "delimiters", "comments", "filters", "directives", "components", "extends", "mixins", "inheritAttrs", "model", ["props", "propsData"], "data", "render", "watch", "methods", "computed", "LIFECYCLE_HOOKS", "renderError"]}],
