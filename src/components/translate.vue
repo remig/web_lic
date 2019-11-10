@@ -30,6 +30,7 @@ import _ from '../util';
 import uiState from '../ui_state';
 import DialogManager from '../dialog';
 import LanguageList from '../../languages/languages.json';
+import EventBus from '../event_bus';
 
 LanguageList.sort((a, b) => {
 	if (a.language < b.language) {
@@ -136,15 +137,14 @@ function restoreLanguage() {
 	setLocale(uiState.get('locale'));
 }
 
-async function pickLanguage(onLanguageChange) {
+async function pickLanguage() {
 	if (currentLocale != null || LanguageList.length < 2) {
 		if (currentLocale != null) {
-			onLanguageChange();
+			EventBus.$emit('redraw-ui');
 		}
 	} else {
 		await DialogManager('localeChooserDialog', dialog => {
 			dialog.visible = true;
-			dialog.onLanguageChange = onLanguageChange;
 		});
 	}
 }
@@ -159,7 +159,6 @@ export default {
 	data() {
 		return {
 			visible: false,
-			onLanguageChange: null,
 			chosenLocaleCode: 'en',
 			languageList: LanguageList
 		};
@@ -172,9 +171,7 @@ export default {
 		},
 		changeLanguage() {
 			setLocale(this.chosenLocaleCode);
-			if (typeof this.onLanguageChange === 'function') {
-				this.onLanguageChange();
-			}
+			EventBus.$emit('redraw-ui');
 		}
 	},
 	translate,

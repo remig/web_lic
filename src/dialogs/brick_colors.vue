@@ -51,6 +51,8 @@ import store from '../store';
 import LDParse from '../ld_parse';
 import Storage from '../storage';
 import backwardCompat from '../backward_compat';
+import EventBus from '../event_bus';
+
 const customColors = Storage.get.customBrickColors();
 
 interface colorRow {
@@ -116,7 +118,7 @@ export default {
 			Storage.replace.customBrickColors(fixedColors);
 			store.mutations.csi.markAllDirty();
 			store.mutations.pliItem.markAllDirty();
-			this.$root.redrawUI();
+			EventBus.$emit('redraw-ui');
 		},
 		reset() {
 			this.colorData.forEach(el => {

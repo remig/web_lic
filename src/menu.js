@@ -279,11 +279,7 @@ const menu = [
 			text: 'action.edit.scene_rendering.name',
 			id: 'scene_rendering_menu',
 			shown: enableIfModel,
-			cb() {
-				DialogManager('sceneRenderingDialog', dialog => {
-					dialog.show(app);
-				});
-			}
+			cb: () => DialogManager('sceneRenderingDialog')
 		},
 		{
 			text: 'action.edit.brick_colors.name',

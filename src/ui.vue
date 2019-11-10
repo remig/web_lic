@@ -595,6 +595,10 @@ const UI = {
 			this.setSelected(item);
 		});
 
+		EventBus.$on('redraw-ui', (props = {}) => {
+			this.redrawUI(props.clearSelection);
+		});
+
 		// EventBus.$on('state-change', () => {
 		// 	Vue.nextTick(NavTree.update);
 		// });
@@ -618,8 +622,7 @@ const UI = {
 			await DialogManager('whatsNewDialog');
 		}
 
-		// TODO: use event bus to call 'redrawUI' from arbitrary places
-		await LocaleManager.pickLanguage(this.redrawUI);
+		await LocaleManager.pickLanguage();
 
 		LDParse.setCustomColorTable(Storage.get.customBrickColors());
 
