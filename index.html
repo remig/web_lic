@@ -30,68 +30,8 @@
 </head>
 <body>
 
-	<div id="container" @click="closeMenus()">
+	<div id="app"></div>
 
-		<div id="busyOverlay" :class="{hidden: busyText === ''}" v-cloak>
-			<!--<div id="busyText">{{busyText}}<div id="spinner"></div></div>-->
-			<div id="busyContainer">
-				<div class="busyText">{{busyText}}</div>
-				<div class="progress">
-					<div id="progressbar" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
-				</div>
-			</div>
-		</div>
-
-		<nav-bar
-			id="navMenu"
-			:menu-entry-list="navBarContent"
-			:filename="{name: filename, isDirty}"
-			ref="navMenuComponent"
-			@close-menus="closeMenus"
-		></nav-bar>
-
-		<div class="mainBody" @contextmenu.stop.prevent="rightClick($event)">
-
-			<div id="leftPane" class="split split-horizontal">
-				<nav-tree-container
-					ref="navTreeContainer"
-					:current-item="selectedItemLookup"
-					@select-item="setSelected"
-				></nav-tree-container>
-			</div>
-
-			<div id="rightPane" class="split split-horizontal">
-				<page-view
-					ref="pageView"
-					:app="this"
-					:selected-item="selectedItemLookup"
-					:current-page-lookup="currentPageLookup"
-				></page-view>
-				<getting-started-panel v-if="!haveModel()" :app="this"></getting-started-panel>
-				<template-panel
-					v-if="isTemplatePageCurrent"
-					id="templatePanelContainer"
-					ref="templatePanel"
-					:app="this"
-					:selected-item="selectedItemLookup"
-				></template-panel>
-			</div>
-
-		</div>
-
-		<popup-menu
-			id="contextMenu"
-			class="dropdown"
-			tabindex="-1"
-			:menu-entries="contextMenu"
-			:selected-item="selectedItemLookup"
-			ref="contextMenuComponent"
-		></popup-menu>
-
-		<dialog-manager></dialog-manager>
-
-		<div id="statusBar" v-cloak >{{statusText}}</div>
-	</div>
 	<div id="offscreenCache" class="offscreen">
 		<input type="file" name="openFileChooser" id="openFileChooser">
 		<svg xmlns="http://www.w3.org/2000/svg">

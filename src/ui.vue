@@ -1,5 +1,74 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
+<template>
+	<div id="container" @click="closeMenus()">
+		<div v-cloak id="busyOverlay" :class="{hidden: busyText === ''}">
+			<!--<div id="busyText">{{busyText}}<div id="spinner"></div></div>-->
+			<div id="busyContainer">
+				<div class="busyText">
+					{{busyText}}
+				</div>
+				<div class="progress">
+					<div id="progressbar" class="progress-bar" role="progressbar" style="width: 0%">
+						0%
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<nav-bar
+			id="navMenu"
+			ref="navMenuComponent"
+			:menu-entry-list="navBarContent"
+			:filename="{name: filename, isDirty}"
+			@close-menus="closeMenus"
+		/>
+
+		<div class="mainBody" @contextmenu.stop.prevent="rightClick($event)">
+			<div id="leftPane" class="split split-horizontal">
+				<nav-tree-container
+					ref="navTreeContainer"
+					:current-item="selectedItemLookup"
+					@select-item="setSelected"
+				/>
+			</div>
+
+			<div id="rightPane" class="split split-horizontal">
+				<page-view
+					ref="pageView"
+					:app="this"
+					:selected-item="selectedItemLookup"
+					:current-page-lookup="currentPageLookup"
+				/>
+				<getting-started-panel v-if="!haveModel()" :app="this" />
+				<template-panel
+					v-if="isTemplatePageCurrent"
+					id="templatePanelContainer"
+					ref="templatePanel"
+					:app="this"
+					:selected-item="selectedItemLookup"
+				/>
+			</div>
+		</div>
+
+		<popup-menu
+			id="contextMenu"
+			ref="contextMenuComponent"
+			class="dropdown"
+			tabindex="-1"
+			:menu-entries="contextMenu"
+			:selected-item="selectedItemLookup"
+		/>
+
+		<dialog-manager />
+
+		<div v-cloak id="statusBar">
+			{{statusText}}
+		</div>
+	</div>
+</template>
+
+<script>
 /* global Vue: false, Split: false, ELEMENT: false */
 
 // TODO:
@@ -55,27 +124,28 @@ Vue.use({
 	}
 });
 
-const app = new Vue({
-	el: '#container',
+const UI = {
 	components: {NavBar, NavTreeContainer, PopupMenu, TemplatePanel, GettingStartedPanel},
-	data: {
-		// Store transient UI state data here.  Do *not* store state items here; Vue turns these
-		// into observers, which destroys performance for big stores like we have here
-		currentPageLookup: null,
-		selectedItemLookup: null,
-		statusText: '',
-		busyText: '',
-		contextMenu: null,
-		filename: null,
-		dirtyState: {
-			undoIndex: 0,
-			lastSaveIndex: 0
-		},
-		lastRightClickPos: {
-			x: null,
-			y: null
-		},
-		disableLocalStorage: false
+	data() {
+		return {
+			// Store transient UI state data here.  Do *not* store state items here; Vue turns these
+			// into observers, which destroys performance for big stores like we have here
+			currentPageLookup: null,
+			selectedItemLookup: null,
+			statusText: '',
+			busyText: '',
+			contextMenu: null,
+			filename: null,
+			dirtyState: {
+				undoIndex: 0,
+				lastSaveIndex: 0
+			},
+			lastRightClickPos: {
+				x: null,
+				y: null
+			},
+			disableLocalStorage: false
+		};
 	},
 	methods: {
 		importBuiltInModel(url) {
@@ -570,9 +640,13 @@ const app = new Vue({
 			this.openLicFileFromContent(localModel);
 		}
 	}
-});
+};
 
 window.__lic = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build and in Cypress
-	_, app, store, undoStack, LDParse, Storage, uiState
+	_, app: UI, store, undoStack, LDParse, Storage, uiState
 };
+
+export default UI;
+
+</script>
