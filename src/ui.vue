@@ -69,7 +69,7 @@
 </template>
 
 <script>
-/* global Vue: false, Split: false, ELEMENT: false */
+/* global Vue: false, Split: false  */
 
 // TODO:
 // - add 'culled' versions of popular parts, with their inside bits removed
@@ -111,18 +111,6 @@ import GettingStartedPanel from './components/getting_started.vue';
 import './page_view';
 import './components/element_extensions.vue';
 import EventBus from './event_bus';
-
-ELEMENT.locale(ELEMENT.lang.en);
-
-Vue.config.performance = false;
-
-Vue.use({
-	install(Vue) {
-		// Add a 'tr' method to every component, which makes translating strings in template HTML easier
-		Vue.prototype.tr = LocaleManager.translate;
-		Vue.prototype._ = _;
-	}
-});
 
 const UI = {
 	components: {NavBar, NavTreeContainer, PopupMenu, TemplatePanel, GettingStartedPanel},
