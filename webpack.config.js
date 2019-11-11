@@ -68,6 +68,10 @@ module.exports = [{
 	mode: 'production',
 	module: {rules},
 	plugins: [
+		new webpack.NormalModuleReplacementPlugin(
+			/element-ui[\/\\]lib[\/\\]locale[\/\\]lang[\/\\]zh-CN/,
+			'element-ui/lib/locale/lang/en'
+		),
 		new VueLoaderPlugin(),
 		new UglifyJSPlugin({sourceMap: false}),
 		new webpack.DefinePlugin({
