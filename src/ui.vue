@@ -110,16 +110,7 @@ import PopupMenu from './components/popup_menu.vue';
 import TemplatePanel from './components/template_panel.vue';
 import GettingStartedPanel from './components/getting_started.vue';
 import './page_view';
-import './components/element_extensions';
 import EventBus from './event_bus';
-
-Vue.use({
-	install(vue) {
-		// Add a 'tr' method to every component, which makes translating strings in template HTML easier
-		vue.prototype.tr = LocaleManager.translate;
-		vue.prototype._ = _;
-	}
-});
 
 const UI = {
 	components: {NavBar, NavTreeContainer, PopupMenu, TemplatePanel, GettingStartedPanel},
