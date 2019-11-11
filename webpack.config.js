@@ -43,7 +43,7 @@ const rules = [
 
 module.exports = [{
 	name: 'local',
-	entry: './src/app.js',
+	entry: './src/app.ts',
 	output: {
 		filename: 'bundle.js',
 		chunkFilename: '[name].bundle.js',
@@ -59,7 +59,7 @@ module.exports = [{
 	}
 }, {
 	name: 'prod',
-	entry: './src/app.js',
+	entry: './src/app.ts',
 	output: {
 		filename: 'bundle.js',
 		path: path.resolve(__dirname, 'dist'),

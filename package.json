@@ -46,5 +46,8 @@
 		"webpack-dev-server": "3.9.0",
 		"webpack-glsl-loader": "1.0.1"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"element-ui": "2.4.1",
+		"vue": "2.5.16"
+	}
 }

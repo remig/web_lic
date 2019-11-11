@@ -1,10 +1,11 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-/* global Vue: false, ELEMENT: false */
+import Vue from 'vue';
+import {Dialog, Tooltip} from 'element-ui';
 
 // Change defaults for common Element components
 Vue.component('licDialog', {
-	mixins: [ELEMENT.Dialog],
+	mixins: [Dialog],
 	props: {
 		modal: {
 			type: Boolean,
@@ -22,7 +23,7 @@ Vue.component('licDialog', {
 });
 
 Vue.component('licTooltip', {
-	mixins: [ELEMENT.Tooltip],
+	mixins: [Tooltip],
 	props: {
 		openDelay: {
 			type: Number,

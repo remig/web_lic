@@ -69,7 +69,6 @@
 </template>
 
 <script>
-/* global Vue: false, Split: false  */
 
 // TODO:
 // - add 'culled' versions of popular parts, with their inside bits removed
@@ -89,6 +88,8 @@
 // - Try moving a point on a line annotation; crash in glossary.point lookup
 // - Grid config dialog is atrociously ugly
 
+/* global Split: false  */
+import Vue from 'vue';
 import _ from './util';
 import uiState from './ui_state';
 import store from './store';
@@ -111,6 +112,14 @@ import GettingStartedPanel from './components/getting_started.vue';
 import './page_view';
 import './components/element_extensions';
 import EventBus from './event_bus';
+
+Vue.use({
+	install(vue) {
+		// Add a 'tr' method to every component, which makes translating strings in template HTML easier
+		vue.prototype.tr = LocaleManager.translate;
+		vue.prototype._ = _;
+	}
+});
 
 const UI = {
 	components: {NavBar, NavTreeContainer, PopupMenu, TemplatePanel, GettingStartedPanel},

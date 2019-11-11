@@ -1,7 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-/* global Vue: false */
-
+import Vue from 'vue';
 import _ from './util';
 import Draw from './draw';
 import store from './store';

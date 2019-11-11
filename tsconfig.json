@@ -6,6 +6,8 @@
         "target": "es5",
 		"module": "esnext",
 		"isolatedModules": true,
+		"importHelpers": true,
+		"moduleResolution": "node",
 
 		// "strict": true,
 		// "noImplicitAny": true,

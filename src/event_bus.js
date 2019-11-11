@@ -1,6 +1,6 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-/* global Vue: false */
+import Vue from 'vue';
 const EventBus = new Vue();
 export default EventBus;
 

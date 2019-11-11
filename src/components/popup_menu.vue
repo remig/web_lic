@@ -37,8 +37,8 @@
 
 <script>
 
+import Vue from 'vue';
 import _ from '../util';
-/* global Vue: false */
 
 function hideSubMenus() {
 	document.querySelectorAll('.dropdown-submenu.open').forEach(el => {

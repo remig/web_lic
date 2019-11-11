@@ -17,7 +17,7 @@
 
 <script>
 
-/* global Vue: false */
+import Vue from 'vue';
 import _ from '../util';
 import store from '../store';
 import undoStack from '../undo_stack';

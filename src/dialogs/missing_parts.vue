@@ -41,7 +41,7 @@
 
 <script>
 
-/* global Vue: false */
+import Vue from 'vue';
 import _ from '../util';
 import LDParse from '../ld_parse';
 import openFileHandler from '../file_uploader';
