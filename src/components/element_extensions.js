@@ -1,11 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-<script>
-
 /* global Vue: false, ELEMENT: false */
 
 // Change defaults for common Element components
-
 Vue.component('licDialog', {
 	mixins: [ELEMENT.Dialog],
 	props: {
@@ -53,5 +50,3 @@ Vue.component('licTooltip', {
 		}
 	}
 });
-
-</script>

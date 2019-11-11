@@ -109,7 +109,7 @@ import PopupMenu from './components/popup_menu.vue';
 import TemplatePanel from './components/template_panel.vue';
 import GettingStartedPanel from './components/getting_started.vue';
 import './page_view';
-import './components/element_extensions.vue';
+import './components/element_extensions';
 import EventBus from './event_bus';
 
 const UI = {
