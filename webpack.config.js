@@ -27,7 +27,7 @@ const rules = [
 		]
 	},
 	{
-		test: /\.(js|vue)$/,
+		test: /\.(js|ts|vue)$/,
 		exclude: [/node_modules/],
 		loader: 'eslint-loader',
 		options: {
