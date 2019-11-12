@@ -1,24 +1,38 @@
 {
-    "compilerOptions": {
-        "outDir": "./dist",
-        "sourceMap": true,
-        "allowJs": true,
-        "target": "es5",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"sourceMap": true,
+		"allowJs": true,
+		"target": "es5",
 		"module": "esnext",
 		"isolatedModules": true,
 		"importHelpers": true,
 		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
 
 		// "strict": true,
 		// "noImplicitAny": true,
-		// "noImplicitThis": true,
 		// "strictNullChecks": true,
+		// "strictPropertyInitialization": true,
+		// "noImplicitThis": true,
 		// "alwaysStrict": true,
 		// "strictBindCallApply": true,
 		// "strictFunctionTypes": true,
-		// "strictPropertyInitialization": true,
-    },
-    "include": [
-        "./src/**/*"
-    ]
+	},
+	"types": [
+		"webpack-env"
+	],
+	"lib": [
+		"esnext",
+		"dom",
+		"dom.iterable",
+		"scripthost"
+	],
+	"include": [
+		"./src/**/*"
+	],
+	"exclude": [
+		"node_modules"
+	]
 }
