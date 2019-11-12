@@ -1,5 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
+import {Point, Box} from './item_types';
+
 declare const _: any;
 
 // Add a handful of useful utility functions to lodash
@@ -182,20 +184,19 @@ _.mixin({
 		return units;
 	})(),
 	geom: (() => {
-		interface PointInterface {
-			x: number;
-			y: number;
+
+		function isPoint(point: any): point is Point {
+			return (point as Point).x !== undefined
+				&& (point as Point).y !== undefined;
 		}
 
-		interface BoxInterface {
-			x: number;
-			y: number;
-			width: number;
-			height: number;
+		function isBox(box: any): box is Box {
+			return (box as Box).width !== undefined
+				&& (box as Box).height !== undefined;
 		}
 
 		function geom() {}
-		geom.bbox = function(points) {
+		geom.bbox = function(points: (Point | Box)[]): Box {
 			let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 			for (let i = 0; i < (points || []).length; i++) {
 				const p = points[i];
@@ -203,10 +204,8 @@ _.mixin({
 				minY = Math.min(minY, p.y);
 				maxX = Math.max(maxX, p.x);
 				maxY = Math.max(maxY, p.y);
-				if (p.hasOwnProperty('width')) {
+				if (isBox(p)) {
 					maxX = Math.max(maxX, p.x + p.width);
-				}
-				if (p.hasOwnProperty('height')) {
 					maxY = Math.max(maxY, p.y + p.height);
 				}
 			}
@@ -215,7 +214,7 @@ _.mixin({
 				width: maxX - minX, height: maxY - minY
 			};
 		};
-		geom.expandBox = function(box: BoxInterface, minWidth: number, minHeight: number) {
+		geom.expandBox = function(box: Box, minWidth: number, minHeight: number) {
 			box = _.cloneDeep(box);
 			if (Math.floor(box.width) < 1) {
 				box.width = minWidth;
@@ -228,7 +227,7 @@ _.mixin({
 			return box;
 		};
 		geom.moveBoxEdge = function(
-			box: BoxInterface,
+			box: Box,
 			edge: 'top' | 'right' | 'bottom' | 'left',
 			dt: number
 		) {
@@ -249,13 +248,15 @@ _.mixin({
 					break;
 			}
 		};
-		geom.distance = (p1, p2) => {
+		geom.distance = (p1: number | Point, p2: number | Point) => {
 			if (typeof p1 === 'number' && typeof p2 === 'number') {
 				return Math.abs(p1 - p2);
+			} else if (isPoint(p1) && isPoint(p2)) {
+				return Math.sqrt(((p1.x - p2.x) ** 2) + ((p1.y - p2.y) ** 2));
 			}
-			return Math.sqrt(((p1.x - p2.x) ** 2) + ((p1.y - p2.y) ** 2));
+			return 0;
 		};
-		geom.midpoint = (p1: PointInterface, p2: PointInterface) => {
+		geom.midpoint = (p1: Point, p2: Point) => {
 			return {x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2};
 		};
 		geom.arrow = () => {
