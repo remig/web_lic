@@ -4,13 +4,11 @@ import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
 
-interface GetterInterface {
-	[key: string]: any
-}
-
-function getter(s: string) {
+function getter(s) {
 	return item => {
-		item = (typeof item === 'number') ? {type: s, id: item} : item;
+		item = (typeof item === 'number')
+			? {type: s, id: item}
+			: item;
 		return store.get.lookupToItem(item);
 	};
 }
@@ -420,7 +418,7 @@ const Getters = {
 			].filter(el => el);
 		}
 		const nodes = store.get.pageList();
-		store.get.submodels().forEach((submodel: any) => {
+		store.get.submodels().forEach((submodel) => {
 			const page = store.get.pageForItem({id: submodel.stepID, type: 'step'});
 			const pageIndex = nodes.indexOf(page);
 			submodel.type = 'submodel';
