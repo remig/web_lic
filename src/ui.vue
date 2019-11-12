@@ -87,8 +87,9 @@
 // - When edit annotation dialogs open, set focus somewhere useful
 // - Try moving a point on a line annotation; crash in glossary.point lookup
 // - Grid config dialog is atrociously ugly
+// - Title page CSI includes rotate context menu but it doesn't work
 
-/* global Split: false  */
+/* global Split: false */
 import Vue from 'vue';
 import _ from './util';
 import uiState from './ui_state';

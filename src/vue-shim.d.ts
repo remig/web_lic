@@ -9,3 +9,6 @@ declare module 'vue/types/vue' {
 		_: any
 	}
 }
+
+declare module 'element-ui/lib/locale/lang/en' {
+}

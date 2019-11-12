@@ -13,21 +13,28 @@ LanguageList.sort((a, b) => {
 	return 0;
 });
 
+const tuple = <T extends string[]>(...args: T) => args;
+const LocaleList = tuple(...LanguageList.map(e => e.code));
+type LocaleType = typeof LocaleList[number];
+let currentLocale: LocaleType;
+
 const noTranslateKey = '_tr_';
-let currentLocale;
 
 // TODO: when loading a language, flatten the hierarchy so it doesn't have to be traversed constantly.
 // eg: {navbar: {file: {root: 'foo'}}} => {'navbar.file.root': 'foo'}
 // And pre-compile any _@mf format strings into lookup functions
 // And do all of this at build time, not runtime...
 
+interface LoadedLanguageType {
+	[key: string]: any;
+}
+
 // Always load English; fall back on this if a different language is missing a key
-const loadedLanguages = {
-	// key: locale code, value: language
+const loadedLanguages: LoadedLanguageType = {
 	en: require('../languages/en.json')
 };
 
-function __tr(locale, key, args) {
+function __tr(locale: string, key: string, args: any[]) {
 	let lookup = loadedLanguages[locale];
 	const keys = key.split('.');
 	for (let i = 0; i < keys.length; i++) {
@@ -50,7 +57,7 @@ function __tr(locale, key, args) {
 	return lookup;
 }
 
-function translateLink(text, link) {
+function translateLink(text: string, link: string) {
 	const email = '<a href="mailto:lic@bugeyedmonkeys.com" target="_blank">lic@bugeyedmonkeys.com</a>';
 	return text
 		.replace('$email{}', email)
@@ -58,7 +65,7 @@ function translateLink(text, link) {
 		.replace('}', '</a>');
 }
 
-function translate(key, ...args) {
+function translate(key: string, ...args: any[]): string {
 
 	if (key.startsWith(noTranslateKey)) {
 		return key.replace(noTranslateKey, '');  // Don't translate these already translated strings
@@ -94,7 +101,7 @@ function getLocale() {
 	return currentLocale;
 }
 
-function setLocale(locale) {
+function setLocale(locale: LocaleType) {
 	if (locale == null) {
 		return;
 	}
@@ -111,7 +118,7 @@ function restoreLanguage() {
 	setLocale(uiState.get('locale'));
 }
 
-function noTranslate(str) {
+function noTranslate(str: string) {
 	return noTranslateKey + str;
 }
 

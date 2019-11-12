@@ -46,6 +46,7 @@
 
 <script lang="ts">
 
+import Vue from 'vue';
 import _ from '../util';
 import store from '../store';
 import LDParse from '../ld_parse';
@@ -56,22 +57,25 @@ import EventBus from '../event_bus';
 const customColors = Storage.get.customBrickColors();
 
 interface colorRow {
-	id: number,
-	name: string,
-	color: string,
-	edge: string
+	id: number;
+	name: string;
+	color: string;
+	edge: string;
+}
+
+interface ColorTableEntry {  // TODO: this goes in LDParse, when its ready
+	name: 'string';
+	color: 'string';
+	edge: 'string';
 }
 
 function buildColorTable(): colorRow[] {
 	const colors: colorRow[] = [];
-	_.forOwn(LDParse.colorTable, (v, k) => {
-		if (v.color < 0 || v.edge < 0) {
-			return;
-		}
-		k = parseInt(k, 10);
-		const customColor = customColors[k] || {};
+	_.forOwn(LDParse.colorTable, (v: ColorTableEntry, k: string) => {
+		const id = parseInt(k, 10);
+		const customColor = customColors[id] || {};
 		colors.push({
-			id: k,
+			id,
 			name: v.name,
 			color: customColor.color || v.color,
 			edge: customColor.edge || v.edge
@@ -80,8 +84,8 @@ function buildColorTable(): colorRow[] {
 	return colors;
 }
 
-export default {
-	data: function() {
+export default Vue.extend({
+	data() {
 		return {
 			colorData: buildColorTable()
 		};
@@ -131,7 +135,8 @@ export default {
 			this.$emit('close');
 		}
 	}
-};
+});
+
 </script>
 
 <style>
