@@ -118,7 +118,7 @@ function noTranslate(str) {
 restoreLanguage();
 
 export {
-	translate,
+	translate as tr,
 	getLocale,
 	setLocale,
 	LanguageList,

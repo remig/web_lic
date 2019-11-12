@@ -3,7 +3,7 @@
 import _ from './util';
 import LDParse from './ld_parse';
 import store from './store';
-import LocaleManager from './components/translate.vue';
+import {tr} from './translations';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
@@ -840,7 +840,7 @@ const api = {
 					store.mutations.page.delete({page: originalPage});
 				}
 				progressCallback(
-					LocaleManager.translate('glossary.step_count_@c', stepsToMerge[0].number)
+					tr('glossary.step_count_@c', stepsToMerge[0].number)
 				);
 				_.pullAt(stepsToMerge, 0);
 				resolve();

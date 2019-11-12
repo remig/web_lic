@@ -33,8 +33,7 @@
 <script>
 
 import _ from '../util';
-import LocaleManager from './translate.vue';
-const tr = LocaleManager.translate;
+import {tr} from '../translations';
 
 export default {
 	props: {

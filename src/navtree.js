@@ -5,9 +5,7 @@ import store from './store';
 import uiState from './ui_state';
 import EventBus from './event_bus';
 import LDParse from './ld_parse';
-import LocaleManager from './components/translate.vue';
-
-const tr = LocaleManager.translate;
+import {tr} from './translations';
 
 let lastSelectedId, invisibleNodeTypes, expandedNodes;
 

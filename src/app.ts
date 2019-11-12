@@ -6,7 +6,7 @@ import './components/element_extensions';
 
 import UI from './ui.vue';
 import _ from './util';
-import {translate} from './translations';
+import {tr} from './translations';
 
 Vue.use(ElementUI, {locale});
 
@@ -15,7 +15,7 @@ Vue.config.performance = false;
 Vue.use({
 	install(vue) {
 		// Add a 'tr' method to every component, which makes translating strings in template HTML easier
-		vue.prototype.tr = translate;
+		vue.prototype.tr = tr;
 		vue.prototype._ = _;
 	}
 });

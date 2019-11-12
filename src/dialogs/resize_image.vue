@@ -97,9 +97,6 @@
 
 import _ from '../util';
 import store from '../store';
-import LocaleManager from '../components/translate.vue';
-
-const tr = LocaleManager.translate;
 
 const anchorOffsets = {
 	top_left: {x: 0, y: 0},
@@ -201,10 +198,10 @@ export default {
 				|| info.originalHeight > info.pageHeight;
 		},
 		bodyText() {
-			return tr(`dialog.resize_image.${this.isImageTooBig ? 'too_big' : 'too_small'}`);
+			return this.tr(`dialog.resize_image.${this.isImageTooBig ? 'too_big' : 'too_small'}`);
 		},
 		resizeText() {
-			return tr(`dialog.resize_image.${this.isImageTooBig ? 'shrink' : 'stretch'}`);
+			return this.tr(`dialog.resize_image.${this.isImageTooBig ? 'shrink' : 'stretch'}`);
 		},
 		needAspectRatioUI() {
 			if (this.imageInfo.preserveSize || this.aspectRatiosMatch) {

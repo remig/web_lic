@@ -5,12 +5,12 @@ import InstructionExporter from './export';
 import store from './store';
 import undoStack from './undo_stack';
 import Storage from './storage';
-import LocaleManager from './components/translate.vue';
+import * as translate from './translations';
 import uiState from './ui_state';
 import DialogManager from './dialog';
 
 let app;
-const tr = LocaleManager.translate;
+const tr = translate.tr;
 
 function enableIfModel() {
 	return store != null && store.model != null;
@@ -156,12 +156,12 @@ const menu = [
 			text: 'action.file.set_language.name',
 			id: 'set_language_menu',
 			children() {
-				return LocaleManager.LanguageList.map(language => {
+				return translate.LanguageList.map(language => {
 					return {
-						text: LocaleManager.noTranslate(language.language),
+						text: translate.noTranslate(language.language),
 						id: `language_${language.code}_menu`,
 						cb() {
-							LocaleManager.setLocale(language.code);
+							translate.setLocale(language.code);
 							app.redrawUI();
 						}
 					};

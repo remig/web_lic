@@ -7,10 +7,9 @@ import store from './store';
 import undoStack from './undo_stack';
 import openFileHandler from './file_uploader';
 import DialogManager from './dialog';
-import LocaleManager from './components/translate.vue';
+import {tr, noTranslate} from './translations';
 
 let app;
-const tr = LocaleManager.translate;
 
 const clampScale = (() => {
 	const min = 0.0001, max = 20;
@@ -788,7 +787,7 @@ const contextMenu = {
 					const abstractPart = LDParse.partDictionary[part.filename];
 					return {
 						id: 'select_part_' + partID + '_cmenu',
-						text: LocaleManager.noTranslate(abstractPart.name),
+						text: noTranslate(abstractPart.name),
 						cb() {
 							app.setSelected({type: 'part', id: partID, stepID: step.id});
 						}

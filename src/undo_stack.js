@@ -4,7 +4,7 @@
 
 import _ from './util';
 import store from './store';
-import LocaleManager from './components/translate.vue';
+import {tr, noTranslate} from './translations';
 
 // stack is an array of state
 // undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone
@@ -130,8 +130,8 @@ const api = {
 	},
 
 	undoText() {
-		return LocaleManager.noTranslate(
-			LocaleManager.translate(
+		return noTranslate(
+			tr(
 				'action.edit.undo.name_@c',
 				api.isUndoAvailable() ? state.stack[state.index].undoText : ''
 			)
@@ -139,8 +139,8 @@ const api = {
 	},
 
 	redoText() {
-		return LocaleManager.noTranslate(
-			LocaleManager.translate(
+		return noTranslate(
+			tr(
 				'action.edit.redo.name_@c',
 				api.isRedoAvailable() ? state.stack[state.index + 1].undoText : ''
 			)

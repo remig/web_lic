@@ -23,15 +23,13 @@ import AnnotationSetters from './store/annotation_setters';
 import CalloutSetters from './store/callout_setters';
 import CalloutArrowSetters from './store/callout_arrow_setters';
 import StepInsertion from './store/step_insertion';
-import LocaleManager from './components/translate.vue';
+import {tr} from './translations';
 
 import LDParse from './ld_parse';
 import LDRender from './ld_render';
 import defaultTemplate from './template';
 import Storage from './storage';
 import packageInfo from '../package.json';
-
-const tr = LocaleManager.translate;
 
 const emptyState = {
 	template: _.cloneDeep(defaultTemplate),

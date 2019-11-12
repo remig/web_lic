@@ -27,13 +27,12 @@
 <script>
 
 import DialogManager from '../dialog';
-import LanguageList from '../../languages/languages.json';
 import EventBus from '../event_bus';
-import {translate, setLocale, getLocale, noTranslate} from '../translations';
+import * as translate from '../translations';
 
 async function pickLanguage() {
-	const currentLocale = getLocale();
-	if (currentLocale != null || LanguageList.length < 2) {
+	const currentLocale = translate.getLocale();
+	if (currentLocale != null || translate.LanguageList.length < 2) {
 		if (currentLocale != null) {
 			EventBus.$emit('redraw-ui');
 		}
@@ -49,26 +48,21 @@ export default {
 		return {
 			visible: false,
 			chosenLocaleCode: 'en',
-			languageList: LanguageList
+			languageList: translate.LanguageList
 		};
 	},
 	methods: {
 		ok() {
 			this.visible = false;
-			setLocale(this.chosenLocaleCode);
+			translate.setLocale(this.chosenLocaleCode);
 			this.$emit('close');
 		},
 		changeLanguage() {
-			setLocale(this.chosenLocaleCode);
+			translate.setLocale(this.chosenLocaleCode);
 			EventBus.$emit('redraw-ui');
 		}
 	},
-	translate,
-	getLocale,
-	setLocale,
-	pickLanguage,
-	LanguageList,
-	noTranslate
+	pickLanguage
 };
 
 </script>
