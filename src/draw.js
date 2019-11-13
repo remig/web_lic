@@ -26,7 +26,7 @@ const api = {
 		const rectStyle = {
 			strokeStyle: template.border.color,
 			// * 2 because line is centered on page edge, so half of it is clipped
-			lineWidth: Math.floor(template.border.width * 2)
+			lineWidth: Math.floor(template.border.width * 2),
 		};
 
 		if (template.fill.color) {
@@ -177,7 +177,7 @@ const api = {
 		const rectStyle = {
 			fillStyle: template.fill.color,
 			strokeStyle: template.border.color,
-			lineWidth: template.border.width
+			lineWidth: template.border.width,
 		};
 		api.roundedRectItemStyled(ctx, submodelImage, template.border.cornerRadius, rectStyle);
 
@@ -251,7 +251,7 @@ const api = {
 		const rectStyle = {
 			fillStyle: template.pli.fill.color,
 			strokeStyle: template.pli.border.color,
-			lineWidth: template.pli.border.width
+			lineWidth: template.pli.border.width,
 		};
 		api.roundedRectItemStyled(ctx, pli, template.pli.border.cornerRadius, rectStyle);
 
@@ -296,7 +296,7 @@ const api = {
 		const rectStyle = {
 			fillStyle: template.fill.color,
 			strokeStyle: template.border.color,
-			lineWidth: template.border.width
+			lineWidth: template.border.width,
 		};
 		api.roundedRectItemStyled(ctx, callout, template.border.cornerRadius, rectStyle);
 
@@ -327,7 +327,7 @@ const api = {
 			parent: store.get.parent(arrow.parent),
 			border,
 			points: arrow.points,
-			direction: arrow.direction
+			direction: arrow.direction,
 		}, ctx);
 	},
 
@@ -336,7 +336,7 @@ const api = {
 		icon = store.get.rotateIcon(icon);
 		const scale = {  // Icon is drawn in 100 x 94 space; scale to that
 			width: icon.width / 100,  // TODO: put Layout.rotateIconAspectRatio somewhere easier to read
-			height: icon.height / 94
+			height: icon.height / 94,
 		};
 
 		ctx.strokeStyle = template.border.color;
@@ -536,7 +536,7 @@ const api = {
 					};
 					image.src = annotation.src;
 				}
-			}
+			},
 		};
 
 		return function(annotation, ctx) {
@@ -668,7 +668,7 @@ const api = {
 		ctx.arc(x + w - r, y + h - r, r, 0, Math.PI / 2);
 		ctx.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
 		ctx.closePath();
-	}
+	},
 };
 
 function pixelOffset({x, y}, lineWidth) {

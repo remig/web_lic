@@ -6,15 +6,15 @@ import store from '../store';
 export default {
 	add(opts) {  // opts: {parent}
 		const arrow = store.mutations.item.add({item: {
-			type: 'calloutArrow', points: [], direction: 'right'
+			type: 'calloutArrow', points: [], direction: 'right',
 		}, parent: opts.parent});
 
 		store.mutations.item.add({item: {
-			type: 'point', x: 0, y: 0
+			type: 'point', x: 0, y: 0,
 		}, parent: arrow});
 
 		store.mutations.item.add({item: {
-			type: 'point', x: 0, y: 0
+			type: 'point', x: 0, y: 0,
 		}, parent: arrow});
 
 		return arrow;
@@ -35,10 +35,10 @@ export default {
 		store.mutations.item.add({
 			item: {type: 'point', relativeTo: p1.relativeTo, ...midpoint},
 			parent: arrow,
-			parentInsertionIndex
+			parentInsertionIndex,
 		});
 	},
 	rotateTip(opts) {  // opts: {arrow, direction}
 		store.get.lookupToItem(opts.arrow).direction = opts.direction;
-	}
+	},
 };

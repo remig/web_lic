@@ -28,8 +28,8 @@ export default {
 	methods: {
 		newValues() {
 			this.$emit('new-values', 'rotateicon');
-		}
-	}
+		},
+	},
 };
 
 </script>

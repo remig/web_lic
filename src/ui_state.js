@@ -18,24 +18,24 @@ const defaultState = {
 				titlePage: true,
 				// submodelBreakdown: false,
 				pli: true,
-				partListPage: true
-			}
+				partListPage: true,
+			},
 		},
 		'export': {
 			images: {
 				scale: 1,
 				dpi: 96,
-				maintainPrintSize: true
+				maintainPrintSize: true,
 			},
 			pdf: {
 				// Don't cache physical page size because it should initially match current pixel page size
 				dpi: 96,
-				units: 'point'  // One of 'point', 'mm', 'cm', 'in'
-			}
+				units: 'point',  // One of 'point', 'mm', 'cm', 'in'
+			},
 		},
 		multiBook: {
-			firstPageNumber: 'start_page_1'  // or preserve_page_count
-		}
+			firstPageNumber: 'start_page_1',  // or preserve_page_count
+		},
 	},
 	template: null,  // NYI
 	navTree: {
@@ -44,12 +44,12 @@ const defaultState = {
 			all: true, page_step_part: false, group_parts: false,
 			step: true, submodelImage: true, csi: true, part: true,
 			pli: true, pliItem: true, callout: true, calloutArrow: true,
-			annotation: true, numberLabel: true, quantityLabel: true, divider: true
-		}
+			annotation: true, numberLabel: true, quantityLabel: true, divider: true,
+		},
 	},
 	pageView: {
 		facingPage: false,
-		scroll: false
+		scroll: false,
 	},
 	zoom: 1,  // NYI
 	grid: {
@@ -57,20 +57,20 @@ const defaultState = {
 		spacing: 100,
 		offset: {
 			top: 50,
-			left: 50
+			left: 50,
 		},
 		line: {
 			width: 1,
 			color: 'auto',
-			dash: []
-		}
+			dash: [],
+		},
 	},
 	splitter: 20,
 	guides: [],
 	guideStyle: {  // NYI
 		width: 1,
-		color: 'black'
-	}
+		color: 'black',
+	},
 };
 
 Storage.initialize(defaultState);
@@ -105,11 +105,11 @@ const api = {
 				const path = `/${guideID}/position`, root = currentState.guides;
 				return {
 					redo: [{root, op: 'replace', path, value: newPosition}],
-					undo: [{root, op: 'replace', path, value: originalPosition}]
+					undo: [{root, op: 'replace', path, value: originalPosition}],
 				};
-			}
-		}
-	}
+			},
+		},
+	},
 };
 
 // Load UI state from storage just once here. uiState module itself keeps a copy for fast lookup everywhere

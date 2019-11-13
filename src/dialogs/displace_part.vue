@@ -58,8 +58,8 @@ export default{
 				partDistance: 0,
 				arrowOffset: 0,
 				arrowLength: 0,
-				arrowRotation: 0
-			}
+				arrowRotation: 0,
+			},
 		};
 	},
 	methods: {
@@ -73,8 +73,8 @@ export default{
 		cancel() {
 			this.$emit('cancel', this.values);
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

@@ -12,7 +12,7 @@ export default {
 			transformPanel,
 			{
 				props: {templateEntry: 'pliItem'},
-				on: {'new-values': this.newValues}
+				on: {'new-values': this.newValues},
 			}
 		);
 	},
@@ -24,8 +24,8 @@ export default {
 			const pli = store.get.parent(this.selectedItem);
 			pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
 			this.$emit('new-values', 'pliitem');
-		}
-	}
+		},
+	},
 };
 
 </script>

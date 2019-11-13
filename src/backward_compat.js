@@ -48,7 +48,7 @@ function fixOldTemplate(template) {
 		template.sceneRendering.rotation = [
 			// These are the camera rotations used in older versions of lic.
 			{axis: 'x', angle: 26.33},
-			{axis: 'y', angle: 45}
+			{axis: 'y', angle: 45},
 		];
 	}
 	template.useBlackStudFaces = true;

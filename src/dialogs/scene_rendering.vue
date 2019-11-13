@@ -52,7 +52,7 @@ export default{
 	data: function() {
 		this.originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
 		return {
-			values: _.cloneDeep(store.state.template.sceneRendering)
+			values: _.cloneDeep(store.state.template.sceneRendering),
 		};
 	},
 	methods: {
@@ -76,8 +76,8 @@ export default{
 			store.mutations.sceneRendering.set({...this.originalRenderState, refresh: true});
 			EventBus.$emit('redraw-ui', {clearSelection: true});
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

@@ -17,7 +17,7 @@ const state = {
 	stack: [],
 	index: -1,
 	localStorageTimer: null,
-	onChangeCB: null
+	onChangeCB: null,
 };
 
 const api = {
@@ -80,7 +80,7 @@ const api = {
 			state: newState,
 			actionList: changeList.filter(isAction),
 			undoText,
-			clearCacheTargets
+			clearCacheTargets,
 		});
 		setIndex(state, state.index + 1);
 
@@ -145,7 +145,7 @@ const api = {
 				api.isRedoAvailable() ? state.stack[state.index + 1].undoText : ''
 			)
 		);
-	}
+	},
 };
 
 function isMutation(change) {

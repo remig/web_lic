@@ -74,13 +74,13 @@ export default {
 		triggerMenu(e) {
 			this.$emit('close-menus');
 			e.target.parentElement.classList.add('open');
-		}
+		},
 	},
 	computed: {
 		version() {
 			return _.version.nice(packageInfo.version);  // major.minor is enough for public consumption
-		}
-	}
+		},
+	},
 };
 
 </script>

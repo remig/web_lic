@@ -250,8 +250,9 @@ const Getters = {
 	},
 	isMoveable: (() => {
 		const moveableItems = [
-			'step', 'csi', 'pli', 'pliItem', 'quantityLabel', 'numberLabel', 'annotation',
-			'submodelImage', 'callout', 'divider', 'point', 'rotateIcon'
+			'step', 'csi', 'pli', 'pliItem', 'quantityLabel',
+			'numberLabel', 'annotation', 'submodelImage', 'callout',
+			'divider', 'point', 'rotateIcon',
 		];
 		return function(item) {
 			if (store.get.isTemplatePage(store.get.pageForItem(item))) {
@@ -314,8 +315,9 @@ const Getters = {
 	},
 	childList() {
 		const children = [
-			'page', 'numberLabel', 'divider', 'annotation', 'callout', 'csi',
-			'pliItem', 'quantityLabel', 'rotateIcon', 'step', 'submodelImage'
+			'page', 'numberLabel', 'divider', 'annotation',
+			'callout', 'csi', 'pliItem', 'quantityLabel',
+			'rotateIcon', 'step', 'submodelImage',
 		];
 		if (store.state.plisVisible) {
 			children.push('pli');
@@ -414,7 +416,7 @@ const Getters = {
 		if (store.state.books.length) {
 			return [
 				store.get.templatePage(),
-				...store.state.books
+				...store.state.books,
 			].filter(el => el);
 		}
 		const nodes = store.get.pageList();
@@ -504,9 +506,9 @@ const Getters = {
 			const offset = store.get.coords.itemToPage(relativeTo);
 			return {
 				x: x + offset.x,
-				y: y + offset.y
+				y: y + offset.y,
 			};
-		}
+		},
 	},
 	targetBoxFromPoints(t) {
 		const parent = store.get.parent(t);
@@ -589,9 +591,9 @@ const Getters = {
 			x: box.x - pad + dx,
 			y: box.y - pad,
 			width: pad + box.width + pad - 1,
-			height: pad + box.height + pad - 1
+			height: pad + box.height + pad - 1,
 		};
-	}
+	},
 };
 
 export default Getters;

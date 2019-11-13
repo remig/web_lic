@@ -207,7 +207,7 @@ function createNode(item) {
 
 	const textNode = _.dom.createElement('span', {
 		id: 'treeRow_' + getItemId(item),
-		'class': 'treeText'
+		'class': 'treeText',
 	}, null, getItemText(item));
 
 	if (childNodes.length) {
@@ -307,7 +307,7 @@ const api = {
 			invisibleNodeTypes = new Set(newTypes);
 			api.update();
 		}
-	}
+	},
 };
 
 export default api;

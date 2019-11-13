@@ -31,7 +31,7 @@ interface LoadedLanguageType {
 
 // Always load English; fall back on this if a different language is missing a key
 const loadedLanguages: LoadedLanguageType = {
-	en: require('../languages/en.json')
+	en: require('../languages/en.json'),
 };
 
 function __tr(locale: string, key: string, args: any[]) {
@@ -129,5 +129,5 @@ export {
 	getLocale,
 	setLocale,
 	LanguageList,
-	noTranslate
+	noTranslate,
 };

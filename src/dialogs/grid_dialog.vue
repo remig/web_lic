@@ -106,7 +106,7 @@ export default {
 		return {
 			useAutoColor: true,
 			lineColor: '',
-			newState: uiState.get('grid')
+			newState: uiState.get('grid'),
 		};
 	},
 	methods: {
@@ -138,18 +138,18 @@ export default {
 				root: store.cache.stateCache,
 				op: 'replace',
 				path: '/uiState/gridPath',
-				value: null
+				value: null,
 			};
 			const root = uiState.getCurrentState(), op = 'replace', path = '/grid';
 			const change = {
 				redo: [
 					{root, op, path, value: _.cloneDeep(this.newState)},
-					storeOp
+					storeOp,
 				],
 				undo: [
 					{root, op, path, value: this.originalState},
-					storeOp
-				]
+					storeOp,
+				],
 			};
 			undoStack.commit(change, null, 'Style Grid');
 			this.$emit('close');
@@ -159,8 +159,8 @@ export default {
 			store.cache.set('uiState', 'gridPath', null);
 			this.app.drawCurrentPage();
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

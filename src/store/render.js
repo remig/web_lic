@@ -19,7 +19,7 @@ const canvasCache = (function() {
 		},
 		clear() {
 			cache = {};
-		}
+		},
 	};
 })();
 
@@ -70,7 +70,7 @@ export default {
 			const config = {
 				size: hiResScale * 1000,
 				zoom: getScale(csi),
-				resizeContainer: true
+				resizeContainer: true,
 			};
 			if (step.parts != null) {
 				const partList = store.get.partList(step);
@@ -98,7 +98,7 @@ export default {
 			resizeContainer: true,
 			displacedParts: step.displacedParts,
 			rotation: getRotation(csi),
-			displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color
+			displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color,
 		};
 		const container = canvasCache.get(null, true);
 		const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, config);
@@ -107,7 +107,7 @@ export default {
 			height: container.height,
 			dx: offset.dx,
 			dy: offset.dy,
-			container
+			container,
 		};
 	},
 	pli(colorCode, filename, item, hiResScale = 1, bypassCache) {
@@ -123,7 +123,7 @@ export default {
 				size: hiResScale * 1000,
 				zoom: getScale(item),
 				resizeContainer: true,
-				rotation: getRotation(item)
+				rotation: getRotation(item),
 			};
 			container = container || canvasCache.create(item.domID);
 			LDRender.renderPart(colorCode, filename, container, config);
@@ -161,5 +161,5 @@ export default {
 			res = LDRender.renderPart(0, store.model.filename, container, config);
 		}
 		store.state.template.sceneRendering.zoom = zoom;
-	}
+	},
 };

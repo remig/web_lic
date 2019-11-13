@@ -34,7 +34,7 @@ export default {
 	props: ['templateEntry'],
 	data() {
 		return {
-			scale: _.get(store.state.template, this.templateEntry).scale
+			scale: _.get(store.state.template, this.templateEntry).scale,
 		};
 	},
 	methods: {
@@ -46,13 +46,13 @@ export default {
 			}
 			transform.scale = this.scale;
 			this.$emit('new-values');
-		}
+		},
 	},
 	computed: {
 		rotation() {
 			return _.get(store.state.template, this.templateEntry).rotation;
-		}
-	}
+		},
+	},
 };
 
 </script>

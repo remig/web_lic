@@ -9,7 +9,7 @@ export default {
 
 		const annotation = store.mutations.item.add({item: {
 			type: 'annotation',
-			annotationType: opts.annotationType
+			annotationType: opts.annotationType,
 		}, parent: opts.parent});
 
 		_.assign(annotation, opts.properties);
@@ -29,11 +29,11 @@ export default {
 		} else if (annotation.annotationType === 'arrow') {
 			annotation.points = [];
 			store.mutations.item.add({item: {
-				type: 'point', x: opts.x, y: opts.y
+				type: 'point', x: opts.x, y: opts.y,
 			}, parent: annotation});
 
 			store.mutations.item.add({item: {
-				type: 'point', x: opts.x + 100, y: opts.y
+				type: 'point', x: opts.x + 100, y: opts.y,
 			}, parent: annotation});
 		} else {
 			// image annotation width & height set by image load logic during first draw
@@ -59,5 +59,5 @@ export default {
 		}
 		store.cache.clear(item);  // Clear cached images, if any
 		store.mutations.item.delete({item});
-	}
+	},
 };

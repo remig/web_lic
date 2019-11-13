@@ -28,7 +28,7 @@ export default {
 		store.mutations.step.toggleRotateIcon({step, display: true});
 
 		store.mutations.submodelImage.add({
-			parent: step, modelFilename: modelData.model.filename, quantity: 2
+			parent: step, modelFilename: modelData.model.filename, quantity: 2,
 		});
 
 		const pli = store.get.pli(step.pliID);
@@ -36,7 +36,7 @@ export default {
 			store.mutations.pliItem.add({
 				parent: pli,
 				filename: p.filename,
-				colorCode: p.colorCode
+				colorCode: p.colorCode,
 			});
 		});
 		step.displacedParts = [{partID: 1, direction: 'up'}];
@@ -65,5 +65,5 @@ export default {
 		store.state.template.page.width = opts.width;
 		store.state.template.page.height = opts.height;
 		store.mutations.page.markAllDirty();
-	}
+	},
 };

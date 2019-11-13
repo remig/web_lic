@@ -34,7 +34,7 @@ export default {
 	components: {PanelBase, FillPanel, BorderPanel},
 	data() {
 		return {
-			includeSubmodels: store.state.template.pli.includeSubmodels
+			includeSubmodels: store.state.template.pli.includeSubmodels,
 		};
 	},
 	methods: {
@@ -47,8 +47,8 @@ export default {
 				template.includeSubmodels = this.includeSubmodels;
 				this.$emit('new-values', 'pli');
 			}
-		}
-	}
+		},
+	},
 };
 
 </script>

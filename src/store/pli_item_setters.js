@@ -11,13 +11,13 @@ export default {
 			colorCode: opts.colorCode,
 			quantity: (opts.quantity == null) ? 1 : opts.quantity,
 			quantityLabelID: null,
-			x: null, y: null, width: null, height: null
+			x: null, y: null, width: null, height: null,
 		}, parent: opts.parent});
 
 		store.mutations.item.add({item: {
 			type: 'quantityLabel',
 			align: 'left', valign: 'top',
-			x: null, y: null, width: null, height: null
+			x: null, y: null, width: null, height: null,
 		}, parent: pliItem});
 
 		return pliItem;
@@ -39,5 +39,5 @@ export default {
 		let list = store.state.pliItems;
 		list = filename ? list.filter(item => item.filename === filename) : list;
 		list.forEach(item => (item.isDirty = true));
-	}
+	},
 };

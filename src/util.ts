@@ -68,7 +68,7 @@ _.mixin({
 		return function(font = '') {
 			const fullFontParts = {
 				fontStyle: '', fontVariant: '', fontWeight: '',
-				fontStretch: '', fontSize: '', fontFamily: ''
+				fontStretch: '', fontSize: '', fontFamily: '',
 			};
 			const fontFamily: string[] = [];
 			let haveFontSize = false;
@@ -106,10 +106,10 @@ _.mixin({
 	})(),
 	fontPartsToFont({
 		fontStyle = '', fontVariant = '', fontWeight = '',
-		fontStretch = '', fontSize = '', fontFamily = ''
+		fontStretch = '', fontSize = '', fontFamily = '',
 	} = {}) {
 		return [
-			fontStyle, fontVariant, fontWeight, fontStretch, fontSize, fontFamily.trim()
+			fontStyle, fontVariant, fontWeight, fontStretch, fontSize, fontFamily.trim(),
 		].filter(el => el !== '').join(' ').trim();
 	},
 	fontString(
@@ -120,7 +120,7 @@ _.mixin({
 			fontSize: size + 'pt',
 			fontFamily: family,
 			fontWeight: bold ? 'bold' : null,
-			fontStyle: italic ? 'italic' : null
+			fontStyle: italic ? 'italic' : null,
 		});
 	},
 	degrees(radians: number): number {
@@ -164,7 +164,7 @@ _.mixin({
 			point: 0.75,
 			'in': 0.75 / 72,
 			mm: 0.75 / 72 * 25.4,
-			cm: 0.75 / 72 * 2.54
+			cm: 0.75 / 72 * 2.54,
 		};
 		function units() {}
 		units.pixelsToUnits = function(pixelCount: number, newUnits: UnitTypes) {
@@ -211,7 +211,7 @@ _.mixin({
 			}
 			return {
 				x: minX, y: minY,
-				width: maxX - minX, height: maxY - minY
+				width: maxX - minX, height: maxY - minY,
 			};
 		};
 		geom.expandBox = function(box: Box, minWidth: number, minHeight: number) {
@@ -264,11 +264,11 @@ _.mixin({
 				head: {
 					length: 30,
 					width: 7,
-					insetDepth: 3
+					insetDepth: 3,
 				},
 				body: {
-					width: 1.25
-				}
+					width: 1.25,
+				},
 			};
 		};
 		return geom;
@@ -286,7 +286,7 @@ _.mixin({
 			return {
 				major: revs[0] || 0,
 				minor: revs[1] || 0,
-				revision: revs[2] || 0
+				revision: revs[2] || 0,
 			};
 		};
 		version.nice = (v: string): string => {
@@ -330,7 +330,7 @@ _.mixin({
 		function color() {}
 		color.toRGB = (() => {
 			const rgbLookupCache: CacheType = {
-				'#000000': [0, 0, 0]
+				'#000000': [0, 0, 0],
 			};
 			return function(colorString: string) {
 				let rgb;
@@ -428,7 +428,7 @@ _.mixin({
 			return false;
 		}
 		return _.color.isVisible(border.color);
-	}
+	},
 });
 
 interface CacheType {

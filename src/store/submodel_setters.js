@@ -41,7 +41,7 @@ export default {
 			}
 			step.submodelImages.forEach(submodelImageID => {
 				store.mutations.submodelImage.delete({
-					submodelImage: {type: 'submodelImage', id: submodelImageID}
+					submodelImage: {type: 'submodelImage', id: submodelImageID},
 				});
 			});
 			pagesToDelete.add(step.parent.id);
@@ -59,5 +59,5 @@ export default {
 		if (doLayout) {
 			store.mutations.page.layout({page: destStep.parent});
 		}
-	}
+	},
 };

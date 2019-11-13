@@ -129,7 +129,7 @@ function generateObjectList(part, modelView, colorCode, config) {
 
 				const localConfig = {
 					alpha: localAlpha,
-					parentColorCode: colorCode
+					parentColorCode: colorCode,
 				};
 				const newObject = generateObjectList(abstractPart, partMatrix, newColorCode, localConfig);
 				res.faces.push(...newObject.faces);
@@ -149,7 +149,7 @@ function generateObjectList(part, modelView, colorCode, config) {
 				const newColorCode = (subPart.colorCode == null) ? colorCode : subPart.colorCode;
 				const localConfig = {
 					alpha: config.alpha,
-					parentColorCode: colorCode
+					parentColorCode: colorCode,
 				};
 
 				const newObject = generateObjectList(abstractPart, partMatrix, newColorCode, localConfig);
@@ -253,7 +253,7 @@ function addObject(objectsToDraw, buffers, modelView, color) {
 	if (buffers && modelView && color) {
 		objectsToDraw.push({
 			buffers,
-			uniforms: {modelView, color}
+			uniforms: {modelView, color},
 		});
 	}
 }
@@ -345,7 +345,7 @@ function getPartBoundingBox(part, modelView) {
 	}
 	return {
 		min: [minX, minY, minZ],
-		max: [maxX, maxY, maxZ]
+		max: [maxX, maxY, maxZ],
 	};
 }
 
@@ -353,7 +353,7 @@ function growBox(box) {
 	const scale = 1.5, min = box.min, max = box.max;
 	return {
 		min: [min[0] - scale, min[1] - scale, min[2] - scale],
-		max: [max[0] + scale, max[1] + scale, max[2] + scale]
+		max: [max[0] + scale, max[1] + scale, max[2] + scale],
 	};
 }
 
@@ -368,7 +368,7 @@ function createBBoxBuffer(box) {
 		next: [],
 		direction: [],
 		order: [],
-		indices: {data: [], lastIndex: 0}
+		indices: {data: [], lastIndex: 0},
 	};
 
 	// Bottom face
@@ -402,7 +402,7 @@ function createBBoxBuffer(box) {
 
 	return {
 		vao,
-		numElements: lineData.indices.data.length
+		numElements: lineData.indices.data.length,
 	};
 }
 
@@ -413,14 +413,14 @@ function importPart(part) {
 		let coloredPrimitives;
 		const faceData = {
 			position: [],
-			indices: {data: [], lastIndex: 0}
+			indices: {data: [], lastIndex: 0},
 		};
 		const lineData = {
 			position: [],
 			next: [],
 			direction: [],
 			order: [],
-			indices: {data: [], lastIndex: 0}
+			indices: {data: [], lastIndex: 0},
 		};
 		const condLineData = {
 			position: [],
@@ -429,7 +429,7 @@ function importPart(part) {
 			order: [],
 			condPointA: [],
 			condPointB: [],
-			indices: {data: [], lastIndex: 0}
+			indices: {data: [], lastIndex: 0},
 		};
 
 		for (let i = 0; i < part.primitives.length; i++) {
@@ -448,7 +448,7 @@ function importPart(part) {
 				if (coloredPrimitives[colorCode] == null) {
 					coloredPrimitives[colorCode] = {
 						position: [],
-						indices: {data: [], lastIndex: 0}
+						indices: {data: [], lastIndex: 0},
 					};
 				}
 				addFace(coloredPrimitives[colorCode], p.p);
@@ -468,7 +468,7 @@ function importPart(part) {
 			gl.bindVertexArray(null);
 			partBuffer.faces = {
 				vao,
-				numElements: faceData.indices.data.length
+				numElements: faceData.indices.data.length,
 			};
 		}
 		if (lineData.position.length) {
@@ -485,7 +485,7 @@ function importPart(part) {
 			gl.bindVertexArray(null);
 			partBuffer.lines = {
 				vao,
-				numElements: lineData.indices.data.length
+				numElements: lineData.indices.data.length,
 			};
 		}
 		if (condLineData.position.length) {
@@ -504,7 +504,7 @@ function importPart(part) {
 			gl.bindVertexArray(null);
 			partBuffer.condLines = {
 				vao,
-				numElements: condLineData.indices.data.length
+				numElements: condLineData.indices.data.length,
 			};
 		}
 		if (coloredPrimitives != null) {
@@ -522,7 +522,7 @@ function importPart(part) {
 					gl.bindVertexArray(null);
 					partBuffer.coloredFaces[colorCode] = {
 						vao,
-						numElements: face.indices.data.length
+						numElements: face.indices.data.length,
 					};
 				}
 			}
@@ -549,7 +549,7 @@ function LDMatrixToMatrix(m) {
 function MatrixToLDMatrix(m) {
 	return [
 		m[12], m[13], m[14],  // x, y, z
-		m[ 0], m[ 4], m[ 8], m[1], m[5], m[9], m[2], m[6], m[10]  // a - i
+		m[ 0], m[ 4], m[ 8], m[1], m[5], m[9], m[2], m[6], m[10],  // a - i
 	];
 }
 /* eslint-enable computed-property-spacing */
@@ -600,16 +600,16 @@ export default {
 		programs = {
 			faces: {
 				program: faceProgram,
-				uniformSetters: twgl.createUniformSetters(gl, faceProgram)
+				uniformSetters: twgl.createUniformSetters(gl, faceProgram),
 			},
 			lines: {
 				program: lineProgram,
-				uniformSetters: twgl.createUniformSetters(gl, lineProgram)
+				uniformSetters: twgl.createUniformSetters(gl, lineProgram),
 			},
 			condLines: {
 				program: condLineProgram,
-				uniformSetters: twgl.createUniformSetters(gl, condLineProgram)
-			}
+				uniformSetters: twgl.createUniformSetters(gl, condLineProgram),
+			},
 		};
 
 		partBufferCache[arrowPartName] = Arrows.createArrowBuffers(gl);
@@ -663,7 +663,7 @@ export default {
 			c * e, af + be * d, bf - ae * d, 0,
 			-c * f, ae - bf * d, be + af * d, 0,
 			d, -b * c, a * c, 0,
-			pos.x, pos.y, pos.z, 1
+			pos.x, pos.y, pos.z, 1,
 		];
 
 		return MatrixToLDMatrix(m).map(el => Math.abs(el) < 0.0000001 ? 0 : el);
@@ -710,7 +710,7 @@ export default {
 		return {
 			position: {x: m[12], y: m[13], z: m[14]},
 			rotation: {x: _.degrees(rx), y: _.degrees(ry), z: _.degrees(rz)},
-			scale: {x: sx, y: sy, z: sz}
+			scale: {x: sx, y: sy, z: sz},
 		};
-	}
+	},
 };

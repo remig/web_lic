@@ -77,7 +77,7 @@ export default{
 			rotation: {x: 0, y: 0, z: 0},
 			position: {x: 0, y: 0, z: 0},
 			addRotateIcon: true,
-			showRotateIconCheckbox: true
+			showRotateIconCheckbox: true,
 		};
 	},
 	methods: {
@@ -91,8 +91,8 @@ export default{
 		cancel() {
 			this.$emit('cancel', this.$data);
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

@@ -9,17 +9,17 @@ Vue.component('licDialog', {
 	props: {
 		modal: {
 			type: Boolean,
-			'default': false
+			'default': false,
 		},
 		showClose: {
 			type: Boolean,
-			'default': false
+			'default': false,
 		},
 		visible: {
 			type: Boolean,
-			'default': true
-		}
-	}
+			'default': true,
+		},
+	},
 });
 
 Vue.component('licTooltip', {
@@ -27,27 +27,27 @@ Vue.component('licTooltip', {
 	props: {
 		openDelay: {
 			type: Number,
-			'default': 500
+			'default': 500,
 		},
 		effect: {
 			type: String,
-			'default': 'light'
+			'default': 'light',
 		},
 		arrowOffset: {
 			type: Number,
-			'default': 0
+			'default': 0,
 		},
 		transition: {
 			type: String,
-			'default': 'none'
+			'default': 'none',
 		},
 		enterable: {
 			type: Boolean,
-			'default': false
+			'default': false,
 		},
 		placement: {
 			type: String,
-			'default': 'right'
-		}
-	}
+			'default': 'right',
+		},
+	},
 });

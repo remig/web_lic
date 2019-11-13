@@ -52,14 +52,14 @@ export default {
 	components: {PanelBase},
 	props: {
 		templateEntry: {type: String, required: true},
-		title: {type: String, 'default': 'template.fill.title'}
+		title: {type: String, 'default': 'template.fill.title'},
 	},
 	data() {
 		const template = _.get(store.state.template, this.templateEntry).fill;
 		return {
 			color: template.color,
 			gradient: template.gradient,
-			imageFilename: template.image == null ? null : template.image.filename || ''
+			imageFilename: template.image == null ? null : template.image.filename || '',
 		};
 	},
 	methods: {
@@ -120,14 +120,14 @@ export default {
 			const template = _.get(store.state.template, this.templateEntry).fill;
 			template.color = this.color;
 			this.$emit('new-values', {type: this.templateEntry, noLayout: true});
-		}
+		},
 	},
 	computed: {
 		truncatedImageName() {
 			const fn = this.imageFilename;
 			return (fn.length > 12) ? fn.substr(0, 5) + '...png' : fn;
-		}
-	}
+		},
+	},
 };
 
 </script>

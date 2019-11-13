@@ -17,9 +17,9 @@ Vue.use({
 		// Add a 'tr' method to every component, which makes translating strings in template HTML easier
 		vue.prototype.tr = tr;
 		vue.prototype._ = _;
-	}
+	},
 });
 
 new Vue({
-	render: h => h(UI)
+	render: h => h(UI),
 }).$mount('#app');

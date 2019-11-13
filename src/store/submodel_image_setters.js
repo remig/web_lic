@@ -9,7 +9,7 @@ export default {
 			type: 'submodelImage', csiID: null, quantityLabelID: null,
 			modelFilename: opts.modelFilename, quantity: opts.quantity || 1,
 			x: null, y: null, width: null, height: null,
-			innerContentOffset: {x: 0, y: 0}
+			innerContentOffset: {x: 0, y: 0},
 		}, parent: opts.parent});
 
 		store.mutations.csi.add({parent: submodelImage});
@@ -18,7 +18,7 @@ export default {
 			store.mutations.item.add({item: {
 				type: 'quantityLabel',
 				align: 'right', valign: 'bottom',
-				x: null, y: null, width: null, height: null
+				x: null, y: null, width: null, height: null,
 			}, parent: submodelImage});
 		}
 		return submodelImage;
@@ -35,5 +35,5 @@ export default {
 		if (opts.doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(submodelImage)});
 		}
-	}
+	},
 };

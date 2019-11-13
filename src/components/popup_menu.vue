@@ -116,7 +116,7 @@ export default {
 				'dropdown-submenu': entry.children,
 				disabled: entry.enabled && this.selectedItem != null
 					? !entry.enabled(this.selectedItem)
-					: false
+					: false,
 			};
 		},
 		visibleMenuEntries() {
@@ -135,8 +135,8 @@ export default {
 				}
 				return true;
 			});
-		}
-	}
+		},
+	},
 };
 
 </script>

@@ -9,7 +9,7 @@ export default {
 			pliItems: [],
 			x: null, y: null, width: null, height: null,
 			innerContentOffset: {x: 0, y: 0},
-			borderOffset: {x: 0, y: 0}
+			borderOffset: {x: 0, y: 0},
 		}, parent: opts.parent});
 	},
 	delete(opts) {  // opts: {pli, deleteItem: false}
@@ -33,7 +33,7 @@ export default {
 			store.mutations.pliItem.add({
 				parent: pli,
 				filename: opts.part.filename,
-				colorCode: opts.part.colorCode
+				colorCode: opts.part.colorCode,
 			});
 		}
 	},
@@ -63,5 +63,5 @@ export default {
 		if (opts.doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(pli)});
 		}
-	}
+	},
 };

@@ -99,7 +99,7 @@ const pageSizeLookups = {  // [width, height] in pixels
 	letter: [816, 1056],
 	'gov-letter': [768, 1008],
 	legal: [816, 1344],
-	'junior-legal': [480, 768]
+	'junior-legal': [480, 768],
 };
 
 // TODO: add UI to set default page layout (horizontal vs. vertical , row / cols, etc)
@@ -115,10 +115,10 @@ export default {
 			pageSizeLookups,
 			sizePreset: {
 				format: (template.sizePreset || {}).format || 'custom',
-				orientation: (template.sizePreset || {}).orientation || 'vertical'
+				orientation: (template.sizePreset || {}).orientation || 'vertical',
 			},
 			aspectRatio: template.width / template.height,
-			maintainAspectRatio: true
+			maintainAspectRatio: true,
 		};
 	},
 	methods: {
@@ -179,15 +179,15 @@ export default {
 		printedSize(unit) {
 			return {
 				width: _.round(_.units.pixelsToUnits(this.width, unit), 2),
-				height: _.round(_.units.pixelsToUnits(this.height, unit), 2)
+				height: _.round(_.units.pixelsToUnits(this.height, unit), 2),
 			};
-		}
+		},
 	},
 	computed: {
 		haveCustomFormat() {
 			return this.sizePreset.format === 'custom';
-		}
-	}
+		},
+	},
 };
 
 </script>

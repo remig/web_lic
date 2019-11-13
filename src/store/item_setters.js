@@ -42,7 +42,7 @@ const api = {
 		const list = parent[opts.listType + 's'] || [];
 		while (list.length) {
 			store.mutations[itemType].delete({
-				[itemType]: {type: opts.listType, id: list[0]}
+				[itemType]: {type: opts.listType, id: list[0]},
 			});
 		}
 	},
@@ -84,7 +84,7 @@ const api = {
 				}
 			}
 		});
-	}
+	},
 };
 
 export default api;

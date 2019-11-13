@@ -127,13 +127,13 @@ const UI = {
 			filename: null,
 			dirtyState: {
 				undoIndex: 0,
-				lastSaveIndex: 0
+				lastSaveIndex: 0,
 			},
 			lastRightClickPos: {
 				x: null,
-				y: null
+				y: null,
 			},
-			disableLocalStorage: false
+			disableLocalStorage: false,
 		};
 	},
 	methods: {
@@ -538,7 +538,7 @@ const UI = {
 		},
 		haveModel() {
 			return store && store.model != null;
-		}
+		},
 	},
 	computed: {
 		isDirty() {
@@ -549,7 +549,7 @@ const UI = {
 		},
 		isTemplatePageCurrent() {
 			return store.get.isTemplatePage(this.currentPageLookup);
-		}
+		},
 	},
 	async mounted() {
 
@@ -616,7 +616,7 @@ const UI = {
 			minSize: [100, store.state.template.page.width + 10],
 			direction: 'horizontal',
 			gutterSize: 5,
-			snapOffset: 0
+			snapOffset: 0,
 		});
 
 		if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
@@ -631,12 +631,12 @@ const UI = {
 		if (!_.isEmpty(localModel)) {
 			this.openLicFileFromContent(localModel);
 		}
-	}
+	},
 };
 
 window.__lic = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build and in Cypress
-	_, app: UI, store, undoStack, LDParse, Storage, uiState
+	_, app: UI, store, undoStack, LDParse, Storage, uiState,
 };
 
 export default UI;

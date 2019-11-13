@@ -28,7 +28,7 @@ module.exports = {
 		"block-spacing": ["error", "never"],
 		"brace-style": ["error", "1tbs", {"allowSingleLine": true}],
 		"class-methods-use-this": "error",
-		"comma-dangle": ["warn", "never"],
+		"comma-dangle": ["warn", "always-multiline"],
 		"comma-spacing": "error",
 		"complexity": ["error", 36],  // TODO: reduce this over time
 		"computed-property-spacing": ["warn", "never"],

@@ -75,7 +75,7 @@ export default {
 	data: function() {
 		return {
 			includePartsPerStep: false,
-			newState: uiState.get('dialog.importModel')
+			newState: uiState.get('dialog.importModel'),
 		};
 	},
 	methods: {
@@ -85,8 +85,8 @@ export default {
 		ok() {
 			this.$emit('ok', this.newState);
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

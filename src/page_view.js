@@ -21,12 +21,12 @@ Vue.component('pageView', {
 		return {
 			pageSize: {
 				width: store.state.template.page.width,
-				height: store.state.template.page.height
+				height: store.state.template.page.height,
 			},
 			pageCount: 0,
 			pageLockStatus: [],
 			facingPage: uiState.get('pageView.facingPage'),
-			scroll: uiState.get('pageView.scroll')
+			scroll: uiState.get('pageView.scroll'),
 		};
 	},
 	render(createElement) {
@@ -50,9 +50,9 @@ Vue.component('pageView', {
 					attrs: {
 						id: getCanvasID(pageLookup),
 						width: pageWidth,
-						height: pageHeight
+						height: pageHeight,
 					},
-					'class': ['pageCanvas']
+					'class': ['pageCanvas'],
 				}
 			);
 
@@ -67,7 +67,7 @@ Vue.component('pageView', {
 					{
 						props: {width: 20, value: locked},
 						'class': 'pageLockSwitch',
-						on: {input: setPageLocked(pageLookup.id)}
+						on: {input: setPageLocked(pageLookup.id)},
 					}
 				);
 
@@ -81,8 +81,8 @@ Vue.component('pageView', {
 								pageSize: {width: pageWidth, height: pageHeight},
 								offset,
 								id: guideID,
-								...props
-							}
+								...props,
+							},
 						}
 					);
 				});
@@ -101,13 +101,13 @@ Vue.component('pageView', {
 				{
 					'class': [
 						'pageContainer',
-						{oddNumberedPage: facing && !_.isEven(idx)}
+						{oddNumberedPage: facing && !_.isEven(idx)},
 					],
 					style: {
 						marginTop: scrolling ? multiPagePadding + 'px' : null,
 						marginBottom: scrolling ? multiPagePadding + 'px' : null,
-						visibility: (pageLookup == null) ? 'hidden' : null
-					}
+						visibility: (pageLookup == null) ? 'hidden' : null,
+					},
 				},
 				[canvas, guides]
 			);
@@ -168,8 +168,8 @@ Vue.component('pageView', {
 				'class': 'pageViewContainer',
 				style: {
 					width: facing ? pageWidth + pageWidth + 70 + 'px' : pageWidth + 'px',
-					height: scrolling ? null : pageHeight + 'px'
-				}
+					height: scrolling ? null : pageHeight + 'px',
+				},
 			},
 			containerList
 		);
@@ -177,7 +177,7 @@ Vue.component('pageView', {
 		const handlers = {
 			mousedown: this.mouseDown,
 			mousemove: this.mouseMove,
-			mouseup: this.mouseUp
+			mouseup: this.mouseUp,
 		};
 		if (scrolling) {
 			handlers.scroll = this.drawVisiblePages;
@@ -188,7 +188,7 @@ Vue.component('pageView', {
 			{
 				'class': {singleEntry: !scrolling},
 				attrs: {id: 'rightSubPane'},
-				on: handlers
+				on: handlers,
 			},
 			[subRoot]
 		);
@@ -212,7 +212,7 @@ Vue.component('pageView', {
 			} else {
 				this.drawVisiblePages();
 			}
-		}
+		},
 	},
 	methods: {
 		forceUpdate() {
@@ -247,7 +247,7 @@ Vue.component('pageView', {
 				this.mouseDragItem = {
 					guide: this.$refs[e.target.dataset.id],
 					x: e.screenX,
-					y: e.screenY
+					y: e.screenY,
 				};
 			} else if (this.selectedItem) {
 				const item = store.get.lookupToItem(this.selectedItem);
@@ -422,9 +422,9 @@ Vue.component('pageView', {
 			const box = canvas.getBoundingClientRect();
 			return {
 				x: Math.floor(point.x - box.x),
-				y: Math.floor(point.y - box.y)
+				y: Math.floor(point.y - box.y),
 			};
-		}
+		},
 	},
 	computed: {
 		isFacingView() {
@@ -436,8 +436,8 @@ Vue.component('pageView', {
 			return this.scroll && this.pageCount > 1
 				&& (this.currentPageLookup == null
 					|| !store.get.isTemplatePage(this.currentPageLookup));
-		}
-	}
+		},
+	},
 });
 
 function getPairedPages(page) {

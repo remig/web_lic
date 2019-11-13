@@ -7,7 +7,7 @@ import LicGL from './webgl/licgl';
 const measurementCanvas = document.createElement('canvas');
 const renderState = {
 	zoom: 500,
-	lineThickness: 0.0015
+	lineThickness: 0.0015,
 };
 
 const api = {
@@ -50,7 +50,7 @@ const api = {
 
 		return {
 			dx: Math.max(0, noSelectedPartsBounds.x - selectedPartsBounds.x),
-			dy: Math.max(0, noSelectedPartsBounds.y - selectedPartsBounds.y)
+			dy: Math.max(0, noSelectedPartsBounds.y - selectedPartsBounds.y),
 		};
 	},
 
@@ -66,7 +66,7 @@ const api = {
 		if (newState.edgeWidth != null) {
 			renderState.lineThickness = newState.edgeWidth * 0.0004;
 		}
-	}
+	},
 };
 
 function buildConfig(config) {
@@ -131,7 +131,7 @@ function contextBoundingBox(data, w, h) {
 	return {
 		x: minX, y: minY,
 		maxX: maxX, maxY: maxY,
-		w: maxX - minX, h: maxY - minY
+		w: maxX - minX, h: maxY - minY,
 	};
 }
 /* eslint-enable no-labels */

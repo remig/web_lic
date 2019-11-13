@@ -57,7 +57,7 @@ function buildColorTable() {
 			id: k,
 			name: v.name,
 			color: customColor.color || v.color,
-			edge: customColor.edge || v.edge
+			edge: customColor.edge || v.edge,
 		});
 	});
 	return colors;
@@ -66,7 +66,7 @@ function buildColorTable() {
 export default {
 	data: function() {
 		return {
-			colorData: buildColorTable()
+			colorData: buildColorTable(),
 		};
 	},
 	methods: {
@@ -76,8 +76,8 @@ export default {
 		},
 		cancel() {
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

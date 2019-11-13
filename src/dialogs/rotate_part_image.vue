@@ -43,7 +43,7 @@ export default{
 			title: '',
 			addRotateIcon: true,
 			showRotateIconCheckbox: true,
-			initialRotation: []
+			initialRotation: [],
 		};
 	},
 	methods: {
@@ -60,7 +60,7 @@ export default{
 		cancel() {
 			this.$emit('cancel', this.$data);
 			this.$emit('close');
-		}
+		},
 	},
 	computed: {
 		rotation: {
@@ -69,9 +69,9 @@ export default{
 			},
 			set(newRotation) {
 				this.$data.rotation = this.initialRotation = _.cloneDeep(newRotation);
-			}
-		}
-	}
+			},
+		},
+	},
 };
 </script>
 

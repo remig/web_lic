@@ -57,14 +57,14 @@ import packageInfo from '../../package.json';
 export default {
 	data() {
 		return {
-			version: packageInfo.version
+			version: packageInfo.version,
 		};
 	},
 	methods: {
 		cancel() {
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 
 </script>

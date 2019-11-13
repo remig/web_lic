@@ -50,7 +50,7 @@ const emptyState = {
 	callouts: [],
 	calloutArrows: [],
 	points: [],
-	rotateIcons: []
+	rotateIcons: [],
 };
 
 const store = {
@@ -98,7 +98,7 @@ const store = {
 				partDictionary: LDParse.partDictionary,
 				colorTable: LDParse.colorTable,
 				modelFilename: store.model.filename,
-				state: store.state
+				state: store.state,
 			};
 		}
 		content.version = packageInfo.version;
@@ -149,7 +149,7 @@ const store = {
 		},
 		reset() {
 			store.cache.stateCache = {};
-		}
+		},
 	},
 	get: Getters,
 	// TODO: convert all 'opts' arguments into {opts} for automatic destructuring.  duh.
@@ -173,17 +173,17 @@ const store = {
 			add(opts) {  // opts: {parent}
 				return store.mutations.item.add({item: {
 					type: 'rotateIcon',
-					x: null, y: null, scale: 1
+					x: null, y: null, scale: 1,
 				}, parent: opts.parent});
 			},
 			delete(opts) {  // opts: {rotateIcon}
 				store.mutations.item.delete({item: opts.rotateIcon});
-			}
+			},
 		},
 		divider: {
 			add(opts) {  // opts: {parent, p1, p2}
 				return store.mutations.item.add({item: {
-					type: 'divider', p1: opts.p1, p2: opts.p2
+					type: 'divider', p1: opts.p1, p2: opts.p2,
 				}, parent: opts.parent});
 			},
 			reposition(opts) { // opts: {item, dx, dy}
@@ -205,7 +205,7 @@ const store = {
 			},
 			delete(opts) {  // opts: {divider}
 				store.mutations.item.delete({item: opts.divider});
-			}
+			},
 		},
 		sceneRendering: {
 			set(opts) {  // opts: {zoom, edgeWidth, refresh: false}
@@ -221,7 +221,7 @@ const store = {
 				store.mutations.csi.markAllDirty();
 				store.mutations.pliItem.markAllDirty();
 				store.mutations.page.markAllDirty();
-			}
+			},
 		},
 		pliTransform: {
 			set(opts) {  // opts: {filename, rotation, scale}
@@ -247,7 +247,7 @@ const store = {
 				if (_.isEmpty(transform)) {
 					delete store.state.pliTransforms[opts.filename];
 				}
-			}
+			},
 		},
 		renumber(itemList, start = 1) {
 			let prevNumber;
@@ -281,7 +281,7 @@ const store = {
 					parent,
 					insertionIndex,
 					parentInsertionIndex: 0,
-					doNotRenumber: true
+					doNotRenumber: true,
 				});
 				page.number = parent ? store.get.page(parent.pages[1]).number : 1;
 				store.mutations.page.renumber();
@@ -294,9 +294,9 @@ const store = {
 					annotationType: 'label',
 					properties: {
 						text: store.get.modelName(true),
-						font: '20pt Helvetica'
+						font: '20pt Helvetica',
 					},
-					parent: page
+					parent: page,
 				});
 
 				// TODO: This part & page count gets out of sync with the doc as pages are added / removed
@@ -313,7 +313,7 @@ const store = {
 				store.mutations.annotation.add({
 					annotationType: 'label',
 					properties: {text, font: '16pt Helvetica'},
-					parent: page
+					parent: page,
 				});
 			}
 
@@ -372,7 +372,7 @@ const store = {
 					const newPages = store.mutations.addInitialPages({
 						modelFilename: filename,
 						partsPerStep: opts.partsPerStep,
-						lastStepNumber
+						lastStepNumber,
 					});
 					if (newPages) {
 						submodelPagesAdded.push(newPages);
@@ -383,7 +383,7 @@ const store = {
 				pagesAdded.push(page.id);
 
 				const step = store.mutations.step.add({
-					dest: page, doLayout: false, stepNumber: lastStepNumber.num
+					dest: page, doLayout: false, stepNumber: lastStepNumber.num,
 				});
 				lastStepNumber.num += 1;
 				step.parts = parts;
@@ -410,7 +410,7 @@ const store = {
 				store.mutations.submodelImage.add({
 					parent: {id: submodel.stepID, type: 'step'},
 					modelFilename: submodel.filename,
-					quantity: submodel.quantity
+					quantity: submodel.quantity,
 				});
 			});
 		},
@@ -423,7 +423,7 @@ const store = {
 					});
 					progressCallback({
 						stepCount: steps.length,
-						text: tr('glossary.step_count_@c', 0)
+						text: tr('glossary.step_count_@c', 0),
 					});
 					for (let i = 0; i < steps.length; i++) {
 						const step = steps[i];
@@ -443,8 +443,8 @@ const store = {
 					resolve();
 				}, 100);
 			});
-		}
-	}
+		},
+	},
 };
 
 export default store;

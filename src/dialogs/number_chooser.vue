@@ -40,7 +40,7 @@ export default {
 			bodyText: '',
 			min: 0,
 			max: 100,
-			step: 1
+			step: 1,
 		};
 	},
 	methods: {
@@ -54,8 +54,8 @@ export default {
 		cancel() {
 			this.$emit('cancel');
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

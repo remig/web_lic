@@ -86,12 +86,12 @@ Vue.component('dialogManager', {
 		multiBookDialog: () => import(
 			/* webpackChunkName: "multiBookDialog" */
 			'./dialogs/multi_book.vue'
-		)
+		),
 	},
 	data() {
 		return {
 			visible: false,
-			currentDialog: null
+			currentDialog: null,
 		};
 	},
 	render(createElement) {
@@ -119,7 +119,7 @@ Vue.component('dialogManager', {
 	},
 	mounted() {
 		component = this;
-	}
+	},
 });
 
 function setDialog(dialogName, cb) {

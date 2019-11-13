@@ -11,11 +11,11 @@ function createArrowBuffers(gl) {
 		head: {
 			length: 26,
 			width: 6,
-			insetDepth: 3
+			insetDepth: 3,
 		},
 		body: {
-			width: 1.4
-		}
+			width: 1.4,
+		},
 	};
 
 	const head = arrowDimensions.head;
@@ -29,7 +29,7 @@ function createArrowBuffers(gl) {
 		body.width, bodyLength, 0,  // 3 right arrow joint
 		head.width, bodyLength - head.insetDepth, 0,  // 4 right arrow end
 		body.width, 0, 0,  // 5 right base corner
-		-body.width, 0, 0  // 6 left base corner
+		-body.width, 0, 0,  // 6 left base corner
 	];
 
 	const tipIndices = [0, 1, 2, 0, 2, 3, 0, 3, 4];
@@ -50,12 +50,12 @@ function createArrowBuffers(gl) {
 	return {
 		tip: {
 			vao: tipVao,
-			numElements: tipIndices.length
+			numElements: tipIndices.length,
 		},
 		body: {
 			vao: bodyVao,
-			numElements: bodyIndices.length
-		}
+			numElements: bodyIndices.length,
+		},
 	};
 }
 
@@ -124,5 +124,5 @@ function getArrowRotation({direction, arrowRotation = 0}) {
 export default {
 	createArrowBuffers,
 	getArrowPosition,
-	getArrowRotation
+	getArrowRotation,
 };

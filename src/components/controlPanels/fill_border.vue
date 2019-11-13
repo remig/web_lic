@@ -21,13 +21,13 @@ import BorderPanel from './border.vue';
 export default {
 	components: {FillPanel, BorderPanel},
 	props: {
-		templateEntry: {type: String, required: true}
+		templateEntry: {type: String, required: true},
 	},
 	methods: {
 		newValues() {
 			this.$emit('new-values', this.templateEntry);
-		}
-	}
+		},
+	},
 };
 
 </script>

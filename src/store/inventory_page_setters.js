@@ -80,7 +80,7 @@ export default {
 				parent: page,
 				filename,
 				colorCode,
-				quantity: 1
+				quantity: 1,
 			});
 		}
 		if (opts.doLayout) {
@@ -109,5 +109,5 @@ export default {
 			// Only need to layout first page; layout logic will recreate the rest
 			store.mutations.page.layout({page});
 		}
-	}
+	},
 };

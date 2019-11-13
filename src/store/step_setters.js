@@ -19,11 +19,11 @@ export default {
 				submodelImages: [], annotations: [], stretchedPages: [],
 				csiID: null, pliID: null, rotateIconID: null,
 				model: opts.model || {filename: null, parentStepID: null},
-				x: null, y: null, width: null, height: null, subStepLayout: 'vertical'
+				x: null, y: null, width: null, height: null, subStepLayout: 'vertical',
 			},
 			parent: dest,
 			insertionIndex: opts.insertionIndex,
-			parentInsertionIndex: opts.parentInsertionIndex
+			parentInsertionIndex: opts.parentInsertionIndex,
 		});
 
 		store.mutations.csi.add({parent: step});
@@ -36,7 +36,7 @@ export default {
 			store.mutations.item.add({item: {
 				type: 'numberLabel',
 				align: 'left', valign: 'top',
-				x: null, y: null, width: null, height: null
+				x: null, y: null, width: null, height: null,
 			}, parent: step});
 		}
 		if (opts.renumber) {
@@ -116,7 +116,7 @@ export default {
 		store.mutations.item.reparent({
 			item: step,
 			newParent: destPage,
-			parentInsertionIndex: opts.parentInsertionIndex || 0
+			parentInsertionIndex: opts.parentInsertionIndex || 0,
 		});
 		store.mutations.page.layout({page: currentPage});
 		store.mutations.page.layout({page: destPage});
@@ -179,12 +179,12 @@ export default {
 	addSubStep(opts) {  // opts: {step, doLayout}
 		const step = store.get.lookupToItem(opts.step);
 		const newStep = store.mutations.step.add({
-			dest: step, stepNumber: 1, doLayout: false, renumber: false
+			dest: step, stepNumber: 1, doLayout: false, renumber: false,
 		});
 		newStep.pliID = null;
 		store.mutations.item.reparent({
 			item: store.get.csi(step.csiID),
-			newParent: newStep
+			newParent: newStep,
 		});
 		newStep.parts = _.cloneDeep(step.parts);
 		newStep.model = _.cloneDeep(step.model);
@@ -248,5 +248,5 @@ export default {
 		if (opts.doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(step)});
 		}
-	}
+	},
 };

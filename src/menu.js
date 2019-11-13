@@ -21,7 +21,7 @@ function toggleGrid() {
 	const value = root.enabled;
 	const change = {
 		redo: [{root, op, path, value: !value}],
-		undo: [{root, op, path, value}]
+		undo: [{root, op, path, value}],
 	};
 	const text = tr('action.view.grid.' + (value ? 'hide' : 'show') + '.undo');
 	undoStack.commit(change, null, text);
@@ -34,7 +34,7 @@ function addGuide(orientation) {
 		const position = Math.floor((orientation === 'vertical') ? (width / 2) : (height / 2));
 		const change = {
 			redo: [{root, op: 'add', path: '/-', value: {orientation, position}}],
-			undo: [{root, op: 'remove', path: `/${root.length}`}]
+			undo: [{root, op: 'remove', path: `/${root.length}`}],
 		};
 		undoStack.commit(change, null, tr('action.view.guides.add_' + orientation + '.undo'));
 	};
@@ -45,7 +45,7 @@ function removeGuides() {
 	const originalGuides = _.cloneDeep(root.guides);
 	const change = {
 		redo: [{root, op, path, value: []}],
-		undo: [{root, op, path, value: originalGuides}]
+		undo: [{root, op, path, value: originalGuides}],
 	};
 	undoStack.commit(change, null, tr('action.view.guides.remove.undo'));
 }
@@ -55,38 +55,38 @@ const menu = [
 		{
 			text: 'action.file.open_lic.name',
 			id: 'open_menu',
-			cb: () => app.openLicFile()
+			cb: () => app.openLicFile(),
 		},
 		{
 			text: 'action.file.open_lic_recent.name',
 			id: 'open_recent_menu',
 			enabled: () => false,
-			cb() {}
+			cb() {},
 		},
 		{
 			text: 'action.file.close.name',
 			id: 'close_menu',
 			enabled: enableIfModel,
-			cb: () => app.closeModel()
+			cb: () => app.closeModel(),
 		},
 		{
 			text: 'action.file.save.name',
 			id: 'save_menu',
 			shortcut: 'ctrl+s',
 			enabled: enableIfModel,
-			cb: () => app.save()
+			cb: () => app.save(),
 		},
 		{
 			text: 'action.file.save_as.name',
 			id: 'save_as_menu',
 			enabled: enableIfModel,
-			cb: () => app.saveAs()
+			cb: () => app.saveAs(),
 		},
 		{text: 'separator'},
 		{
 			text: 'action.file.import_model.name',
 			id: 'import_custom_model_menu',
-			cb: () => app.importCustomModel()
+			cb: () => app.importCustomModel(),
 		},
 		{
 			text: 'action.file.import_builtin_model.name',
@@ -95,24 +95,24 @@ const menu = [
 				{
 					text: 'action.file.import_builtin_model.models.trivial',
 					id: 'import_trivial_model_menu',
-					cb: () => app.importBuiltInModel('trivial_model.ldr')
+					cb: () => app.importBuiltInModel('trivial_model.ldr'),
 				},
 				{
 					text: 'action.file.import_builtin_model.models.alligator',
 					id: 'import_alligator_menu',
-					cb: () => app.importBuiltInModel('20015 - Alligator.mpd')
+					cb: () => app.importBuiltInModel('20015 - Alligator.mpd'),
 				},
 				{
 					text: 'action.file.import_builtin_model.models.xwing',
 					id: 'import_xwing_menu',
-					cb: () => app.importBuiltInModel('7140 - X-Wing Fighter.mpd')
+					cb: () => app.importBuiltInModel('7140 - X-Wing Fighter.mpd'),
 				},
 				{
 					text: 'action.file.import_builtin_model.models.lab',
 					id: 'import_mobile_lab_menu',
-					cb: () => app.importBuiltInModel('6901 - Mobile Lab.mpd')
-				}
-			]
+					cb: () => app.importBuiltInModel('6901 - Mobile Lab.mpd'),
+				},
+			],
 		},
 		{text: 'separator'},
 		{
@@ -123,23 +123,23 @@ const menu = [
 				{
 					text: 'action.file.template.save.name',
 					id: 'save_template_menu',
-					cb: () => app.saveTemplate()
+					cb: () => app.saveTemplate(),
 				},
 				{
 					text: 'action.file.template.save_as.name',
 					id: 'save_template_as_menu',
-					cb: () => app.saveTemplateAs()
+					cb: () => app.saveTemplateAs(),
 				},
 				{
 					text: 'action.file.template.load.name',
 					id: 'load_template_menu',
-					cb: () => app.importTemplate()
+					cb: () => app.importTemplate(),
 				},
 				{
 					text: 'action.file.template.load_builtin.name',
 					id: 'load_builtin_template_menu',
 					enabled: false,
-					cb() {}
+					cb() {},
 				},
 				{
 					text: 'action.file.template.reset.name',
@@ -147,9 +147,9 @@ const menu = [
 					cb() {
 						const text = tr('action.file.template.reset.undo');
 						undoStack.commit('templatePage.reset', null, text, ['csi', 'pliItem']);
-					}
-				}
-			]
+					},
+				},
+			],
 		},
 		{text: 'separator'},
 		{
@@ -163,10 +163,10 @@ const menu = [
 						cb() {
 							translate.setLocale(language.code);
 							app.redrawUI();
-						}
+						},
 					};
 				});
-			}
+			},
 		},
 		{
 			text: 'action.file.clear_cache.name',
@@ -176,8 +176,8 @@ const menu = [
 				uiState.resetUIState();
 				Storage.clear.everything();
 				app.redrawUI();
-			}
-		}
+			},
+		},
 	]},
 	{text: 'action.edit.name', id: 'edit_menu', children: [
 		{
@@ -185,14 +185,14 @@ const menu = [
 			text: undoStack.undoText,
 			shortcut: 'ctrl+z',
 			enabled: undoStack.isUndoAvailable,
-			cb: undoStack.undo
+			cb: undoStack.undo,
 		},
 		{
 			id: 'redo_menu',
 			text: undoStack.redoText,
 			shortcut: 'ctrl+y',
 			enabled: undoStack.isRedoAvailable,
-			cb: undoStack.redo
+			cb: undoStack.redo,
 		},
 		{text: 'separator'},
 		{
@@ -206,7 +206,7 @@ const menu = [
 				undoStack.commit('addTitlePage', {}, tr(this.text()));
 				app.clearSelected();
 				app.setCurrentPage(store.get.firstPage());
-			}
+			},
 		},
 		{
 			text() {
@@ -219,7 +219,7 @@ const menu = [
 				undoStack.commit('removeTitlePage', {}, tr(this.text()));
 				app.clearSelected();
 				app.setCurrentPage(store.get.firstBasicPage());
-			}
+			},
 		},
 		{
 			text: 'action.edit.pli.show.name',
@@ -227,7 +227,7 @@ const menu = [
 			shown: () => enableIfModel() && !store.state.plisVisible,
 			cb() {
 				undoStack.commit('pli.toggleVisibility', {visible: true}, tr(this.text));
-			}
+			},
 		},
 		{
 			text: 'action.edit.pli.hide.name',
@@ -235,7 +235,7 @@ const menu = [
 			shown: () => enableIfModel() && store.state.plisVisible,
 			cb() {
 				undoStack.commit('pli.toggleVisibility', {visible: false}, tr(this.text));
-			}
+			},
 		},
 		{
 			text: 'action.edit.inventory_page.add.name',
@@ -245,7 +245,7 @@ const menu = [
 				app.clearSelected();
 				undoStack.commit('inventoryPage.add', null, tr(this.text));
 				app.setCurrentPage(store.get.inventoryPages()[0]);
-			}
+			},
 		},
 		{
 			text: 'action.edit.inventory_page.remove.name',
@@ -255,7 +255,7 @@ const menu = [
 				app.clearSelected();
 				undoStack.commit('inventoryPage.deleteAll', null, tr(this.text));
 				app.setCurrentPage(store.get.lastBasicPage());
-			}
+			},
 		},
 		{
 			text: 'action.edit.multi_book.name',
@@ -272,20 +272,20 @@ const menu = [
 						app.setCurrentPage(store.get.firstPage());
 					});
 				});
-			}
+			},
 		},
 		{text: 'action.edit.snap.name', id: 'edit_snap_menu', enabled: () => false, cb() {}},
 		{
 			text: 'action.edit.scene_rendering.name',
 			id: 'scene_rendering_menu',
 			shown: enableIfModel,
-			cb: () => DialogManager('sceneRenderingDialog')
+			cb: () => DialogManager('sceneRenderingDialog'),
 		},
 		{
 			text: 'action.edit.brick_colors.name',
 			id: 'edit_brick_colors_menu',
-			cb: () => DialogManager('brickColorDialog')
-		}
+			cb: () => DialogManager('brickColorDialog'),
+		},
 	]},
 	{text: 'action.view.name', id: 'view_menu', children: [
 		{
@@ -296,26 +296,26 @@ const menu = [
 				{
 					text: 'action.view.show_pages.one.name',
 					id: 'show_one_page_menu',
-					cb: () => app.setPageView({facingPage: false, scroll: false})
+					cb: () => app.setPageView({facingPage: false, scroll: false}),
 				},
 				{
 					text: 'action.view.show_pages.two.name',
 					id: 'show_two_pages_menu',
 					enabled: false,
-					cb: () => app.setPageView({facingPage: true, scroll: false})
+					cb: () => app.setPageView({facingPage: true, scroll: false}),
 				},
 				{
 					text: 'action.view.show_pages.one_scroll.name',
 					id: 'show_one_scroll_menu',
-					cb: () => app.setPageView({facingPage: false, scroll: true})
+					cb: () => app.setPageView({facingPage: false, scroll: true}),
 				},
 				{
 					text: 'action.view.show_pages.two_scroll.name',
 					id: 'show_two_scroll_menu',
 					enabled: false,
-					cb: () => app.setPageView({facingPage: true, scroll: true})
-				}
-			]
+					cb: () => app.setPageView({facingPage: true, scroll: true}),
+				},
+			],
 		},
 		{
 			text: 'action.view.zoom.name',
@@ -325,8 +325,8 @@ const menu = [
 				{text: 'action.view.zoom.full.name', id: 'zoom_full_menu', enabled: () => false, cb() {}},
 				{text: 'action.view.zoom.fit.name', id: 'zoom_fit_menu', enabled: () => false, cb() {}},
 				{text: 'action.view.zoom.in.name', id: 'zoom_in_menu', enabled: () => false, cb() {}},
-				{text: 'action.view.zoom.out.name', id: 'zoom_out_menu', enabled: () => false, cb() {}}
-			]
+				{text: 'action.view.zoom.out.name', id: 'zoom_out_menu', enabled: () => false, cb() {}},
+			],
 		},
 		{
 			text: 'action.view.grid.name',
@@ -340,7 +340,7 @@ const menu = [
 							: 'action.view.grid.show.name';
 					},
 					id: 'grid_show_hide_menu',
-					cb: toggleGrid
+					cb: toggleGrid,
 				},
 				{
 					text: 'action.view.grid.customize.name',
@@ -349,9 +349,9 @@ const menu = [
 						DialogManager('gridDialog', dialog => {
 							dialog.show(app);
 						});
-					}
-				}
-			]
+					},
+				},
+			],
 		},
 		{
 			text: 'action.view.guides.name',
@@ -361,27 +361,27 @@ const menu = [
 				{
 					text: 'action.view.guides.add_horizontal.name',
 					id: 'add_h_guide_menu',
-					cb: addGuide('horizontal')
+					cb: addGuide('horizontal'),
 				},
 				{
 					text: 'action.view.guides.add_vertical.name',
 					id: 'add_v_guide_menu',
-					cb: addGuide('vertical')
+					cb: addGuide('vertical'),
 				},
 				{
 					text: 'action.view.guides.remove.name',
 					id: 'remove_guide_menu',
-					cb: removeGuides
-				}
-			]
-		}
+					cb: removeGuides,
+				},
+			],
+		},
 	]},
 	{text: 'action.export.name', id: 'export_menu', children: [
 		{
 			text: 'action.export.pdf.name',
 			id: 'export_pdf_menu',
 			enabled: enableIfModel,
-			cb: () => InstructionExporter.generatePDF(app, store)
+			cb: () => InstructionExporter.generatePDF(app, store),
 		},
 		{
 			text: 'action.export.hi_res_pdf.name',
@@ -394,13 +394,13 @@ const menu = [
 					});
 					dialog.show(store.state.template.page);
 				});
-			}
+			},
 		},
 		{
 			text: 'action.export.png.name',
 			id: 'export_png_menu',
 			enabled: enableIfModel,
-			cb: () => InstructionExporter.generatePNGZip(app, store)
+			cb: () => InstructionExporter.generatePNGZip(app, store),
 		},
 		{
 			text: 'action.export.hi_res_png.name',
@@ -414,9 +414,9 @@ const menu = [
 					const pageSize = store.state.template.page;
 					dialog.show({width: pageSize.width, height: pageSize.height});
 				});
-			}
-		}
-	]}
+			},
+		},
+	]},
 ];
 
 export default function Menu(localApp) {

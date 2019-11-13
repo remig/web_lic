@@ -50,13 +50,13 @@ const api: API = {
 				return api.replace.customBrickColors({});
 			}
 			return JSON.parse(res);
-		}
+		},
 	},
 	replace: {
 		model: createReplace(StorageKeys.model),
 		ui: createReplace(StorageKeys.ui),
 		customFonts: createReplace(StorageKeys.customFonts),
-		customBrickColors: createReplace(StorageKeys.customBrickColors)
+		customBrickColors: createReplace(StorageKeys.customBrickColors),
 	},
 	clear: {
 		// TODO: update status bar when stuff is cleared.  Should update status bar more in general
@@ -71,8 +71,8 @@ const api: API = {
 		everything() {
 			localStorage.clear();
 			api.clear.ui();
-		}
-	}
+		},
+	},
 };
 
 function createGet(k: StorageKeys) {

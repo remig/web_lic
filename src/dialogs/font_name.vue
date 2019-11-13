@@ -39,7 +39,7 @@ export default {
 	data: function() {
 		return {
 			font: '',
-			fontName: ''
+			fontName: '',
 		};
 	},
 	methods: {
@@ -61,12 +61,12 @@ export default {
 				return [
 					{label: 'builtInFonts', options: familyNames},
 					{label: 'customFonts', options: customFamilyNames},
-					{label: 'custom', options: ['Custom...']}
+					{label: 'custom', options: ['Custom...']},
 				];
 			}
 			return [
 				{label: 'builtInFonts', options: familyNames},
-				{label: 'customFonts', options: ['Custom...']}
+				{label: 'customFonts', options: ['Custom...']},
 			];
 		},
 		addCustomFont(family) {
@@ -74,15 +74,15 @@ export default {
 				const familyLower = family.toLowerCase();
 				const names = [
 					...familyNames.map(f => f.toLowerCase()),
-					...customFamilyNames.map(f => f.toLowerCase())
+					...customFamilyNames.map(f => f.toLowerCase()),
 				];
 				if (!names.includes(familyLower)) {
 					customFamilyNames.push(family);
 					Storage.replace.customFonts(customFamilyNames);
 				}
 			}
-		}
-	}
+		},
+	},
 };
 
 </script>

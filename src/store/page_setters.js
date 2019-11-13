@@ -19,11 +19,11 @@ export default {
 				innerContentOffset: {x: 0, y: 0},
 				number: opts.pageNumber,
 				numberLabelID: null,
-				layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical'
+				layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
 			},
 			parent: opts.parent,
 			insertionIndex: opts.insertionIndex,
-			parentInsertionIndex: opts.parentInsertionIndex
+			parentInsertionIndex: opts.parentInsertionIndex,
 		});
 
 		if (opts.pageNumber === 'id') {  // Special flag to say 'use page ID as page number'
@@ -34,7 +34,7 @@ export default {
 			store.mutations.item.add({item: {
 				type: 'numberLabel',
 				align: 'right', valign: 'bottom',
-				x: null, y: null, width: null, height: null
+				x: null, y: null, width: null, height: null,
 			}, parent: page});
 		}
 
@@ -51,7 +51,7 @@ export default {
 					store.mutations.step.delete({
 						step: {type: 'step', id: page.steps[0]},
 						doNotRenumber: opts.doNotRenumber,
-						deleteParts: true
+						deleteParts: true,
 					});
 				}
 			} else {
@@ -103,5 +103,5 @@ export default {
 		if (!page.locked) {
 			Layout.page(page, opts.layout || page.layout);
 		}
-	}
+	},
 };

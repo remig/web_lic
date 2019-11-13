@@ -7,7 +7,7 @@ export default {
 		return store.mutations.item.add({item: {
 			type: 'csi', domID: null, annotations: [],
 			rotation: null, scale: null,
-			x: null, y: null, width: null, height: null
+			x: null, y: null, width: null, height: null,
 		}, parent: opts.parent});
 	},
 	rotate(opts) {  // opts: {csi, rotation: [{axis, angle}], addRotateIcon, doLayout = false}
@@ -38,5 +38,5 @@ export default {
 	},
 	markAllDirty() {
 		store.state.csis.forEach(csi => (csi.isDirty = true));
-	}
+	},
 };

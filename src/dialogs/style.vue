@@ -85,7 +85,7 @@ export default {
 			size: 0,
 			bold: false,
 			italic: false,
-			underline: false
+			underline: false,
 		};
 	},
 	methods: {
@@ -103,17 +103,17 @@ export default {
 			this.$emit('ok', {
 				text: this.text,
 				font: _.fontString(this),
-				color: this.color
+				color: this.color,
 			});
 			this.$emit('close');
 		},
 		cancel() {
 			this.$emit('close');
-		}
+		},
 	},
 	computed: {
-		familyNames: fontNameDialog.methods.getFamilyNames
-	}
+		familyNames: fontNameDialog.methods.getFamilyNames,
+	},
 };
 </script>
 

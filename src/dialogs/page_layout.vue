@@ -75,8 +75,8 @@ export default{
 			values: {
 				rows: 0,
 				cols: 0,
-				direction: 'vertical'
-			}
+				direction: 'vertical',
+			},
 		};
 	},
 	methods: {
@@ -104,17 +104,17 @@ export default{
 		cancel() {
 			this.$emit('cancel', this.actualValues);
 			this.$emit('close');
-		}
+		},
 	},
 	computed: {
 		actualValues() {
 			return {
 				rows: this.autoRows ? 'auto' : this.values.rows,
 				cols: this.autoCols ? 'auto' : this.values.cols,
-				direction: this.values.direction
+				direction: this.values.direction,
 			};
-		}
-	}
+		},
+	},
 };
 </script>
 

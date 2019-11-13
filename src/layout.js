@@ -196,7 +196,7 @@ const api = {
 		const borderWidth = template.border.width;
 		const pageSize = {
 			width: template.width - borderWidth - borderWidth,
-			height: template.height - borderWidth - borderWidth
+			height: template.height - borderWidth - borderWidth,
 		};
 
 		page.innerContentOffset = {x: borderWidth, y: borderWidth};
@@ -294,7 +294,7 @@ const api = {
 		const borderWidth = template.border.width;
 		const pageSize = {
 			width: template.width - borderWidth - borderWidth,
-			height: template.height - borderWidth - borderWidth
+			height: template.height - borderWidth - borderWidth,
 		};
 
 		const lblSize = _.measureLabel(template.numberLabel.font, page.number);
@@ -436,7 +436,7 @@ const api = {
 						annotationType: 'arrow',
 						properties: {direction: 'right', tagName},
 						parent: step,
-						x: 0, y: 0
+						x: 0, y: 0,
 					});
 				}
 				annotation.direction = 'right';
@@ -775,7 +775,7 @@ const api = {
 		store.mutations.divider.add({
 			parent: page,
 			p1: {x, y: margin},
-			p2: {x, y: box.height - margin}
+			p2: {x, y: box.height - margin},
 		});
 	},
 
@@ -800,7 +800,7 @@ const api = {
 				store.mutations.divider.add({
 					parent: target,
 					p1: {x: x + margin, y: y + (rowSize * i)},
-					p2: {x: x + box.width - margin, y: y + (rowSize * i)}
+					p2: {x: x + box.width - margin, y: y + (rowSize * i)},
 				});
 			}
 		} else {
@@ -808,7 +808,7 @@ const api = {
 				store.mutations.divider.add({
 					parent: target,
 					p1: {x: x + (colSize * i), y: y + margin},
-					p2: {x: x + (colSize * i), y: y + box.height - margin}
+					p2: {x: x + (colSize * i), y: y + box.height - margin},
 				});
 			}
 		}
@@ -879,7 +879,7 @@ const api = {
 					x: boxes[0].x - (margin / 2),
 					y: boxes[0].y - (margin / 2),
 					width: boxes[0].width + margin,
-					height: boxes[0].height + margin
+					height: boxes[0].height + margin,
 				};
 			}
 			const bbox = _.geom.bbox(boxes);  // bbox of all children in step coordinates
@@ -899,12 +899,12 @@ const api = {
 				const pliItem = store.get.pliItem(itemID);
 				boxes.push({
 					x: pli.x + pliItem.x, y: pli.y + pliItem.y,
-					width: pliItem.width, height: pliItem.height
+					width: pliItem.width, height: pliItem.height,
 				});
 				const qtyLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 				boxes.push({
 					x: pli.x + pliItem.x + qtyLabel.x, y: pli.y + pliItem.y + qtyLabel.y,
-					width: qtyLabel.width, height: qtyLabel.height
+					width: qtyLabel.width, height: qtyLabel.height,
 				});
 			});
 			api.adjustBoundingBox.item(pli, boxes, store.state.template.pli);
@@ -924,7 +924,7 @@ const api = {
 				const step = store.get.step(itemID);
 				boxes.push({
 					x: callout.x + step.x, y: callout.y + step.y,
-					width: step.width, height: step.height
+					width: step.width, height: step.height,
 				});
 			});
 			api.adjustBoundingBox.item(callout, boxes, store.state.template.callout);
@@ -935,8 +935,8 @@ const api = {
 			if (item.parent.type === 'pliItem') {
 				api.adjustBoundingBox.pliItem(store.get.parent(item));
 			}
-		}
-	}
+		},
+	},
 };
 
 // This is only used for 'inside-out' type layouts, which are only used in callouts for now

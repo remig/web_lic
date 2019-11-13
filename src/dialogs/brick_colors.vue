@@ -73,7 +73,7 @@ function buildColorTable(): colorRow[] {
 			id,
 			name: v.name,
 			color: customColor.color || v.color,
-			edge: customColor.edge || v.edge
+			edge: customColor.edge || v.edge,
 		});
 	});
 	return colors;
@@ -82,7 +82,7 @@ function buildColorTable(): colorRow[] {
 export default Vue.extend({
 	data() {
 		return {
-			colorData: buildColorTable()
+			colorData: buildColorTable(),
 		};
 	},
 	methods: {
@@ -128,8 +128,8 @@ export default Vue.extend({
 		},
 		cancel() {
 			this.$emit('close');
-		}
-	}
+		},
+	},
 });
 
 </script>

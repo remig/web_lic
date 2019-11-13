@@ -40,7 +40,7 @@ export default {
 	data() {
 		return {
 			position: store.state.template.page.numberLabel.position,
-			positions: ['right', 'left', 'even-left', 'even-right']
+			positions: ['right', 'left', 'even-left', 'even-right'],
 		};
 	},
 	methods: {
@@ -50,8 +50,8 @@ export default {
 		},
 		newValues() {
 			this.$emit('new-values', 'pagenumber');
-		}
-	}
+		},
+	},
 };
 
 </script>

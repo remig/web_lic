@@ -64,7 +64,7 @@ function generatePDF(app, store, config) {
 	let hiResScale = 1;
 	const pageSize = {
 		width: store.state.template.page.width * 0.75,  // 0.75 = 72 / 96
-		height: store.state.template.page.height * 0.75
+		height: store.state.template.page.height * 0.75,
 	};
 
 	if (config) {

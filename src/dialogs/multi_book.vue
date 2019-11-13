@@ -192,7 +192,7 @@ function calculateBookSplits(bookCount, pageCount, noSplitSubmodels) {
 	for (let i = 0; i < bookCount; i++) {
 		const pages = {
 			start: (i * pagesPerBook) + 1,
-			end: Math.min(((i + 1) * pagesPerBook), pageCount)
+			end: Math.min(((i + 1) * pagesPerBook), pageCount),
 		};
 		const steps = pageSpreadToStepSpread(pages);
 		bookDivisions.push({bookNumber: i + 1, pages, steps});
@@ -276,7 +276,7 @@ export default {
 			noSplitSubmodels: true,
 			// firstPageNumber: start_page_1 or preserve_page_count
 			firstPageNumber: uiState.get('dialog.multiBook.firstPageNumber'),
-			fileSplit: 'one_file'  // or separate_files
+			fileSplit: 'one_file',  // or separate_files
 		};
 	},
 	methods: {
@@ -300,20 +300,20 @@ export default {
 				includeTitlePages: this.includeTitlePages,
 				noSplitSubmodels: this.noSplitSubmodels,
 				firstPageNumber: this.firstPageNumber,
-				fileSplit: this.fileSplit
+				fileSplit: this.fileSplit,
 			});
 			this.$emit('close');
 		},
 		cancel() {
 			this.$emit('cancel');
 			this.$emit('close');
-		}
+		},
 	},
 	computed: {
 		dialogWidth() {
 			return Math.max(450, this.bookDivisions.length * 150) + 'px';
-		}
-	}
+		},
+	},
 };
 </script>
 

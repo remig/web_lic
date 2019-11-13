@@ -88,7 +88,7 @@ export default {
 			italic: fontParts.fontStyle === 'italic',
 			underline: false,
 			color: template.color,
-			familyNames: getFamilyNames()
+			familyNames: getFamilyNames(),
 		};
 	},
 	methods: {
@@ -124,8 +124,8 @@ export default {
 			template.font = _.fontString(this);
 			template.color = this.color;
 			this.$emit('new-values', this.templateEntry);
-		}
-	}
+		},
+	},
 };
 
 </script>

@@ -21,13 +21,13 @@ export default {
 		const book = store.mutations.item.add({item: {
 			type: 'book',
 			pages: [],
-			number: opts.bookNumber
+			number: opts.bookNumber,
 		}});
 		pages.forEach(page => {
 			page.parent = {};
 			store.mutations.item.reparent({
 				item: page,
-				newParent: book
+				newParent: book,
 			});
 		});
 		return book;
@@ -91,7 +91,7 @@ export default {
 			partDictionary: LDParse.partDictionary,
 			colorTable: LDParse.colorTable,
 			modelFilename: store.model.filename,
-			version: packageInfo.version
+			version: packageInfo.version,
 		};
 		let firstBookState;
 		const books = _.cloneDeep(store.state.books);  // Need to clone because loop hoses state
@@ -131,5 +131,5 @@ export default {
 	layout(opts) {  // opts: {book}
 		const book = store.get.lookupToItem(opts.book);
 		Layout.book(book);
-	}
+	},
 };

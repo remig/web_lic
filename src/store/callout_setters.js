@@ -13,7 +13,7 @@ export default {
 			innerContentOffset: {x: 0, y: 0},
 			borderOffset: {x: 0, y: 0},
 			layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
-			position: opts.position || 'left'
+			position: opts.position || 'left',
 		}, parent: opts.parent});
 
 		if (opts.includeEmptyStep) {
@@ -56,7 +56,7 @@ export default {
 		const newStep = store.mutations.step.add({
 			dest: callout,
 			stepNumber,
-			parentInsertionIndex: opts.insertionIndex
+			parentInsertionIndex: opts.insertionIndex,
 		});
 		newStep.model = model;
 
@@ -67,7 +67,7 @@ export default {
 					store.mutations.item.add({item: {
 						type: 'numberLabel',
 						align: 'left', valign: 'top',
-						x: null, y: null, width: null, height: null
+						x: null, y: null, width: null, height: null,
 					}, parent: step});
 				}
 			});
@@ -82,5 +82,5 @@ export default {
 		if (opts.doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(callout)});
 		}
-	}
+	},
 };

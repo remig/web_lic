@@ -50,7 +50,7 @@ export default {
 	components: {PanelBase},
 	props: {
 		templateEntry: {type: String, required: true},
-		title: {type: String, 'default': 'template.border.title'}
+		title: {type: String, 'default': 'template.border.title'},
 	},
 	data() {
 		const template = _.get(store.state.template, this.templateEntry);
@@ -58,7 +58,7 @@ export default {
 			width: template.border.width || 0,
 			color: template.border.color,
 			cornerRadius: template.border.cornerRadius,
-			innerMargin: template.innerMargin == null ? null : template.innerMargin * 100
+			innerMargin: template.innerMargin == null ? null : template.innerMargin * 100,
 		};
 	},
 	methods: {
@@ -73,8 +73,8 @@ export default {
 			template.border.cornerRadius = this.cornerRadius;
 			template.innerMargin = this.innerMargin == null ? null : this.innerMargin / 100;
 			this.$emit('new-values', this.templateEntry);
-		}
-	}
+		},
+	},
 };
 
 </script>

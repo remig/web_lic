@@ -48,7 +48,7 @@ export default {
 		return {
 			visible: false,
 			chosenLocaleCode: 'en',
-			languageList: translate.LanguageList
+			languageList: translate.LanguageList,
 		};
 	},
 	methods: {
@@ -60,9 +60,9 @@ export default {
 		changeLanguage() {
 			translate.setLocale(this.chosenLocaleCode);
 			EventBus.$emit('redraw-ui');
-		}
+		},
 	},
-	pickLanguage
+	pickLanguage,
 };
 
 </script>

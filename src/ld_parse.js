@@ -66,7 +66,7 @@ const api = {
 					edge: line[8],
 					alpha,
 					rgba: _.color.toVec4(line[6], alpha),
-					edgeRgba: _.color.toVec4(line[8], 0)
+					edgeRgba: _.color.toVec4(line[8], 0),
 				};
 			}
 		}
@@ -191,8 +191,8 @@ const api = {
 					p = api.partDictionary[p.filename];
 					return p.isSubModel ? p : null;
 				}).filter(p => p != null);
-			}
-		}
+			},
+		},
 	},
 	// These set functions will *not* perform the desired action directly
 	// Instead, they return an object with two arrays of JSON-patch operations;
@@ -213,7 +213,7 @@ const api = {
 			const path = `/${opts.filename}/parts/${idx}`;
 			return {
 				redo: [{root, op: 'add', path, value: opts.part}],
-				undo: [{root, op: 'remove', path}]
+				undo: [{root, op: 'remove', path}],
 			};
 		},
 		removePart(opts) {  // opts: {filename, partID}
@@ -222,10 +222,10 @@ const api = {
 			const path = `/${opts.filename}/parts/${opts.partID}`;
 			return {
 				redo: [{root, op: 'remove', path}],
-				undo: [{root, op: 'add', path, value: part}]
+				undo: [{root, op: 'add', path, value: part}],
 			};
-		}
-	}
+		},
+	},
 };
 
 function actionBuilder(filename, partID, property, newValue) {
@@ -234,7 +234,7 @@ function actionBuilder(filename, partID, property, newValue) {
 	const path = `/${filename}/parts/${partID}/${property}`;
 	return {
 		redo: [{root, op, path, value: newValue}],
-		undo: [{root, op, path, value: originalValue}]
+		undo: [{root, op, path, value: originalValue}],
 	};
 }
 
@@ -309,7 +309,7 @@ function parseComment(abstractPart, line) {
 		if (abstractPart.parts) {
 			abstractPart.steps.push({
 				parts: abstractPart.parts.slice(abstractPart.steps.lastPart)
-					.map((v, i) => i + abstractPart.steps.lastPart)
+					.map((v, i) => i + abstractPart.steps.lastPart),
 			});
 			abstractPart.steps.lastPart = abstractPart.parts.length;
 		}
@@ -329,7 +329,7 @@ async function parsePart(abstractPartParent, line) {
 	await loadPart(filename);
 	const newPart = {
 		filename,
-		matrix: parseFloatList(line.slice(2, 14))
+		matrix: parseFloatList(line.slice(2, 14)),
 	};
 	let colorCode = parseColorCode(line[1]);
 	colorCode = forceBlack(colorCode, abstractPartParent.filename, filename);
@@ -354,7 +354,7 @@ function parseLine(abstractPart, line) {
 	}
 	abstractPart.primitives.push([
 		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
-		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
+		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
 	]);
 }
 
@@ -362,7 +362,7 @@ function parseTriangle(abstractPart, line) {
 	let points = [
 		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
 		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
-		parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10])
+		parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
 	];
 	if (parseColorCode(line[1]) != null) {
 		points = {p: points, c: parseColorCode(line[1])};
@@ -378,7 +378,7 @@ function parseQuad(abstractPart, line) {
 		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
 		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
 		parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
-		parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13])
+		parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13]),
 	];
 	if (parseColorCode(line[1]) != null) {
 		points = {p: points, c: parseColorCode(line[1])};
@@ -396,12 +396,12 @@ function parseCondLine(abstractPart, line) {
 	abstractPart.primitives.push({
 		p: [
 			parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
-			parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7])
+			parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
 		],
 		cp: [
 			parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
-			parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13])
-		]
+			parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13]),
+		],
 	});
 }
 
@@ -411,7 +411,7 @@ const lineParsers = {
 	2: parseLine,
 	3: parseTriangle,
 	4: parseQuad,
-	5: parseCondLine
+	5: parseCondLine,
 };
 
 async function lineListToAbstractPart(filename, lineList, progressCallback) {

@@ -39,17 +39,17 @@ export default {
 	props: {
 		title: {type: String, 'default': tr('dialog.rotation.title')},
 		initialRotation: {type: Array},
-		includeLabels: {type: Boolean, 'default': true}
+		includeLabels: {type: Boolean, 'default': true},
 	},
 	data() {
 		return {
-			rotation: _.cloneDeep(this.initialRotation || [])
+			rotation: _.cloneDeep(this.initialRotation || []),
 		};
 	},
 	watch: {
 		initialRotation() {
 			this.rotation = _.cloneDeep(this.initialRotation || []);
-		}
+		},
 	},
 	methods: {
 		updateValues() {
@@ -62,8 +62,8 @@ export default {
 		removeRotation(idx) {
 			this.rotation.splice(idx, 1);
 			this.updateValues();
-		}
-	}
+		},
+	},
 };
 
 </script>

@@ -107,7 +107,7 @@ const anchorOffsets = {
 	right: {x: 1, y: 0.5},
 	bottom_left: {x: 0, y: 1},
 	bottom: {x: 0.5, y: 1},
-	bottom_right: {x: 1, y: 1}
+	bottom_right: {x: 1, y: 1},
 };
 
 export default {
@@ -124,8 +124,8 @@ export default {
 				preserveAspectRatio: true,
 				anchorPosition: 'top_left',
 				pageWidth: page.width,
-				pageHeight: page.height
-			}
+				pageHeight: page.height,
+			},
 		};
 	},
 	methods: {
@@ -182,14 +182,14 @@ export default {
 		cancel() {
 			this.$emit('cancel');
 			this.$emit('close');
-		}
+		},
 	},
 	computed: {
 		anchorPositionList() {
 			return [
 				'top_left', 'top', 'top_right',
 				'left', 'center', 'right',
-				'bottom_left', 'bottom', 'bottom_right'
+				'bottom_left', 'bottom', 'bottom_right',
 			];
 		},
 		isImageTooBig() {
@@ -222,8 +222,8 @@ export default {
 				info.originalWidth / info.originalHeight,
 				info.pageWidth / info.pageHeight
 			);
-		}
-	}
+		},
+	},
 };
 </script>
 

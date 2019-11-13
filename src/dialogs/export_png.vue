@@ -57,7 +57,7 @@ export default {
 			pageSize: {width: 0, height: 0},
 			scale: uiState.get('dialog.export.images.scale'),
 			dpi: uiState.get('dialog.export.images.dpi') || 96,
-			maintainPrintSize: uiState.get('dialog.export.images.maintainPrintSize')
+			maintainPrintSize: uiState.get('dialog.export.images.maintainPrintSize'),
 		};
 	},
 	methods: {
@@ -81,19 +81,19 @@ export default {
 			uiState.get('dialog.export.images').maintainPrintSize = this.maintainPrintSize;
 			this.$emit('ok', {
 				scale: this.scale,
-				dpi: this.dpi
+				dpi: this.dpi,
 			});
 			this.$emit('close');
 		},
 		cancel() {
 			this.$emit('close');
-		}
+		},
 	},
 	computed: {
 		scaledPageSize() {
 			return {
 				width: Math.floor(this.pageSize.width * this.scale),
-				height: Math.floor(this.pageSize.height * this.scale)
+				height: Math.floor(this.pageSize.height * this.scale),
 			};
 		},
 		scaledPrintSize() {
@@ -107,10 +107,10 @@ export default {
 				cm_width: conv(width, 'cm'),
 				cm_height: conv(height, 'cm'),
 				in_width: conv(width, 'in'),
-				in_height: conv(height, 'in')
+				in_height: conv(height, 'in'),
 			};
-		}
-	}
+		},
+	},
 };
 </script>
 
