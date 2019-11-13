@@ -52,7 +52,7 @@ _.mixin({
 				res = {width: Math.ceil(res.width), height: Math.ceil(res.height)};
 				labelSizeCache[font] = labelSizeCache[font] || {};
 				labelSizeCache[font][text] = res;
-				return _.cloneDeep(res);  // Always return a clone so we don't accidentally alter cached values
+				return _.cloneDeep(res);  // return a clone so we don't accidentally alter cached values
 			}
 			return null;
 		};
@@ -70,7 +70,7 @@ _.mixin({
 				fontStyle: '', fontVariant: '', fontWeight: '',
 				fontStretch: '', fontSize: '', fontFamily: ''
 			};
-			let fontFamily: string[] = [];
+			const fontFamily: string[] = [];
 			let haveFontSize = false;
 			font = String(font || '');
 
@@ -186,13 +186,13 @@ _.mixin({
 	geom: (() => {
 
 		function isPoint(point: any): point is Point {
-			return (point as Point).x !== undefined
-				&& (point as Point).y !== undefined;
+			return (point as Point).x != null
+				&& (point as Point).y != null;
 		}
 
 		function isBox(box: any): box is Box {
-			return (box as Box).width !== undefined
-				&& (box as Box).height !== undefined;
+			return (box as Box).width != null
+				&& (box as Box).height != null;
 		}
 
 		function geom() {}
@@ -290,8 +290,8 @@ _.mixin({
 			};
 		};
 		version.nice = (v: string): string => {
-			const version = _.version.parse(v);
-			return `${version.major}.${version.minor}`;
+			const ver = _.version.parse(v);
+			return `${ver.major}.${ver.minor}`;
 		};
 		version.isOldVersion = (prev: string, current: string) => {
 			const prevRev = _.version.parse(prev);
@@ -386,12 +386,12 @@ _.mixin({
 				b = parseInt(colorString.substr(4, 2), 16) / 255;
 				a = (255 - (alpha || 0)) / 255;
 			} else {
-				const color = _.color.toRGB(colorString);
-				r = color.r / 255;
-				g = color.g / 255;
-				b = color.b / 255;
+				const localColor = _.color.toRGB(colorString);
+				r = localColor.r / 255;
+				g = localColor.g / 255;
+				b = localColor.b / 255;
 				a = (alpha == null)
-					? (color.a == null ? 1 : color.a)
+					? (localColor.a == null ? 1 : localColor.a)
 					: alpha;
 			}
 			return [_.round(r, 4), _.round(g, 4), _.round(b, 4), _.round(a, 4)];
