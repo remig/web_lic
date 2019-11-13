@@ -636,7 +636,7 @@ const UI = {
 
 window.__lic = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build and in Cypress
-	_, app: UI, store, undoStack, LDParse, Storage, uiState,
+	_, store, undoStack, LDParse, Storage, uiState,
 };
 
 export default UI;
