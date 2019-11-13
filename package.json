@@ -23,8 +23,8 @@
 	},
 	"license": "GPL-3.0-or-later",
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "2.6.1",
-		"@typescript-eslint/parser": "2.6.1",
+		"@typescript-eslint/eslint-plugin": "2.7.0",
+		"@typescript-eslint/parser": "2.7.0",
 		"babel-polyfill": "6.26.0",
 		"css-loader": "0.28.11",
 		"cypress": "3.5.0",
