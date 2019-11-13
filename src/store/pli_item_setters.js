@@ -4,15 +4,17 @@ import store from '../store';
 import Layout from '../layout';
 
 export default {
-	add(opts) { // opts: {parent, filename, colorCode, quantity = 1}
+	add({
+		parent, filename, colorCode, quantity = 1,
+	}) {
 		const pliItem = store.mutations.item.add({item: {
 			type: 'pliItem', domID: null,
-			filename: opts.filename,
-			colorCode: opts.colorCode,
-			quantity: (opts.quantity == null) ? 1 : opts.quantity,
+			filename: filename,
+			colorCode: colorCode,
+			quantity: (quantity == null) ? 1 : quantity,
 			quantityLabelID: null,
 			x: null, y: null, width: null, height: null,
-		}, parent: opts.parent});
+		}, parent: parent});
 
 		store.mutations.item.add({item: {
 			type: 'quantityLabel',
@@ -22,14 +24,14 @@ export default {
 
 		return pliItem;
 	},
-	delete(opts) {  // opts: {pliItem}
-		const pliItem = store.get.lookupToItem(opts.pliItem);
+	delete({pliItem}) {
+		pliItem = store.get.lookupToItem(pliItem);
 		store.mutations.item.delete({item: {type: 'quantityLabel', id: pliItem.quantityLabelID}});
 		store.mutations.item.delete({item: pliItem});
 	},
-	changeQuantity(opts) {  // opts: {pliItem, quantity}
-		const pliItem = store.get.lookupToItem(opts.pliItem);
-		pliItem.quantity = opts.quantity;
+	changeQuantity({pliItem, quantity}) {
+		pliItem = store.get.lookupToItem(pliItem);
+		pliItem.quantity = quantity;
 		// New label might be bigger / smaller than before; calculate new size
 		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 		const font = store.state.template.pliItem.quantityLabel.font;
