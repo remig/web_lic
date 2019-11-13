@@ -47,6 +47,7 @@
 <script lang="ts">
 
 import Vue from 'vue';
+import {LDrawColorCode, ColorTableEntry} from '../item_types';
 import _ from '../util';
 import store from '../store';
 import LDParse from '../ld_parse';
@@ -57,16 +58,10 @@ import EventBus from '../event_bus';
 const customColors = Storage.get.customBrickColors();
 
 interface colorRow {
-	id: number;
+	id: LDrawColorCode;
 	name: string;
 	color: string;
 	edge: string;
-}
-
-interface ColorTableEntry {  // TODO: this goes in LDParse, when its ready
-	name: 'string';
-	color: 'string';
-	edge: 'string';
 }
 
 function buildColorTable(): colorRow[] {

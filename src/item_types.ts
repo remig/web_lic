@@ -1,3 +1,13 @@
+export type LDrawColorCode = number;
+
+export interface ColorTableEntry {
+	name: string;
+	color: string;
+	edge: string;
+	rgba: string;
+	edgeRgba: string;
+}
+
 export interface Point {
 	x: number;
 	y: number;
