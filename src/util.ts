@@ -6,6 +6,7 @@ declare const _: any;
 
 // Add a handful of useful utility functions to lodash
 // TODO: A lot of these duplicate functionality in lodash; remove them
+// TODO: mixin like this loses all typing info
 _.mixin({
 	eq(a: number, b: number, e:number = 0.0001): boolean {
 		return Math.abs(a - b) < e;

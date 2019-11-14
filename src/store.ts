@@ -2,11 +2,12 @@
 
 /* global saveAs: false */
 
+import {Model, LookupItem, Point, Page} from './item_types';
+
 import _ from './util';
 import Layout from './layout';
 import Renderer from './store/render';
 import Getters from './store/getters';
-
 import ItemSetters from './store/item_setters';
 import PartSetters from './store/part_setters';
 import SubmodelSetters from './store/submodel_setters';
@@ -53,13 +54,29 @@ const emptyState = {
 	rotateIcons: [],
 };
 
-const store = {
+interface SaveContent {
+	version: string;
+	partDictionary: any;
+	colorTable: any;
+	modelFilename: any;
+	state: any;
+}
+
+type SaveModes = 'file' | 'local';
+type SaveTargets = 'state' | 'template';
+
+interface Store {
+	model: Model | null;
+	[key: string]: any;
+}
+
+const store: Store = {
 
 	version: null,  // The version of Lic that created this state
 
 	// The currently loaded LDraw model, as returned from LDParse
 	model: null,  // Not in state because it is saved separately, and not affected by undo / redo
-	setModel(model) {
+	setModel(model: Model) {
 		store.model = model;
 		LDRender.setModel(model);
 		store.state.licFilename = store.get.modelFilenameBase();
@@ -67,7 +84,7 @@ const store = {
 	// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic,
 	//  except static stuff in model, like part geometries
 	state: _.cloneDeep(emptyState),
-	replaceState(state) {
+	replaceState(state: any) {
 		store.state = state;
 		store.cache.reset();
 	},
@@ -79,7 +96,7 @@ const store = {
 		store.state = _.cloneDeep(emptyState);
 		store.cache.reset();
 	},
-	load(content) {
+	load(content: SaveContent) {
 		LDParse.setPartDictionary(content.partDictionary);
 		LDParse.setColorTable(content.colorTable);
 		store.model = LDParse.partDictionary[content.modelFilename];
@@ -89,19 +106,25 @@ const store = {
 	},
 	// mode is either 'file' or 'local', target is either 'state' or 'template'
 	// filename is optional; if set, will use that instead of store.state.licFilename
-	save({mode, target = 'state', filename, jsonIndent}) {
+	save(
+		{mode, target = 'state', filename, jsonIndent}
+		: {mode: SaveModes, target: SaveTargets, filename: string, jsonIndent: number}
+	) {
 		let content;
 		if (target === 'template') {
-			content = {template: store.state.template};
+			content = {
+				version: packageInfo.version,
+				template: store.state.template,
+			};
 		} else {
 			content = {
+				version: packageInfo.version,
 				partDictionary: LDParse.partDictionary,
 				colorTable: LDParse.colorTable,
-				modelFilename: store.model.filename,
+				modelFilename: store?.model?.filename,
 				state: store.state,
 			};
 		}
-		content.version = packageInfo.version;
 		if (mode === 'file') {
 			content = JSON.stringify(content, null, jsonIndent);
 			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
@@ -119,7 +142,7 @@ const store = {
 		// Keys are either [item type][item ID][cache key] for info specific to exactly one item, or
 		// [item type][cache key] for info specific to all items of one type.
 		stateCache: {},
-		get(item, key, defaultValue) {
+		get(item: any, key: string, defaultValue: any) {
 			const cache = store.cache.stateCache;
 			if (item && item.type && item.id != null && cache[item.type] && cache[item.type][item.id]) {
 				return cache[item.type][item.id][key];
@@ -128,7 +151,7 @@ const store = {
 			}
 			return defaultValue;
 		},
-		set(item, key, newValue) {
+		set(item: any, key: string, newValue: any) {
 			const cache = store.cache.stateCache;
 			if (item && item.type && item.id != null) {
 				cache[item.type] = cache[item.type] || {};
@@ -139,7 +162,7 @@ const store = {
 				cache[item][key] = newValue;
 			}
 		},
-		clear(item) {
+		clear(item: any) {
 			const cache = store.cache.stateCache;
 			if (item && item.type && item.id != null && cache[item.type]) {
 				delete cache[item.type][item.id];
@@ -159,19 +182,19 @@ const store = {
 		calloutArrow: CalloutArrowSetters,
 		csi: CSISetters,
 		divider: {
-			add({parent, p1, p2}) {
+			add({parent, p1, p2}: {parent: any, p1: Point, p2: Point}) {
 				return store.mutations.item.add({item: {
 					type: 'divider', p1, p2,
 				}, parent});
 			},
-			reposition({item, dx, dy}) {
+			reposition({item, dx, dy}: {item: LookupItem, dx: number, dy: number}) {
 				const divider = store.get.divider(item);
 				divider.p1.x += dx;
 				divider.p2.x += dx;
 				divider.p1.y += dy;
 				divider.p2.y += dy;
 			},
-			setLength({divider, newLength}) {
+			setLength({divider, newLength}: {divider: LookupItem, newLength: number}) {
 				const dividerItem = store.get.divider(divider);
 				const bbox = _.geom.bbox([dividerItem.p1, dividerItem.p2]);
 				const isHorizontal = (bbox.height === 0);
@@ -181,7 +204,7 @@ const store = {
 					dividerItem.p2.y = dividerItem.p1.y + newLength;
 				}
 			},
-			delete({divider}) {
+			delete({divider}: {divider: any}) {
 				store.mutations.item.delete({item: divider});
 			},
 		},
@@ -194,13 +217,13 @@ const store = {
 		part: PartSetters,
 		// quantityLabel
 		rotateIcon: {
-			add({parent}) {
+			add({parent}: {parent: LookupItem}) {
 				return store.mutations.item.add({item: {
 					type: 'rotateIcon',
 					x: null, y: null, scale: 1,
 				}, parent});
 			},
-			delete({rotateIcon}) {
+			delete({rotateIcon}: {rotateIcon: LookupItem}) {
 				store.mutations.item.delete({item: rotateIcon});
 			},
 		},
@@ -210,7 +233,10 @@ const store = {
 		templatePage: TemplatePageSetters,
 		inventoryPage: InventoryPageSetters,
 		sceneRendering: {
-			set({zoom, edgeWidth, rotation, refresh = false}) {
+			set(
+				{zoom, edgeWidth, rotation, refresh = false}
+				: {zoom: number, edgeWidth: number, rotation: any[], refresh: boolean}
+			) {
 				store.state.template.sceneRendering.zoom = zoom;
 				store.state.template.sceneRendering.edgeWidth = edgeWidth;
 				store.state.template.sceneRendering.rotation = _.cloneDeep(rotation);
@@ -226,7 +252,10 @@ const store = {
 			},
 		},
 		pliTransform: {
-			set({filename, rotation, scale}) {
+			set(
+				{filename, rotation, scale}
+				: {filename: string, rotation: any[], scale: number}
+			) {
 				// If rotation or scale is null, delete those entries.  If they're missing, ignore them.
 				let transform = store.state.pliTransforms[filename];
 				if (!transform) {
@@ -251,8 +280,8 @@ const store = {
 				}
 			},
 		},
-		renumber(itemList, start = 1) {
-			let prevNumber;
+		renumber(itemList: any[], start = 1) {
+			let prevNumber: number | null;
 			itemList.forEach(el => {
 				if (el && el.number != null) {
 					if (prevNumber == null) {
@@ -266,16 +295,16 @@ const store = {
 		},
 		setNumber() {  // opts: {target, number} NYI
 		},
-		layoutTitlePage(page) {
+		layoutTitlePage(page: Page) {
 			Layout.titlePage(page);
 		},
 		addTitlePage() {
 
-			function addOneTitlePage(parent) {
+			function addOneTitlePage(parent?: any) {
 				let insertionIndex = 1;
 				if (parent) {
 					insertionIndex = store.state.pages.findIndex(
-						page => page.id === parent.pages[0]
+						(page: any) => page.id === parent.pages[0]
 					);
 				}
 				const page = store.mutations.page.add({
@@ -289,7 +318,7 @@ const store = {
 				store.mutations.page.renumber();
 
 				const step = store.mutations.step.add({dest: page});
-				step.model.filename = store.model.filename;
+				step.model.filename = store?.model?.filename;
 				step.parts = null;
 
 				store.mutations.annotation.add({
@@ -328,30 +357,33 @@ const store = {
 		removeTitlePage() {
 			store.state.pages
 				.map(store.get.page)
-				.filter(page => page.subtype === 'titlePage')
-				.forEach(page => {
+				.filter((page: Page) => page.subtype === 'titlePage')
+				.forEach((page: Page) => {
 					store.mutations.item.deleteChildList({item: page, listType: 'step'});
 					store.mutations.page.delete({page});
 				});
 		},
-		addInitialPages({modelFilename, lastStepNumber = {num: 1}, partsPerStep}) {
+		addInitialPages(
+			{modelFilename, lastStepNumber = {num: 1}, partsPerStep}
+			: {modelFilename?: string, lastStepNumber: {num: number}, partsPerStep?: number}
+		) {
 
 			if (!modelFilename) {
-				modelFilename = store.model.filename;
+				modelFilename = store?.model?.filename;
 			}
 			const localModel = LDParse.model.get.abstractPart(modelFilename);
 
 			if (!localModel.steps) {
 				const submodels = LDParse.model.get.submodels(localModel);
-				if (submodels.some(p => p.steps && p.steps.length)) {
+				if (submodels.some((p: any) => p.steps && p.steps.length)) {
 					// If main model contains no steps but contains submodels that contain steps,
 					// add one step per part in main model.
-					localModel.steps = localModel.parts.map((p, idx) => ({parts: [idx]}));
-				} else if (localModel === store.model || store.model.hasAutoSteps) {
+					localModel.steps = localModel.parts.map((p: any, idx: number) => ({parts: [idx]}));
+				} else if (localModel === store?.model || store?.model?.hasAutoSteps) {
 					// Only auto-add steps to the main model, or to sub models if the main model itself
 					// needed auto-steps.
 					localModel.steps = StepInsertion(localModel, {partsPerStep});
-					if (localModel === store.model) {
+					if (store.model && localModel === store.model) {
 						store.model.hasAutoSteps = true;
 					}
 				} else {
@@ -359,18 +391,20 @@ const store = {
 				}
 			}
 
-			const pagesAdded = [];
+			const pagesAdded: number[] = [];
 
-			localModel.steps.forEach(modelStep => {
+			localModel.steps.forEach((modelStep: any) => {
 
 				const parts = _.cloneDeep(modelStep.parts || []);
-				const submodelIDs = parts.filter(pID => {
+				const submodelIDs = parts.filter((pID: number) => {
 					return LDParse.model.isSubmodel(localModel.parts[pID].filename);
 				});
-				const submodelFilenames = new Set(submodelIDs.map(pID => localModel.parts[pID].filename));
+				const submodelFilenames = new Set<string>(
+					submodelIDs.map((pID: number) => localModel.parts[pID].filename)
+				);
 
-				const submodelPagesAdded = [];
-				for (const filename of submodelFilenames) {
+				const submodelPagesAdded: Page[] = [];
+				submodelFilenames.forEach((filename: string) => {
 					const newPages = store.mutations.addInitialPages({
 						modelFilename: filename,
 						partsPerStep,
@@ -379,7 +413,7 @@ const store = {
 					if (newPages) {
 						submodelPagesAdded.push(newPages);
 					}
-				}
+				});
 
 				const page = store.mutations.page.add({pageNumber: 'id'});
 				pagesAdded.push(page.id);
@@ -391,8 +425,8 @@ const store = {
 				step.parts = parts;
 				step.model.filename = modelFilename;
 
-				submodelPagesAdded.forEach(submodelPageGroup => {
-					submodelPageGroup.forEach(pageID => {
+				submodelPagesAdded.forEach((submodelPageGroup: any) => {
+					submodelPageGroup.forEach((pageID: number) => {
 						const submodelPage = store.get.page(pageID);
 						const submodelStep = store.get.step(submodelPage.steps[0]);
 						submodelStep.model.parentStepID = step.id;
@@ -400,7 +434,7 @@ const store = {
 				});
 
 				const pli = store.get.pli(step.pliID);
-				parts.forEach(partID => {
+				parts.forEach((partID: number) => {
 					const part = localModel.parts[partID];
 					store.mutations.pli.addPart({pli, part});
 				});
@@ -408,7 +442,7 @@ const store = {
 			return pagesAdded;
 		},
 		addInitialSubmodelImages() {
-			store.get.submodels().forEach(submodel => {
+			store.get.submodels().forEach((submodel: any) => {
 				store.mutations.submodelImage.add({
 					parent: {id: submodel.stepID, type: 'step'},
 					modelFilename: submodel.filename,
@@ -416,11 +450,11 @@ const store = {
 				});
 			});
 		},
-		async mergeInitialPages(progressCallback) {
+		async mergeInitialPages(progressCallback: any) {
 			return new Promise(async function(resolve) {
 				window.setTimeout(async function() {
 					let stepSet = [], prevModelName;
-					const steps = store.state.steps.filter(step => {
+					const steps = store.state.steps.filter((step: any) => {
 						return step.parent.type === 'page';
 					});
 					progressCallback({

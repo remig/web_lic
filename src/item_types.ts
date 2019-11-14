@@ -1,5 +1,13 @@
 export type LDrawColorCode = number;
 
+export interface Model {
+	filename: string;
+	name: string;
+	parts: any[];
+	steps: any[];
+	hasAutoSteps?: boolean;
+}
+
 export interface ColorTableEntry {
 	name: string;
 	color: string;
@@ -18,14 +26,31 @@ export interface Box extends Point {
 	height: number;
 }
 
-export interface Item {
+export type ItemTypes =
+	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider' | 'numberLabel'| 'page'
+	| 'pli' | 'pliItem' | 'point' | 'part' | 'quantityLabel' | 'rotateIcon' | 'step'	| 'submodelImage'
+
+export interface LookupItem {
 	id: number;
-	type: string;
-	parent: any;
+	type: ItemTypes;
+}
+
+export interface Item extends LookupItem {
+	parent: LookupItem;
+}
+
+export interface PointItem extends Item, Point {
+	type: 'point'
 }
 
 export type PageLayouts = 'horizontal' | 'vertical'
 export type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
+
+export interface Divider extends Item {
+	type: 'divider',
+	p1: Point,
+	p2: Point
+}
 
 export interface Page extends Item {
 	type: 'page';

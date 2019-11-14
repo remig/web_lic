@@ -12,3 +12,5 @@ declare module 'vue/types/vue' {
 
 declare module 'element-ui/lib/locale/lang/en' {
 }
+
+declare function saveAs(blob: any, filename: string): void;
