@@ -1,11 +1,28 @@
 export type LDrawColorCode = number;
 
+export type Primitive = number[];
+
+export interface AbstractPart {
+	filename: string;
+	name: string;
+	parts: any[];
+	primitives: Primitive[];
+	isSubModel?: boolean;
+}
+
+export interface Part {
+	filename: string;
+	matrix: number[];
+	colorCode?: number;
+}
+
 export interface Model {
 	filename: string;
 	name: string;
 	parts: any[];
 	steps: any[];
 	hasAutoSteps?: boolean;
+	parentStepId?: number;
 }
 
 export interface ColorTableEntry {
@@ -27,8 +44,9 @@ export interface Box extends Point {
 }
 
 export type ItemTypes =
-	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider' | 'numberLabel'| 'page'
-	| 'pli' | 'pliItem' | 'point' | 'part' | 'quantityLabel' | 'rotateIcon' | 'step'	| 'submodelImage'
+	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
+	| 'numberLabel'| 'page' | 'pli' | 'pliItem' | 'point' | 'part'
+	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodelImage' | 'submodel'
 
 export interface LookupItem {
 	id: number;
@@ -40,7 +58,12 @@ export interface Item extends LookupItem {
 }
 
 export interface PointItem extends Item, Point {
-	type: 'point'
+	type: 'point';
+}
+
+export interface PartItem extends Item {
+	type: 'part';
+	stepID: number;
 }
 
 export type PageLayouts = 'horizontal' | 'vertical'
@@ -55,17 +78,37 @@ export interface Divider extends Item {
 export interface Page extends Item {
 	type: 'page';
 	subtype: PageSubtypes;
-	steps: any[];
-	dividers: any[];
 	annotations: any[];
-	pliItems: any[];
-	needsLayout: boolean;
-	locked: boolean;
-	stretchedStep: any;
+	dividers: any[];
 	innerContentOffset: Point;
+	layout: PageLayouts
+	locked: boolean;
+	needsLayout: boolean;
 	number: number;
 	numberLabelID: number;
-	layout: PageLayouts
+	pliItems: any[];
+	steps: any[];
+	stretchedStep: any;
+}
+
+export interface Step extends Item, Box {
+	type: 'step';
+	annotations: any[];
+	callouts: any[];
+	csiID?: number;
+	dividers: any[];
+	model: {
+		filename: string;
+	};
+	number: number;
+	numberLabelID: number;
+	parts: number[];
+	pliID?: number;
+	rotateIconID?: number;
+	steps: number[];
+	stretchedPages: number[];
+	subStepLayout: 'horizontal' | 'vertical';
+	submodelImages: number[];
 }
 
 export interface PLIItem extends Item, Box {
