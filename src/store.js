@@ -154,32 +154,11 @@ const store = {
 	get: Getters,
 	// TODO: convert all 'opts' arguments into {opts} for automatic destructuring.  duh.
 	mutations: {
-		item: ItemSetters,
-		part: PartSetters,
-		submodel: SubmodelSetters,
-		book: BookSetters,
-		templatePage: TemplatePageSetters,
-		page: PageSetters,
-		inventoryPage: InventoryPageSetters,
-		step: StepSetters,
-		csi: CSISetters,
-		pli: PLISetters,
-		pliItem: PLIItemSetters,
-		submodelImage: SubmodelImageSetters,
 		annotation: AnnotationSetters,
+		book: BookSetters,
 		callout: CalloutSetters,
 		calloutArrow: CalloutArrowSetters,
-		rotateIcon: {
-			add(opts) {  // opts: {parent}
-				return store.mutations.item.add({item: {
-					type: 'rotateIcon',
-					x: null, y: null, scale: 1,
-				}, parent: opts.parent});
-			},
-			delete(opts) {  // opts: {rotateIcon}
-				store.mutations.item.delete({item: opts.rotateIcon});
-			},
-		},
+		csi: CSISetters,
 		divider: {
 			add(opts) {  // opts: {parent, p1, p2}
 				return store.mutations.item.add({item: {
@@ -207,6 +186,30 @@ const store = {
 				store.mutations.item.delete({item: opts.divider});
 			},
 		},
+		// numberLabel
+		page: PageSetters,
+		pli: PLISetters,
+		pliItem: PLIItemSetters,
+		// point
+		item: ItemSetters,
+		part: PartSetters,
+		// quantityLabel
+		rotateIcon: {
+			add(opts) {  // opts: {parent}
+				return store.mutations.item.add({item: {
+					type: 'rotateIcon',
+					x: null, y: null, scale: 1,
+				}, parent: opts.parent});
+			},
+			delete(opts) {  // opts: {rotateIcon}
+				store.mutations.item.delete({item: opts.rotateIcon});
+			},
+		},
+		step: StepSetters,
+		submodelImage: SubmodelImageSetters,
+		submodel: SubmodelSetters,
+		templatePage: TemplatePageSetters,
+		inventoryPage: InventoryPageSetters,
 		sceneRendering: {
 			set(opts) {  // opts: {zoom, edgeWidth, refresh: false}
 				store.state.template.sceneRendering.zoom = opts.zoom;
