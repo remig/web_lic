@@ -5,12 +5,9 @@ import store from '../store';
 import Layout from '../layout';
 
 const api = {
-	add({
-		item,
-		parent,
-		insertionIndex = -1,
-		parentInsertionIndex = -1,
-	}) {
+	add(
+		{item, parent, insertionIndex = -1, parentInsertionIndex = -1}
+	) {
 		item.id = store.get.nextItemID(item);
 		if (store.state.hasOwnProperty(item.type)) {
 			store.state[item.type] = item;
@@ -41,16 +38,20 @@ const api = {
 		}
 	},
 	deleteChildList({item, listType}) {
-		const itemType = store.mutations[listType] ? listType : 'item';
 		const parent = store.get.lookupToItem(item);
 		const list = parent[listType + 's'] || [];
+		const itemType = store.mutations[listType]
+			? listType
+			: 'item';
 		while (list.length) {
 			store.mutations[itemType].delete({
 				[itemType]: {type: listType, id: list[0]},
 			});
 		}
 	},
-	reparent({item, newParent, parentInsertionIndex = -1}) {
+	reparent(
+		{item, newParent, parentInsertionIndex = -1}
+	) {
 		item = store.get.lookupToItem(item);
 		const oldParent = store.get.parent(item) || {};
 		newParent = store.get.lookupToItem(newParent);
