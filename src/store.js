@@ -152,7 +152,6 @@ const store = {
 		},
 	},
 	get: Getters,
-	// TODO: convert all 'opts' arguments into {opts} for automatic destructuring.  duh.
 	mutations: {
 		annotation: AnnotationSetters,
 		book: BookSetters,
@@ -160,30 +159,30 @@ const store = {
 		calloutArrow: CalloutArrowSetters,
 		csi: CSISetters,
 		divider: {
-			add(opts) {  // opts: {parent, p1, p2}
+			add({parent, p1, p2}) {
 				return store.mutations.item.add({item: {
-					type: 'divider', p1: opts.p1, p2: opts.p2,
-				}, parent: opts.parent});
+					type: 'divider', p1, p2,
+				}, parent});
 			},
-			reposition(opts) { // opts: {item, dx, dy}
-				const divider = store.get.divider(opts.item);
-				divider.p1.x += opts.dx;
-				divider.p2.x += opts.dx;
-				divider.p1.y += opts.dy;
-				divider.p2.y += opts.dy;
+			reposition({item, dx, dy}) {
+				const divider = store.get.divider(item);
+				divider.p1.x += dx;
+				divider.p2.x += dx;
+				divider.p1.y += dy;
+				divider.p2.y += dy;
 			},
-			setLength(opts) { // opts: {divider, newLength}
-				const divider = store.get.divider(opts.divider);
-				const bbox = _.geom.bbox([divider.p1, divider.p2]);
+			setLength({divider, newLength}) {
+				const dividerItem = store.get.divider(divider);
+				const bbox = _.geom.bbox([dividerItem.p1, dividerItem.p2]);
 				const isHorizontal = (bbox.height === 0);
 				if (isHorizontal) {
-					divider.p2.x = divider.p1.x + opts.newLength;
+					dividerItem.p2.x = dividerItem.p1.x + newLength;
 				} else {
-					divider.p2.y = divider.p1.y + opts.newLength;
+					dividerItem.p2.y = dividerItem.p1.y + newLength;
 				}
 			},
-			delete(opts) {  // opts: {divider}
-				store.mutations.item.delete({item: opts.divider});
+			delete({divider}) {
+				store.mutations.item.delete({item: divider});
 			},
 		},
 		// numberLabel
@@ -195,14 +194,14 @@ const store = {
 		part: PartSetters,
 		// quantityLabel
 		rotateIcon: {
-			add(opts) {  // opts: {parent}
+			add({parent}) {
 				return store.mutations.item.add({item: {
 					type: 'rotateIcon',
 					x: null, y: null, scale: 1,
-				}, parent: opts.parent});
+				}, parent});
 			},
-			delete(opts) {  // opts: {rotateIcon}
-				store.mutations.item.delete({item: opts.rotateIcon});
+			delete({rotateIcon}) {
+				store.mutations.item.delete({item: rotateIcon});
 			},
 		},
 		step: StepSetters,
@@ -211,11 +210,11 @@ const store = {
 		templatePage: TemplatePageSetters,
 		inventoryPage: InventoryPageSetters,
 		sceneRendering: {
-			set(opts) {  // opts: {zoom, edgeWidth, refresh: false}
-				store.state.template.sceneRendering.zoom = opts.zoom;
-				store.state.template.sceneRendering.edgeWidth = opts.edgeWidth;
-				store.state.template.sceneRendering.rotation = _.cloneDeep(opts.rotation);
-				if (opts.refresh) {
+			set({zoom, edgeWidth, rotation, refresh = false}) {
+				store.state.template.sceneRendering.zoom = zoom;
+				store.state.template.sceneRendering.edgeWidth = edgeWidth;
+				store.state.template.sceneRendering.rotation = _.cloneDeep(rotation);
+				if (refresh) {
 					store.mutations.sceneRendering.refreshAll();
 				}
 			},
@@ -227,28 +226,28 @@ const store = {
 			},
 		},
 		pliTransform: {
-			set(opts) {  // opts: {filename, rotation, scale}
+			set({filename, rotation, scale}) {
 				// If rotation or scale is null, delete those entries.  If they're missing, ignore them.
-				let transform = store.state.pliTransforms[opts.filename];
+				let transform = store.state.pliTransforms[filename];
 				if (!transform) {
-					transform = store.state.pliTransforms[opts.filename] = {};
+					transform = store.state.pliTransforms[filename] = {};
 				}
-				if (opts.hasOwnProperty('rotation')) {
-					if (Array.isArray(opts.rotation)) {
-						transform.rotation = opts.rotation.filter(el => el.angle !== 0);
+				if (rotation != null) {
+					if (Array.isArray(rotation)) {
+						transform.rotation = rotation.filter(el => el.angle !== 0);
 					}
-					if (opts.rotation == null || _.isEmpty(transform.rotation)) {
+					if (rotation == null || _.isEmpty(transform.rotation)) {
 						delete transform.rotation;
 					}
 				}
-				if (opts.hasOwnProperty('scale')) {
-					transform.scale = opts.scale;
+				if (scale != null) {
+					transform.scale = scale;
 					if (!transform.scale || transform.scale === 1) {
 						delete transform.scale;
 					}
 				}
 				if (_.isEmpty(transform)) {
-					delete store.state.pliTransforms[opts.filename];
+					delete store.state.pliTransforms[filename];
 				}
 			},
 		},
@@ -335,11 +334,11 @@ const store = {
 					store.mutations.page.delete({page});
 				});
 		},
-		addInitialPages(opts) {  // opts: {modelFilename,  lastStepNumber, partsPerStep}
+		addInitialPages({modelFilename, lastStepNumber = {num: 1}, partsPerStep}) {
 
-			opts = opts || {};
-			const lastStepNumber = opts.lastStepNumber || {num: opts.lastStepNumber || 1};
-			const modelFilename = opts.modelFilename || store.model.filename;
+			if (!modelFilename) {
+				modelFilename = store.model.filename;
+			}
 			const localModel = LDParse.model.get.abstractPart(modelFilename);
 
 			if (!localModel.steps) {
@@ -351,7 +350,7 @@ const store = {
 				} else if (localModel === store.model || store.model.hasAutoSteps) {
 					// Only auto-add steps to the main model, or to sub models if the main model itself
 					// needed auto-steps.
-					localModel.steps = StepInsertion(localModel, {partsPerStep: opts.partsPerStep});
+					localModel.steps = StepInsertion(localModel, {partsPerStep});
 					if (localModel === store.model) {
 						store.model.hasAutoSteps = true;
 					}
@@ -374,7 +373,7 @@ const store = {
 				for (const filename of submodelFilenames) {
 					const newPages = store.mutations.addInitialPages({
 						modelFilename: filename,
-						partsPerStep: opts.partsPerStep,
+						partsPerStep,
 						lastStepNumber,
 					});
 					if (newPages) {
