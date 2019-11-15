@@ -43,6 +43,7 @@
 
 import _ from '../../util';
 import store from '../../store';
+import cache from '../../cache';
 import openFileHandler from '../../file_uploader';
 import DialogManager from '../../dialog';
 import PanelBase from './panel_base.vue';
@@ -101,7 +102,7 @@ export default {
 							});
 						}
 					}
-					store.cache.set('page', 'backgroundImage', image);
+					cache.set('page', 'backgroundImage', image);
 					this.updateValues();
 				};
 				image.src = src;

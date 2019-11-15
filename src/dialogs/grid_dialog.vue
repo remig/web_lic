@@ -96,7 +96,7 @@
 <script>
 
 import _ from '../util';
-import store from '../store';
+import cache from '../cache';
 import undoStack from '../undo_stack';
 import uiState from '../ui_state';
 
@@ -126,7 +126,7 @@ export default {
 				this.newState.line.color = this.lineColor;
 			}
 			uiState.set('grid', _.cloneDeep(this.newState));
-			store.cache.set('uiState', 'gridPath', null);
+			cache.set('uiState', 'gridPath', null);
 			this.app.drawCurrentPage();
 		},
 		updateColor(newColor) {
@@ -135,7 +135,7 @@ export default {
 		},
 		ok() {
 			const storeOp = {
-				root: store.cache.stateCache,
+				root: cache.stateCache,
 				op: 'replace',
 				path: '/uiState/gridPath',
 				value: null,
@@ -156,7 +156,7 @@ export default {
 		},
 		cancel() {
 			uiState.set('grid', this.originalState);
-			store.cache.set('uiState', 'gridPath', null);
+			cache.set('uiState', 'gridPath', null);
 			this.app.drawCurrentPage();
 			this.$emit('close');
 		},

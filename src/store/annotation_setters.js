@@ -2,6 +2,7 @@
 
 import _ from '../util';
 import store from '../store';
+import cache from '../cache';
 import Layout from '../layout';
 
 export default {
@@ -57,7 +58,7 @@ export default {
 		if (item.hasOwnProperty('points')) {
 			store.mutations.item.deleteChildList({item, listType: 'point'});
 		}
-		store.cache.clear(item);  // Clear cached images, if any
+		cache.clear(item);  // Clear cached images, if any
 		store.mutations.item.delete({item});
 	},
 };

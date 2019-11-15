@@ -6,6 +6,7 @@ import {Model, LookupItem, Point, Page} from './item_types';
 
 import _ from './util';
 import Layout from './layout';
+import cache from './cache';
 import Renderer from './store/render';
 import Getters from './store/getters';
 import ItemSetters from './store/item_setters';
@@ -86,7 +87,7 @@ const store: Store = {
 	state: _.cloneDeep(emptyState),
 	replaceState(state: any) {
 		store.state = state;
-		store.cache.reset();
+		cache.reset();
 	},
 	resetState() {
 		if (store.model) {
@@ -94,7 +95,7 @@ const store: Store = {
 		}
 		store.model = null;
 		store.state = _.cloneDeep(emptyState);
-		store.cache.reset();
+		cache.reset();
 	},
 	load(content: SaveContent) {
 		LDParse.setPartDictionary(content.partDictionary);
@@ -137,43 +138,6 @@ const store: Store = {
 		}
 	},
 	render: Renderer,
-	cache: {
-		// For temporary state-based data that's transient yet expensive to recompute.
-		// Keys are either [item type][item ID][cache key] for info specific to exactly one item, or
-		// [item type][cache key] for info specific to all items of one type.
-		stateCache: {},
-		get(item: any, key: string, defaultValue: any) {
-			const cache = store.cache.stateCache;
-			if (item && item.type && item.id != null && cache[item.type] && cache[item.type][item.id]) {
-				return cache[item.type][item.id][key];
-			} else if (typeof item === 'string' && cache[item] && cache[item][key]) {
-				return cache[item][key];
-			}
-			return defaultValue;
-		},
-		set(item: any, key: string, newValue: any) {
-			const cache = store.cache.stateCache;
-			if (item && item.type && item.id != null) {
-				cache[item.type] = cache[item.type] || {};
-				cache[item.type][item.id] = cache[item.type][item.id] || {};
-				cache[item.type][item.id][key] = newValue;
-			} else if (typeof item === 'string') {
-				cache[item] = cache[item] || {};
-				cache[item][key] = newValue;
-			}
-		},
-		clear(item: any) {
-			const cache = store.cache.stateCache;
-			if (item && item.type && item.id != null && cache[item.type]) {
-				delete cache[item.type][item.id];
-			} else if (typeof item === 'string') {
-				delete cache[item];
-			}
-		},
-		reset() {
-			store.cache.stateCache = {};
-		},
-	},
 	get: Getters,
 	mutations: {
 		annotation: AnnotationSetters,

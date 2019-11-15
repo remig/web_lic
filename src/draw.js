@@ -2,6 +2,7 @@
 
 import _ from './util';
 import store from './store';
+import cache from './cache';
 import LDParse from './ld_parse';
 import uiState from './ui_state';
 
@@ -35,14 +36,14 @@ const api = {
 		}
 
 		if (template.fill.image) {
-			const cachedImage = store.cache.get('page', 'backgroundImage');
+			const cachedImage = cache.get('page', 'backgroundImage');
 			if (cachedImage) {
 				api.pageBackground(cachedImage, template.fill.image, ctx);
 			} else {
 				const image = new Image();
 				image.onload = () => {
 					// TODO: this gets called multiple times on initial page load
-					store.cache.set('page', 'backgroundImage', image);
+					cache.set('page', 'backgroundImage', image);
 					api.page(page, canvas, config);
 				};
 				image.src = template.fill.image.src;
@@ -519,18 +520,18 @@ const api = {
 			},
 
 			image(annotation, ctx) {
-				const cachedImage = store.cache.get(annotation, 'rawImage');
+				const cachedImage = cache.get(annotation, 'rawImage');
 				if (cachedImage && cachedImage !== 'pending') {
 					const x = Math.floor(annotation.x);
 					const y = Math.floor(annotation.y);
 					ctx.drawImage(cachedImage, x, y);
 				} else if (cachedImage == null) {
-					store.cache.set(annotation, 'rawImage', 'pending');  // Avoid caching multiple times
+					cache.set(annotation, 'rawImage', 'pending');  // Avoid caching multiple times
 					const image = new Image();
 					image.onload = function() {
 						annotation.width = this.width;
 						annotation.height = this.height;
-						store.cache.set(annotation, 'rawImage', image);
+						cache.set(annotation, 'rawImage', image);
 						const page = store.get.pageForItem(annotation);
 						api.page(page, ctx.canvas);
 					};
@@ -585,10 +586,10 @@ const api = {
 	grid(ctx, width, height) {
 
 		const grid = uiState.get('grid');
-		let gridPath = store.cache.get('uiState', 'gridPath');
+		let gridPath = cache.get('uiState', 'gridPath');
 		if (gridPath == null) {
 			gridPath = api.buildGrid(grid, width, height);
-			store.cache.set('uiState', 'gridPath', gridPath);
+			cache.set('uiState', 'gridPath', gridPath);
 		}
 
 		ctx.save();
