@@ -13,17 +13,17 @@ import LDParse from '../ld_parse';
 import packageInfo from '../../package.json';
 
 export default {
-	add(opts = {}) {  // opts: {bookNumber, pages: {start, end}}
-		const pageNumbers = _.range(opts.pages.start, opts.pages.end + 1);
-		const pages = pageNumbers.map(pageNumber => {
+	add({bookNumber, pages} = {}) {
+		const pageNumbers = _.range(pages.start, pages.end + 1);
+		const pageList = pageNumbers.map(pageNumber => {
 			return store.get.itemByNumber('page', pageNumber);
 		});
 		const book = store.mutations.item.add({item: {
 			type: 'book',
 			pages: [],
-			number: opts.bookNumber,
+			number: bookNumber,
 		}});
-		pages.forEach(page => {
+		pageList.forEach(page => {
 			page.parent = {};
 			store.mutations.item.reparent({
 				item: page,
@@ -34,12 +34,12 @@ export default {
 	},
 	delete() {
 	},
-	setBookPageNumbers(opts) { // opts: {book, firstPageNumber: 'start_page_1' or 'preserve_page_count'}
-		const book = store.get.lookupToItem(opts.book);
-		if (opts.firstPageNumber === 'start_page_1') {
-			const pages = book.pages.map(store.get.page);
+	setBookPageNumbers({book, firstPageNumber}) {  // firstPageNumber: 'start_page_1' or 'preserve_page_count'
+		const bookItem = store.get.lookupToItem(book);
+		if (firstPageNumber === 'start_page_1') {
+			const pages = bookItem.pages.map(store.get.page);
 			store.mutations.renumber(pages, 1);
-		} else {  // vs 'preserve_page_count'
+		} else if (firstPageNumber === 'preserve_page_count') {
 			store.mutations.page.renumber();
 		}
 	},
@@ -110,21 +110,22 @@ export default {
 			.then(zipContent => saveAs(zipContent, fn + '.zip'));
 		store.replaceState(firstBookState);
 	},
-	divideInstructions(opts) {
-		// opts: {bookDivisions, firstPageNumber, includeTitlePages, fileSplit, noSplitSubmodels}
+	divideInstructions({
+		bookDivisions, firstPageNumber, includeTitlePages, fileSplit,
+	}) {
 		//  bookDivisions: [{bookNumber: 1, pages: {start, end}, steps: {start, end}}]}
-		opts.bookDivisions.forEach(book => {
+		bookDivisions.forEach(book => {
 			store.mutations.book.add(book);
 		});
-		if (opts.includeTitlePages) {
+		if (includeTitlePages) {
 			store.mutations.removeTitlePage();  // Remove any existing title pages first
 			store.mutations.addTitlePage();
 		}
-		opts.bookDivisions.forEach(book => {
+		bookDivisions.forEach(book => {
 			book = store.get.itemByNumber('book', book.bookNumber);
-			store.mutations.book.setBookPageNumbers({book, firstPageNumber: opts.firstPageNumber});
+			store.mutations.book.setBookPageNumbers({book, firstPageNumber});
 		});
-		if (opts.fileSplit === 'separate_files') {  // vs 'one_file'
+		if (fileSplit === 'separate_files') {  // vs 'one_file'
 			store.mutations.book.splitFileByBook();
 		}
 	},

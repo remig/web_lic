@@ -6,14 +6,14 @@ import cache from '../cache';
 import Layout from '../layout';
 
 export default {
-	add(opts) {  // opts: {annotationType, properties, parent, x, y}
+	add({annotationType, properties, parent, x, y}) {
 
 		const annotation = store.mutations.item.add({item: {
 			type: 'annotation',
-			annotationType: opts.annotationType,
-		}, parent: opts.parent});
+			annotationType,
+		}, parent});
 
-		_.assign(annotation, opts.properties);
+		_.assign(annotation, properties);
 
 		// Guarantee some nice defaults
 		if (annotation.annotationType === 'label') {
@@ -22,39 +22,39 @@ export default {
 			annotation.color = annotation.color || 'black';
 			annotation.align = 'left';
 			annotation.valign = 'top';
-			annotation.x = opts.x;
-			annotation.y = opts.y;
-			if (opts.properties.text) {
+			annotation.x = x;
+			annotation.y = y;
+			if (properties.text) {
 				Layout.label(annotation);
 			}
 		} else if (annotation.annotationType === 'arrow') {
 			annotation.points = [];
 			store.mutations.item.add({item: {
-				type: 'point', x: opts.x, y: opts.y,
+				type: 'point', x, y,
 			}, parent: annotation});
 
 			store.mutations.item.add({item: {
-				type: 'point', x: opts.x + 100, y: opts.y,
+				type: 'point', x: x + 100, y,
 			}, parent: annotation});
 		} else {
 			// image annotation width & height set by image load logic during first draw
-			annotation.x = opts.x;
-			annotation.y = opts.y;
+			annotation.x = x;
+			annotation.y = y;
 		}
 		return annotation;
 	},
-	set(opts) {  // opts: {annotation, newProperties}
-		const annotation = store.get.lookupToItem(opts.annotation);
-		const props = opts.newProperties || {};
-		if (annotation.annotationType === 'label') {
-			annotation.text = (props.text == null) ? annotation.text : props.text;
-			annotation.color = (props.color == null) ? annotation.color : props.color;
-			annotation.font = (props.font == null) ? annotation.font : props.font;
-			Layout.label(annotation);
+	set({annotation, newProperties}) {
+		const item = store.get.lookupToItem(annotation);
+		const props = newProperties || {};
+		if (item.annotationType === 'label') {
+			item.text = (props.text == null) ? item.text : props.text;
+			item.color = (props.color == null) ? item.color : props.color;
+			item.font = (props.font == null) ? item.font : props.font;
+			Layout.label(item);
 		}
 	},
-	delete(opts) {  // opts: {annotation}
-		const item = store.get.lookupToItem(opts.annotation);
+	delete({annotation}) {
+		const item = store.get.lookupToItem(annotation);
 		if (item.hasOwnProperty('points')) {
 			store.mutations.item.deleteChildList({item, listType: 'point'});
 		}
