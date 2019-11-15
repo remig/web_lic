@@ -5,9 +5,9 @@ import {LookupItem} from './item_types';
 let stateCache: {[key: string]: any} = {};
 
 interface Cache {
-	get(item: any, key: string, defaultValue: any): any;
-	set(item: any, key: string, newValue: any): void;
-	clear(item: any): void;
+	get(item: string | LookupItem, key: string, defaultValue: any): any;
+	set(item: string | LookupItem, key: string, newValue: any): void;
+	clear(item: string | LookupItem): void;
 	reset(): void;
 	stateCache: {[key: string]: any};
 }
