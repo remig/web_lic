@@ -3,6 +3,11 @@
 import _ from 'lodash';
 import {Point, Size, Box} from './item_types';
 
+// These are used from lodash... not a lot...
+// isEmpty, get, cloneDeep, assign, isEqual, round, clamp, last, pullAt
+// forOwn, startCase, clone, each, some, unzip, chunk, range, count,
+// difference, template, set
+
 interface CacheInterface {
 	[key: string]: any
 }
