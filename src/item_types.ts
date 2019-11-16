@@ -38,10 +38,12 @@ export interface Point {
 	y: number;
 }
 
-export interface Box extends Point {
+export interface Size {
 	width: number;
 	height: number;
 }
+
+export interface Box extends Point, Size {}
 
 export type ItemTypes =
 	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'

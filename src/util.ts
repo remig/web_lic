@@ -1,14 +1,123 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {Point, Box} from './item_types';
+import _ from 'lodash';
+import {Point, Size, Box} from './item_types';
 
-declare const _: any;
+interface CacheInterface {
+	[key: string]: any
+}
 
-// Add a handful of useful utility functions to lodash
-// TODO: A lot of these duplicate functionality in lodash; remove them
-// TODO: mixin like this loses all typing info
-_.mixin({
-	eq(a: number, b: number, e:number = 0.0001): boolean {
+interface BorderInterface {
+	width?: number;
+	color?: string;
+}
+
+type EdgeList = 'top' | 'right' | 'bottom' | 'left';
+
+interface ArrowInterface {
+	head: {
+		length: number;
+		width: number;
+		insetDepth: number;
+	},
+	body: {
+		width: number,
+	},
+}
+
+interface GeomInterface {
+	bbox(points: (Point | Box)[]): Box;
+	expandBox(box: Box, minWidth: number, minHeight: number): Box;
+	moveBoxEdge(box: Box, edge: EdgeList, dt: number): void;
+	distance(p1: number | Point, p2: number | Point): number;
+	midpoint(p1: Point, p2: Point): number;
+	arrow(): ArrowInterface;
+}
+
+interface RGBColor {
+	r: number;
+	g: number;
+	b: number;
+	a: number | null;
+	toString(): string;
+}
+
+interface ColorInterface {
+	toRGB(colorString: string): RGBColor;
+	toVec4(colorString: string, alpha: number): number[];
+	luma(colorString: any, isUnitColor: boolean): number;
+	opposite(colorString: string): 'white' | 'black';
+	isVisible(colorString: string): boolean;
+}
+
+interface FontPartsInterface {
+	fontStyle?: string;
+	fontVariant?: string;
+	fontWeight?: string;
+	fontStretch?: string;
+	fontSize?: string;
+	fontFamily?: string;
+}
+
+interface DOMInterface {
+	createElement(type: string, attrs: any, parent: any, text: string): HTMLElement;
+	emptyNode(node: HTMLElement): void;
+}
+
+type UnitTypes = 'point' | 'in' | 'mm' | 'cm';
+
+interface UnitsInterface {
+	pixelsToUnits(pixelCount: number, newUnits: UnitTypes): number;
+	unitsToPixels(unitCount: number, newUnits: UnitTypes): number;
+	pointsToUnits(pointCount: number, newUnits: UnitTypes): number;
+	unitToPoints(unitCount: number, newUnits: UnitTypes): number;
+}
+
+interface Version {
+	major: number;
+	minor: number;
+	revision: number;
+}
+
+interface VersionInterface {
+	parse(v: string): Version;
+	nice(v: string): string;
+	isOldVersion(prev: string, current: string): boolean;
+}
+
+interface LoDashMixins extends _.LoDashStatic {
+	equal(a: number, b: number, e:number): boolean;
+	isEven(n: number): boolean;
+	insert<T>(array: T[], item: T, idx: number): void;
+	deleteItem<T>(array: T[], item: T): void;
+	count<T>(array: T[], search: T): number;
+	itemEq(a: any, b: any): boolean;
+	measureLabel(font: string, text: string): Size;
+	fontToFontParts(font: string): FontPartsInterface;
+	fontPartsToFont(font: FontPartsInterface): string;
+	fontString(
+		{size, family, bold, italic}:
+		{size: number, family: string, bold: string, italic: string}
+	): string;
+	degrees(radians: number): number;
+	radians(degrees: number): number;
+	dom: DOMInterface;
+	units: UnitsInterface;
+	geom: GeomInterface;
+	version: VersionInterface;
+	sort: {
+		numeric: {
+			ascending(a: any, b: any): any;
+			descending(a: any, b: any): any;
+		};
+	};
+	formatTime(start: number, end: number): string;
+	color: ColorInterface;
+	isBorderVisible(border: BorderInterface): boolean;
+}
+
+const mixin = {
+	equal(a: number, b: number, e:number = 0.0001): boolean {
 		return Math.abs(a - b) < e;
 	},
 	isEven(n: number): boolean {
@@ -40,7 +149,7 @@ _.mixin({
 		return a && b && a.id === b.id && a.type === b.type && a.stepID === b.stepID;
 	},
 	measureLabel: (() => {
-		const labelSizeCache: CacheType = {};  // {font: {text: {width: 10, height: 20}}}
+		const labelSizeCache: CacheInterface = {};  // {font: {text: {width: 10, height: 20}}}
 		return function(font: string, text: string) {
 			if (labelSizeCache[font] && labelSizeCache[font][text]) {
 				return _.cloneDeep(labelSizeCache[font][text]);
@@ -117,11 +226,11 @@ _.mixin({
 		{size, family, bold, italic}:
 		{size: number, family: string, bold: string, italic: string}
 	) {
-		return _.fontPartsToFont({
+		return mixin.fontPartsToFont({
 			fontSize: size + 'pt',
 			fontFamily: family,
-			fontWeight: bold ? 'bold' : null,
-			fontStyle: italic ? 'italic' : null,
+			fontWeight: bold ? 'bold' : '',
+			fontStyle: italic ? 'italic' : '',
 		});
 	},
 	degrees(radians: number): number {
@@ -160,7 +269,6 @@ _.mixin({
 		return dom;
 	})(),
 	units: (() => {
-		type UnitTypes = 'point' | 'in' | 'mm' | 'cm';
 		const unitConversions = {  // this conversion factor * pixel count = units
 			point: 0.75,
 			'in': 0.75 / 72,
@@ -175,12 +283,12 @@ _.mixin({
 			return unitCount / unitConversions[newUnits];
 		};
 		units.pointsToUnits = function(pointCount: number, newUnits: UnitTypes) {
-			const pixels = _.units.unitsToPixels(pointCount, 'point');
-			return _.units.pixelsToUnits(pixels, newUnits);
+			const pixels = mixin.units.unitsToPixels(pointCount, 'point');
+			return mixin.units.pixelsToUnits(pixels, newUnits);
 		};
 		units.unitToPoints = function(unitCount: number, newUnits: UnitTypes) {
-			const pixels = _.units.unitsToPixels(unitCount, newUnits);
-			return _.units.pixelsToUnits(pixels, 'point');
+			const pixels = mixin.units.unitsToPixels(unitCount, newUnits);
+			return mixin.units.pixelsToUnits(pixels, 'point');
 		};
 		return units;
 	})(),
@@ -227,11 +335,7 @@ _.mixin({
 			}
 			return box;
 		};
-		geom.moveBoxEdge = function(
-			box: Box,
-			edge: 'top' | 'right' | 'bottom' | 'left',
-			dt: number
-		) {
+		geom.moveBoxEdge = function(box: Box, edge: EdgeList, dt: number) {
 			switch (edge) {
 				case 'top':
 					box.y += dt;
@@ -275,14 +379,8 @@ _.mixin({
 		return geom;
 	})(),
 	version: (() => {
-		interface VersionInterface {
-			major: number;
-			minor: number;
-			revision: number;
-		}
-
 		function version() {}
-		version.parse = (v: string): VersionInterface => {
+		version.parse = (v: string): Version => {
 			const revs: number[] = (v || '').split('.').map(w => parseInt(w, 10));
 			return {
 				major: revs[0] || 0,
@@ -291,12 +389,12 @@ _.mixin({
 			};
 		};
 		version.nice = (v: string): string => {
-			const ver = _.version.parse(v);
+			const ver = mixin.version.parse(v);
 			return `${ver.major}.${ver.minor}`;
 		};
 		version.isOldVersion = (prev: string, current: string) => {
-			const prevRev = _.version.parse(prev);
-			const curRev = _.version.parse(current);
+			const prevRev = mixin.version.parse(prev);
+			const curRev = mixin.version.parse(current);
 			if (prevRev.major !== curRev.major) {
 				return prevRev.major < curRev.major;
 			} else if (prevRev.minor !== curRev.minor) {
@@ -330,7 +428,7 @@ _.mixin({
 	color: (() => {
 		function color() {}
 		color.toRGB = (() => {
-			const rgbLookupCache: CacheType = {
+			const rgbLookupCache: CacheInterface = {
 				'#000000': [0, 0, 0],
 			};
 			return function(colorString: string) {
@@ -363,10 +461,10 @@ _.mixin({
 					}
 				}
 
-				const res = {r: rgb[0], g: rgb[1], b: rgb[2], a: null};
-				if (rgb.length > 3) {
-					res.a = rgb[3];
-				}
+				const res = {r: rgb[0], g: rgb[1], b: rgb[2], a: rgb[3]};
+				// if (rgb.length > 3) {
+				// 	res.a = rgb[3];
+				// }
 				res.toString = function() {
 					return (this.a == null)
 						? `rgb(${this.r}, ${this.g}, ${this.b})`
@@ -379,7 +477,7 @@ _.mixin({
 			if (!colorString || typeof colorString !== 'string') {
 				return [0, 0, 0, 0];
 			}
-			let r, g, b, a;
+			let r: number, g: number, b: number, a: number;
 			if (colorString.startsWith('#')) {
 				colorString = colorString.replace('#', '');
 				r = parseInt(colorString.substr(0, 2), 16) / 255;
@@ -387,7 +485,7 @@ _.mixin({
 				b = parseInt(colorString.substr(4, 2), 16) / 255;
 				a = (255 - (alpha || 0)) / 255;
 			} else {
-				const localColor = _.color.toRGB(colorString);
+				const localColor = mixin.color.toRGB(colorString);
 				r = localColor.r / 255;
 				g = localColor.g / 255;
 				b = localColor.b / 255;
@@ -399,7 +497,7 @@ _.mixin({
 		};
 		color.luma = (colorString: any, isUnitColor: boolean) => {
 			if (!Array.isArray(colorString)) {
-				const colorObj = _.color.toRGB(colorString);
+				const colorObj = mixin.color.toRGB(colorString);
 				colorString = [colorObj.r, colorObj.g, colorObj.b];
 			}
 			const scale = isUnitColor ? 1 : 255;
@@ -408,13 +506,13 @@ _.mixin({
 				+ (0.0721 * ((colorString[2] / scale) ** 2.2));
 		};
 		color.opposite = (colorString: string) => {
-			return (_.color.luma(colorString) < 0.18) ? 'white' : 'black';
+			return (mixin.color.luma(colorString, false) < 0.18) ? 'white' : 'black';
 		};
 		color.isVisible = (colorString: string) => {
 			if (!colorString || typeof colorString !== 'string') {
 				return false;
 			}
-			const colorObj = _.color.toRGB(colorString);
+			const colorObj = mixin.color.toRGB(colorString);
 			if (colorObj.hasOwnProperty('a') && colorObj.a === 0) {
 				return false;
 			}
@@ -422,24 +520,16 @@ _.mixin({
 		};
 		return color;
 	})(),
-	isBorderVisible(border: BorderType) {
+	isBorderVisible(border: BorderInterface) {
 		if (!border || !border.width || border.width < 1 ||
 			!border.color || typeof border.color !== 'string'
 		) {
 			return false;
 		}
-		return _.color.isVisible(border.color);
+		return mixin.color.isVisible(border.color);
 	},
-});
+};
 
-interface CacheType {
-	[key: string]: any
-}
+_.mixin(mixin);
 
-interface BorderType {
-	width?: number;
-	color?: string;
-}
-
-
-export default _;
+export default <LoDashMixins>_;

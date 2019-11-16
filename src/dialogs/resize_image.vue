@@ -218,7 +218,7 @@ export default {
 		},
 		aspectRatiosMatch() {
 			const info = this.imageInfo;
-			return _.eq(
+			return _.equal(
 				info.originalWidth / info.originalHeight,
 				info.pageWidth / info.pageHeight
 			);
