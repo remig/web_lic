@@ -64,7 +64,9 @@ type ItemTypeNames =
 	| 'part' | 'submodel';
 
 type ItemTypes =
-	Book | Divider | Page | PartItem | PLIItem | PointItem | Step;
+	Annotation | Book | Callout | CalloutArrow | CSI | Divider
+	| NumberLabel | Page | PartItem | PLIItem | PLI | PointItem
+	| QuantityLabel | RotateIcon | Step | SubmodelImage;
 
 type ItemListTypes =
 	'annotations' | 'books' | 'callouts' | 'calloutArrows' | 'csis' | 'dividers'
@@ -127,7 +129,7 @@ interface CalloutArrow extends Item, PointListItem {
 }
 
 interface Callout extends Item, StepParent, Box {
-	type: 'Callout';
+	type: 'callout';
 	borderOffset: Point;
 	calloutArrows: number[];
 	innerContentOffset: Point;
@@ -196,7 +198,7 @@ interface RotateIcon extends Item, Box {
 	scale: number;
 }
 
-interface Step extends Item, Box {
+interface Step extends Item, NumberedItem, Box {
 	type: 'step';
 	annotations: number[];
 	callouts: number[];
@@ -207,7 +209,6 @@ interface Step extends Item, Box {
 		filename: string;
 		parentStepID: number;
 	};
-	number: number;
 	numberLabelID: number;
 	parts: number[];
 	pliID: number;

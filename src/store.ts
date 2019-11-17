@@ -14,47 +14,26 @@ import defaultTemplate from './template';
 import Storage from './storage';
 import packageInfo from '../package.json';
 
-/*
-import {Model, Step, Page, Divider} from './item_types';
-
-interface StateInterface {
-	pages: Page[];
-	steps: Step[];
-	dividers: Divider[];
-}
-
-const foo: StateInterface = {
-	pages: [],
-	steps: [],
-	dividers: [],
-};
-
-function itemList<T>(listName: keyof StateInterface): T[] {
-	return foo[listName] as unknown as T[];
-}
-
-*/
-
 const emptyState = {
-	template: _.cloneDeep(defaultTemplate),
-	licFilename: null,  // user-visible filename (without extension) used to load / save lic file
-	plisVisible: true,
-	pliTransforms: {},
-	books: [],
-	pages: [],
-	dividers: [],
-	steps: [],
-	csis: [],
-	plis: [],
-	pliItems: [],
-	quantityLabels: [],
-	numberLabels: [],
-	submodelImages: [],
 	annotations: [],
-	callouts: [],
+	books: [],
 	calloutArrows: [],
+	callouts: [],
+	csis: [],
+	dividers: [],
+	licFilename: null,  // user-visible filename (without extension) used to load / save lic file
+	numberLabels: [],
+	pages: [],
+	pliItems: [],
+	pliTransforms: {},
+	plis: [],
+	plisVisible: true,
 	points: [],
+	quantityLabels: [],
 	rotateIcons: [],
+	steps: [],
+	submodelImages: [],
+	template: _.cloneDeep(defaultTemplate),
 };
 
 interface SaveContent {
@@ -65,22 +44,18 @@ interface SaveContent {
 	state: any;
 }
 
-type SaveModes = 'file' | 'local';
-type SaveTargets = 'state' | 'template';
-
 interface Store {
 	version: string | null;
 	model: Model | null;
 	setModel(model: Model): void;
-	state: any;
+	state: StateInterface;
 
 	replaceState(state: any): void;
 	resetState(): void;
 	load(content: SaveContent): void;
-	save(
-		{mode, target, filename, jsonIndent}
-		: {mode: SaveModes, target: SaveTargets, filename: string, jsonIndent: number}
-	): void;
+	saveLocal(): void;
+	saveToFile(filename?: string, jsonIndent?: number): void;
+	saveTemplate(filename?: string, jsonIndent?: number): void;
 	render: any;
 	get: GetterInterface;
 	mutations: MutationInterface;
@@ -121,38 +96,44 @@ const store: Store = {
 		LDRender.setRenderState(content.state.template.sceneRendering);
 		store.replaceState(content.state);
 	},
-	// mode is either 'file' or 'local', target is either 'state' or 'template'
-	// filename is optional; if set, will use that instead of store.state.licFilename
-	save({mode, target = 'state', filename, jsonIndent}) {
-		let content;
-		if (target === 'template') {
-			content = {
-				version: packageInfo.version,
-				template: store.state.template,
-			};
-		} else {
-			content = {
-				version: packageInfo.version,
-				partDictionary: LDParse.partDictionary,
-				colorTable: LDParse.colorTable,
-				modelFilename: store?.model?.filename,
-				state: store.state,
-			};
-		}
-		if (mode === 'file') {
-			content = JSON.stringify(content, null, jsonIndent);
-			const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
-			filename = filename || store.state.licFilename;
-			filename = (target === 'template') ? filename + '.lit' : filename + '.lic';
-			saveAs(blob, filename);
-		} else if (mode === 'local' && target !== 'template') {
-			console.log('Updating local storage');  // eslint-disable-line no-console
-			Storage.replace.model(content);
-		}
+	saveLocal() {
+		const content = getSaveContent();
+		console.log('Updating local storage');  // eslint-disable-line no-console
+		Storage.replace.model(content);
+	},
+	saveToFile(filename?: string, jsonIndent?: number) {
+		const content = getSaveContent();
+		filename = (filename || store.state.licFilename || 'filename') + '.lic';
+		saveJSON(content, filename, jsonIndent);
+	},
+	saveTemplate(filename?: string, jsonIndent?: number) {
+		const content = {
+			version: packageInfo.version,
+			template: store.state.template,
+		};
+		filename = (filename || store.state.licFilename || 'filename') + '.lit';
+		saveJSON(content, filename, jsonIndent);
 	},
 	render: Renderer,
 	get: Getters,
 	mutations: Mutations,
 };
+
+function getSaveContent(): object {
+	return {
+		version: packageInfo.version,
+		partDictionary: LDParse.partDictionary,
+		colorTable: LDParse.colorTable,
+		modelFilename: store?.model?.filename,
+		state: store.state,
+	};
+}
+
+function saveJSON(json: object, filename: string, jsonIndent?: number): void {
+	const content = JSON.stringify(json, null, jsonIndent);
+	const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+	saveAs(blob, filename);
+}
+
 
 export default store;

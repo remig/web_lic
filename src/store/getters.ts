@@ -21,9 +21,8 @@ interface SubmodelIdentifier {
 	stepID: number;
 }
 
-// TODO: clean up 'submodel' as an item type vs. entry in getters
-function getItem(itemType: ItemTypeNames, id: number): Item {
-	return (store.get as any)[itemType](id);
+function getStateChildList<T extends Item>(childType: ItemTypeNames): T[] {
+	return (store.state as any)[childType + 's'];
 }
 
 function getChildIDList(item: Item, childType: ItemTypeNames): number[] {
@@ -55,7 +54,7 @@ export interface GetterInterface {
 	modelFilenameBase(ext?: string): string;
 	pageCount(): number;
 	isTitlePage(pageLookup: LookupItem): boolean;
-	titlePage(): Page;
+	titlePage(): Page | null;
 	isBasicPage(pageLookup: LookupItem): boolean;
 	basicPages(): Page[];
 	isInventoryPage(pageLookup: LookupItem): boolean;
@@ -90,8 +89,8 @@ export interface GetterInterface {
 	pliItemIsSubmodel(pliItemLookup: LookupItem): boolean;
 	pliTransform(filename: string): any;
 	isMoveable(item: LookupItem): boolean;
-	prev<T extends Item>(itemLookup: LookupItem, itemList?: Item[]): T | null;
-	next<T extends Item>(itemLookup: LookupItem, itemList?: Item[]): T | null;
+	prev<T extends NumberedItem>(itemLookup: LookupItem, itemList?: NumberedItem[]): T | null;
+	next<T extends NumberedItem>(itemLookup: LookupItem, itemList?: NumberedItem[]): T | null;
 	parent(itemLookup: LookupItem): ItemTypes | null;
 	isDescendent(itemLookup: LookupItem, ancestorLookup: LookupItem): boolean;
 	childList(): ItemTypeNames[];
@@ -101,8 +100,9 @@ export interface GetterInterface {
 	pageForItem(item: any): Page;
 	submodels(): SubmodelIdentifier[];
 	topLevelTreeNodes(): any[];
-	nextItemID(item: any): number;
-	itemByNumber(type: string, number: number): Item | null;
+	nextItemID(item: ItemTypeNames): number
+	nextItemID(item: LookupItem | null): number
+	itemByNumber(type: ItemTypeNames, number: number): Item | null;
 	lookupToItem(lookup: LookupItem | null): ItemTypes | null;
 	lookupToItem(lookup: number, type: ItemTypeNames): ItemTypes | null;
 	itemToLookup(item: Item): LookupItem | null;
@@ -175,7 +175,7 @@ export const Getters: GetterInterface = {
 		return (page || {}).subtype === 'titlePage';
 	},
 	titlePage() {
-		return store.state.pages.find(store.get.isTitlePage);
+		return store.state.pages.find(store.get.isTitlePage) || null;
 	},
 	isBasicPage(pageLookup: LookupItem) {
 		const page = store.get.page(pageLookup);
@@ -396,13 +396,13 @@ export const Getters: GetterInterface = {
 			return moveableItems.includes(item.type);
 		};
 	})(),
-	prev<T>(itemLookup: LookupItem, itemList?: Item[]) {
+	prev<T>(itemLookup: LookupItem, itemList?: NumberedItem[]) {
 		// Get the previous item in the specified item's list, based on item.number and matching parent types
 		const item = store.get.lookupToItem(itemLookup);
 		if (!item || !hasProperty<NumberedItem>(item, 'number')) {
 			return null;
 		}
-		const foo: NumberedItem[] = itemList || store.state[item.type + 's'];
+		const foo: NumberedItem[] = itemList || getStateChildList<NumberedItem>(item.type);
 		const idx = foo.findIndex((el: NumberedItem) => {
 			if (el.number === item.number - 1 && (el.parent || {}).type === (item.parent || {}).type) {
 				if ((el.parent || {}).type === 'page') {
@@ -416,13 +416,13 @@ export const Getters: GetterInterface = {
 		});
 		return (idx < 0) ? null : foo[idx] as unknown as T;
 	},
-	next<T>(itemLookup: LookupItem, itemList?: Item[]) {
+	next<T>(itemLookup: LookupItem, itemList?: NumberedItem[]) {
 		// Get the next item in the specified item's list, based on item.number and matching parent types
 		const item = store.get.lookupToItem(itemLookup);
 		if (!item || !hasProperty<NumberedItem>(item, 'number')) {
 			return null;
 		}
-		const foo: NumberedItem[] = itemList || store.state[item.type + 's'];
+		const foo: NumberedItem[] = itemList || getStateChildList<NumberedItem>(item.type);
 		const idx = foo.findIndex((el: NumberedItem) => {
 			if (el.number === item.number + 1 && el.parent.type === item.parent.type) {
 				if (el.parent.type === 'page') {
@@ -484,6 +484,12 @@ export const Getters: GetterInterface = {
 		return false;
 	},
 	children(itemLookup: LookupItem, childTypeList?: ItemTypeNames[]) {
+
+		// TODO: clean up 'submodel' as an item type vs. entry in getters
+		function getItem(itemType: ItemTypeNames, id: number): Item {
+			return (store.get as any)[itemType](id);
+		}
+
 		const item = store.get.lookupToItem(itemLookup);
 		if (item == null) {
 			return [];
@@ -578,19 +584,26 @@ export const Getters: GetterInterface = {
 		});
 		return nodes.filter((el: object) => el);
 	},
-	nextItemID(item: any) {
+	nextItemID(item: ItemTypeNames | LookupItem | null) {
+		// TODO: get rid of ItemTypeNames option in here; always call this with a non-null lookup
 		// Get the next unused ID in this item's list
-		if (item && item.type) {
-			item = item.type;
+		if (item == null) {
+			return 0;
 		}
-		const itemList = store.state[item + 's'];
+		let itemType: ItemTypeNames;
+		if (typeof item === 'string') {
+			itemType = item;
+		} else {
+			itemType = item.type;
+		}
+		const itemList = getStateChildList(itemType);
 		if (_.isEmpty(itemList)) {
 			return 0;
 		}
 		return Math.max(...itemList.map((el: LookupItem) => el.id)) + 1;
 	},
-	itemByNumber(type: string, number: number) {
-		const itemList = store.state[type + 's'];
+	itemByNumber(type: ItemTypeNames, number: number) {
+		const itemList = getStateChildList(type);
 		if (itemList) {
 			return itemList.find((el: any) => el.number === number) || null;
 		}
@@ -612,9 +625,10 @@ export const Getters: GetterInterface = {
 		) {
 			return lookup as ItemTypes;  // lookup is already an item
 		} else if (store.state.hasOwnProperty(lookup.type)) {
-			return store.state[lookup.type];
+			// TODO: do we ever get in here?  For what?
+			return (store.state as any)[lookup.type];
 		}
-		const itemList = store.state[lookup.type + 's'];
+		const itemList = getStateChildList<ItemTypes>(lookup.type);
 		if (itemList) {
 			return itemList.find(
 				(el: Item) => el.id === lookup.id

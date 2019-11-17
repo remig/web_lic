@@ -350,7 +350,7 @@ export const Mutations: MutationInterface = {
 	async mergeInitialPages(progressCallback: any) {
 		return new Promise(async function(resolve) {
 			window.setTimeout(async function() {
-				let stepSet = [], prevModelName;
+				let stepSet: Step[] = [], prevModelName;
 				const steps = store.state.steps.filter((step: any) => {
 					return step.parent.type === 'page';
 				});

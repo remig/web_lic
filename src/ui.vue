@@ -194,7 +194,7 @@ const UI = {
 					if (layoutChoices.include.partListPage) {
 						store.mutations.inventoryPage.add();
 					}
-					store.save({mode: 'local'});
+					store.saveLocal();
 
 					const firstPage = store.get.firstPage();
 					this.currentPageLookup = store.get.itemToLookup(firstPage);
@@ -228,7 +228,7 @@ const UI = {
 			this.filename = store.state.licFilename;
 			const firstPage = store.get.firstPage();
 			this.currentPageLookup = store.get.itemToLookup(firstPage);
-			store.save({mode: 'local'});
+			store.saveLocal();
 			undoStack.saveBaseState();
 			this.clearSelected();
 			const time = _.formatTime(start, Date.now());
@@ -240,7 +240,7 @@ const UI = {
 			});
 		},
 		save() {
-			store.save({mode: 'file'});
+			store.saveToFile();
 			this.dirtyState.lastSaveIndex = undoStack.getIndex();
 		},
 		saveAs() {
@@ -256,7 +256,7 @@ const UI = {
 			});
 		},
 		saveTemplate(filename) {
-			store.save({mode: 'file', target: 'template', filename, jsonIndent: '\t'});
+			store.saveTemplate(filename, '\t');
 		},
 		saveTemplateAs() {
 			DialogManager('stringChooserDialog', dialog => {

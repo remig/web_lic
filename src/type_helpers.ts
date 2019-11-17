@@ -8,10 +8,8 @@ export function hasListProperty(item: Item | null, prop: ItemTypeNames): item is
 	return (item != null) && item.hasOwnProperty(prop + 's');
 }
 
-export function isItemSpecificType<T extends Item>(item: Item | null, itemType: string): item is T {
+export function isItemSpecificType<T extends Item>(
+	item: Item | null, itemType: ItemTypeNames
+): item is T {
 	return (item != null) && item.type === itemType;
-}
-
-export function isPLIItem(item: Item | null): item is PLIItem {
-	return (item != null) && item.type === 'pliItem';
 }
