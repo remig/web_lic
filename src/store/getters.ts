@@ -6,7 +6,7 @@ import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
 
-function getter<T>(s: string) {
+function getter<T>(s: ItemTypes) {
 	return (itemLookup: number | LookupItem) => {
 		if (typeof itemLookup === 'number') {
 			return store.get.lookupToItem({type: s, id: itemLookup}) as unknown as T;
@@ -103,7 +103,8 @@ export interface GetterInterface {
 	topLevelTreeNodes(): any[];
 	nextItemID(item: any): number;
 	itemByNumber(type: string, number: number): Item | null;
-	lookupToItem(lookup: any, type?: string): Item | null;
+	lookupToItem(lookup: LookupItem | null): Item | null;
+	lookupToItem(lookup: number, type: ItemTypes): Item | null;
 	itemToLookup(item: Item): LookupItem | null;
 	coords: {
 		pageToItem(
@@ -595,16 +596,21 @@ export const Getters: GetterInterface = {
 		}
 		return null;
 	},
-	lookupToItem(lookup: any, type?: string): Item | null {
+	lookupToItem(lookup: number | LookupItem | null, type?: ItemTypes): Item | null {
 		// Convert a {type, id} lookup object into the actual item it refers to
-		if (lookup == null || (!lookup.type && type == null)) {
+		if (lookup == null) {
 			return null;
 		}
-		if (typeof lookup === 'number' && type != null) {
-			lookup = {type, id: lookup};
+		if (typeof lookup === 'number') {
+			return (type == null)
+				? null
+				: store.get.lookupToItem({type, id: lookup});
 		}
-		if (lookup.parent || lookup.number != null || lookup.steps != null) {
-			return lookup;  // lookup is already an item
+		if (lookup.hasOwnProperty('parent')
+			|| lookup.hasOwnProperty('number')
+			|| lookup.hasOwnProperty('steps')
+		) {
+			return lookup as Item;  // lookup is already an item
 		} else if (store.state.hasOwnProperty(lookup.type)) {
 			return store.state[lookup.type];
 		}
