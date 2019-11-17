@@ -47,14 +47,14 @@ interface Size {
 
 interface Box extends Point, Size {}
 
-type ItemTypes =
+type ItemTypeNames =
 	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
 	| 'numberLabel'| 'page' | 'pli' | 'pliItem' | 'point'
 	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodelImage'
 	| 'part' | 'submodel';
 
-type ItemTypeReal =
-	Book | Divider | Page | PLIItem | Step;
+type ItemTypes =
+	Book | Divider | Page | PartItem | PLIItem | PointItem | Step;
 
 type ItemListTypes =
 	'annotations' | 'books' | 'callouts' | 'calloutArrows' | 'csis' | 'dividers'
@@ -63,7 +63,7 @@ type ItemListTypes =
 
 interface LookupItem {
 	id: number;
-	type: ItemTypes;
+	type: ItemTypeNames;
 }
 
 interface Item extends LookupItem {
@@ -71,7 +71,7 @@ interface Item extends LookupItem {
 }
 
 interface ItemWithChildList extends Item {
-	getList(itemType: ItemTypes): number[];
+	getList(itemType: ItemTypeNames): number[];
 }
 
 interface NumberedItem extends Item {

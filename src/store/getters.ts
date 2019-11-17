@@ -6,7 +6,7 @@ import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
 
-function getter<T>(s: ItemTypes) {
+function getter<T>(s: ItemTypeNames) {
 	return (itemLookup: number | LookupItem) => {
 		if (typeof itemLookup === 'number') {
 			return store.get.lookupToItem({type: s, id: itemLookup}) as unknown as T;
@@ -22,15 +22,15 @@ interface SubmodelIdentifier {
 }
 
 // TODO: clean up 'submodel' as an item type vs. entry in getters
-function getItem(itemType: ItemTypes, id: number): Item {
+function getItem(itemType: ItemTypeNames, id: number): Item {
 	return (store.get as any)[itemType](id);
 }
 
-function getChildIDList(item: Item, childType: ItemTypes): number[] {
+function getChildIDList(item: Item, childType: ItemTypeNames): number[] {
 	return (item as any)[childType + 's'];
 }
 
-function getChildID(item: Item, childType: ItemTypes): number {
+function getChildID(item: Item, childType: ItemTypeNames): number {
 	return (item as any)[childType + 'ID'];
 }
 
@@ -92,19 +92,19 @@ export interface GetterInterface {
 	isMoveable(item: LookupItem): boolean;
 	prev<T extends Item>(itemLookup: LookupItem, itemList?: Item[]): T | null;
 	next<T extends Item>(itemLookup: LookupItem, itemList?: Item[]): T | null;
-	parent(itemLookup: LookupItem): Item | null;
+	parent(itemLookup: LookupItem): ItemTypes | null;
 	isDescendent(itemLookup: LookupItem, ancestorLookup: LookupItem): boolean;
-	childList(): ItemTypes[];
+	childList(): ItemTypeNames[];
 	stepChildren(step: LookupItem): Item[];
 	hasChildren(itemLookup: LookupItem): boolean;
-	children(itemLookup: LookupItem, childTypeList?: ItemTypes[]): Item[];
+	children(itemLookup: LookupItem, childTypeList?: ItemTypeNames[]): Item[];
 	pageForItem(item: any): Page;
 	submodels(): SubmodelIdentifier[];
 	topLevelTreeNodes(): any[];
 	nextItemID(item: any): number;
 	itemByNumber(type: string, number: number): Item | null;
-	lookupToItem(lookup: LookupItem | null): Item | null;
-	lookupToItem(lookup: number, type: ItemTypes): Item | null;
+	lookupToItem(lookup: LookupItem | null): ItemTypes | null;
+	lookupToItem(lookup: number, type: ItemTypeNames): ItemTypes | null;
 	itemToLookup(item: Item): LookupItem | null;
 	coords: {
 		pageToItem(
@@ -118,13 +118,13 @@ export interface GetterInterface {
 			relativeTo?: LookupItem
 		): Point;
 	},
-	targetBoxFromPoints(targetLookup: LookupItem): Box;
-	targetBox(targetLookup: LookupItem): Box;
+	targetBoxFromPoints(targetLookup: LookupItem): Box | null;
+	targetBox(targetLookup: LookupItem): Box | null;
 	highlightBox(
 		itemLookup: LookupItem,
 		pageSize: {width: number, height: number},
 		currentPage: Page
-	): Box | {display: string};
+	): Box | {display: string} | null;
 }
 
 export const Getters: GetterInterface = {
@@ -456,7 +456,7 @@ export const Getters: GetterInterface = {
 		return false;
 	},
 	childList() {
-		const children: ItemTypes[] = [
+		const children: ItemTypeNames[] = [
 			'page', 'numberLabel', 'divider', 'annotation',
 			'callout', 'csi', 'pliItem', 'quantityLabel',
 			'rotateIcon', 'step', 'submodelImage', 'calloutArrow',
@@ -483,14 +483,14 @@ export const Getters: GetterInterface = {
 		}
 		return false;
 	},
-	children(itemLookup: LookupItem, childTypeList?: ItemTypes[]) {
+	children(itemLookup: LookupItem, childTypeList?: ItemTypeNames[]) {
 		const item = store.get.lookupToItem(itemLookup);
 		if (item == null) {
 			return [];
 		}
 		const children: Item[] = [];
 		const foo = (childTypeList == null) ? store.get.childList() : childTypeList;
-		foo.forEach((childType: ItemTypes) => {
+		foo.forEach((childType: ItemTypeNames) => {
 			const childIDList = getChildIDList(item, childType);
 			if (childIDList && childIDList.length) {
 				children.push(...childIDList.map((id: number) => getItem(childType, id)));
@@ -596,7 +596,7 @@ export const Getters: GetterInterface = {
 		}
 		return null;
 	},
-	lookupToItem(lookup: number | LookupItem | null, type?: ItemTypes): Item | null {
+	lookupToItem(lookup: number | LookupItem | null, type?: ItemTypeNames): ItemTypes | null {
 		// Convert a {type, id} lookup object into the actual item it refers to
 		if (lookup == null) {
 			return null;
@@ -610,7 +610,7 @@ export const Getters: GetterInterface = {
 			|| lookup.hasOwnProperty('number')
 			|| lookup.hasOwnProperty('steps')
 		) {
-			return lookup as Item;  // lookup is already an item
+			return lookup as ItemTypes;  // lookup is already an item
 		} else if (store.state.hasOwnProperty(lookup.type)) {
 			return store.state[lookup.type];
 		}
@@ -681,7 +681,10 @@ export const Getters: GetterInterface = {
 		},
 	},
 	targetBoxFromPoints(targetLookup: LookupItem) {
-		const t = store.get.lookupToItem(targetLookup) as PointListItem;
+		const t = store.get.lookupToItem(targetLookup);
+		if (!hasProperty<PointListItem>(t, 'points')) {
+			return null;
+		}
 		const parent = store.get.parent(t);
 		const points = t.points.map((pointID: number) => {
 			const pt = store.get.point(pointID);
@@ -750,12 +753,18 @@ export const Getters: GetterInterface = {
 			const pliItem = item as PLIItem;
 			box = store.get.targetBox(pliItem);
 			const lbl = store.get.quantityLabel(pliItem.quantityLabelID);
-			box = _.geom.bbox([box, store.get.targetBox(lbl)]);
+			const lblBox = store.get.targetBox(lbl);
+			if (box && lblBox) {
+				box = _.geom.bbox([box, lblBox]);
+			}
 		} else {
 			box = store.get.targetBox(item);
-			if (type === 'point') {
+			if (box && type === 'point') {
 				box = {x: box.x - 2, y: box.y - 2, width: 4, height: 4};
 			}
+		}
+		if (box == null) {
+			return null;
 		}
 		let dx = 0;
 		if (currentPage && currentPage.stretchedStep) {
