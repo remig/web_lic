@@ -1,10 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {
-	Item, LookupItem, Part, AbstractPart, PLIItem, Step, Book,
-	Page, PointListItem, NumberedItem, Point, Box, ItemTypes, Divider,
-	isItemSpecificType, hasProperty, PLIItemParent, StepParent,
-} from '../item_types';
+import {isItemSpecificType, hasProperty} from '../type_helpers';
 
 import _ from '../util';
 import LDParse from '../ld_parse';

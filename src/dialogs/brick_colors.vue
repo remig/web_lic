@@ -47,7 +47,6 @@
 <script lang="ts">
 
 import Vue from 'vue';
-import {LDrawColorCode, ColorTableEntry} from '../item_types';
 import _ from '../util';
 import store from '../store';
 import LDParse from '../ld_parse';

@@ -1,10 +1,10 @@
-export type Direction = 'up' | 'down' | 'left' | 'right';
+type Direction = 'up' | 'down' | 'left' | 'right';
 
-export type LDrawColorCode = number;
+type LDrawColorCode = number;
 
-export type Primitive = number[];
+type Primitive = number[];
 
-export interface AbstractPart {
+interface AbstractPart {
 	filename: string;
 	name: string;
 	parts: any[];
@@ -12,13 +12,13 @@ export interface AbstractPart {
 	isSubModel?: boolean;
 }
 
-export interface Part {
+interface Part {
 	filename: string;
 	matrix: number[];
 	colorCode?: number;
 }
 
-export interface Model {
+interface Model {
 	filename: string;
 	name: string;
 	parts: any[];
@@ -27,7 +27,7 @@ export interface Model {
 	parentStepId?: number;
 }
 
-export interface ColorTableEntry {
+interface ColorTableEntry {
 	name: string;
 	color: string;
 	edge: string;
@@ -35,93 +35,85 @@ export interface ColorTableEntry {
 	edgeRgba: string;
 }
 
-export interface Point {
+interface Point {
 	x: number;
 	y: number;
 }
 
-export interface Size {
+interface Size {
 	width: number;
 	height: number;
 }
 
-export interface Box extends Point, Size {}
+interface Box extends Point, Size {}
 
-export type ItemTypes =
+type ItemTypes =
 	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
 	| 'numberLabel'| 'page' | 'pli' | 'pliItem' | 'point'
 	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodelImage'
 	| 'part' | 'submodel';
 
-export type ItemTypeReal =
+type ItemTypeReal =
 	Book | Divider | Page | PLIItem | Step;
 
-export type ItemListTypes =
+type ItemListTypes =
 	'annotations' | 'books' | 'callouts' | 'calloutArrows' | 'csis' | 'dividers'
 	| 'numberLabels'| 'pages' | 'plis' | 'pliItems' | 'points' | 'parts'
 	| 'quantityLabels' | 'rotateIcons' | 'steps' | 'submodelImages' | 'submodels';
 
-export interface LookupItem {
+interface LookupItem {
 	id: number;
 	type: ItemTypes;
 }
 
-export interface Item extends LookupItem {
+interface Item extends LookupItem {
 	parent: LookupItem;
 }
 
-export function hasProperty<T extends Item>(item: Item | null, prop: string): item is T {
-	return (item != null) && item.hasOwnProperty(prop);
-}
-
-export interface ItemWithChildList extends Item {
+interface ItemWithChildList extends Item {
 	getList(itemType: ItemTypes): number[];
 }
 
-export function hasListProperty(item: Item | null, prop: ItemTypes): item is ItemWithChildList {
-	return (item != null) && item.hasOwnProperty(prop + 's');
-}
-
-export interface NumberedItem extends Item {
+interface NumberedItem extends Item {
 	number: number;
 }
 
-export interface PLIItemParent extends Item {
+interface PLIItemParent extends Item {
 	pliItems: number[];
 }
 
-export interface StepParent extends Item {
+interface StepParent extends Item {
 	steps: number[];
 }
 
-export interface PointItem extends Item, Point {
+interface PointItem extends Item, Point {
 	type: 'point';
 }
 
-export interface PointListItem extends Item {
+interface PointListItem extends Item {
 	points: number[];
 }
 
-export interface PartItem extends Item {
+interface PartItem extends Item {
 	type: 'part';
 	stepID: number;
 }
 
-export type PageLayouts = 'horizontal' | 'vertical'
-export type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
+type PageLayouts = 'horizontal' | 'vertical'
+type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
 
-export interface Book extends Item, NumberedItem {
+interface Book extends Item, NumberedItem {
 	type: 'book';
 	pages: number[];
 }
 
-export interface Divider extends Item {
+interface Divider extends Item {
 	type: 'divider',
 	p1: Point,
 	p2: Point
 }
 
-export interface Page extends Item, PLIItemParent, NumberedItem, StepParent {
+interface Page extends Item, PLIItemParent, NumberedItem, StepParent {
 	type: 'page';
 	subtype: PageSubtypes;
 	annotations: number[];
@@ -135,12 +127,12 @@ export interface Page extends Item, PLIItemParent, NumberedItem, StepParent {
 	stretchedStep: any;
 }
 
-export interface DisplacedPart {
+interface DisplacedPart {
 	partID: number;
 	direction: Direction;
 }
 
-export interface Step extends Item, Box {
+interface Step extends Item, Box {
 	type: 'step';
 	annotations: number[];
 	callouts: number[];
@@ -163,7 +155,7 @@ export interface Step extends Item, Box {
 	prevBookParts: number[];
 }
 
-export interface PLIItem extends Item, Box {
+interface PLIItem extends Item, Box {
 	type: 'pliItem';
 	domID: string | null;
 	filename: string;
@@ -172,15 +164,7 @@ export interface PLIItem extends Item, Box {
 	quantityLabelID: number;
 }
 
-export function isItemSpecificType<T extends Item>(item: Item | null, itemType: string): item is T {
-	return (item != null) && item.type === itemType;
-}
-
-export function isPLIItem(item: Item | null): item is PLIItem {
-	return (item != null) && item.type === 'pliItem';
-}
-
-export interface StateInterface {
+interface StateInterface {
 	annotations: any[];
 	books: any[];
 	calloutArrows: any[];

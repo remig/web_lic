@@ -1,7 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import _ from 'lodash';
-import {Point, Size, Box} from './item_types';
 
 // These are used from lodash... not a lot...
 // isEmpty, get, cloneDeep, assign, isEqual, round, clamp, last, pullAt

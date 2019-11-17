@@ -1,7 +1,5 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import {LookupItem} from './item_types';
-
 let stateCache: {[key: string]: any} = {};
 
 interface Cache {
@@ -9,7 +7,6 @@ interface Cache {
 	set(item: string | LookupItem, key: string, newValue: any): void;
 	clear(item: string | LookupItem): void;
 	reset(): void;
-	stateCache: {[key: string]: any};
 }
 
 const cacheAPI: Cache = {
@@ -48,7 +45,6 @@ const cacheAPI: Cache = {
 	reset() {
 		stateCache = {};
 	},
-	stateCache,
 };
 
 export default cacheAPI;

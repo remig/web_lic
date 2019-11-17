@@ -1,5 +1,5 @@
+/* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import {LookupItem, Point, Page, Divider} from '../item_types';
 import _ from '../util';
 import store from '../store';
 import LDParse from '../ld_parse';

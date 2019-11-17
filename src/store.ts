@@ -2,8 +2,6 @@
 
 /* global saveAs: false */
 
-import {Model} from './item_types';
-
 import _ from './util';
 import cache from './cache';
 import Renderer from './store/render';
