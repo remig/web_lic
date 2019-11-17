@@ -6,7 +6,7 @@ import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
 
-function getter<T>(s: ItemTypeNames) {
+function getter<T extends Item>(s: ItemTypeNames) {
 	return (itemLookup: number | LookupItem) => {
 		if (typeof itemLookup === 'number') {
 			return store.get.lookupToItem({type: s, id: itemLookup}) as unknown as T;
@@ -741,18 +741,16 @@ export const Getters: GetterInterface = {
 			store.mutations.page.layout({page});
 		}
 		let box;
-		if (type && type.toLowerCase().endsWith('page')) {
+		if (item.type === 'page') {
 			box = {x: 5, y: 5, width: pageSize.width - 9, height: pageSize.height - 9};
-		} else if (type === 'divider') {
-			const divider = item as Divider;
+		} else if (item.type === 'divider') {
 			// TODO: when divider is rewritten to just a list of points, get rid of this
-			let pointBox = _.geom.bbox([divider.p1, divider.p2]);
+			let pointBox = _.geom.bbox([item.p1, item.p2]);
 			pointBox = _.geom.expandBox(pointBox, 8, 8);
-			box = store.get.targetBox({...divider, ...pointBox});
-		} else if (type === 'pliItem') {  // Special case: pliItem box should include its quantity label
-			const pliItem = item as PLIItem;
-			box = store.get.targetBox(pliItem);
-			const lbl = store.get.quantityLabel(pliItem.quantityLabelID);
+			box = store.get.targetBox({...item, ...pointBox});
+		} else if (item.type === 'pliItem') {  // Special case: pliItem box should include its quantity label
+			box = store.get.targetBox(item);
+			const lbl = store.get.quantityLabel(item.quantityLabelID);
 			const lblBox = store.get.targetBox(lbl);
 			if (box && lblBox) {
 				box = _.geom.bbox([box, lblBox]);
