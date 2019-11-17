@@ -47,6 +47,16 @@ interface Size {
 
 interface Box extends Point, Size {}
 
+interface Alignment {
+	align: 'left' | 'right';
+	valign: 'top' | 'bottom';
+}
+
+interface DisplacedPart {
+	partID: number;
+	direction: Direction;
+}
+
 type ItemTypeNames =
 	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
 	| 'numberLabel'| 'page' | 'pli' | 'pliItem' | 'point'
@@ -86,10 +96,6 @@ interface StepParent extends Item {
 	steps: number[];
 }
 
-interface PointItem extends Item, Point {
-	type: 'point';
-}
-
 interface PointListItem extends Item {
 	points: number[];
 }
@@ -102,15 +108,49 @@ interface PartItem extends Item {
 type PageLayouts = 'horizontal' | 'vertical'
 type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
 
+interface Annotation extends Item, Box, Alignment {
+	type: 'annotation';
+	annotationType: 'label' | 'image';
+	color: string;
+	font: string;
+	text: string;
+}
+
 interface Book extends Item, NumberedItem {
 	type: 'book';
 	pages: number[];
+}
+
+interface CalloutArrow extends Item, PointListItem {
+	type: 'calloutArrow';
+	direction: Direction;
+}
+
+interface Callout extends Item, StepParent, Box {
+	type: 'Callout';
+	borderOffset: Point;
+	calloutArrows: number[];
+	innerContentOffset: Point;
+	layout: PageLayouts;
+	position: 'left';
+}
+
+interface CSI extends Item, Box {
+	type: 'csi';
+	annotations: number[];
+	domID: string;
+	rotation: any;
+	scale: number;
 }
 
 interface Divider extends Item {
 	type: 'divider',
 	p1: Point,
 	p2: Point
+}
+
+interface NumberLabel extends Item, Box, Alignment {
+	type: 'numberLabel';
 }
 
 interface Page extends Item, PLIItemParent, NumberedItem, StepParent {
@@ -127,9 +167,33 @@ interface Page extends Item, PLIItemParent, NumberedItem, StepParent {
 	stretchedStep: any;
 }
 
-interface DisplacedPart {
-	partID: number;
-	direction: Direction;
+interface PLI extends Item, PLIItemParent, Box {
+	type: 'pli';
+	borderOffset: Point;
+	innerContentOffset: Point;
+}
+
+interface PLIItem extends Item, Box {
+	type: 'pliItem';
+	domID: string | null;
+	filename: string;
+	colorCode: number;
+	quantity: number;
+	quantityLabelID: number;
+}
+
+interface PointItem extends Item, Point {
+	type: 'point';
+	relativeTo: LookupItem;
+}
+
+interface QuantityLabel extends Item, Box, Alignment {
+	type: 'quantityLabel';
+}
+
+interface RotateIcon extends Item, Box {
+	type: 'rotateIcon';
+	scale: number;
 }
 
 interface Step extends Item, Box {
@@ -155,33 +219,33 @@ interface Step extends Item, Box {
 	prevBookParts: number[];
 }
 
-interface PLIItem extends Item, Box {
-	type: 'pliItem';
-	domID: string | null;
-	filename: string;
-	colorCode: number;
+interface SubmodelImage extends Item, Box {
+	type: 'submodelImage';
+	csiID: number;
+	innerContentOffset: Point;
+	modelFilename: string;
 	quantity: number;
-	quantityLabelID: number;
+	quantityLabelId: number;
 }
 
 interface StateInterface {
-	annotations: any[];
-	books: any[];
-	calloutArrows: any[];
-	callouts: any[];
-	csis: any[];
+	annotations: Annotation[];
+	books: Book[];
+	calloutArrows: CalloutArrow[];
+	callouts: Callout[];
+	csis: CSI[];
 	dividers: Divider[];
-	licFilename: string;
-	numberLabels: any[];
+	licFilename: string | null;
+	numberLabels: NumberLabel[];
 	pages: Page[];
 	pliItems: PLIItem[];
-	pliTransforms: any[];
-	plis: any[];
+	pliTransforms: any;
+	plis: PLI[];
 	plisVisible: boolean;
 	points: Point[];
-	quantityLabels: any[];
-	rotateIcons: any[];
+	quantityLabels: QuantityLabel[];
+	rotateIcons: RotateIcon[];
 	steps: Step[];
-	submodelImages: any[];
+	submodelImages: SubmodelImage[];
 	template: any;
 }
