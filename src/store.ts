@@ -7,7 +7,7 @@ import {Model} from './item_types';
 import _ from './util';
 import cache from './cache';
 import Renderer from './store/render';
-import Getters from './store/getters';
+import {GetterInterface, Getters} from './store/getters';
 import {MutationInterface, Mutations} from './store/mutations';
 
 import LDParse from './ld_parse';
@@ -15,6 +15,27 @@ import LDRender from './ld_render';
 import defaultTemplate from './template';
 import Storage from './storage';
 import packageInfo from '../package.json';
+
+/*
+import {Model, Step, Page, Divider} from './item_types';
+
+interface StateInterface {
+	pages: Page[];
+	steps: Step[];
+	dividers: Divider[];
+}
+
+const foo: StateInterface = {
+	pages: [],
+	steps: [],
+	dividers: [],
+};
+
+function itemList<T>(listName: keyof StateInterface): T[] {
+	return foo[listName] as unknown as T[];
+}
+
+*/
 
 const emptyState = {
 	template: _.cloneDeep(defaultTemplate),
@@ -63,7 +84,7 @@ interface Store {
 		: {mode: SaveModes, target: SaveTargets, filename: string, jsonIndent: number}
 	): void;
 	render: any;
-	get: any;
+	get: GetterInterface;
 	mutations: MutationInterface;
 	[key: string]: any;
 }
