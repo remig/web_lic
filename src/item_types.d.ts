@@ -69,6 +69,8 @@ interface DisplacedPart {
 	direction: Direction;
 }
 
+type AnnotationTypes = 'label' | 'arrow' | 'image';
+
 type ItemTypeNames =
 	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
 	| 'numberLabel'| 'page' | 'pli' | 'pliItem' | 'point'

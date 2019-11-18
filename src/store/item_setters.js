@@ -55,8 +55,10 @@ const api = {
 		item = store.get.lookupToItem(item);
 		const oldParent = store.get.parent(item) || {};
 		newParent = store.get.lookupToItem(newParent);
-		item.parent.id = newParent.id;
-		item.parent.type = newParent.type;
+		item.parent = {
+			id: newParent.id,
+			type: newParent.type,
+		};
 		if (oldParent.hasOwnProperty(item.type + 's')) {
 			_.deleteItem(oldParent[item.type + 's'], item.id);
 		} else if (oldParent.hasOwnProperty(item.type + 'ID')) {

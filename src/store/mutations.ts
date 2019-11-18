@@ -2,30 +2,31 @@
 
 import _ from '../util';
 import store from '../store';
+import {tr} from '../translations';
 import LDParse from '../ld_parse';
 import LDRender from '../ld_render';
 import Layout from '../layout';
-import ItemSetters from '../store/item_setters';
-import PartSetters from '../store/part_setters';
-import SubmodelSetters from '../store/submodel_setters';
-import TemplatePageSetters from '../store/template_page_setters';
-import BookSetters from '../store/book_setters';
-import PageSetters from '../store/page_setters';
-import InventoryPageSetters from '../store/inventory_page_setters';
-import StepSetters from '../store/step_setters';
-import CSISetters from '../store/csi_setters';
-import PLISetters from '../store/pli_setters';
-import PLIItemSetters from '../store/pli_item_setters';
-import SubmodelImageSetters from '../store/submodel_image_setters';
-import AnnotationSetters from '../store/annotation_setters';
+
+import {AnnotationMutationInterface, AnnotationMutations} from '../store/annotation_setters';
+import {BookMutationInterface, BookMutations} from '../store/book_setters';
 import CalloutSetters from '../store/callout_setters';
 import CalloutArrowSetters from '../store/callout_arrow_setters';
+import CSISetters from '../store/csi_setters';
+import InventoryPageSetters from '../store/inventory_page_setters';
+import ItemSetters from '../store/item_setters';
+import PageSetters from '../store/page_setters';
+import PartSetters from '../store/part_setters';
+import PLISetters from '../store/pli_setters';
+import PLIItemSetters from '../store/pli_item_setters';
+import StepSetters from '../store/step_setters';
 import StepInsertion from '../store/step_insertion';
-import {tr} from '../translations';
+import SubmodelSetters from '../store/submodel_setters';
+import SubmodelImageSetters from '../store/submodel_image_setters';
+import TemplatePageSetters from '../store/template_page_setters';
 
 export interface MutationInterface {
-	annotation: any,
-	book: any,
+	annotation: AnnotationMutationInterface,
+	book: BookMutationInterface,
 	callout: any,
 	calloutArrow: any,
 	csi: any,
@@ -75,8 +76,8 @@ export interface MutationInterface {
 }
 
 export const Mutations: MutationInterface = {
-	annotation: AnnotationSetters,
-	book: BookSetters,
+	annotation: AnnotationMutations,
+	book: BookMutations,
 	callout: CalloutSetters,
 	calloutArrow: CalloutArrowSetters,
 	csi: CSISetters,

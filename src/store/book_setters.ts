@@ -12,8 +12,46 @@ import Layout from '../layout';
 import LDParse from '../ld_parse';
 import packageInfo from '../../package.json';
 
-export default {
-	add({bookNumber, pages} = {}) {
+interface PageSpan {
+	start: number;
+	end: number;
+}
+
+interface BookDivision {
+	bookNumber: number,
+	pages: PageSpan,
+	steps: PageSpan
+}
+
+type FirstPageOptions = 'start_page_1' | 'preserve_page_count';
+
+type FileSplitOptions = 'separate_files' | 'one_file';
+
+export interface BookMutationInterface {
+	add(
+		{bookNumber, pages}
+		: {bookNumber: number, pages: PageSpan}
+	): Book;
+	delete(): void;
+	setBookPageNumbers(
+		{book, firstPageNumber}
+		: {book: LookupItem, firstPageNumber: FirstPageOptions}
+	): void;
+	splitFileByBook(): void;
+	divideInstructions(
+		{bookDivisions, firstPageNumber, includeTitlePages, fileSplit}
+		: {
+			bookDivisions: BookDivision[],
+			firstPageNumber: FirstPageOptions,
+			includeTitlePages: boolean,
+			fileSplit: FileSplitOptions
+		}
+	): void;
+	layout({book}: {book: LookupItem}): void;
+}
+
+export const BookMutations: BookMutationInterface = {
+	add({bookNumber, pages}) {
 		const pageNumbers = _.range(pages.start, pages.end + 1);
 		const pageList = pageNumbers.map(pageNumber => {
 			return store.get.itemByNumber('page', pageNumber);
@@ -24,18 +62,19 @@ export default {
 			number: bookNumber,
 		}});
 		pageList.forEach(page => {
-			page.parent = {};
-			store.mutations.item.reparent({
-				item: page,
-				newParent: book,
-			});
+			if (page != null) {
+				store.mutations.item.reparent({
+					item: page,
+					newParent: book,
+				});
+			}
 		});
 		return book;
 	},
 	delete() {
 	},
 	setBookPageNumbers({book, firstPageNumber}) {  // firstPageNumber: 'start_page_1' or 'preserve_page_count'
-		const bookItem = store.get.lookupToItem(book);
+		const bookItem = store.get.book(book);
 		if (firstPageNumber === 'start_page_1') {
 			const pages = bookItem.pages.map(store.get.page);
 			store.mutations.renumber(pages, 1);
@@ -50,7 +89,7 @@ export default {
 		const zip = new JSZip();
 		const fileFolder = zip.folder(fn);
 
-		function addPartsFromPreviousSteps(book) {
+		function addPartsFromPreviousSteps(book: Book) {
 			const visitedModels = new Set();
 			book.pages
 				.map(store.get.page)
@@ -59,13 +98,13 @@ export default {
 				.map(store.get.step)
 				.forEach(step => {
 					if (!visitedModels.has(step.model.filename) && step.parts) {
-						step.prevBookParts = store.get.partList(step);
+						step.prevBookParts = store.get.partList(step) || [];
 						visitedModels.add(step.model.filename);
 					}
 				});
 		}
 
-		function getStateForBook(book) {
+		function getStateForBook(book: Book) {
 
 			// If this isn't the first book, add parts from all previous books
 			// to the first step of each model in this book
@@ -90,13 +129,14 @@ export default {
 		const content = {
 			partDictionary: LDParse.partDictionary,
 			colorTable: LDParse.colorTable,
-			modelFilename: store.model.filename,
+			modelFilename: store.model?.filename,
 			version: packageInfo.version,
+			state: {},
 		};
 		let firstBookState;
 		const books = _.cloneDeep(store.state.books);  // Need to clone because loop hoses state
 		books.forEach((book, idx) => {
-			book = store.get.lookupToItem(book);
+			book = store.get.book(book);
 			const res = getStateForBook(book);
 			content.state = res.newState;
 			if (idx === 0) {
@@ -107,7 +147,7 @@ export default {
 			fileFolder.file(`${modelName}_book_${book.number}.lic`, json);
 		});
 		zip.generateAsync({type: 'blob'})
-			.then(zipContent => saveAs(zipContent, fn + '.zip'));
+			.then((zipContent: any) => saveAs(zipContent, fn + '.zip'));
 		store.replaceState(firstBookState);
 	},
 	divideInstructions({
@@ -121,16 +161,18 @@ export default {
 			store.mutations.removeTitlePage();  // Remove any existing title pages first
 			store.mutations.addTitlePage();
 		}
-		bookDivisions.forEach(book => {
-			book = store.get.itemByNumber('book', book.bookNumber);
-			store.mutations.book.setBookPageNumbers({book, firstPageNumber});
+		bookDivisions.forEach(bookDivision => {
+			const book = store.get.itemByNumber('book', bookDivision.bookNumber);
+			if (book != null) {
+				store.mutations.book.setBookPageNumbers({book, firstPageNumber});
+			}
 		});
 		if (fileSplit === 'separate_files') {  // vs 'one_file'
 			store.mutations.book.splitFileByBook();
 		}
 	},
-	layout(opts) {  // opts: {book}
-		const book = store.get.lookupToItem(opts.book);
+	layout({book}) {
+		book = store.get.book(book);
 		Layout.book(book);
 	},
 };

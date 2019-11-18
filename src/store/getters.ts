@@ -34,21 +34,23 @@ function getChildID(item: Item, childType: ItemTypeNames): number {
 }
 
 export interface GetterInterface {
+
+	annotation(id: LookupItem | number): Annotation;
 	book(id: LookupItem | number): Book;
+	callout(id: LookupItem | number): Callout;
+	calloutArrow(id: LookupItem | number): CalloutArrow;
+	divider(id: LookupItem | number): Divider;
+	csi(id: LookupItem | number): CSI;
+	numberLabel(id: LookupItem | number): NumberLabel;
 	page(id: LookupItem | number): Page;
-	divider(id: LookupItem | number): any;
-	step(id: LookupItem | number): Step;
-	csi(id: LookupItem | number): any;
-	pli(id: LookupItem | number): any;
+	pli(id: LookupItem | number): PLI;
 	pliItem(id: LookupItem | number): PLIItem;
-	quantityLabel(id: LookupItem | number): any;
-	numberLabel(id: LookupItem | number): any;
-	submodelImage(id: LookupItem | number): any;
-	annotation(id: LookupItem | number): any;
-	callout(id: LookupItem | number): any;
-	calloutArrow(id: LookupItem | number): any;
-	point(id: LookupItem | number): any;
-	rotateIcon(id: LookupItem | number): any;
+	point(id: LookupItem | number): PointItem;
+	quantityLabel(id: LookupItem | number): QuantityLabel;
+	rotateIcon(id: LookupItem | number): RotateIcon;
+	step(id: LookupItem | number): Step;
+	submodelImage(id: LookupItem | number): SubmodelImage;
+
 	modelName(nice: boolean): string;
 	modelFilename(): string;
 	modelFilenameBase(ext?: string): string;

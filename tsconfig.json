@@ -5,6 +5,7 @@
 		"allowJs": true,
 		"target": "es5",
 		"module": "esnext",
+		"lib": ["dom", "es5", "es2019", "scripthost"],
 		"isolatedModules": true,
 		"importHelpers": true,
 		"moduleResolution": "node",
