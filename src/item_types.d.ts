@@ -1,4 +1,5 @@
 type Direction = 'up' | 'down' | 'left' | 'right';
+type Orientation = 'horizontal' | 'vertical'
 
 type LDrawColorCode = number;
 
@@ -121,7 +122,6 @@ interface PartItem extends Item {
 	stepID: number;
 }
 
-type PageLayouts = 'horizontal' | 'vertical'
 type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
 
 interface Annotation extends Item, Box, Alignment {
@@ -139,7 +139,7 @@ interface Book extends Item, NumberedItem {
 
 interface CalloutArrow extends Item, PointListItem {
 	type: 'calloutArrow';
-	direction: Direction;
+	position: Direction;
 }
 
 interface Callout extends Item, StepParent, Box {
@@ -147,8 +147,8 @@ interface Callout extends Item, StepParent, Box {
 	borderOffset: Point;
 	calloutArrows: number[];
 	innerContentOffset: Point;
-	layout: PageLayouts;
-	position: 'left';
+	layout: Orientation;
+	position: Direction;
 }
 
 interface CSI extends Item, Box {
@@ -175,7 +175,7 @@ interface Page extends Item, PLIItemParent, NumberedItem, StepParent {
 	annotations: number[];
 	dividers: number[];
 	innerContentOffset: Point;
-	layout: PageLayouts
+	layout: Orientation
 	locked: boolean;
 	needsLayout: boolean;
 	numberLabelID: number;

@@ -9,7 +9,7 @@ import Layout from '../layout';
 
 import {AnnotationMutationInterface, AnnotationMutations} from '../store/annotation_setters';
 import {BookMutationInterface, BookMutations} from '../store/book_setters';
-import CalloutSetters from '../store/callout_setters';
+import {CalloutMutationInterface, CalloutMutations} from '../store/callout_setters';
 import CalloutArrowSetters from '../store/callout_arrow_setters';
 import CSISetters from '../store/csi_setters';
 import InventoryPageSetters from '../store/inventory_page_setters';
@@ -27,7 +27,7 @@ import TemplatePageSetters from '../store/template_page_setters';
 export interface MutationInterface {
 	annotation: AnnotationMutationInterface,
 	book: BookMutationInterface,
-	callout: any,
+	callout: CalloutMutationInterface,
 	calloutArrow: any,
 	csi: any,
 	divider: {
@@ -78,7 +78,7 @@ export interface MutationInterface {
 export const Mutations: MutationInterface = {
 	annotation: AnnotationMutations,
 	book: BookMutations,
-	callout: CalloutSetters,
+	callout: CalloutMutations,
 	calloutArrow: CalloutArrowSetters,
 	csi: CSISetters,
 	divider: {
