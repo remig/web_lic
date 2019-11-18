@@ -87,7 +87,7 @@ export interface GetterInterface {
 	partList(stepLookup: LookupItem): number[] | null;
 	matchingPLIItem(parentLookup: LookupItem, part: any): PLIItem | null;
 	pliItemIsSubmodel(pliItemLookup: LookupItem): boolean;
-	pliTransform(filename: string): any;
+	pliTransform(filename: LDrawPartFilename): PLITransform;
 	isMoveable(item: LookupItem): boolean;
 	prev<T extends NumberedItem>(itemLookup: LookupItem, itemList?: NumberedItem[]): T | null;
 	next<T extends NumberedItem>(itemLookup: LookupItem, itemList?: NumberedItem[]): T | null;
@@ -380,7 +380,7 @@ export const Getters: GetterInterface = {
 		}
 		return false;
 	},
-	pliTransform(filename: string) {
+	pliTransform(filename: LDrawPartFilename) {
 		return store.state.pliTransforms[filename] || {};
 	},
 	isMoveable: (() => {

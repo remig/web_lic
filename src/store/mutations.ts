@@ -153,16 +153,18 @@ export const Mutations: MutationInterface = {
 	pliTransform: {
 		set(
 			{filename, rotation, scale}
-			: {filename: string, rotation: any[], scale: number}
+			: {filename: string, rotation: Rotation[], scale: number}
 		) {
 			// If rotation or scale is null, delete those entries.  If they're missing, ignore them.
 			let transform = store.state.pliTransforms[filename];
 			if (!transform) {
-				transform = store.state.pliTransforms[filename] = {};
+				transform = store.state.pliTransforms[filename] = {} as PLITransform;
 			}
 			if (rotation != null) {
 				if (Array.isArray(rotation)) {
 					transform.rotation = rotation.filter(el => el.angle !== 0);
+				} else {
+					// TODO: can we even get here anymore?
 				}
 				if (rotation == null || _.isEmpty(transform.rotation)) {
 					delete transform.rotation;

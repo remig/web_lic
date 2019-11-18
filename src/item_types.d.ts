@@ -2,6 +2,8 @@ type Direction = 'up' | 'down' | 'left' | 'right';
 
 type LDrawColorCode = number;
 
+type LDrawPartFilename = string;
+
 type Primitive = number[];
 
 interface AbstractPart {
@@ -46,6 +48,16 @@ interface Size {
 }
 
 interface Box extends Point, Size {}
+
+interface Rotation {
+	axis: 'x' | 'y' | 'z';
+	angle: number;
+}
+
+interface PLITransform {
+	rotation: Rotation[];
+	scale: number;
+}
 
 interface Alignment {
 	align: 'left' | 'right';
@@ -240,7 +252,7 @@ interface StateInterface {
 	numberLabels: NumberLabel[];
 	pages: Page[];
 	pliItems: PLIItem[];
-	pliTransforms: any;
+	pliTransforms: {[key: string]: PLITransform};  // key should be LDrawPartFilename but that doesn't work...
 	plis: PLI[];
 	plisVisible: boolean;
 	points: Point[];
