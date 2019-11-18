@@ -1039,7 +1039,7 @@ const contextMenu = {
 					})(position),
 					cb: (function(pos) {
 						return function(selectedItem) {
-							const opts = {callout: selectedItem, pos, doLayout: true};
+							const opts = {callout: selectedItem, position: pos, doLayout: true};
 							undoStack.commit('callout.layout', opts, tr('action.callout.position.undo'));
 						};
 					})(position),
