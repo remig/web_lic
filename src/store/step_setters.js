@@ -6,93 +6,98 @@ import Layout from '../layout';
 import LDParse from '../ld_parse';
 
 export default {
-	// opts: {dest, doLayout=false, model=null, stepNumber=null, renumber=false,
-	// insertionIndex=-1, parentInsertionIndex=-1}
-	add(opts) {
+	add(
+		{dest, doLayout = false, model = null, stepNumber = null, renumber = false,
+			insertionIndex = -1, parentInsertionIndex = -1}
+	) {
 
-		const dest = store.get.lookupToItem(opts.dest);
+		const parent = store.get.lookupToItem(dest);
 		const step = store.mutations.item.add({
 			item: {
 				type: 'step',
-				number: opts.stepNumber, numberLabelID: null,
+				number: stepNumber, numberLabelID: null,
 				parts: [], callouts: [], steps: [], dividers: [],
 				submodelImages: [], annotations: [], stretchedPages: [],
 				csiID: null, pliID: null, rotateIconID: null,
-				model: opts.model || {filename: null, parentStepID: null},
+				model: model || {filename: null, parentStepID: null},
 				x: null, y: null, width: null, height: null, subStepLayout: 'vertical',
 			},
-			parent: dest,
-			insertionIndex: opts.insertionIndex,
-			parentInsertionIndex: opts.parentInsertionIndex,
+			parent,
+			insertionIndex,
+			parentInsertionIndex,
 		});
 
 		store.mutations.csi.add({parent: step});
 
-		if (dest.type === 'page' || dest.type === 'templatePage') {
+		if (parent.type === 'page' || parent.type === 'templatePage') {
 			store.mutations.pli.add({parent: step});
 		}
 
-		if (opts.stepNumber != null) {
+		if (stepNumber != null) {
 			store.mutations.item.add({item: {
 				type: 'numberLabel',
 				align: 'left', valign: 'top',
 				x: null, y: null, width: null, height: null,
 			}, parent: step});
 		}
-		if (opts.renumber) {
+		if (renumber) {
 			store.mutations.step.renumber(step);
 		}
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(dest)});
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(parent)});
 		}
 		return step;
 	},
-	delete(opts) { // opts: {step, doNotRenumber: false, deleteParts: false, doLayout}
-		const step = store.get.lookupToItem(opts.step);
-		if (step.parts && step.parts.length) {
-			if (opts.deleteParts) {
-				while (step.parts.length) {
-					store.mutations.step.removePart({step, partID: step.parts[0]});
+	delete(
+		{step, doNotRenumber = false, deleteParts = false, doLayout = false}
+	) {
+		const item = store.get.step(step);
+		if (item.parts && item.parts.length) {
+			if (deleteParts) {
+				while (item.parts.length) {
+					store.mutations.step.removePart({step: item, partID: item.parts[0]});
 				}
 			} else {
 				throw 'Cannot delete a step with parts';
 			}
 		}
-		if (step.numberLabelID != null) {
-			store.mutations.item.delete({item: store.get.numberLabel(step.numberLabelID)});
+		if (item.numberLabelID != null) {
+			store.mutations.item.delete({item: store.get.numberLabel(item.numberLabelID)});
 		}
-		if (step.csiID != null) {
-			store.render.removeCanvas(step);
-			store.mutations.item.delete({item: store.get.csi(step.csiID)});
+		if (item.csiID != null) {
+			store.render.removeCanvas(item);
+			store.mutations.item.delete({item: store.get.csi(item.csiID)});
 		}
-		if (step.pliID != null) {
-			store.mutations.pli.delete({pli: store.get.pli(step.pliID), deleteItems: true});
+		if (item.pliID != null) {
+			store.mutations.pli.delete({pli: store.get.pli(item.pliID), deleteItems: true});
 		}
-		store.mutations.item.deleteChildList({item: step, listType: 'callout'});
-		store.mutations.item.delete({item: step});
-		if (!opts.doNotRenumber) {
-			store.mutations.step.renumber(step);
+		store.mutations.item.deleteChildList({item, listType: 'callout'});
+		store.mutations.item.delete({item});
+		if (!doNotRenumber) {
+			store.mutations.step.renumber(item);
 		}
-		if (step.parent.type === 'callout') {
+		if (item.parent.type === 'callout') {
 			// If we delete the 2nd last step from a callout, remove step number from last remaining step
-			const callout = store.get.parent(step);
+			const callout = store.get.parent(item);
 			if (callout.steps.length === 1) {
 				const calloutStep = store.get.step(callout.steps[0]);
 				if (calloutStep.numberLabelID != null) {
-					store.mutations.item.delete({item: store.get.numberLabel(calloutStep.numberLabelID)});
+					store.mutations.item.delete(
+						{item: store.get.numberLabel(calloutStep.numberLabelID)}
+					);
 				}
 			}
 		}
-		if (opts.doLayout) {
+		if (doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(step)});
 		}
 	},
 	renumber(step) {
-		step = store.get.lookupToItem(step);
+		const stepItem = store.get.step(step);
 		let stepList;
-		if (step && (step.parent.type === 'step' || step.parent.type === 'callout')) {
+		if (stepItem && (stepItem.parent.type === 'step' || stepItem.parent.type === 'callout')) {
 			// Renumber steps in target callout / parent step
-			const parent = store.get.parent(step);
+			const parent = store.get.parent(stepItem);
 			stepList = parent.steps.map(store.get.step);
 		} else {
 			// Renumber all base steps across all pages
@@ -105,116 +110,116 @@ export default {
 		}
 		store.mutations.renumber(stepList);
 	},
-	layout(opts) {  // opts: {step, box}
-		const step = store.get.lookupToItem(opts.step);
-		Layout.step(step, opts.box);
+	layout({step, box}) {
+		const stepItem = store.get.step(step);
+		Layout.step(stepItem, box);
 	},
-	moveToPage(opts) {  // opts: {step, destPage, parentInsertionIndex = 0}
-		const step = store.get.lookupToItem(opts.step);
-		const currentPage = store.get.parent(step);
-		const destPage = store.get.lookupToItem(opts.destPage);
+	moveToPage({step, destPage, parentInsertionIndex = 0}) {
+		const item = store.get.lookupToItem(step);
+		const currentPage = store.get.parent(item);
+		const destPageItem = store.get.lookupToItem(destPage);
 		store.mutations.item.reparent({
-			item: step,
-			newParent: destPage,
-			parentInsertionIndex: opts.parentInsertionIndex || 0,
+			item,
+			newParent: destPageItem,
+			parentInsertionIndex: parentInsertionIndex || 0,
 		});
 		store.mutations.page.layout({page: currentPage});
-		store.mutations.page.layout({page: destPage});
+		store.mutations.page.layout({page: destPageItem});
 	},
-	moveToPreviousPage(opts) {  // opts: {step}
-		const destPage = store.get.prevBasicPage(opts.step);
+	moveToPreviousPage({step}) {
+		const destPage = store.get.prevBasicPage(step);
 		if (destPage) {
 			const parentInsertionIndex = destPage.steps.length;
-			store.mutations.step.moveToPage({step: opts.step, destPage, parentInsertionIndex});
+			store.mutations.step.moveToPage({step, destPage, parentInsertionIndex});
 		}
 	},
-	moveToNextPage(opts) {  // opts: {step}
-		const destPage = store.get.nextBasicPage(opts.step);
+	moveToNextPage({step}) {
+		const destPage = store.get.nextBasicPage(step);
 		if (destPage) {
-			store.mutations.step.moveToPage({step: opts.step, destPage, parentInsertionIndex: 0});
+			store.mutations.step.moveToPage({step, destPage, parentInsertionIndex: 0});
 		}
 	},
-	mergeWithStep(opts) {  // opts: {srcStep, destStep}
-		const srcStep = store.get.lookupToItem(opts.srcStep);
-		const destStep = store.get.lookupToItem(opts.destStep);
-		if (!srcStep || !destStep) {
+	mergeWithStep({srcStep, destStep}) {
+		const srcStepItem = store.get.step(srcStep);
+		const destStepItem = store.get.step(destStep);
+		if (!srcStepItem || !destStepItem) {
 			return;
 		}
-		_.cloneDeep(srcStep.parts).forEach(partID => {
-			store.mutations.part.moveToStep({partID, srcStep, destStep, doLayout: false});
+		_.cloneDeep(srcStepItem.parts).forEach(partID => {
+			store.mutations.part.moveToStep({partID, srcStepItem, destStepItem, doLayout: false});
 		});
-		store.mutations.step.delete({step: srcStep});
+		store.mutations.step.delete({step: srcStepItem});
 
-		const sourcePage = store.get.pageForItem(srcStep);
-		const destPage = store.get.pageForItem(destStep);
+		const sourcePage = store.get.pageForItem(srcStepItem);
+		const destPage = store.get.pageForItem(destStepItem);
 		store.mutations.page.layout({page: sourcePage});
 		if (sourcePage.id !== destPage.id) {
 			store.mutations.page.layout({page: destPage});
 		}
 	},
-	stretchToPage(opts) {  // opts: {step, stretchToPage, doLayout}
-		const step = store.get.lookupToItem(opts.step);
-		const destPage = store.get.lookupToItem(opts.stretchToPage);
-		destPage.stretchedStep = {stepID: step.id, leftOffset: 0};
-		step.stretchedPages.push(opts.stretchToPage.id);
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(step)});
+	stretchToPage({step, stretchToPage, doLayout}) {
+		const stepItem = store.get.step(step);
+		const destPage = store.get.page(stretchToPage);
+		destPage.stretchedStep = {stepID: stepItem.id, leftOffset: 0};
+		stepItem.stretchedPages.push(stretchToPage.id);
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 			store.mutations.page.layout({page: destPage});
 		}
 	},
-	addCallout(opts) {  // opts: {step}
-		const step = store.get.lookupToItem(opts.step);
-		step.callouts = step.callouts || [];
+	addCallout({step}) {
+		const stepItem = store.get.step(step);
+		stepItem.callouts = stepItem.callouts || [];
 		let position = 'left';
-		if (step.callouts.length) {
+		if (stepItem.callouts.length) {
 			const availablePositions = _.difference(
 				['left', 'bottom', 'right', 'top'],
-				step.callouts.map(calloutID => store.get.callout(calloutID).position)
+				stepItem.callouts.map(calloutID => store.get.callout(calloutID).position)
 			);
 			position = availablePositions[0] || 'left';
 		}
-		store.mutations.callout.add({parent: step, position, includeEmptyStep: true});
-		store.mutations.page.layout({page: store.get.pageForItem(step)});
+		store.mutations.callout.add({parent: stepItem, position, includeEmptyStep: true});
+		store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 	},
-	addSubStep(opts) {  // opts: {step, doLayout}
-		const step = store.get.lookupToItem(opts.step);
+	addSubStep({step, doLayout}) {
+		const stepItem = store.get.lookupToItem(step);
 		const newStep = store.mutations.step.add({
-			dest: step, stepNumber: 1, doLayout: false, renumber: false,
+			dest: stepItem, stepNumber: 1, doLayout: false, renumber: false,
 		});
 		newStep.pliID = null;
 		store.mutations.item.reparent({
-			item: store.get.csi(step.csiID),
+			item: store.get.csi(stepItem.csiID),
 			newParent: newStep,
 		});
-		newStep.parts = _.cloneDeep(step.parts);
-		newStep.model = _.cloneDeep(step.model);
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(step)});
+		newStep.parts = _.cloneDeep(stepItem.parts);
+		newStep.model = _.cloneDeep(stepItem.model);
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 		}
 	},
-	setSubStepLayout(opts) {  // opts: {step, layout, doLayout}
-		const step = store.get.lookupToItem(opts.step);
-		step.subStepLayout = opts.layout;
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(step)});
+	setSubStepLayout({step, layout, doLayout}) {
+		const stepItem = store.get.step(step);
+		stepItem.subStepLayout = layout;
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 		}
 	},
-	toggleRotateIcon(opts) { // opts: {step, display, doLayout}
-		const step = store.get.lookupToItem(opts.step);
-		if (opts.display && step.rotateIconID == null) {
-			store.mutations.rotateIcon.add({parent: step});
-		} else if (!opts.display && step.rotateIconID != null) {
-			const rotateIcon = store.get.rotateIcon(step.rotateIconID);
+	toggleRotateIcon({step, display, doLayout}) {
+		const stepItem = store.get.lookupToItem(step);
+		if (display && stepItem.rotateIconID == null) {
+			store.mutations.rotateIcon.add({parent: stepItem});
+		} else if (!display && stepItem.rotateIconID != null) {
+			const rotateIcon = store.get.rotateIcon(stepItem.rotateIconID);
 			store.mutations.rotateIcon.delete({rotateIcon});
 		}
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(step)});
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 		}
 	},
-	copyRotation(opts) {  // {step, nextXSteps, rotation}  Copy step's CSI rotation to next X steps
-		const step = store.get.lookupToItem(opts.step);
-		let csi, nextStep = step;
-		for (let i = 0; i < opts.nextXSteps; i++) {
+	copyRotation({step, nextXSteps, rotation}) {  // Copy step's CSI rotation to next X steps
+		const stepItem = store.get.step(step);
+		let csi, nextStep = stepItem;
+		for (let i = 0; i < nextXSteps; i++) {
 			if (nextStep) {
 				nextStep = store.get.nextStep(nextStep);
 			}
@@ -222,31 +227,31 @@ export default {
 				csi = store.get.csi(nextStep.csiID);
 				if (csi) {
 					csi.isDirty = true;
-					csi.rotation = opts.rotation;
+					csi.rotation = rotation;
 				}
 			}
 		}
 	},
-	addPart(opts) {  // opts: {step, partID, doLayout: false}
-		const step = store.get.lookupToItem(opts.step);
-		step.parts.push(opts.partID);
-		step.parts.sort(_.sort.numeric.ascending);
-		if (step.pliID != null) {
-			const part = LDParse.model.get.partFromID(opts.partID, step.model.filename);
-			const pli = {type: 'pli', id: step.pliID};
+	addPart({step, partID}) {
+		const stepItem = store.get.step(step);
+		stepItem.parts.push(partID);
+		stepItem.parts.sort(_.sort.numeric.ascending);
+		if (stepItem.pliID != null) {
+			const part = LDParse.model.get.partFromID(partID, stepItem.model.filename);
+			const pli = {type: 'pli', id: stepItem.pliID};
 			store.mutations.pli.addPart({pli, part});
 		}
 	},
-	removePart(opts) {  // opts: {step, partID, doLayout: false}
-		const step = store.get.lookupToItem(opts.step);
-		_.deleteItem(step.parts, opts.partID);
-		if (step.pliID != null) {
-			const part = LDParse.model.get.partFromID(opts.partID, step.model.filename);
-			const pli = {type: 'pli', id: step.pliID};
+	removePart({step, partID, doLayout = false}) {
+		const stepItem = store.get.step(step);
+		_.deleteItem(stepItem.parts, partID);
+		if (stepItem.pliID != null) {
+			const part = LDParse.model.get.partFromID(partID, stepItem.model.filename);
+			const pli = {type: 'pli', id: stepItem.pliID};
 			store.mutations.pli.removePart({pli, part});
 		}
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(step)});
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 		}
 	},
 };

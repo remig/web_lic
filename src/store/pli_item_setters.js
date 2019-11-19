@@ -4,9 +4,9 @@ import store from '../store';
 import Layout from '../layout';
 
 export default {
-	add({
-		parent, filename, colorCode, quantity = 1,
-	}) {
+	add(
+		{parent, filename, colorCode, quantity = 1}
+	) {
 		const pliItem = store.mutations.item.add({item: {
 			type: 'pliItem', domID: null,
 			filename: filename,

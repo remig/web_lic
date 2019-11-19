@@ -49,13 +49,13 @@ export default {
 
 		Layout.allInventoryPages();
 	},
-	delete(opts) {  // opts: {page}
-		const page = store.get.lookupToItem(opts.page);
-		if (page.numberLabelID != null) {
-			store.mutations.item.delete({item: store.get.numberLabel(page.numberLabelID)});
+	delete({page}) {
+		const item = store.get.page(page);
+		if (item.numberLabelID != null) {
+			store.mutations.item.delete({item: store.get.numberLabel(item.numberLabelID)});
 		}
-		store.mutations.item.deleteChildList({item: page, listType: 'pliItem'});
-		store.mutations.item.delete({item: page});
+		store.mutations.item.deleteChildList({item, listType: 'pliItem'});
+		store.mutations.item.delete({item});
 	},
 	deleteAll() {
 		const pages = store.get.inventoryPages() || [];
@@ -63,40 +63,40 @@ export default {
 			store.mutations.inventoryPage.delete({page});
 		});
 	},
-	addPart(opts) {  // opts: {filename & colorCode or part, doLayout: false}
+	addPart({filename, colorCode, part, doLayout = false}) {
 
 		const page = store.get.inventoryPages()[0];
 		if (!page) {
 			return;
 		}
-		const filename = opts.filename || opts.part.filename;
-		const colorCode = opts.colorCode || opts.part.colorCode;
+		const localFilename = filename || part.filename;
+		const localColorCode = colorCode || part.colorCode;
 
-		const pliItem = findPLIItem(filename, colorCode);
+		const pliItem = findPLIItem(localFilename, localColorCode);
 		if (pliItem) {
 			pliItem.quantity += 1;
 		} else {
 			store.mutations.pliItem.add({
 				parent: page,
-				filename,
-				colorCode,
+				filename: localFilename,
+				colorCode: localColorCode,
 				quantity: 1,
 			});
 		}
-		if (opts.doLayout) {
+		if (doLayout) {
 			// Only need to layout first page; layout logic will recreate the rest
 			store.mutations.page.layout({page});
 		}
 	},
-	removePart(opts) {  // opts: {filename & colorCode or part, doLayout: false}
+	removePart({filename, colorCode, part, doLayout = false}) {
 
 		const page = store.get.inventoryPages()[0];
 		if (!page) {
 			return;
 		}
-		const filename = opts.filename || opts.part.filename;
-		const colorCode = opts.colorCode || opts.part.colorCode;
-		const pliItem = findPLIItem(filename, colorCode);
+		const localFilename = filename || part.filename;
+		const localColorCode = colorCode || part.colorCode;
+		const pliItem = findPLIItem(localFilename, localColorCode);
 		if (pliItem) {
 			if (pliItem.quantity === 1) {
 				store.mutations.pliItem.delete({pliItem});
@@ -105,7 +105,7 @@ export default {
 			}
 		}
 
-		if (opts.doLayout) {
+		if (doLayout) {
 			// Only need to layout first page; layout logic will recreate the rest
 			store.mutations.page.layout({page});
 		}

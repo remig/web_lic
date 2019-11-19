@@ -8,29 +8,32 @@ import Layout from '../layout';
 export default {
 	// opts: {pageNumber, subtype = 'page', doNotRenumber: false,
 	// parent = null, insertionIndex = -1, parentInsertionIndex = null}
-	add(opts = {}) {
+	add({
+		pageNumber, subtype = 'page', doNotRenumber = false,
+		parent = null, insertionIndex = -1, parentInsertionIndex = null,
+	}) {
 		const pageSize = store.state.template.page;
 		const page = store.mutations.item.add({
 			item: {
 				type: 'page',
-				subtype: opts.subtype || 'page',
+				subtype: subtype,
 				steps: [], dividers: [], annotations: [], pliItems: [],
 				needsLayout: true, locked: false, stretchedStep: null,
 				innerContentOffset: {x: 0, y: 0},
-				number: opts.pageNumber,
+				number: pageNumber,
 				numberLabelID: null,
 				layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
 			},
-			parent: opts.parent,
-			insertionIndex: opts.insertionIndex,
-			parentInsertionIndex: opts.parentInsertionIndex,
+			parent,
+			insertionIndex,
+			parentInsertionIndex,
 		});
 
-		if (opts.pageNumber === 'id') {  // Special flag to say 'use page ID as page number'
+		if (pageNumber === 'id') {  // Special flag to say 'use page ID as page number'
 			page.number = page.id;
 		}
 
-		if (opts.pageNumber != null) {
+		if (pageNumber != null) {
 			store.mutations.item.add({item: {
 				type: 'numberLabel',
 				align: 'right', valign: 'bottom',
@@ -38,19 +41,19 @@ export default {
 			}, parent: page});
 		}
 
-		if (!opts.doNotRenumber) {
+		if (!doNotRenumber) {
 			store.mutations.page.renumber();
 		}
 		return page;
 	},
-	delete(opts) {  // opts: {page, doNotRenumber: false, deleteSteps: false}
-		const page = store.get.lookupToItem(opts.page);
-		if (page.steps && page.steps.length) {
-			if (opts.deleteSteps) {
-				while (page.steps.length) {
+	delete({page, doNotRenumber = false, deleteSteps = false}) {
+		const item = store.get.page(page);
+		if (item.steps && item.steps.length) {
+			if (deleteSteps) {
+				while (item.steps.length) {
 					store.mutations.step.delete({
-						step: {type: 'step', id: page.steps[0]},
-						doNotRenumber: opts.doNotRenumber,
+						step: {type: 'step', id: item.steps[0]},
+						doNotRenumber,
 						deleteParts: true,
 					});
 				}
@@ -58,20 +61,20 @@ export default {
 				throw 'Cannot delete a page with steps';
 			}
 		}
-		if (page.numberLabelID != null) {
-			store.mutations.item.delete({item: store.get.numberLabel(page.numberLabelID)});
+		if (item.numberLabelID != null) {
+			store.mutations.item.delete({item: store.get.numberLabel(item.numberLabelID)});
 		}
-		store.mutations.item.deleteChildList({item: page, listType: 'divider'});
-		store.mutations.item.deleteChildList({item: page, listType: 'annotation'});
-		store.mutations.item.delete({item: page});
-		if (!opts.doNotRenumber) {
+		store.mutations.item.deleteChildList({item, listType: 'divider'});
+		store.mutations.item.deleteChildList({item, listType: 'annotation'});
+		store.mutations.item.delete({item});
+		if (!doNotRenumber) {
 			store.mutations.page.renumber();
 		}
 	},
-	setLocked(opts) {  // opts: {page, locked}
-		const page = store.get.lookupToItem(opts.page);
-		if (page) {
-			page.locked = opts.locked;
+	setLocked({page, locked}) {
+		const item = store.get.page(page);
+		if (item) {
+			item.locked = locked;
 		}
 	},
 	renumber() {
@@ -98,10 +101,10 @@ export default {
 	markAllDirty() {
 		store.state.pages.forEach(page => (page.needsLayout = true));
 	},
-	layout(opts) {  // opts: {page, layout}, layout = 'horizontal' or 'vertical' or {rows, cols}
-		const page = store.get.lookupToItem(opts.page);
-		if (!page.locked) {
-			Layout.page(page, opts.layout || page.layout);
+	layout({page, layout}) {  // layout = 'horizontal' or 'vertical' or {rows, cols}
+		const item = store.get.page(page);
+		if (!item.locked) {
+			Layout.page(item, layout || item.layout);
 		}
 	},
 };

@@ -34,44 +34,43 @@ export default {
 		// TODO: no need to layout entire page; can layout just the step containing the newly displaced part
 		store.mutations.page.layout({page: store.get.pageForItem(step)});
 	},
-	moveToStep(opts) { // opts: {partID, srcStep, destStep, doLayout = false}
-		const srcStep = store.get.lookupToItem(opts.srcStep);
-		store.mutations.step.removePart({step: srcStep, partID: opts.partID});
-		store.mutations.csi.resetSize({csi: srcStep.csiID});
+	moveToStep({partID, srcStep, destStep, doLayout = false}) {
+		const srcStepItem = store.get.step(srcStep);
+		store.mutations.step.removePart({step: srcStepItem, partID});
+		store.mutations.csi.resetSize({csi: srcStepItem.csiID});
 
-		const destStep = store.get.lookupToItem(opts.destStep);
-		store.mutations.step.addPart({step: destStep, partID: opts.partID});
-		store.mutations.csi.resetSize({csi: destStep.csiID});
+		const destStepItem = store.get.step(destStep);
+		store.mutations.step.addPart({step: destStepItem, partID});
+		store.mutations.csi.resetSize({csi: destStepItem.csiID});
 
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(srcStep)});
-			if (srcStep.parent.id !== destStep.parent.id) {
-				store.mutations.page.layout({page: store.get.pageForItem(destStep)});
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(srcStepItem)});
+			if (srcStepItem.parent.id !== destStepItem.parent.id) {
+				store.mutations.page.layout({page: store.get.pageForItem(destStepItem)});
 			}
 		}
 	},
-	addToCallout(opts) {  // opts: {partID, step, callout, doLayout = false}
-		const partID = opts.partID;
-		const step = store.get.lookupToItem(opts.step);
-		const callout = store.get.lookupToItem(opts.callout);
+	addToCallout({partID, step, callout, doLayout = false}) {
+		const stepItem = store.get.step(step);
+		const calloutItem = store.get.callout(callout);
 		let destCalloutStep;
-		if (_.isEmpty(callout.steps)) {
-			destCalloutStep = store.mutations.step.add({dest: callout});
+		if (_.isEmpty(calloutItem.steps)) {
+			destCalloutStep = store.mutations.step.add({dest: calloutItem});
 		} else {
-			destCalloutStep = store.get.step(_.last(callout.steps));
+			destCalloutStep = store.get.step(_.last(calloutItem.steps));
 		}
-		destCalloutStep.model = _.cloneDeep(step.model);
+		destCalloutStep.model = _.cloneDeep(stepItem.model);
 		destCalloutStep.parts.push(partID);
 		store.mutations.csi.resetSize({csi: destCalloutStep.csiID});
-		if (opts.doLayout) {
+		if (doLayout) {
 			store.mutations.page.layout({page: step.parent});
 		}
 	},
-	removeFromCallout(opts) {  // opts: {partID, step}
-		const step = store.get.lookupToItem(opts.step);
-		_.deleteItem(step.parts, opts.partID);
-		store.mutations.csi.resetSize({csi: step.csiID});
-		store.mutations.page.layout({page: store.get.pageForItem(step)});
+	removeFromCallout({partID, step}) {
+		const stepItem = store.get.step(step);
+		_.deleteItem(stepItem.parts, partID);
+		store.mutations.csi.resetSize({csi: stepItem.csiID});
+		store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 	},
 	delete(opts) { // opts: {partID, step, doLayout}
 		// Remove part from the step its in and from the model entirely

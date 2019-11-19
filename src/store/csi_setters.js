@@ -3,37 +3,37 @@
 import store from '../store';
 
 export default {
-	add(opts) { // opts: {parent}
+	add({parent}) {
 		return store.mutations.item.add({item: {
 			type: 'csi', domID: null, annotations: [],
 			rotation: null, scale: null,
 			x: null, y: null, width: null, height: null,
-		}, parent: opts.parent});
+		}, parent});
 	},
-	rotate(opts) {  // opts: {csi, rotation: [{axis, angle}], addRotateIcon, doLayout = false}
-		const csi = store.get.lookupToItem(opts.csi);
-		csi.rotation = opts.rotation;
-		csi.isDirty = true;
+	rotate({csi, rotation, addRotateIcon, doLayout = false}) {  // rotation: [{axis, angle}]
+		const csiItem = store.get.csi(csi);
+		csiItem.rotation = rotation;
+		csiItem.isDirty = true;
 		store.mutations.step.toggleRotateIcon(
-			{step: {type: 'step', id: csi.parent.id}, display: opts.addRotateIcon}
+			{step: {type: 'step', id: csiItem.parent.id}, display: addRotateIcon}
 		);
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(csi)});
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(csiItem)});
 		}
 	},
-	scale(opts) { // opts: {csi, scale, doLayout = false}
-		const csi = store.get.lookupToItem(opts.csi);
-		csi.scale = opts.scale;
-		csi.isDirty = true;
-		if (opts.doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(csi)});
+	scale({csi, scale, doLayout = false}) {
+		const csiItem = store.get.csi(csi);
+		csiItem.scale = scale;
+		csiItem.isDirty = true;
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(csiItem)});
 		}
 	},
-	resetSize(opts) {  // opts: {csi}
-		const csi = store.get.lookupToItem(opts.csi, 'csi');
-		if (csi) {
-			csi.width = csi.height = null;
-			csi.isDirty = true;
+	resetSize({csi}) {
+		const csiItem = store.get.csi(csi);
+		if (csiItem) {
+			csiItem.width = csiItem.height = null;
+			csiItem.isDirty = true;
 		}
 	},
 	markAllDirty() {

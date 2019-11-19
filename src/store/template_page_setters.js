@@ -49,21 +49,21 @@ export default {
 			store.get.step(s).model.filename = modelData.model.filename;
 		});
 	},
-	set(opts) {  // opts: {entry, value}
-		const entry = _.get(store.state.template, opts.entry);
-		_.assign(entry, opts.value);
+	set({entry, value}) {
+		const newEntry = _.get(store.state.template, entry);
+		_.assign(newEntry, value);
 	},
-	load(opts) {  // opts: {template}
-		store.state.template = opts.template;
+	load({template}) {
+		store.state.template = template;
 		store.mutations.sceneRendering.refreshAll();
 	},
 	reset() {
 		store.state.template = _.cloneDeep(defaultTemplate);
 		store.mutations.sceneRendering.refreshAll();
 	},
-	setPageSize(opts) {  // opts: {width, height}
-		store.state.template.page.width = opts.width;
-		store.state.template.page.height = opts.height;
+	setPageSize({width, height}) {
+		store.state.template.page.width = width;
+		store.state.template.page.height = height;
 		store.mutations.page.markAllDirty();
 	},
 };
