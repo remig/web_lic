@@ -38,7 +38,8 @@
         "annotation": "Annotation",
         "callout": "Callout",
         "ctrl": "Ctrl",
-        "arrow": "Arrow"
+		"arrow": "Arrow",
+		"point": "Point"
     },
 	"action": {
         "file": {
