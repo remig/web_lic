@@ -8,10 +8,13 @@ import store from '../store';
 
 function getter<T extends Item>(s: ItemTypeNames) {
 	return (itemLookup: number | LookupItem) => {
+		let res;
 		if (typeof itemLookup === 'number') {
-			return store.get.lookupToItem({type: s, id: itemLookup}) as unknown as T;
+			res = store.get.lookupToItem({type: s, id: itemLookup});
+		} else {
+			res = store.get.lookupToItem(itemLookup);
 		}
-		return store.get.lookupToItem(itemLookup) as unknown as T;
+		return (res == null) ? null : res as unknown as T;
 	};
 }
 
@@ -35,21 +38,21 @@ function getChildID(item: Item, childType: ItemTypeNames): number {
 
 export interface GetterInterface {
 
-	annotation(id: LookupItem | number): Annotation;
-	book(id: LookupItem | number): Book;
-	callout(id: LookupItem | number): Callout;
-	calloutArrow(id: LookupItem | number): CalloutArrow;
-	divider(id: LookupItem | number): Divider;
-	csi(id: LookupItem | number): CSI;
-	numberLabel(id: LookupItem | number): NumberLabel;
-	page(id: LookupItem | number): Page;
-	pli(id: LookupItem | number): PLI;
-	pliItem(id: LookupItem | number): PLIItem;
-	point(id: LookupItem | number): PointItem;
-	quantityLabel(id: LookupItem | number): QuantityLabel;
-	rotateIcon(id: LookupItem | number): RotateIcon;
-	step(id: LookupItem | number): Step;
-	submodelImage(id: LookupItem | number): SubmodelImage;
+	annotation(id: LookupItem | number): Annotation | null;
+	book(id: LookupItem | number): Book | null;
+	callout(id: LookupItem | number): Callout | null;
+	calloutArrow(id: LookupItem | number): CalloutArrow | null;
+	csi(id: LookupItem | number): CSI | null;
+	divider(id: LookupItem | number): Divider | null;
+	numberLabel(id: LookupItem | number): NumberLabel | null;
+	page(id: LookupItem | number): Page | null;
+	pli(id: LookupItem | number): PLI | null;
+	pliItem(id: LookupItem | number): PLIItem | null;
+	point(id: LookupItem | number): PointItem | null;
+	quantityLabel(id: LookupItem | number): QuantityLabel | null;
+	rotateIcon(id: LookupItem | number): RotateIcon | null;
+	step(id: LookupItem | number): Step | null;
+	submodelImage(id: LookupItem | number): SubmodelImage | null;
 
 	modelName(nice: boolean): string;
 	modelFilename(): string;
@@ -80,8 +83,8 @@ export interface GetterInterface {
 	adjacentStep(
 		stepLookup: LookupItem, direction: 'prev' | 'next', limitToSubmodel: boolean
 	): Step | null;
-	prevStep(stepLookup: LookupItem, limitToSubmodel: boolean): Step | null;
-	nextStep(stepLookup: LookupItem, limitToSubmodel: boolean): Step | null;
+	prevStep(stepLookup: LookupItem, limitToSubmodel?: boolean): Step | null;
+	nextStep(stepLookup: LookupItem, limitToSubmodel?: boolean): Step | null;
 	part(partID: number, stepLookup: LookupItem): any;
 	partsInStep(stepLookup: LookupItem): Part[];
 	abstractPartsInStep(stepLookup: LookupItem): any[];
@@ -272,7 +275,7 @@ export const Getters: GetterInterface = {
 		const book = store.get.book(bookLookup);
 		if (book) {
 			const firstPage = store.get.page(book.pages[0]);
-			if (firstPage.subtype === 'templatePage') {
+			if (firstPage && firstPage.subtype === 'templatePage') {
 				return store.get.page(book.pages[1]);
 			}
 			return firstPage;
@@ -287,11 +290,15 @@ export const Getters: GetterInterface = {
 	},
 	adjacentStep(stepLookup: LookupItem, direction: 'prev' | 'next', limitToSubmodel: boolean) {
 		const step = store.get.step(stepLookup);
+		if (step == null) {
+			throw 'Trying to find the adjacent Step to a non-existent Step';
+		}
 		let itemList;
 		if (step.parent.type === 'step' || step.parent.type === 'callout') {
 			const parent = store.get.parent(step);
 			if (hasProperty<StepParent>(parent, 'steps')) {
-				itemList = parent.steps.map(store.get.step);
+				itemList = parent.steps.map(store.get.step)
+					.filter((tmpStep): tmpStep is Step => tmpStep != null);
 			}
 		}
 		let adjacentStep = store.get[direction]<Step>(step, itemList);
@@ -306,14 +313,17 @@ export const Getters: GetterInterface = {
 		}
 		return adjacentStep;
 	},
-	prevStep(stepLookup: LookupItem, limitToSubmodel: boolean) {
+	prevStep(stepLookup: LookupItem, limitToSubmodel: boolean = false) {
 		return store.get.adjacentStep(stepLookup, 'prev', limitToSubmodel);
 	},
-	nextStep(stepLookup: LookupItem, limitToSubmodel: boolean) {
+	nextStep(stepLookup: LookupItem, limitToSubmodel: boolean = false) {
 		return store.get.adjacentStep(stepLookup, 'next', limitToSubmodel);
 	},
 	part(partID: number, stepLookup: LookupItem) {
 		const step = store.get.step(stepLookup);
+		if (step == null) {
+			throw 'Trying to get a Part from a non-existent Step';
+		}
 		return LDParse.model.get.partFromID(partID, step.model.filename);
 	},
 	partsInStep(stepLookup: LookupItem) {
@@ -346,7 +356,7 @@ export const Getters: GetterInterface = {
 	partList(stepLookup: LookupItem) {
 		// Return a list of part IDs for every part in this (and previous) step
 		let step: Step | null = store.get.step(stepLookup);
-		if (step.parts == null) {
+		if (step == null || step.parts == null) {
 			return null;
 		}
 		let partList: number[] = [];
@@ -369,8 +379,10 @@ export const Getters: GetterInterface = {
 		const parent = store.get.lookupToItem(parentLookup);
 		if (hasProperty<PLIItemParent>(parent, 'pliItems')) {
 			return (parent.pliItems || []).map(store.get.pliItem)
-				.find((i: PLIItem) => {
-					return i.filename === part.filename && i.colorCode === part.colorCode;
+				.find(i => {
+					return i
+					&& (i.filename === part.filename)
+					&& (i.colorCode === part.colorCode);
 				}) || null;
 		}
 		return null;
@@ -410,7 +422,7 @@ export const Getters: GetterInterface = {
 				if ((el.parent || {}).type === 'page') {
 					const page = store.get.page(item.parent);
 					const elPage = store.get.page(el.parent);
-					return page.subtype === elPage.subtype;
+					return page && elPage && (page.subtype === elPage.subtype);
 				}
 				return true;
 			}
@@ -430,7 +442,7 @@ export const Getters: GetterInterface = {
 				if (el.parent.type === 'page') {
 					const page = store.get.page(item.parent);
 					const elPage = store.get.page(el.parent);
-					return page.subtype === elPage.subtype;
+					return page && elPage && (page.subtype === elPage.subtype);
 				}
 				return true;
 			}
@@ -531,7 +543,8 @@ export const Getters: GetterInterface = {
 		const addedModelNames = new Set([mainModelFilename]);
 		store.state.steps.filter((step: Step) => {
 			if (step.parent.type === 'page' && step.model.filename !== mainModelFilename) {
-				return store.get.page(step.parent).subtype === 'page';
+				const tmpPage = store.get.page(step.parent);
+				return (tmpPage == null) ? false : tmpPage.subtype === 'page';
 			}
 			return false;
 		}).forEach((step: Step) => {
@@ -541,6 +554,9 @@ export const Getters: GetterInterface = {
 				let parentStepID = step.model.parentStepID;
 				while (parentStepID != null) {
 					const parentStep = store.get.step(parentStepID);
+					if (parentStep == null) {
+						throw 'Trying to find submodels in non-existent parent Step';
+					}
 					if (parentStep.parts.length > 1) {
 						// Check if parent step contains multiple copies of the current submodel;
 						// adjust quantity label accordingly
@@ -702,10 +718,12 @@ export const Getters: GetterInterface = {
 			return null;
 		}
 		const parent = store.get.parent(t);
-		const points = t.points.map((pointID: number) => {
+		const points = t.points.map(pointID => {
 			const pt = store.get.point(pointID);
-			return store.get.coords.pointToPage(pt.x, pt.y, pt.relativeTo || parent);
-		});
+			return pt
+				? store.get.coords.pointToPage(pt.x, pt.y, pt.relativeTo || parent)
+				: null;
+		}).filter((p): p is Point => p != null);
 		return _.geom.expandBox(_.geom.bbox(points), 8, 8);
 	},
 	targetBox(targetLookup: LookupItem) {
@@ -767,7 +785,7 @@ export const Getters: GetterInterface = {
 		} else if (item.type === 'pliItem') {  // Special case: pliItem box should include its quantity label
 			box = store.get.targetBox(item);
 			const lbl = store.get.quantityLabel(item.quantityLabelID);
-			const lblBox = store.get.targetBox(lbl);
+			const lblBox = (lbl == null) ? null : store.get.targetBox(lbl);
 			if (box && lblBox) {
 				box = _.geom.bbox([box, lblBox]);
 			}
@@ -783,7 +801,7 @@ export const Getters: GetterInterface = {
 		let dx = 0;
 		if (currentPage && currentPage.stretchedStep) {
 			const stretchedStep = store.get.step(currentPage.stretchedStep.stepID);
-			if (store.get.isDescendent(item, stretchedStep)) {
+			if (stretchedStep && store.get.isDescendent(item, stretchedStep)) {
 				dx = currentPage.stretchedStep.leftOffset;
 			}
 		}

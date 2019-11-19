@@ -89,6 +89,9 @@ export const Mutations: MutationInterface = {
 		},
 		reposition({item, dx, dy}: {item: LookupItem, dx: number, dy: number}) {
 			const divider = store.get.divider(item);
+			if (divider == null) {
+				throw 'Trying to reposition a non-existent Divider';
+			}
 			divider.p1.x += dx;
 			divider.p2.x += dx;
 			divider.p1.y += dy;
@@ -96,6 +99,9 @@ export const Mutations: MutationInterface = {
 		},
 		setLength({divider, newLength}: {divider: LookupItem, newLength: number}) {
 			const dividerItem = store.get.divider(divider);
+			if (dividerItem == null) {
+				throw 'Trying to set length of a non-existent Divider';
+			}
 			const bbox = _.geom.bbox([dividerItem.p1, dividerItem.p2]);
 			const isHorizontal = (bbox.height === 0);
 			if (isHorizontal) {
@@ -214,7 +220,14 @@ export const Mutations: MutationInterface = {
 				parentInsertionIndex: 0,
 				doNotRenumber: true,
 			});
-			page.number = parent ? store.get.page(parent.pages[1]).number : 1;
+			page.number = 1;
+			if (parent) {
+				const tmpPage = store.get.page(parent.pages[1]);
+				if (tmpPage == null) {
+					throw 'Trying to get a Book Page number from a non-existent Page';
+				}
+				page.number = tmpPage.number;
+			}
 			store.mutations.page.renumber();
 
 			const step = store.mutations.step.add({dest: page});
@@ -235,7 +248,11 @@ export const Mutations: MutationInterface = {
 			const pageCount = store.get.pageCount();  // TODO: count only pages in the current book
 			let text;
 			if (parent) {
-				const bookNumber = store.get.book(parent).number;
+				const parentBook = store.get.book(parent);
+				if (parentBook == null) {
+					throw 'Trying to find a nice annotation for a non-existent Book';
+				}
+				const bookNumber = parentBook.number;
 				text = tr('title_page.book_model_info_@mf', {bookNumber, partCount, pageCount});
 			} else {
 				text = tr('title_page.model_info_@mf', {partCount, pageCount});
@@ -257,7 +274,7 @@ export const Mutations: MutationInterface = {
 	removeTitlePage() {
 		store.state.pages
 			.map(store.get.page)
-			.filter((page: Page) => page.subtype === 'titlePage')
+			.filter((page): page is Page => page != null && page.subtype === 'titlePage')
 			.forEach((page: Page) => {
 				store.mutations.item.deleteChildList({item: page, listType: 'step'});
 				store.mutations.page.delete({page});
@@ -328,7 +345,13 @@ export const Mutations: MutationInterface = {
 			submodelPagesAdded.forEach((submodelPageGroup: number[]) => {
 				submodelPageGroup.forEach((pageID: number) => {
 					const submodelPage = store.get.page(pageID);
+					if (submodelPage == null) {
+						throw 'Trying to set a model into a non-existent submodel page';
+					}
 					const submodelStep = store.get.step(submodelPage.steps[0]);
+					if (submodelStep == null) {
+						throw 'Trying to set a model into a non-existent submodel';
+					}
 					submodelStep.model.parentStepID = step.id;
 				});
 			});

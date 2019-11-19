@@ -157,6 +157,7 @@ interface CSI extends Item, Box {
 	domID: string;
 	rotation: any;
 	scale: number;
+	isDirty: boolean;
 }
 
 interface Divider extends Item {

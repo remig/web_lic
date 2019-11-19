@@ -75,6 +75,9 @@ export const BookMutations: BookMutationInterface = {
 	},
 	setBookPageNumbers({book, firstPageNumber}) {  // firstPageNumber: 'start_page_1' or 'preserve_page_count'
 		const bookItem = store.get.book(book);
+		if (bookItem == null) {
+			throw 'Trying to set page numbers on non-existent Books';
+		}
 		if (firstPageNumber === 'start_page_1') {
 			const pages = bookItem.pages.map(store.get.page);
 			store.mutations.renumber(pages, 1);
@@ -93,11 +96,11 @@ export const BookMutations: BookMutationInterface = {
 			const visitedModels = new Set();
 			book.pages
 				.map(store.get.page)
-				.map(page => page.steps)
+				.map(page => (page || {}).steps)
 				.flat()
 				.map(store.get.step)
 				.forEach(step => {
-					if (!visitedModels.has(step.model.filename) && step.parts) {
+					if (step && !visitedModels.has(step.model.filename) && step.parts) {
 						step.prevBookParts = store.get.partList(step) || [];
 						visitedModels.add(step.model.filename);
 					}
@@ -136,7 +139,6 @@ export const BookMutations: BookMutationInterface = {
 		let firstBookState;
 		const books = _.cloneDeep(store.state.books);  // Need to clone because loop hoses state
 		books.forEach((book, idx) => {
-			book = store.get.book(book);
 			const res = getStateForBook(book);
 			content.state = res.newState;
 			if (idx === 0) {
@@ -172,7 +174,7 @@ export const BookMutations: BookMutationInterface = {
 		}
 	},
 	layout({book}) {
-		book = store.get.book(book);
-		Layout.book(book);
+		const item = store.get.book(book);
+		Layout.book(item);
 	},
 };
