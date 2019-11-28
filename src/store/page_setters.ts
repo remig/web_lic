@@ -5,7 +5,25 @@ import store from '../store';
 import uiState from '../ui_state';
 import Layout from '../layout';
 
-export default {
+export interface PageMutationInterface {
+	add({
+		pageNumber, subtype, doNotRenumber,
+		parent, insertionIndex, parentInsertionIndex,
+	} : {
+		pageNumber?: number | 'id', subtype?: PageSubtypes, doNotRenumber?: boolean,
+		parent?: LookupItem, insertionIndex?: number, parentInsertionIndex?: number,
+	}): Page;
+	delete(
+		{page, doNotRenumber, deleteSteps}
+		: {page: LookupItem, doNotRenumber?: boolean, deleteSteps?: boolean}
+	): void;
+	setLocked({page, locked}: {page: LookupItem, locked: boolean}): void;
+	renumber(): void;
+	markAllDirty(): void;
+	layout({page, layout}: {page: LookupItem, layout?: any}): void;
+}
+
+export const PageMutations: PageMutationInterface = {
 	// opts: {pageNumber, subtype = 'page', doNotRenumber: false,
 	// parent = null, insertionIndex = -1, parentInsertionIndex = null}
 	add({
@@ -48,6 +66,9 @@ export default {
 	},
 	delete({page, doNotRenumber = false, deleteSteps = false}) {
 		const item = store.get.page(page);
+		if (item == null) {
+			return;
+		}
 		if (item.steps && item.steps.length) {
 			if (deleteSteps) {
 				while (item.steps.length) {
@@ -85,10 +106,15 @@ export default {
 				if (firstPageNumber === 'start_page_1') {
 					store.mutations.renumber(pages, 1);
 				} else if (firstPageNumber === 'preserve_page_count') {
-					const prevBook = store.get.prev(book);
+					const prevBook = store.get.prev<Book>(book);
 					if (prevBook) {
-						const lastPageNumber = store.get.page(_.last(prevBook.pages)).number;
-						store.mutations.renumber(pages, lastPageNumber + 1);
+						const lastPageId = _.last(prevBook.pages) || -1;
+						const lastPage = store.get.page(lastPageId);
+						if (lastPage == null) {
+							store.mutations.renumber(pages, 1);
+						} else {
+							store.mutations.renumber(pages, lastPage.number + 1);
+						}
 					} else {
 						store.mutations.renumber(pages, 1);
 					}
@@ -103,7 +129,7 @@ export default {
 	},
 	layout({page, layout}) {  // layout = 'horizontal' or 'vertical' or {rows, cols}
 		const item = store.get.page(page);
-		if (!item.locked) {
+		if (item != null && !item.locked) {
 			Layout.page(item, layout || item.layout);
 		}
 	},

@@ -14,7 +14,7 @@ import {CalloutArrowMutationInterface, CalloutArrowMutations} from '../store/cal
 import {CSIMutationInterface, CSIMutations} from '../store/csi_setters';
 import {InventoryPageMutationInterface, InventoryPageMutations} from '../store/inventory_page_setters';
 import ItemSetters from '../store/item_setters';
-import PageSetters from '../store/page_setters';
+import {PageMutationInterface, PageMutations} from '../store/page_setters';
 import PartSetters from '../store/part_setters';
 import PLISetters from '../store/pli_setters';
 import PLIItemSetters from '../store/pli_item_setters';
@@ -36,7 +36,7 @@ export interface MutationInterface {
 		setLength({divider, newLength}: {divider: LookupItem, newLength: number}): void,
 		delete({divider}: {divider: any}): void,
 	},
-	page: any,
+	page: PageMutationInterface,
 	pli: any,
 	pliItem: any,
 	item: any,
@@ -115,7 +115,7 @@ export const Mutations: MutationInterface = {
 		},
 	},
 	// numberLabel
-	page: PageSetters,
+	page: PageMutations,
 	pli: PLISetters,
 	pliItem: PLIItemSetters,
 	// point

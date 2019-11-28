@@ -45,9 +45,10 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 		}
 
 		const lastPage = store.get.lastPage();
-		const pageNumber = lastPage ? lastPage.number + 1 : 0;
-		const opts = {subtype: 'inventoryPage', pageNumber};
-		const page = store.mutations.page.add(opts);
+		const page = store.mutations.page.add({
+			subtype: 'inventoryPage',
+			pageNumber: lastPage ? lastPage.number + 1 : 0,
+		});
 		const itemList: PartListEntry[] = [];  // index: colorCode, value: {filename: quantity}}
 
 		function buildPartList(model: Model) {
