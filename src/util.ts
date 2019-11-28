@@ -34,7 +34,7 @@ interface GeomInterface {
 	expandBox(box: Box, minWidth: number, minHeight: number): Box;
 	moveBoxEdge(box: Box, edge: EdgeList, dt: number): void;
 	distance(p1: number | Point, p2: number | Point): number;
-	midpoint(p1: Point, p2: Point): number;
+	midpoint(p1: Point, p2: Point): Point;
 	arrow(): ArrowInterface;
 }
 
@@ -365,7 +365,7 @@ const mixin = {
 			}
 			return 0;
 		};
-		geom.midpoint = (p1: Point, p2: Point) => {
+		geom.midpoint = (p1: Point, p2: Point): Point => {
 			return {x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2};
 		};
 		geom.arrow = () => {

@@ -88,11 +88,11 @@ function translate(key: string, ...args: any[]): string {
 		try {
 			res = __tr('en', key, args);
 		} catch (e) {
-			throw 'Invalid key lookup: ' + key;
+			throw 'Invalid translation key lookup: ' + key;
 		}
 	}
 	if (res == null) {
-		throw 'Invalid key lookup: ' + key;
+		throw 'Invalid translation key lookup: ' + key;
 	}
 	return res;
 }

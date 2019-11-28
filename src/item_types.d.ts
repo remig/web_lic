@@ -139,7 +139,7 @@ interface Book extends Item, NumberedItem {
 
 interface CalloutArrow extends Item, PointListItem {
 	type: 'calloutArrow';
-	position: Direction;
+	direction: Direction;
 }
 
 interface Callout extends Item, StepParent, Box {
