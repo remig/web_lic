@@ -11,8 +11,8 @@ import {AnnotationMutationInterface, AnnotationMutations} from '../store/annotat
 import {BookMutationInterface, BookMutations} from '../store/book_setters';
 import {CalloutMutationInterface, CalloutMutations} from '../store/callout_setters';
 import {CalloutArrowMutationInterface, CalloutArrowMutations} from '../store/callout_arrow_setters';
-import CSISetters from '../store/csi_setters';
-import InventoryPageSetters from '../store/inventory_page_setters';
+import {CSIMutationInterface, CSIMutations} from '../store/csi_setters';
+import {InventoryPageMutationInterface, InventoryPageMutations} from '../store/inventory_page_setters';
 import ItemSetters from '../store/item_setters';
 import PageSetters from '../store/page_setters';
 import PartSetters from '../store/part_setters';
@@ -29,7 +29,7 @@ export interface MutationInterface {
 	book: BookMutationInterface,
 	callout: CalloutMutationInterface,
 	calloutArrow: CalloutArrowMutationInterface,
-	csi: any,
+	csi: CSIMutationInterface,
 	divider: {
 		add({parent, p1, p2}: {parent: any, p1: Point, p2: Point}): Divider,
 		reposition({item, dx, dy}: {item: LookupItem, dx: number, dy: number}): void,
@@ -49,7 +49,7 @@ export interface MutationInterface {
 	submodelImage: any,
 	submodel: any,
 	templatePage: any,
-	inventoryPage: any,
+	inventoryPage: InventoryPageMutationInterface,
 	sceneRendering: {
 		set(
 			{zoom, edgeWidth, rotation, refresh}
@@ -80,7 +80,7 @@ export const Mutations: MutationInterface = {
 	book: BookMutations,
 	callout: CalloutMutations,
 	calloutArrow: CalloutArrowMutations,
-	csi: CSISetters,
+	csi: CSIMutations,
 	divider: {
 		add({parent, p1, p2}: {parent: any, p1: Point, p2: Point}) {
 			return store.mutations.item.add({item: {
@@ -137,7 +137,7 @@ export const Mutations: MutationInterface = {
 	submodelImage: SubmodelImageSetters,
 	submodel: SubmodelSetters,
 	templatePage: TemplatePageSetters,
-	inventoryPage: InventoryPageSetters,
+	inventoryPage: InventoryPageMutations,
 	sceneRendering: {
 		set(
 			{zoom, edgeWidth, rotation, refresh = false}

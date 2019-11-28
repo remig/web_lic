@@ -158,6 +158,8 @@ interface CSI extends Item, Box {
 	rotation: any;
 	scale: number;
 	isDirty: boolean;
+	width: number | null;
+	height: number | null;
 }
 
 interface Divider extends Item {
