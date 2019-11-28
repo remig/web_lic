@@ -1110,11 +1110,12 @@ const contextMenu = {
 				const arrow = store.get.calloutArrow(selectedItem);
 				return arrow.points.map((pointID, idx) => {
 					return {
-						text: (idx === 0) ? 'action.callout_arrow.select_point.base.name' :
-							(idx === arrow.points.length - 1) ?
-								'action.callout_arrow.select_point.tip.name' :
-								tr('action.callout_arrow.select_point.point.name_@mf', {idx}),
-						id: 'arrow_select_point_' + idx + '_cmenu',
+						text: (idx === 0)
+							? 'action.callout_arrow.select_point.base.name'
+							: (idx === arrow.points.length - 1)
+								? 'action.callout_arrow.select_point.tip.name'
+								: noTranslate(tr('action.callout_arrow.select_point.point.name_@mf', {idx})),
+						id: 'arrow_select_point_' + pointID + '_cmenu',
 						cb() {
 							app.setSelected({type: 'point', id: pointID});
 						},
