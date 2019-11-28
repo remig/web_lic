@@ -146,7 +146,12 @@ export default {
 			return;
 		}
 		_.cloneDeep(srcStepItem.parts).forEach(partID => {
-			store.mutations.part.moveToStep({partID, srcStepItem, destStepItem, doLayout: false});
+			store.mutations.part.moveToStep({
+				partID,
+				srcStep: srcStepItem,
+				destStep: destStepItem,
+				doLayout: false,
+			});
 		});
 		store.mutations.step.delete({step: srcStepItem});
 
