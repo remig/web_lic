@@ -1287,7 +1287,7 @@ const contextMenu = {
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
-					dialog.values = displacement;
+					dialog.values = {...displacement};
 				});
 			},
 		},

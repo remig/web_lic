@@ -64,14 +64,14 @@ export default{
 	},
 	methods: {
 		updateValues() {
-			this.$emit('update', this.values);
+			this.$emit('update', {...this.values});
 		},
 		ok() {
-			this.$emit('ok', this.values);
+			this.$emit('ok', {...this.values});
 			this.$emit('close');
 		},
 		cancel() {
-			this.$emit('cancel', this.values);
+			this.$emit('cancel', {...this.values});
 			this.$emit('close');
 		},
 	},
