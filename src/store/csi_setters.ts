@@ -11,7 +11,7 @@ export interface CSIMutationInterface {
 		}
 	): void;
 	scale({csi, scale, doLayout}: {csi:LookupItem, scale: number, doLayout: boolean}): void;
-	resetSize({csi}: {csi: LookupItem}): void;
+	resetSize({csi}: {csi: number | LookupItem}): void;
 	markAllDirty(): void;
 }
 

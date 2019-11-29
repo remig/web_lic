@@ -15,7 +15,7 @@ import {CSIMutationInterface, CSIMutations} from '../store/csi_setters';
 import {InventoryPageMutationInterface, InventoryPageMutations} from '../store/inventory_page_setters';
 import ItemSetters from '../store/item_setters';
 import {PageMutationInterface, PageMutations} from '../store/page_setters';
-import PartSetters from '../store/part_setters';
+import {PartMutationInterface, PartMutations} from '../store/part_setters';
 import PLISetters from '../store/pli_setters';
 import PLIItemSetters from '../store/pli_item_setters';
 import StepSetters from '../store/step_setters';
@@ -40,7 +40,7 @@ export interface MutationInterface {
 	pli: any,
 	pliItem: any,
 	item: any,
-	part: any,
+	part: PartMutationInterface,
 	rotateIcon: {
 		add({parent}: {parent: LookupItem}): any,
 		delete({rotateIcon}: {rotateIcon: LookupItem}): void,
@@ -120,7 +120,7 @@ export const Mutations: MutationInterface = {
 	pliItem: PLIItemSetters,
 	// point
 	item: ItemSetters,
-	part: PartSetters,
+	part: PartMutations,
 	// quantityLabel
 	rotateIcon: {
 		add({parent}: {parent: LookupItem}) {

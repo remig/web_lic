@@ -30,7 +30,7 @@ export interface InventoryPageMutationInterface {
 	): void;
 	removePart(
 		{filename, colorCode, part, doLayout}
-		: {filename?: string, colorCode?: number, part: Part, doLayout: boolean}
+		: {filename?: string, colorCode?: number, part: Part, doLayout?: boolean}
 	): void;
 }
 

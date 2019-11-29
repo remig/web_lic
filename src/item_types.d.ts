@@ -68,6 +68,10 @@ interface Alignment {
 interface DisplacedPart {
 	partID: number;
 	direction: Direction;
+	arrowLength: number;
+	arrowOffset: number;
+	arrowRotation: number;
+	partDistance: number;
 }
 
 type AnnotationTypes = 'label' | 'arrow' | 'image';
