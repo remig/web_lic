@@ -295,10 +295,10 @@ Vue.component('pageView', {
 				return;
 			}
 			if (this.mouseDownPt
-				&& (this.mouseDragItem == null || !_.itemEq(this.selectedItem, this.mouseDragItem.item))
+				&& (this.mouseDragItem == null || !this.mouseDragItem.moved)
 				&& e.target.nodeName === 'CANVAS'
 			) {
-				// If mouse down + mouse up with nothing selected, handle as if 'click' for selection
+				// If mouse down + mouse up with nothing moved, handle as if 'click' for selection
 				const page = getPageForCanvas(e.target);
 				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
 				if (target) {
