@@ -275,11 +275,13 @@ Vue.component('pageView', {
 			if (dx === 0 && dy === 0) {
 				return;
 			}
+
+			const up = {x: e.offsetX, y: e.offsetY};
 			if (this.mouseDragItem.guide) {
 				// TODO: transient bug: sometimes dragging a guide will put up the 'stop error cursor'
 				// and stop all mouse movements...
 				this.mouseDragItem.guide.moveBy(dx, dy);
-			} else {
+			} else if (this.mouseDownPt && _.geom.distance(this.mouseDownPt, up) > 5) {
 				// TODO: Update parent bounding boxes for children like CSI, submodel, etc
 				store.mutations.item.reposition({item: this.mouseDragItem.item, dx, dy});
 				this.mouseDragItem.moved = true;
@@ -292,11 +294,11 @@ Vue.component('pageView', {
 			if (e.button !== 0) {
 				return;
 			}
-			const up = {x: e.offsetX, y: e.offsetY};
-			if (this.mouseDownPt && _.geom.distance(this.mouseDownPt, up) < 10
+			if (this.mouseDownPt
+				&& (this.mouseDragItem == null || !_.itemEq(this.selectedItem, this.mouseDragItem.item))
 				&& e.target.nodeName === 'CANVAS'
 			) {
-				// If mouse down + mouse up with very little movement, handle as if 'click' for selection
+				// If mouse down + mouse up with nothing selected, handle as if 'click' for selection
 				const page = getPageForCanvas(e.target);
 				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
 				if (target) {
