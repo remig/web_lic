@@ -7,32 +7,41 @@ import LDParse from '../ld_parse';
 export default {
 	// opts: {partID, step, direction, partDistance=60, arrowOffset=0, arrowLength=60, arrowRotation=0}
 	// If direction == null, remove displacement
-	displace(opts) {
-		const step = store.get.lookupToItem(opts.step);
-		delete opts.step;
+	displace({
+		partID, step, direction,
+		partDistance = 60, arrowOffset = 0, arrowLength = 60, arrowRotation = 0,
+	}) {
+		const stepItem = store.get.step(step);
 		const displacementDistance = 60;
-		store.mutations.csi.resetSize({csi: step.csiID});
-		opts.partDistance = (opts.partDistance == null) ? displacementDistance : opts.partDistance;
-		opts.arrowOffset = (opts.arrowOffset == null) ? 0 : opts.arrowOffset;
-		opts.arrowLength = (opts.arrowLength == null) ? displacementDistance : opts.arrowLength;
-		opts.arrowRotation = (opts.arrowRotation == null) ? 0 : opts.arrowRotation;
-		step.displacedParts = step.displacedParts || [];
-		const idx = step.displacedParts.findIndex(p => p.partID === opts.partID);
-		if (opts.direction) {
+		store.mutations.csi.resetSize({csi: stepItem.csiID});
+		partDistance = (partDistance == null) ? displacementDistance : partDistance;
+		arrowOffset = (arrowOffset == null) ? 0 : arrowOffset;
+		arrowLength = (arrowLength == null) ? displacementDistance : arrowLength;
+		arrowRotation = (arrowRotation == null) ? 0 : arrowRotation;
+		stepItem.displacedParts = stepItem.displacedParts || [];
+		const idx = stepItem.displacedParts.findIndex(p => p.partID === partID);
+		if (direction) {
 			if (idx >= 0) {
-				step.displacedParts[idx].direction = opts.direction;
-				step.displacedParts[idx].partDistance = opts.partDistance;
-				step.displacedParts[idx].arrowOffset = opts.arrowOffset;
-				step.displacedParts[idx].arrowLength = opts.arrowLength;
-				step.displacedParts[idx].arrowRotation = opts.arrowRotation;
+				stepItem.displacedParts[idx].direction = direction;
+				stepItem.displacedParts[idx].partDistance = partDistance;
+				stepItem.displacedParts[idx].arrowOffset = arrowOffset;
+				stepItem.displacedParts[idx].arrowLength = arrowLength;
+				stepItem.displacedParts[idx].arrowRotation = arrowRotation;
 			} else {
-				step.displacedParts.push(opts);
+				stepItem.displacedParts.push({
+					partID,
+					direction,
+					partDistance,
+					arrowOffset,
+					arrowLength,
+					arrowRotation,
+				});
 			}
 		} else if (idx >= 0) {
-			_.pullAt(step.displacedParts, idx);
+			_.pullAt(stepItem.displacedParts, idx);
 		}
 		// TODO: no need to layout entire page; can layout just the step containing the newly displaced part
-		store.mutations.page.layout({page: store.get.pageForItem(step)});
+		store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 	},
 	moveToStep({partID, srcStep, destStep, doLayout = false}) {
 		const srcStepItem = store.get.step(srcStep);
@@ -72,20 +81,20 @@ export default {
 		store.mutations.csi.resetSize({csi: stepItem.csiID});
 		store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 	},
-	delete(opts) { // opts: {partID, step, doLayout}
+	delete({partID, step, doLayout}) {
 		// Remove part from the step its in and from the model entirely
-		const partStep = store.get.lookupToItem(opts.step);
+		const partStep = store.get.step(step);
 		const model = LDParse.model.get.abstractPart(partStep.model.filename);
-		const part = LDParse.model.get.partFromID(opts.partID, model.filename);
-		store.mutations.step.removePart(opts);
-		store.mutations.inventoryPage.removePart({part, doLayout: opts.doLayout});
-		store.state.steps.filter(step => {
-			return step.model.filename === model.filename
-				&& !_.isEmpty(step.parts);
-		}).forEach(step => {
-			step.parts.forEach((partID, idx) => {
-				if (partID > opts.partID) {
-					step.parts[idx] -= 1;
+		const part = LDParse.model.get.partFromID(partID, model.filename);
+		store.mutations.step.removePart({step, partID, doLayout});
+		store.mutations.inventoryPage.removePart({part, doLayout: doLayout});
+		store.state.steps.filter(stepItem => {
+			return stepItem.model.filename === model.filename
+				&& !_.isEmpty(stepItem.parts);
+		}).forEach(stepItem => {
+			stepItem.parts.forEach((localPartId, idx) => {
+				if (localPartId > partID) {
+					stepItem.parts[idx] -= 1;
 				}
 			});
 		});
