@@ -704,9 +704,15 @@ const api = {
 
 		// Coordinates for first point (base) are relative to the *callout*
 		// Position on edge of callout centered on last step
-		const lastStep = callout.steps.length > 1 ? store.get.step(_.last(callout.steps)) : null;
+		let lastStep = callout.steps.length > 1 ? store.get.step(_.last(callout.steps)) : null;
 		const p1 = store.get.point(arrow.points[0]);
 		p1.relativeTo = {type: 'callout', id: callout.id};
+		const margin = getMargin(store.state.template.callout.step.innerMargin);
+		if (callout.height - margin - lastStep.height - margin < 10) {
+			// If last step is nearly as tall as the callout, center to callout
+			// This avoids off-by-a-few-pixel arrow draw issues
+			lastStep = null;
+		}
 
 		if (isOnSide) {
 			p1.x = (calloutPos === 'left') ? callout.borderOffset.x + callout.width : 0;
