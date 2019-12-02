@@ -6,8 +6,11 @@ import _ from '../util';
 // returns the same step array structure as LDParse generates:
 // [{parts: [0, 1, 2]}, {parts: [3]}, {parts: [4, 5]}]
 // config: {allowPartReorder, partsPerStep}
-export default function(model, config) {
-	const partsPerStep = config.partsPerStep || 10;
+export default function(
+	model: Model,
+	{partsPerStep = 10}
+	: {partsPerStep?: number}
+) {
 	const partIndices = (model.parts || []).map((el, idx) => idx);
 	return _.chunk(partIndices, partsPerStep)
 		.map(el => ({parts: el}));

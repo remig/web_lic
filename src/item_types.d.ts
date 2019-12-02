@@ -28,7 +28,7 @@ interface Model {
 	parts: any[];
 	steps: any[];
 	hasAutoSteps?: boolean;
-	parentStepId?: number;
+	parentStepID?: number;
 }
 
 interface ColorTableEntry {
@@ -69,10 +69,10 @@ interface Alignment {
 interface DisplacedPart {
 	partID: number;
 	direction: Direction;
-	arrowLength: number;
-	arrowOffset: number;
-	arrowRotation: number;
-	partDistance: number;
+	arrowLength?: number;
+	arrowOffset?: number;
+	arrowRotation?: number;
+	partDistance?: number;
 }
 
 type AnnotationTypes = 'label' | 'arrow' | 'image';
@@ -230,7 +230,7 @@ interface Step extends Item, NumberedItem, Box {
 	dividers: number[];
 	model: {
 		filename: string;
-		parentStepID: number;
+		parentStepID: number | null;
 	};
 	numberLabelID: number;
 	parts: number[];
@@ -249,7 +249,7 @@ interface SubmodelImage extends Item, Box {
 	innerContentOffset: Point;
 	modelFilename: string;
 	quantity: number;
-	quantityLabelId: number;
+	quantityLabelID: number;
 }
 
 interface StateInterface {

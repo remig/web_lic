@@ -6,6 +6,7 @@ import {tr} from '../translations';
 import LDParse from '../ld_parse';
 import LDRender from '../ld_render';
 import Layout from '../layout';
+import StepInsertion from '../store/step_insertion';
 
 import {AnnotationMutationInterface, AnnotationMutations} from '../store/annotation_setters';
 import {BookMutationInterface, BookMutations} from '../store/book_setters';
@@ -19,10 +20,9 @@ import {PartMutationInterface, PartMutations} from '../store/part_setters';
 import {PLIMutationInterface, PLIMutations} from '../store/pli_setters';
 import {PLIItemMutationInterface, PLIItemMutations} from '../store/pli_item_setters';
 import {StepMutationInterface, StepMutations} from '../store/step_setters';
-import StepInsertion from '../store/step_insertion';
-import SubmodelSetters from '../store/submodel_setters';
-import SubmodelImageSetters from '../store/submodel_image_setters';
-import TemplatePageSetters from '../store/template_page_setters';
+import {SubmodelMutationInterface, SubmodelMutations} from '../store/submodel_setters';
+import {SubmodelImageMutationInterface, submodelImageMutations} from '../store/submodel_image_setters';
+import {TemplatePageMutationInterface, TemplatePageMutations} from '../store/template_page_setters';
 
 export interface MutationInterface {
 	annotation: AnnotationMutationInterface,
@@ -46,9 +46,9 @@ export interface MutationInterface {
 		delete({rotateIcon}: {rotateIcon: LookupItem}): void,
 	},
 	step: StepMutationInterface,
-	submodelImage: any,
-	submodel: any,
-	templatePage: any,
+	submodel: SubmodelMutationInterface,
+	submodelImage: SubmodelImageMutationInterface,
+	templatePage: TemplatePageMutationInterface,
 	inventoryPage: InventoryPageMutationInterface,
 	sceneRendering: {
 		set(
@@ -134,9 +134,9 @@ export const Mutations: MutationInterface = {
 		},
 	},
 	step: StepMutations,
-	submodelImage: SubmodelImageSetters,
-	submodel: SubmodelSetters,
-	templatePage: TemplatePageSetters,
+	submodelImage: submodelImageMutations,
+	submodel: SubmodelMutations,
+	templatePage: TemplatePageMutations,
 	inventoryPage: InventoryPageMutations,
 	sceneRendering: {
 		set(

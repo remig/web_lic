@@ -18,6 +18,7 @@ export interface StepMutationInterface {
 		: {step: LookupItem, doNotRenumber?: boolean, deleteParts?: boolean, doLayout?: boolean}
 	): void;
 	renumber(step: LookupItem): void;
+	renumberAll(): void;
 	layout({step, box}: {step: LookupItem, box: Box}): void;
 	moveToPage(
 		{step, destPage, parentInsertionIndex}
@@ -142,7 +143,7 @@ export const StepMutations: StepMutationInterface = {
 		}
 	},
 	renumber(step) {
-		const stepItem = store.get.step(step);
+		const stepItem = store.get.step(step || -1);
 		let stepList: (Step | null)[] = [];
 		if (stepItem && (stepItem.parent.type === 'step' || stepItem.parent.type === 'callout')) {
 			// Renumber steps in target callout / parent step
@@ -150,16 +151,18 @@ export const StepMutations: StepMutationInterface = {
 			if (hasProperty<StepParent>(parent, 'steps')) {
 				stepList = parent.steps.map(store.get.step);
 			}
-		} else {
-			// Renumber all base steps across all pages
-			stepList = store.state.steps.filter(el => {
-				if (el.parent && el.parent.type === 'page') {
-					const newPage = store.get.page(el.parent);
-					return newPage ? newPage.subtype === 'page' : false;
-				}
-				return false;
-			});
 		}
+		store.mutations.renumber(stepList);
+	},
+	renumberAll() {
+		// Renumber all base steps across all pages
+		const stepList = store.state.steps.filter(el => {
+			if (el.parent && el.parent.type === 'page') {
+				const newPage = store.get.page(el.parent);
+				return newPage ? newPage.subtype === 'page' : false;
+			}
+			return false;
+		});
 		store.mutations.renumber(stepList);
 	},
 	layout({step, box}) {

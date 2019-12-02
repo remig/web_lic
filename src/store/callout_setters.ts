@@ -6,13 +6,13 @@ import store from '../store';
 export interface CalloutMutationInterface {
 	add(
 		{parent, position, includeEmptyStep}
-		: {parent: LookupItem, position: Position, includeEmptyStep: boolean}
+		: {parent: LookupItem, position?: Position, includeEmptyStep?: boolean}
 	): Callout;
 	delete({callout, doLayout}: {callout: LookupItem, doLayout: boolean}): void;
 	addFirstStep({callout, doLayout}: {callout: LookupItem, doLayout: boolean}): void;
 	addStep(
 		{callout, insertionIndex, doLayout}
-		: {callout: LookupItem, insertionIndex: number, doLayout: boolean}
+		: {callout: LookupItem, insertionIndex?: number, doLayout?: boolean}
 	): void;
 	layout(
 		{callout, layout, position, doLayout}
@@ -72,6 +72,9 @@ export const CalloutMutations: CalloutMutationInterface = {
 		if (item.steps.length < 1) {
 			store.mutations.callout.addFirstStep({callout, doLayout});
 			return;
+		}
+		if (insertionIndex == null) {
+			insertionIndex = item.steps.length;
 		}
 
 		const modelStep = store.get.step(item.steps[0]);
