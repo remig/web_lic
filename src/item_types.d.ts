@@ -1,4 +1,5 @@
-type Direction = 'up' | 'down' | 'left' | 'right';
+type Direction = 'up' | 'right' | 'down' | 'left';
+type Position = 'top' | 'right' | 'bottom' | 'left';
 type Orientation = 'horizontal' | 'vertical'
 
 type LDrawColorCode = number;
@@ -152,14 +153,14 @@ interface Callout extends Item, StepParent, Box {
 	calloutArrows: number[];
 	innerContentOffset: Point;
 	layout: Orientation;
-	position: Direction;
+	position: Position;
 }
 
 interface CSI extends Item, Box {
 	type: 'csi';
 	annotations: number[];
 	domID: string;
-	rotation: any;
+	rotation: Rotation[];
 	scale: number;
 	isDirty: boolean;
 	width: number | null;
@@ -203,6 +204,7 @@ interface PLIItem extends Item, Box {
 	colorCode: number;
 	quantity: number;
 	quantityLabelID: number;
+	isDirty: boolean;
 }
 
 interface PointItem extends Item, Point {
@@ -232,7 +234,7 @@ interface Step extends Item, NumberedItem, Box {
 	};
 	numberLabelID: number;
 	parts: number[];
-	pliID: number;
+	pliID: number | null;
 	rotateIconID?: number;
 	steps: number[];
 	stretchedPages: number[];

@@ -708,7 +708,7 @@ const api = {
 		const p1 = store.get.point(arrow.points[0]);
 		p1.relativeTo = {type: 'callout', id: callout.id};
 		const margin = getMargin(store.state.template.callout.step.innerMargin);
-		if (callout.height - margin - lastStep.height - margin < 10) {
+		if (lastStep && (callout.height - margin - lastStep.height - margin < 10)) {
 			// If last step is nearly as tall as the callout, center to callout
 			// This avoids off-by-a-few-pixel arrow draw issues
 			lastStep = null;

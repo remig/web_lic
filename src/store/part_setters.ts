@@ -103,7 +103,7 @@ export const PartMutations: PartMutationInterface = {
 			const lastStepId = _.last(calloutItem.steps) || -1;
 			destCalloutStep = store.get.step(lastStepId);
 		}
-		if (destCalloutStep == null) {
+		if (destCalloutStep == null || destCalloutStep.csiID == null) {
 			return;
 		}
 		destCalloutStep.model = _.cloneDeep(stepItem.model);

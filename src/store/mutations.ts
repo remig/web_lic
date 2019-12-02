@@ -16,9 +16,9 @@ import {InventoryPageMutationInterface, InventoryPageMutations} from '../store/i
 import ItemSetters from '../store/item_setters';
 import {PageMutationInterface, PageMutations} from '../store/page_setters';
 import {PartMutationInterface, PartMutations} from '../store/part_setters';
-import PLISetters from '../store/pli_setters';
-import PLIItemSetters from '../store/pli_item_setters';
-import StepSetters from '../store/step_setters';
+import {PLIMutationInterface, PLIMutations} from '../store/pli_setters';
+import {PLIItemMutationInterface, PLIItemMutations} from '../store/pli_item_setters';
+import {StepMutationInterface, StepMutations} from '../store/step_setters';
 import StepInsertion from '../store/step_insertion';
 import SubmodelSetters from '../store/submodel_setters';
 import SubmodelImageSetters from '../store/submodel_image_setters';
@@ -37,15 +37,15 @@ export interface MutationInterface {
 		delete({divider}: {divider: any}): void,
 	},
 	page: PageMutationInterface,
-	pli: any,
-	pliItem: any,
+	pli: PLIMutationInterface,
+	pliItem: PLIItemMutationInterface,
 	item: any,
 	part: PartMutationInterface,
 	rotateIcon: {
 		add({parent}: {parent: LookupItem}): any,
 		delete({rotateIcon}: {rotateIcon: LookupItem}): void,
 	},
-	step: any,
+	step: StepMutationInterface,
 	submodelImage: any,
 	submodel: any,
 	templatePage: any,
@@ -63,7 +63,7 @@ export interface MutationInterface {
 			: {filename: string, rotation: any[], scale: number}
 		): void,
 	},
-	renumber(itemList: any[], start: number): void,
+	renumber(itemList: any[], start?: number): void,
 	layoutTitlePage(page: Page): void,
 	addTitlePage(): void,
 	removeTitlePage(): void,
@@ -116,8 +116,8 @@ export const Mutations: MutationInterface = {
 	},
 	// numberLabel
 	page: PageMutations,
-	pli: PLISetters,
-	pliItem: PLIItemSetters,
+	pli: PLIMutations,
+	pliItem: PLIItemMutations,
 	// point
 	item: ItemSetters,
 	part: PartMutations,
@@ -133,7 +133,7 @@ export const Mutations: MutationInterface = {
 			store.mutations.item.delete({item: rotateIcon});
 		},
 	},
-	step: StepSetters,
+	step: StepMutations,
 	submodelImage: SubmodelImageSetters,
 	submodel: SubmodelSetters,
 	templatePage: TemplatePageSetters,
@@ -231,8 +231,9 @@ export const Mutations: MutationInterface = {
 			store.mutations.page.renumber();
 
 			const step = store.mutations.step.add({dest: page});
-			step.model.filename = store?.model?.filename;
-			step.parts = null;
+			if (store && store.model && store.model.filename) {
+				step.model.filename = store.model.filename;
+			}
 
 			store.mutations.annotation.add({
 				annotationType: 'label',
@@ -340,7 +341,9 @@ export const Mutations: MutationInterface = {
 			});
 			lastStepNumber.num += 1;
 			step.parts = parts;
-			step.model.filename = modelFilename;
+			if (modelFilename) {
+				step.model.filename = modelFilename;
+			}
 
 			submodelPagesAdded.forEach((submodelPageGroup: number[]) => {
 				submodelPageGroup.forEach((pageID: number) => {
@@ -356,11 +359,15 @@ export const Mutations: MutationInterface = {
 				});
 			});
 
-			const pli = store.get.pli(step.pliID);
-			parts.forEach((partID: number) => {
-				const part = localModel.parts[partID];
-				store.mutations.pli.addPart({pli, part});
-			});
+			if (step.pliID != null) {
+				const pli = store.get.pli(step.pliID);
+				if (pli != null) {
+					parts.forEach((partID: number) => {
+						const part = localModel.parts[partID];
+						store.mutations.pli.addPart({pli, part});
+					});
+				}
+			}
 		});
 		return pagesAdded;
 	},

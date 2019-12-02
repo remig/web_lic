@@ -72,7 +72,7 @@ export default {
 				zoom: getScale(csi),
 				resizeContainer: true,
 			};
-			if (step.parts != null) {
+			if (!store.get.isTitlePage(step.parent)) {
 				const partList = store.get.partList(step);
 				if (!partList.length) {
 					return null;

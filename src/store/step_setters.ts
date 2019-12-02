@@ -1,11 +1,54 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
+import {hasProperty, isItemSpecificType} from '../type_helpers';
 import _ from '../util';
 import store from '../store';
 import Layout from '../layout';
 import LDParse from '../ld_parse';
 
-export default {
+export interface StepMutationInterface {
+	add(
+		{dest, doLayout, model, stepNumber,
+			renumber, insertionIndex, parentInsertionIndex}
+		: {dest: LookupItem, doLayout?: boolean, model?: Model, stepNumber?: number,
+			renumber?: boolean, insertionIndex?: number, parentInsertionIndex?: number}
+	): Step;
+	delete(
+		{step, doNotRenumber, deleteParts, doLayout}
+		: {step: LookupItem, doNotRenumber?: boolean, deleteParts?: boolean, doLayout?: boolean}
+	): void;
+	renumber(step: LookupItem): void;
+	layout({step, box}: {step: LookupItem, box: Box}): void;
+	moveToPage(
+		{step, destPage, parentInsertionIndex}
+		: {step: LookupItem, destPage: LookupItem, parentInsertionIndex?: number}
+	): void;
+	moveToPreviousPage({step}: {step: LookupItem}): void;
+	moveToNextPage({step}: {step: LookupItem}): void;
+	mergeWithStep({srcStep, destStep}:{srcStep: LookupItem, destStep: LookupItem}): void;
+	stretchToPage(
+		{step, stretchToPage, doLayout}
+		: {step: LookupItem, stretchToPage: LookupItem, doLayout?: boolean}
+	): void;
+	addCallout({step}: {step: LookupItem}): void;
+	addSubStep({step, doLayout}: {step: LookupItem, doLayout?: boolean}): void;
+	setSubStepLayout(
+		{step, layout, doLayout}
+		: {step: LookupItem, layout: Orientation, doLayout?: boolean}
+	): void;
+	toggleRotateIcon(
+		{step, display, doLayout}
+		: {step: LookupItem, display: boolean, doLayout?: boolean}
+	): void;
+	copyRotation(
+		{step, nextXSteps, rotation}
+		: {step: LookupItem, nextXSteps: number, rotation: Rotation[]}
+	): void;
+	addPart({step, partID}: {step: LookupItem, partID: number}): void;
+	removePart({step, partID, doLayout}: {step: LookupItem, partID: number, doLayout?: boolean}): void;
+}
+
+export const StepMutations: StepMutationInterface = {
 	add(
 		{dest, doLayout = false, model = null, stepNumber = null, renumber = false,
 			insertionIndex = -1, parentInsertionIndex = -1}
@@ -29,7 +72,7 @@ export default {
 
 		store.mutations.csi.add({parent: step});
 
-		if (parent.type === 'page' || parent.type === 'templatePage') {
+		if (parent && parent.type === 'page') {
 			store.mutations.pli.add({parent: step});
 		}
 
@@ -52,6 +95,9 @@ export default {
 		{step, doNotRenumber = false, deleteParts = false, doLayout = false}
 	) {
 		const item = store.get.step(step);
+		if (item == null) {
+			return;
+		}
 		if (item.parts && item.parts.length) {
 			if (deleteParts) {
 				while (item.parts.length) {
@@ -69,7 +115,7 @@ export default {
 			store.mutations.item.delete({item: store.get.csi(item.csiID)});
 		}
 		if (item.pliID != null) {
-			store.mutations.pli.delete({pli: store.get.pli(item.pliID), deleteItems: true});
+			store.mutations.pli.delete({pli: {type: 'pli', id: item.pliID}, deleteItems: true});
 		}
 		store.mutations.item.deleteChildList({item, listType: 'callout'});
 		store.mutations.item.delete({item});
@@ -79,9 +125,12 @@ export default {
 		if (item.parent.type === 'callout') {
 			// If we delete the 2nd last step from a callout, remove step number from last remaining step
 			const callout = store.get.parent(item);
+			if (callout == null || !isItemSpecificType<Callout>(callout, 'callout')) {
+				return;
+			}
 			if (callout.steps.length === 1) {
 				const calloutStep = store.get.step(callout.steps[0]);
-				if (calloutStep.numberLabelID != null) {
+				if (calloutStep != null && calloutStep.numberLabelID != null) {
 					store.mutations.item.delete(
 						{item: store.get.numberLabel(calloutStep.numberLabelID)}
 					);
@@ -94,16 +143,19 @@ export default {
 	},
 	renumber(step) {
 		const stepItem = store.get.step(step);
-		let stepList;
+		let stepList: (Step | null)[] = [];
 		if (stepItem && (stepItem.parent.type === 'step' || stepItem.parent.type === 'callout')) {
 			// Renumber steps in target callout / parent step
 			const parent = store.get.parent(stepItem);
-			stepList = parent.steps.map(store.get.step);
+			if (hasProperty<StepParent>(parent, 'steps')) {
+				stepList = parent.steps.map(store.get.step);
+			}
 		} else {
 			// Renumber all base steps across all pages
 			stepList = store.state.steps.filter(el => {
-				if (el.parent.type === 'page') {
-					return store.get.page(el.parent).subtype === 'page';
+				if (el.parent && el.parent.type === 'page') {
+					const newPage = store.get.page(el.parent);
+					return newPage ? newPage.subtype === 'page' : false;
 				}
 				return false;
 			});
@@ -115,9 +167,15 @@ export default {
 		Layout.step(stepItem, box);
 	},
 	moveToPage({step, destPage, parentInsertionIndex = 0}) {
-		const item = store.get.lookupToItem(step);
+		const item = store.get.step(step);
+		if (item == null) {
+			return;
+		}
 		const currentPage = store.get.parent(item);
-		const destPageItem = store.get.lookupToItem(destPage);
+		const destPageItem = store.get.page(destPage);
+		if (currentPage == null || destPageItem == null) {
+			return;
+		}
 		store.mutations.item.reparent({
 			item,
 			newParent: destPageItem,
@@ -165,6 +223,9 @@ export default {
 	stretchToPage({step, stretchToPage, doLayout}) {
 		const stepItem = store.get.step(step);
 		const destPage = store.get.page(stretchToPage);
+		if (stepItem == null || destPage == null) {
+			return;
+		}
 		destPage.stretchedStep = {stepID: stepItem.id, leftOffset: 0};
 		stepItem.stretchedPages.push(stretchToPage.id);
 		if (doLayout) {
@@ -174,12 +235,18 @@ export default {
 	},
 	addCallout({step}) {
 		const stepItem = store.get.step(step);
+		if (stepItem == null) {
+			return;
+		}
 		stepItem.callouts = stepItem.callouts || [];
-		let position = 'left';
+		let position: Position = 'left';
 		if (stepItem.callouts.length) {
-			const availablePositions = _.difference(
+			const availablePositions = _.difference<Position>(
 				['left', 'bottom', 'right', 'top'],
-				stepItem.callouts.map(calloutID => store.get.callout(calloutID).position)
+				stepItem.callouts.map(calloutID => {
+					const callout = store.get.callout(calloutID);
+					return callout ? callout.position : 'left';
+				})
 			);
 			position = availablePositions[0] || 'left';
 		}
@@ -187,7 +254,10 @@ export default {
 		store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 	},
 	addSubStep({step, doLayout}) {
-		const stepItem = store.get.lookupToItem(step);
+		const stepItem = store.get.step(step);
+		if (stepItem == null || stepItem.csiID == null) {
+			return;
+		}
 		const newStep = store.mutations.step.add({
 			dest: stepItem, stepNumber: 1, doLayout: false, renumber: false,
 		});
@@ -204,18 +274,25 @@ export default {
 	},
 	setSubStepLayout({step, layout, doLayout}) {
 		const stepItem = store.get.step(step);
-		stepItem.subStepLayout = layout;
-		if (doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
+		if (stepItem) {
+			stepItem.subStepLayout = layout;
+			if (doLayout) {
+				store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
+			}
 		}
 	},
 	toggleRotateIcon({step, display, doLayout}) {
-		const stepItem = store.get.lookupToItem(step);
+		const stepItem = store.get.step(step);
+		if (stepItem == null) {
+			return;
+		}
 		if (display && stepItem.rotateIconID == null) {
 			store.mutations.rotateIcon.add({parent: stepItem});
 		} else if (!display && stepItem.rotateIconID != null) {
 			const rotateIcon = store.get.rotateIcon(stepItem.rotateIconID);
-			store.mutations.rotateIcon.delete({rotateIcon});
+			if (rotateIcon) {
+				store.mutations.rotateIcon.delete({rotateIcon});
+			}
 		}
 		if (doLayout) {
 			store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
@@ -228,7 +305,7 @@ export default {
 			if (nextStep) {
 				nextStep = store.get.nextStep(nextStep);
 			}
-			if (nextStep) {
+			if (nextStep && nextStep.csiID) {
 				csi = store.get.csi(nextStep.csiID);
 				if (csi) {
 					csi.isDirty = true;
@@ -239,20 +316,26 @@ export default {
 	},
 	addPart({step, partID}) {
 		const stepItem = store.get.step(step);
+		if (stepItem == null) {
+			return;
+		}
 		stepItem.parts.push(partID);
 		stepItem.parts.sort(_.sort.numeric.ascending);
 		if (stepItem.pliID != null) {
 			const part = LDParse.model.get.partFromID(partID, stepItem.model.filename);
-			const pli = {type: 'pli', id: stepItem.pliID};
+			const pli: LookupItem = {type: 'pli', id: stepItem.pliID};
 			store.mutations.pli.addPart({pli, part});
 		}
 	},
 	removePart({step, partID, doLayout = false}) {
 		const stepItem = store.get.step(step);
+		if (stepItem == null) {
+			return;
+		}
 		_.deleteItem(stepItem.parts, partID);
 		if (stepItem.pliID != null) {
 			const part = LDParse.model.get.partFromID(partID, stepItem.model.filename);
-			const pli = {type: 'pli', id: stepItem.pliID};
+			const pli: LookupItem = {type: 'pli', id: stepItem.pliID};
 			store.mutations.pli.removePart({pli, part});
 		}
 		if (doLayout) {

@@ -6,7 +6,7 @@ import store from '../store';
 export interface CalloutMutationInterface {
 	add(
 		{parent, position, includeEmptyStep}
-		: {parent: LookupItem, position: Direction, includeEmptyStep: boolean}
+		: {parent: LookupItem, position: Position, includeEmptyStep: boolean}
 	): Callout;
 	delete({callout, doLayout}: {callout: LookupItem, doLayout: boolean}): void;
 	addFirstStep({callout, doLayout}: {callout: LookupItem, doLayout: boolean}): void;
@@ -16,7 +16,7 @@ export interface CalloutMutationInterface {
 	): void;
 	layout(
 		{callout, layout, position, doLayout}
-		: {callout: LookupItem, layout: Orientation, position: Direction, doLayout: boolean}
+		: {callout: LookupItem, layout: Orientation, position: Position, doLayout: boolean}
 	): void;
 }
 
