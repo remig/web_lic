@@ -4,7 +4,7 @@
 
 import _ from './util';
 import cache from './cache';
-import Renderer from './store/render';
+import {RendererInterface, Renderer} from './store/render';
 import {GetterInterface, Getters} from './store/getters';
 import {MutationInterface, Mutations} from './store/mutations';
 
@@ -56,7 +56,7 @@ interface Store {
 	saveLocal(): void;
 	saveToFile(filename?: string, jsonIndent?: number): void;
 	saveTemplate(filename?: string, jsonIndent?: number): void;
-	render: any;
+	render: RendererInterface;
 	get: GetterInterface;
 	mutations: MutationInterface;
 	[key: string]: any;

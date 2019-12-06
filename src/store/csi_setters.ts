@@ -21,7 +21,7 @@ export const CSIMutations: CSIMutationInterface = {
 			type: 'csi', id: -1, parent,
 			domID: null, isDirty: false,
 			annotations: [],
-			rotation: null, scale: 1,
+			rotation: null, scale: null, autoScale: null,
 			x: 0, y: 0, width: 0, height: 0,
 		}, parent});
 	},

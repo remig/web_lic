@@ -4,15 +4,15 @@ import store from '../store';
 import LDRender from '../ld_render';
 
 const canvasCache = (function() {
-	let cache = {};
+	let cache: {[key: string]: HTMLCanvasElement} = {};
 	const transientCanvas = document.createElement('canvas');
 	return {
-		create(domId) {
+		create(domId: string) {
 			cache[domId] = document.createElement('canvas');
 			return cache[domId];
 		},
-		get(domId, bypass) {
-			if (bypass) {
+		get(domId?: string, bypass?: boolean) {
+			if (domId == null || bypass === true) {
 				return transientCanvas;
 			}
 			return cache[domId];
@@ -23,42 +23,78 @@ const canvasCache = (function() {
 	};
 })();
 
-function getRotation(item) {
-	let rot = item.rotation;
+function getCSIRotation(csi: CSI) {
+	let rot = csi.rotation;
 	if (rot && rot.length) {
 		return rot;
 	}
-	if (item.filename) {
-		const transform = store.get.pliTransform(item.filename);
-		if (transform.rotation) {
-			return transform.rotation;
-		}
-	}
-	rot = store.get.templateForItem(item).rotation;
+	rot = store.get.templateForItem(csi).rotation;
 	return (rot && rot.length) ? rot : null;
 }
 
-function getScale(item) {
+function getCSIScale(csi: CSI) {
 	let scale;
-	if (item.scale != null) {
-		scale = item.scale;
-	} else if (item.autoScale != null) {
-		scale = item.autoScale;
-	} else if (item.filename) {
-		const transform = store.get.pliTransform(item.filename);
-		if (transform.scale != null) {
-			scale = transform.scale;
-		}
+	if (csi.scale != null) {
+		scale = csi.scale;
+	} else if (csi.autoScale != null) {
+		scale = csi.autoScale;
 	}
 	if (scale == null) {
+		scale = store.get.templateForItem(csi).scale;
+	}
+	return (scale === 1) ? null : scale;
+}
+
+function getPLIItemRotation(item: PLIItem) {
+	let rot;
+	const transform = store.get.pliTransform(item.filename);
+	if (transform.rotation) {
+		rot = transform.rotation;
+	} else {
+		rot = store.get.templateForItem(item).rotation;
+	}
+	return (rot && rot.length) ? rot : null;
+}
+
+function getPLIItemScale(item: PLIItem) {
+	let scale;
+	const transform = store.get.pliTransform(item.filename);
+	if (transform.scale != null) {
+		scale = transform.scale;
+	} else {
 		scale = store.get.templateForItem(item).scale;
 	}
 	return (scale === 1) ? null : scale;
 }
 
-export default {
+export interface RenderResult {
+	width: number;
+	height: number;
+	dx?: number;
+	dy?: number;
+	container: any;
+}
 
-	csi(localModel, step, csi, selectedPartIDs, hiResScale = 1, bypassCache) {
+export interface RendererInterface {
+	csi(
+		localModel: any, step: Step, csi: CSI, selectedPartIDs: number[],
+		hiResScale?: number, bypassCache?: boolean
+	): RenderResult | null;
+	csiWithSelection(
+		localModel: any, step: Step, csi: CSI, selectedPartIDs: number[]
+	): RenderResult | null;
+	pli(
+		colorCode: number, filename: string, item: CSI | PLIItem,
+		hiResScale?: number, bypassCache?: boolean
+	): RenderResult | null;
+	clearCanvasCache(): void;
+	removeCanvas(item: ItemTypes): void;
+	adjustCameraZoom(): void;
+}
+
+export const Renderer: RendererInterface = {
+
+	csi(localModel, step, csi, selectedPartIDs, hiResScale = 1, bypassCache = false) {
 
 		if (csi.domID == null) {
 			csi.domID = `CSI_${step.csiID}`;
@@ -67,20 +103,20 @@ export default {
 
 		let container = canvasCache.get(csi.domID, bypassCache);
 		if (csi.isDirty || container == null || bypassCache) {
-			const config = {
+			const config: any = {
 				size: hiResScale * 1000,
-				zoom: getScale(csi),
+				zoom: getCSIScale(csi),
 				resizeContainer: true,
 			};
 			if (!store.get.isTitlePage(step.parent)) {
 				const partList = store.get.partList(step);
-				if (!partList.length) {
+				if (partList == null || !partList.length) {
 					return null;
 				}
 				config.partList = partList;
 				config.selectedPartIDs = selectedPartIDs;
 				config.displacedParts = step.displacedParts;
-				config.rotation = getRotation(csi);
+				config.rotation = getCSIRotation(csi);
 				config.displacementArrowColor = store.state.template.step.csi.displacementArrow.fill.color;
 			}
 			container = container || canvasCache.create(csi.domID);
@@ -92,15 +128,15 @@ export default {
 	csiWithSelection(localModel, step, csi, selectedPartIDs) {
 		const config = {
 			size: 1000,
-			zoom: getScale(csi),
+			zoom: getCSIScale(csi),
 			partList: store.get.partList(step),
 			selectedPartIDs,
 			resizeContainer: true,
 			displacedParts: step.displacedParts,
-			rotation: getRotation(csi),
+			rotation: getCSIRotation(csi),
 			displacementArrowColor: store.state.template.step.csi.displacementArrow.fill.color,
 		};
-		const container = canvasCache.get(null, true);
+		const container = canvasCache.get();
 		const offset = LDRender.renderAndDeltaSelectedPart(localModel, container, config);
 		return {
 			width: container.width,
@@ -116,16 +152,17 @@ export default {
 			item.domID = `PLI_${filename}_${colorCode}`;
 			item.isDirty = true;
 		}
-
 		let container = canvasCache.get(item.domID, bypassCache);
 		if (item.isDirty || container == null || bypassCache) {
+			const zoom = (item.type === 'csi') ? getCSIScale(item) : getPLIItemScale(item);
+			const rotation = (item.type === 'csi') ? getCSIRotation(item) : getPLIItemRotation(item);
 			const config = {
 				size: hiResScale * 1000,
-				zoom: getScale(item),
+				zoom,
 				resizeContainer: true,
-				rotation: getRotation(item),
+				rotation,
 			};
-			container = container || canvasCache.create(item.domID);
+			container = container || canvasCache.create(item.domID || '');
 			LDRender.renderPart(colorCode, filename, container, config);
 			delete item.isDirty;
 		}
@@ -145,10 +182,14 @@ export default {
 	},
 	adjustCameraZoom() {
 
+		if (store.model == null) {
+			return;
+		}
+
 		// Render the main model; if it's too big to fit in the default view, zoom out until it fits
 		const size = 1000, maxSize = size - 150, zoomStep = 20;
 		const config = {size, resizeContainer: true};
-		const container = canvasCache.get(null, true);
+		const container = canvasCache.get();
 		let zoom = 0;
 
 		let res = LDRender.renderPart(0, store.model.filename, container, config);

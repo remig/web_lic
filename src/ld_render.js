@@ -84,7 +84,7 @@ function buildConfig(config) {
 
 /* eslint-disable no-labels */
 function contextBoundingBox(data, w, h) {
-	let x, y, minX, minY, maxX, maxY;
+	let x, y, minX = 0, minY = 0, maxX = 0, maxY = 0;
 	o1: {
 		for (y = h; y--;) {
 			for (x = w; x--;) {

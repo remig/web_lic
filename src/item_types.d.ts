@@ -157,9 +157,10 @@ interface Callout extends StepParent, BoxedItem {
 interface CSI extends BoxedItem {
 	type: 'csi';
 	annotations: number[];
+	autoScale: number | null;
 	domID: string | null;
 	rotation: Rotation[] | null;
-	scale: number;
+	scale: number | null;
 	isDirty: boolean;
 	width: number | null;
 	height: number | null;
