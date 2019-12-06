@@ -12,7 +12,7 @@ export interface AnnotationMutationInterface {
 			annotationType: AnnotationTypes,
 			properties: any,
 			parent: LookupItem,
-			x?: number, y?: number
+			x: number, y: number
 		}
 	): Annotation
 	set(
@@ -28,9 +28,12 @@ export interface AnnotationMutationInterface {
 export const AnnotationMutations: AnnotationMutationInterface = {
 	add({annotationType, properties, parent, x, y}) {
 
-		const annotation = store.mutations.item.add({item: {
-			type: 'annotation',
-			annotationType,
+		const annotation = store.mutations.item.add<Annotation>({item: {
+			type: 'annotation', id: -1, parent,
+			annotationType, points: [],
+			color: '', font: '', text: '',
+			align: 'left', valign: 'top',
+			x: 0, y: 0, width: 0, height: 0,
 		}, parent});
 
 		_.assign(annotation, properties);
@@ -49,12 +52,14 @@ export const AnnotationMutations: AnnotationMutationInterface = {
 			}
 		} else if (annotation.annotationType === 'arrow') {
 			annotation.points = [];
-			store.mutations.item.add({item: {
-				type: 'point', x, y,
+			store.mutations.item.add<PointItem>({item: {
+				type: 'point', id: -1, parent: annotation,
+				x, y, relativeTo: null,
 			}, parent: annotation});
 
-			store.mutations.item.add({item: {
-				type: 'point', x: (x || 0) + 100, y,
+			store.mutations.item.add<PointItem>({item: {
+				type: 'point', id: -1, parent: annotation,
+				x: (x || 0) + 100, y, relativeTo: null,
 			}, parent: annotation});
 		} else {
 			// image annotation width & height set by image load logic during first draw

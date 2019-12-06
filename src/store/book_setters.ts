@@ -56,11 +56,12 @@ export const BookMutations: BookMutationInterface = {
 		const pageList = pageNumbers.map(pageNumber => {
 			return store.get.itemByNumber('page', pageNumber);
 		});
-		const book = store.mutations.item.add({item: {
-			type: 'book',
+		const parent: LookupItem = {id: -1, type: 'book'};
+		const book = store.mutations.item.add<Book>({item: {
+			type: 'book', id: -1, parent,
 			pages: [],
 			number: bookNumber,
-		}});
+		}, parent});
 		pageList.forEach(page => {
 			if (page != null) {
 				store.mutations.item.reparent({

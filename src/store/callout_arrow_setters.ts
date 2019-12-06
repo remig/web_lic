@@ -12,16 +12,19 @@ export interface CalloutArrowMutationInterface {
 
 export const CalloutArrowMutations: CalloutArrowMutationInterface = {
 	add({parent}) {
-		const arrow = store.mutations.item.add({item: {
-			type: 'calloutArrow', points: [], direction: 'right',
+		const arrow = store.mutations.item.add<CalloutArrow>({item: {
+			type: 'calloutArrow', id: -1, parent,
+			points: [], direction: 'right',
 		}, parent});
 
-		store.mutations.item.add({item: {
-			type: 'point', x: 0, y: 0,
+		store.mutations.item.add<PointItem>({item: {
+			type: 'point', id: -1, parent: arrow,
+			x: 0, y: 0, relativeTo: null,
 		}, parent: arrow});
 
-		store.mutations.item.add({item: {
-			type: 'point', x: 0, y: 0,
+		store.mutations.item.add<PointItem>({item: {
+			type: 'point', id: -1, parent: arrow,
+			x: 0, y: 0, relativeTo: null,
 		}, parent: arrow});
 
 		return arrow;
@@ -45,8 +48,11 @@ export const CalloutArrowMutations: CalloutArrowMutationInterface = {
 		const conv = store.get.coords.pointToPage;
 		const midpoint = _.geom.midpoint(conv(p1), conv(p2));
 		const pageMidpoint = store.get.coords.pageToItem(midpoint, p1.relativeTo);
-		store.mutations.item.add({
-			item: {type: 'point', relativeTo: p1.relativeTo, ...pageMidpoint},
+		store.mutations.item.add<PointItem>({
+			item: {
+				type: 'point', id: -1, parent: arrowItem,
+				relativeTo: p1.relativeTo, ...pageMidpoint,
+			},
 			parent: arrowItem,
 			parentInsertionIndex,
 		});

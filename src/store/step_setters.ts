@@ -10,7 +10,7 @@ export interface StepMutationInterface {
 	add(
 		{dest, doLayout, model, stepNumber,
 			renumber, insertionIndex, parentInsertionIndex}
-		: {dest: LookupItem, doLayout?: boolean, model?: Model, stepNumber?: number,
+		: {dest: LookupItem, doLayout?: boolean, model?: StepModel, stepNumber?: number,
 			renumber?: boolean, insertionIndex?: number, parentInsertionIndex?: number}
 	): Step;
 	delete(
@@ -51,20 +51,22 @@ export interface StepMutationInterface {
 
 export const StepMutations: StepMutationInterface = {
 	add(
-		{dest, doLayout = false, model = null, stepNumber = null, renumber = false,
-			insertionIndex = -1, parentInsertionIndex = -1}
+		{dest, doLayout = false, model = null, stepNumber = null,
+			renumber = false, insertionIndex = -1, parentInsertionIndex = -1}
 	) {
 
-		const parent = store.get.lookupToItem(dest);
-		const step = store.mutations.item.add({
+		// TODO: parent should never be null here
+		const parent = store.get.lookupToItem(dest) || {type: 'page', id: -1};
+		const step = store.mutations.item.add<Step>({
 			item: {
-				type: 'step',
-				number: stepNumber, numberLabelID: null,
+				type: 'step', id: -1, parent,
+				number: -1, numberLabelID: null,
 				parts: [], callouts: [], steps: [], dividers: [],
 				submodelImages: [], annotations: [], stretchedPages: [],
 				csiID: null, pliID: null, rotateIconID: null,
-				model: model || {filename: null, parentStepID: null},
-				x: null, y: null, width: null, height: null, subStepLayout: 'vertical',
+				model: model || {filename: '', parentStepID: null},
+				prevBookParts: null, displacedParts: null,
+				x: 0, y: 0, width: 0, height: 0, subStepLayout: 'vertical',
 			},
 			parent,
 			insertionIndex,
@@ -78,10 +80,11 @@ export const StepMutations: StepMutationInterface = {
 		}
 
 		if (stepNumber != null) {
-			store.mutations.item.add({item: {
-				type: 'numberLabel',
+			step.number = stepNumber;
+			store.mutations.item.add<NumberLabel>({item: {
+				type: 'numberLabel', id: -1, parent: step,
 				align: 'left', valign: 'top',
-				x: null, y: null, width: null, height: null,
+				x: 0, y: 0, width: 0, height: 0,
 			}, parent: step});
 		}
 		if (renumber) {

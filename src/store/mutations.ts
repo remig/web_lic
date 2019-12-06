@@ -14,7 +14,7 @@ import {CalloutMutationInterface, CalloutMutations} from '../store/callout_sette
 import {CalloutArrowMutationInterface, CalloutArrowMutations} from '../store/callout_arrow_setters';
 import {CSIMutationInterface, CSIMutations} from '../store/csi_setters';
 import {InventoryPageMutationInterface, InventoryPageMutations} from '../store/inventory_page_setters';
-import ItemSetters from '../store/item_setters';
+import {ItemMutationInterface, ItemMutations} from '../store/item_setters';
 import {PageMutationInterface, PageMutations} from '../store/page_setters';
 import {PartMutationInterface, PartMutations} from '../store/part_setters';
 import {PLIMutationInterface, PLIMutations} from '../store/pli_setters';
@@ -36,11 +36,14 @@ export interface MutationInterface {
 		setLength({divider, newLength}: {divider: LookupItem, newLength: number}): void,
 		delete({divider}: {divider: any}): void,
 	},
+	numberLabel: {},
 	page: PageMutationInterface,
 	pli: PLIMutationInterface,
 	pliItem: PLIItemMutationInterface,
-	item: any,
+	item: ItemMutationInterface,
 	part: PartMutationInterface,
+	point: {},
+	quantityLabel: {},
 	rotateIcon: {
 		add({parent}: {parent: LookupItem}): any,
 		delete({rotateIcon}: {rotateIcon: LookupItem}): void,
@@ -83,8 +86,8 @@ export const Mutations: MutationInterface = {
 	csi: CSIMutations,
 	divider: {
 		add({parent, p1, p2}: {parent: any, p1: Point, p2: Point}) {
-			return store.mutations.item.add({item: {
-				type: 'divider', p1, p2,
+			return store.mutations.item.add<Divider>({item: {
+				type: 'divider', id: -1, parent, p1, p2,
 			}, parent});
 		},
 		reposition({item, dx, dy}: {item: LookupItem, dx: number, dy: number}) {
@@ -114,19 +117,19 @@ export const Mutations: MutationInterface = {
 			store.mutations.item.delete({item: divider});
 		},
 	},
-	// numberLabel
+	numberLabel: {},
 	page: PageMutations,
 	pli: PLIMutations,
 	pliItem: PLIItemMutations,
-	// point
-	item: ItemSetters,
+	point: {},
+	item: ItemMutations,
 	part: PartMutations,
-	// quantityLabel
+	quantityLabel: {},
 	rotateIcon: {
 		add({parent}: {parent: LookupItem}) {
-			return store.mutations.item.add({item: {
-				type: 'rotateIcon',
-				x: null, y: null, scale: 1,
+			return store.mutations.item.add<RotateIcon>({item: {
+				type: 'rotateIcon', id: -1, parent,
+				x: 0, y: 0, scale: 1, width: 0, height: 0,
 			}, parent});
 		},
 		delete({rotateIcon}: {rotateIcon: LookupItem}) {
@@ -241,7 +244,7 @@ export const Mutations: MutationInterface = {
 					text: store.get.modelName(true),
 					font: '20pt Helvetica',
 				},
-				parent: page,
+				parent: page, x: 0, y: 0,
 			});
 
 			// TODO: This part & page count gets out of sync with the doc as pages are added / removed
@@ -262,7 +265,7 @@ export const Mutations: MutationInterface = {
 			store.mutations.annotation.add({
 				annotationType: 'label',
 				properties: {text, font: '16pt Helvetica'},
-				parent: page,
+				parent: page, x: 0, y: 0,
 			});
 		}
 

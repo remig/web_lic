@@ -39,7 +39,7 @@ export const TemplatePageMutations: TemplatePageMutationInterface = {
 			parent: step, modelFilename: modelData.model.filename, quantity: 2,
 		});
 
-		if (step.pliID) {
+		if (step.pliID != null) {
 			const pli = store.get.pli(step.pliID);
 			if (pli) {
 				[modelData.part1, modelData.part2].forEach(p => {

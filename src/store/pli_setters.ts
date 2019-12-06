@@ -14,10 +14,10 @@ export interface PLIMutationInterface {
 
 export const PLIMutations: PLIMutationInterface = {
 	add({parent}) {
-		return store.mutations.item.add({item: {
-			type: 'pli',
+		return store.mutations.item.add<PLI>({item: {
+			type: 'pli', id: -1, parent,
 			pliItems: [],
-			x: null, y: null, width: null, height: null,
+			x: 0, y: 0, width: 0, height: 0,
 			innerContentOffset: {x: 0, y: 0},
 			borderOffset: {x: 0, y: 0},
 		}, parent});

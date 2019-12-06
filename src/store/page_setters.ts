@@ -28,17 +28,17 @@ export const PageMutations: PageMutationInterface = {
 	// parent = null, insertionIndex = -1, parentInsertionIndex = null}
 	add({
 		pageNumber, subtype = 'page', doNotRenumber = false,
-		parent = null, insertionIndex = -1, parentInsertionIndex = null,
+		parent = null, insertionIndex = -1, parentInsertionIndex = -1,
 	}) {
 		const pageSize = store.state.template.page;
-		const page = store.mutations.item.add({
+		const page = store.mutations.item.add<Page>({
 			item: {
-				type: 'page',
+				type: 'page', id: -1, parent: parent || {type: 'book', id: -1},
 				subtype: subtype,
 				steps: [], dividers: [], annotations: [], pliItems: [],
 				needsLayout: true, locked: false, stretchedStep: null,
 				innerContentOffset: {x: 0, y: 0},
-				number: pageNumber,
+				number: -1,
 				numberLabelID: null,
 				layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
 			},
@@ -49,13 +49,15 @@ export const PageMutations: PageMutationInterface = {
 
 		if (pageNumber === 'id') {  // Special flag to say 'use page ID as page number'
 			page.number = page.id;
+		} else if (typeof pageNumber === 'number') {
+			page.number = pageNumber;
 		}
 
 		if (pageNumber != null) {
-			store.mutations.item.add({item: {
-				type: 'numberLabel',
+			store.mutations.item.add<NumberLabel>({item: {
+				type: 'numberLabel', id: -1, parent: page,
 				align: 'right', valign: 'bottom',
-				x: null, y: null, width: null, height: null,
+				x: 0, y: 0, width: 0, height: 0,
 			}, parent: page});
 		}
 

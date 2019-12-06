@@ -17,10 +17,12 @@ export interface CSIMutationInterface {
 
 export const CSIMutations: CSIMutationInterface = {
 	add({parent}) {
-		return store.mutations.item.add({item: {
-			type: 'csi', domID: null, annotations: [],
-			rotation: null, scale: null,
-			x: null, y: null, width: null, height: null,
+		return store.mutations.item.add<CSI>({item: {
+			type: 'csi', id: -1, parent,
+			domID: null, isDirty: false,
+			annotations: [],
+			rotation: null, scale: 1,
+			x: 0, y: 0, width: 0, height: 0,
 		}, parent});
 	},
 	rotate({csi, rotation, addRotateIcon, doLayout = false}) {

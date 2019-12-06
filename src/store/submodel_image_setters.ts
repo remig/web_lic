@@ -15,22 +15,25 @@ export interface SubmodelImageMutationInterface {
 
 export const submodelImageMutations: SubmodelImageMutationInterface = {
 	add({parent, modelFilename, quantity = 1}) {
-		const submodelImage = store.mutations.item.add({item: {
-			// TODO: submodelImages don't have a CSI, they have a pliItem with no quantity label.  Fix that
-			type: 'submodelImage', csiID: null, quantityLabelID: null,
-			modelFilename,
-			quantity,
-			x: null, y: null, width: null, height: null,
-			innerContentOffset: {x: 0, y: 0},
-		}, parent});
+		// TODO: submodelImages don't have a CSI, they have a pliItem with no quantity label.  Fix that
+		const submodelImage = store.mutations.item.add<SubmodelImage>(
+			{item: {
+				type: 'submodelImage', id: -1, parent,
+				csiID: null, quantityLabelID: null,
+				modelFilename,
+				quantity,
+				x: 0, y: 0, width: 0, height: 0,
+				innerContentOffset: {x: 0, y: 0},
+			}, parent}
+		);
 
 		store.mutations.csi.add({parent: submodelImage});
 
 		if (quantity > 1) {
-			store.mutations.item.add({item: {
-				type: 'quantityLabel',
+			store.mutations.item.add<QuantityLabel>({item: {
+				type: 'quantityLabel', id: -1, parent: submodelImage,
 				align: 'right', valign: 'bottom',
-				x: null, y: null, width: null, height: null,
+				x: 0, y: 0, width: 0, height: 0,
 			}, parent: submodelImage});
 		}
 		return submodelImage;

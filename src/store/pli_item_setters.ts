@@ -17,19 +17,18 @@ export const PLIItemMutations: PLIItemMutationInterface = {
 	add(
 		{parent, filename, colorCode, quantity = 1}
 	) {
-		const pliItem = store.mutations.item.add({item: {
-			type: 'pliItem', domID: null,
-			filename,
-			colorCode,
-			quantity,
-			quantityLabelID: null,
-			x: null, y: null, width: null, height: null,
+		const pliItem = store.mutations.item.add<PLIItem>({item: {
+			type: 'pliItem', id: -1, parent,
+			filename, colorCode,
+			quantity, quantityLabelID: -1,
+			x: 0, y: 0, width: 0, height: 0,
+			domID: null, isDirty: false,
 		}, parent: parent});
 
-		store.mutations.item.add({item: {
-			type: 'quantityLabel',
+		store.mutations.item.add<QuantityLabel>({item: {
+			type: 'quantityLabel', id: -1, parent: pliItem,
 			align: 'left', valign: 'top',
-			x: null, y: null, width: null, height: null,
+			x: 0, y: 0, width: 0, height: 0,
 		}, parent: pliItem});
 
 		return pliItem;

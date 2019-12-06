@@ -23,10 +23,10 @@ export interface CalloutMutationInterface {
 export const CalloutMutations: CalloutMutationInterface = {
 	add({parent, position = 'left', includeEmptyStep = false}) {
 		const pageSize = store.state.template.page;
-		const callout = store.mutations.item.add({item: {
-			type: 'callout',
+		const callout = store.mutations.item.add<Callout>({item: {
+			type: 'callout', id: -1, parent,
 			steps: [], calloutArrows: [],
-			x: null, y: null, width: null, height: null,
+			x: 0, y: 0, width: 0, height: 0,
 			innerContentOffset: {x: 0, y: 0},
 			borderOffset: {x: 0, y: 0},
 			layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
@@ -106,10 +106,10 @@ export const CalloutMutations: CalloutMutationInterface = {
 				}
 				step.number = idx + 1;
 				if (step.numberLabelID == null) {
-					store.mutations.item.add({item: {
-						type: 'numberLabel',
+					store.mutations.item.add<NumberLabel>({item: {
+						type: 'numberLabel', id: -1, parent: step,
 						align: 'left', valign: 'top',
-						x: null, y: null, width: null, height: null,
+						x: 0, y: 0, width: 0, height: 0,
 					}, parent: step});
 				}
 			});

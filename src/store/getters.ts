@@ -114,13 +114,13 @@ export interface GetterInterface {
 	coords: {
 		pageToItem(
 			{x, y}: {x: number, y: number},
-			itemLookup: LookupItem,
+			itemLookup: LookupItem | null,
 		): Point;
 		itemToPage(itemLookup: LookupItem): Point;
 		pointToPage(
-			x: number | {x: number, y: number, relativeTo: LookupItem},
+			x: number | PointItem,
 			y?: number,
-			relativeTo?: LookupItem
+			relativeTo?: LookupItem | null
 		): Point;
 	},
 	targetBoxFromPoints(targetLookup: LookupItem): Box | null;
@@ -257,9 +257,11 @@ export const Getters: GetterInterface = {
 				return parent ? template[parent.type].quantityLabel : null;
 			case 'numberLabel':
 				if (parent) {
-					if (parent.parent && parent.parent.type === 'callout') {
+					if (parent.parent.type === 'callout') {
 						return template.callout.step.numberLabel;
-					} else if (parent.type === 'page' && (parent as Page).subtype === 'templatePage') {
+					} else if (parent.type === 'page'
+						&& parent.subtype === 'templatePage'
+					) {
 						return template.page.numberLabel;
 					}
 					return template[parent.type].numberLabel;
@@ -411,34 +413,18 @@ export const Getters: GetterInterface = {
 		};
 	})(),
 	prev<T>(itemLookup: LookupItem, itemList?: NumberedItem[]) {
-		// Get the previous item in the specified item's list, based on item.number and matching parent types
+		// Get the previous item in the specified item's list, based on
+		// item.number and matching types and parent types
 		const item = store.get.lookupToItem(itemLookup);
 		if (!item || !hasProperty<NumberedItem>(item, 'number')) {
 			return null;
 		}
 		const foo: NumberedItem[] = itemList || getStateChildList<NumberedItem>(item.type);
-		const idx = foo.findIndex((el: NumberedItem) => {
-			if (el.number === item.number - 1 && (el.parent || {}).type === (item.parent || {}).type) {
-				if ((el.parent || {}).type === 'page') {
-					const page = store.get.page(item.parent);
-					const elPage = store.get.page(el.parent);
-					return page && elPage && (page.subtype === elPage.subtype);
-				}
-				return true;
+		const foundItem = foo.find((el: NumberedItem) => {
+			if (el.number !== item.number - 1 || el.type !== item.type) {
+				return false;
 			}
-			return false;
-		});
-		return (idx < 0) ? null : foo[idx] as unknown as T;
-	},
-	next<T>(itemLookup: LookupItem, itemList?: NumberedItem[]) {
-		// Get the next item in the specified item's list, based on item.number and matching parent types
-		const item = store.get.lookupToItem(itemLookup);
-		if (!item || !hasProperty<NumberedItem>(item, 'number')) {
-			return null;
-		}
-		const foo: NumberedItem[] = itemList || getStateChildList<NumberedItem>(item.type);
-		const idx = foo.findIndex((el: NumberedItem) => {
-			if (el.number === item.number + 1 && el.parent.type === item.parent.type) {
+			if (el.parent.type === item.parent.type) {
 				if (el.parent.type === 'page') {
 					const page = store.get.page(item.parent);
 					const elPage = store.get.page(el.parent);
@@ -448,11 +434,35 @@ export const Getters: GetterInterface = {
 			}
 			return false;
 		});
-		return (idx < 0) ? null : foo[idx] as unknown as T;
+		return foundItem ? foundItem as unknown as T : null;
+	},
+	next<T>(itemLookup: LookupItem, itemList?: NumberedItem[]) {
+		// Get the next item in the specified item's list, based on
+		// item.number and matching types and parent types
+		const item = store.get.lookupToItem(itemLookup);
+		if (!item || !hasProperty<NumberedItem>(item, 'number')) {
+			return null;
+		}
+		const foo = itemList || getStateChildList<NumberedItem>(item.type);
+		const foundItem = foo.find(el => {
+			if (el == null || el.number !== item.number + 1 || el.type !== item.type) {
+				return false;
+			}
+			if (el.parent.type === item.parent.type) {
+				if (el.parent.type === 'page') {
+					const page = store.get.page(item.parent);
+					const elPage = store.get.page(el.parent);
+					return page && elPage && (page.subtype === elPage.subtype);
+				}
+				return true;
+			}
+			return false;
+		});
+		return foundItem ? foundItem as unknown as T : null;
 	},
 	parent(itemLookup: LookupItem) {
 		const item = store.get.lookupToItem(itemLookup);
-		if (item && item.parent) {
+		if (item != null) {
 			return store.get.lookupToItem(item.parent);
 		}
 		return null;
@@ -670,10 +680,10 @@ export const Getters: GetterInterface = {
 		// x & y are in page coordinates; transform to item coordinates
 		pageToItem(
 			{x, y}: {x: number, y: number},
-			itemLookup: LookupItem,
+			itemLookup: LookupItem | null,
 		) {
-			let item: any = store.get.lookupToItem(itemLookup);
-			while (item) {
+			let item = store.get.lookupToItem(itemLookup);
+			while (item && hasProperty<PointedItem>(item, 'x')) {
 				x -= item.x || 0;
 				y -= item.y || 0;
 				item = store.get.parent(item);
@@ -691,9 +701,9 @@ export const Getters: GetterInterface = {
 			return {x, y};
 		},
 		pointToPage(
-			xIn: number | {x: number, y: number, relativeTo: LookupItem},
+			xIn: number | PointItem,
 			y?: number,
-			relativeTo?: LookupItem
+			relativeTo?: LookupItem | null
 		) {
 			let x;
 			if (typeof xIn === 'number') {

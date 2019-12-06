@@ -31,6 +31,11 @@ interface Model {
 	parentStepID?: number;
 }
 
+interface StepModel {
+	filename: string;
+	parentStepID: number | null;
+}
+
 interface ColorTableEntry {
 	name: string;
 	color: string;
@@ -88,11 +93,6 @@ type ItemTypes =
 	| NumberLabel | Page | PartItem | PLIItem | PLI | PointItem
 	| QuantityLabel | RotateIcon | Step | SubmodelImage;
 
-type ItemListTypes =
-	'annotations' | 'books' | 'callouts' | 'calloutArrows' | 'csis' | 'dividers'
-	| 'numberLabels'| 'pages' | 'plis' | 'pliItems' | 'points' | 'parts'
-	| 'quantityLabels' | 'rotateIcons' | 'steps' | 'submodelImages' | 'submodels';
-
 interface LookupItem {
 	id: number;
 	type: ItemTypeNames;
@@ -102,9 +102,9 @@ interface Item extends LookupItem {
 	parent: LookupItem;
 }
 
-interface ItemWithChildList extends Item {
-	getList(itemType: ItemTypeNames): number[];
-}
+interface PointedItem extends Item, Point {}
+
+interface BoxedItem extends Item, Box {}
 
 interface NumberedItem extends Item {
 	number: number;
@@ -127,27 +127,25 @@ interface PartItem extends Item {
 	stepID: number;
 }
 
-type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
-
-interface Annotation extends Item, Box, Alignment {
+interface Annotation extends BoxedItem, Alignment, PointListItem {
 	type: 'annotation';
-	annotationType: 'label' | 'image';
+	annotationType: AnnotationTypes;
 	color: string;
 	font: string;
 	text: string;
 }
 
-interface Book extends Item, NumberedItem {
+interface Book extends NumberedItem {
 	type: 'book';
 	pages: number[];
 }
 
-interface CalloutArrow extends Item, PointListItem {
+interface CalloutArrow extends PointListItem {
 	type: 'calloutArrow';
 	direction: Direction;
 }
 
-interface Callout extends Item, StepParent, Box {
+interface Callout extends StepParent, BoxedItem {
 	type: 'callout';
 	borderOffset: Point;
 	calloutArrows: number[];
@@ -156,11 +154,11 @@ interface Callout extends Item, StepParent, Box {
 	position: Position;
 }
 
-interface CSI extends Item, Box {
+interface CSI extends BoxedItem {
 	type: 'csi';
 	annotations: number[];
-	domID: string;
-	rotation: Rotation[];
+	domID: string | null;
+	rotation: Rotation[] | null;
 	scale: number;
 	isDirty: boolean;
 	width: number | null;
@@ -173,11 +171,13 @@ interface Divider extends Item {
 	p2: Point
 }
 
-interface NumberLabel extends Item, Box, Alignment {
+interface NumberLabel extends BoxedItem, Alignment {
 	type: 'numberLabel';
 }
 
-interface Page extends Item, PLIItemParent, NumberedItem, StepParent {
+type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
+
+interface Page extends PLIItemParent, NumberedItem, StepParent {
 	type: 'page';
 	subtype: PageSubtypes;
 	annotations: number[];
@@ -186,18 +186,18 @@ interface Page extends Item, PLIItemParent, NumberedItem, StepParent {
 	layout: Orientation
 	locked: boolean;
 	needsLayout: boolean;
-	numberLabelID: number;
+	numberLabelID: number | null;
 	pliItems: number[];
 	stretchedStep: any;
 }
 
-interface PLI extends Item, PLIItemParent, Box {
+interface PLI extends PLIItemParent, BoxedItem {
 	type: 'pli';
 	borderOffset: Point;
 	innerContentOffset: Point;
 }
 
-interface PLIItem extends Item, Box {
+interface PLIItem extends BoxedItem {
 	type: 'pliItem';
 	domID: string | null;
 	filename: string;
@@ -207,49 +207,46 @@ interface PLIItem extends Item, Box {
 	isDirty: boolean;
 }
 
-interface PointItem extends Item, Point {
+interface PointItem extends PointedItem {
 	type: 'point';
-	relativeTo: LookupItem;
+	relativeTo: LookupItem | null;
 }
 
-interface QuantityLabel extends Item, Box, Alignment {
+interface QuantityLabel extends BoxedItem, Alignment {
 	type: 'quantityLabel';
 }
 
-interface RotateIcon extends Item, Box {
+interface RotateIcon extends BoxedItem {
 	type: 'rotateIcon';
 	scale: number;
 }
 
-interface Step extends Item, NumberedItem, Box {
+interface Step extends NumberedItem, BoxedItem {
 	type: 'step';
 	annotations: number[];
 	callouts: number[];
-	csiID?: number;
-	displacedParts: DisplacedPart[];
+	csiID: number | null;
+	displacedParts: DisplacedPart[] | null;
 	dividers: number[];
-	model: {
-		filename: string;
-		parentStepID: number | null;
-	};
-	numberLabelID: number;
+	model: StepModel;
+	numberLabelID: number | null;
 	parts: number[];
 	pliID: number | null;
-	rotateIconID?: number;
+	rotateIconID: number | null;
 	steps: number[];
 	stretchedPages: number[];
 	subStepLayout: 'horizontal' | 'vertical';
 	submodelImages: number[];
-	prevBookParts: number[];
+	prevBookParts: number[] | null;
 }
 
-interface SubmodelImage extends Item, Box {
+interface SubmodelImage extends BoxedItem {
 	type: 'submodelImage';
-	csiID: number;
+	csiID: number | null;
 	innerContentOffset: Point;
 	modelFilename: string;
 	quantity: number;
-	quantityLabelID: number;
+	quantityLabelID: number | null;
 }
 
 interface StateInterface {
