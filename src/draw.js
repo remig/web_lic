@@ -6,384 +6,6 @@ import cache from './cache';
 import LDParse from './ld_parse';
 import uiState from './ui_state';
 
-export const Draw = {
-
-	page(page, canvas, config = {}) {  // config: {hiResScale, selectedItem, noCache, noGrid}
-
-		const hiResScale = config.hiResScale = config.hiResScale || 1;
-		if (page.needsLayout) {
-			store.mutations.page.layout({page});
-		}
-
-		const ctx = canvas.getContext('2d');
-		ctx.save();
-		if (hiResScale > 1) {
-			ctx.scale(hiResScale, hiResScale);
-		}
-
-		const template = store.state.template.page;
-		ctx.clearRect(0, 0, template.width, template.height);
-
-		const rectStyle = {
-			strokeStyle: template.border.color,
-			// * 2 because line is centered on page edge, so half of it is clipped
-			lineWidth: Math.floor(template.border.width * 2),
-		};
-
-		if (template.fill.color) {
-			ctx.fillStyle = template.fill.color;
-			ctx.fillRect(0, 0, template.width, template.height);
-		}
-
-		if (template.fill.image) {
-			const cachedImage = cache.get('page', 'backgroundImage');
-			if (cachedImage) {
-				drawPageBackground(cachedImage, template.fill.image, ctx);
-			} else {
-				const image = new Image();
-				image.onload = () => {
-					// TODO: this gets called multiple times on initial page load
-					cache.set('page', 'backgroundImage', image);
-					Draw.page(page, canvas, config);
-				};
-				image.src = template.fill.image.src;
-				return;
-			}
-		}
-
-		if (template.border.cornerRadius > template.border.width) {
-			// On very rounded page corners, outside corner radius shows up inside the page.  Fill that in.
-			const s = template.border.cornerRadius / 2;
-			ctx.fillStyle = template.border.color;
-			ctx.fillRect(0, 0, s, s);
-			ctx.fillRect(template.width - s, 0, s, s);
-			ctx.fillRect(template.width - s, template.height - s, s, s);
-			ctx.fillRect(0, template.height - s, s, s);
-		}
-
-		drawRoundedRectStyled(
-			// offset corner radius by border width so radius defines inner border radius
-			ctx, 0, 0, template.width, template.height,
-			template.border.cornerRadius + template.border.width, rectStyle
-		);
-
-		if (!config.noGrid && uiState.get('grid').enabled) {
-			drawGrid(ctx, template.width, template.height);
-		}
-
-		ctx.translate(Math.floor(page.innerContentOffset.x), Math.floor(page.innerContentOffset.y));
-
-		page.steps.forEach(id => drawStep({type: 'step', id}, ctx, config));
-
-		if (page.stretchedStep) {
-			ctx.save();
-			ctx.translate(Math.floor(page.stretchedStep.leftOffset), 0);
-			drawStep({type: 'step', id: page.stretchedStep.stepID}, ctx, config);
-			ctx.restore();
-		}
-
-		page.pliItems.forEach(id => drawPLIItem({type: 'pliItem', id}, ctx, config));
-
-		drawDividers(page.dividers, ctx);
-
-		if (page.numberLabelID != null) {
-			ctx.save();
-			const lbl = store.get.numberLabel(page.numberLabelID);
-			ctx.fillStyle = template.numberLabel.color;
-			ctx.font = template.numberLabel.font;
-			ctx.textAlign = lbl.align || 'start';
-			ctx.textBaseline = lbl.valign || 'alphabetic';
-			ctx.fillText(page.number, lbl.x, lbl.y);
-			ctx.restore();
-		}
-
-		page.annotations.forEach(id => {
-			drawAnnotation(store.get.annotation(id), ctx); // eslint-disable-line no-use-before-define
-		});
-		ctx.restore();
-
-		// Draw highlight box around the selected page item, if any
-		if (config.selectedItem) {
-			let doHighlight = false;
-			const itemPage = store.get.pageForItem(config.selectedItem);
-			if (_.itemEq(itemPage, page)) {
-				doHighlight = true;
-			} else if (page.stretchedStep) {
-				const stretchedStep = store.get.step(page.stretchedStep.stepID);
-				if (store.get.isDescendent(config.selectedItem, stretchedStep)) {
-					doHighlight = true;
-				}
-			}
-			if (doHighlight) {
-				const box = store.get.highlightBox(config.selectedItem, template, page);
-				drawHighlight(ctx, box);
-			}
-		}
-	},
-};
-
-// TODO: Add support for a quantity label to a step. Useful on last step of a submodel built many times.
-function drawStep(step, ctx, config) {
-
-	step = store.get.step(step);
-
-	ctx.save();
-	ctx.translate(Math.floor(step.x), Math.floor(step.y));
-
-	if (step.csi == null && step.steps.length) {
-		step.steps.forEach(id => drawStep({type: 'step', id}, ctx, config));
-	} else if (step.csiID != null) {
-		drawCSI(step.csiID, ctx, config);
-	}
-
-	step.submodelImages.forEach(submodelImageID => {
-		drawSubmodelImage(submodelImageID, ctx, config);
-	});
-
-	step.callouts.forEach(calloutID => {
-		drawCallout(calloutID, ctx, config);
-	});
-
-	if (step.pliID != null && store.state.plisVisible) {
-		drawPLI(step.pliID, ctx, config);
-	}
-
-	if (step.numberLabelID != null) {
-		let template = store.state.template;
-		template = (step.parent.type === 'callout') ? template.callout.step : template.step;
-		const lbl = store.get.numberLabel(step.numberLabelID);
-		ctx.fillStyle = template.numberLabel.color;
-		ctx.font = template.numberLabel.font;
-		ctx.textAlign = lbl.align || 'start';
-		ctx.textBaseline = lbl.valign || 'alphabetic';
-		ctx.fillText(String(step.number), lbl.x, lbl.y);
-	}
-
-	if (step.rotateIconID != null) {
-		drawRotateIcon(step.rotateIconID, ctx);
-	}
-
-	drawDividers(step.dividers, ctx);
-
-	step.annotations.forEach(id => {
-		drawAnnotation(store.get.annotation(id), ctx); // eslint-disable-line no-use-before-define
-	});
-	ctx.restore();
-}
-
-function drawSubmodelImage(submodelImage, ctx, {hiResScale, noCache}) {
-	submodelImage = store.get.submodelImage(submodelImage);
-	const template = store.state.template.submodelImage;
-	const csi = store.get.csi(submodelImage.csiID);
-
-	const rectStyle = {
-		fillStyle: template.fill.color,
-		strokeStyle: template.border.color,
-		lineWidth: template.border.width,
-	};
-	drawRoundedRectItemStyled(ctx, submodelImage, template.border.cornerRadius, rectStyle);
-
-	ctx.save();
-	ctx.translate(
-		Math.floor(submodelImage.innerContentOffset.x),
-		Math.floor(submodelImage.innerContentOffset.y)
-	);
-
-	ctx.save();
-	ctx.scale(1 / hiResScale, 1 / hiResScale);
-	const part = LDParse.model.get.abstractPart(submodelImage.modelFilename);
-	const siCanvas = store.render.pli(part.colorCode, part.filename, csi, hiResScale, noCache).container;
-	const x = Math.floor((submodelImage.x + csi.x) * hiResScale);
-	const y = Math.floor((submodelImage.y + csi.y) * hiResScale);
-	ctx.drawImage(siCanvas, x, y);
-	ctx.restore();
-
-	if (submodelImage.quantityLabelID != null) {
-		ctx.save();
-		const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
-		ctx.fillStyle = template.quantityLabel.color;
-		ctx.font = template.quantityLabel.font;
-		ctx.textAlign = lbl.align || 'start';
-		ctx.textBaseline = lbl.valign || 'alphabetic';
-		ctx.fillText('x' + submodelImage.quantity, lbl.x, lbl.y);
-		ctx.restore();
-	}
-	ctx.restore();
-}
-
-function drawCSI(csi, ctx, {hiResScale, selectedItem, noCache}) {
-	csi = store.get.csi(csi);
-	const step = store.get.parent(csi);
-	const localModel = LDParse.model.get.abstractPart(step.model.filename);
-
-	ctx.save();
-	ctx.translate(Math.floor(csi.x), Math.floor(csi.y));
-
-	ctx.save();
-	ctx.scale(1 / hiResScale, 1 / hiResScale);
-	const havePart = selectedItem && selectedItem.type === 'part' && selectedItem.stepID === step.id;
-	const selectedPartIDs = havePart ? [selectedItem.id] : null;
-	const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
-	const res = store.render[renderer](localModel, step, csi, selectedPartIDs, hiResScale, noCache);
-	if (res) {
-		ctx.drawImage(res.container, Math.floor(-res.dx), Math.floor(-res.dy));
-	}
-	ctx.restore();
-
-	csi.annotations.forEach(id => {
-		drawAnnotation(store.get.annotation(id), ctx); // eslint-disable-line no-use-before-define
-	});
-	ctx.restore();
-}
-
-function drawPLI(pli, ctx, {hiResScale, noCache}) {
-	const template = store.state.template;
-	pli = store.get.pli(pli);
-
-	let pliItems = pli.pliItems;
-	if (!template.pli.includeSubmodels) {
-		pliItems = pliItems.filter(id => {
-			return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
-		});
-	}
-
-	if (_.isEmpty(pliItems)) {
-		return;
-	}
-	const rectStyle = {
-		fillStyle: template.pli.fill.color,
-		strokeStyle: template.pli.border.color,
-		lineWidth: template.pli.border.width,
-	};
-	drawRoundedRectItemStyled(ctx, pli, template.pli.border.cornerRadius, rectStyle);
-
-	ctx.save();
-	ctx.translate(Math.floor(pli.innerContentOffset.x), Math.floor(pli.innerContentOffset.y));
-	ctx.translate(Math.floor(pli.x), Math.floor(pli.y));
-	pliItems.forEach(idx => {
-		drawPLIItem(idx, ctx, {hiResScale, noCache});
-	});
-	ctx.restore();
-}
-
-function drawPLIItem(pliItem, ctx, {hiResScale, noCache}) {
-	ctx.save();
-	ctx.scale(1 / hiResScale, 1 / hiResScale);
-	pliItem = store.get.pliItem(pliItem);
-	const pliCanvas = store.render.pli(
-		pliItem.colorCode, pliItem.filename, pliItem, hiResScale, noCache
-	).container;
-	const x = Math.floor(pliItem.x) * hiResScale;
-	const y = Math.floor(pliItem.y) * hiResScale;
-	ctx.drawImage(pliCanvas, x, y);
-	ctx.restore();
-
-	const template = store.state.template.pliItem.quantityLabel;
-	const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-	ctx.fillStyle = template.color;
-	ctx.font = template.font;
-	ctx.textBaseline = quantityLabel.valign || 'top';
-	ctx.fillText(
-		'x' + pliItem.quantity,
-		pliItem.x + quantityLabel.x,
-		pliItem.y + quantityLabel.y
-	);
-}
-
-function drawCallout(callout, ctx, config) {
-	const template = store.state.template.callout;
-	callout = store.get.callout(callout);
-	ctx.save();
-
-	const rectStyle = {
-		fillStyle: template.fill.color,
-		strokeStyle: template.border.color,
-		lineWidth: template.border.width,
-	};
-	drawRoundedRectItemStyled(ctx, callout, template.border.cornerRadius, rectStyle);
-
-	ctx.translate(Math.floor(callout.x), Math.floor(callout.y));
-	ctx.translate(Math.floor(callout.innerContentOffset.x), Math.floor(callout.innerContentOffset.y));
-
-	callout.steps.forEach(id => drawStep({type: 'step', id}, ctx, config));
-	ctx.restore();
-
-	ctx.strokeStyle = template.arrow.border.color;
-	ctx.fillStyle = template.arrow.border.color;
-	ctx.lineWidth = template.arrow.border.width;
-	callout.calloutArrows.forEach(arrowID => {
-		drawCalloutArrow(arrowID, ctx);
-	});
-}
-
-function drawCalloutArrow(arrow, ctx) {
-	arrow = store.get.calloutArrow(arrow);
-	const border = store.state.template.callout.arrow.border;
-	if (!_.isBorderVisible(border)) {
-		return;
-	}
-	drawAnnotation({ // eslint-disable-line no-use-before-define
-		id: arrow.id,
-		type: arrow.type,
-		annotationType: (arrow.points.length > 2) ? 'arrow' : 'stairStepArrow',
-		parent: store.get.parent(arrow.parent),
-		border,
-		points: arrow.points,
-		direction: arrow.direction,
-	}, ctx);
-}
-
-function drawRotateIcon(icon, ctx) {
-	const template = store.state.template.rotateIcon;
-	icon = store.get.rotateIcon(icon);
-	const scale = {  // Icon is drawn in 100 x 94 space; scale to that
-		width: icon.width / 100,  // TODO: put Layout.rotateIconAspectRatio somewhere easier to read
-		height: icon.height / 94,
-	};
-
-	ctx.strokeStyle = template.border.color;
-	ctx.lineWidth = template.border.width;
-	ctx.save();
-	ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
-	ctx.scale(scale.width, scale.height);
-
-	if (template.fill.color) {
-		ctx.fillStyle = template.fill.color;
-		drawRoundedRect(ctx, 0, 0, 100, 94, 15);
-		ctx.fill();
-	}
-
-	const haveBorder = _.isBorderVisible(template.border);
-	if (haveBorder) {
-		drawRoundedRect(ctx, 0, 0, 100, 94, 15);
-	}
-	ctx.restore();
-	if (haveBorder) {
-		ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
-	}
-
-	if (_.isBorderVisible(template.arrow.border)) {
-		ctx.fillStyle = ctx.strokeStyle = template.arrow.border.color;
-		ctx.lineWidth = template.arrow.border.width;
-		ctx.save();
-		ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
-		ctx.scale(scale.width, scale.height);
-		ctx.beginPath();
-		ctx.arc(50, 38, 39, _.radians(29), _.radians(130));
-		ctx.stroke();
-
-		ctx.beginPath();
-		ctx.arc(50, 56, 39, _.radians(180 + 29), _.radians(180 + 130));
-		ctx.stroke();
-
-		drawArrowHead(ctx, 24, 67, 135, [1, 0.7]); // eslint-disable-line no-use-before-define
-		ctx.fill();
-		drawArrowHead(ctx, 75, 27, -45, [1, 0.7]); // eslint-disable-line no-use-before-define
-		ctx.fill();
-	}
-	ctx.restore();
-}
-
 const drawArrowHead = (() => {
 
 	const presetAngles = {up: 180, left: 90, right: -90};
@@ -534,7 +156,7 @@ const drawAnnotation = (() => {
 					annotation.height = this.height;
 					cache.set(annotation, 'rawImage', image);
 					const page = store.get.pageForItem(annotation);
-					Draw.page(page, ctx.canvas);
+					Draw.page(page, ctx.canvas);  // eslint-disable-line no-use-before-define
 				};
 				image.src = annotation.src;
 			}
@@ -545,6 +167,384 @@ const drawAnnotation = (() => {
 		drawLookup[annotation.annotationType](annotation, ctx);
 	};
 })();
+
+export const Draw = {
+
+	page(page, canvas, config = {}) {  // config: {hiResScale, selectedItem, noCache, noGrid}
+
+		const hiResScale = config.hiResScale = config.hiResScale || 1;
+		if (page.needsLayout) {
+			store.mutations.page.layout({page});
+		}
+
+		const ctx = canvas.getContext('2d');
+		ctx.save();
+		if (hiResScale > 1) {
+			ctx.scale(hiResScale, hiResScale);
+		}
+
+		const template = store.state.template.page;
+		ctx.clearRect(0, 0, template.width, template.height);
+
+		const rectStyle = {
+			strokeStyle: template.border.color,
+			// * 2 because line is centered on page edge, so half of it is clipped
+			lineWidth: Math.floor(template.border.width * 2),
+		};
+
+		if (template.fill.color) {
+			ctx.fillStyle = template.fill.color;
+			ctx.fillRect(0, 0, template.width, template.height);
+		}
+
+		if (template.fill.image) {
+			const cachedImage = cache.get('page', 'backgroundImage');
+			if (cachedImage) {
+				drawPageBackground(cachedImage, template.fill.image, ctx);
+			} else {
+				const image = new Image();
+				image.onload = () => {
+					// TODO: this gets called multiple times on initial page load
+					cache.set('page', 'backgroundImage', image);
+					Draw.page(page, canvas, config);
+				};
+				image.src = template.fill.image.src;
+				return;
+			}
+		}
+
+		if (template.border.cornerRadius > template.border.width) {
+			// On very rounded page corners, outside corner radius shows up inside the page.  Fill that in.
+			const s = template.border.cornerRadius / 2;
+			ctx.fillStyle = template.border.color;
+			ctx.fillRect(0, 0, s, s);
+			ctx.fillRect(template.width - s, 0, s, s);
+			ctx.fillRect(template.width - s, template.height - s, s, s);
+			ctx.fillRect(0, template.height - s, s, s);
+		}
+
+		drawRoundedRectStyled(
+			// offset corner radius by border width so radius defines inner border radius
+			ctx, 0, 0, template.width, template.height,
+			template.border.cornerRadius + template.border.width, rectStyle
+		);
+
+		if (!config.noGrid && uiState.get('grid').enabled) {
+			drawGrid(ctx, template.width, template.height);
+		}
+
+		ctx.translate(Math.floor(page.innerContentOffset.x), Math.floor(page.innerContentOffset.y));
+
+		page.steps.forEach(id => drawStep({type: 'step', id}, ctx, config));
+
+		if (page.stretchedStep) {
+			ctx.save();
+			ctx.translate(Math.floor(page.stretchedStep.leftOffset), 0);
+			drawStep({type: 'step', id: page.stretchedStep.stepID}, ctx, config);
+			ctx.restore();
+		}
+
+		page.pliItems.forEach(id => drawPLIItem({type: 'pliItem', id}, ctx, config));
+
+		drawDividers(page.dividers, ctx);
+
+		if (page.numberLabelID != null) {
+			ctx.save();
+			const lbl = store.get.numberLabel(page.numberLabelID);
+			ctx.fillStyle = template.numberLabel.color;
+			ctx.font = template.numberLabel.font;
+			ctx.textAlign = lbl.align || 'start';
+			ctx.textBaseline = lbl.valign || 'alphabetic';
+			ctx.fillText(page.number, lbl.x, lbl.y);
+			ctx.restore();
+		}
+
+		page.annotations.forEach(id => {
+			drawAnnotation(store.get.annotation(id), ctx);
+		});
+		ctx.restore();
+
+		// Draw highlight box around the selected page item, if any
+		if (config.selectedItem) {
+			let doHighlight = false;
+			const itemPage = store.get.pageForItem(config.selectedItem);
+			if (_.itemEq(itemPage, page)) {
+				doHighlight = true;
+			} else if (page.stretchedStep) {
+				const stretchedStep = store.get.step(page.stretchedStep.stepID);
+				if (store.get.isDescendent(config.selectedItem, stretchedStep)) {
+					doHighlight = true;
+				}
+			}
+			if (doHighlight) {
+				const box = store.get.highlightBox(config.selectedItem, template, page);
+				drawHighlight(ctx, box);
+			}
+		}
+	},
+};
+
+// TODO: Add support for a quantity label to a step. Useful on last step of a submodel built many times.
+function drawStep(step, ctx, config) {
+
+	step = store.get.step(step);
+
+	ctx.save();
+	ctx.translate(Math.floor(step.x), Math.floor(step.y));
+
+	if (step.csi == null && step.steps.length) {
+		step.steps.forEach(id => drawStep({type: 'step', id}, ctx, config));
+	} else if (step.csiID != null) {
+		drawCSI(step.csiID, ctx, config);
+	}
+
+	step.submodelImages.forEach(submodelImageID => {
+		drawSubmodelImage(submodelImageID, ctx, config);
+	});
+
+	step.callouts.forEach(calloutID => {
+		drawCallout(calloutID, ctx, config);
+	});
+
+	if (step.pliID != null && store.state.plisVisible) {
+		drawPLI(step.pliID, ctx, config);
+	}
+
+	if (step.numberLabelID != null) {
+		let template = store.state.template;
+		template = (step.parent.type === 'callout') ? template.callout.step : template.step;
+		const lbl = store.get.numberLabel(step.numberLabelID);
+		ctx.fillStyle = template.numberLabel.color;
+		ctx.font = template.numberLabel.font;
+		ctx.textAlign = lbl.align || 'start';
+		ctx.textBaseline = lbl.valign || 'alphabetic';
+		ctx.fillText(String(step.number), lbl.x, lbl.y);
+	}
+
+	if (step.rotateIconID != null) {
+		drawRotateIcon(step.rotateIconID, ctx);
+	}
+
+	drawDividers(step.dividers, ctx);
+
+	step.annotations.forEach(id => {
+		drawAnnotation(store.get.annotation(id), ctx);
+	});
+	ctx.restore();
+}
+
+function drawSubmodelImage(submodelImage, ctx, {hiResScale, noCache}) {
+	submodelImage = store.get.submodelImage(submodelImage);
+	const template = store.state.template.submodelImage;
+	const csi = store.get.csi(submodelImage.csiID);
+
+	const rectStyle = {
+		fillStyle: template.fill.color,
+		strokeStyle: template.border.color,
+		lineWidth: template.border.width,
+	};
+	drawRoundedRectItemStyled(ctx, submodelImage, template.border.cornerRadius, rectStyle);
+
+	ctx.save();
+	ctx.translate(
+		Math.floor(submodelImage.innerContentOffset.x),
+		Math.floor(submodelImage.innerContentOffset.y)
+	);
+
+	ctx.save();
+	ctx.scale(1 / hiResScale, 1 / hiResScale);
+	const part = LDParse.model.get.abstractPart(submodelImage.modelFilename);
+	const siCanvas = store.render.pli(part.colorCode, part.filename, csi, hiResScale, noCache).container;
+	const x = Math.floor((submodelImage.x + csi.x) * hiResScale);
+	const y = Math.floor((submodelImage.y + csi.y) * hiResScale);
+	ctx.drawImage(siCanvas, x, y);
+	ctx.restore();
+
+	if (submodelImage.quantityLabelID != null) {
+		ctx.save();
+		const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
+		ctx.fillStyle = template.quantityLabel.color;
+		ctx.font = template.quantityLabel.font;
+		ctx.textAlign = lbl.align || 'start';
+		ctx.textBaseline = lbl.valign || 'alphabetic';
+		ctx.fillText('x' + submodelImage.quantity, lbl.x, lbl.y);
+		ctx.restore();
+	}
+	ctx.restore();
+}
+
+function drawCSI(csi, ctx, {hiResScale, selectedItem, noCache}) {
+	csi = store.get.csi(csi);
+	const step = store.get.parent(csi);
+	const localModel = LDParse.model.get.abstractPart(step.model.filename);
+
+	ctx.save();
+	ctx.translate(Math.floor(csi.x), Math.floor(csi.y));
+
+	ctx.save();
+	ctx.scale(1 / hiResScale, 1 / hiResScale);
+	const havePart = selectedItem && selectedItem.type === 'part' && selectedItem.stepID === step.id;
+	const selectedPartIDs = havePart ? [selectedItem.id] : null;
+	const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
+	const res = store.render[renderer](localModel, step, csi, selectedPartIDs, hiResScale, noCache);
+	if (res) {
+		ctx.drawImage(res.container, Math.floor(-res.dx), Math.floor(-res.dy));
+	}
+	ctx.restore();
+
+	csi.annotations.forEach(id => {
+		drawAnnotation(store.get.annotation(id), ctx);
+	});
+	ctx.restore();
+}
+
+function drawPLI(pli, ctx, {hiResScale, noCache}) {
+	const template = store.state.template;
+	pli = store.get.pli(pli);
+
+	let pliItems = pli.pliItems;
+	if (!template.pli.includeSubmodels) {
+		pliItems = pliItems.filter(id => {
+			return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
+		});
+	}
+
+	if (_.isEmpty(pliItems)) {
+		return;
+	}
+	const rectStyle = {
+		fillStyle: template.pli.fill.color,
+		strokeStyle: template.pli.border.color,
+		lineWidth: template.pli.border.width,
+	};
+	drawRoundedRectItemStyled(ctx, pli, template.pli.border.cornerRadius, rectStyle);
+
+	ctx.save();
+	ctx.translate(Math.floor(pli.innerContentOffset.x), Math.floor(pli.innerContentOffset.y));
+	ctx.translate(Math.floor(pli.x), Math.floor(pli.y));
+	pliItems.forEach(idx => {
+		drawPLIItem(idx, ctx, {hiResScale, noCache});
+	});
+	ctx.restore();
+}
+
+function drawPLIItem(pliItem, ctx, {hiResScale, noCache}) {
+	ctx.save();
+	ctx.scale(1 / hiResScale, 1 / hiResScale);
+	pliItem = store.get.pliItem(pliItem);
+	const pliCanvas = store.render.pli(
+		pliItem.colorCode, pliItem.filename, pliItem, hiResScale, noCache
+	).container;
+	const x = Math.floor(pliItem.x) * hiResScale;
+	const y = Math.floor(pliItem.y) * hiResScale;
+	ctx.drawImage(pliCanvas, x, y);
+	ctx.restore();
+
+	const template = store.state.template.pliItem.quantityLabel;
+	const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+	ctx.fillStyle = template.color;
+	ctx.font = template.font;
+	ctx.textBaseline = quantityLabel.valign || 'top';
+	ctx.fillText(
+		'x' + pliItem.quantity,
+		pliItem.x + quantityLabel.x,
+		pliItem.y + quantityLabel.y
+	);
+}
+
+function drawCallout(callout, ctx, config) {
+	const template = store.state.template.callout;
+	callout = store.get.callout(callout);
+	ctx.save();
+
+	const rectStyle = {
+		fillStyle: template.fill.color,
+		strokeStyle: template.border.color,
+		lineWidth: template.border.width,
+	};
+	drawRoundedRectItemStyled(ctx, callout, template.border.cornerRadius, rectStyle);
+
+	ctx.translate(Math.floor(callout.x), Math.floor(callout.y));
+	ctx.translate(Math.floor(callout.innerContentOffset.x), Math.floor(callout.innerContentOffset.y));
+
+	callout.steps.forEach(id => drawStep({type: 'step', id}, ctx, config));
+	ctx.restore();
+
+	ctx.strokeStyle = template.arrow.border.color;
+	ctx.fillStyle = template.arrow.border.color;
+	ctx.lineWidth = template.arrow.border.width;
+	callout.calloutArrows.forEach(arrowID => {
+		drawCalloutArrow(arrowID, ctx);
+	});
+}
+
+function drawCalloutArrow(arrow, ctx) {
+	arrow = store.get.calloutArrow(arrow);
+	const border = store.state.template.callout.arrow.border;
+	if (!_.isBorderVisible(border)) {
+		return;
+	}
+	drawAnnotation({
+		id: arrow.id,
+		type: arrow.type,
+		annotationType: (arrow.points.length > 2) ? 'arrow' : 'stairStepArrow',
+		parent: store.get.parent(arrow.parent),
+		border,
+		points: arrow.points,
+		direction: arrow.direction,
+	}, ctx);
+}
+
+function drawRotateIcon(icon, ctx) {
+	const template = store.state.template.rotateIcon;
+	icon = store.get.rotateIcon(icon);
+	const scale = {  // Icon is drawn in 100 x 94 space; scale to that
+		width: icon.width / 100,  // TODO: put Layout.rotateIconAspectRatio somewhere easier to read
+		height: icon.height / 94,
+	};
+
+	ctx.strokeStyle = template.border.color;
+	ctx.lineWidth = template.border.width;
+	ctx.save();
+	ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
+	ctx.scale(scale.width, scale.height);
+
+	if (template.fill.color) {
+		ctx.fillStyle = template.fill.color;
+		drawRoundedRect(ctx, 0, 0, 100, 94, 15);
+		ctx.fill();
+	}
+
+	const haveBorder = _.isBorderVisible(template.border);
+	if (haveBorder) {
+		drawRoundedRect(ctx, 0, 0, 100, 94, 15);
+	}
+	ctx.restore();
+	if (haveBorder) {
+		ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
+	}
+
+	if (_.isBorderVisible(template.arrow.border)) {
+		ctx.fillStyle = ctx.strokeStyle = template.arrow.border.color;
+		ctx.lineWidth = template.arrow.border.width;
+		ctx.save();
+		ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
+		ctx.scale(scale.width, scale.height);
+		ctx.beginPath();
+		ctx.arc(50, 38, 39, _.radians(29), _.radians(130));
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.arc(50, 56, 39, _.radians(180 + 29), _.radians(180 + 130));
+		ctx.stroke();
+
+		drawArrowHead(ctx, 24, 67, 135, [1, 0.7]);
+		ctx.fill();
+		drawArrowHead(ctx, 75, 27, -45, [1, 0.7]);
+		ctx.fill();
+	}
+	ctx.restore();
+}
 
 function drawPageBackground(cachedImage, imageInfo = {}, ctx) {
 	if (imageInfo.x != null && imageInfo.y != null) {
