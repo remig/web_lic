@@ -2,7 +2,7 @@
 
 import Vue from 'vue';
 import _ from './util';
-import Draw from './draw';
+import {Draw} from './draw';
 import store from './store';
 import undoStack from './undo_stack';
 import uiState from './ui_state';

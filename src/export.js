@@ -3,7 +3,7 @@
 /* global jsPDF: false, JSZip: false, saveAs: false */
 
 import _ from './util';
-import Draw from './draw';
+import {Draw} from './draw';
 import {changeDpiDataUrl} from './changedpi';
 import {tr} from './translations';
 
