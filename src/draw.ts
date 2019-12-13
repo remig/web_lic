@@ -6,19 +6,55 @@ import cache from './cache';
 import LDParse from './ld_parse';
 import uiState from './ui_state';
 
+interface DrawConfig {
+	hiResScale?: number;
+	selectedItem?: ItemTypes;
+	noCache?: boolean;
+	noGrid?: boolean;
+}
+
+interface StyleInterface {
+	fillStyle?: string | null;
+	lineWidth: number;
+	strokeStyle: string;
+}
+
+function isSize(s: any): s is Size {
+	return (s && s.width != null && s.height != null);
+}
+
+function isPoint(p: any): p is Point {
+	return (p && p.x != null && p.y != null);
+}
+
+function isBox(b: any): b is Box {
+	return (b && b.x != null && b.y != null && b.width != null && b.height != null);
+}
+
+function isPointItem(p: any): p is PointItem {
+	return (p && p.relativeTo != null);
+}
+
+export interface DrawInterface {
+	page(page: Page, canvas: HTMLCanvasElement, config?: DrawConfig): void;
+}
+
 const drawArrowHead = (() => {
 
-	const presetAngles = {up: 180, left: 90, right: -90};
+	const presetAngles = {up: 180, left: 90, right: -90, down: 0};
 	const arrowDimensions = _.geom.arrow();
 
-	return function(ctx, baseX, baseY, rotation, scale) {
+	return function(
+		ctx: CanvasRenderingContext2D,
+		baseX: number, baseY: number, rotation?: number | Direction | null, scale?: number | number[]
+	) {
 		const head = arrowDimensions.head, bodyWidth = 1.25;
 		ctx.save();
 		ctx.translate(baseX, baseY);
-		if (rotation in presetAngles) {
-			ctx.rotate(_.radians(presetAngles[rotation]));
-		} else if (typeof rotation === 'number') {
+		if (typeof rotation === 'number') {
 			ctx.rotate(_.radians(rotation));
+		} else if (rotation && (rotation in presetAngles)) {
+			ctx.rotate(_.radians(presetAngles[rotation]));
 		}
 		if (scale) {
 			if (Array.isArray(scale)) {
@@ -41,8 +77,8 @@ const drawArrowHead = (() => {
 
 const drawAnnotation = (() => {
 
-	function transformPoint(pt, annotation, borderWidth) {
-		if (!pt.relativeTo) {
+	function transformPoint(pt: Point | PointItem, annotation: Annotation, borderWidth: number) {
+		if (!isPointItem(pt)) {
 			return pixelOffset(pt, borderWidth);
 		}
 		// We're in an arbitrarily transformed coordinate space, defined by annotation's parent.
@@ -56,8 +92,10 @@ const drawAnnotation = (() => {
 		}
 		// Start from relativeTo and walk the transform backward; if we hit parent, return that transform
 		while (relativeTo) {
-			x += relativeTo.x || 0;
-			y += relativeTo.y || 0;
+			if (isPoint(relativeTo)) {
+				x += relativeTo.x;
+				y += relativeTo.y;
+			}
 			relativeTo = store.get.parent(relativeTo);
 			if (parent === relativeTo) {
 				return pixelOffset({x, y}, borderWidth);
@@ -66,8 +104,10 @@ const drawAnnotation = (() => {
 		// Haven't found target, and we've transformed to the page, so start from the parent
 		// and walk the transform forward until we hit the page
 		while (parent) {
-			x -= parent.x || 0;
-			y -= parent.y || 0;
+			if (isPoint(parent)) {
+				x -= parent.x;
+				y -= parent.y;
+			}
 			parent = store.get.parent(parent);
 		}
 		return pixelOffset({x, y}, borderWidth);
@@ -75,51 +115,70 @@ const drawAnnotation = (() => {
 
 	const drawLookup = {
 
-		label(annotation, ctx) {
+		label(annotation: Annotation, ctx: CanvasRenderingContext2D) {
 			const x = Math.floor(annotation.x);
 			const y = Math.floor(annotation.y);
 			ctx.fillStyle = annotation.color || 'black';
 			ctx.font = annotation.font || 'bold 20pt Helvetica';
-			ctx.align = annotation.align || 'left';
+			ctx.textAlign = annotation.align || 'left';
 			ctx.textBaseline = annotation.valign || 'alphabetic';
 			ctx.fillText(annotation.text, x, y);
 		},
 
-		arrow(annotation, ctx) {
+		arrow(annotation: Annotation, ctx: CanvasRenderingContext2D, points?: Point[]) {
 			const border = annotation.border || {color: 'black', width: 1};
 			ctx.strokeStyle = border.color || 'black';
 			ctx.fillStyle = border.color || 'black';
 			ctx.lineWidth = border.width;
 			ctx.beginPath();
-			annotation.points.forEach((pt, idx) => {
-				pt = store.get.point(pt) || pt;
-				pt = transformPoint(pt, annotation, border.width);
-				ctx[(idx === 0) ? 'moveTo' : 'lineTo'](pt.x, pt.y);
+			const pointList = points || annotation.points;
+			pointList.forEach((pointId: number | Point, idx: number) => {
+				const pointItem = (typeof pointId === 'number')
+					? store.get.point(pointId)
+					: pointId;
+				if (pointItem) {
+					const pt = transformPoint(pointItem, annotation, border.width);
+					ctx[(idx === 0) ? 'moveTo' : 'lineTo'](pt.x, pt.y);
+				}
 			});
 			ctx.stroke();
-			let lastPt = _.last(annotation.points);
-			lastPt = store.get.point(lastPt) || lastPt;
-			const tip = transformPoint(lastPt, annotation, border.width);
-			drawArrowHead(ctx, tip.x, tip.y, annotation.direction);
-			ctx.fill();
+			const lastPt = _.last<Point | number>(pointList);
+			const lastPtItem = (typeof lastPt === 'number')
+				? store.get.point(lastPt)
+				: lastPt;
+			if (lastPtItem) {
+				const tip = transformPoint(lastPtItem, annotation, border.width);
+				drawArrowHead(ctx, tip.x, tip.y, annotation.direction);
+				ctx.fill();
+			}
 		},
 
-		stairStepArrow(annotation, ctx) {
+		stairStepArrow(annotation: Annotation, ctx: CanvasRenderingContext2D) {
 			const direction = annotation.direction;
-			annotation.annotationType = 'arrow';
-			let points = annotation.points.map(pt => {
-				pt = store.get.point(pt);
-				return transformPoint(pt, annotation, annotation.border.width);
-			});
-			if (points[0].x === points[1].x || points[0].y === points[1].y) {
-				drawAnnotation(annotation, ctx);
+			const pointItems = annotation.points.map(pt => {
+				const point = store.get.point(pt);
+				if (point) {
+					const width = (annotation && annotation.border && annotation.border.width)
+						? annotation.border.width
+						: 0;
+					return transformPoint(point, annotation, width);
+				}
+				return null;
+			}).filter(pt => pt != null);
+			const firstPoint = pointItems[0];
+			const lastPoint = pointItems[1];
+			if (firstPoint == null || lastPoint == null) {
 				return;
 			}
-			const bbox = _.geom.bbox(points);
+			if (firstPoint.x === lastPoint.x || firstPoint.y === lastPoint.y) {
+				drawLookup.arrow(annotation, ctx, [firstPoint, lastPoint]);
+				return;
+			}
+			const bbox = _.geom.bbox([firstPoint, lastPoint]);
 
-			points = [points[0], _.cloneDeep(points[0]), _.cloneDeep(points[0]), points[1]];
+			const points = [firstPoint, _.cloneDeep(firstPoint), _.cloneDeep(firstPoint), lastPoint];
 
-			let midX = points[0].x, midY = points[0].y;
+			let midX = firstPoint.x, midY = firstPoint.y;
 			if (direction === 'up') {
 				midY -= bbox.height / 2;
 			} else if (direction === 'right') {
@@ -138,11 +197,10 @@ const drawAnnotation = (() => {
 			} else {
 				points[2].y = points[3].y;
 			}
-			annotation.points = points;
-			drawAnnotation(annotation, ctx);
+			drawLookup.arrow(annotation, ctx, points);
 		},
 
-		image(annotation, ctx) {
+		image(annotation: Annotation, ctx: CanvasRenderingContext2D) {
 			const cachedImage = cache.get(annotation, 'rawImage');
 			if (cachedImage && cachedImage !== 'pending') {
 				const x = Math.floor(annotation.x);
@@ -151,33 +209,47 @@ const drawAnnotation = (() => {
 			} else if (cachedImage == null) {
 				cache.set(annotation, 'rawImage', 'pending');  // Avoid caching multiple times
 				const image = new Image();
-				image.onload = function() {
-					annotation.width = this.width;
-					annotation.height = this.height;
-					cache.set(annotation, 'rawImage', image);
-					const page = store.get.pageForItem(annotation);
-					Draw.page(page, ctx.canvas);  // eslint-disable-line no-use-before-define
+				image.onload = event => {
+					if (event && isSize(event)) {
+						annotation.width = event.width;
+						annotation.height = event.height;
+						cache.set(annotation, 'rawImage', image);
+						const page = store.get.pageForItem(annotation);
+						Draw.page(page, ctx.canvas);  // eslint-disable-line no-use-before-define
+					}
 				};
-				image.src = annotation.src;
+				image.src = annotation.src || '';
 			}
 		},
 	};
 
-	return function(annotation, ctx) {
-		drawLookup[annotation.annotationType](annotation, ctx);
+	return function(annotationId: number | Annotation, ctx: CanvasRenderingContext2D) {
+		let annotation;
+		if (typeof annotationId === 'number') {
+			annotation = store.get.annotation(annotationId);
+		} else {
+			annotation = annotationId;
+		}
+		if (annotation) {
+			drawLookup[annotation.annotationType](annotation, ctx);
+		}
 	};
 })();
 
-export const Draw = {
+export const Draw: DrawInterface = {
 
-	page(page, canvas, config = {}) {  // config: {hiResScale, selectedItem, noCache, noGrid}
+	page(page: Page, canvas: HTMLCanvasElement, config: DrawConfig = {}) {
+
+		const ctx = canvas.getContext('2d');
+		if (ctx == null) {
+			return;
+		}
 
 		const hiResScale = config.hiResScale = config.hiResScale || 1;
 		if (page.needsLayout) {
 			store.mutations.page.layout({page});
 		}
 
-		const ctx = canvas.getContext('2d');
 		ctx.save();
 		if (hiResScale > 1) {
 			ctx.scale(hiResScale, hiResScale);
@@ -190,6 +262,7 @@ export const Draw = {
 			strokeStyle: template.border.color,
 			// * 2 because line is centered on page edge, so half of it is clipped
 			lineWidth: Math.floor(template.border.width * 2),
+			fillStyle: null,
 		};
 
 		if (template.fill.color) {
@@ -226,7 +299,8 @@ export const Draw = {
 		drawRoundedRectStyled(
 			// offset corner radius by border width so radius defines inner border radius
 			ctx, 0, 0, template.width, template.height,
-			template.border.cornerRadius + template.border.width, rectStyle
+			template.border.cornerRadius + template.border.width,
+			rectStyle
 		);
 
 		if (!config.noGrid && uiState.get('grid').enabled) {
@@ -235,32 +309,34 @@ export const Draw = {
 
 		ctx.translate(Math.floor(page.innerContentOffset.x), Math.floor(page.innerContentOffset.y));
 
-		page.steps.forEach(id => drawStep({type: 'step', id}, ctx, config));
+		page.steps.forEach(id => drawStep(id, ctx, config));
 
 		if (page.stretchedStep) {
 			ctx.save();
 			ctx.translate(Math.floor(page.stretchedStep.leftOffset), 0);
-			drawStep({type: 'step', id: page.stretchedStep.stepID}, ctx, config);
+			drawStep(page.stretchedStep.stepID, ctx, config);
 			ctx.restore();
 		}
 
-		page.pliItems.forEach(id => drawPLIItem({type: 'pliItem', id}, ctx, config));
+		page.pliItems.forEach(id => drawPLIItem(id, ctx, config));
 
 		drawDividers(page.dividers, ctx);
 
 		if (page.numberLabelID != null) {
-			ctx.save();
 			const lbl = store.get.numberLabel(page.numberLabelID);
-			ctx.fillStyle = template.numberLabel.color;
-			ctx.font = template.numberLabel.font;
-			ctx.textAlign = lbl.align || 'start';
-			ctx.textBaseline = lbl.valign || 'alphabetic';
-			ctx.fillText(page.number, lbl.x, lbl.y);
-			ctx.restore();
+			if (lbl) {
+				ctx.save();
+				ctx.fillStyle = template.numberLabel.color;
+				ctx.font = template.numberLabel.font;
+				ctx.textAlign = lbl.align || 'start';
+				ctx.textBaseline = lbl.valign || 'alphabetic';
+				ctx.fillText(String(page.number), lbl.x, lbl.y);
+				ctx.restore();
+			}
 		}
 
 		page.annotations.forEach(id => {
-			drawAnnotation(store.get.annotation(id), ctx);
+			drawAnnotation(id, ctx);
 		});
 		ctx.restore();
 
@@ -272,28 +348,35 @@ export const Draw = {
 				doHighlight = true;
 			} else if (page.stretchedStep) {
 				const stretchedStep = store.get.step(page.stretchedStep.stepID);
-				if (store.get.isDescendent(config.selectedItem, stretchedStep)) {
-					doHighlight = true;
+				if (stretchedStep) {
+					if (store.get.isDescendent(config.selectedItem, stretchedStep)) {
+						doHighlight = true;
+					}
 				}
 			}
 			if (doHighlight) {
 				const box = store.get.highlightBox(config.selectedItem, template, page);
-				drawHighlight(ctx, box);
+				if (isBox(box)) {
+					drawHighlight(ctx, box);
+				}
 			}
 		}
 	},
 };
 
 // TODO: Add support for a quantity label to a step. Useful on last step of a submodel built many times.
-function drawStep(step, ctx, config) {
+function drawStep(stepId: number, ctx: CanvasRenderingContext2D, config: DrawConfig) {
 
-	step = store.get.step(step);
+	const step = store.get.step(stepId);
+	if (step == null) {
+		return;
+	}
 
 	ctx.save();
 	ctx.translate(Math.floor(step.x), Math.floor(step.y));
 
-	if (step.csi == null && step.steps.length) {
-		step.steps.forEach(id => drawStep({type: 'step', id}, ctx, config));
+	if (step.csiID == null && step.steps.length) {
+		step.steps.forEach(id => drawStep(id, ctx, config));
 	} else if (step.csiID != null) {
 		drawCSI(step.csiID, ctx, config);
 	}
@@ -311,14 +394,16 @@ function drawStep(step, ctx, config) {
 	}
 
 	if (step.numberLabelID != null) {
-		let template = store.state.template;
-		template = (step.parent.type === 'callout') ? template.callout.step : template.step;
 		const lbl = store.get.numberLabel(step.numberLabelID);
-		ctx.fillStyle = template.numberLabel.color;
-		ctx.font = template.numberLabel.font;
-		ctx.textAlign = lbl.align || 'start';
-		ctx.textBaseline = lbl.valign || 'alphabetic';
-		ctx.fillText(String(step.number), lbl.x, lbl.y);
+		if (lbl) {
+			let template = store.state.template;
+			template = (step.parent.type === 'callout') ? template.callout.step : template.step;
+			ctx.fillStyle = template.numberLabel.color;
+			ctx.font = template.numberLabel.font;
+			ctx.textAlign = lbl.align || 'start';
+			ctx.textBaseline = lbl.valign || 'alphabetic';
+			ctx.fillText(String(step.number), lbl.x, lbl.y);
+		}
 	}
 
 	if (step.rotateIconID != null) {
@@ -328,16 +413,24 @@ function drawStep(step, ctx, config) {
 	drawDividers(step.dividers, ctx);
 
 	step.annotations.forEach(id => {
-		drawAnnotation(store.get.annotation(id), ctx);
+		drawAnnotation(id, ctx);
 	});
 	ctx.restore();
 }
 
-function drawSubmodelImage(submodelImage, ctx, {hiResScale, noCache}) {
-	submodelImage = store.get.submodelImage(submodelImage);
-	const template = store.state.template.submodelImage;
-	const csi = store.get.csi(submodelImage.csiID);
+function drawSubmodelImage(
+	submodelImageId: number, ctx: CanvasRenderingContext2D, {hiResScale = 1, noCache}: DrawConfig
+) {
+	const submodelImage = store.get.submodelImage(submodelImageId);
+	if (submodelImage == null) {
+		return;
+	}
+	const csi = store.get.csi(submodelImage.csiID ?? -1);
+	if (csi == null) {
+		return;
+	}
 
+	const template = store.state.template.submodelImage;
 	const rectStyle = {
 		fillStyle: template.fill.color,
 		strokeStyle: template.border.color,
@@ -354,28 +447,42 @@ function drawSubmodelImage(submodelImage, ctx, {hiResScale, noCache}) {
 	ctx.save();
 	ctx.scale(1 / hiResScale, 1 / hiResScale);
 	const part = LDParse.model.get.abstractPart(submodelImage.modelFilename);
-	const siCanvas = store.render.pli(part.colorCode, part.filename, csi, hiResScale, noCache).container;
-	const x = Math.floor((submodelImage.x + csi.x) * hiResScale);
-	const y = Math.floor((submodelImage.y + csi.y) * hiResScale);
-	ctx.drawImage(siCanvas, x, y);
+	const renderResult = store.render.pli(
+		part.colorCode, part.filename, csi, hiResScale, noCache
+	);
+	if (renderResult) {
+		const x = Math.floor((submodelImage.x + csi.x) * hiResScale);
+		const y = Math.floor((submodelImage.y + csi.y) * hiResScale);
+		ctx.drawImage(renderResult.container, x, y);
+	}
 	ctx.restore();
 
 	if (submodelImage.quantityLabelID != null) {
-		ctx.save();
 		const lbl = store.get.quantityLabel(submodelImage.quantityLabelID);
-		ctx.fillStyle = template.quantityLabel.color;
-		ctx.font = template.quantityLabel.font;
-		ctx.textAlign = lbl.align || 'start';
-		ctx.textBaseline = lbl.valign || 'alphabetic';
-		ctx.fillText('x' + submodelImage.quantity, lbl.x, lbl.y);
-		ctx.restore();
+		if (lbl) {
+			ctx.save();
+			ctx.fillStyle = template.quantityLabel.color;
+			ctx.font = template.quantityLabel.font;
+			ctx.textAlign = lbl.align || 'start';
+			ctx.textBaseline = lbl.valign || 'alphabetic';
+			ctx.fillText('x' + submodelImage.quantity, lbl.x, lbl.y);
+			ctx.restore();
+		}
 	}
 	ctx.restore();
 }
 
-function drawCSI(csi, ctx, {hiResScale, selectedItem, noCache}) {
-	csi = store.get.csi(csi);
+function drawCSI(
+	csiId: number, ctx: CanvasRenderingContext2D, {hiResScale = 1, selectedItem, noCache}: DrawConfig
+) {
+	const csi = store.get.csi(csiId);
+	if (csi == null) {
+		return;
+	}
 	const step = store.get.parent(csi);
+	if (step == null || step.type !== 'step') {
+		return;
+	}
 	const localModel = LDParse.model.get.abstractPart(step.model.filename);
 
 	ctx.save();
@@ -383,26 +490,35 @@ function drawCSI(csi, ctx, {hiResScale, selectedItem, noCache}) {
 
 	ctx.save();
 	ctx.scale(1 / hiResScale, 1 / hiResScale);
-	const havePart = selectedItem && selectedItem.type === 'part' && selectedItem.stepID === step.id;
-	const selectedPartIDs = havePart ? [selectedItem.id] : null;
+	const havePart = (selectedItem != null)
+		&& (selectedItem.type === 'part')
+		&& (selectedItem.stepID === step.id);
+	const selectedPartIDs = (havePart && selectedItem) ? [selectedItem.id] : null;
 	const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
-	const res = store.render[renderer](localModel, step, csi, selectedPartIDs, hiResScale, noCache);
-	if (res) {
+	const res = store.render[renderer](
+		localModel, step, csi, selectedPartIDs, hiResScale, noCache
+	);
+	if (res && res.dx != null && res.dy != null) {
 		ctx.drawImage(res.container, Math.floor(-res.dx), Math.floor(-res.dy));
 	}
 	ctx.restore();
 
 	csi.annotations.forEach(id => {
-		drawAnnotation(store.get.annotation(id), ctx);
+		drawAnnotation(id, ctx);
 	});
 	ctx.restore();
 }
 
-function drawPLI(pli, ctx, {hiResScale, noCache}) {
-	const template = store.state.template;
-	pli = store.get.pli(pli);
+function drawPLI(
+	pliId: number, ctx: CanvasRenderingContext2D, {hiResScale, noCache}: DrawConfig
+) {
+	const pli = store.get.pli(pliId);
+	if (pli == null) {
+		return;
+	}
 
 	let pliItems = pli.pliItems;
+	const template = store.state.template;
 	if (!template.pli.includeSubmodels) {
 		pliItems = pliItems.filter(id => {
 			return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
@@ -428,20 +544,32 @@ function drawPLI(pli, ctx, {hiResScale, noCache}) {
 	ctx.restore();
 }
 
-function drawPLIItem(pliItem, ctx, {hiResScale, noCache}) {
+function drawPLIItem(
+	pliItemId: number, ctx: CanvasRenderingContext2D, {hiResScale = 1, noCache}: DrawConfig
+) {
+	const pliItem = store.get.pliItem(pliItemId);
+	if (pliItem == null) {
+		return;
+	}
+
 	ctx.save();
 	ctx.scale(1 / hiResScale, 1 / hiResScale);
-	pliItem = store.get.pliItem(pliItem);
-	const pliCanvas = store.render.pli(
+	const renderResult = store.render.pli(
 		pliItem.colorCode, pliItem.filename, pliItem, hiResScale, noCache
-	).container;
-	const x = Math.floor(pliItem.x) * hiResScale;
-	const y = Math.floor(pliItem.y) * hiResScale;
-	ctx.drawImage(pliCanvas, x, y);
+	);
+	if (renderResult) {
+		const x = Math.floor(pliItem.x) * hiResScale;
+		const y = Math.floor(pliItem.y) * hiResScale;
+		ctx.drawImage(renderResult.container, x, y);
+	}
 	ctx.restore();
 
-	const template = store.state.template.pliItem.quantityLabel;
 	const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+	if (quantityLabel == null) {
+		return;
+	}
+
+	const template = store.state.template.pliItem.quantityLabel;
 	ctx.fillStyle = template.color;
 	ctx.font = template.font;
 	ctx.textBaseline = quantityLabel.valign || 'top';
@@ -452,9 +580,12 @@ function drawPLIItem(pliItem, ctx, {hiResScale, noCache}) {
 	);
 }
 
-function drawCallout(callout, ctx, config) {
+function drawCallout(calloutId: number, ctx: CanvasRenderingContext2D, config: DrawConfig) {
 	const template = store.state.template.callout;
-	callout = store.get.callout(callout);
+	const callout = store.get.callout(calloutId);
+	if (callout == null) {
+		return;
+	}
 	ctx.save();
 
 	const rectStyle = {
@@ -465,10 +596,8 @@ function drawCallout(callout, ctx, config) {
 	drawRoundedRectItemStyled(ctx, callout, template.border.cornerRadius, rectStyle);
 
 	ctx.translate(Math.floor(callout.x), Math.floor(callout.y));
-	ctx.translate(Math.floor(callout.innerContentOffset.x), Math.floor(callout.innerContentOffset.y));
 
-	callout.steps.forEach(id => drawStep({type: 'step', id}, ctx, config));
-	ctx.restore();
+	callout.steps.forEach(id => drawStep(id, ctx, config));
 
 	ctx.strokeStyle = template.arrow.border.color;
 	ctx.fillStyle = template.arrow.border.color;
@@ -476,28 +605,37 @@ function drawCallout(callout, ctx, config) {
 	callout.calloutArrows.forEach(arrowID => {
 		drawCalloutArrow(arrowID, ctx);
 	});
+	ctx.restore();
 }
 
-function drawCalloutArrow(arrow, ctx) {
-	arrow = store.get.calloutArrow(arrow);
+function drawCalloutArrow(arrowId: number, ctx: CanvasRenderingContext2D) {
+	const arrow = store.get.calloutArrow(arrowId);
+	if (arrow == null) {
+		return;
+	}
 	const border = store.state.template.callout.arrow.border;
 	if (!_.isBorderVisible(border)) {
 		return;
 	}
 	drawAnnotation({
 		id: arrow.id,
-		type: arrow.type,
+		type: 'annotation',
 		annotationType: (arrow.points.length > 2) ? 'arrow' : 'stairStepArrow',
-		parent: store.get.parent(arrow.parent),
+		parent: _.clone(arrow.parent),
 		border,
 		points: arrow.points,
 		direction: arrow.direction,
+		color: '', font: '', text: '', align: 'left', valign: 'top',
+		x: 0, y: 0, width: 0, height: 0,
 	}, ctx);
 }
 
-function drawRotateIcon(icon, ctx) {
+function drawRotateIcon(iconId: number, ctx: CanvasRenderingContext2D) {
 	const template = store.state.template.rotateIcon;
-	icon = store.get.rotateIcon(icon);
+	const icon = store.get.rotateIcon(iconId);
+	if (icon == null) {
+		return;
+	}
 	const scale = {  // Icon is drawn in 100 x 94 space; scale to that
 		width: icon.width / 100,  // TODO: put Layout.rotateIconAspectRatio somewhere easier to read
 		height: icon.height / 94,
@@ -511,13 +649,13 @@ function drawRotateIcon(icon, ctx) {
 
 	if (template.fill.color) {
 		ctx.fillStyle = template.fill.color;
-		drawRoundedRect(ctx, 0, 0, 100, 94, 15);
+		drawRoundedRect(ctx, 0, 0, 100, 94, 15, template.border.width);
 		ctx.fill();
 	}
 
 	const haveBorder = _.isBorderVisible(template.border);
 	if (haveBorder) {
-		drawRoundedRect(ctx, 0, 0, 100, 94, 15);
+		drawRoundedRect(ctx, 0, 0, 100, 94, 15, template.border.width);
 	}
 	ctx.restore();
 	if (haveBorder) {
@@ -546,7 +684,9 @@ function drawRotateIcon(icon, ctx) {
 	ctx.restore();
 }
 
-function drawPageBackground(cachedImage, imageInfo = {}, ctx) {
+function drawPageBackground(
+	cachedImage: HTMLImageElement, imageInfo: any = {}, ctx: CanvasRenderingContext2D
+) {
 	if (imageInfo.x != null && imageInfo.y != null) {
 		ctx.drawImage(cachedImage,
 			imageInfo.x, imageInfo.y,
@@ -557,7 +697,7 @@ function drawPageBackground(cachedImage, imageInfo = {}, ctx) {
 	}
 }
 
-function drawDividers(dividerList, ctx) {
+function drawDividers(dividerList: number[], ctx: CanvasRenderingContext2D) {
 	const template = store.state.template.divider.border;
 	if (!_.isBorderVisible(template)) {
 		return;
@@ -566,6 +706,9 @@ function drawDividers(dividerList, ctx) {
 	ctx.lineWidth = template.width;
 	dividerList.forEach(id => {
 		const divider = store.get.divider(id);
+		if (divider == null) {
+			return;
+		}
 		ctx.beginPath();
 		const p1 = pixelOffset(divider.p1, template.width);
 		ctx.moveTo(p1.x, p1.y);
@@ -575,7 +718,7 @@ function drawDividers(dividerList, ctx) {
 	});
 }
 
-function drawHighlight(ctx, box) {
+function drawHighlight(ctx: CanvasRenderingContext2D, box: Box) {
 	ctx.save();
 	ctx.strokeStyle = '#2eb9ce';
 	ctx.lineWidth = 3;
@@ -584,7 +727,7 @@ function drawHighlight(ctx, box) {
 	ctx.restore();
 }
 
-function drawGrid(ctx, width, height) {
+function drawGrid(ctx: CanvasRenderingContext2D, width: number, height: number) {
 
 	const grid = uiState.get('grid');
 	let gridPath = cache.get('uiState', 'gridPath');
@@ -608,7 +751,7 @@ function drawGrid(ctx, width, height) {
 	ctx.restore();
 }
 
-function buildGrid(grid, width, height) {
+function buildGrid(grid: any, width: number, height: number) {
 	const gridSize = Math.max(1, Math.floor(grid.spacing));
 	const po = (grid.line.width % 2) ? 0.5 : 0;
 	const path = new Path2D();
@@ -627,7 +770,9 @@ function buildGrid(grid, width, height) {
 	return path;
 }
 
-function drawRoundedRectItemStyled(ctx, item, r, style) {
+function drawRoundedRectItemStyled(
+	ctx: CanvasRenderingContext2D, item: any, r: number, style: StyleInterface
+) {
 	let {x, y, width, height} = item;
 	if (item.borderOffset) {
 		x += item.borderOffset.x;
@@ -642,9 +787,13 @@ function drawRoundedRectItemStyled(ctx, item, r, style) {
 	drawRoundedRectStyled(ctx, x, y, width, height, r, style);
 }
 
-function drawRoundedRectStyled(ctx, x, y, w, h, r, style) {
+function drawRoundedRectStyled(
+	ctx: CanvasRenderingContext2D,
+	x: number, y: number, w: number, h: number, r: number,
+	style: StyleInterface
+) {
 	ctx.save();
-	if (_.color.isVisible(style.fillStyle)) {
+	if (style.fillStyle && _.color.isVisible(style.fillStyle)) {
 		ctx.fillStyle = style.fillStyle;
 		drawRoundedRect(ctx, x, y, w, h, r, style.lineWidth);
 		ctx.fill();
@@ -658,7 +807,10 @@ function drawRoundedRectStyled(ctx, x, y, w, h, r, style) {
 	ctx.restore();
 }
 
-function drawRoundedRect(ctx, x, y, w, h, r, lineWidth) {
+function drawRoundedRect(
+	ctx: CanvasRenderingContext2D,
+	x: number, y: number, w: number, h: number, r: number, lineWidth: number
+) {
 	// r defines the inner curve, but we're drawing from the middle, so offset r accordingly
 	// r += lineWidth / 2;  //Disabled for now because it doesn't look right.
 	({x, y} = pixelOffset({x, y}, lineWidth));
@@ -672,7 +824,7 @@ function drawRoundedRect(ctx, x, y, w, h, r, lineWidth) {
 	ctx.closePath();
 }
 
-function pixelOffset({x, y}, lineWidth) {
+function pixelOffset({x, y}: Point, lineWidth: number): Point {
 	x = Math.floor(x);
 	y = Math.floor(y);
 	if (lineWidth % 2) {  // Avoid half-pixel offset blurry lines
