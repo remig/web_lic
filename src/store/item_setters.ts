@@ -64,10 +64,12 @@ export const ItemMutations:ItemMutationInterface = {
 			return;
 		}
 		const list = getList(parent, listType);
-		const mutation: any = store.mutations[listType];
-		const itemType = (mutation && mutation.delete)
-			? listType
-			: 'item';
+		let itemType: any = listType;
+		let mutation: any = store.mutations[listType];
+		if (mutation == null || mutation.delete == null) {
+			mutation = store.mutations.item;
+			itemType = 'item';
+		}
 		while (list.length) {
 			mutation.delete({
 				[itemType]: {type: listType, id: list[0]},
