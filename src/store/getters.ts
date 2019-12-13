@@ -129,7 +129,7 @@ export interface GetterInterface {
 		itemLookup: LookupItem,
 		pageSize: {width: number, height: number},
 		currentPage: Page
-	): Box | {display: string} | null;
+	): Box | {display: 'none'} | null;
 }
 
 export const Getters: GetterInterface = {

@@ -3,7 +3,7 @@
 let stateCache: {[key: string]: any} = {};
 
 interface Cache {
-	get(item: string | LookupItem, key: string, defaultValue: any): any;
+	get(item: string | LookupItem, key: string, defaultValue?: any): any;
 	set(item: string | LookupItem, key: string, newValue: any): void;
 	clear(item: string | LookupItem): void;
 	reset(): void;

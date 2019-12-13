@@ -80,7 +80,7 @@ interface DisplacedPart {
 	partDistance?: number;
 }
 
-type AnnotationTypes = 'label' | 'arrow' | 'image';
+type AnnotationTypes = 'label' | 'arrow' | 'stairStepArrow' | 'image';
 
 type ItemTypeNames =
 	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
@@ -133,6 +133,12 @@ interface Annotation extends BoxedItem, Alignment, PointListItem {
 	color: string;
 	font: string;
 	text: string;
+	src?: string | null;
+	direction?: Direction | null;
+	border?: {
+		color: string;
+		width: number;
+	} | null;
 }
 
 interface Book extends NumberedItem {

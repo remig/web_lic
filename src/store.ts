@@ -59,7 +59,6 @@ interface Store {
 	render: RendererInterface;
 	get: GetterInterface;
 	mutations: MutationInterface;
-	[key: string]: any;
 }
 
 const store: Store = {

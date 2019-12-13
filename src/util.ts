@@ -51,7 +51,7 @@ interface ColorInterface {
 	toVec4(colorString: string, alpha: number): number[];
 	luma(colorString: any, isUnitColor: boolean): number;
 	opposite(colorString: string): 'white' | 'black';
-	isVisible(colorString: string): boolean;
+	isVisible(colorString?: string | null): boolean;
 }
 
 interface FontPartsInterface {
@@ -512,7 +512,7 @@ const mixin = {
 		color.opposite = (colorString: string) => {
 			return (mixin.color.luma(colorString, false) < 0.18) ? 'white' : 'black';
 		};
-		color.isVisible = (colorString: string) => {
+		color.isVisible = (colorString?: string | null) => {
 			if (!colorString || typeof colorString !== 'string') {
 				return false;
 			}
