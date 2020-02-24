@@ -13,16 +13,46 @@ import {tr, noTranslate} from './translations';
 // TODO: Need performance metrics for decent max stack size.
 // TODO: check if previous undo stack entry has same text as newest one; if so, merge them (if sensical)
 
-const state = {
+interface UndoState {
+	stack: UndoStackEntry[];
+	index: number;
+	localStorageTimer: any;
+	onChangeCB?: (() => void) | null;
+}
+
+interface UndoStackEntry {
+	state: any;
+	actionList?: ActionChange[];
+	undoText?: string | null;
+	clearCacheTargets?: ClearCacheTarget[];
+}
+
+const state: UndoState = {
 	stack: [],
 	index: -1,
 	localStorageTimer: null,
 	onChangeCB: null,
 };
 
+interface UndoRedoAction {
+	root: string, op: string, path: string, value: any
+}
+
+interface ActionChange {
+	undo: UndoRedoAction[],
+	redo: UndoRedoAction[],
+}
+
+interface MutationChange {
+	mutation: string,
+	opts: any,
+}
+
+type ClearCacheTarget = CSI | PLIItem | 'csi' | 'renderer';
+
 const api = {
 
-	onChange(onChangeCB) {
+	onChange(onChangeCB: () => void) {
 		state.onChangeCB = onChangeCB;
 	},
 
@@ -36,29 +66,35 @@ const api = {
 	// clearCacheTargets is an array of either:
 	//  - items or {id, type} selectionItems that will get their 'isDirty' flag set when an undo / reo
 	//  - a item type string like 'csi', which resets all items of that type
-	commit(changeList, opts, undoText, clearCacheTargets) {
+	commit(
+		changeList: string | ActionChange | (MutationChange | ActionChange)[],
+		opts: any,
+		undoText: string,
+		clearCacheTargets: ClearCacheTarget[]
+	) {
 
+		let localChangeList: (MutationChange | ActionChange)[];
 		if (typeof changeList === 'string') {
-			changeList = [{mutation: changeList, opts}];
+			localChangeList = [{mutation: changeList, opts}];
 		} else if (isAction(changeList)) {
-			changeList = [changeList];
+			localChangeList = [changeList];
+		} else {
+			localChangeList = changeList;
 		}
 
 		performClearCacheTargets(state.index - 1, state.index);
 
 		// We now have an array of mutation & action objects.  Apply it
-		changeList.forEach(change => {
+		localChangeList.forEach(change => {
 			if (isMutation(change)) {
 				const mutation = _.get(store.mutations, change.mutation);
 				if (mutation) {
 					mutation(change.opts);
 				}
 			} else if (isAction(change)) {
-				change.redo.forEach(action => {
+				change.redo.forEach((action: UndoRedoAction) => {
 					jsonpatch.applyOperation(action.root, action);
 				});
-			} else if (change === 'clearCacheTargets') {
-				performClearCacheTargets(state.index - 1, state.index);
 			}
 		});
 
@@ -68,7 +104,7 @@ const api = {
 		}
 
 		let newState;
-		if (_.isEmpty(changeList.filter(isMutation))) {
+		if (_.isEmpty(localChangeList.filter(isMutation))) {
 			// If we have no new state, reuse previous stack state entry
 			newState = state.stack[state.stack.length - 1].state;
 		} else {
@@ -78,7 +114,7 @@ const api = {
 		// TODO: state can be really big; consider switching store.mutations to JSON-patch
 		state.stack.push({
 			state: newState,
-			actionList: changeList.filter(isAction),
+			actionList: localChangeList.filter(isAction),
 			undoText,
 			clearCacheTargets,
 		});
@@ -148,23 +184,23 @@ const api = {
 	},
 };
 
-function isMutation(change) {
-	return change && (change.hasOwnProperty('mutation') || typeof change === 'string');
+function isMutation(change: any): change is MutationChange {
+	return change?.hasOwnProperty('mutation') || typeof change === 'string';
 }
 
-function isAction(change) {
-	return change && change.hasOwnProperty('undo') && change.hasOwnProperty('redo');
+function isAction(change: any): change is ActionChange {
+	return change?.hasOwnProperty('undo') && change?.hasOwnProperty('redo');
 }
 
-function performUndoRedoAction(undoOrRedo, newIndex) {
+function performUndoRedoAction(undoOrRedo: 'undo' | 'redo', newIndex: number) {
 
 	const newStack = state.stack[newIndex];
 	const newState = _.cloneDeep(newStack.state);
 	store.replaceState(newState);
 
 	const actionStack = (undoOrRedo === 'undo') ? state.stack[state.index] : newStack;
-	(actionStack.actionList || []).forEach(action => {
-		action[undoOrRedo].forEach(subAction => {
+	(actionStack.actionList || []).forEach((action: any) => {
+		action[undoOrRedo].forEach((subAction: UndoRedoAction) => {
 			jsonpatch.applyOperation(subAction.root, subAction);
 		});
 	});
@@ -177,7 +213,7 @@ function performUndoRedoAction(undoOrRedo, newIndex) {
 	}
 }
 
-function performClearCacheTargets(prevIndex, newIndex) {
+function performClearCacheTargets(prevIndex: number, newIndex: number) {
 	const clearCacheTargets = [], stack = state.stack;
 	if (stack[prevIndex] && stack[prevIndex].clearCacheTargets) {
 		clearCacheTargets.push(...stack[prevIndex].clearCacheTargets);
@@ -189,24 +225,24 @@ function performClearCacheTargets(prevIndex, newIndex) {
 		if (typeof item === 'string') {
 			if (item === 'renderer') {  // Special case: refresh renderer settings
 				store.mutations.sceneRendering.refreshAll();
-			} else {  // item = 'pliItem', 'csi', 'page'
+			} else if (item === 'csi' || item === 'pliItem') {
 				store.mutations[item].markAllDirty();
 			}
 		} else {
 			// Some cache items were cloned from previous states;
 			// ensure we pull only the actual item from the current state
-			item = {type: item.type, id: item.id};
-			item = store.get.lookupToItem(item);
-			if (item) {
-				item.isDirty = true;
+			const localItemLookup = {type: item.type, id: item.id};
+			const localItem = store.get.lookupToItem(localItemLookup);
+			if (localItem && (localItem.type === 'csi' || localItem.type === 'pliItem')) {
+				localItem.isDirty = true;
 			}
 		}
 	});
 }
 
-function setIndex(stack, newIndex) {
+function setIndex(stack: UndoState, newIndex: number) {
 	stack.index = newIndex;
-	if (stack.onChangeCB) {
+	if (stack && stack.onChangeCB) {
 		stack.onChangeCB();
 	}
 }
