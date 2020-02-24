@@ -21,6 +21,7 @@
 		"strictPropertyInitialization": true,
 		"strictBindCallApply": true,
 		"strictFunctionTypes": true,
+		"downlevelIteration": true,
 	},
 	"types": [
 		"webpack-env"
