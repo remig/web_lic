@@ -189,10 +189,14 @@ const contextMenu = {
 			id: 'page_prepend_blank_cmenu',
 			cb(selectedItem) {
 				const nextPage = store.get.lookupToItem(selectedItem);
-				undoStack.commit('page.add', {
-					pageNumber: nextPage.number,
-					insertionIndex: store.state.pages.indexOf(nextPage),
-				}, tr(this.text));
+				undoStack.commit(
+					'page.add',
+					{
+						pageNumber: nextPage.number,
+						insertionIndex: store.state.pages.indexOf(nextPage),
+					},
+					tr(this.text)
+				);
 			},
 		},
 		{
@@ -200,10 +204,14 @@ const contextMenu = {
 			id: 'page_append_blank_cmenu',
 			cb(selectedItem) {
 				const prevPage = store.get.lookupToItem(selectedItem);
-				undoStack.commit('page.add', {
-					pageNumber: prevPage.number + 1,
-					insertionIndex: store.state.pages.indexOf(prevPage) + 1,
-				}, tr(this.text));
+				undoStack.commit(
+					'page.add',
+					{
+						pageNumber: prevPage.number + 1,
+						insertionIndex: store.state.pages.indexOf(prevPage) + 1,
+					},
+					tr(this.text)
+				);
 			},
 		},
 		{text: 'separator'},
@@ -396,8 +404,11 @@ const contextMenu = {
 						return !(store.get.prevBasicPage(selectedItem) || {}).locked;
 					},
 					cb(selectedItem) {
-						undoStack.commit('step.moveToPreviousPage', {step: selectedItem},
-							tr('action.step.move_to.previous_page.undo'));
+						undoStack.commit(
+							'step.moveToPreviousPage',
+							{step: selectedItem},
+							tr('action.step.move_to.previous_page.undo')
+						);
 					},
 				},
 				{
@@ -416,8 +427,11 @@ const contextMenu = {
 						return !(store.get.nextBasicPage(selectedItem) || {}).locked;
 					},
 					cb(selectedItem) {
-						undoStack.commit('step.moveToNextPage', {step: selectedItem},
-							tr('action.step.move_to.next_page.undo'));
+						undoStack.commit(
+							'step.moveToNextPage',
+							{step: selectedItem},
+							tr('action.step.move_to.next_page.undo')
+						);
 					},
 				},
 			],
@@ -437,8 +451,11 @@ const contextMenu = {
 					cb(selectedItem) {
 						const srcStep = selectedItem;
 						const destStep = store.get.prevStep(selectedItem, true);
-						undoStack.commit('step.mergeWithStep', {srcStep, destStep},
-							tr('action.step.merge_with.previous_step.undo'));
+						undoStack.commit(
+							'step.mergeWithStep',
+							{srcStep, destStep},
+							tr('action.step.merge_with.previous_step.undo')
+						);
 						app.clearSelected();
 					},
 				},
@@ -451,8 +468,11 @@ const contextMenu = {
 					cb(selectedItem) {
 						const srcStep = selectedItem;
 						const destStep = store.get.nextStep(selectedItem, true);
-						undoStack.commit('step.mergeWithStep', {srcStep, destStep},
-							tr('action.step.merge_with.next_step.undo'));
+						undoStack.commit(
+							'step.mergeWithStep',
+							{srcStep, destStep},
+							tr('action.step.merge_with.next_step.undo')
+						);
 						app.clearSelected();
 					},
 				},
@@ -576,8 +596,12 @@ const contextMenu = {
 						const csi = selectedItem;
 						const rotation = [{axis: 'z', angle: 180}];
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
-						undoStack.commit('csi.rotate', opts,
-							tr('action.csi.rotate.flip_upside_down.undo'), [csi]);
+						undoStack.commit(
+							'csi.rotate',
+							opts,
+							tr('action.csi.rotate.flip_upside_down.undo'),
+							[csi]
+						);
 					},
 				},
 				{
@@ -587,8 +611,12 @@ const contextMenu = {
 						const csi = selectedItem;
 						const rotation = [{axis: 'y', angle: 180}];
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
-						undoStack.commit('csi.rotate', opts,
-							tr('action.csi.rotate.rotate_front_to_back.undo'), [csi]);
+						undoStack.commit(
+							'csi.rotate',
+							opts,
+							tr('action.csi.rotate.rotate_front_to_back.undo'),
+							[csi]
+						);
 					},
 				},
 				{
