@@ -6,12 +6,20 @@ import _ from './util';
 import {Draw} from './draw';
 import {changeDpiDataUrl} from './changedpi';
 import {tr} from './translations';
+import {Store} from './store';
 
-function exportInstructions(app, store, exportType, hiResScale, drawPageCallback, doneCallback) {
+function exportInstructions(
+	app: any,
+	store: Store,
+	exportType: 'PNG' | 'PDF',
+	hiResScale: number,
+	drawPageCallback: (page: Page, canvas: HTMLCanvasElement) => void,
+	doneCallback: (finishedCallback: any) => void
+) {
 
 	app.busyText = tr(`dialog.busy_indicator.generating_${exportType}`);
 
-	async function exportPage(page, canvas) {
+	async function exportPage(page: Page, canvas: HTMLCanvasElement) {
 		return new Promise(resolve => window.setTimeout(() => {
 			if (!page) {
 				resolve();
@@ -30,7 +38,7 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 		}, 100));
 	}
 
-	async function exportPages(pages, canvas) {
+	async function exportPages(pages: Page[], canvas: HTMLCanvasElement) {
 		for (let i = 0; i < pages.length; i++) {
 			await exportPage(pages[i], canvas);
 		}
@@ -38,9 +46,9 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 
 	window.setTimeout(() => {
 		const start = Date.now();
-		const canvas = document.getElementById('exportImagesCanvas');
-		canvas.width = store.state.template.page.width * hiResScale;
-		canvas.height = store.state.template.page.height * hiResScale;
+		const canvas = document.getElementById('exportImagesCanvas') as HTMLCanvasElement;
+		canvas.width = (store.state?.template?.page?.width ?? 0) * hiResScale;
+		canvas.height = (store.state?.template?.page?.height ?? 0) * hiResScale;
 
 		const pages = store.state.pages.slice(1);  // Skip template page
 		app.updateProgress({stepCount: pages.length, text: 'Page 0'});
@@ -58,7 +66,12 @@ function exportInstructions(app, store, exportType, hiResScale, drawPageCallback
 	}, 0);
 }
 
-function generatePDF(app, store, config) {
+interface PDFConfig {
+	dpi: number,
+	pageSize: {width: number, height: number}
+}
+
+function generatePDF(app: any, store: Store, config?: PDFConfig) {
 
 	// draw PDF in points so it comes out the exact same size as the current page, with images at 96 dpi
 	let hiResScale = 1;
@@ -82,7 +95,7 @@ function generatePDF(app, store, config) {
 		[pageSize.width, pageSize.height]
 	);
 
-	function drawPage(page, canvas) {
+	function drawPage(page: Page, canvas: HTMLCanvasElement) {
 		const data = canvas.toDataURL('image/png');
 		doc.addImage(data, 'PNG', 0, 0, pageSize.width, pageSize.height);
 		if (!store.get.isLastPage(page)) {
@@ -90,7 +103,7 @@ function generatePDF(app, store, config) {
 		}
 	}
 
-	function done(finishedCallback) {
+	function done(finishedCallback: () => void) {
 		doc.save(store.get.modelFilenameBase('.pdf'));
 		finishedCallback();
 	}
@@ -98,13 +111,15 @@ function generatePDF(app, store, config) {
 	exportInstructions(app, store, 'PDF', hiResScale, drawPage, done);
 }
 
-function generatePNGZip(app, store, hiResScale = 1, dpi = 96) {
+function generatePNGZip(
+	app: any, store: Store, hiResScale: number = 1, dpi: number = 96
+) {
 
 	const fn = store.get.modelFilenameBase();
 	const zip = new JSZip();
 	const imgFolder = zip.folder(fn);
 
-	function drawPage(page, canvas) {
+	function drawPage(page: Page, canvas: HTMLCanvasElement) {
 		const pageName = (page.subtype === 'titlePage')
 			? 'Page 1 Title Page.png'
 			: `Page ${page.number}.png`;
@@ -116,9 +131,9 @@ function generatePNGZip(app, store, hiResScale = 1, dpi = 96) {
 		imgFolder.file(pageName, data, {base64: true});
 	}
 
-	function done(finishedCallback) {
+	function done(finishedCallback: () => void) {
 		zip.generateAsync({type: 'blob'})
-			.then(content => saveAs(content, fn + '.zip'))
+			.then((content: any) => saveAs(content, fn + '.zip'))
 			.then(finishedCallback);
 	}
 

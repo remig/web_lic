@@ -44,7 +44,7 @@ interface SaveContent {
 	state: any;
 }
 
-interface Store {
+export interface Store {
 	version: string | null;
 	model: Model | null;
 	setModel(model: Model): void;
@@ -133,6 +133,5 @@ function saveJSON(json: object, filename: string, jsonIndent?: number): void {
 	const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
 	saveAs(blob, filename);
 }
-
 
 export default store;
