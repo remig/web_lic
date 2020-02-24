@@ -1,22 +1,31 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-// fileType: 'text' or 'dataURL'
-export default function openChooser(acceptFileTypes, fileType, callback) {
-	const input = document.getElementById('openFileChooser');
-	input.onchange = function(e) {
-		const reader = new FileReader();
-		reader.onload = (filename => {
-			return evt => {
-				callback(evt.target.result, filename);
-			};
-		})(e.target.files[0].name);
-		if (fileType === 'text') {
-			reader.readAsText(e.target.files[0]);
-		} else {
-			reader.readAsDataURL(e.target.files[0]);
-		}
-		e.target.value = '';
-	};
-	input.setAttribute('accept', acceptFileTypes);
-	input.click();
+export default function openFileHandler(
+	acceptFileTypes: string,
+	fileType: 'text' | 'dataURL',
+	callback: (src: string | ArrayBuffer | null, filename: string) => void
+) {
+	const input = document.getElementById('openFileChooser') as HTMLInputElement;
+	if (input) {
+		input.onchange = function(e: Event) {
+			const target = e.target as HTMLInputElement;
+			const file = target?.files?.[0];
+			if (target && file) {
+				const reader = new FileReader();
+				reader.onload = (filename => {
+					return (evt: ProgressEvent) => {
+						callback((evt.target as FileReader).result, filename);
+					};
+				})(file.name);
+				if (fileType === 'text') {
+					reader.readAsText(file);
+				} else {
+					reader.readAsDataURL(file);
+				}
+				target.value = '';
+			}
+		};
+		input.setAttribute('accept', acceptFileTypes);
+		input.click();
+	}
 }
