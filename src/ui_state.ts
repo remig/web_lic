@@ -3,7 +3,80 @@
 import _ from './util';
 import Storage from './storage';
 
-const defaultState = {
+interface GuideInterface {
+	orientation: 'horizontal' | 'vertical';
+	position: number;
+}
+
+interface UIStateInterface {
+	locale: string | null;
+	lastUsedVersion: string | null;
+	dialog: {
+		importModel: {
+			stepsPerPage: number,
+			partsPerStep: number | null,
+			useMaxSteps: boolean,
+			firstPageNumber: number,
+			firstStepNumber: number,
+			addStepsForSubmodels: boolean,
+			include: {
+				titlePage: boolean,
+				pli: boolean,
+				partListPage: boolean,
+			},
+		},
+		'export': {
+			images: {
+				scale: number,
+				dpi: number,
+				maintainPrintSize: boolean,
+			},
+			pdf: {
+				dpi: number,
+				units: 'point' | 'mm' | 'cm' | 'in',
+			},
+		},
+		multiBook: {
+			firstPageNumber: 'start_page_1' | 'preserve_page_count'
+		},
+	},
+	template: null,
+	navTree: {
+		expandedNodes: string[],
+		checkedItems: {
+			all: boolean, page_step_part: boolean, group_parts: boolean,
+			step: boolean, submodelImage: boolean, csi: boolean, part: boolean,
+			pli: boolean, pliItem: boolean, callout: boolean, calloutArrow: boolean,
+			annotation: boolean, numberLabel: boolean, quantityLabel: boolean, divider: boolean,
+		},
+	},
+	pageView: {
+		facingPage: boolean,
+		scroll: boolean,
+	},
+	zoom: number,
+	grid: {
+		enabled: boolean,
+		spacing: number,
+		offset: {
+			top: number,
+			left: number,
+		},
+		line: {
+			width: number,
+			color: string,
+			dash: string[],
+		},
+	},
+	splitter: number,
+	guides: GuideInterface[],
+	guideStyle: {  // NYI
+		width: number,
+		color: string,
+	},
+}
+
+const defaultState: UIStateInterface = {
 	locale: null,
 	lastUsedVersion: null,
 	dialog: {
@@ -78,10 +151,10 @@ Storage.initialize(defaultState);
 let currentState = _.cloneDeep(defaultState);
 
 const api = {
-	get(key) {
+	get(key: string) {
 		return _.get(currentState, key);
 	},
-	set(key, prop) {
+	set(key: string, prop: unknown) {
 		_.set(currentState, key, prop);
 	},
 	getCurrentState() {
@@ -94,13 +167,13 @@ const api = {
 	resetUIState() {
 		currentState = _.cloneDeep(defaultState);
 	},
-	setUIState(newState) {
+	setUIState(newState: any) {
 		currentState = _.cloneDeep(newState);
 	},
 	mutations: {
 		// TODO: Move more ui state mutations here (menu grid & guide bits, etc)
 		guides: {
-			setPosition(guideID, newPosition) {
+			setPosition(guideID: number, newPosition: number) {
 				const originalPosition = currentState.guides[guideID].position;
 				const path = `/${guideID}/position`, root = currentState.guides;
 				return {
