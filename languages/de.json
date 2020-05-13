@@ -656,7 +656,8 @@
 			"page_size": "Seitengröße",
 			"by": "x",
 			"image_res": "Bildauflösung",
-			"dpi": "DPI"
+			"dpi": "DPI",
+			"image_type": "Bildtyp"
 		},
 		"export_hi_res_png": {
 			"title": "Exportiere hochauflösendes PNGs",
