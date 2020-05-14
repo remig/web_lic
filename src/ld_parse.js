@@ -313,6 +313,23 @@ function parseComment(abstractPart, line) {
 			});
 			abstractPart.steps.lastPart = abstractPart.parts.length;
 		}
+	} else if (command === '!LEOCAD') {
+		// LeoCAD annotation
+		if (line.length >= 4) {
+			const annotationKey1 = line[2];
+			const annotationKey2 = line[3];
+			const annotationValue = line.slice(4).join(' ');
+			if (annotationKey1 === 'MODEL') {
+				switch (annotationKey2) {
+					case 'AUTHOR':
+						abstractPart.author = annotationValue;
+						break;
+					case 'DESCRIPTION':
+						abstractPart.description = annotationValue;
+						break;
+				}
+			}
+		}
 	}
 }
 
