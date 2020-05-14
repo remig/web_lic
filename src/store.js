@@ -296,7 +296,7 @@ const store = {
 					annotationType: 'label',
 					properties: {
 						text: store.get.modelName(true),
-						font: '20pt Helvetica'
+						font: 'bold 30pt Helvetica'
 					},
 					parent: page
 				});
