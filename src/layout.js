@@ -591,8 +591,8 @@ const api = {
 		const font = store.state.template.pliItem.quantityLabel.font;
 		const lblSize = _.measureLabel(font, 'x' + pliItem.quantity);
 		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-		quantityLabel.x = -qtyLabelOffset;
-		quantityLabel.y = pliSize.height;
+		quantityLabel.x = pliSize.container.bottomX - qtyLabelOffset;
+		quantityLabel.y = pliSize.height + qtyLabelOffset;
 		quantityLabel.width = lblSize.width;
 		quantityLabel.height = lblSize.height;
 	},
