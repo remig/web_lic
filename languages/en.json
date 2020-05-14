@@ -674,8 +674,7 @@
 			"page_size": "Physical Page Size",
 			"by": "x",
 			"image_res": "Image Resolution",
-			"dpi": "DPI",
-			"image_type": "Image Type"
+			"dpi": "DPI"
 		},
 		"export_hi_res_png": {
 			"title": "Export Hi-Res PNGs",

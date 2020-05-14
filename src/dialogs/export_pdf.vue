@@ -43,12 +43,6 @@
 				>
 				<span>{{tr("dialog.export_hi_res_pdf.dpi")}}</span>
 			</el-form-item>
-			<el-form-item :label="tr('dialog.export_hi_res_pdf.image_type')">
-				<el-select :value="newState.imageType" @change="updateImageType">
-					<el-option key="png" label="png" value="png" />
-					<el-option key="jpeg" label="jpeg" value="jpeg" />
-				</el-select>
-			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
@@ -92,15 +86,11 @@ export default {
 			this.pageSize.height = _.round(_.units.pixelsToUnits(heightInPixels, newUnits));
 			this.newState.units = newUnits;
 		},
-		updateImageType(newImageType) {
-			this.newState.imageType = newImageType;
-		},
 		ok() {
 			const units = this.newState.units;
 			this.$emit('ok', {
 				dpi: this.newState.dpi,
 				units: this.newState.units,
-				imageType: this.newState.imageType,
 				pageSize: {
 					width: _.units.unitToPoints(this.pageSize.width, units),
 					height: _.units.unitToPoints(this.pageSize.height, units)

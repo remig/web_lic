@@ -65,7 +65,6 @@ function generatePDF(app, store, config) {
 		width: store.state.template.page.width * 0.75,  // 0.75 = 72 / 96
 		height: store.state.template.page.height * 0.75
 	};
-	let imageType = 'png';
 
 	if (config) {
 		// If we have a custom page size, scale images to fit into custom page at custom dpi
@@ -74,7 +73,6 @@ function generatePDF(app, store, config) {
 		hiResScale = hiResScale * config.pageSize.width / pageSize.width;
 		pageSize.width = config.pageSize.width;
 		pageSize.height = config.pageSize.height;
-		imageType = config.imageType;
 	}
 
 	const doc = new jsPDF(
@@ -84,8 +82,8 @@ function generatePDF(app, store, config) {
 	);
 
 	function drawPage(page, canvas) {
-		const data = canvas.toDataURL('image/' + imageType, 1.0);
-		doc.addImage(data, imageType.toUpperCase(), 0, 0, pageSize.width, pageSize.height);
+		const data = canvas.toDataURL('image/jpeg');
+		doc.addImage(data, 'JPEG', 0, 0, pageSize.width, pageSize.height);
 		if (!store.get.isLastPage(page)) {
 			doc.addPage(pageSize.width, pageSize.height);
 		}

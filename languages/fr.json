@@ -656,8 +656,7 @@
 			"page_size": "Taille physique de la page",
 			"by": "x",
 			"image_res": "Résolution de l'image",
-			"dpi": "Point Par Pouce",
-			"image_type": "Format de l'image"
+			"dpi": "Point Par Pouce"
 		},
 		"export_hi_res_png": {
 			"title": "Exporter en images PNG haute résolution",

@@ -30,8 +30,7 @@ const defaultState = {
 			pdf: {
 				// Don't cache physical page size because it should initially match current pixel page size
 				dpi: 96,
-				units: 'point',  // One of 'point', 'mm', 'cm', 'in'
-				imageType: 'png' // 'png' or 'jpeg'
+				units: 'point'  // One of 'point', 'mm', 'cm', 'in'
 			}
 		},
 		multiBook: {
