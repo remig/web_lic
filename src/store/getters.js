@@ -12,7 +12,7 @@ export default {
 			return store.model.description;
 		} else if (store.model.name) {
 			// strip extension from filename
-			return store.model.name.replace(/\.[^/.]+$/, "");
+			return store.model.name.replace(/\.[^/.]+$/, '');
 		}
 		const name = store.get.modelFilenameBase();
 		if (nice) {
