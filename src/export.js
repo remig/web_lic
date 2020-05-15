@@ -82,8 +82,8 @@ function generatePDF(app, store, config) {
 	);
 
 	function drawPage(page, canvas) {
-		const data = canvas.toDataURL('image/png');
-		doc.addImage(data, 'PNG', 0, 0, pageSize.width, pageSize.height);
+		const data = canvas.toDataURL('image/jpeg');
+		doc.addImage(data, 'JPEG', 0, 0, pageSize.width, pageSize.height);
 		if (!store.get.isLastPage(page)) {
 			doc.addPage(pageSize.width, pageSize.height);
 		}
