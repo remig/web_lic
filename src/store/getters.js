@@ -8,8 +8,11 @@ export default {
 	modelName(nice) {
 		if (!store.model) {
 			return '';
+		} else if (store.model.description) {
+			return store.model.description;
 		} else if (store.model.name) {
-			return store.model.name;
+			// strip extension from filename
+			return store.model.name.replace(/\.[^/.]+$/, '');
 		}
 		const name = store.get.modelFilenameBase();
 		if (nice) {
