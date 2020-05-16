@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import whatsNew from '../../whats_new.json'
 
 export default {
 	data: function() {
@@ -60,10 +61,7 @@ export default {
 		}
 	},
 	async mounted() {
-		const content = await fetch('whats_new.json');
-		if (content && content.ok) {
-			this.content = await content.json();
-		}
+		this.content = whatsNew;
 	}
 };
 
