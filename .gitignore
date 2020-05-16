@@ -1,6 +1,5 @@
 .idea
 node_modules/*
-package-lock.json
 ldraw
 ldraw_flat
 dist
