@@ -17,7 +17,7 @@
 					class="form-control"
 					@input="updateValues"
 				>
-				<div v-if="bodyText" style="margin-top: 15px" v-html="bodyText" />
+				<div v-if="bodyText" style="margin-top: 15px" v-html="bodyText"></div>
 			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">

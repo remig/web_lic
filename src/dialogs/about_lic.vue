@@ -12,14 +12,14 @@
 			<h4>{{tr('dialog.about_lic.version_@mf', {version})}}</h4>
 			<!--
 				TODO: Add server API to fetch the most recent lic version and display it here
-				<p><i class="fas fa-check" />&nbsp;You are using the most recent version of Lic.</p>
+				<p><i class="fas fa-check"></i>&nbsp;You are using the most recent version of Lic.</p>
 			-->
-			<p v-html="tr('dialog.about_lic.free_@link', 'https://github.com/remig/web_lic')" />
-			<p v-html="tr('dialog.about_lic.read_more_@link', 'http://bugeyedmonkeys.com/lic/about/')" />
-			<p v-html="tr('dialog.about_lic.ldraw_@link', 'https://www.ldraw.org/')" />
-			<p v-html="tr('dialog.about_lic.contact_@link', 'https://github.com/remig/web_lic/issues')" />
+			<p v-html="tr('dialog.about_lic.free_@link', 'https://github.com/remig/web_lic')"></p>
+			<p v-html="tr('dialog.about_lic.read_more_@link', 'http://bugeyedmonkeys.com/lic/about/')"></p>
+			<p v-html="tr('dialog.about_lic.ldraw_@link', 'https://www.ldraw.org/')"></p>
+			<p v-html="tr('dialog.about_lic.contact_@link', 'https://github.com/remig/web_lic/issues')"></p>
 			<!-- eslint-disable-next-line max-len -->
-			<p v-html="tr('dialog.about_lic.lang_@link', 'https://github.com/remig/web_lic/wiki/Translating-Lic')" />
+			<p v-html="tr('dialog.about_lic.lang_@link', 'https://github.com/remig/web_lic/wiki/Translating-Lic')"></p>
 			<p><strong>{{tr('dialog.about_lic.thanks')}}</strong>
 				<ul>
 					<li>{{tr('dialog.about_lic.feedback')}}

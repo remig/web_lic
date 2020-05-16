@@ -13,19 +13,19 @@
 		<ul class="list-group" data-testid="get-started-list">
 			<li class="list-group-item">
 				<a class="lineLink" data-testid="get-started-import" @click.prevent="importCustomModel">
-					<i class="far fa-edit fa-2x fa-pull-left" />
+					<i class="far fa-edit fa-2x fa-pull-left"></i>
 					{{tr('dialog.welcome.import')}}
 				</a>
 			</li>
 			<li class="list-group-item">
 				<a class="lineLink" data-testid="get-started-open" @click.prevent="open">
-					<i class="far fa-save fa-2x fa-pull-left" />
+					<i class="far fa-save fa-2x fa-pull-left"></i>
 					{{tr('dialog.welcome.open')}}
 				</a>
 			</li>
 			<li class="list-group-item">
 				<span class="lineLink">
-					<i class="fas fa-file-upload fa-2x fa-pull-left" />
+					<i class="fas fa-file-upload fa-2x fa-pull-left"></i>
 					{{tr('dialog.welcome.test')}}
 				</span>
 				<ul class="list-inline">
@@ -38,7 +38,7 @@
 			</li>
 			<li class="list-group-item">
 				<a class="lineLink" data-testid="get-started-learn" @click.prevent="showAbout">
-					<i class="fas fa-question-circle fa-2x fa-pull-left" />
+					<i class="fas fa-question-circle fa-2x fa-pull-left"></i>
 					{{tr('dialog.welcome.learn')}}
 				</a>
 			</li>

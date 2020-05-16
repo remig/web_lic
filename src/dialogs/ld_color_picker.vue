@@ -20,7 +20,7 @@
 					<td style="text-align: left;">{{_.startCase(row.name)}}</td>
 					<td>
 						<div class="swatch" @click="pick(row.id)">
-							<div :style="{'background-color': row.color}" class="inner_swatch" />
+							<div :style="{'background-color': row.color}" class="inner_swatch"></div>
 						</div>
 					</td>
 				</tr>

@@ -27,10 +27,10 @@
 					@input="updateHeight($event.target.value)"
 				>
 				<el-select :value="newState.units" @change="updateUnits">
-					<el-option key="point" label="point" value="point" />
-					<el-option key="mm" label="mm" value="mm" />
-					<el-option key="cm" label="cm" value="cm" />
-					<el-option key="in" label="in" value="in" />
+					<el-option key="point" label="point" value="point"></el-option>
+					<el-option key="mm" label="mm" value="mm"></el-option>
+					<el-option key="cm" label="cm" value="cm"></el-option>
+					<el-option key="in" label="in" value="in"></el-option>
 				</el-select>
 			</el-form-item>
 			<el-form-item :label="tr('dialog.export_hi_res_pdf.image_res')">
