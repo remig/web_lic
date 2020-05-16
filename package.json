@@ -6,7 +6,7 @@
 	"scripts": {
 		"build": "parcel build index.html",
 		"prod": "parcel build index.html",
-		"start": "parcel index.html",
+		"start": "parcel index.html --port 8080",
 		"test": "npx cypress open",
 		"deploy": "npm run prod && python deploy.py",
 		"stats": "webpack --config webpack.prod.js --profile --json > stats.json",
