@@ -37,5 +37,20 @@
 		"plugins": [
 			"@babel/plugin-transform-runtime"
 		]
+	},
+	"staticFiles": {
+		"staticPath": [
+			{
+				"staticPath": "static"
+			},
+			{
+				"staticPath": "languages",
+				"staticOutDir": "languages"
+			},
+			{
+				"staticPath": "ldraw",
+				"staticOutDir": "ldraw"
+			}
+		]
 	}
 }
