@@ -17,7 +17,7 @@ describe('Launch initial empty page', () => {
 
 	beforeEach(() => {
 		cy.clearLocalStorage();
-		cy.visit('http://localhost:8080');
+		cy.visit('/');
 		cy.queryLic(lic => {
 			lic.app.disableLocalStorage = true;
 		});

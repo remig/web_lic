@@ -1,4 +1,5 @@
 {
+	"baseUrl": "http://localhost:36305",
 	"fixturesFolder": "test/fixtures",
 	"integrationFolder": "test/integration",
 	"pluginsFile": "test/plugins",

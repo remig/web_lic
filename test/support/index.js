@@ -33,7 +33,7 @@ Cypress.Commands.add('importXWing', importModel.bind(null, 'xwing'));
 
 Cypress.Commands.add('reloadLicPage', () => {
 	cy.clearLocalStorage();
-	cy.visit('http://localhost:8080');
+	cy.visit('/');
 	cy.get('#whats_new_dialog .el-button').click();
 	cy.get('#locale_chooser_dialog .el-button').click();
 	cy.queryLic(lic => {
