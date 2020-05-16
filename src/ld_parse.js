@@ -7,7 +7,7 @@ const blackColor = {name: 'Black', color: '#05131D', edge: '#595959', alpha: 0};
 const api = {
 
 	// Path to load LDraw parts via HTTP. Either absolute or relative to current page.
-	LDrawPath: '../ldraw/',
+	LDrawPath: 'ldraw/',
 
 	// Load the specified url via AJAX and return an abstractPart representing the content of url.
 	async loadRemotePart(url, progressCallback) {
