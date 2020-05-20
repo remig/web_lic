@@ -3,8 +3,8 @@
 <template>
 	<div id="tree">
 		<div class="treeButtons">
-			<el-button icon="fas fa-expand-arrows-alt" @click="expand" />
-			<el-button icon="fas fa-compress" @click="collapse" />
+			<el-button icon="fas fa-expand-arrows-alt" @click="expand"></el-button>
+			<el-button icon="fas fa-compress" @click="collapse"></el-button>
 			<el-dropdown
 				id="treeShowHideMenu"
 				:hide-on-click="false"
@@ -20,14 +20,15 @@
 							v-if="el.name === 'divider'"
 							:key="`${el}_${idx}`"
 							:divided="true"
-						/>
+						>
+						</el-dropdown-item>
 						<el-dropdown-item
 							v-else
 							:key="`${el}_${idx}`"
 							:command="el"
 						>
 							{{tr(el.name)}}
-							<i v-if="el.checked" class="fas fa-check"/>
+							<i v-if="el.checked" class="fas fa-check"></i>
 						</el-dropdown-item>
 					</template>
 				</el-dropdown-menu>

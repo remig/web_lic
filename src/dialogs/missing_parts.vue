@@ -8,12 +8,11 @@
 	>
 		<div
 			class="subheading"
-			v-html="tr('dialog.missing_parts.subtitle')"
-		/>
+			v-html="tr('dialog.missing_parts.subtitle')"></div>
 		<table class="missingPartsTable">
 			<tr v-for="(value, filename) in missingPartsData" :key="filename" class="missingPartRow">
 				<td>
-					<i v-if="value.uploaded" class="fas fa-check" />
+					<i v-if="value.uploaded" class="fas fa-check"></i>
 					{{filename}}
 				</td>
 				<td>{{partCount(value.count)}}</td>
@@ -21,8 +20,7 @@
 					<licTooltip v-if="showSendButton(filename)">
 						<div
 							slot="content"
-							v-html="tr('dialog.missing_parts.send_to_remote.tooltip')"
-						/>
+							v-html="tr('dialog.missing_parts.send_to_remote.tooltip')"></div>
 						<el-button @click="sendToRemote(filename)">
 							{{tr("dialog.missing_parts.send_to_remote.title")}}
 						</el-button>

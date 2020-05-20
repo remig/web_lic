@@ -79,7 +79,7 @@ const app = new Vue({
 	},
 	methods: {
 		importBuiltInModel(url) {
-			url = './static/models/' + url;
+			url = './models/' + url;
 			this.importModel(() => LDParse.loadRemotePart(url, this.updateProgress));
 		},
 		importCustomModel() {

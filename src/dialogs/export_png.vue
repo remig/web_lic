@@ -35,8 +35,8 @@
 				>
 			</el-form-item>
 			<el-form-item>
-				<div v-html="tr('dialog.export_hi_res_png.size_@mf', scaledPageSize)" />
-				<div v-html="tr('dialog.export_hi_res_png.print_size_@mf', scaledPrintSize)" />
+				<div v-html="tr('dialog.export_hi_res_png.size_@mf', scaledPageSize)"></div>
+				<div v-html="tr('dialog.export_hi_res_png.print_size_@mf', scaledPrintSize)"></div>
 			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">

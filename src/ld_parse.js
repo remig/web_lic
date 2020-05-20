@@ -7,7 +7,7 @@ const blackColor = {name: 'Black', color: '#05131D', edge: '#595959', alpha: 0};
 const api = {
 
 	// Path to load LDraw parts via HTTP. Either absolute or relative to current page.
-	LDrawPath: '../ldraw/',
+	LDrawPath: 'ldraw/',
 
 	// Load the specified url via AJAX and return an abstractPart representing the content of url.
 	async loadRemotePart(url, progressCallback) {
@@ -238,6 +238,14 @@ function actionBuilder(filename, partID, property, newValue) {
 	};
 }
 
+function checkPartResponse(resp) {
+	return resp != null &&
+		resp.ok &&
+		// make sure parcel does not serve the main index file to us
+		resp.headers.get('content-type') &&
+		!resp.headers.get('content-type').includes("text/html");
+}
+
 async function requestPart(fn) {
 	if (!fn || typeof fn !== 'string') {
 		return '';
@@ -247,7 +255,7 @@ async function requestPart(fn) {
 
 	let resp = await fetch(qualifiedFn);  // flat LDraw file layout should alwyas end up here
 
-	if (resp == null || !resp.ok) {
+	if (!checkPartResponse(resp)) {
 		// Support non-flat LDraw file layouts.  Try to guess 'parts' vs 'p' folder to minimize requests
 		let pathsToTry;
 		if (fn.startsWith('8/') || fn.startsWith('48/')) {
@@ -259,7 +267,7 @@ async function requestPart(fn) {
 		}
 
 		for (let i = 0; i < pathsToTry.length; i++) {
-			if (resp == null || !resp.ok) {
+			if (!checkPartResponse(resp)) {
 				resp = await fetch(api.LDrawPath + pathsToTry[i] + fn);
 			}
 		}

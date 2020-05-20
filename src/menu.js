@@ -161,8 +161,7 @@ const menu = [
 						text: LocaleManager.noTranslate(language.language),
 						id: `language_${language.code}_menu`,
 						cb() {
-							LocaleManager.setLocale(language.code);
-							app.redrawUI();
+							LocaleManager.setLocale(language.code, app.redrawUI);
 						}
 					};
 				});

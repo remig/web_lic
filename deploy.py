@@ -13,13 +13,14 @@ print('Deploying version ' + version + ' to ' + site)
 ftp = FTP('ftp.' + site, username, pwd)
 ftp.cwd('~/' + site + '/lic')
 ftp.mkd(version)
-ftp.mkd(version + '/static')
-ftp.mkd(version + '/dist')
-bundles = glob.glob('dist/[0-9]*.bundle.js')
-bundles = [n.replace(os.path.sep, '/') for n in bundles]
-models = glob.glob('static/models/*')
-files = ['whats_new.json', 'index.html', 'favicon.ico', 'dist/bundle.js', 'static/style.css', 'static/transparent_background.png']
-for fn in files + bundles + models:
+
+# upload all files in dist/
+files = []
+os.chdir('dist')
+for (dir, dirnames, filesnames) in os.walk('.'):
+	for fn in filesnames:
+		files.append(dir + fn)
+for fn in files:
 	try:
 		ftp.delete(fn)
 	except error_perm:

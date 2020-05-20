@@ -20,10 +20,10 @@
 					<td>{{row.id}}</td>
 					<td style="text-align: left;">{{_.startCase(row.name)}}</td>
 					<td>
-						<el-color-picker v-model="row.color" color-format="hex" />
+						<el-color-picker v-model="row.color" color-format="hex"></el-color-picker>
 					</td>
 					<td>
-						<el-color-picker v-model="row.edge" color-format="hex" />
+						<el-color-picker v-model="row.edge" color-format="hex"></el-color-picker>
 					</td>
 				</tr>
 			</table>

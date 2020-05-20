@@ -29,7 +29,10 @@
 import _ from '../util';
 import uiState from '../ui_state';
 import DialogManager from '../dialog';
+
 import LanguageList from '../../languages/languages.json';
+// load default language
+import langEn from '../../languages/en.json';
 
 LanguageList.sort((a, b) => {
 	if (a.language < b.language) {
@@ -50,7 +53,7 @@ let currentLocale;
 // And do all of this at build time, not runtime...
 
 // Always load English; fall back on this if a different language is missing a key
-loadedLanguages.en = require('../../languages/en.json');
+loadedLanguages.en = langEn;
 
 function __tr(locale, key, args) {
 	let lookup = loadedLanguages[locale];
@@ -119,16 +122,23 @@ function getLocale() {
 	return currentLocale;
 }
 
-function setLocale(locale) {
+async function setLocale(locale, callback) {
 	if (locale == null) {
 		return;
 	}
+	if (!(loadedLanguages.hasOwnProperty(locale))) {
+		let r = await fetch(`languages/${locale}.json`);
+		if (r && r.ok) {
+			loadedLanguages[locale] = await r.json();
+		} else {
+			console.log(`Language ${locale} not found.`);
+			return;
+		}
+	}
 	currentLocale = locale;
 	uiState.set('locale', locale);
-	if (!(loadedLanguages.hasOwnProperty(locale))) {
-		// TODO: loading languages via require means all languages are included in the compiled bundle,
-		// so need to switch to ajax and load only what we need
-		loadedLanguages[locale] = require(`../../languages/${locale}.json`);
+	if (callback) {
+		callback();
 	}
 }
 
