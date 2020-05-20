@@ -126,7 +126,8 @@ export default {
 				rotation: getRotation(item)
 			};
 			container = container || canvasCache.create(item.domID);
-			LDRender.renderPart(colorCode, filename, container, config);
+			const part = LDRender.renderPart(colorCode, filename, container, config);
+			container.bottomX = part.bottomX;
 			delete item.isDirty;
 		}
 		return {width: container.width, height: container.height, container};

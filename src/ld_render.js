@@ -136,6 +136,30 @@ function contextBoundingBox(data, w, h) {
 }
 /* eslint-enable no-labels */
 
+/**
+ * Find the left-and-bottom-most point of the image
+ * @param img
+ */
+function determineBottomLeft(img, w, h) {
+	// start at the bottom line and find the first non-0 point
+	for (let y = h - 1; y >= 0; --y) {
+		for (let x = 0; x < w; ++x) {
+			if (img[(y * w + x) * 4 + 3] > 0) {
+				// found the first non-0 point
+				return {
+					x: x,
+					y: y
+				};
+			}
+		}
+	}
+	// fallback: should never happen!
+	return {
+		x: 0,
+		y: h - 1
+	};
+}
+
 // Render the specified scene in a size x size viewport, then crop it of all whitespace.
 // Return a {width, height} object specifying the final tightly cropped rendered image size.
 function renderToCanvas(canvas, container, config) {
@@ -151,6 +175,8 @@ function renderToCanvas(canvas, container, config) {
 		return null;
 	}
 
+	const bottomLeft = determineBottomLeft(data.data, data.width, data.height);
+
 	container = (typeof container === 'string') ? document.getElementById(container) : container;
 	if (config.resizeContainer) {
 		container.width = bounds.w + 1;
@@ -164,7 +190,13 @@ function renderToCanvas(canvas, container, config) {
 		config.dx || 0, config.dy || 0,
 		bounds.w + 1, bounds.h + 1
 	);
-	return {x: bounds.x, y: bounds.y, width: bounds.w, height: bounds.h};
+	return {
+		x: bounds.x,
+		y: bounds.y,
+		width: bounds.w,
+		height: bounds.h,
+		bottomX: bottomLeft.x - bounds.x
+	};
 }
 
 export default api;
