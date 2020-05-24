@@ -738,7 +738,7 @@ export const Getters: GetterInterface = {
 	},
 	targetBox(targetLookup: LookupItem) {
 		let t: any = store.get.lookupToItem(targetLookup);
-		if (t && t.points) {
+		if (t?.points?.length > 0) {
 			return store.get.targetBoxFromPoints(t);
 		}
 
