@@ -116,7 +116,7 @@ export const ItemMutations:ItemMutationInterface = {
 				// special case: dividers must move both points
 				// TODO: change 'p1' & 'p2' in divider to proper points; won't need this special case
 				store.mutations.divider.reposition({item: localItem, dx, dy});
-			} else if (hasProperty<PointListItem>(localItem, 'points')) {
+			} else if (hasProperty<PointListItem>(localItem, 'points') && localItem.points.length > 0) {
 				localItem.points.forEach(ptId => {
 					const pt = store.get.point(ptId);
 					if (pt) {
