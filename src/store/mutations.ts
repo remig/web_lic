@@ -170,15 +170,10 @@ export const Mutations: MutationInterface = {
 			if (!transform) {
 				transform = store.state.pliTransforms[filename] = {} as PLITransform;
 			}
-			if (rotation != null) {
-				if (Array.isArray(rotation)) {
-					transform.rotation = rotation.filter(el => el.angle !== 0);
-				} else {
-					// TODO: can we even get here anymore?
-				}
-				if (rotation == null || _.isEmpty(transform.rotation)) {
-					delete transform.rotation;
-				}
+			if (_.isEmpty(rotation)) {
+				delete transform.rotation;
+			} else {
+				transform.rotation = rotation.filter(el => el.angle !== 0);
 			}
 			if (scale != null) {
 				transform.scale = scale;
