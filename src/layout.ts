@@ -9,13 +9,44 @@ const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
 const qtyLabelOffset = 5;  // TODO: this belongs in the template
 
-const api = {
+export interface LayoutInterface {
+
+	book(book),
+	titlePage(page),
+	allInventoryPages(),
+	// Lays out a single inventory page. Any pli items on the page that don't fit are ignored
+	inventoryPage(page, box),
+	page(page, layout = 'horizontal'),
+	pageNumber(page),
+	step(step, box, pageMargin?: any),
+	submodelImage(submodelImage, box),
+	csi(csi, box),
+	pli(pli),
+	pliItem(pliItem),
+	callout(callout, box),
+	calloutArrow(callout),
+	subSteps(step, stepBox),
+	templatePageDividers(page, box),
+	dividers(target, layoutDirection, rows, cols, box),
+	label(label, font?: any, text?: any),
+	async mergeSteps(stepsToMerge, progressCallback),
+	adjustBoundingBox: {
+		item(item, boxes, template),
+		stepUnused(item),
+		pli(item),
+		pliItem(item),
+		callout(item),
+		quantityLabel(item),
+	},
+}
+
+const Layout: LayoutInterface = {
 
 	book(book) {
 		book = store.get.lookupToItem(book);
 		for (let i = 0; i < book.pages.length; i++) {
 			const page = store.get.lookupToItem('page', book.pages[i]);
-			api.page(page);
+			Layout.page(page);
 		}
 	},
 	titlePage(page) {
@@ -38,7 +69,7 @@ const api = {
 		if (titleAnnotation == null) {
 			titleAnnotation = store.mutations.titlePage.addTitleLabel(page);
 		}
-		api.label(titleAnnotation);
+		Layout.label(titleAnnotation);
 		titleAnnotation.x = (pageSize.width - titleAnnotation.width) / 2;
 		titleAnnotation.y = (step.y - titleAnnotation.height) / 2;
 
@@ -46,7 +77,7 @@ const api = {
 		if (pageCountAnnotation == null) {
 			pageCountAnnotation = store.mutations.titlePage.addPageCountLabel(page);
 		}
-		api.label(pageCountAnnotation);
+		Layout.label(pageCountAnnotation);
 		pageCountAnnotation.x = (pageSize.width - pageCountAnnotation.width) / 2;
 		pageCountAnnotation.y = step.y + step.height + ((step.y - pageCountAnnotation.height) / 2);
 
@@ -75,7 +106,7 @@ const api = {
 		}
 
 		const allPLIItems = firstPage.pliItems.map(store.get.pliItem);
-		api.page(firstPage);
+		Layout.page(firstPage);
 		let nextPage = firstPage;
 		const unplaced = item => {
 			return !nextPage.pliItems.includes(item.id);
@@ -89,7 +120,7 @@ const api = {
 			const opts = {subtype: 'inventoryPage', pageNumber: nextPage.number + 1};
 			nextPage = store.mutations.page.add(opts);
 			unplacedPLIItems.forEach(reparent);
-			api.page(nextPage);
+			Layout.page(nextPage);
 			unplacedPLIItems = unplacedPLIItems.filter(unplaced);
 		}
 	},
@@ -102,7 +133,7 @@ const api = {
 
 		// Layout each pli; this sets its size info and positions its quantity label.
 		pliItems.forEach(pliItem => {
-			api.pliItem(pliItem);
+			Layout.pliItem(pliItem);
 		});
 
 		// Sort pli items by color code, then sort within one color code by pli width
@@ -195,7 +226,7 @@ const api = {
 	page(page, layout = 'horizontal') {
 
 		if (page.subtype === 'titlePage') {
-			api.titlePage(page);
+			Layout.titlePage(page);
 			return;
 		}
 
@@ -210,13 +241,13 @@ const api = {
 		page.innerContentOffset = {x: borderWidth, y: borderWidth};
 
 		if (page.numberLabelID != null) {
-			api.pageNumber(page);
+			Layout.pageNumber(page);
 			const lbl = store.get.numberLabel(page.numberLabelID);
 			pageSize.height -= lbl.height + (margin / 2);
 		}
 
 		if (page.subtype === 'inventoryPage') {
-			api.inventoryPage(page, pageSize);
+			Layout.inventoryPage(page, pageSize);
 			return;
 		}
 
@@ -256,7 +287,7 @@ const api = {
 				box.x = colSize * (i % cols);
 				box.y = rowSize * Math.floor(i / cols);
 			}
-			api.step(store.get.step(page.steps[i]), box);
+			Layout.step(store.get.step(page.steps[i]), box);
 		}
 
 		if (stepCount < (rows * cols)) {
@@ -270,7 +301,7 @@ const api = {
 				for (let i = 0; i < stepsInLastCol; i++) {
 					box.y = box.height * i;
 					const stepIndex = ((cols - 1) * rows) + i;
-					api.step(store.get.step(page.steps[stepIndex]), box);
+					Layout.step(store.get.step(page.steps[stepIndex]), box);
 				}
 			} else {
 				const stepsInLastRow = cols - emptySlots;
@@ -280,14 +311,14 @@ const api = {
 				for (let i = 0; i < stepsInLastRow; i++) {
 					box.x = box.width * i;
 					const stepIndex = ((rows - 1) * cols) + i;
-					api.step(store.get.step(page.steps[stepIndex]), box);
+					Layout.step(store.get.step(page.steps[stepIndex]), box);
 				}
 			}
 		}
 
 		page.layout = layout;
 		page.actualLayout = (rows > 1 || cols > 1) ? {rows, cols, direction: layoutDirection} : 'horizontal';
-		api.dividers(page, layoutDirection, rows, cols, pageSize);
+		Layout.dividers(page, layoutDirection, rows, cols, pageSize);
 
 		if (0 && store.state.plisVisible) {
 			alignStepContent(page);
@@ -358,14 +389,14 @@ const api = {
 		step.submodelImages.forEach(submodelImageID => {
 			const submodelImage = store.get.submodelImage(submodelImageID);
 			if (submodelImage) {
-				api.submodelImage(submodelImage, box);
+				Layout.submodelImage(submodelImage, box);
 				_.geom.moveBoxEdge(box, 'top', submodelImage.height + margin);
 			}
 		});
 
 		const pli = (step.pliID != null && store.state.plisVisible) ? store.get.pli(step.pliID) : null;
 		if (pli) {
-			api.pli(pli);
+			Layout.pli(pli);
 			pli.y = box.y;
 			_.geom.moveBoxEdge(box, 'top', pli.height + margin);
 		}
@@ -382,7 +413,7 @@ const api = {
 
 		step.callouts.forEach(calloutID => {
 			const callout = store.get.callout(calloutID);
-			api.callout(callout, box);
+			Layout.callout(callout, box);
 			if (callout.position === 'left') {
 				_.geom.moveBoxEdge(box, 'left', callout.width + margin);
 			} else if (callout.position === 'right') {
@@ -395,15 +426,15 @@ const api = {
 		});
 
 		if (step.csiID == null && step.steps.length) {
-			api.subSteps(step, box);
+			Layout.subSteps(step, box);
 		} else if (step.csiID != null) {
-			api.csi(store.get.csi(step.csiID), box);
+			Layout.csi(store.get.csi(step.csiID), box);
 		}
 
 		// Layout callout arrows after CSI because arrow tip position depends on CSI layout
 		step.callouts.forEach(calloutID => {
 			const callout = store.get.callout(calloutID);
-			api.calloutArrow(callout);
+			Layout.calloutArrow(callout);
 		});
 
 		if (step.rotateIconID != null && step.csiID != null) {
@@ -575,7 +606,7 @@ const api = {
 		for (let i = 0; i < pliItems.length; i++) {
 
 			const pliItem = store.get.pliItem(pliItems[i]);
-			api.pliItem(pliItem);
+			Layout.pliItem(pliItem);
 			pliItem.x = left;
 			pliItem.y = margin;
 
@@ -638,7 +669,7 @@ const api = {
 				}
 				stepBox.width = entry.width;
 				rows[rows.length - 1].push({step: entry.step, box: _.cloneDeep(stepBox)});
-				api.step(entry.step, stepBox, 0);
+				Layout.step(entry.step, stepBox, 0);
 				stepBox.x += stepBox.width + margin;
 				calloutBox.width = Math.max(calloutBox.width, stepBox.x);
 			});
@@ -668,7 +699,7 @@ const api = {
 				}
 				stepBox.height = entry.height;
 				columns[columns.length - 1].push({step: entry.step, box: _.cloneDeep(stepBox)});
-				api.step(entry.step, stepBox, 0);
+				Layout.step(entry.step, stepBox, 0);
 				stepBox.y += stepBox.height + margin;
 				calloutBox.height = Math.max(calloutBox.height, stepBox.y);
 			});
@@ -775,9 +806,9 @@ const api = {
 				box.x = stepBox.x + (colSize * (i % cols));
 				box.y = stepBox.y + (rowSize * Math.floor(i / cols));
 			}
-			api.step(store.get.step(step.steps[i]), box);
+			Layout.step(store.get.step(step.steps[i]), box);
 		}
-		api.dividers(step, step.subStepLayout, rows, cols, stepBox);
+		Layout.dividers(step, step.subStepLayout, rows, cols, stepBox);
 	},
 
 	templatePageDividers(page, box) {
@@ -799,7 +830,7 @@ const api = {
 		store.mutations.item.deleteChildList({item: target, listType: 'divider'});
 
 		if (target.type === 'templatePage') {
-			api.templatePageDividers(target, box);
+			Layout.templatePageDividers(target, box);
 			return;
 		}
 
@@ -902,7 +933,7 @@ const api = {
 			step.width = bbox.width;
 			step.height = bbox.height;
 			if (step.parent.type === 'callout') {
-				api.adjustBoundingBox.callout(store.get.parent(step));
+				Layout.adjustBoundingBox.callout(store.get.parent(step));
 			}
 		},
 
@@ -921,13 +952,13 @@ const api = {
 					width: qtyLabel.width, height: qtyLabel.height,
 				});
 			});
-			api.adjustBoundingBox.item(pli, boxes, store.state.template.pli);
+			Layout.adjustBoundingBox.item(pli, boxes, store.state.template.pli);
 		},
 
 		pliItem(item) {
 			const pliItem = store.get.lookupToItem(item);
 			if (pliItem.parent.type === 'pli') {
-				api.adjustBoundingBox.pli(pliItem.parent);
+				Layout.adjustBoundingBox.pli(pliItem.parent);
 			}
 		},
 
@@ -941,13 +972,13 @@ const api = {
 					width: step.width, height: step.height,
 				});
 			});
-			api.adjustBoundingBox.item(callout, boxes, store.state.template.callout);
-			api.calloutArrow(callout);
+			Layout.adjustBoundingBox.item(callout, boxes, store.state.template.callout);
+			Layout.calloutArrow(callout);
 		},
 
 		quantityLabel(item) {
 			if (item.parent.type === 'pliItem') {
-				api.adjustBoundingBox.pliItem(store.get.parent(item));
+				Layout.adjustBoundingBox.pliItem(store.get.parent(item));
 			}
 		},
 	},
@@ -1052,4 +1083,4 @@ function isStepTooSmall(step) {
 	return false;
 }
 
-export default api;
+export default Layout;
