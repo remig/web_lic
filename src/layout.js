@@ -31,16 +31,24 @@ const api = {
 		step.y = (pageSize.height - step.height) / 2;
 		csi.x = csi.y = 20;
 
-		// TODO: If an annotation was changed / deleted, need to fix it before setting it
-		const title = store.get.annotation(page.annotations[0]);
-		api.label(title);
-		title.x = (pageSize.width - title.width) / 2;
-		title.y = (step.y - title.height) / 2;
+		const annotations = page.annotations.map(store.get.annotation);
 
-		const modelInfo = store.get.annotation(page.annotations[1]);
-		api.label(modelInfo);
-		modelInfo.x = (pageSize.width - modelInfo.width) / 2;
-		modelInfo.y = step.y + step.height + ((step.y - modelInfo.height) / 2);
+		// TODO: If an annotation was changed / deleted, need to fix it before setting it
+		let titleAnnotation = annotations.find(a => a.meta.type === 'title-page-model-name');
+		if (titleAnnotation == null) {
+			titleAnnotation = store.mutations.titlePage.addTitleLabel(page);
+		}
+		api.label(titleAnnotation);
+		titleAnnotation.x = (pageSize.width - titleAnnotation.width) / 2;
+		titleAnnotation.y = (step.y - titleAnnotation.height) / 2;
+
+		let pageCountAnnotation = annotations.find(a => a.meta.type === 'title-page-page-count');
+		if (pageCountAnnotation == null) {
+			pageCountAnnotation = store.mutations.titlePage.addPageCountLabel(page);
+		}
+		api.label(pageCountAnnotation);
+		pageCountAnnotation.x = (pageSize.width - pageCountAnnotation.width) / 2;
+		pageCountAnnotation.y = step.y + step.height + ((step.y - pageCountAnnotation.height) / 2);
 
 		delete page.needsLayout;
 	},

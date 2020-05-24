@@ -133,6 +133,7 @@ interface Annotation extends BoxedItem, Alignment, PointListItem {
 	color: string;
 	font: string;
 	text: string;
+	meta?: any;
 	src?: string | null;
 	direction?: Direction | null;
 	border?: {
