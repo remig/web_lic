@@ -161,8 +161,8 @@ export const BookMutations: BookMutationInterface = {
 			store.mutations.book.add(book);
 		});
 		if (includeTitlePages) {
-			store.mutations.removeTitlePage();  // Remove any existing title pages first
-			store.mutations.addTitlePage();
+			store.mutations.titlePage.delete();  // Remove any existing title pages first
+			store.mutations.titlePage.add();
 		}
 		bookDivisions.forEach(bookDivision => {
 			const book = store.get.itemByNumber('book', bookDivision.bookNumber);

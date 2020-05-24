@@ -203,7 +203,7 @@ const menu = [
 			id: 'add_title_page_menu',
 			shown: () => enableIfModel() && store.get.titlePage() == null,
 			cb() {
-				undoStack.commit('addTitlePage', {}, tr(this.text()));
+				undoStack.commit('titlePage.add', {}, tr(this.text()));
 				app.clearSelected();
 				app.setCurrentPage(store.get.firstPage());
 			},
@@ -216,7 +216,7 @@ const menu = [
 			id: 'remove_title_page_menu',
 			shown: () => enableIfModel() && store.get.titlePage() != null,
 			cb() {
-				undoStack.commit('removeTitlePage', {}, tr(this.text()));
+				undoStack.commit('titlePage.delete', {}, tr(this.text()));
 				app.clearSelected();
 				app.setCurrentPage(store.get.firstBasicPage());
 			},

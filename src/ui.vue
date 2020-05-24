@@ -192,7 +192,7 @@ const UI = {
 					}
 					if (layoutChoices.include.titlePage) {
 						// Add title page after regular pages so title page labels comes out correct
-						store.mutations.addTitlePage();
+						store.mutations.titlePage.add();
 					}
 					store.saveLocal();
 
