@@ -187,12 +187,12 @@ const UI = {
 						this.busyText = this.tr('dialog.busy_indicator.merging_steps');
 						await store.mutations.mergeInitialPages(this.updateProgress);
 					}
+					if (layoutChoices.include.partListPage) {
+						store.mutations.inventoryPage.add();
+					}
 					if (layoutChoices.include.titlePage) {
 						// Add title page after regular pages so title page labels comes out correct
 						store.mutations.addTitlePage();
-					}
-					if (layoutChoices.include.partListPage) {
-						store.mutations.inventoryPage.add();
 					}
 					store.saveLocal();
 
