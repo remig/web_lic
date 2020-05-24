@@ -42,6 +42,7 @@ export interface TitlePageMutationInterface {
 	add(): void;
 	delete(): void;
 	addTitleLabel(page: Page): Annotation;
+	setPageCountLabels(parent?: Book): void;
 	addPageCountLabel(page: Page, parent?: Book): Annotation;
 }
 
@@ -63,7 +64,7 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 				store.mutations.page.delete({page});
 			});
 	},
-	addTitleLabel(page: Page) {
+	addTitleLabel(page) {
 		return store.mutations.annotation.add({
 			annotationType: 'label',
 			properties: {
@@ -76,27 +77,38 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 			parent: page, x: 0, y: 0,
 		});
 	},
-	addPageCountLabel(page: Page, parent?: Book) {
-
-		// TODO: This part & page count gets out of sync with the doc as pages are added / removed
-		const partCount = LDParse.model.get.partCount(store.model);
-		const pageCount = store.get.pageCount();  // TODO: count only pages in the current book
-		let text;
-		if (parent) {
-			const parentBook = store.get.book(parent);
-			if (parentBook == null) {
-				throw 'Trying to find a nice annotation for a non-existent Book';
+	setPageCountLabels(parent) {
+		// TODO: this is broken for multiple books
+		const titlePage = store.get.titlePage();
+		if (titlePage) {
+			const annotations = titlePage.annotations.map(store.get.annotation);
+			const annotation = annotations.find(a => {
+				return (a == null) ? false : a.meta.type === 'title-page-page-count';
+			});
+			if (annotation != null) {
+				const partCount = LDParse.model.get.partCount(store.model);
+				const pageCount = store.get.pageCount();  // TODO: count only pages in the current book
+				let text;
+				if (parent) {
+					const parentBook = store.get.book(parent);
+					if (parentBook == null) {
+						throw 'Trying to find a nice annotation for a non-existent Book';
+					}
+					const bookNumber = parentBook.number;
+					text = tr('title_page.book_model_info_@mf', {bookNumber, partCount, pageCount});
+				} else {
+					text = tr('title_page.model_info_@mf', {partCount, pageCount});
+				}
+				store.mutations.annotation.set({annotation, newProperties: {text}});
 			}
-			const bookNumber = parentBook.number;
-			text = tr('title_page.book_model_info_@mf', {bookNumber, partCount, pageCount});
-		} else {
-			text = tr('title_page.model_info_@mf', {partCount, pageCount});
 		}
+	},
+	addPageCountLabel(page, parent) {
 
-		return store.mutations.annotation.add({
+		const annotation = store.mutations.annotation.add({
 			annotationType: 'label',
 			properties: {
-				text,
+				text: '',
 				font: '16pt Helvetica',
 				meta: {
 					type: 'title-page-page-count',
@@ -104,5 +116,9 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 			},
 			parent: page, x: 0, y: 0,
 		});
+
+		store.mutations.titlePage.setPageCountLabels(parent);
+
+		return annotation;
 	},
 };

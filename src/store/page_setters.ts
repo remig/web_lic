@@ -9,14 +9,15 @@ export interface PageMutationInterface {
 	add({
 		pageNumber, subtype, doNotRenumber,
 		parent, insertionIndex, parentInsertionIndex,
-	} : {
+	}: {
 		pageNumber?: number | 'id', subtype?: PageSubtypes, doNotRenumber?: boolean,
 		parent?: LookupItem, insertionIndex?: number, parentInsertionIndex?: number,
 	}): Page;
-	delete(
-		{page, doNotRenumber, deleteSteps}
-		: {page: LookupItem, doNotRenumber?: boolean, deleteSteps?: boolean}
-	): void;
+	delete({
+		page, doNotRenumber, deleteSteps,
+	}: {
+		page: LookupItem, doNotRenumber?: boolean, deleteSteps?: boolean
+	}): void;
 	setLocked({page, locked}: {page: LookupItem, locked: boolean}): void;
 	renumber(): void;
 	markAllDirty(): void;
@@ -24,8 +25,6 @@ export interface PageMutationInterface {
 }
 
 export const PageMutations: PageMutationInterface = {
-	// opts: {pageNumber, subtype = 'page', doNotRenumber: false,
-	// parent = null, insertionIndex = -1, parentInsertionIndex = null}
 	add({
 		pageNumber, subtype = 'page', doNotRenumber = false,
 		parent = null, insertionIndex = -1, parentInsertionIndex = -1,
@@ -64,6 +63,9 @@ export const PageMutations: PageMutationInterface = {
 		if (!doNotRenumber) {
 			store.mutations.page.renumber();
 		}
+
+		store.mutations.titlePage.setPageCountLabels();
+
 		return page;
 	},
 	delete({page, doNotRenumber = false, deleteSteps = false}) {
@@ -93,6 +95,7 @@ export const PageMutations: PageMutationInterface = {
 		if (!doNotRenumber) {
 			store.mutations.page.renumber();
 		}
+		store.mutations.titlePage.setPageCountLabels();
 	},
 	setLocked({page, locked}) {
 		const item = store.get.page(page);
