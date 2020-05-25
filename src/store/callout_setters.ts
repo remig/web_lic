@@ -82,7 +82,9 @@ export const CalloutMutations: CalloutMutationInterface = {
 			throw 'Can\'t find a Model in the first step in callout';
 		}
 		const model = _.cloneDeep(modelStep.model);
-		const destStep = store.get.step(item.steps[insertionIndex]);
+		const destStep = (item.steps[insertionIndex] == null)
+			? null
+			: store.get.step(item.steps[insertionIndex]);
 		const lastStepID = _.last(item.steps);
 		const lastStep = store.get.step((lastStepID == null) ? -1 : lastStepID);
 		if (lastStep == null) {

@@ -1,20 +1,26 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {isItemSpecificType, hasProperty} from '../type_helpers';
-
+import {hasProperty} from '../type_helpers';
 import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
+import {isNotNull} from '../type_helpers';
 
-function getter<T extends Item>(s: ItemTypeNames) {
+function getter<T extends ItemTypes>(s: ItemTypeNames) {
 	return (itemLookup: number | LookupItem) => {
 		let res;
 		if (typeof itemLookup === 'number') {
 			res = store.get.lookupToItem({type: s, id: itemLookup});
+			if (res == null) {
+				throw `Invalid entity Lookup id: ${itemLookup}, type: ${s}`;
+			}
 		} else {
 			res = store.get.lookupToItem(itemLookup);
+			if (res == null) {
+				throw `Invalid entity Lookup id: ${itemLookup.id}, type: ${itemLookup.type}`;
+			}
 		}
-		return (res == null) ? null : res as unknown as T;
+		return res as T;
 	};
 }
 
@@ -38,21 +44,21 @@ function getChildID(item: Item, childType: ItemTypeNames): number {
 
 export interface GetterInterface {
 
-	annotation(id: LookupItem | number): Annotation | null;
-	book(id: LookupItem | number): Book | null;
-	callout(id: LookupItem | number): Callout | null;
-	calloutArrow(id: LookupItem | number): CalloutArrow | null;
-	csi(id: LookupItem | number): CSI | null;
-	divider(id: LookupItem | number): Divider | null;
-	numberLabel(id: LookupItem | number): NumberLabel | null;
-	page(id: LookupItem | number): Page | null;
-	pli(id: LookupItem | number): PLI | null;
-	pliItem(id: LookupItem | number): PLIItem | null;
-	point(id: LookupItem | number): PointItem | null;
-	quantityLabel(id: LookupItem | number): QuantityLabel | null;
-	rotateIcon(id: LookupItem | number): RotateIcon | null;
-	step(id: LookupItem | number): Step | null;
-	submodelImage(id: LookupItem | number): SubmodelImage | null;
+	annotation(id: LookupItem | number): Annotation;
+	book(id: LookupItem | number): Book;
+	callout(id: LookupItem | number): Callout;
+	calloutArrow(id: LookupItem | number): CalloutArrow;
+	csi(id: LookupItem | number): CSI;
+	divider(id: LookupItem | number): Divider;
+	numberLabel(id: LookupItem | number): NumberLabel;
+	page(id: LookupItem | number): Page;
+	pli(id: LookupItem | number): PLI;
+	pliItem(id: LookupItem | number): PLIItem;
+	point(id: LookupItem | number): PointItem;
+	quantityLabel(id: LookupItem | number): QuantityLabel;
+	rotateIcon(id: LookupItem | number): RotateIcon;
+	step(id: LookupItem | number): Step;
+	submodelImage(id: LookupItem | number): SubmodelImage;
 
 	modelName(nice: boolean): string;
 	modelFilename(): string;
@@ -71,13 +77,13 @@ export interface GetterInterface {
 	lastBasicPage(): Page | null;
 	prevBasicPage(item: LookupItem): Page | null;
 	nextBasicPage(item: LookupItem): Page | null;
-	prevPage(item: LookupItem): Page;
-	nextPage(item: LookupItem): Page;
+	prevPage(item: LookupItem): Page | null;
+	nextPage(item: LookupItem): Page | null;
 	pageList(): Page[];
 	templatePage(): Page;
 	templateForItem(itemLookup: LookupItem): any;
 	isTemplatePage(pageLookup: LookupItem): boolean;
-	firstBookPage(bookLookup: LookupItem): Page | null;
+	firstBookPage(bookLookup: LookupItem): Page;
 	firstPage(): Page | null;
 	lastPage(): Page | null;
 	adjacentStep(
@@ -106,7 +112,7 @@ export interface GetterInterface {
 	submodels(): SubmodelIdentifier[];
 	topLevelTreeNodes(): any[];
 	nextItemID(item: ItemTypeNames): number
-	nextItemID(item: LookupItem | null): number
+	nextItemID(item: LookupItem): number
 	itemByNumber(type: ItemTypeNames, number: number): Item | null;
 	lookupToItem(lookup: LookupItem | null): ItemTypes | null;
 	lookupToItem(lookup: number, type: ItemTypeNames): ItemTypes | null;
@@ -133,21 +139,22 @@ export interface GetterInterface {
 }
 
 export const Getters: GetterInterface = {
-	annotation: getter('annotation'),
-	book: getter('book'),
-	callout: getter('callout'),
-	calloutArrow: getter('calloutArrow'),
-	csi: getter('csi'),
-	divider: getter('divider'),
-	numberLabel: getter('numberLabel'),
-	page: getter('page'),
-	pli: getter('pli'),
-	pliItem: getter('pliItem'),
-	point: getter('point'),
-	quantityLabel: getter('quantityLabel'),
-	rotateIcon: getter('rotateIcon'),
-	step: getter('step'),
-	submodelImage: getter('submodelImage'),
+	annotation: getter<Annotation>('annotation'),
+	book: getter<Book>('book'),
+	callout: getter<Callout>('callout'),
+	calloutArrow: getter<CalloutArrow>('calloutArrow'),
+	csi: getter<CSI>('csi'),
+	divider: getter<Divider>('divider'),
+	numberLabel: getter<NumberLabel>('numberLabel'),
+	page: getter<Page>('page'),
+	pli: getter<PLI>('pli'),
+	pliItem: getter<PLIItem>('pliItem'),
+	point: getter<PointItem>('point'),
+	quantityLabel: getter<QuantityLabel>('quantityLabel'),
+	rotateIcon: getter<RotateIcon>('rotateIcon'),
+	step: getter<Step>('step'),
+	submodelImage: getter<SubmodelImage>('submodelImage'),
+
 	modelName(nice: boolean) {
 		if (!store.model) {
 			return '';
@@ -177,21 +184,21 @@ export const Getters: GetterInterface = {
 	},
 	isTitlePage(pageLookup: LookupItem) {
 		const page = store.get.page(pageLookup);
-		return (page || {}).subtype === 'titlePage';
+		return page.subtype === 'titlePage';
 	},
 	titlePage() {
 		return store.state.pages.find(store.get.isTitlePage) || null;
 	},
 	isBasicPage(pageLookup: LookupItem) {
 		const page = store.get.page(pageLookup);
-		return (page || {}).subtype === 'page';
+		return page.subtype === 'page';
 	},
 	basicPages() {
 		return store.state.pages.filter(store.get.isBasicPage);
 	},
 	isInventoryPage(pageLookup: LookupItem) {
 		const page = store.get.page(pageLookup);
-		return (page || {}).subtype === 'inventoryPage';
+		return page.subtype === 'inventoryPage';
 	},
 	inventoryPages() {
 		return store.state.pages.filter(store.get.isInventoryPage);
@@ -199,12 +206,12 @@ export const Getters: GetterInterface = {
 	isFirstBasicPage(pageLookup: LookupItem) {
 		const page = store.get.page(pageLookup);
 		const basicPages = store.get.basicPages();
-		return (page != null) && (page.id === basicPages[0].id);
+		return page.id === basicPages[0].id;
 	},
 	isLastBasicPage(pageLookup: LookupItem) {
 		const page = store.get.page(pageLookup);
 		const lastPage = _.last(store.get.basicPages());
-		return (page != null) && (lastPage != null) && (page.id === lastPage.id);
+		return (lastPage != null) && (page.id === lastPage.id);
 	},
 	isLastPage(page: LookupItem) {
 		const lastPage = _.last(store.state.pages) as Page;
@@ -271,18 +278,15 @@ export const Getters: GetterInterface = {
 	},
 	isTemplatePage(pageLookup: LookupItem) {
 		const page = store.get.page(pageLookup);
-		return (page != null) && (page.subtype === 'templatePage');
+		return page.subtype === 'templatePage';
 	},
 	firstBookPage(bookLookup: LookupItem) {
 		const book = store.get.book(bookLookup);
-		if (book) {
-			const firstPage = store.get.page(book.pages[0]);
-			if (firstPage && firstPage.subtype === 'templatePage') {
-				return store.get.page(book.pages[1]);
-			}
-			return firstPage;
+		const firstPage = store.get.page(book.pages[0]);
+		if (firstPage && firstPage.subtype === 'templatePage') {
+			return store.get.page(book.pages[1]);
 		}
-		return null;
+		return firstPage;
 	},
 	firstPage() {
 		return store.state.pages[1];  // first page should still ignore template page
@@ -292,15 +296,13 @@ export const Getters: GetterInterface = {
 	},
 	adjacentStep(stepLookup: LookupItem, direction: 'prev' | 'next', limitToSubmodel: boolean) {
 		const step = store.get.step(stepLookup);
-		if (step == null) {
-			throw 'Trying to find the adjacent Step to a non-existent Step';
-		}
 		let itemList;
 		if (step.parent.type === 'step' || step.parent.type === 'callout') {
 			const parent = store.get.parent(step);
 			if (hasProperty<StepParent>(parent, 'steps')) {
-				itemList = parent.steps.map(store.get.step)
-					.filter((tmpStep): tmpStep is Step => tmpStep != null);
+				itemList = parent.steps
+					.map(store.get.step)
+					.filter(isNotNull);
 			}
 		}
 		let adjacentStep = store.get[direction]<Step>(step, itemList);
@@ -323,42 +325,30 @@ export const Getters: GetterInterface = {
 	},
 	part(partID: number, stepLookup: LookupItem) {
 		const step = store.get.step(stepLookup);
-		if (step == null) {
-			throw 'Trying to get a Part from a non-existent Step';
-		}
 		return LDParse.model.get.partFromID(partID, step.model.filename);
 	},
 	partsInStep(stepLookup: LookupItem) {
 		const step = store.get.step(stepLookup);
-		if (step) {
-			return (step.parts || []).map((partID: number) => {
-				return LDParse.model.get.partFromID(partID, step.model.filename);
-			});
-		}
-		return [];
+		return (step.parts || []).map((partID: number) => {
+			return LDParse.model.get.partFromID(partID, step.model.filename);
+		});
 	},
 	abstractPartsInStep(stepLookup: LookupItem) {
-		const step = store.get.lookupToItem(stepLookup);
-		if (step) {
-			const parts = store.get.partsInStep(step);
-			return parts.map((part: Part) => {
-				return LDParse.model.get.abstractPart(part.filename);
-			});
-		}
-		return [];
+		const step = store.get.step(stepLookup);
+		const parts = store.get.partsInStep(step);
+		return parts.map((part: Part) => {
+			return LDParse.model.get.abstractPart(part.filename);
+		});
 	},
 	stepHasSubmodel(stepLookup: LookupItem) {
-		const step = store.get.lookupToItem(stepLookup);
-		if (step) {
-			const parts = store.get.abstractPartsInStep(step);
-			return parts.some((part: AbstractPart) => part.isSubModel);
-		}
-		return false;
+		const step = store.get.step(stepLookup);
+		const parts = store.get.abstractPartsInStep(step);
+		return parts.some((part: AbstractPart) => part.isSubModel);
 	},
 	partList(stepLookup: LookupItem) {
 		// Return a list of part IDs for every part in this (and previous) step
 		let step: Step | null = store.get.step(stepLookup);
-		if (step == null || step.parts == null) {
+		if (step.parts == null) {
 			return null;
 		}
 		let partList: number[] = [];
@@ -390,11 +380,8 @@ export const Getters: GetterInterface = {
 		return null;
 	},
 	pliItemIsSubmodel(pliItemLookup: LookupItem) {
-		const pliItem = store.get.lookupToItem(pliItemLookup);
-		if (isItemSpecificType<PLIItem>(pliItem, 'pliItem')) {
-			return LDParse.model.isSubmodel(pliItem.filename);
-		}
-		return false;
+		const pliItem = store.get.pliItem(pliItemLookup);
+		return LDParse.model.isSubmodel(pliItem.filename);
 	},
 	pliTransform(filename: LDrawPartFilename) {
 		return store.state.pliTransforms[filename] || {};
@@ -612,12 +599,9 @@ export const Getters: GetterInterface = {
 		});
 		return nodes.filter((el: object) => el);
 	},
-	nextItemID(item: ItemTypeNames | LookupItem | null) {
+	nextItemID(item: ItemTypeNames | LookupItem) {
 		// TODO: get rid of ItemTypeNames option in here; always call this with a non-null lookup
 		// Get the next unused ID in this item's list
-		if (item == null) {
-			return 0;
-		}
 		let itemType: ItemTypeNames;
 		if (typeof item === 'string') {
 			itemType = item;

@@ -308,7 +308,7 @@ export const StepMutations: StepMutationInterface = {
 	},
 	copyRotation({step, nextXSteps, rotation}) {  // Copy step's CSI rotation to next X steps
 		const stepItem = store.get.step(step);
-		let csi, nextStep = stepItem;
+		let csi, nextStep: Step | null = stepItem;
 		for (let i = 0; i < nextXSteps; i++) {
 			if (nextStep) {
 				nextStep = store.get.nextStep(nextStep);

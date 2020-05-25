@@ -548,7 +548,9 @@ const UI = {
 			return Menu(this);
 		},
 		isTemplatePageCurrent() {
-			return store.get.isTemplatePage(this.currentPageLookup);
+			return (this.currentPageLookup == null)
+				? false
+				: store.get.isTemplatePage(this.currentPageLookup);
 		},
 	},
 	async mounted() {
