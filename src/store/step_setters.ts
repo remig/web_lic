@@ -75,7 +75,7 @@ export const StepMutations: StepMutationInterface = {
 
 		store.mutations.csi.add({parent: step});
 
-		if (parent && parent.type === 'page') {
+		if (parent != null && parent.type === 'page') {
 			store.mutations.pli.add({parent: step});
 		}
 
@@ -99,9 +99,11 @@ export const StepMutations: StepMutationInterface = {
 		{step, doNotRenumber = false, deleteParts = false, doLayout = false}
 	) {
 		const item = store.get.step(step);
-		if (item == null) {
-			return;
+		let page;
+		if (doLayout) {
+			page = store.get.pageForItem(item);
 		}
+
 		if (item.parts && item.parts.length) {
 			if (deleteParts) {
 				while (item.parts.length) {
@@ -141,14 +143,14 @@ export const StepMutations: StepMutationInterface = {
 				}
 			}
 		}
-		if (doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(step)});
+		if (doLayout && page != null) {
+			store.mutations.page.layout({page});
 		}
 	},
 	renumber(step) {
 		const stepItem = store.get.step(step || -1);
 		let stepList: (Step | null)[] = [];
-		if (stepItem && (stepItem.parent.type === 'step' || stepItem.parent.type === 'callout')) {
+		if (stepItem.parent.type === 'step' || stepItem.parent.type === 'callout') {
 			// Renumber steps in target callout / parent step
 			const parent = store.get.parent(stepItem);
 			if (hasProperty<StepParent>(parent, 'steps')) {
@@ -170,15 +172,10 @@ export const StepMutations: StepMutationInterface = {
 	},
 	layout({step, box}) {
 		const stepItem = store.get.step(step);
-		if (stepItem != null) {
-			Layout.step(stepItem, box);
-		}
+		Layout.step(stepItem, box);
 	},
 	moveToPage({step, destPage, parentInsertionIndex = 0}) {
 		const item = store.get.step(step);
-		if (item == null) {
-			return;
-		}
 		const currentPage = store.get.parent(item);
 		const destPageItem = store.get.page(destPage);
 		if (currentPage == null || destPageItem == null) {
@@ -208,9 +205,6 @@ export const StepMutations: StepMutationInterface = {
 	mergeWithStep({srcStep, destStep}) {
 		const srcStepItem = store.get.step(srcStep);
 		const destStepItem = store.get.step(destStep);
-		if (!srcStepItem || !destStepItem) {
-			return;
-		}
 		_.cloneDeep(srcStepItem.parts).forEach(partID => {
 			store.mutations.part.moveToStep({
 				partID,
@@ -231,9 +225,6 @@ export const StepMutations: StepMutationInterface = {
 	stretchToPage({step, stretchToPage, doLayout}) {
 		const stepItem = store.get.step(step);
 		const destPage = store.get.page(stretchToPage);
-		if (stepItem == null || destPage == null) {
-			return;
-		}
 		destPage.stretchedStep = {stepID: stepItem.id, leftOffset: 0};
 		stepItem.stretchedPages.push(stretchToPage.id);
 		if (doLayout) {
@@ -243,9 +234,6 @@ export const StepMutations: StepMutationInterface = {
 	},
 	addCallout({step}) {
 		const stepItem = store.get.step(step);
-		if (stepItem == null) {
-			return;
-		}
 		stepItem.callouts = stepItem.callouts || [];
 		let position: Position = 'left';
 		if (stepItem.callouts.length) {
@@ -263,7 +251,7 @@ export const StepMutations: StepMutationInterface = {
 	},
 	addSubStep({step, doLayout}) {
 		const stepItem = store.get.step(step);
-		if (stepItem == null || stepItem.csiID == null) {
+		if (stepItem.csiID == null) {
 			return;
 		}
 		const newStep = store.mutations.step.add({
@@ -282,18 +270,13 @@ export const StepMutations: StepMutationInterface = {
 	},
 	setSubStepLayout({step, layout, doLayout}) {
 		const stepItem = store.get.step(step);
-		if (stepItem) {
-			stepItem.subStepLayout = layout;
-			if (doLayout) {
-				store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
-			}
+		stepItem.subStepLayout = layout;
+		if (doLayout) {
+			store.mutations.page.layout({page: store.get.pageForItem(stepItem)});
 		}
 	},
 	toggleRotateIcon({step, display, doLayout}) {
 		const stepItem = store.get.step(step);
-		if (stepItem == null) {
-			return;
-		}
 		if (display && stepItem.rotateIconID == null) {
 			store.mutations.rotateIcon.add({parent: stepItem});
 		} else if (!display && stepItem.rotateIconID != null) {
@@ -324,9 +307,6 @@ export const StepMutations: StepMutationInterface = {
 	},
 	addPart({step, partID}) {
 		const stepItem = store.get.step(step);
-		if (stepItem == null) {
-			return;
-		}
 		stepItem.parts.push(partID);
 		stepItem.parts.sort(_.sort.numeric.ascending);
 		if (stepItem.pliID != null) {
@@ -337,9 +317,6 @@ export const StepMutations: StepMutationInterface = {
 	},
 	removePart({step, partID, doLayout = false}) {
 		const stepItem = store.get.step(step);
-		if (stepItem == null) {
-			return;
-		}
 		_.deleteItem(stepItem.parts, partID);
 		if (stepItem.pliID != null) {
 			const part = LDParse.model.get.partFromID(partID, stepItem.model.filename);
