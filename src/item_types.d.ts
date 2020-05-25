@@ -172,8 +172,6 @@ interface CSI extends BoxedItem {
 	rotation: Rotation[] | null;
 	scale: number | null;
 	isDirty: boolean;
-	width: number | null;
-	height: number | null;
 }
 
 interface Divider extends Item {

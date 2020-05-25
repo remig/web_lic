@@ -63,8 +63,8 @@ const Layout: LayoutInterface = {
 		const csi = store.get.csi(step.csiID);
 		const box = {x: 0, y: 0, width: pageSize.width, height: pageSize.height};
 		store.mutations.step.layout({step, box});
-		step.width = (csi.width ?? 0) + 40;
-		step.height = (csi.height ?? 0) + 40;
+		step.width = csi.width + 40;
+		step.height = csi.height + 40;
 		step.x = (pageSize.width - step.width) / 2;
 		step.y = (pageSize.height - step.height) / 2;
 		csi.x = csi.y = 20;
@@ -525,7 +525,7 @@ const Layout: LayoutInterface = {
 					const p2 = store.get.point(annotation.points[2]);
 					p2.relativeTo = {type: 'step', id: prevStep.id};
 					p2.x = step.width;
-					p2.y = csi.y + ((csi.height ?? 0) / 2);
+					p2.y = csi.y + (csi.height / 2);
 				} else {
 					// The Step that places submodel is on the page after the step that completes submodel
 					// Start arrow on extreme left of page, ignoring page margins
@@ -533,7 +533,7 @@ const Layout: LayoutInterface = {
 						store.mutations.item.delete({item: {type: 'point', id: annotation.points[2]}});
 					}
 					base.relativeTo = {type: 'page', id: step.parent.id};
-					base.y = store.get.coords.pointToPage(0, (csi.height ?? 0) / 2, csi).y;
+					base.y = store.get.coords.pointToPage(0, csi.height / 2, csi).y;
 					base.x = 0;
 				}
 
@@ -542,7 +542,7 @@ const Layout: LayoutInterface = {
 					const tip = store.get.point(lastIdx);
 					tip.relativeTo = {type: 'csi', id: csi.id};
 					tip.x = -_.geom.arrow().head.length - 10;
-					tip.y = (csi.height ?? 0) / 2;
+					tip.y = csi.height / 2;
 				}
 			}
 		}
@@ -691,7 +691,7 @@ const Layout: LayoutInterface = {
 
 		if (callout.layout === 'horizontal') {
 			const maxCalloutWidth = isOnSide ? box.width * 0.75 : box.width;  // TODO: consider CSI width
-			const tallestStep = Math.max(...stepSizes.map(el => el?.height ?? 0));
+			const tallestStep = Math.max(...stepSizes.map(el => el.height));
 			const stepBox: Box = {
 				x: margin,
 				y: margin,
@@ -727,7 +727,7 @@ const Layout: LayoutInterface = {
 			});
 		} else {
 			const maxCalloutHeight = isOnSide ? box.height : box.height * 0.5;  // TODO: consider CSI height
-			const widestStep = Math.max(...stepSizes.map(el => el?.width ?? 0));
+			const widestStep = Math.max(...stepSizes.map(el => el.width));
 			const stepBox: Box = {
 				x: margin,
 				y: margin,
@@ -840,11 +840,11 @@ const Layout: LayoutInterface = {
 			p2.relativeTo = {type: 'csi', id: csi.id};
 
 			if (isOnSide) {
-				p2.x = (calloutPos === 'left') ? -arrowSize : (csi.width ?? 0) + arrowSize;
-				p2.y = (csi.height ?? 0) / 2;
+				p2.x = (calloutPos === 'left') ? -arrowSize : csi.width + arrowSize;
+				p2.y = csi.height / 2;
 			} else {
-				p2.x = (csi.width ?? 0) / 2;
-				p2.y = (calloutPos === 'top') ? -arrowSize : (csi.height ?? 0) + arrowSize;
+				p2.x = csi.width / 2;
+				p2.y = (calloutPos === 'top') ? -arrowSize : csi.height + arrowSize;
 			}
 		}
 	},
@@ -886,7 +886,7 @@ const Layout: LayoutInterface = {
 			return;
 		}
 		const csi = store.get.csi(step.csiID);
-		const x = margin + csi.x + (csi.width ?? 0) + 30;
+		const x = margin + csi.x + csi.width + 30;
 		store.mutations.divider.add({
 			parent: page,
 			p1: {x, y: margin},
@@ -1149,7 +1149,7 @@ function alignStepContent(page: Page) {
 		stepList.forEach(step => {
 			if (step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
-				csi.y = (step.height + tallestPLIHeight - (csi.height ?? 0)) / 2;
+				csi.y = (step.height + tallestPLIHeight - csi.height) / 2;
 				if (step.numberLabelID != null) {
 					const lbl = store.get.numberLabel(step.numberLabelID);
 					lbl.y = tallestPLIHeight ? tallestPLIHeight + margin : 0;
@@ -1174,13 +1174,13 @@ function isStepTooSmall(stepID: number) {
 		submodelSpace.height += submodelImage.height;
 	});
 
-	if (step.width < (csi.width ?? 0) * 1.1) {
+	if (step.width < csi.width * 1.1) {
 		return true;
 	} else if (pli && step.width < pli.width * 1.05) {
 		return true;
 	} else if (step.width < submodelSpace.width) {
 		return true;
-	} else if (step.height < (submodelSpace.height + pliHeight + (csi.height ?? 0)) * 1.2) {
+	} else if (step.height < (submodelSpace.height + pliHeight + csi.height) * 1.2) {
 		return true;
 	}
 	return false;

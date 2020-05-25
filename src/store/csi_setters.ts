@@ -51,7 +51,7 @@ export const CSIMutations: CSIMutationInterface = {
 	resetSize({csi}) {
 		const csiItem = store.get.csi(csi);
 		if (csiItem) {
-			csiItem.width = csiItem.height = null;
+			csiItem.width = csiItem.height = 0;
 			csiItem.isDirty = true;
 		}
 	},
