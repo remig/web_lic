@@ -5,6 +5,7 @@ import store from './store';
 import cache from './cache';
 import LDParse from './ld_parse';
 import uiState from './ui_state';
+import {isSize, isPoint, isBox, isPointItem} from './type_helpers';
 
 interface DrawConfig {
 	hiResScale?: number;
@@ -17,22 +18,6 @@ interface StyleInterface {
 	fillStyle?: string | null;
 	lineWidth: number;
 	strokeStyle: string;
-}
-
-function isSize(s: any): s is Size {
-	return (s && s.width != null && s.height != null);
-}
-
-function isPoint(p: any): p is Point {
-	return (p && p.x != null && p.y != null);
-}
-
-function isBox(b: any): b is Box {
-	return (b && b.x != null && b.y != null && b.width != null && b.height != null);
-}
-
-function isPointItem(p: any): p is PointItem {
-	return (p && p.relativeTo != null);
 }
 
 export interface DrawInterface {

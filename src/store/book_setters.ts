@@ -176,6 +176,8 @@ export const BookMutations: BookMutationInterface = {
 	},
 	layout({book}) {
 		const item = store.get.book(book);
-		Layout.book(item);
+		if (item) {
+			Layout.book(item);
+		}
 	},
 };

@@ -77,11 +77,12 @@ export interface RenderResult {
 
 export interface RendererInterface {
 	csi(
-		localModel: any, step: Step, csi: CSI, selectedPartIDs: number[] | null,
+		localModel: any, step: Step, csi: CSI, selectedPartIDs?: number[] | null,
 		hiResScale?: number, bypassCache?: boolean
 	): RenderResult | null;
 	csiWithSelection(
-		localModel: any, step: Step, csi: CSI, selectedPartIDs: number[] | null
+		localModel: any, step: Step, csi: CSI, selectedPartIDs?: number[] | null,
+		hiResScale?: number, bypassCache?: boolean
 	): RenderResult | null;
 	pli(
 		colorCode: number, filename: string, item: CSI | PLIItem,

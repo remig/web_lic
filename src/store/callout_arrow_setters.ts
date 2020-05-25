@@ -2,11 +2,12 @@
 
 import _ from '../util';
 import store from '../store';
+import {isPointListItem} from '../type_helpers';
 
 export interface CalloutArrowMutationInterface {
 	add({parent}: {parent: LookupItem}): CalloutArrow;
 	delete({calloutArrow}: {calloutArrow: CalloutArrow}): void;
-	addPoint({arrow}: {arrow: CalloutArrow}): void;
+	addPoint({arrow}: {arrow: LookupItem}): void;
 	rotateTip({arrow, direction}: {arrow: CalloutArrow, direction: Direction}): void;
 }
 
@@ -35,8 +36,8 @@ export const CalloutArrowMutations: CalloutArrowMutationInterface = {
 		store.mutations.item.delete({item});
 	},
 	addPoint({arrow}) {
-		const arrowItem = store.get.calloutArrow(arrow);
-		if (arrowItem == null) {
+		const arrowItem = store.get.lookupToItem(arrow);
+		if (arrowItem == null || !isPointListItem(arrowItem)) {
 			return;
 		}
 		const parentInsertionIndex = Math.ceil(arrowItem.points.length / 2);

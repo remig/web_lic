@@ -170,7 +170,9 @@ export const StepMutations: StepMutationInterface = {
 	},
 	layout({step, box}) {
 		const stepItem = store.get.step(step);
-		Layout.step(stepItem, box);
+		if (stepItem != null) {
+			Layout.step(stepItem, box);
+		}
 	},
 	moveToPage({step, destPage, parentInsertionIndex = 0}) {
 		const item = store.get.step(step);

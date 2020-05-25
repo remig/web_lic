@@ -48,8 +48,10 @@ export const PLIItemMutations: PLIItemMutationInterface = {
 		item.quantity = quantity;
 		// New label might be bigger / smaller than before; calculate new size
 		const quantityLabel = store.get.quantityLabel(item.quantityLabelID);
-		const font = store.state.template.item.quantityLabel.font;
-		Layout.label(quantityLabel, font, 'x' + item.quantity);
+		if (quantityLabel != null) {
+			const font: string = store.state.template.pliItem.quantityLabel.font;
+			Layout.quantityLabel(quantityLabel, font, 'x' + item.quantity);
+		}
 	},
 	markAllDirty(filename) {
 		const list = filename

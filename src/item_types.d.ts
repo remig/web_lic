@@ -104,7 +104,9 @@ interface Item extends LookupItem {
 
 interface PointedItem extends Item, Point {}
 
-interface BoxedItem extends Item, Box {}
+interface BoxedItem extends Item, Box {
+	borderOffset?: Point;
+}
 
 interface NumberedItem extends Item {
 	number: number;
@@ -133,7 +135,8 @@ interface Annotation extends BoxedItem, Alignment, PointListItem {
 	color: string;
 	font: string;
 	text: string;
-	meta?: any;
+	tagName?: string;
+	meta?: any;  // TODO: use tagName instead
 	src?: string | null;
 	direction?: Direction | null;
 	border?: {
@@ -185,13 +188,20 @@ interface NumberLabel extends BoxedItem, Alignment {
 
 type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
 
+interface GridLayout {
+	rows: number | 'auto',
+	cols: number | 'auto',
+	direction: Orientation,
+}
+
 interface Page extends PLIItemParent, NumberedItem, StepParent {
 	type: 'page';
 	subtype: PageSubtypes;
 	annotations: number[];
 	dividers: number[];
 	innerContentOffset: Point;
-	layout: Orientation
+	layout: Orientation | GridLayout;
+	actualLayout?: Orientation | GridLayout,
 	locked: boolean;
 	needsLayout: boolean;
 	numberLabelID: number | null;
