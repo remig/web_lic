@@ -4,7 +4,7 @@ import {hasProperty} from '../type_helpers';
 import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
-import {isNotNull} from '../type_helpers';
+import {isTemplateType, isNotNull} from '../type_helpers';
 
 function getter<T extends ItemTypes>(s: ItemTypeNames) {
 	return (itemLookup: number | LookupItem) => {
@@ -81,7 +81,7 @@ export interface GetterInterface {
 	nextPage(item: LookupItem): Page | null;
 	pageList(): Page[];
 	templatePage(): Page;
-	templateForItem(itemLookup: LookupItem): any;
+	templateForItem(item: LookupItem): any;
 	isTemplatePage(pageLookup: LookupItem): boolean;
 	firstBookPage(bookLookup: LookupItem): Page;
 	firstPage(): Page | null;
@@ -249,30 +249,43 @@ export const Getters: GetterInterface = {
 	templatePage() {
 		return store.state.pages[0];
 	},
-	templateForItem(item: LookupItem) {
+	templateForItem(item: LookupItem): any {
 		const template = store.state.template;
-		if (template[item.type]) {
+		if (isTemplateType(item.type)) {
 			return template[item.type];
 		}
 		const parent = store.get.parent(item);
-		switch (item.type) {
-			case 'csi':
-				return parent ? template[parent.type]?.csi : null;
-			case 'divider':
-				return template.page.divider;
-			case 'quantityLabel':
-				return parent ? template[parent.type].quantityLabel : null;
-			case 'numberLabel':
-				if (parent) {
-					if (parent.parent.type === 'callout') {
-						return template.callout.step.numberLabel;
-					} else if (parent.type === 'page'
-						&& parent.subtype === 'templatePage'
-					) {
-						return template.page.numberLabel;
-					}
-					return template[parent.type].numberLabel;
-				}
+		if (parent == null) {
+			return null;
+		}
+		if (isTemplateType(parent.type)) {
+			const parentTemplate = template[parent.type];
+			if (parentTemplate == null) {
+				return null;
+			}
+		} else {
+			return null;
+		}
+		if (item.type === 'csi') {
+			if (parent.type === 'step') {
+				return template.step.csi;
+			} else if (parent.type === 'submodelImage') {
+				return template.submodelImage.csi;
+			}
+		} else if (item.type === 'quantityLabel') {
+			if (parent.type === 'pliItem') {
+				return template.pliItem.quantityLabel;
+			} else if (parent.type === 'submodelImage') {
+				return template.submodelImage.quantityLabel;
+			}
+		} else if (item.type === 'numberLabel') {
+			if (parent.type === 'page' && parent.subtype === 'templatePage') {
+				return template.page.numberLabel;
+			} else if (parent.type === 'step') {
+				return template.step.numberLabel;
+			} else if (parent.parent.type === 'callout') {
+				return template.callout.step.numberLabel;
+			}
 		}
 		return null;
 	},

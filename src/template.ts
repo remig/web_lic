@@ -1,7 +1,21 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
+const part1 = {
+	colorCode: 1, filename: '3001.dat',
+	matrix: [0, 0, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0],
+};
+const part2 = {
+	colorCode: 4, filename: '3003.dat',
+	matrix: [0, -24, 20, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+};
+const model = {
+	filename: 'templateModel.ldr',
+	name: 'templateModel.ldr',
+	parts: [part1, part2],
+};
+
 // All margins are decimal percentages of max(pageWidth, pageHeight)
-const template = {
+const template: Template = {
 	page: {
 		width: 900,
 		height: 700,
@@ -15,7 +29,13 @@ const template = {
 		fill: {
 			color: '#ffffff',
 			gradient: '',
-			image: '',
+			image: {
+				x: 0,
+				y: 0,
+				width: 0,
+				height: 0,
+				src: '',
+			},
 		},
 		border: {
 			width: 0,
@@ -138,24 +158,11 @@ const template = {
 			{axis: 'y', angle: 50},
 		],
 	},
-};
-
-const part1 = {
-	colorCode: 1, filename: '3001.dat',
-	matrix: [0, 0, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0],
-};
-const part2 = {
-	colorCode: 4, filename: '3003.dat',
-	matrix: [0, -24, 20, 1, 0, 0, 0, 1, 0, 0, 0, 1],
-};
-const model = {
-	filename: 'templateModel.ldr',
-	name: 'templateModel.ldr',
-	parts: [part1, part2],
-};
-
-template.modelData = {
-	model, part1, part2,
+	modelData: {
+		model,
+		part1,
+		part2,
+	},
 };
 
 export default template;

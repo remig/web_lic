@@ -17,7 +17,7 @@ interface DrawConfig {
 interface StyleInterface {
 	fillStyle?: string | null;
 	lineWidth: number;
-	strokeStyle: string;
+	strokeStyle: string | null;
 }
 
 export interface DrawInterface {
@@ -255,7 +255,7 @@ export const Draw: DrawInterface = {
 			ctx.fillRect(0, 0, template.width, template.height);
 		}
 
-		if (template.fill.image) {
+		if (template.fill.image.src) {
 			const cachedImage = cache.get('page', 'backgroundImage');
 			if (cachedImage) {
 				drawPageBackground(cachedImage, template.fill.image, ctx);
@@ -271,7 +271,7 @@ export const Draw: DrawInterface = {
 			}
 		}
 
-		if (template.border.cornerRadius > template.border.width) {
+		if (template.border.cornerRadius > template.border.width && template.border.color) {
 			// On very rounded page corners, outside corner radius shows up inside the page.  Fill that in.
 			const s = template.border.cornerRadius / 2;
 			ctx.fillStyle = template.border.color;
@@ -381,8 +381,9 @@ function drawStep(stepId: number, ctx: CanvasRenderingContext2D, config: DrawCon
 	if (step.numberLabelID != null) {
 		const lbl = store.get.numberLabel(step.numberLabelID);
 		if (lbl) {
-			let template = store.state.template;
-			template = (step.parent.type === 'callout') ? template.callout.step : template.step;
+			const template = (step.parent.type === 'callout')
+				? store.state.template.callout.step
+				: store.state.template.step;
 			ctx.fillStyle = template.numberLabel.color;
 			ctx.font = template.numberLabel.font;
 			ctx.textAlign = lbl.align || 'start';
@@ -584,8 +585,10 @@ function drawCallout(calloutId: number, ctx: CanvasRenderingContext2D, config: D
 
 	callout.steps.forEach(id => drawStep(id, ctx, config));
 
-	ctx.strokeStyle = template.arrow.border.color;
-	ctx.fillStyle = template.arrow.border.color;
+	if (template.arrow.border.color != null) {
+		ctx.strokeStyle = template.arrow.border.color;
+		ctx.fillStyle = template.arrow.border.color;
+	}
 	ctx.lineWidth = template.arrow.border.width;
 	callout.calloutArrows.forEach(arrowID => {
 		drawCalloutArrow(arrowID, ctx);
@@ -599,7 +602,7 @@ function drawCalloutArrow(arrowId: number, ctx: CanvasRenderingContext2D) {
 		return;
 	}
 	const border = store.state.template.callout.arrow.border;
-	if (!_.isBorderVisible(border)) {
+	if (!isBorderVisible(border)) {
 		return;
 	}
 	drawAnnotation({
@@ -626,7 +629,9 @@ function drawRotateIcon(iconId: number, ctx: CanvasRenderingContext2D) {
 		height: icon.height / 94,
 	};
 
-	ctx.strokeStyle = template.border.color;
+	if (template.border.color != null) {
+		ctx.strokeStyle = template.border.color;
+	}
 	ctx.lineWidth = template.border.width;
 	ctx.save();
 	ctx.translate(Math.floor(icon.x), Math.floor(icon.y));
@@ -634,20 +639,30 @@ function drawRotateIcon(iconId: number, ctx: CanvasRenderingContext2D) {
 
 	if (template.fill.color) {
 		ctx.fillStyle = template.fill.color;
-		drawRoundedRect(ctx, 0, 0, 100, 94, 15, template.border.width);
+		drawRoundedRect(
+			ctx,
+			0, 0, 100, 94,
+			template.border.cornerRadius,
+			template.border.width
+		);
 		ctx.fill();
 	}
 
-	const haveBorder = _.isBorderVisible(template.border);
+	const haveBorder = isBorderVisible(template.border);
 	if (haveBorder) {
-		drawRoundedRect(ctx, 0, 0, 100, 94, 15, template.border.width);
+		drawRoundedRect(
+			ctx,
+			0, 0, 100, 94,
+			template.border.cornerRadius,
+			template.border.width
+		);
 	}
 	ctx.restore();
 	if (haveBorder) {
 		ctx.stroke();  // Stroke in unscaled space to ensure borders of constant width
 	}
 
-	if (_.isBorderVisible(template.arrow.border)) {
+	if (isBorderVisible(template.arrow.border)) {
 		ctx.fillStyle = ctx.strokeStyle = template.arrow.border.color;
 		ctx.lineWidth = template.arrow.border.width;
 		ctx.save();
@@ -670,7 +685,7 @@ function drawRotateIcon(iconId: number, ctx: CanvasRenderingContext2D) {
 }
 
 function drawPageBackground(
-	cachedImage: HTMLImageElement, imageInfo: any = {}, ctx: CanvasRenderingContext2D
+	cachedImage: HTMLImageElement, imageInfo: ImageTemplate, ctx: CanvasRenderingContext2D
 ) {
 	if (imageInfo.x != null && imageInfo.y != null) {
 		ctx.drawImage(cachedImage,
@@ -684,7 +699,7 @@ function drawPageBackground(
 
 function drawDividers(dividerList: number[], ctx: CanvasRenderingContext2D) {
 	const template = store.state.template.divider.border;
-	if (!_.isBorderVisible(template)) {
+	if (!isBorderVisible(template)) {
 		return;
 	}
 	ctx.strokeStyle = template.color;
@@ -783,13 +798,24 @@ function drawRoundedRectStyled(
 		drawRoundedRect(ctx, x, y, w, h, r, style.lineWidth);
 		ctx.fill();
 	}
-	if (_.isBorderVisible({width: style.lineWidth, color: style.strokeStyle})) {
-		ctx.strokeStyle = style.strokeStyle;
-		ctx.lineWidth = style.lineWidth;
-		drawRoundedRect(ctx, x, y, w, h, r, style.lineWidth);
+	const b = {width: style.lineWidth, color: style.strokeStyle};
+	if (isBorderVisible(b)) {
+		ctx.strokeStyle = b.color;
+		ctx.lineWidth = b.width;
+		drawRoundedRect(ctx, x, y, w, h, r, b.width);
 		ctx.stroke();
 	}
 	ctx.restore();
+}
+
+interface VisibleBorder {
+	width: number;
+	color: string;
+}
+
+// typesafe version of _isBorderVisible mixin
+function isBorderVisible(border: Border): border is VisibleBorder {
+	return _.isBorderVisible(border);
 }
 
 function drawRoundedRect(

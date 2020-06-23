@@ -54,6 +54,11 @@ interface Size {
 	height: number;
 }
 
+interface Border {
+	width: number;
+	color: string | null;
+}
+
 interface Box extends Point, Size {}
 
 interface Rotation {
@@ -87,6 +92,8 @@ type ItemTypeNames =
 	| 'numberLabel'| 'page' | 'pli' | 'pliItem' | 'point'
 	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodelImage'
 	| 'part' | 'submodel';
+
+type TemplateTypeNames = keyof Template;
 
 type ItemTypes =
 	Annotation | Book | Callout | CalloutArrow | CSI | Divider
@@ -139,10 +146,7 @@ interface Annotation extends BoxedItem, Alignment, PointListItem {
 	meta?: any;  // TODO: use tagName instead
 	src?: string | null;
 	direction?: Direction | null;
-	border?: {
-		color: string;
-		width: number;
-	} | null;
+	border?: Border | null;
 }
 
 interface Book extends NumberedItem {
@@ -175,9 +179,9 @@ interface CSI extends BoxedItem {
 }
 
 interface Divider extends Item {
-	type: 'divider',
-	p1: Point,
-	p2: Point
+	type: 'divider';
+	p1: Point;
+	p2: Point;
 }
 
 interface NumberLabel extends BoxedItem, Alignment {
@@ -187,9 +191,9 @@ interface NumberLabel extends BoxedItem, Alignment {
 type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
 
 interface GridLayout {
-	rows: number | 'auto',
-	cols: number | 'auto',
-	direction: Orientation,
+	rows: number | 'auto';
+	cols: number | 'auto';
+	direction: Orientation;
 }
 
 interface Page extends PLIItemParent, NumberedItem, StepParent {
@@ -199,7 +203,7 @@ interface Page extends PLIItemParent, NumberedItem, StepParent {
 	dividers: number[];
 	innerContentOffset: Point;
 	layout: Orientation | GridLayout;
-	actualLayout?: Orientation | GridLayout,
+	actualLayout?: Orientation | GridLayout;
 	locked: boolean;
 	needsLayout: boolean;
 	numberLabelID: number | null;
@@ -265,6 +269,129 @@ interface SubmodelImage extends BoxedItem {
 	quantityLabelID: number | null;
 }
 
+interface LabelTemplate {
+	font: string;
+	color: string;
+}
+
+interface RoundBorderTemplate extends Border {
+	cornerRadius: number;
+}
+
+interface FillTemplate {
+	color: string | null;
+}
+
+interface ImageTemplate {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	src: string;
+}
+
+interface BaseTemplate { }
+
+interface PageTemplate extends BaseTemplate {
+	width: number;
+	height: number;
+	sizePreset: null;
+	innerMargin: number;
+	numberLabel: {
+		font: string;
+		color: string;
+		position: 'right' | 'left' | 'even-right' | 'even-left';
+	},
+	fill: {
+		color: string;
+		gradient: string;
+		image: ImageTemplate;
+	},
+	border: RoundBorderTemplate;
+}
+
+interface StepTemplate extends BaseTemplate {
+	innerMargin: number;
+	csi: {
+		scale: number;
+		rotation: Rotation[];
+		displacementArrow: {
+			fill: FillTemplate;
+			border: Border;
+		},
+	},
+	numberLabel: LabelTemplate;
+}
+
+interface SubmodelTemplate extends BaseTemplate {
+	innerMargin: number;
+	maxHeight: number;
+	csi: {
+		scale: number;
+		rotation: Rotation[];
+	},
+	fill: FillTemplate;
+	border: RoundBorderTemplate;
+	quantityLabel: LabelTemplate;
+}
+
+interface PLITemplate extends BaseTemplate {
+	innerMargin: number;
+	includeSubmodels: boolean;
+	fill: FillTemplate;
+	border: RoundBorderTemplate;
+}
+
+interface PLIItemTemplate extends BaseTemplate {
+	scale: number;
+	rotation: Rotation[];
+	quantityLabel: LabelTemplate;
+}
+
+interface CalloutTemplate extends BaseTemplate {
+	innerMargin: number;
+	fill: FillTemplate;
+	border: RoundBorderTemplate;
+	arrow: {
+		border: Border;
+	},
+	step: {
+		innerMargin: number;
+		numberLabel: LabelTemplate;
+	},
+}
+
+interface Template {
+
+	page: PageTemplate,
+	step: StepTemplate,
+	submodelImage: SubmodelTemplate,
+	pli: PLITemplate,
+	pliItem: PLIItemTemplate,
+	callout: CalloutTemplate,
+	divider: {
+		border: Border;
+	},
+	rotateIcon: {
+		size: number;
+		fill: FillTemplate;
+		border: RoundBorderTemplate;
+		arrow: {
+			border: Border;
+		},
+	},
+	sceneRendering: {
+		zoom: number;
+		edgeWidth: number;
+		rotation: Rotation[];
+	},
+	modelData: {
+		model;
+		part1;
+		part2;
+	},
+}
+
 interface StateInterface {
 	annotations: Annotation[];
 	books: Book[];
@@ -284,5 +411,5 @@ interface StateInterface {
 	rotateIcons: RotateIcon[];
 	steps: Step[];
 	submodelImages: SubmodelImage[];
-	template: any;
+	template: Template;
 }

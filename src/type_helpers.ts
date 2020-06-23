@@ -1,5 +1,7 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
+import defaultTemplate from './template';
+
 export function hasProperty<T extends Item>(item: Item | null, prop: string): item is T {
 	return (item != null) && item.hasOwnProperty(prop);
 }
@@ -32,4 +34,12 @@ export function isPointListItem(p: any): p is PointListItem {
 
 export function isNotNull<T>(v: T | null): v is T {
 	return v != null;
+}
+
+export function isTemplate<T extends BaseTemplate>(t: any, type: string): t is T {
+	return t.hasOwnProperty(type);
+}
+
+export function isTemplateType(p: string): p is keyof Template {
+	return defaultTemplate.hasOwnProperty(p);
 }

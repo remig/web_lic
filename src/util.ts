@@ -11,11 +11,6 @@ interface CacheInterface {
 	[key: string]: any
 }
 
-interface BorderInterface {
-	width?: number;
-	color?: string;
-}
-
 type EdgeList = 'top' | 'right' | 'bottom' | 'left';
 
 interface ArrowInterface {
@@ -117,7 +112,7 @@ interface LoDashMixins extends _.LoDashStatic {
 	};
 	formatTime(start: number, end: number): string;
 	color: ColorInterface;
-	isBorderVisible(border: BorderInterface): boolean;
+	isBorderVisible(border: Border): boolean;
 }
 
 const mixin = {
@@ -524,7 +519,7 @@ const mixin = {
 		};
 		return color;
 	})(),
-	isBorderVisible(border: BorderInterface) {
+	isBorderVisible(border: Border) {
 		if (!border || !border.width || border.width < 1 ||
 			!border.color || typeof border.color !== 'string'
 		) {

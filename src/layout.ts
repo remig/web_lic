@@ -396,8 +396,9 @@ const Layout: LayoutInterface = {
 		}
 
 		// Starting with a pre-defined box, layout everything in this step inside it
-		let template = store.state.template;
-		template = (step.parent.type === 'callout') ? template.callout.step : template.step;
+		const template = (step.parent.type === 'callout')
+			? store.state.template.callout.step
+			: store.state.template.step;
 		pageMargin = (pageMargin == null) ? getMargin(store.state.template.page.innerMargin) : pageMargin;
 		const margin = getMargin(template.innerMargin);
 

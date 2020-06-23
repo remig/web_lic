@@ -25,11 +25,11 @@ const canvasCache = (function() {
 
 function getCSIRotation(csi: CSI) {
 	let rot = csi.rotation;
-	if (rot && rot.length) {
+	if (rot?.length) {
 		return rot;
 	}
 	rot = store.get.templateForItem(csi).rotation;
-	return (rot && rot.length) ? rot : null;
+	return rot?.length ? rot : null;
 }
 
 function getCSIScale(csi: CSI) {
@@ -46,24 +46,18 @@ function getCSIScale(csi: CSI) {
 }
 
 function getPLIItemRotation(item: PLIItem) {
-	let rot;
 	const transform = store.get.pliTransform(item.filename);
-	if (transform.rotation) {
-		rot = transform.rotation;
-	} else {
-		rot = store.get.templateForItem(item).rotation;
-	}
-	return (rot && rot.length) ? rot : null;
+	const rot = (transform.rotation == null)
+		? store.get.templateForItem(item).rotation
+		: transform.rotation;
+	return rot?.length ? rot : null;
 }
 
 function getPLIItemScale(item: PLIItem) {
-	let scale;
 	const transform = store.get.pliTransform(item.filename);
-	if (transform.scale != null) {
-		scale = transform.scale;
-	} else {
-		scale = store.get.templateForItem(item).scale;
-	}
+	const scale = (transform.scale == null)
+		? store.get.templateForItem(item).scale
+		: transform.scale;
 	return (scale === 1) ? null : scale;
 }
 
