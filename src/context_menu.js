@@ -843,7 +843,7 @@ const contextMenu = {
 				app.clearSelected();
 				DialogManager('rotatePartImageDialog', dialog => {
 					dialog.$on('update', newValues => {
-						store.mutations.pliTransform.set({filename, rotation: newValues.rotation});
+						store.mutations.pliTransform.rotate({filename, rotation: newValues.rotation});
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
@@ -862,7 +862,7 @@ const contextMenu = {
 						);
 					});
 					dialog.$on('cancel', () => {
-						store.mutations.pliTransform.set({filename, rotation: originalRotation});
+						store.mutations.pliTransform.rotate({filename, rotation: originalRotation});
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
@@ -882,7 +882,7 @@ const contextMenu = {
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				store.mutations.pliTransform.set({filename, rotation: null});
+				store.mutations.pliTransform.rotate({filename, rotation: null});
 				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
 				const changes = dirtyItems.map(item => {
 					return {
@@ -908,7 +908,7 @@ const contextMenu = {
 				DialogManager('numberChooserDialog', dialog => {
 					dialog.$on('update', newValues => {
 						const scale = clampScale(newValues.value);
-						store.mutations.pliTransform.set({filename, scale});
+						store.mutations.pliTransform.scale({filename, scale});
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
@@ -927,7 +927,7 @@ const contextMenu = {
 						);
 					});
 					dialog.$on('cancel', () => {
-						store.mutations.pliTransform.set({filename, scale: originalScale});
+						store.mutations.pliTransform.scale({filename, scale: originalScale});
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
@@ -950,7 +950,7 @@ const contextMenu = {
 			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				store.mutations.pliTransform.set({filename, scale: null});
+				store.mutations.pliTransform.scale({filename, scale: null});
 				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
 				const changes = dirtyItems.map(item => {
 					return {
