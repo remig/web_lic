@@ -71,6 +71,7 @@
 <script>
 
 // TODO:
+// - Make all dialogs that affect page rendering moveable, so they can be moved to unobscure stuff
 // - add 'culled' versions of popular parts, with their inside bits removed
 // - auto add a 'rotate back' CSI rotation icon on the step after the currently rotated one
 // - Undo / redo stack bakes action text into itself, which breaks translations
@@ -85,9 +86,9 @@
 // - Need submodel + bag breakdown page and final 'no step' complete model page
 // - Add double click on annotation support: pop up the 'edit annotation' dialog
 // - When edit annotation dialogs open, set focus somewhere useful
-// - Try moving a point on a line annotation; crash in glossary.point lookup
 // - Grid config dialog is atrociously ugly
 // - Title page CSI includes rotate context menu but it doesn't work
+// - Remove all default rotation from X-Wing and get nutso horizontal lines
 
 /* global Split: false */
 import Vue from 'vue';
@@ -584,7 +585,7 @@ const UI = {
 
 				Storage.replace.ui(uiState.getCurrentState());
 
-				if (this && this.isDirty) {
+				if (0 && this && this.isDirty) {
 					const msg = 'You have unsaved changes. Leave anyway?';
 					e.returnValue = msg;
 					return msg;

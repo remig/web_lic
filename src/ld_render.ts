@@ -10,14 +10,32 @@ const renderState = {
 	lineThickness: 0.0015,
 };
 
-const api = {
+export interface LDRenderInterface {
+	renderPart(
+		colorCode: number,
+		filename: string,
+		containerID: string | HTMLCanvasElement,
+		config: any
+	): Box | null,
+	renderModel(
+		model: any, containerID: string | HTMLCanvasElement, config: any
+	): Box | null,
+	renderAndDeltaSelectedPart(
+		model: any, containerID: string | HTMLCanvasElement, config: any
+	): {dx: number, dy: number},
+	setModel(model: any): void,
+	setRenderState(newState: {zoom?: number, edgeWidth?: number}): void,
+	imageOutOfBounds(bounds: Box, maxSize: number): boolean,
+}
+
+const api: LDRenderInterface = {
 
 	// Render the chosen part filename with the chosen color code to the chosen container.
 	// Return a {width, height} object representing the size of the rendering.
 	// config: {size, resizeContainer, dx, dy, rotation: {x, y, z}}
 	renderPart(colorCode, filename, containerID, config) {
 
-		function renderCb(renderConfig) {
+		function renderCb(renderConfig: any) {
 			const part = LDParse.partDictionary[filename];
 			return LicGL.renderPart(part, colorCode, renderConfig);
 		}
@@ -26,7 +44,7 @@ const api = {
 
 	renderModel(model, containerID, config) {
 
-		function renderCb(renderConfig) {
+		function renderCb(renderConfig: any) {
 			return LicGL.renderModel(model, renderConfig);
 		}
 		return renderAndScaleToFit(renderCb, containerID, config);
@@ -38,7 +56,7 @@ const api = {
 	// so that they do not change positions when rendered with & without selected parts.
 	renderAndDeltaSelectedPart(model, containerID, config) {
 
-		function renderCb(renderConfig) {
+		function renderCb(renderConfig: any) {
 			return LicGL.renderModel(model, renderConfig);
 		}
 
@@ -51,6 +69,9 @@ const api = {
 		config.selectedPartIDs = selectedPartIDs;
 		const selectedPartsBounds = renderAndScaleToFit(renderCb, containerID, config);
 
+		if (selectedPartsBounds == null || noSelectedPartsBounds == null) {
+			return {dx: 0, dy: 0};
+		}
 		return {
 			dx: Math.max(0, noSelectedPartsBounds.x - selectedPartsBounds.x),
 			dy: Math.max(0, noSelectedPartsBounds.y - selectedPartsBounds.y),
@@ -72,19 +93,17 @@ const api = {
 	},
 
 	imageOutOfBounds(bounds, maxSize) {
-		if (bounds == null || (bounds.width == null && bounds.w == null)) {
+		if (bounds == null) {
 			return false;
 		}
-		const w = (bounds.width == null) ? bounds.w : bounds.width;
-		const h = (bounds.height == null) ? bounds.h : bounds.height;
 		return bounds.x < 1
             || bounds.y < 1
-            || (bounds.x + w) > maxSize
-            || (bounds.y + h) > maxSize;
+            || (bounds.x + bounds.width) > maxSize
+            || (bounds.y + bounds.height) > maxSize;
 	},
 };
 
-function buildConfig(config) {
+function buildConfig(config: any) {
 
 	const res = _.cloneDeep(config);
 	if (config.zoom && config.zoom !== 1) {
@@ -98,7 +117,7 @@ function buildConfig(config) {
 }
 
 /* eslint-disable no-labels */
-function contextBoundingBox(data, w, h) {
+function contextBoundingBox(data: Uint8ClampedArray, w: number, h: number) {
 	let x, y, minX = 0, minY = 0, maxX = 0, maxY = 0;
 	o1: {
 		for (y = h; y--;) {
@@ -144,26 +163,35 @@ function contextBoundingBox(data, w, h) {
 		}
 	}
 	return {
-		x: minX, y: minY,
-		maxX: maxX, maxY: maxY,
-		w: maxX - minX, h: maxY - minY,
+		x: minX,
+		y: minY,
+		maxX: maxX,
+		maxY: maxY,
+		width: maxX - minX,
+		height: maxY - minY,
 	};
 }
 /* eslint-enable no-labels */
 
-function getCanvasBounds(canvas, config) {
-	const size = config.size;
+function getCanvasBounds(canvas: HTMLCanvasElement, size: number) {
 	measurementCanvas.width = measurementCanvas.height = size;
 	const ctx = measurementCanvas.getContext('2d');
+	if (ctx == null) {
+		return null;
+	}
+
 	ctx.drawImage(canvas, 0, 0);
 	const data = ctx.getImageData(0, 0, size, size);
-
 	return contextBoundingBox(data.data, size, size);
 }
 
 // Re-render the canvas returned from renderCb() at increasing zooms until the rendered
 // image is fully in the canvas, then draw the image to the chosen container
-function renderAndScaleToFit(renderCb, container, config) {
+function renderAndScaleToFit(
+	renderCb: (config: any) => HTMLCanvasElement,
+	containerId: string | HTMLCanvasElement,
+	config: any
+) {
 
 	const maxZooms = 5;
 	const glConfig = buildConfig(config);
@@ -171,8 +199,8 @@ function renderAndScaleToFit(renderCb, container, config) {
 	let zooms = 0;
 
 	let canvas = renderCb(glConfig);
-	let bounds = getCanvasBounds(canvas, glConfig);
-	if (!bounds) {
+	let bounds = getCanvasBounds(canvas, glConfig.size);
+	if (bounds == null) {
 		return null;
 	}
 	while (zooms < maxZooms && api.imageOutOfBounds(bounds, maxSize)) {
@@ -182,7 +210,7 @@ function renderAndScaleToFit(renderCb, container, config) {
 		glConfig.lineThickness *= 0.5;
 		maxSize = glConfig.size - 150;
 		canvas = renderCb(glConfig);
-		bounds = getCanvasBounds(canvas, glConfig);
+		bounds = getCanvasBounds(canvas, glConfig.size);
 		if (!bounds) {
 			return null;
 		}
@@ -191,20 +219,33 @@ function renderAndScaleToFit(renderCb, container, config) {
 	// Draw the specified canvas into the specified container,
 	// in a size x size viewport, then crop it of all whitespace.
 	// Return a {width, height} object specifying the final tightly cropped rendered image size.
-	container = (typeof container === 'string') ? document.getElementById(container) : container;
+	const container = (typeof containerId === 'string')
+		? document.getElementById(containerId) as HTMLCanvasElement
+		: containerId;
+	if (container == null) {
+		return null;
+	}
 	if (config.resizeContainer) {
-		container.width = bounds.w + 1;
-		container.height = bounds.h + 1;
+		container.width = bounds.width + 1;
+		container.height = bounds.height + 1;
 	}
 	const ctx2 = container.getContext('2d');
+	if (ctx2 == null) {
+		return null;
+	}
 	ctx2.drawImage(
 		canvas,
 		bounds.x, bounds.y,
-		bounds.w + 1, bounds.h + 1,
+		bounds.width + 1, bounds.height + 1,
 		config.dx || 0, config.dy || 0,
-		bounds.w + 1, bounds.h + 1
+		bounds.width + 1, bounds.height + 1
 	);
-	return {x: bounds.x, y: bounds.y, width: bounds.w, height: bounds.h};
+	return {
+		x: bounds.x,
+		y: bounds.y,
+		width: bounds.width,
+		height: bounds.height,
+	};
 }
 
 export default api;

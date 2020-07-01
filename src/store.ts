@@ -38,7 +38,7 @@ const emptyState = {
 
 interface SaveContent {
 	version: string;
-	partDictionary: any;
+	partDictionary: PartDictionary;
 	colorTable: any;
 	modelFilename: any;
 	state: any;

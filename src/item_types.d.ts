@@ -31,6 +31,8 @@ interface Model {
 	parentStepID?: number;
 }
 
+type PartDictionary = {[key: string]: AbstractPart | Model};
+
 interface StepModel {
 	filename: string;
 	parentStepID: number | null;
