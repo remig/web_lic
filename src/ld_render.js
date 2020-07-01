@@ -17,17 +17,19 @@ const api = {
 	// config: {size, resizeContainer, dx, dy, rotation: {x, y, z}}
 	renderPart(colorCode, filename, containerID, config) {
 
-		config = buildConfig(config);
-		const part = LDParse.partDictionary[filename];
-		const canvas = LicGL.renderPart(part, colorCode, config);
-		return renderToCanvas(canvas, containerID, config);
+		function renderCb(renderConfig) {
+			const part = LDParse.partDictionary[filename];
+			return LicGL.renderPart(part, colorCode, renderConfig);
+		}
+		return renderAndScaleToFit(renderCb, containerID, config);
 	},
 
 	renderModel(model, containerID, config) {
 
-		config = buildConfig(config);
-		const canvas = LicGL.renderModel(model, config);
-		return renderToCanvas(canvas, containerID, config);
+		function renderCb(renderConfig) {
+			return LicGL.renderModel(model, renderConfig);
+		}
+		return renderAndScaleToFit(renderCb, containerID, config);
 	},
 
 	// Renders the model twice; once with all parts unselected and once with parts selected.
@@ -36,17 +38,18 @@ const api = {
 	// so that they do not change positions when rendered with & without selected parts.
 	renderAndDeltaSelectedPart(model, containerID, config) {
 
+		function renderCb(renderConfig) {
+			return LicGL.renderModel(model, renderConfig);
+		}
+
 		// Render with no parts selected
-		config = buildConfig(config);
 		const selectedPartIDs = config.selectedPartIDs;
 		config.selectedPartIDs = null;
-		let canvas = LicGL.renderModel(model, config);
-		const noSelectedPartsBounds = renderToCanvas(canvas, containerID, config);
+		const noSelectedPartsBounds = renderAndScaleToFit(renderCb, containerID, config);
 
 		// Render again with parts selected
 		config.selectedPartIDs = selectedPartIDs;
-		canvas = LicGL.renderModel(model, config);
-		const selectedPartsBounds = renderToCanvas(canvas, containerID, config);
+		const selectedPartsBounds = renderAndScaleToFit(renderCb, containerID, config);
 
 		return {
 			dx: Math.max(0, noSelectedPartsBounds.x - selectedPartsBounds.x),
@@ -66,6 +69,18 @@ const api = {
 		if (newState.edgeWidth != null) {
 			renderState.lineThickness = newState.edgeWidth * 0.0004;
 		}
+	},
+
+	imageOutOfBounds(bounds, maxSize) {
+		if (bounds == null || (bounds.width == null && bounds.w == null)) {
+			return false;
+		}
+		const w = (bounds.width == null) ? bounds.w : bounds.width;
+		const h = (bounds.height == null) ? bounds.h : bounds.height;
+		return bounds.x < 1
+            || bounds.y < 1
+            || (bounds.x + w) > maxSize
+            || (bounds.y + h) > maxSize;
 	},
 };
 
@@ -136,21 +151,46 @@ function contextBoundingBox(data, w, h) {
 }
 /* eslint-enable no-labels */
 
-// Render the specified scene in a size x size viewport, then crop it of all whitespace.
-// Return a {width, height} object specifying the final tightly cropped rendered image size.
-function renderToCanvas(canvas, container, config) {
-
+function getCanvasBounds(canvas, config) {
 	const size = config.size;
 	measurementCanvas.width = measurementCanvas.height = size;
 	const ctx = measurementCanvas.getContext('2d');
 	ctx.drawImage(canvas, 0, 0);
 	const data = ctx.getImageData(0, 0, size, size);
 
-	const bounds = contextBoundingBox(data.data, size, size);
+	return contextBoundingBox(data.data, size, size);
+}
+
+// Re-render the canvas returned from renderCb() at increasing zooms until the rendered
+// image is fully in the canvas, then draw the image to the chosen container
+function renderAndScaleToFit(renderCb, container, config) {
+
+	const maxZooms = 5;
+	const glConfig = buildConfig(config);
+	let maxSize = glConfig.size - 150;
+	let zooms = 0;
+
+	let canvas = renderCb(glConfig);
+	let bounds = getCanvasBounds(canvas, glConfig);
 	if (!bounds) {
 		return null;
 	}
+	while (zooms < maxZooms && api.imageOutOfBounds(bounds, maxSize)) {
+		zooms += 1;
+		glConfig.size *= 2;
+		glConfig.zoom *= 2;
+		glConfig.lineThickness *= 0.5;
+		maxSize = glConfig.size - 150;
+		canvas = renderCb(glConfig);
+		bounds = getCanvasBounds(canvas, glConfig);
+		if (!bounds) {
+			return null;
+		}
+	}
 
+	// Draw the specified canvas into the specified container,
+	// in a size x size viewport, then crop it of all whitespace.
+	// Return a {width, height} object specifying the final tightly cropped rendered image size.
 	container = (typeof container === 'string') ? document.getElementById(container) : container;
 	if (config.resizeContainer) {
 		container.width = bounds.w + 1;

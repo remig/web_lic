@@ -189,9 +189,7 @@ export const Renderer: RendererInterface = {
 
 		let res = LDRender.renderPart(0, store.model.filename, container, config);
 
-		while (res && zoom > -500
-			&& (res.x < 1 || res.y < 1 || res.width > maxSize || res.height > maxSize)
-		) {
+		while (res && (zoom > -500) && LDRender.imageOutOfBounds(res, maxSize)) {
 			zoom -= zoomStep;
 			LDRender.setRenderState({zoom});
 			res = LDRender.renderPart(0, store.model.filename, container, config);
