@@ -9,7 +9,12 @@ import * as translate from './translations';
 import uiState from './ui_state';
 import DialogManager from './dialog';
 
-let app;
+interface DialogInterface {
+	$on: (event: string, opts: any) => void;
+	show: (app: any) => void;
+}
+
+let app: any;
 const tr = translate.tr;
 
 function enableIfModel() {
@@ -27,7 +32,7 @@ function toggleGrid() {
 	undoStack.commit(change, null, text);
 }
 
-function addGuide(orientation) {
+function addGuide(orientation: Orientation) {
 	return function() {
 		const root = uiState.get('guides');
 		const {width, height} = store.state.template.page;
@@ -36,12 +41,14 @@ function addGuide(orientation) {
 			redo: [{root, op: 'add', path: '/-', value: {orientation, position}}],
 			undo: [{root, op: 'remove', path: `/${root.length}`}],
 		};
-		undoStack.commit(change, null, tr('action.view.guides.add_' + orientation + '.undo'));
+		undoStack.commit(change, null, tr(`action.view.guides.add_${orientation}.undo`));
 	};
 }
 
 function removeGuides() {
-	const root = uiState.getCurrentState(), op = 'replace', path = '/guides';
+	const root = uiState.getCurrentState();
+	const op = 'replace';
+	const path = '/guides';
 	const originalGuides = _.cloneDeep(root.guides);
 	const change = {
 		redo: [{root, op, path, value: []}],
@@ -262,8 +269,8 @@ const menu = [
 			id: 'multi_book_menu',
 			shown: enableIfModel,
 			cb() {
-				DialogManager('multiBookDialog', dialog => {
-					dialog.$on('ok', opts => {
+				DialogManager('multiBookDialog', (dialog: DialogInterface) => {
+					dialog.$on('ok', (opts: any) => {
 						undoStack.commit(
 							'book.divideInstructions',
 							opts,
@@ -346,7 +353,7 @@ const menu = [
 					text: 'action.view.grid.customize.name',
 					id: 'customize_grid_menu',
 					cb() {
-						DialogManager('gridDialog', dialog => {
+						DialogManager('gridDialog', (dialog: DialogInterface) => {
 							dialog.show(app);
 						});
 					},
@@ -388,8 +395,8 @@ const menu = [
 			id: 'export_hi_pdf_menu',
 			enabled: enableIfModel,
 			cb() {
-				DialogManager('pdfExportDialog', dialog => {
-					dialog.$on('ok', newValues => {
+				DialogManager('pdfExportDialog', (dialog: DialogInterface) => {
+					dialog.$on('ok', (newValues: any) => {
 						InstructionExporter.generatePDF(app, store, newValues);
 					});
 					dialog.show(store.state.template.page);
@@ -407,8 +414,8 @@ const menu = [
 			id: 'export_hi_png_menu',
 			enabled: enableIfModel,
 			cb() {
-				DialogManager('pngExportDialog', dialog => {
-					dialog.$on('ok', newValues => {
+				DialogManager('pngExportDialog', (dialog: DialogInterface) => {
+					dialog.$on('ok', (newValues: any) => {
 						InstructionExporter.generatePNGZip(app, store, newValues.scale, newValues.dpi);
 					});
 					const pageSize = store.state.template.page;
@@ -419,7 +426,7 @@ const menu = [
 	]},
 ];
 
-export default function Menu(localApp) {
+export default function Menu(localApp: any) {
 	app = localApp;
 	return menu;
 }

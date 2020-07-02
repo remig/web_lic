@@ -42,11 +42,14 @@ declare interface jsPDF {
 declare const jsPDF: jsPDF;
 
 interface jsonpatchOperation {
-	op: string, path: string, value: any;
+	op: string, path: string, value?: any;
 }
 
 declare interface jsonpatch {
-	applyOperation(root: string, action: jsonpatchOperation);
+	applyOperation<T>(
+		root: T,
+		action: jsonpatchOperation
+	);
 }
 
 declare const jsonpatch: jsonpatch;

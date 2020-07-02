@@ -35,7 +35,7 @@ const state: UndoState = {
 };
 
 interface UndoRedoAction {
-	root: string, op: string, path: string, value: any
+	root: any, op: string, path: string, value?: any
 }
 
 interface ActionChange {
@@ -48,7 +48,7 @@ interface MutationChange {
 	opts: any,
 }
 
-type ClearCacheTarget = CSI | PLIItem | 'csi' | 'renderer';
+type ClearCacheTarget = CSI | PLIItem | 'csi' |'pliItem' | 'renderer';
 
 const api = {
 
@@ -70,7 +70,7 @@ const api = {
 		changeList: string | ActionChange | (MutationChange | ActionChange)[],
 		opts: any,
 		undoText: string,
-		clearCacheTargets: ClearCacheTarget[]
+		clearCacheTargets?: ClearCacheTarget[]
 	) {
 
 		let localChangeList: (MutationChange | ActionChange)[];
