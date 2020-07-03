@@ -240,17 +240,17 @@ Vue.component('dialogManager', {
 });
 
 /* eslint-disable max-len */
-function setDialog(dialogName: 'localeChooserDialog', cb?: (dialog: LocaleChooserDialog) => LocaleChooserDialog): Promise<unknown>;
-function setDialog(dialogName: 'stringChooserDialog', cb?: (dialog: StringChooserDialog) => StringChooserDialog): Promise<unknown>;
-function setDialog(dialogName: 'numberChooserDialog', cb?: (dialog: NumberChooserDialog) => NumberChooserDialog): Promise<unknown>;
-function setDialog(dialogName: 'displacePartDialog', cb?: (dialog: DisplacePartDialog) => DisplacePartDialog): Promise<unknown>;
-function setDialog(dialogName: 'rotatePartImageDialog', cb?: (dialog: RotatePartImageDialog) => RotatePartImageDialog): Promise<unknown>;
-function setDialog(dialogName: 'transformPartDialog', cb?: (dialog: TransformPartDialog) => TransformPartDialog): Promise<unknown>;
-function setDialog(dialogName: 'pageLayoutDialog', cb?: (dialog: PageLayoutDialog) => PageLayoutDialog): Promise<unknown>;
-function setDialog(dialogName: 'styleDialog', cb?: (dialog: StyleDialog) => StyleDialog): Promise<unknown>;
-function setDialog(dialogName: 'importModelDialog', cb?: (dialog: ImportModelDialog) => ImportModelDialog): Promise<unknown>;
-function setDialog(dialogName: 'resizeImageDialog', cb?: (dialog: ResizeImageDialog) => ResizeImageDialog): Promise<unknown>;
-function setDialog(dialogName: DialogNames, cb?: (dialog: DialogInterface) => DialogInterface): Promise<unknown>;
+function setDialog(dialogName: 'localeChooserDialog', cb?: (dialog: LocaleChooserDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'stringChooserDialog', cb?: (dialog: StringChooserDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'numberChooserDialog', cb?: (dialog: NumberChooserDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'displacePartDialog', cb?: (dialog: DisplacePartDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'rotatePartImageDialog', cb?: (dialog: RotatePartImageDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'transformPartDialog', cb?: (dialog: TransformPartDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'pageLayoutDialog', cb?: (dialog: PageLayoutDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'styleDialog', cb?: (dialog: StyleDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'importModelDialog', cb?: (dialog: ImportModelDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'resizeImageDialog', cb?: (dialog: ResizeImageDialog) => void): Promise<unknown>;
+function setDialog(dialogName: DialogNames, cb?: (dialog: DialogInterface) => void): Promise<unknown>;
 function setDialog(dialogName: DialogNames, cb?: (dialog: any) => any) {
 /* eslint-enable max-len */
 	component.currentDialog = null;  // This forces Vue to re-render a dialog if it was just opened
