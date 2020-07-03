@@ -48,7 +48,9 @@ interface MutationChange {
 	opts: any,
 }
 
-type ClearCacheTarget = CSI | PLIItem | 'csi' |'pliItem' | 'renderer';
+type ClearCacheTarget =
+	{type: 'csi', id: number} | {type: 'pliItem', id: number}
+	| CSI | PLIItem | 'csi' |'pliItem' | 'renderer';
 
 const api = {
 
