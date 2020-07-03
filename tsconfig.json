@@ -15,6 +15,7 @@
 		"strict": true,
 
 		"alwaysStrict": true,
+		"noImplicitReturns": true,
 		"noImplicitAny": true,
 		"noImplicitThis": true,
 		"strictNullChecks": true,
