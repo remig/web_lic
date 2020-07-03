@@ -112,7 +112,7 @@ export const ItemMutations:ItemMutationInterface = {
 			if (localItem == null) {
 				return;
 			}
-			if (isItemSpecificType<Divider>(localItem, 'divider')) {
+			if (isItemSpecificType(localItem, 'divider')) {
 				// special case: dividers must move both points
 				// TODO: change 'p1' & 'p2' in divider to proper points; won't need this special case
 				store.mutations.divider.reposition({item: localItem, dx, dy});

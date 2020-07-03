@@ -10,7 +10,7 @@ function findPLIItem(filename: string, colorCode: number): PLIItem | undefined {
 	return store.state.pliItems.find(pliItem => {
 		if (pliItem.filename === filename && pliItem.colorCode === colorCode) {
 			const parent = store.get.parent(pliItem);
-			if (isItemSpecificType<Page>(parent, 'page')
+			if (isItemSpecificType(parent, 'page')
 				&& parent.subtype === 'inventoryPage'
 			) {
 				return true;

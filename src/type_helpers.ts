@@ -6,9 +6,26 @@ export function hasProperty<T extends Item>(item: Item | null, prop: string): it
 	return (item != null) && item.hasOwnProperty(prop);
 }
 
-export function isItemSpecificType<T extends Item>(
-	item: Item | null, itemType: ItemTypeNames
-): item is T {
+type Lookup = Item | LookupItem | null;
+
+export function isItemSpecificType(item: Lookup, itemType: 'annotation'): item is Annotation;
+export function isItemSpecificType(item: Lookup, itemType: 'book'): item is Book;
+export function isItemSpecificType(item: Lookup, itemType: 'callout'): item is Callout;
+export function isItemSpecificType(item: Lookup, itemType: 'calloutArrow'): item is CalloutArrow;
+export function isItemSpecificType(item: Lookup, itemType: 'csi'): item is CSI;
+export function isItemSpecificType(item: Lookup, itemType: 'divider'): item is Divider;
+export function isItemSpecificType(item: Lookup, itemType: 'numberLabel'): item is NumberLabel;
+export function isItemSpecificType(item: Lookup, itemType: 'page'): item is Page;
+export function isItemSpecificType(item: Lookup, itemType: 'pli'): item is PLI;
+export function isItemSpecificType(item: Lookup, itemType: 'pliItem'): item is PLIItem;
+export function isItemSpecificType(item: Lookup, itemType: 'point'): item is PointItem;
+export function isItemSpecificType(item: Lookup, itemType: 'quantityLabel'): item is QuantityLabel;
+export function isItemSpecificType(item: Lookup, itemType: 'rotateIcon'): item is RotateIcon;
+export function isItemSpecificType(item: Lookup, itemType: 'step'): item is Step;
+export function isItemSpecificType(item: Lookup, itemType: 'submodelImage'): item is SubmodelImage;
+export function isItemSpecificType(item: Lookup, itemType: 'part'): item is PartItem;
+export function isItemSpecificType(item: Lookup, itemType: ItemTypeNames): item is LookupItem;
+export function isItemSpecificType(item: Lookup, itemType: ItemTypeNames): item is LookupItem {
 	return (item != null) && item.type === itemType;
 }
 

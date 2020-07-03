@@ -131,7 +131,7 @@ export const StepMutations: StepMutationInterface = {
 		if (item.parent.type === 'callout') {
 			// If we delete the 2nd last step from a callout, remove step number from last remaining step
 			const callout = store.get.parent(item);
-			if (callout == null || !isItemSpecificType<Callout>(callout, 'callout')) {
+			if (callout == null || !isItemSpecificType(callout, 'callout')) {
 				return;
 			}
 			if (callout.steps.length === 1) {
