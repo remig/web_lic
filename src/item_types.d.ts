@@ -91,15 +91,15 @@ type AnnotationTypes = 'label' | 'arrow' | 'stairStepArrow' | 'image';
 
 type ItemTypeNames =
 	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
-	| 'numberLabel'| 'page' | 'pli' | 'pliItem' | 'point'
+	| 'numberLabel'| 'page' | 'part' | 'pli' | 'pliItem' | 'point'
 	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodelImage'
-	| 'part' | 'submodel';
+	| 'submodel';
 
 type TemplateTypeNames = keyof Template;
 
 type ItemTypes =
 	Annotation | Book | Callout | CalloutArrow | CSI | Divider
-	| NumberLabel | Page | PartItem | PLIItem | PLI | PointItem
+	| NumberLabel | Page | PartItem | PLI | PLIItem | PointItem
 	| QuantityLabel | RotateIcon | Step | SubmodelImage;
 
 interface LookupItem {
