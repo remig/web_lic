@@ -1,9 +1,28 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
-import Vue from 'vue';
+import Vue, {VNode} from 'vue';
 
 // TODO: set focus to correct UI widget when showing each dialog
 // TODO: make dialogs draggable, so they can be moved out of the way & see stuff behind them
-let component;
+let component: any;
+
+export interface DialogInterface {
+	$on: (event: string, opts: any) => void;
+	show: (app: any) => void;
+}
+
+interface DialogProps {
+	visible: boolean;
+	currentDialog: any;
+	outstandingImport: any;
+	resolve: any;
+}
+
+type DialogNames =
+	'localeChooserDialog' | 'stringChooserDialog' | 'numberChooserDialog'
+	| 'missingPartsDialog' | 'sceneRenderingDialog' | 'ldColorPickerDialog' | 'displacePartDialog'
+	| 'rotatePartImageDialog' | 'transformPartDialog' | 'pageLayoutDialog' | 'brickColorDialog'
+	| 'gridDialog' | 'pdfExportDialog' | 'pngExportDialog' | 'styleDialog' | 'importModelDialog'
+	| 'whatsNewDialog' | 'aboutLicDialog' | 'resizeImageDialog' | 'multiBookDialog';
 
 Vue.component('dialogManager', {
 	components: {
@@ -88,24 +107,26 @@ Vue.component('dialogManager', {
 			'./dialogs/multi_book.vue'
 		),
 	},
-	data() {
+	data(): DialogProps {
 		return {
 			visible: false,
 			currentDialog: null,
+			outstandingImport: null,
+			resolve: null,
 		};
 	},
-	render(createElement) {
+	render(createElement): VNode {
 		return this.visible
 			? createElement(this.currentDialog, {ref: 'currentDialog', tag: 'component'})
-			: null;
+			: createElement();
 	},
 	updated() {
 		Vue.nextTick(() => {
 			if (this.$refs && this.$refs.currentDialog) {
-				const dlg = this.$refs.currentDialog;
-				if (this.outstandingImport) {
+				const dlg: any = this.$refs.currentDialog;
+				if (typeof this.outstandingImport === 'function') {
 					this.outstandingImport(dlg);
-					delete this.outstandingImport;
+					this.outstandingImport = null;
 				}
 				if (dlg.$refs && dlg.$refs.set_focus) {
 					dlg.$refs.set_focus.focus();
@@ -122,7 +143,10 @@ Vue.component('dialogManager', {
 	},
 });
 
-function setDialog(dialogName, cb) {
+function setDialog(
+	dialogName: DialogNames,
+	cb?: (dialog: DialogInterface) => any
+) {
 	component.currentDialog = null;  // This forces Vue to re-render a dialog if it was just opened
 	component.outstandingImport = cb;
 	return new Promise(resolve => {

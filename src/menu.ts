@@ -7,12 +7,7 @@ import undoStack from './undo_stack';
 import Storage from './storage';
 import * as translate from './translations';
 import uiState from './ui_state';
-import DialogManager from './dialog';
-
-interface DialogInterface {
-	$on: (event: string, opts: any) => void;
-	show: (app: any) => void;
-}
+import DialogManager, {DialogInterface} from './dialog';
 
 let app: any;
 const tr = translate.tr;
