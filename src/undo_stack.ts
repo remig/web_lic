@@ -24,7 +24,7 @@ interface UndoStackEntry {
 	state: any;
 	actionList?: ActionChange[];
 	undoText?: string | null;
-	clearCacheTargets?: ClearCacheTarget[];
+	clearCacheTargets?: ClearCacheTarget[] | null;
 }
 
 const state: UndoState = {
@@ -49,7 +49,7 @@ interface MutationChange {
 }
 
 type ClearCacheTarget =
-	{type: 'csi', id: number} | {type: 'pliItem', id: number}
+	{type: 'csi', id?: number | null} | {type: 'pliItem', id?: number | null}
 	| CSI | PLIItem | 'csi' |'pliItem' | 'renderer';
 
 const api = {
@@ -72,7 +72,7 @@ const api = {
 		changeList: string | ActionChange | (MutationChange | ActionChange)[],
 		opts: any,
 		undoText: string,
-		clearCacheTargets?: ClearCacheTarget[]
+		clearCacheTargets?: ClearCacheTarget[] | null
 	) {
 
 		let localChangeList: (MutationChange | ActionChange)[];
@@ -217,10 +217,10 @@ function performUndoRedoAction(undoOrRedo: 'undo' | 'redo', newIndex: number) {
 
 function performClearCacheTargets(prevIndex: number, newIndex: number) {
 	const clearCacheTargets = [], stack = state.stack;
-	if (stack[prevIndex] && stack[prevIndex].clearCacheTargets) {
+	if (stack[prevIndex]?.clearCacheTargets) {
 		clearCacheTargets.push(...stack[prevIndex].clearCacheTargets);
 	}
-	if (stack[newIndex] && stack[newIndex].clearCacheTargets) {
+	if (stack[newIndex]?.clearCacheTargets) {
 		clearCacheTargets.push(...stack[newIndex].clearCacheTargets);
 	}
 	clearCacheTargets.forEach(item => {
@@ -233,10 +233,12 @@ function performClearCacheTargets(prevIndex: number, newIndex: number) {
 		} else {
 			// Some cache items were cloned from previous states;
 			// ensure we pull only the actual item from the current state
-			const localItemLookup = {type: item.type, id: item.id};
-			const localItem = store.get.lookupToItem(localItemLookup);
-			if (localItem && (localItem.type === 'csi' || localItem.type === 'pliItem')) {
-				localItem.isDirty = true;
+			if (item.type != null && item.id != null) {
+				const localItemLookup = {type: item.type, id: item.id};
+				const localItem = store.get.lookupToItem(localItemLookup);
+				if (localItem?.type === 'csi' || localItem?.type === 'pliItem') {
+					localItem.isDirty = true;
+				}
 			}
 		}
 	});
@@ -244,9 +246,7 @@ function performClearCacheTargets(prevIndex: number, newIndex: number) {
 
 function setIndex(stack: UndoState, newIndex: number) {
 	stack.index = newIndex;
-	if (stack && stack.onChangeCB) {
-		stack.onChangeCB();
-	}
+	stack.onChangeCB?.();
 }
 
 function setStateTimer() {

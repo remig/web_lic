@@ -77,7 +77,7 @@
 // - Undo / redo stack bakes action text into itself, which breaks translations
 // - Add ability to upload a custom ldconfig file, to customize all colors in one shot
 // - Put submodels inline then move submodel merge step to previous page
-//		as the only step on row 2; arrow is wrong
+//     as the only step on row 2; arrow is wrong
 // - Shrunken submodel images need to be centered (move lots of steps onto alligator head step to see)
 // - Change page numbers to 'even left odd right' (or 'odd left even right') then append a page:
 //     pages after new page have badly positioned page numbers
@@ -89,6 +89,10 @@
 // - Grid config dialog is atrociously ugly
 // - Title page CSI includes rotate context menu but it doesn't work
 // - Remove all default rotation from X-Wing and get nutso horizontal lines
+// - Balance part list columns better, so instead of 9-7-5 we get 7-7-7 kinda thing
+// - first add support for multiple selection, then add support for merging two parts in a PLI,
+//     like for antenna base and stick, or left / right hinge parts or 2x2 turntables
+// - When displacing a part, check if it has exactly one stud; if so, stick arrow in stud
 
 /* global Split: false */
 import Vue from 'vue';

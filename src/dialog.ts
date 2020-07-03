@@ -1,6 +1,12 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 import Vue, {VNode} from 'vue';
 
+type DialogEvent = 'ok' | 'cancel' | 'update';
+export interface DialogInterface {
+	$on(event: DialogEvent, cb: any): void;
+	show(app: any): void;
+}
+
 // Can't export type information from a vue file, so must
 // declare each dialog's property interface here. Ugh.
 interface LocaleChooserDialog extends DialogInterface {
@@ -12,6 +18,7 @@ interface StringChooserDialog extends DialogInterface {
 	title: string;
 	label: string;
 	width: string;
+	$on(event: 'ok', cb: (filename: string) => void): void;
 }
 
 interface NumberChooserDialog extends DialogInterface {
@@ -25,13 +32,21 @@ interface NumberChooserDialog extends DialogInterface {
 	step: number;
 }
 
+interface LdColorPickerDialog extends DialogInterface {
+	$on(event: 'ok', cb: (newColorCode: number) => void): void;
+}
+
+interface DisplacePartValues {
+	partDistance: number;
+	arrowOffset: number;
+	arrowLength: number;
+	arrowRotation: number;
+}
+
 interface DisplacePartDialog extends DialogInterface {
-	values: {
-		partDistance: number;
-		arrowOffset: number;
-		arrowLength: number;
-		arrowRotation: number;
-	},
+	values: DisplacePartValues,
+	$on(event: 'update', cb: (newValues: DisplacePartValues) => void): void;
+	$on(event: 'ok' | 'cancel', cb: () => void): void;
 }
 
 interface RotatePartImageDialog extends DialogInterface {
@@ -42,12 +57,18 @@ interface RotatePartImageDialog extends DialogInterface {
 	rotation: Rotation[];
 }
 
-interface TransformPartDialog extends DialogInterface {
+interface TransformPartProps {
 	title: string;
 	rotation: {x: number, y: number, z: number};
 	position: {x: number, y: number, z: number};
 	addRotateIcon: boolean;
 	showRotateIconCheckbox: boolean;
+}
+
+interface TransformPartDialog extends DialogInterface, TransformPartProps {
+	$on(event: 'update', cb: (newTransform: TransformPartProps) => void): void;
+	$on(event: 'ok', cb: (newTransform: TransformPartProps) => void): void;
+	$on(event: 'cancel', cb: () => void): void;
 }
 
 interface PageLayoutDialog extends DialogInterface {
@@ -99,12 +120,6 @@ interface ResizeImageDialog extends DialogInterface {
 // TODO: set focus to correct UI widget when showing each dialog
 // TODO: make dialogs draggable, so they can be moved out of the way & see stuff behind them
 let component: any;
-
-type DialogEvent = 'ok' | 'cancel' | 'update';
-export interface DialogInterface {
-	$on: (event: DialogEvent, opts: any) => void;
-	show: (app: any) => void;
-}
 
 interface DialogProps {
 	visible: boolean;
@@ -243,6 +258,7 @@ Vue.component('dialogManager', {
 function setDialog(dialogName: 'localeChooserDialog', cb?: (dialog: LocaleChooserDialog) => void): Promise<unknown>;
 function setDialog(dialogName: 'stringChooserDialog', cb?: (dialog: StringChooserDialog) => void): Promise<unknown>;
 function setDialog(dialogName: 'numberChooserDialog', cb?: (dialog: NumberChooserDialog) => void): Promise<unknown>;
+function setDialog(dialogName: 'ldColorPickerDialog', cb?: (dialog: LdColorPickerDialog) => void): Promise<unknown>;
 function setDialog(dialogName: 'displacePartDialog', cb?: (dialog: DisplacePartDialog) => void): Promise<unknown>;
 function setDialog(dialogName: 'rotatePartImageDialog', cb?: (dialog: RotatePartImageDialog) => void): Promise<unknown>;
 function setDialog(dialogName: 'transformPartDialog', cb?: (dialog: TransformPartDialog) => void): Promise<unknown>;
