@@ -1,6 +1,10 @@
 type Direction = 'up' | 'right' | 'down' | 'left';
 type Position = 'top' | 'right' | 'bottom' | 'left';
 type Orientation = 'horizontal' | 'vertical'
+type Anchors =
+	'top_left' | 'top' | 'top_right'
+	| 'left' | 'center' | 'right'
+	| 'bottom_left' | 'bottom' | 'bottom_right';
 
 type LDrawColorCode = number;
 

@@ -7,7 +7,7 @@ import undoStack from './undo_stack';
 import Storage from './storage';
 import * as translate from './translations';
 import uiState from './ui_state';
-import DialogManager, {DialogInterface} from './dialog';
+import DialogManager from './dialog';
 
 let app: any;
 const tr = translate.tr;
@@ -264,7 +264,7 @@ const menu = [
 			id: 'multi_book_menu',
 			shown: enableIfModel,
 			cb() {
-				DialogManager('multiBookDialog', (dialog: DialogInterface) => {
+				DialogManager('multiBookDialog', dialog => {
 					dialog.$on('ok', (opts: any) => {
 						undoStack.commit(
 							'book.divideInstructions',
@@ -348,7 +348,7 @@ const menu = [
 					text: 'action.view.grid.customize.name',
 					id: 'customize_grid_menu',
 					cb() {
-						DialogManager('gridDialog', (dialog: DialogInterface) => {
+						DialogManager('gridDialog', dialog => {
 							dialog.show(app);
 						});
 					},
@@ -390,7 +390,7 @@ const menu = [
 			id: 'export_hi_pdf_menu',
 			enabled: enableIfModel,
 			cb() {
-				DialogManager('pdfExportDialog', (dialog: DialogInterface) => {
+				DialogManager('pdfExportDialog', dialog => {
 					dialog.$on('ok', (newValues: any) => {
 						InstructionExporter.generatePDF(app, store, newValues);
 					});
@@ -409,7 +409,7 @@ const menu = [
 			id: 'export_hi_png_menu',
 			enabled: enableIfModel,
 			cb() {
-				DialogManager('pngExportDialog', (dialog: DialogInterface) => {
+				DialogManager('pngExportDialog', dialog => {
 					dialog.$on('ok', (newValues: any) => {
 						InstructionExporter.generatePNGZip(app, store, newValues.scale, newValues.dpi);
 					});

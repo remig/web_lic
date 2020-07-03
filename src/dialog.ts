@@ -1,12 +1,108 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 import Vue, {VNode} from 'vue';
 
+// Can't export type information from a vue file, so must
+// declare each dialog's property interface here. Ugh.
+interface LocaleChooserDialog extends DialogInterface {
+	visible: boolean;
+}
+
+interface StringChooserDialog extends DialogInterface {
+	newString: string;
+	title: string;
+	label: string;
+	width: string;
+}
+
+interface NumberChooserDialog extends DialogInterface {
+	value: number;
+	title: string;
+	label: string;
+	width: string;
+	bodyText: string;
+	min: number;
+	max: number;
+	step: number;
+}
+
+interface DisplacePartDialog extends DialogInterface {
+	values: {
+		partDistance: number;
+		arrowOffset: number;
+		arrowLength: number;
+		arrowRotation: number;
+	},
+}
+
+interface RotatePartImageDialog extends DialogInterface {
+	title: string;
+	addRotateIcon: boolean;
+	showRotateIconCheckbox: boolean;
+	initialRotation: string;
+	rotation: Rotation[];
+}
+
+interface TransformPartDialog extends DialogInterface {
+	title: string;
+	rotation: {x: number, y: number, z: number};
+	position: {x: number, y: number, z: number};
+	addRotateIcon: boolean;
+	showRotateIconCheckbox: boolean;
+}
+
+interface PageLayoutDialog extends DialogInterface {
+	autoRows: boolean;
+	autoCols: boolean;
+	values: {
+		rows: number;
+		cols: number;
+		direction: Orientation;
+	};
+}
+
+interface StyleDialog extends DialogInterface {
+	title: string;
+	text: string;
+	color: string;
+	font: string;
+	family: string;
+	size: string;
+	bold: boolean;
+	italic: boolean;
+	underline: boolean;
+}
+
+interface ImportModelDialog extends DialogInterface {
+	includePartsPerStep: boolean;
+	newState: any;
+}
+
+interface ResizeImageDialog extends DialogInterface {
+	imageInfo: {
+		filename: string;
+		src: string;
+		width: number;
+		originalWidth: number;
+		height: number;
+		originalHeight: number;
+		x: number;
+		y: number;
+		dpi: number;
+		preserveSize: boolean;
+		preserveAspectRatio: boolean;
+		anchorPosition: Anchors;
+		pageWidth: number;
+		pageHeight: number;
+	},
+}
+
 // TODO: set focus to correct UI widget when showing each dialog
 // TODO: make dialogs draggable, so they can be moved out of the way & see stuff behind them
 let component: any;
 
+type DialogEvent = 'ok' | 'cancel' | 'update';
 export interface DialogInterface {
-	$on: (event: string, opts: any) => void;
+	$on: (event: DialogEvent, opts: any) => void;
 	show: (app: any) => void;
 }
 
@@ -143,10 +239,20 @@ Vue.component('dialogManager', {
 	},
 });
 
-function setDialog(
-	dialogName: DialogNames,
-	cb?: (dialog: DialogInterface) => any
-) {
+/* eslint-disable max-len */
+function setDialog(dialogName: 'localeChooserDialog', cb?: (dialog: LocaleChooserDialog) => LocaleChooserDialog): Promise<unknown>;
+function setDialog(dialogName: 'stringChooserDialog', cb?: (dialog: StringChooserDialog) => StringChooserDialog): Promise<unknown>;
+function setDialog(dialogName: 'numberChooserDialog', cb?: (dialog: NumberChooserDialog) => NumberChooserDialog): Promise<unknown>;
+function setDialog(dialogName: 'displacePartDialog', cb?: (dialog: DisplacePartDialog) => DisplacePartDialog): Promise<unknown>;
+function setDialog(dialogName: 'rotatePartImageDialog', cb?: (dialog: RotatePartImageDialog) => RotatePartImageDialog): Promise<unknown>;
+function setDialog(dialogName: 'transformPartDialog', cb?: (dialog: TransformPartDialog) => TransformPartDialog): Promise<unknown>;
+function setDialog(dialogName: 'pageLayoutDialog', cb?: (dialog: PageLayoutDialog) => PageLayoutDialog): Promise<unknown>;
+function setDialog(dialogName: 'styleDialog', cb?: (dialog: StyleDialog) => StyleDialog): Promise<unknown>;
+function setDialog(dialogName: 'importModelDialog', cb?: (dialog: ImportModelDialog) => ImportModelDialog): Promise<unknown>;
+function setDialog(dialogName: 'resizeImageDialog', cb?: (dialog: ResizeImageDialog) => ResizeImageDialog): Promise<unknown>;
+function setDialog(dialogName: DialogNames, cb?: (dialog: DialogInterface) => DialogInterface): Promise<unknown>;
+function setDialog(dialogName: DialogNames, cb?: (dialog: any) => any) {
+/* eslint-enable max-len */
 	component.currentDialog = null;  // This forces Vue to re-render a dialog if it was just opened
 	component.outstandingImport = cb;
 	return new Promise(resolve => {
