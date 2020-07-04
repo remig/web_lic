@@ -45,10 +45,10 @@ export default {
 	},
 	methods: {
 		updateValues() {
-			this.$emit('update', {...this.$data});
+			this.$emit('update', this.$data.value);
 		},
 		ok() {
-			this.$emit('ok', {...this.$data});
+			this.$emit('ok', this.$data.value);
 			this.$emit('close');
 		},
 		cancel() {

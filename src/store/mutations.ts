@@ -63,14 +63,8 @@ export interface MutationInterface {
 		refreshAll(): void,
 	},
 	pliTransform: {
-		rotate(
-			{filename, rotation}
-			: {filename: string, rotation: Rotation[]}
-		): void,
-		scale(
-			{filename, scale}
-			: {filename: string, scale: number}
-		): void
+		rotate(filename: string, rotation: Rotation[] | null): void,
+		scale(filename: string, scale: number | null): void
 	},
 	renumber(itemList: any[], start?: number): void,
 	addInitialPages(
@@ -165,15 +159,12 @@ export const Mutations: MutationInterface = {
 		},
 	},
 	pliTransform: {
-		rotate(
-			{filename, rotation}
-			: {filename: string, rotation: Rotation[]}
-		) {
+		rotate(filename, rotation) {
 			let transform = store.state.pliTransforms[filename];
 			if (!transform) {
 				transform = store.state.pliTransforms[filename] = {} as PLITransform;
 			}
-			if (_.isEmpty(rotation)) {
+			if (_.isEmpty(rotation) || rotation == null) {
 				delete transform.rotation;
 			} else {
 				transform.rotation = rotation.filter(el => el.angle !== 0);
@@ -182,21 +173,15 @@ export const Mutations: MutationInterface = {
 				delete store.state.pliTransforms[filename];
 			}
 		},
-		scale(
-			{filename, scale}
-			: {filename: string, scale: number}
-		) {
+		scale(filename, scale) {
 			let transform = store.state.pliTransforms[filename];
 			if (!transform) {
 				transform = store.state.pliTransforms[filename] = {} as PLITransform;
 			}
-			if (_.isEmpty(scale)) {
+			if (_.isEmpty(scale) || scale == null || scale === 1) {
 				delete transform.scale;
 			} else {
 				transform.scale = scale;
-				if (!transform.scale || transform.scale === 1) {
-					delete transform.scale;
-				}
 			}
 			if (_.isEmpty(transform)) {
 				delete store.state.pliTransforms[filename];

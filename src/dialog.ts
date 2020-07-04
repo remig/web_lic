@@ -4,7 +4,7 @@ import Vue, {VNode} from 'vue';
 type DialogEvent = 'ok' | 'cancel' | 'update';
 export interface DialogInterface {
 	$on(event: DialogEvent, cb: any): void;
-	show(app: any): void;
+	show(app?: any): void;
 }
 
 // Can't export type information from a vue file, so must
@@ -22,7 +22,7 @@ interface StringChooserDialog extends DialogInterface {
 }
 
 interface NumberChooserDialog extends DialogInterface {
-	value: number;
+	value: number | null;
 	title: string;
 	label: string;
 	width: string;
@@ -30,6 +30,9 @@ interface NumberChooserDialog extends DialogInterface {
 	min: number;
 	max: number;
 	step: number;
+	$on(event: 'update', cb: (newValue: number) => void): void;
+	$on(event: 'ok', cb: (newValue: number) => void): void;
+	$on(event: 'cancel', cb: () => void): void;
 }
 
 interface LdColorPickerDialog extends DialogInterface {
@@ -49,12 +52,18 @@ interface DisplacePartDialog extends DialogInterface {
 	$on(event: 'ok' | 'cancel', cb: () => void): void;
 }
 
-interface RotatePartImageDialog extends DialogInterface {
+interface RotatePartImageValues {
 	title: string;
 	addRotateIcon: boolean;
 	showRotateIconCheckbox: boolean;
 	initialRotation: string;
-	rotation: Rotation[];
+	rotation: Rotation[] | null;
+}
+
+interface RotatePartImageDialog extends RotatePartImageValues, DialogInterface {
+	$on(event: 'update', cb: (newValues: RotatePartImageValues) => void): void;
+	$on(event: 'ok', cb: (newValues: RotatePartImageValues) => void): void;
+	$on(event: 'cancel', cb: () => void): void;
 }
 
 interface TransformPartProps {
@@ -71,26 +80,35 @@ interface TransformPartDialog extends DialogInterface, TransformPartProps {
 	$on(event: 'cancel', cb: () => void): void;
 }
 
+interface PageLayoutResults {
+	rows: number;
+	cols: number;
+	direction: Orientation;
+}
+
 interface PageLayoutDialog extends DialogInterface {
 	autoRows: boolean;
 	autoCols: boolean;
-	values: {
-		rows: number;
-		cols: number;
-		direction: Orientation;
-	};
+	values: PageLayoutResults;
+	$on(event: 'update', cb: (newValues: PageLayoutResults) => void): void;
+	$on(event: 'ok', cb: (newValues: PageLayoutResults) => void): void;
+	$on(event: 'cancel', cb: () => void): void;
 }
 
-interface StyleDialog extends DialogInterface {
-	title: string;
+interface StyleDialogProps {
 	text: string;
 	color: string;
 	font: string;
+}
+
+interface StyleDialog extends StyleDialogProps, DialogInterface {
+	title: string;
 	family: string;
 	size: string;
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	$on(event: 'ok', cb: (newProperties: StyleDialogProps) => void): void;
 }
 
 interface ImportModelDialog extends DialogInterface {

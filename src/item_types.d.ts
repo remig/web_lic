@@ -96,15 +96,14 @@ type AnnotationTypes = 'label' | 'arrow' | 'stairStepArrow' | 'image';
 type ItemTypeNames =
 	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
 	| 'numberLabel'| 'page' | 'part' | 'pli' | 'pliItem' | 'point'
-	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodelImage'
-	| 'submodel';
+	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodel' | 'submodelImage';
 
 type TemplateTypeNames = keyof Template;
 
 type ItemTypes =
 	Annotation | Book | Callout | CalloutArrow | CSI | Divider
 	| NumberLabel | Page | PartItem | PLI | PLIItem | PointItem
-	| QuantityLabel | RotateIcon | Step | SubmodelImage;
+	| QuantityLabel | RotateIcon | Step | SubmodelItem | SubmodelImage;
 
 interface LookupItem {
 	id: number;
@@ -140,6 +139,12 @@ interface PointListItem extends Item {
 interface PartItem extends Item {
 	type: 'part';
 	stepID: number;
+}
+
+interface SubmodelItem extends Item {
+	type: 'submodel';
+	stepID: number;
+	filename: string;
 }
 
 interface Annotation extends BoxedItem, Alignment, PointListItem {

@@ -16,14 +16,15 @@ export function isItemSpecificType(item: Lookup, itemType: 'csi'): item is CSI;
 export function isItemSpecificType(item: Lookup, itemType: 'divider'): item is Divider;
 export function isItemSpecificType(item: Lookup, itemType: 'numberLabel'): item is NumberLabel;
 export function isItemSpecificType(item: Lookup, itemType: 'page'): item is Page;
+export function isItemSpecificType(item: Lookup, itemType: 'part'): item is PartItem;
 export function isItemSpecificType(item: Lookup, itemType: 'pli'): item is PLI;
 export function isItemSpecificType(item: Lookup, itemType: 'pliItem'): item is PLIItem;
 export function isItemSpecificType(item: Lookup, itemType: 'point'): item is PointItem;
 export function isItemSpecificType(item: Lookup, itemType: 'quantityLabel'): item is QuantityLabel;
 export function isItemSpecificType(item: Lookup, itemType: 'rotateIcon'): item is RotateIcon;
 export function isItemSpecificType(item: Lookup, itemType: 'step'): item is Step;
+export function isItemSpecificType(item: Lookup, itemType: 'submodel'): item is SubmodelItem;
 export function isItemSpecificType(item: Lookup, itemType: 'submodelImage'): item is SubmodelImage;
-export function isItemSpecificType(item: Lookup, itemType: 'part'): item is PartItem;
 export function isItemSpecificType(item: Lookup, itemType: ItemTypeNames): item is LookupItem;
 export function isItemSpecificType(item: Lookup, itemType: ItemTypeNames): item is LookupItem {
 	return (item != null) && item.type === itemType;

@@ -93,6 +93,8 @@
 // - first add support for multiple selection, then add support for merging two parts in a PLI,
 //     like for antenna base and stick, or left / right hinge parts or 2x2 turntables
 // - When displacing a part, check if it has exactly one stud; if so, stick arrow in stud
+// - Convert alligator tail to callout, merge step 4 & 5; callout grid layout busted, steps 2 & 3 collide
+// - Title Page CSI rotation is broken
 
 /* global Split: false */
 import Vue from 'vue';

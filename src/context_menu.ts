@@ -20,25 +20,23 @@ interface ContextMenuEntryInterface {
 	cb?: (selectedItem: LookupItem) => void;
 	enabled?: (selectedItem: LookupItem) => boolean;
 	shown?: (selectedItem: LookupItem) => boolean;
-	children?: ContextMenuOrSeparatorEntry;
+	children?: ContextMenuEntry;
 	selectedItem?: LookupItem;  // TODO: Is this necessary
 }
 
-type ContextMenuEntry =
-	ContextMenuEntryInterface[]
-	| ((selectedItem: LookupItem) => (ContextMenuEntryInterface)[]);
+function isSeparator(menuEntry: any): menuEntry is ContextMenuSeparator {
+	return menuEntry.text === 'separator';
+}
 
-type ContextMenuOrSeparatorEntry
-	= (ContextMenuSeparator | ContextMenuEntryInterface)[]
+type ContextMenuEntry =
+	(ContextMenuSeparator | ContextMenuEntryInterface)[]
 	| ((selectedItem: LookupItem) => (ContextMenuSeparator | ContextMenuEntryInterface)[]);
 
 type DisplaceDirection = 'up' | 'down' | 'left' | 'right' | 'forward' | 'backward' | null;
 const displaceDirections =
 	['up', 'down', 'left', 'right', 'forward', 'backward', null] as DisplaceDirection[];
 
-function isRegularContextMenuEntry(menu: any): menu is ContextMenuEntryInterface {
-	return menu.hasOwnProperty('id');
-}
+const arrowDirections = ['up', 'right', 'down', 'left'] as Direction[];
 
 let app: any;
 
@@ -157,20 +155,23 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					text: 'action.layout.vertical.name',
 					id: 'page_layout_v_cmenu',
 					shown(selectedItem: LookupItem) {
-						const page = store.get.lookupToItem(selectedItem);
-						return page.layout !== 'vertical';
+						const page = store.get.page(selectedItem);
+						return page?.layout !== 'vertical';
 					},
 					cb(selectedItem: LookupItem) {
-						undoStack.commit('page.layout', {page: selectedItem, layout: 'vertical'},
-							tr('action.layout.vertical.undo'));
+						undoStack.commit(
+							'page.layout',
+							{page: selectedItem, layout: 'vertical'},
+							tr('action.layout.vertical.undo')
+						);
 					},
 				},
 				{
 					text: 'action.layout.horizontal.name',
 					id: 'page_layout_h_cmenu',
 					shown(selectedItem: LookupItem) {
-						const page = store.get.lookupToItem(selectedItem);
-						return page.layout !== 'horizontal';
+						const page = store.get.page(selectedItem);
+						return page?.layout !== 'horizontal';
 					},
 					cb(selectedItem: LookupItem) {
 						const opts = {page: selectedItem, layout: 'horizontal'};
@@ -219,7 +220,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			text: 'action.page.prepend_blank_page.name',
 			id: 'page_prepend_blank_cmenu',
 			cb(selectedItem: LookupItem) {
-				const nextPage = store.get.lookupToItem(selectedItem);
+				const nextPage = store.get.page(selectedItem);
 				undoStack.commit(
 					'page.add',
 					{
@@ -234,7 +235,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			text: 'action.page.append_blank_page.name',
 			id: 'page_append_blank_cmenu',
 			cb(selectedItem: LookupItem) {
-				const prevPage = store.get.lookupToItem(selectedItem);
+				const prevPage = store.get.page(selectedItem);
 				undoStack.commit(
 					'page.add',
 					{
@@ -249,7 +250,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.page.hide_step_separators.name',
 			id: 'page_hide_seps_cmenu',
-			cb: () => {}
+			cb: () => {},
 		},
 		{
 			text: 'action.page.add_blank_step.name',
@@ -257,14 +258,16 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			enabled: enableIfUnlocked,
 			cb(selectedItem: LookupItem) {
 				const dest = store.get.page(selectedItem.id);
-				let prevStep = store.get.step(_.last(dest.steps));
+				let lastStep = _.last(dest.steps);
+				let prevStep = lastStep ? store.get.step(lastStep) : null;
 				if (prevStep == null) {
 					let prevPage = dest;
 					while (prevPage && !prevPage.steps.length) {
 						prevPage = store.get.prevBasicPage(prevPage);
 					}
 					if (prevPage && prevPage.type === 'page' && prevPage.steps.length) {
-						prevStep = store.get.step(_.last(prevPage.steps));
+						lastStep = _.last(prevPage.steps);
+						prevStep = lastStep ? store.get.step(lastStep) : null;
 					} else {
 						prevStep = {number: 0};
 					}
@@ -284,15 +287,19 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			text: 'action.page.delete_this_blank_page.name',
 			id: 'page_delete_page_cmenu',
 			shown(selectedItem: LookupItem) {
-				const page = store.get.lookupToItem(selectedItem);
+				const page = store.get.page(selectedItem);
 				return page.steps.length < 1;
 			},
 			cb(selectedItem: LookupItem) {
-				const page = store.get.lookupToItem(selectedItem);
+				const page = store.get.page(selectedItem);
 				const nextPage = store.get.isLastBasicPage(page)
 					? store.get.prevPage(page)
 					: store.get.nextPage(page);
-				undoStack.commit('page.delete', {page}, tr('action.page.delete_this_blank_page.undo'));
+				undoStack.commit(
+					'page.delete',
+					{page},
+					tr('action.page.delete_this_blank_page.undo')
+				);
 				app.clearSelected();
 				app.setCurrentPage(nextPage);
 			},
@@ -643,7 +650,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							'csi.rotate',
 							opts,
 							tr('action.csi.rotate.flip_upside_down.undo'),
-							[csi]
+							[{type: 'csi', id: csi.id}]
 						);
 					},
 				},
@@ -658,7 +665,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							'csi.rotate',
 							opts,
 							tr('action.csi.rotate.rotate_front_to_back.undo'),
-							[csi]
+							[{type: 'csi', id: csi.id}]
 						);
 					},
 				},
@@ -697,7 +704,9 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							});
 							dialog.title = tr('dialog.rotate_part_image.title_csi');
 							dialog.rotation = initialRotation;
-							dialog.addRotateIcon = parent.rotateIconID != null;
+							if (isItemSpecificType(parent, 'step')) {
+								dialog.addRotateIcon = parent.rotateIconID != null;
+							}
 						});
 					},
 				},
@@ -710,9 +719,15 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					},
 					cb(selectedItem: LookupItem) {
 						const csi = selectedItem;
-						const opts = {csi, rotation: null, addRotateIcon: false, doLayout: true};
-						undoStack.commit('csi.rotate', opts, tr('action.csi.rotate.remove_rotation.undo'),
-							[csi]);
+						const opts = {
+							csi, rotation: null, addRotateIcon: false, doLayout: true,
+						};
+						undoStack.commit(
+							'csi.rotate',
+							opts,
+							tr('action.csi.rotate.remove_rotation.undo'),
+							[{type: 'csi', id: csi.id}]
+						);
 					},
 				},
 			],
@@ -722,7 +737,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			id: 'csi_copy_rotation_cmenu',
 			shown(selectedItem: LookupItem) {
 				const csi = store.get.csi(selectedItem);
-				return csi.rotation && csi.rotation.length;
+				return (csi?.rotation?.length ?? 0) > 0;
 			},
 			cb(selectedItem: LookupItem) {
 				// TODO: this doesn't re-layout pages after applying changes. Must check all affected pages.
@@ -731,18 +746,21 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				const selectedCSI = store.get.csi(selectedItem.id);
 				const rotation = _.cloneDeep(selectedCSI.rotation);
 				const step = store.get.step(selectedCSI.parent.id);
-				const originalRotations = [];
+				const originalRotations: (Rotation[] | 'none')[] = [];
 
 				app.clearSelected();
 				app.redrawUI(true);
 
 				DialogManager('numberChooserDialog', dialog => {
-					dialog.$on('ok', newValues => {
-						const csiList = originalRotations
-							.map((unused, id) => ({type: 'csi', id})).filter(el => el);
+					dialog.$on('ok', newValue => {
+						const csiList: ({type: 'csi', id: number})[] = originalRotations
+							.filter(el => el != null)
+							.map((unused, id) => {
+								return {type: 'csi', id};
+							});
 						undoStack.commit(
 							'step.copyRotation',
-							{step, rotation, nextXSteps: newValues.value},
+							{step, rotation, nextXSteps: newValue},
 							tr('action.csi.copy_rotation_to_next_steps.undo'),
 							csiList
 						);
@@ -757,22 +775,22 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						});
 						app.redrawUI(true);
 					});
-					dialog.$on('update', newValues => {
-						let csi, nextStep = step;
-						for (let i = 0; i < newValues.value; i++) {
+					dialog.$on('update', newValue => {
+						let csi: CSI;
+						let nextStep: Step | null = step;
+						for (let i = 0; i < newValue; i++) {
 							if (nextStep) {
 								nextStep = store.get.nextStep(nextStep);
 							}
-							if (nextStep) {
+							if (nextStep?.csiID) {
 								csi = store.get.csi(nextStep.csiID);
-								if (csi) {
-									if (originalRotations[csi.id] == null) {
-										originalRotations[csi.id] =
-											(csi.rotation == null) ? 'none' : csi.rotation;
-									}
-									csi.isDirty = true;
-									csi.rotation = rotation;
+								if (originalRotations[csi.id] == null) {
+									originalRotations[csi.id] = (csi.rotation == null)
+										? 'none'
+										: csi.rotation;
 								}
+								csi.isDirty = true;
+								csi.rotation = rotation;
 							}
 						}
 						app.redrawUI(true);
@@ -798,15 +816,15 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					}
 				}
 				DialogManager('numberChooserDialog', dialog => {
-					dialog.$on('update', newValues => {
-						csi.scale = clampScale(newValues.value);
+					dialog.$on('update', newValue => {
+						csi.scale = clampScale(newValue);
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
-					dialog.$on('ok', newValues => {
+					dialog.$on('ok', newValue => {
 						undoStack.commit(
 							'csi.scale',
-							{csi, scale: newValues.value, doLayout: true},
+							{csi, scale: newValue, doLayout: true},
 							tr('action.csi.scale.undo'),
 							[csi]
 						);
@@ -831,7 +849,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			id: 'csi_scale_remove_cmenu',
 			shown(selectedItem: LookupItem) {
 				const csi = store.get.csi(selectedItem.id);
-				return (csi.scale != null);
+				return csi.scale != null;
 			},
 			cb(selectedItem: LookupItem) {
 				const csi = store.get.csi(selectedItem.id);
@@ -849,21 +867,27 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			id: 'csi_select_part_cmenu',
 			shown(selectedItem: LookupItem) {
 				const step = store.get.parent(selectedItem);
-				return step && step.parts && step.parts.length;
+				if (isItemSpecificType(step, 'step')) {
+					return step?.parts.length > 0 && step.parts.length > 0;
+				}
+				return false;
 			},
 			children(selectedItem: LookupItem) {
 				const step = store.get.parent(selectedItem);
-				return (step.parts || []).map(partID => {
-					const part = LDParse.model.get.partFromID(partID, step.model.filename);
-					const abstractPart = LDParse.partDictionary[part.filename];
-					return {
-						id: 'select_part_' + partID + '_cmenu',
-						text: noTranslate(abstractPart.name),
-						cb() {
-							app.setSelected({type: 'part', id: partID, stepID: step.id});
-						},
-					};
-				});
+				if (step != null && isItemSpecificType(step, 'step')) {
+					return (step.parts || []).map(partID => {
+						const part = LDParse.model.get.partFromID(partID, step.model.filename);
+						const abstractPart = LDParse.partDictionary[part.filename];
+						return {
+							id: 'select_part_' + partID + '_cmenu',
+							text: noTranslate(abstractPart.name),
+							cb() {
+								app.setSelected({type: 'part', id: partID, stepID: step.id});
+							},
+						};
+					});
+				}
+				return [];
 			},
 		},
 		{
@@ -890,7 +914,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				app.clearSelected();
 				DialogManager('rotatePartImageDialog', dialog => {
 					dialog.$on('update', newValues => {
-						store.mutations.pliTransform.rotate({filename, rotation: newValues.rotation});
+						store.mutations.pliTransform.rotate(filename, newValues.rotation);
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
@@ -909,7 +933,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						);
 					});
 					dialog.$on('cancel', () => {
-						store.mutations.pliTransform.rotate({filename, rotation: originalRotation});
+						store.mutations.pliTransform.rotate(filename, originalRotation);
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
@@ -929,7 +953,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			cb(selectedItem: LookupItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				store.mutations.pliTransform.rotate({filename, rotation: null});
+				store.mutations.pliTransform.rotate(filename, null);
 				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
 				const changes = dirtyItems.map(item => {
 					return {
@@ -953,9 +977,9 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				const originalScale = store.get.pliTransform(filename).scale;
 
 				DialogManager('numberChooserDialog', dialog => {
-					dialog.$on('update', newValues => {
-						const scale = clampScale(newValues.value);
-						store.mutations.pliTransform.scale({filename, scale});
+					dialog.$on('update', newValue => {
+						const scale = clampScale(newValue);
+						store.mutations.pliTransform.scale(filename, scale);
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
@@ -974,7 +998,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						);
 					});
 					dialog.$on('cancel', () => {
-						store.mutations.pliTransform.scale({filename, scale: originalScale});
+						store.mutations.pliTransform.scale(filename, originalScale);
 						store.mutations.pliItem.markAllDirty(filename);
 						app.redrawUI(true);
 					});
@@ -997,7 +1021,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			cb(selectedItem: LookupItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				store.mutations.pliTransform.scale({filename, scale: null});
+				store.mutations.pliTransform.scale(filename, null);
 				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
 				const changes = dirtyItems.map(item => {
 					return {
@@ -1015,7 +1039,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 	],
 	quantityLabel(selectedItem: LookupItem) {
 		const page = store.get.pageForItem(selectedItem);
-		switch (page.type) {
+		switch (page.subtype) {
 			case 'inventoryPage':
 				return [
 					// TODO: add 'Reset Count' menu entry to labels with modified counts
@@ -1024,18 +1048,20 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						id: 'qtylabel_change_cmenu',
 						cb(selItem) {
 							const pliItem = store.get.parent(selItem);
-							DialogManager('numberChooserDialog', dialog => {
-								dialog.$on('ok', newValues => {
-									undoStack.commit(
-										'pliItem.changeQuantity',
-										{pliItem, quantity: newValues.value},
-										tr('action.quantity_label.change_count.undo')
-									);
+							if (isItemSpecificType(pliItem, 'pliItem')) {
+								DialogManager('numberChooserDialog', dialog => {
+									dialog.$on('ok', newValue => {
+										undoStack.commit(
+											'pliItem.changeQuantity',
+											{pliItem, quantity: newValue},
+											tr('action.quantity_label.change_count.undo')
+										);
+									});
+									dialog.title = tr('dialog.change_part_count.title');
+									dialog.label = tr('dialog.change_part_count.label');
+									dialog.value = pliItem.quantity;
 								});
-								dialog.title = tr('dialog.change_part_count.title');
-								dialog.label = tr('dialog.change_part_count.label');
-								dialog.value = pliItem.quantity;
-							});
+							}
 						},
 					},
 				];
@@ -1075,8 +1101,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				DialogManager('styleDialog', dialog => {
 					dialog.$on('ok', newProperties => {
 						const opts = {annotation, newProperties};
-						undoStack.commit('annotation.set', opts,
-							tr('action.annotation.change_text_and_style.undo'));
+						undoStack.commit(
+							'annotation.set',
+							opts,
+							tr('action.annotation.change_text_and_style.undo')
+						);
 					});
 					dialog.title = tr('dialog.style_annotation.title');
 					dialog.text = annotation.text;
@@ -1096,7 +1125,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			case 'image':
 				return [deleteMenu];
 		}
-		return null;
+		return [];
 	},
 	callout: [
 		{
@@ -1108,14 +1137,22 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					id: 'callout_position' + position + '_cmenu',
 					shown: (function(pos) {
 						return function(selectedItem: LookupItem) {
-							const callout = store.get.lookupToItem(selectedItem);
-							return callout.position !== pos;
+							const callout = store.get.callout(selectedItem);
+							return callout?.position !== pos;
 						};
 					})(position),
 					cb: (function(pos) {
 						return function(selectedItem: LookupItem) {
-							const opts = {callout: selectedItem, position: pos, doLayout: true};
-							undoStack.commit('callout.layout', opts, tr('action.callout.position.undo'));
+							const opts = {
+								callout: selectedItem,
+								position: pos,
+								doLayout: true,
+							};
+							undoStack.commit(
+								'callout.layout',
+								opts,
+								tr('action.callout.position.undo')
+							);
 						};
 					})(position),
 				};
@@ -1129,7 +1166,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					text: 'action.callout.layout.horizontal.name',
 					id: 'callout_layout_h_cmenu',
 					shown(selectedItem: LookupItem) {
-						const callout = store.get.lookupToItem(selectedItem);
+						const callout = store.get.callout(selectedItem);
 						return callout.layout !== 'horizontal';
 					},
 					cb(selectedItem: LookupItem) {
@@ -1141,12 +1178,19 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					text: 'action.callout.layout.vertical.name',
 					id: 'callout_layout_v_cmenu',
 					shown(selectedItem: LookupItem) {
-						const callout = store.get.lookupToItem(selectedItem);
+						const callout = store.get.callout(selectedItem);
 						return callout.layout !== 'vertical';
 					},
 					cb(selectedItem: LookupItem) {
-						const opts = {callout: selectedItem, layout: 'vertical', doLayout: true};
-						undoStack.commit('callout.layout', opts, tr('action.callout.layout.vertical.undo'));
+						const opts = {
+							callout: selectedItem,
+							layout: 'vertical',
+							doLayout: true,
+						};
+						undoStack.commit(
+							'callout.layout',
+							opts, tr('action.callout.layout.vertical.undo')
+						);
 					},
 				},
 			],
@@ -1216,7 +1260,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.callout_arrow.rotate_tip.name',
 			id: 'arrow_rotate_tip_cmenu',
-			children: ['up', 'right', 'down', 'left'].map(direction => {
+			children: arrowDirections.map(direction => {
 				return {
 					text: 'action.callout_arrow.rotate_tip.' + direction + '.name',
 					id: 'arrow_rotate_tip_' + direction + '_cmenu',
@@ -1237,8 +1281,8 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				const originalSize = (bbox.height === 0) ? bbox.width : bbox.height;
 
 				DialogManager('numberChooserDialog', dialog => {
-					dialog.$on('update', newValues => {
-						store.mutations.divider.setLength({divider, newLength: newValues.value});
+					dialog.$on('update', newValue => {
+						store.mutations.divider.setLength({divider, newLength: newValue});
 						app.drawCurrentPage();
 					});
 					dialog.$on('ok', () => {
@@ -1271,15 +1315,18 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			id: 'arrow_delete_point_cmenu',
 			shown(selectedItem: LookupItem) {
 				const point = store.get.point(selectedItem);
-				if (point.parent.type === 'calloutArrow') {
-					const pts = store.get.parent(point).points;
+				if (isItemSpecificType(point.parent, 'calloutArrow')) {
+					const pts = store.get.calloutArrow(point).points;
 					return pts[0] !== point.id && pts[pts.length - 1] !== point.id;
 				}
 				return true;
 			},
 			cb(selectedItem: LookupItem) {
-				undoStack.commit('item.delete', {item: selectedItem},
-					tr('action.callout_arrow.delete_point.undo'));
+				undoStack.commit(
+					'item.delete',
+					{item: selectedItem},
+					tr('action.callout_arrow.delete_point.undo')
+				);
 				app.clearSelected();
 			},
 		},
@@ -1290,21 +1337,25 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			id: 'submodel_convert_cmenu',
 			shown(selectedItem: LookupItem) {
 				// Only allow submodel -> callout conversion if submodel contains no submodels
-				const submodel = LDParse.model.get.abstractPart(selectedItem.filename);
-				for (let i = 0; i < submodel.parts.length; i++) {
-					if (LDParse.model.isSubmodel(submodel.parts[i].filename)) {
-						return false;
+				if (isItemSpecificType(selectedItem, 'submodel')) {
+					const submodel = LDParse.model.get.abstractPart(selectedItem.filename);
+					for (let i = 0; i < submodel.parts.length; i++) {
+						if (LDParse.model.isSubmodel(submodel.parts[i].filename)) {
+							return false;
+						}
 					}
 				}
 				return true;
 			},
 			cb(selectedItem: LookupItem) {
-				const step = store.get.step(selectedItem.stepID);
-				const destStep = {type: 'step', id: step.model.parentStepID};
-				const opts = {modelFilename: selectedItem.filename, destStep, doLayout: true};
-				undoStack.commit('submodel.convertToCallout', opts, tr(this.text));
-				app.clearSelected();
-				app.setCurrentPage(store.get.pageForItem(destStep));
+				if (isItemSpecificType(selectedItem, 'submodel')) {
+					const step = store.get.step(selectedItem.stepID);
+					const destStep = {type: 'step', id: step.model.parentStepID};
+					const opts = {modelFilename: selectedItem.filename, destStep, doLayout: true};
+					undoStack.commit('submodel.convertToCallout', opts, tr(this.text));
+					app.clearSelected();
+					app.setCurrentPage(store.get.pageForItem(destStep));
+				}
 			},
 		},
 	],
@@ -1363,12 +1414,12 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							tr('action.part.adjust_displacement.undo'));
 					});
 					dialog.$on('cancel', () => {
-						Object.assign(displacement, originalDisplacement);
+						Object.assign(match, originalDisplacement);
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
 					dialog.$on('update', newValues => {
-						Object.assign(displacement, newValues);
+						Object.assign(match, newValues);
 						csi.isDirty = true;
 						app.redrawUI(true);
 					});
@@ -1567,8 +1618,12 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 								});
 								const page = store.get.pageForItem(step);
 								const mutation = {mutation: 'page.layout', opts: {page}};
-								undoStack.commit([action, mutation], null,
-									tr('action.part.change_part.position_and_rotation.undo'), ['csi']);
+								undoStack.commit(
+									[action, mutation],
+									null,
+									tr('action.part.change_part.position_and_rotation.undo'),
+									['csi']
+								);
 							});
 							dialog.$on('cancel', () => {
 								part.matrix = originalMatrix;
@@ -1718,8 +1773,11 @@ function arrowTipRotationVisible(direction: Direction) {
 function rotateArrowTip(direction: Direction) {
 	return (selectedItem: LookupItem) => {
 		const arrow = store.get.lookupToItem(selectedItem);
-		undoStack.commit('calloutArrow.rotateTip', {arrow, direction},
-			tr('action.callout_arrow.rotate_tip.undo'));
+		undoStack.commit(
+			'calloutArrow.rotateTip',
+			{arrow, direction},
+			tr('action.callout_arrow.rotate_tip.undo')
+		);
 	};
 }
 
@@ -1770,7 +1828,7 @@ function filterMenu(
 	for (let i = 0; i < menu.length; i++) {
 		const entry = menu[i];
 		let deleteIndex = false;
-		if (isRegularContextMenuEntry(entry)) {
+		if (!isSeparator(entry)) {
 			if (entry.shown && !entry.shown(selectedItem)) {
 				deleteIndex = true;
 			} else if (entry.children) {
@@ -1817,9 +1875,9 @@ export default function ContextMenu(selectedItem: LookupItem, localApp: any) {
 	}
 
 	const fullMenu = menu.map(menuEntry => {  // Super cheap clone of menu, so we don't destroy the original
-		if (menuEntry.children) {
+		if (!isSeparator(menuEntry) && menuEntry.children) {
 			const res = _.clone(menuEntry);
-			if (isRegularContextMenuEntry(res)) {
+			if (!isSeparator(res)) {
 				res.children = (typeof menuEntry.children === 'function')
 					? menuEntry.children(selectedItem)
 					: menuEntry.children;
@@ -1834,7 +1892,11 @@ export default function ContextMenu(selectedItem: LookupItem, localApp: any) {
 
 	if (fullMenu && fullMenu.length) {
 		// Copy item type to each menu entry; saves typing them all out everywhere above
-		menu.forEach(menuEntry => (menuEntry.selectedItem = selectedItem));  // TODO: Is this necessary
+		menu.forEach(menuEntry => {
+			if (!isSeparator(menuEntry)) {
+				menuEntry.selectedItem = selectedItem;  // TODO: Is this necessary
+			}
+		});
 		return menu;
 	}
 	return null;
