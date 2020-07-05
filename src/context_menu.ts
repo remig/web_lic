@@ -50,14 +50,14 @@ const clampScale = (() => {
 	return clamp;
 })();
 
-const annotationMenu = {
+const annotationMenu: ContextMenuEntryInterface = {
 	text: 'action.annotation.add.name',
 	id: 'annotation_add_cmenu',
 	children: [
 		{
 			text: 'action.annotation.add.label.name',
 			id: 'annotation_add_label_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				const opts = {
@@ -82,7 +82,7 @@ const annotationMenu = {
 		{
 			text: 'action.annotation.add.arrow.name',
 			id: 'annotation_add_arrow_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				const opts = {
@@ -97,7 +97,7 @@ const annotationMenu = {
 		{
 			text: 'action.annotation.add.image.name',
 			id: 'annotation_add_image_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const clickPos = app.pageCoordsToCanvasCoords(app.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				openFileHandler('.png', 'dataURL', src => {
@@ -119,7 +119,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.layout.redo_layout.name',
 			id: 'title_page_layout_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				undoStack.commit('page.layout', {page: selectedItem}, tr(this.text));
 			},
 		},
@@ -131,7 +131,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.layout.redo_layout.name',
 			id: 'inventory_page_layout_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				undoStack.commit('page.layout', {page: selectedItem}, tr(this.text));
 			},
 		},
@@ -147,18 +147,18 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.layout.redo_layout.name',
 					id: 'page_redo_layout_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						undoStack.commit('page.layout', {page: selectedItem}, tr(this.text));
 					},
 				},
 				{
 					text: 'action.layout.vertical.name',
 					id: 'page_layout_v_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						const page = store.get.page(selectedItem);
 						return page?.layout !== 'vertical';
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						undoStack.commit(
 							'page.layout',
 							{page: selectedItem, layout: 'vertical'},
@@ -169,11 +169,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.layout.horizontal.name',
 					id: 'page_layout_h_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						const page = store.get.page(selectedItem);
 						return page?.layout !== 'horizontal';
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const opts = {page: selectedItem, layout: 'horizontal'};
 						undoStack.commit('page.layout', opts, tr('action.layout.horizontal.undo'));
 					},
@@ -182,7 +182,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					// TODO: don't allow insufficient row / col layouts that hide steps
 					text: 'action.layout.by_row_and_column.name',
 					id: 'page_layout_rc_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.cloneDeep(page.layout);
 
@@ -224,7 +224,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.page.prepend_blank_page.name',
 			id: 'page_prepend_blank_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const nextPage = store.get.page(selectedItem);
 				undoStack.commit(
 					'page.add',
@@ -239,7 +239,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.page.append_blank_page.name',
 			id: 'page_append_blank_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const prevPage = store.get.page(selectedItem);
 				undoStack.commit(
 					'page.add',
@@ -261,7 +261,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			text: 'action.page.add_blank_step.name',
 			id: 'page_add_step_cmenu',
 			enabled: enableIfUnlocked,
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const dest = store.get.page(selectedItem.id);
 				let lastStep = _.last(dest.steps);
 				let prevStep = lastStep ? store.get.step(lastStep) : null;
@@ -289,11 +289,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.page.delete_this_blank_page.name',
 			id: 'page_delete_page_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const page = store.get.page(selectedItem);
 				return page.steps.length < 1;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const page = store.get.page(selectedItem);
 				const nextPage = store.get.isLastBasicPage(page)
 					? store.get.prevPage(page)
@@ -313,7 +313,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			text: 'action.layout.name',
 			id: 'step_layout_cmenu',
 			enabled: enableIfUnlocked,
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const step = store.get.step(selectedItem);
 				return step.steps.length > 0;
 			},
@@ -321,11 +321,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.layout.vertical.name',
 					id: 'step_layout_v_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						const step = store.get.step(selectedItem);
 						return step.subStepLayout !== 'vertical';
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const opts = {step: selectedItem, layout: 'vertical', doLayout: true};
 						undoStack.commit('step.setSubStepLayout', opts, tr('action.layout.vertical.undo'));
 					},
@@ -333,11 +333,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.layout.horizontal.name',
 					id: 'step_layout_h_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						const step = store.get.step(selectedItem);
 						return step.subStepLayout !== 'horizontal';
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const opts = {step: selectedItem, layout: 'horizontal', doLayout: true};
 						undoStack.commit('step.setSubStepLayout', opts, tr('action.layout.horizontal.undo'));
 					},
@@ -345,7 +345,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.layout.by_row_and_column.name',
 					id: 'step_layout_rc_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.cloneDeep(page.layout);
 
@@ -385,18 +385,18 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.step.add_callout.name',
 			id: 'step_add_callout_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				return !step.steps.length;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				undoStack.commit('step.addCallout', {step: selectedItem}, tr(this.text));
 			},
 		},
 		{
 			text: 'action.step.divide_into_sub_steps.name',
 			id: 'step_to_substeps_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const parent = store.get.parent(selectedItem);
 				if (parent?.type === 'page' && step.callouts.length < 1 && step.steps.length < 1) {
@@ -404,14 +404,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				}
 				return false;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				undoStack.commit('step.addSubStep', {step: selectedItem, doLayout: true}, tr(this.text));
 			},
 		},
 		{
 			text: 'action.step.stretch_to_next_page.name',
 			id: 'step_stretch_cmenu',
-			enabled(selectedItem: LookupItem) {
+			enabled(selectedItem) {
 				const step = store.get.step(selectedItem);
 				if (step.parent.type !== 'page') {
 					return false;  // Only stretch basic page steps
@@ -420,7 +420,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				const nextPage = store.get.nextBasicPage(page);
 				return nextPage != null && nextPage.steps.length < 1 && page.steps.length === 1;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const step = store.get.step(selectedItem);
 				let page;
 				if (step.stretchedPages.length > 0) {
@@ -441,7 +441,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.step.move_to.previous_page.name',
 					id: 'step_move_prev_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						const page = store.get.pageForItem(selectedItem);
 						if (store.get.isFirstBasicPage(page) || store.get.isTitlePage(page)) {
 							return false;  // Previous page doesn't exist
@@ -450,10 +450,10 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						}
 						return true;
 					},
-					enabled(selectedItem: LookupItem) {
+					enabled(selectedItem) {
 						return !(store.get.prevBasicPage(selectedItem) || {}).locked;
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						undoStack.commit(
 							'step.moveToPreviousPage',
 							{step: selectedItem},
@@ -464,7 +464,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.step.move_to.next_page.name',
 					id: 'step_move_next_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						const page = store.get.pageForItem(selectedItem);
 						if (store.get.isLastBasicPage(page) || store.get.isTitlePage(page)) {
 							return false;  // Next page doesn't exist
@@ -473,10 +473,10 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						}
 						return true;
 					},
-					enabled(selectedItem: LookupItem) {
+					enabled(selectedItem) {
 						return !(store.get.nextBasicPage(selectedItem) || {}).locked;
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						undoStack.commit(
 							'step.moveToNextPage',
 							{step: selectedItem},
@@ -495,10 +495,10 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.step.merge_with.previous_step.name',
 					id: 'step_merge_prev_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						return store.get.prevStep(selectedItem, true) != null;
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const srcStep = selectedItem;
 						const destStep = store.get.prevStep(selectedItem, true);
 						undoStack.commit(
@@ -512,10 +512,10 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.step.merge_with.next_step.name',
 					id: 'step_merge_next_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						return store.get.nextStep(selectedItem, true) != null;
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const srcStep = selectedItem;
 						const destStep = store.get.nextStep(selectedItem, true);
 						undoStack.commit(
@@ -532,14 +532,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			text: 'action.step.delete_empty_step.name',
 			id: 'step_delete_cmenu',
 			enabled: enableIfUnlocked,
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const step = store.get.step(selectedItem);
 				if (step.parent.type === 'callout' && store.get.callout(step).steps.length < 2) {
 					return false;  // Can't delete first step in a callout
 				}
 				return _.isEmpty(step.parts);
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				undoStack.commit('step.delete', {step: selectedItem, doLayout: true}, tr(this.text));
 				app.clearSelected();
 			},
@@ -549,7 +549,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			text: 'action.step.prepend_blank_step.name',
 			id: 'step_prepend_cmenu',
 			enabled: enableIfUnlocked,  // TODO: disable this if previous step is in a different submodel
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
 				if (isItemSpecificType(dest, 'callout')) {
@@ -577,7 +577,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			text: 'action.step.append_blank_step.name',
 			id: 'step_append_cmenu',
 			enabled: enableIfUnlocked,
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
 				if (isItemSpecificType(dest, 'callout')) {
@@ -605,10 +605,10 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.rotate_icon.add.name',
 			id: 'step_add_rotate_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				return store.get.step(selectedItem).rotateIconID == null;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				undoStack.commit(
 					'step.toggleRotateIcon',
@@ -620,10 +620,10 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.rotate_icon.delete.name',
 			id: 'step_remove_rotate_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				return store.get.step(selectedItem.id).rotateIconID != null;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const step = store.get.step(selectedItem.id);
 				undoStack.commit(
 					'step.toggleRotateIcon',
@@ -634,7 +634,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		},
 		annotationMenu,
 	],
-	numberLabel(selectedItem: LookupItem) {
+	numberLabel(selectedItem) {
 		const parent = store.get.parent(selectedItem);
 		switch (parent?.type) {
 			case 'page':
@@ -664,7 +664,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.csi.rotate.flip_upside_down.name',
 					id: 'csi_rotate_up_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const csi = selectedItem;
 						const rotation = [{axis: 'z', angle: 180}];
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
@@ -679,7 +679,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.csi.rotate.rotate_front_to_back.name',
 					id: 'csi_rotate_front_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const csi = selectedItem;
 						const rotation = [{axis: 'y', angle: 180}];
 						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
@@ -694,7 +694,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.csi.rotate.custom_rotation.name',
 					id: 'csi_rotate_custom_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
 						const parent = store.get.lookupToItem(csi.parent);
 						const originalRotation = _.cloneDeep(csi.rotation);
@@ -735,11 +735,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.csi.rotate.remove_rotation.name',
 					id: 'csi_rotate_remove_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						const csi = store.get.csi(selectedItem.id);
 						return csi.rotation != null;
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const csi = selectedItem;
 						const opts = {
 							csi, rotation: null, addRotateIcon: false, doLayout: true,
@@ -757,11 +757,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.csi.copy_rotation_to_next_steps.name',
 			id: 'csi_copy_rotation_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const csi = store.get.csi(selectedItem);
 				return (csi?.rotation?.length ?? 0) > 0;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				// TODO: this doesn't re-layout pages after applying changes. Must check all affected pages.
 				// TODO: If next step spinner is spun up then back down, need to undo some rotations
 				// TODO: If selected csi step has a rotate icon, add one to the last rotated csi too
@@ -826,7 +826,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.csi.scale.name',
 			id: 'csi_scale_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const csi = store.get.csi(selectedItem.id);
 				const originalScale = csi.scale;
 				let initialScale = originalScale;
@@ -869,11 +869,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.csi.remove_scale.name',
 			id: 'csi_scale_remove_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const csi = store.get.csi(selectedItem.id);
 				return csi.scale != null;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const csi = store.get.csi(selectedItem.id);
 				undoStack.commit(
 					'csi.scale',
@@ -887,14 +887,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.csi.select_part.name',
 			id: 'csi_select_part_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const step = store.get.parent(selectedItem);
 				if (isItemSpecificType(step, 'step')) {
 					return step?.parts.length > 0 && step.parts.length > 0;
 				}
 				return false;
 			},
-			children(selectedItem: LookupItem) {
+			children(selectedItem) {
 				const step = store.get.parent(selectedItem);
 				if (step != null && isItemSpecificType(step, 'step')) {
 					return (step.parts || []).map(partID => {
@@ -924,7 +924,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.pli_item.rotate_part_list_image.name',
 			id: 'pli_rotate_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				const originalRotation = store.get.pliTransform(filename).rotation;
@@ -968,11 +968,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.pli_item.remove_part_list_image_rotate.name',
 			id: 'pli_remove_rotation_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				return store.get.pliTransform(pliItem.filename).rotation != null;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				store.mutations.pliTransform.rotate(filename, null);
@@ -993,7 +993,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.pli_item.scale_part_list_image.name',
 			id: 'pli_scale_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				const originalScale = store.get.pliTransform(filename).scale;
@@ -1036,11 +1036,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.pli_item.remove_part_list_image_scale.name',
 			id: 'pli_remove_scale_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				return store.get.pliTransform(pliItem.filename).scale != null;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				store.mutations.pliTransform.scale(filename, null);
@@ -1059,7 +1059,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			},
 		},
 	],
-	quantityLabel(selectedItem: LookupItem) {
+	quantityLabel(selectedItem) {
 		const page = store.get.pageForItem(selectedItem);
 		switch (page.subtype) {
 			case 'inventoryPage':
@@ -1094,31 +1094,31 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.rotate_icon.delete.name',
 			id: 'rotate_icon_delete_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const rotateIcon = selectedItem;
 				undoStack.commit('rotateIcon.delete', {rotateIcon}, tr(this.text));
 			},
 		},
 	],
 	annotation(selItem) {
-		const deleteMenu = {
+		const deleteMenu: ContextMenuEntryInterface = {
 			text: 'action.annotation.delete.name',
 			id: 'annotation_delete_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const annotation = selectedItem;
 				undoStack.commit('annotation.delete', {annotation}, tr('action.annotation.delete.undo'));
 				app.clearSelected();
 			},
 		};
 
-		const setStyleMenu = {
+		const setStyleMenu: ContextMenuEntryInterface = {
 			text: 'action.annotation.change_text_and_style.name',
 			id: 'annotation_change_text_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const annotation = store.get.annotation(selectedItem);
 				return annotation && annotation.annotationType === 'label';
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const annotation = store.get.annotation(selectedItem);
 				DialogManager('styleDialog', dialog => {
 					dialog.$on('ok', newProperties => {
@@ -1187,11 +1187,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.callout.layout.horizontal.name',
 					id: 'callout_layout_h_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						const callout = store.get.callout(selectedItem);
 						return callout.layout !== 'horizontal';
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const opts = {callout: selectedItem, layout: 'horizontal', doLayout: true};
 						undoStack.commit('callout.layout', opts, tr('action.callout.layout.horizontal.undo'));
 					},
@@ -1199,11 +1199,11 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.callout.layout.vertical.name',
 					id: 'callout_layout_v_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						const callout = store.get.callout(selectedItem);
 						return callout.layout !== 'vertical';
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						const opts = {
 							callout: selectedItem,
 							layout: 'vertical',
@@ -1220,14 +1220,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.callout.add_step.name',
 			id: 'callout_add_step_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				undoStack.commit('callout.addStep', {callout: selectedItem, doLayout: true}, tr(this.text));
 			},
 		},
 		{
 			text: 'action.callout.delete_empty_callout.name',
 			id: 'callout_delete_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const callout = store.get.callout(selectedItem);
 				if (callout == null || callout.steps.length > 1) {
 					return false;
@@ -1237,7 +1237,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				const step = store.get.step(callout.steps[0]);
 				return step.parts.length < 1;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				app.clearSelected();
 				undoStack.commit('callout.delete', {callout: selectedItem, doLayout: true}, tr(this.text));
 			},
@@ -1247,7 +1247,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.callout_arrow.select_point.name',
 			id: 'arrow_select_point_cmenu',
-			children(selectedItem: LookupItem) {
+			children(selectedItem) {
 				const arrow = store.get.calloutArrow(selectedItem);
 				return arrow.points.map((pointID, idx) => {
 					return {
@@ -1267,7 +1267,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.callout_arrow.add_point.name',
 			id: 'arrow_add_point_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const arrow = store.get.calloutArrow(selectedItem);
 				const newPointIdx = Math.ceil(arrow.points.length / 2);
 				undoStack.commit('calloutArrow.addPoint', {arrow}, tr(this.text));
@@ -1296,7 +1296,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.divider.resize.name',
 			id: 'divider_resize_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				const divider = store.get.divider(selectedItem);
 				const bbox = _.geom.bbox([divider.p1, divider.p2]);
 				// TODO: store divider orientation in divider itself
@@ -1325,7 +1325,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.divider.delete.name',
 			id: 'divider_delete_cmenu',
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				undoStack.commit('divider.delete', {divider: selectedItem}, tr('action.divider.delete.undo'));
 				app.clearSelected();
 			},
@@ -1335,7 +1335,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.callout_arrow.delete_point.name',
 			id: 'arrow_delete_point_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				const point = store.get.point(selectedItem);
 				if (isItemSpecificType(point.parent, 'calloutArrow')) {
 					const pts = store.get.calloutArrow(point).points;
@@ -1343,7 +1343,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				}
 				return true;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				undoStack.commit(
 					'item.delete',
 					{item: selectedItem},
@@ -1357,7 +1357,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.submodel.convert_to_callout.name',
 			id: 'submodel_convert_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				// Only allow submodel -> callout conversion if submodel contains no submodels
 				if (isItemSpecificType(selectedItem, 'submodel')) {
 					const submodel = LDParse.model.get.abstractPart(selectedItem.filename);
@@ -1369,7 +1369,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				}
 				return true;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				if (isItemSpecificType(selectedItem, 'submodel')) {
 					const step = store.get.step(selectedItem.stepID);
 					const destStep = {type: 'step', id: step.model.parentStepID};
@@ -1399,7 +1399,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.part.adjust_displacement.name',
 			id: 'part_change_displace_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				if (isItemSpecificType(selectedItem, 'part')) {
 					const step = store.get.step(selectedItem.stepID);
 					if (step.displacedParts) {
@@ -1408,7 +1408,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				}
 				return false;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				if (!isItemSpecificType(selectedItem, 'part')) {
 					return;
 				}
@@ -1462,14 +1462,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.part.move_part_to.previous_step.name',
 					id: 'part_move_prev_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						if (isItemSpecificType(selectedItem, 'part')) {
 							const step = store.get.step({type: 'step', id: selectedItem.stepID});
 							return store.get.prevStep(step) != null;
 						}
 						return false;
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						if (!isItemSpecificType(selectedItem, 'part')) {
 							return;
 						}
@@ -1490,14 +1490,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.part.move_part_to.next_step.name',
 					id: 'part_move_next_cmenu',
-					shown(selectedItem: LookupItem) {
+					shown(selectedItem) {
 						if (isItemSpecificType(selectedItem, 'part')) {
 							const step = store.get.step(selectedItem.stepID);
 							return store.get.nextStep(step) != null;
 						}
 						return false;
 					},
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						if (!isItemSpecificType(selectedItem, 'part')) {
 							return;
 						}
@@ -1520,14 +1520,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.part.add_part_to_callout.name',
 			id: 'part_add_to_callout_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				if (isItemSpecificType(selectedItem, 'part')) {
 					const step = store.get.step(selectedItem.stepID);
 					return step.callouts.length === 1;
 				}
 				return false;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				if (!isItemSpecificType(selectedItem, 'part')) {
 					return;
 				}
@@ -1546,14 +1546,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.part.add_part_to_callout.name',
 			id: 'part_add_to_one_callout_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				if (isItemSpecificType(selectedItem, 'part')) {
 					const step = store.get.step(selectedItem.stepID);
 					return step.callouts.length > 1;
 				}
 				return false;
 			},
-			children(selectedItem: LookupItem) {
+			children(selectedItem) {
 				if (!isItemSpecificType(selectedItem, 'part')) {
 					return [];
 				}
@@ -1580,14 +1580,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		{
 			text: 'action.part.remove_part_from_callout.name',
 			id: 'part_remove_from_callout_cmenu',
-			shown(selectedItem: LookupItem) {
+			shown(selectedItem) {
 				if (isItemSpecificType(selectedItem, 'part')) {
 					const step = store.get.step(selectedItem.stepID);
 					return step.parent.type === 'callout';
 				}
 				return false;
 			},
-			cb(selectedItem: LookupItem) {
+			cb(selectedItem) {
 				if (isItemSpecificType(selectedItem, 'part')) {
 					const step = store.get.step(selectedItem.stepID);
 					app.clearSelected();
@@ -1612,7 +1612,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.part.change_part.position_and_rotation.name',
 					id: 'part_change_pos_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						if (!isItemSpecificType(selectedItem, 'part')) {
 							return;
 						}
@@ -1660,7 +1660,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.part.change_part.color.name',
 					id: 'part_change_color_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						DialogManager('ldColorPickerDialog', dialog => {
 							dialog.$on('ok', newColorCode => {
 								if (!isItemSpecificType(selectedItem, 'part')) {
@@ -1703,7 +1703,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.part.change_part.to_different_part.name',
 					id: 'part_change_part_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						if (!isItemSpecificType(selectedItem, 'part')) {
 							return;
 						}
@@ -1740,7 +1740,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.part.change_part.duplicate.name',
 					id: 'part_duplicate_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						if (isItemSpecificType(selectedItem, 'part')) {
 							const step = store.get.step(selectedItem.stepID);
 							const filename = step.model.filename;
@@ -1761,7 +1761,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				{
 					text: 'action.part.change_part.delete.name',
 					id: 'part_delete_cmenu',
-					cb(selectedItem: LookupItem) {
+					cb(selectedItem) {
 						if (isItemSpecificType(selectedItem, 'part')) {
 							const partID = selectedItem.id;
 							const step = store.get.step(selectedItem.stepID);
