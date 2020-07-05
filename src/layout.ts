@@ -17,7 +17,7 @@ export interface LayoutInterface {
 	allInventoryPages(): void,
 	// Lays out a single inventory page. Any pli items on the page that don't fit are ignored
 	inventoryPage(page: Page, box: Box): void,
-	page(page: Page, layout?: Orientation | GridLayout): void,
+	page(page: Page, layout?: Orientations | GridLayout): void,
 	pageNumber(page: Page): void,
 	step(step: Step, box: Box, pageMargin?: number): void,
 	submodelImage(submodelImage: SubmodelImage, box: Box): void,
@@ -28,7 +28,7 @@ export interface LayoutInterface {
 	calloutArrow(callout: Callout): void,
 	subSteps(step: Step, stepBox: Box): void,
 	templatePageDividers(page: Page, box: Box): void,
-	dividers(target: Page | Step, layoutDirection: Orientation, rows: number, cols: number, box: Box): void,
+	dividers(target: Page | Step, layoutDirection: Orientations, rows: number, cols: number, box: Box): void,
 	label(label: Annotation): void,
 	quantityLabel(label: QuantityLabel, font: string, text: string): void,
 	mergeSteps(stepsToMerge: Step[], progressCallback: (s: string) => void): void,
@@ -271,7 +271,7 @@ const Layout: LayoutInterface = {
 		const stepCount = page.steps.length;
 		let cols = Math.ceil(Math.sqrt(stepCount));
 		let rows = Math.ceil(stepCount / cols);
-		let layoutDirection: Orientation;
+		let layoutDirection: Orientations;
 		if (layout === 'horizontal' || layout === 'vertical') {
 			layoutDirection = layout;
 			if (layout === 'vertical') {
@@ -791,10 +791,10 @@ const Layout: LayoutInterface = {
 		const calloutPos = callout.position;
 		const isOnSide = (calloutPos === 'left' || calloutPos === 'right');
 		arrow.direction = {
-			left: 'right' as Direction,
-			top: 'down' as Direction,
-			right: 'left' as Direction,
-			bottom: 'up' as Direction,
+			left: 'right' as Directions,
+			top: 'down' as Directions,
+			right: 'left' as Directions,
+			bottom: 'up' as Directions,
 		}[calloutPos];
 
 		while (arrow.points.length > 2) {

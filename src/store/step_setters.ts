@@ -35,7 +35,7 @@ export interface StepMutationInterface {
 	addSubStep({step, doLayout}: {step: LookupItem, doLayout?: boolean}): void;
 	setSubStepLayout(
 		{step, layout, doLayout}
-		: {step: LookupItem, layout: Orientation, doLayout?: boolean}
+		: {step: LookupItem, layout: Orientations, doLayout?: boolean}
 	): void;
 	toggleRotateIcon(
 		{step, display, doLayout}
@@ -235,9 +235,9 @@ export const StepMutations: StepMutationInterface = {
 	addCallout({step}) {
 		const stepItem = store.get.step(step);
 		stepItem.callouts = stepItem.callouts || [];
-		let position: Position = 'left';
+		let position: Positions = 'left';
 		if (stepItem.callouts.length) {
-			const availablePositions = _.difference<Position>(
+			const availablePositions = _.difference<Positions>(
 				['left', 'bottom', 'right', 'top'],
 				stepItem.callouts.map(calloutID => {
 					const callout = store.get.callout(calloutID);

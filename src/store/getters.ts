@@ -82,7 +82,7 @@ export interface GetterInterface {
 	pageList(): Page[];
 	templatePage(): Page;
 	templateForItem(item: LookupItem): any;
-	isTemplatePage(pageLookup: LookupItem): boolean;
+	isTemplatePage(pageLookup: number | LookupItem): boolean;
 	firstBookPage(bookLookup: LookupItem): Page;
 	firstPage(): Page | null;
 	lastPage(): Page | null;
@@ -289,7 +289,7 @@ export const Getters: GetterInterface = {
 		}
 		return null;
 	},
-	isTemplatePage(pageLookup: LookupItem) {
+	isTemplatePage(pageLookup) {
 		const page = store.get.page(pageLookup);
 		return page.subtype === 'templatePage';
 	},

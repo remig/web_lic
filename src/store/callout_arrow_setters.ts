@@ -8,7 +8,7 @@ export interface CalloutArrowMutationInterface {
 	add({parent}: {parent: LookupItem}): CalloutArrow;
 	delete({calloutArrow}: {calloutArrow: CalloutArrow}): void;
 	addPoint({arrow}: {arrow: LookupItem}): void;
-	rotateTip({arrow, direction}: {arrow: CalloutArrow, direction: Direction}): void;
+	rotateTip({arrow, direction}: {arrow: CalloutArrow, direction: Directions}): void;
 }
 
 export const CalloutArrowMutations: CalloutArrowMutationInterface = {

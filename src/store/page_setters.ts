@@ -21,7 +21,7 @@ export interface PageMutationInterface {
 	setLocked({page, locked}: {page: LookupItem, locked: boolean}): void;
 	renumber(): void;
 	markAllDirty(): void;
-	layout({page, layout}: {page: LookupItem, layout?: Orientation | GridLayout}): void;
+	layout({page, layout}: {page: LookupItem, layout?: Orientations | GridLayout}): void;
 }
 
 export const PageMutations: PageMutationInterface = {

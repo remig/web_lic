@@ -1,6 +1,6 @@
-type Direction = 'up' | 'right' | 'down' | 'left';
-type Position = 'top' | 'right' | 'bottom' | 'left';
-type Orientation = 'horizontal' | 'vertical'
+type Directions = 'up' | 'right' | 'down' | 'left';
+type Positions = 'top' | 'right' | 'bottom' | 'left';
+type Orientations = 'horizontal' | 'vertical'
 type Anchors =
 	'top_left' | 'top' | 'top_right'
 	| 'left' | 'center' | 'right'
@@ -84,7 +84,7 @@ interface Alignment {
 
 interface DisplacedPart {
 	partID: number;
-	direction: Direction;
+	direction: Directions;
 	arrowLength?: number;
 	arrowOffset?: number;
 	arrowRotation?: number;
@@ -156,7 +156,7 @@ interface Annotation extends BoxedItem, Alignment, PointListItem {
 	tagName?: string;
 	meta?: any;  // TODO: use tagName instead
 	src?: string | null;
-	direction?: Direction | null;
+	direction?: Directions | null;
 	border?: Border | null;
 }
 
@@ -167,7 +167,7 @@ interface Book extends NumberedItem {
 
 interface CalloutArrow extends PointListItem {
 	type: 'calloutArrow';
-	direction: Direction;
+	direction: Directions;
 }
 
 interface Callout extends StepParent, BoxedItem {
@@ -175,8 +175,8 @@ interface Callout extends StepParent, BoxedItem {
 	borderOffset: Point;
 	calloutArrows: number[];
 	innerContentOffset: Point;
-	layout: Orientation;
-	position: Position;
+	layout: Orientations;
+	position: Positions;
 }
 
 interface CSI extends BoxedItem {
@@ -204,7 +204,7 @@ type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
 interface GridLayout {
 	rows: number | 'auto';
 	cols: number | 'auto';
-	direction: Orientation;
+	direction: Orientations;
 }
 
 interface Page extends PLIItemParent, NumberedItem, StepParent {
@@ -213,8 +213,8 @@ interface Page extends PLIItemParent, NumberedItem, StepParent {
 	annotations: number[];
 	dividers: number[];
 	innerContentOffset: Point;
-	layout: Orientation | GridLayout;
-	actualLayout?: Orientation | GridLayout;
+	layout: Orientations | GridLayout;
+	actualLayout?: Orientations | GridLayout;
 	locked: boolean;
 	needsLayout: boolean;
 	numberLabelID: number | null;

@@ -36,7 +36,7 @@ type DisplaceDirection = 'up' | 'down' | 'left' | 'right' | 'forward' | 'backwar
 const displaceDirections =
 	['up', 'down', 'left', 'right', 'forward', 'backward', null] as DisplaceDirection[];
 
-const arrowDirections = ['up', 'right', 'down', 'left'] as Direction[];
+const arrowDirections = ['up', 'right', 'down', 'left'] as Directions[];
 
 let app: any;
 
@@ -1782,7 +1782,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 	],
 };
 
-function arrowTipRotationVisible(direction: Direction) {
+function arrowTipRotationVisible(direction: Directions) {
 	return (selectedItem: LookupItem) => {
 		if (isItemSpecificType(selectedItem, 'calloutArrow')) {
 			const arrow = store.get.calloutArrow(selectedItem);
@@ -1792,7 +1792,7 @@ function arrowTipRotationVisible(direction: Direction) {
 	};
 }
 
-function rotateArrowTip(direction: Direction) {
+function rotateArrowTip(direction: Directions) {
 	return (selectedItem: LookupItem) => {
 		const arrow = store.get.lookupToItem(selectedItem);
 		undoStack.commit(

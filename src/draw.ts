@@ -31,7 +31,7 @@ const drawArrowHead = (() => {
 
 	return function(
 		ctx: CanvasRenderingContext2D,
-		baseX: number, baseY: number, rotation?: number | Direction | null, scale?: number | number[]
+		baseX: number, baseY: number, rotation?: number | Directions | null, scale?: number | number[]
 	) {
 		const head = arrowDimensions.head, bodyWidth = 1.25;
 		ctx.save();

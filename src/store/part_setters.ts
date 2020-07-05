@@ -9,7 +9,7 @@ export interface PartMutationInterface {
 		partID, step, direction,
 		partDistance, arrowOffset, arrowLength, arrowRotation,
 	}: {
-		partID: number, step: LookupItem, direction?: Direction,
+		partID: number, step: LookupItem, direction?: Directions,
 		partDistance?: number, arrowOffset?: number, arrowLength?: number, arrowRotation?: number,
 	}): void;
 	moveToStep(

@@ -27,7 +27,7 @@ function toggleGrid() {
 	undoStack.commit(change, null, text);
 }
 
-function addGuide(orientation: Orientation) {
+function addGuide(orientation: Orientations) {
 	return function() {
 		const root = uiState.get('guides');
 		const {width, height} = store.state.template.page;
