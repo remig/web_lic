@@ -80,18 +80,12 @@ interface TransformPartDialog extends DialogInterface, TransformPartProps {
 	$on(event: 'cancel', cb: () => void): void;
 }
 
-interface PageLayoutResults {
-	rows: number;
-	cols: number;
-	direction: Orientation;
-}
-
 interface PageLayoutDialog extends DialogInterface {
 	autoRows: boolean;
 	autoCols: boolean;
-	values: PageLayoutResults;
-	$on(event: 'update', cb: (newValues: PageLayoutResults) => void): void;
-	$on(event: 'ok', cb: (newValues: PageLayoutResults) => void): void;
+	values: GridLayout;
+	$on(event: 'update', cb: (newValues: GridLayout) => void): void;
+	$on(event: 'ok', cb: (newValues: GridLayout) => void): void;
 	$on(event: 'cancel', cb: () => void): void;
 }
 

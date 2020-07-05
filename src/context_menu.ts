@@ -8,7 +8,7 @@ import undoStack from './undo_stack';
 import openFileHandler from './file_uploader';
 import DialogManager from './dialog';
 import {tr, noTranslate} from './translations';
-import {isItemSpecificType} from './type_helpers';
+import {isItemSpecificType, isStepParent} from './type_helpers';
 
 interface ContextMenuSeparator {
 	text: 'separator'
@@ -206,9 +206,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 								app.redrawUI(true);
 							});
 							// TODO: move these setters and 'show' call into single 'setValues' method
-							dialog.values.rows = originalLayout.rows || 'auto';
-							dialog.values.cols = originalLayout.cols || 'auto';
-							dialog.values.direction = originalLayout.direction || 'vertical';
+							if (typeof originalLayout === 'string') {
+								dialog.values.rows = dialog.values.cols = 'auto';
+								dialog.values.direction = originalLayout;
+							} else {
+								dialog.values.rows = originalLayout.rows;
+								dialog.values.cols = originalLayout.cols;
+								dialog.values.direction = originalLayout.direction;
+							}
 							dialog.show();
 						});
 					},
@@ -261,23 +266,21 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				let lastStep = _.last(dest.steps);
 				let prevStep = lastStep ? store.get.step(lastStep) : null;
 				if (prevStep == null) {
-					let prevPage = dest;
-					while (prevPage && !prevPage.steps.length) {
+					let prevPage: Page | null = dest;
+					while (prevPage && prevPage.steps.length < 1) {
 						prevPage = store.get.prevBasicPage(prevPage);
 					}
-					if (prevPage && prevPage.type === 'page' && prevPage.steps.length) {
+					if (prevPage?.type === 'page' && prevPage?.steps.length > 0) {
 						lastStep = _.last(prevPage.steps);
 						prevStep = lastStep ? store.get.step(lastStep) : null;
-					} else {
-						prevStep = {number: 0};
 					}
 				}
 				const opts = {
 					dest,
-					stepNumber: prevStep.number + 1,
+					stepNumber: prevStep == null ? 0 : prevStep.number + 1,
 					doLayout: true, renumber: true,
-					model: _.cloneDeep(prevStep.model),
-					insertionIndex: store.state.steps.indexOf(prevStep) + 1,
+					model: _.cloneDeep(prevStep?.model),
+					insertionIndex: prevStep == null ? 0 : store.state.steps.indexOf(prevStep) + 1,
 				};
 				undoStack.commit('step.add', opts, tr(this.text));
 			},
@@ -311,7 +314,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			id: 'step_layout_cmenu',
 			enabled: enableIfUnlocked,
 			shown(selectedItem: LookupItem) {
-				const step = store.get.lookupToItem(selectedItem);
+				const step = store.get.step(selectedItem);
 				return step.steps.length > 0;
 			},
 			children: [
@@ -319,7 +322,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					text: 'action.layout.vertical.name',
 					id: 'step_layout_v_cmenu',
 					shown(selectedItem: LookupItem) {
-						const step = store.get.lookupToItem(selectedItem);
+						const step = store.get.step(selectedItem);
 						return step.subStepLayout !== 'vertical';
 					},
 					cb(selectedItem: LookupItem) {
@@ -331,7 +334,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					text: 'action.layout.horizontal.name',
 					id: 'step_layout_h_cmenu',
 					shown(selectedItem: LookupItem) {
-						const step = store.get.lookupToItem(selectedItem);
+						const step = store.get.step(selectedItem);
 						return step.subStepLayout !== 'horizontal';
 					},
 					cb(selectedItem: LookupItem) {
@@ -365,9 +368,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 								store.mutations.page.layout({page, layout: newValues});
 								app.redrawUI(true);
 							});
-							dialog.values.rows = originalLayout.rows || 2;
-							dialog.values.cols = originalLayout.cols || 2;
-							dialog.direction = originalLayout.direction || 'vertical';
+							if (typeof originalLayout === 'string') {
+								dialog.values.rows = dialog.values.cols = 2;
+								dialog.values.direction = originalLayout;
+							} else {
+								dialog.values.cols = originalLayout.cols;
+								dialog.values.rows = originalLayout.rows;
+								dialog.values.direction = originalLayout.direction || 'vertical';
+							}
 							dialog.show({x: 400, y: 150});
 						});
 					},
@@ -391,7 +399,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			shown(selectedItem: LookupItem) {
 				const step = store.get.step(selectedItem.id);
 				const parent = store.get.parent(selectedItem);
-				if (parent.type === 'page' && !step.callouts.length && !step.steps.length) {
+				if (parent?.type === 'page' && step.callouts.length < 1 && step.steps.length < 1) {
 					return true;
 				}
 				return false;
@@ -404,19 +412,19 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			text: 'action.step.stretch_to_next_page.name',
 			id: 'step_stretch_cmenu',
 			enabled(selectedItem: LookupItem) {
-				const step = store.get.lookupToItem(selectedItem);
+				const step = store.get.step(selectedItem);
 				if (step.parent.type !== 'page') {
 					return false;  // Only stretch basic page steps
 				}
 				const page = store.get.pageForItem(selectedItem);
 				const nextPage = store.get.nextBasicPage(page);
-				return nextPage && nextPage.steps.length < 1 && page.steps.length === 1;
+				return nextPage != null && nextPage.steps.length < 1 && page.steps.length === 1;
 			},
 			cb(selectedItem: LookupItem) {
-				const step = store.get.lookupToItem(selectedItem);
+				const step = store.get.step(selectedItem);
 				let page;
-				if (step.stretchedPages.length) {
-					page = store.get.page(_.last(step.stretchedPages));
+				if (step.stretchedPages.length > 0) {
+					page = store.get.page(step.stretchedPages[step.stretchedPages.length - 1]);
 				} else {
 					page = store.get.pageForItem(selectedItem);
 				}
@@ -526,7 +534,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			enabled: enableIfUnlocked,
 			shown(selectedItem: LookupItem) {
 				const step = store.get.step(selectedItem);
-				if (step.parent.type === 'callout' && store.get.parent(step).steps.length < 2) {
+				if (step.parent.type === 'callout' && store.get.callout(step).steps.length < 2) {
 					return false;  // Can't delete first step in a callout
 				}
 				return _.isEmpty(step.parts);
@@ -544,14 +552,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			cb(selectedItem: LookupItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
-				if (dest.type === 'callout') {
+				if (isItemSpecificType(dest, 'callout')) {
 					const opts = {
 						callout: dest,
 						doLayout: true,
 						insertionIndex: dest.steps.indexOf(step.id),
 					};
 					undoStack.commit('callout.addStep', opts, tr(this.text));
-				} else {
+				} else if (isStepParent(dest)) {
 					const opts = {
 						dest,
 						stepNumber: step.number,
@@ -572,14 +580,14 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 			cb(selectedItem: LookupItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
-				if (dest.type === 'callout') {
+				if (isItemSpecificType(dest, 'callout')) {
 					const opts = {
 						callout: dest,
 						doLayout: true,
 						insertionIndex: dest.steps.indexOf(step.id) + 1,
 					};
 					undoStack.commit('callout.addStep', opts, tr(this.text));
-				} else {
+				} else if (isStepParent(dest)) {
 					const opts = {
 						dest,
 						stepNumber: step.number + 1,
@@ -595,18 +603,32 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 		},
 		{text: 'separator'},
 		{
-			text(selectedItem: LookupItem) {
-				const step = store.get.lookupToItem(selectedItem);
-				return step.rotateIconID == null ? 'action.rotate_icon.add.name'
-					: 'action.rotate_icon.delete.name';
+			text: 'action.rotate_icon.add.name',
+			id: 'step_add_rotate_cmenu',
+			shown(selectedItem: LookupItem) {
+				return store.get.step(selectedItem).rotateIconID == null;
 			},
-			id: 'step_add_remove_rotate_cmenu',
 			cb(selectedItem: LookupItem) {
 				const step = store.get.step(selectedItem.id);
 				undoStack.commit(
 					'step.toggleRotateIcon',
-					{step, display: step.rotateIconID == null, doLayout: true},
-					tr(this.text(selectedItem))
+					{step, display: true, doLayout: true},
+					tr(this.text)
+				);
+			},
+		},
+		{
+			text: 'action.rotate_icon.delete.name',
+			id: 'step_remove_rotate_cmenu',
+			shown(selectedItem: LookupItem) {
+				return store.get.step(selectedItem.id).rotateIconID != null;
+			},
+			cb(selectedItem: LookupItem) {
+				const step = store.get.step(selectedItem.id);
+				undoStack.commit(
+					'step.toggleRotateIcon',
+					{step, display: false, doLayout: true},
+					tr(this.text)
 				);
 			},
 		},
@@ -614,7 +636,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 	],
 	numberLabel(selectedItem: LookupItem) {
 		const parent = store.get.parent(selectedItem);
-		switch (parent.type) {
+		switch (parent?.type) {
 			case 'page':
 				return [
 					{

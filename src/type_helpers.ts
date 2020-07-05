@@ -50,6 +50,10 @@ export function isPointListItem(p: any): p is PointListItem {
 	return (p && Array.isArray(p.points));
 }
 
+export function isStepParent(t: any): t is StepParent {
+	return t.hasOwnProperty('steps');
+}
+
 export function isNotNull<T>(v: T | null): v is T {
 	return v != null;
 }

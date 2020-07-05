@@ -21,7 +21,7 @@ export interface PageMutationInterface {
 	setLocked({page, locked}: {page: LookupItem, locked: boolean}): void;
 	renumber(): void;
 	markAllDirty(): void;
-	layout({page, layout}: {page: LookupItem, layout?: any}): void;
+	layout({page, layout}: {page: LookupItem, layout?: Orientation | GridLayout}): void;
 }
 
 export const PageMutations: PageMutationInterface = {
@@ -132,7 +132,7 @@ export const PageMutations: PageMutationInterface = {
 	markAllDirty() {
 		store.state.pages.forEach(page => (page.needsLayout = true));
 	},
-	layout({page, layout}) {  // layout = 'horizontal' or 'vertical' or {rows, cols}
+	layout({page, layout}) {  // layout = 'horizontal' or 'vertical' or {rows, cols, direction}
 		const item = store.get.page(page);
 		if (item != null && !item.locked) {
 			Layout.page(item, layout || item.layout);

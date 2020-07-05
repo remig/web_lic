@@ -95,6 +95,7 @@
 // - When displacing a part, check if it has exactly one stud; if so, stick arrow in stud
 // - Convert alligator tail to callout, merge step 4 & 5; callout grid layout busted, steps 2 & 3 collide
 // - Title Page CSI rotation is broken
+// - Insert a new first page then add a step to it they try moving a part to step: crash
 
 /* global Split: false */
 import Vue from 'vue';
