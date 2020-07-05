@@ -36,14 +36,6 @@ const emptyState = {
 	template: _.cloneDeep(defaultTemplate),
 };
 
-interface SaveContent {
-	version: string;
-	partDictionary: PartDictionary;
-	colorTable: any;
-	modelFilename: any;
-	state: any;
-}
-
 export interface Store {
 	version: string | null;
 	model: Model | null;
@@ -52,7 +44,7 @@ export interface Store {
 
 	replaceState(state: any): void;
 	resetState(): void;
-	load(content: SaveContent): void;
+	load(content: SaveFileContent): void;
 	saveLocal(): void;
 	saveToFile(filename?: string, jsonIndent?: number): void;
 	saveTemplate(filename?: string, jsonIndent?: number): void;
@@ -87,7 +79,7 @@ const store: Store = {
 		store.state = _.cloneDeep(emptyState);
 		cache.reset();
 	},
-	load(content: SaveContent) {
+	load(content: SaveFileContent) {
 		LDParse.setPartDictionary(content.partDictionary);
 		LDParse.setColorTable(content.colorTable);
 		store.model = LDParse.partDictionary[content.modelFilename];
@@ -118,12 +110,12 @@ const store: Store = {
 	mutations: Mutations,
 };
 
-function getSaveContent(): object {
+function getSaveContent(): SaveFileContent {
 	return {
 		version: packageInfo.version,
 		partDictionary: LDParse.partDictionary,
 		colorTable: LDParse.colorTable,
-		modelFilename: store?.model?.filename,
+		modelFilename: store?.model?.filename ?? '',
 		state: store.state,
 	};
 }

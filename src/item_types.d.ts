@@ -312,12 +312,12 @@ interface PageTemplate extends BaseTemplate {
 		font: string;
 		color: string;
 		position: 'right' | 'left' | 'even-right' | 'even-left';
-	},
+	};
 	fill: {
 		color: string;
 		gradient: string;
 		image: ImageTemplate;
-	},
+	};
 	border: RoundBorderTemplate;
 }
 
@@ -329,8 +329,8 @@ interface StepTemplate extends BaseTemplate {
 		displacementArrow: {
 			fill: FillTemplate;
 			border: Border;
-		},
-	},
+		};
+	};
 	numberLabel: LabelTemplate;
 }
 
@@ -340,7 +340,7 @@ interface SubmodelTemplate extends BaseTemplate {
 	csi: {
 		scale: number;
 		rotation: Rotation[];
-	},
+	};
 	fill: FillTemplate;
 	border: RoundBorderTemplate;
 	quantityLabel: LabelTemplate;
@@ -365,42 +365,43 @@ interface CalloutTemplate extends BaseTemplate {
 	border: RoundBorderTemplate;
 	arrow: {
 		border: Border;
-	},
+	};
 	step: {
 		innerMargin: number;
 		numberLabel: LabelTemplate;
-	},
+	};
 }
 
 interface Template {
 
-	page: PageTemplate,
-	step: StepTemplate,
-	submodelImage: SubmodelTemplate,
-	pli: PLITemplate,
-	pliItem: PLIItemTemplate,
-	callout: CalloutTemplate,
+	page: PageTemplate;
+	step: StepTemplate;
+	submodelImage: SubmodelTemplate;
+	pli: PLITemplate;
+	pliItem: PLIItemTemplate;
+	callout: CalloutTemplate;
 	divider: {
 		border: Border;
-	},
+	};
 	rotateIcon: {
 		size: number;
 		fill: FillTemplate;
 		border: RoundBorderTemplate;
 		arrow: {
 			border: Border;
-		},
-	},
+		};
+	};
 	sceneRendering: {
 		zoom: number;
 		edgeWidth: number;
 		rotation: Rotation[];
-	},
+	};
+	useBlackStudFaces: boolean;
 	modelData: {
 		model;
 		part1;
 		part2;
-	},
+	};
 }
 
 interface StateInterface {
@@ -423,4 +424,12 @@ interface StateInterface {
 	steps: Step[];
 	submodelImages: SubmodelImage[];
 	template: Template;
+}
+
+interface SaveFileContent {
+	version: string;
+	partDictionary: PartDictionary;
+	colorTable: any;
+	modelFilename: string;
+	state: StateInterface;
 }

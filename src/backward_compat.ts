@@ -1,13 +1,14 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import _ from './util';
+import defaultTemplate from './template';
 
 // 'fixOldFoo' state is anything before the big version 0.45
 // Anything older than the latest version but newer than 0.44 must still
 // be upgraded, but by regular 'fixFoo' logic
 
-function fixOldRotation(oldRotation) {
-	const newRotation = [];
+function fixOldRotation(oldRotation: any) {
+	const newRotation: Rotation[] = [];
 	if (oldRotation.x) {
 		newRotation.push({axis: 'x', angle: oldRotation.x});
 	}
@@ -20,7 +21,7 @@ function fixOldRotation(oldRotation) {
 	return newRotation;
 }
 
-function fixOldTemplate(template) {
+function fixOldTemplate(template: Template) {
 
 	if (template.pliItem.rotation != null) {
 		template.pliItem.rotation = fixOldRotation(template.pliItem.rotation);
@@ -36,7 +37,7 @@ function fixOldTemplate(template) {
 	}
 
 	if (template.sceneRendering == null) {
-		template.sceneRendering = {};
+		template.sceneRendering = _.cloneDeep(defaultTemplate.sceneRendering);
 	}
 	if (template.sceneRendering.zoom == null) {
 		template.sceneRendering.zoom = 0;
@@ -54,12 +55,12 @@ function fixOldTemplate(template) {
 	template.useBlackStudFaces = true;
 }
 
-function fixState(state) {
+function fixState(state: any) {
 	if (state.books == null) {
 		state.books = [];
 	}
 
-	state.pages.forEach(page => {
+	state.pages.forEach((page: Page) => {
 		if (page.subtype == null) {
 			page.subtype = 'page';
 		}
@@ -68,7 +69,7 @@ function fixState(state) {
 	if (state.titlePage) {
 		state.titlePage.type = 'page';
 		state.titlePage.subtype = 'titlePage';
-		const newId = Math.max(...state.pages.map(el => el.id)) + 1;
+		const newId = Math.max(...state.pages.map((el: Page) => el.id)) + 1;
 		changeItemId(state.titlePage, newId, state);
 		state.pages.unshift(state.titlePage);
 	}
@@ -76,13 +77,13 @@ function fixState(state) {
 		state.templatePage.type = 'page';
 		state.templatePage.subtype = 'templatePage';
 		state.templatePage.number = 0;
-		const newId = Math.max(...state.pages.map(el => el.id)) + 1;
+		const newId = Math.max(...state.pages.map((el: Page) => el.id)) + 1;
 		changeItemId(state.templatePage, newId, state);
 		state.pages.unshift(state.templatePage);
 	}
 	if (state.inventoryPages) {
-		const newId = Math.max(...state.pages.map(el => el.id)) + 1;
-		state.inventoryPages.forEach((page, idx) => {
+		const newId = Math.max(...state.pages.map((el: Page) => el.id)) + 1;
+		state.inventoryPages.forEach((page: Page, idx: number) => {
 			page.type = 'page';
 			page.subtype = 'inventoryPage';
 			changeItemId(page, newId + idx, state);
@@ -95,11 +96,8 @@ function fixState(state) {
 	delete state.inventoryPages;
 }
 
-function fixOldState(state) {
+function fixOldState(state: StateInterface) {
 
-	if (state.inventoryPages == null) {
-		state.inventoryPages = [];
-	}
 	if (state.pliTransforms == null) {
 		state.pliTransforms = {};
 	}
@@ -118,7 +116,7 @@ function fixOldState(state) {
 			step.annotations = [];
 		}
 		if (step.displacedParts) {
-			step.displacedParts.forEach(d => {
+			step.displacedParts.forEach((d: any) => {
 				if (d.hasOwnProperty('distance')) {
 					d.partDistance = d.distance;
 					delete d.distance;
@@ -146,11 +144,11 @@ function fixOldState(state) {
 	});
 
 	state.pliItems.forEach(pliItem => {
-		delete pliItem.partNumbers;
+		delete (pliItem as any).partNumbers;
 	});
 }
 
-function fixColorTable(colorTable) {
+function fixColorTable(colorTable: any) {
 
 	for (const colorCode in colorTable) {
 		if (colorTable.hasOwnProperty(colorCode)) {
@@ -176,7 +174,7 @@ function fixColorTable(colorTable) {
 	return colorTable;
 }
 
-function fixOldPartDictionary(partDictionary) {
+function fixOldPartDictionary(partDictionary: any) {
 
 	for (const partFn in partDictionary) {
 		if (partDictionary.hasOwnProperty(partFn)) {
@@ -196,7 +194,7 @@ function fixOldPartDictionary(partDictionary) {
 			if (part.primitives) {
 				if (part.primitives.length) {
 					// convert primitives to new, more compact form
-					part.primitives = part.primitives.map(p => {
+					part.primitives = part.primitives.map((p: any) => {
 						if (p.colorCode === -1 || p.shape === 'line' || p.shape === 'condline') {
 							if (p.shape === 'condline') {
 								return {p: p.points, cp: p.conditionalPoints};
@@ -213,20 +211,20 @@ function fixOldPartDictionary(partDictionary) {
 	}
 }
 
-function changeItemId(item, newId, state) {
+function changeItemId(item: any, newId: number, state: any) {
 
-	function fixChildList(listType) {
-		(item[listType] || []).forEach(itemId => {
+	function fixChildList(listType: string) {
+		(item[listType] || []).forEach((itemId: number) => {
 			state[listType]
-				.find(child => child.id === itemId)
+				.find((child: any) => child.id === itemId)
 				.parent = {type: item.type, id: newId};
 		});
 	}
 
-	function fixChild(childType) {
+	function fixChild(childType: ItemTypeNames) {
 		if (item[childType + 'ID'] != null) {
-			const child = state[childType + 's']
-				.find(el => el.id === item[childType + 'ID']);
+			const child: any = state[childType + 's']
+				.find((el: any) => el.id === item[childType + 'ID']);
 			if (child) {
 				child.parent = {type: item.type, id: newId};
 			}
@@ -243,18 +241,18 @@ function changeItemId(item, newId, state) {
 	item.id = newId;
 }
 
-function isOld(content) {
+function isOld(content: SaveFileContent) {
 	const version = _.version.parse(content.version);
 	return version.major < 1 && version.minor < 45;
 }
 
-function fixLicTemplate(content) {
+function fixLicTemplate(content: any) {
 	if (isOld(content)) {
 		fixOldTemplate(content.template);
 	}
 }
 
-function fixLicSaveFile(content) {
+function fixLicSaveFile(content: SaveFileContent) {
 
 	if (isOld(content)) {
 

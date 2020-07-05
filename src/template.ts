@@ -158,6 +158,7 @@ const template: Template = {
 			{axis: 'y', angle: 50},
 		],
 	},
+	useBlackStudFaces: true,
 	modelData: {
 		model,
 		part1,
