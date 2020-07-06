@@ -1,6 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import Vue from 'vue';
+import Vue, {VNode} from 'vue';
 import _ from './util';
 import {Draw} from './draw';
 import store from './store';
@@ -10,12 +10,65 @@ import Guide from './components/guide.vue';
 import EventBus from './event_bus';
 
 const multiPagePadding = 15;
+
+interface PageViewComponent {
+
+	// globals
+	$refs: {[key: string]: any};
+	tr(text: string, ...args: any): string;
+
+	// props
+	app: any;
+	selectedItem: LookupItem | null;
+	currentPageId: number | null;
+
+	// data
+	pageSize: Size;
+	pageCount: number;
+	pageLockStatus: boolean[];
+	facingPage: boolean;
+	scroll: boolean;
+
+	// methods
+	forceUpdate(): void;
+	mouseDown(e: MouseEvent): void;
+	mouseMove(e: MouseEvent): void;
+	mouseUp(e: MouseEvent): void;
+	pageUp(): void;
+	pageDown(): void;
+	scrollToPage(pageId: number): void;
+	drawVisiblePages(): void;
+	drawPage(canvas: HTMLCanvasElement): void;
+	pageCoordsToCanvasCoords(point: Point): Point;
+
+	// computed (so they're not typed as functions but the computed function's return values)
+	isFacingView: boolean;
+	isScrollingView: boolean;
+
+	// transient data
+	mouseDownPt: Point | null;
+	mouseDragItem: {
+		type: 'guide';
+		guide: any;
+		moved: boolean;
+		x: number;
+		y: number;
+	} | {
+		type: 'item';
+		item: ItemTypes;
+		moved: boolean;
+		x: number;
+		y: number;
+	} | null;
+}
+
 Vue.component('pageView', {
-	props: ['app', 'selectedItem', 'currentPageLookup'],
+	props: ['app', 'selectedItem', 'currentPageId'],
 	data() {
 
 		EventBus.$on('page-resize', () => {
-			this.forceUpdate();
+			const component: PageViewComponent = this as any;
+			component.forceUpdate();
 		});
 
 		return {
@@ -31,70 +84,83 @@ Vue.component('pageView', {
 	},
 	render(createElement) {
 
-		let pageIDsToDraw;
-		const pageWidth = this.pageSize.width;
-		const pageHeight = this.pageSize.height;
-		const scrolling = this.isScrollingView;
-		const facing = this.isFacingView;
-		const currentPageLookup = this.currentPageLookup;
+		const component: PageViewComponent = this as any;
+
+		let pageIDsToDraw: (number | null)[];
+		const pageWidth = component.pageSize.width;
+		const pageHeight = component.pageSize.height;
+		const scrolling = component.isScrollingView;
+		const facing = component.isFacingView;
+		const currentPageId = component.currentPageId;
 
 		if (!store || !store.model) {
-			return null;
+			return createElement();
 		}
 
-		function renderOnePage(idx, pageLookup, locked) {
+		function renderOnePage(
+			idx: number, pageId: number | null, locked: boolean
+		): VNode {
 
-			const canvas = createElement(
-				'canvas',
-				{
-					attrs: {
-						id: getCanvasID(pageLookup),
-						width: pageWidth,
-						height: pageHeight,
-					},
-					'class': ['pageCanvas'],
-				}
-			);
-
-			let lockIcon, lockSwitch, guides = [];
-			if (pageLookup && pageLookup.subtype !== 'templatePage') {
+			let lockIcon: VNode | undefined;
+			let lockSwitch: VNode | undefined;
+			let guideVNode: VNode | undefined;
+			if (pageId != null && store.get.page(pageId).subtype !== 'templatePage') {
 				lockIcon = createElement(
 					'i',
-					{'class': ['pageLockIcon', 'fas', {'fa-lock': locked, 'fa-lock-open': !locked}]}
+					{
+						'class': [
+							'pageLockIcon',
+							'fas',
+							{'fa-lock': locked, 'fa-lock-open': !locked},
+						],
+					}
 				);
 				lockSwitch = createElement(
 					'el-switch',
 					{
 						props: {width: 20, value: locked},
 						'class': 'pageLockSwitch',
-						on: {input: setPageLocked(pageLookup.id)},
+						on: {input: setPageLocked(pageId)},
 					}
 				);
 
-				guides = uiState.get('guides').map((props, guideID) => {
+				const guides: GuideInterface[] = uiState.get('guides');
+				const guideVNodeList = guides.map((props, guideId) => {
 					const offset = {left: 0, top: 0};
 					return createElement(
 						Guide,
 						{
-							ref: `guide-${guideID}`,
+							ref: `guide-${guideId}`,
 							props: {
 								pageSize: {width: pageWidth, height: pageHeight},
 								offset,
-								id: guideID,
+								id: guideId,
 								...props,
 							},
 						}
 					);
 				});
 
-				if (!_.isEmpty(guides)) {
-					guides = createElement(
+				if (!_.isEmpty(guideVNodeList)) {
+					guideVNode = createElement(
 						'div',
 						{'class': ['pageGuideContainer']},
-						guides
+						guideVNodeList
 					);
 				}
 			}
+
+			const canvas = createElement(
+				'canvas',
+				{
+					attrs: {
+						id: (pageId == null) ? null : getCanvasID(pageId),
+						width: pageWidth,
+						height: pageHeight,
+					},
+					'class': ['pageCanvas'],
+				}
+			);
 
 			const canvasHolder = createElement(
 				'div',
@@ -106,52 +172,51 @@ Vue.component('pageView', {
 					style: {
 						marginTop: scrolling ? multiPagePadding + 'px' : null,
 						marginBottom: scrolling ? multiPagePadding + 'px' : null,
-						visibility: (pageLookup == null) ? 'hidden' : null,
+						visibility: (pageId == null) ? 'hidden' : null,
 					},
 				},
-				[canvas, guides]
+				[canvas as any, guideVNode as any]
 			);
 
 			return createElement(
 				'div',
 				{style: {position: 'relative', display: facing ? 'inline' : null}},
-				[canvasHolder, lockIcon, lockSwitch]
+				[canvasHolder as any, lockIcon as any, lockSwitch as any]
 			);
 		}
 
-		if (currentPageLookup && store.get.isTemplatePage(currentPageLookup)) {
-			pageIDsToDraw = [_.clone(currentPageLookup)];
+		if (currentPageId != null && store.get.isTemplatePage(currentPageId)) {
+			pageIDsToDraw = [currentPageId];
 		} else if (scrolling) {
-			pageIDsToDraw = store.get.pageList().map(p => ({type: p.type, id: p.id}));
+			pageIDsToDraw = store.get.pageList().map(p => p.id);
 			pageIDsToDraw.shift();  // Don't include template page
 			if (facing) {
 				pageIDsToDraw.unshift(null);  // Add empty placeholder to the left of title page
 			}
 		} else if (facing) {
-			pageIDsToDraw = getPairedPages(currentPageLookup)
-				.map(p => (p ? {type: p.type, id: p.id} : null));
-		} else if (currentPageLookup) {
-			pageIDsToDraw = [_.clone(currentPageLookup)];
+			pageIDsToDraw = getPairedPages(currentPageId);
+		} else if (currentPageId != null) {
+			pageIDsToDraw = [currentPageId];
 		} else {
-			return null;  // No pages, nothing to render
+			return createElement();  // No pages, nothing to render
 		}
 
-		let prevPagePair;
-		const containerList = [];
-		pageIDsToDraw.forEach((pageLookup, idx) => {
-			const locked = pageLookup ? this.pageLockStatus[pageLookup.id] : false;
-			const page = renderOnePage(idx, pageLookup, locked);
+		let prevPagePair: VNode | null;
+		const containerList: VNode[] = [];
+		pageIDsToDraw.forEach((pageId, idx) => {
+			const locked = (pageId == null) ? false : component.pageLockStatus[pageId];
+			const pageVNode = renderOnePage(idx, pageId, locked);
 			if (facing && scrolling) {
 				if (prevPagePair) {
-					containerList.push(createElement('div', [prevPagePair, page]));
+					containerList.push(createElement('div', [prevPagePair, pageVNode]));
 					prevPagePair = null;
 				} else if (idx === pageIDsToDraw.length - 1) {
-					containerList.push(createElement('div', [page]));
+					containerList.push(createElement('div', [pageVNode]));
 				} else {
-					prevPagePair = page;
+					prevPagePair = pageVNode;
 				}
 			} else {
-				containerList.push(page);
+				containerList.push(pageVNode);
 			}
 		});
 
@@ -174,13 +239,13 @@ Vue.component('pageView', {
 			containerList
 		);
 
-		const handlers = {
-			mousedown: this.mouseDown,
-			mousemove: this.mouseMove,
-			mouseup: this.mouseUp,
+		const handlers: any = {
+			mousedown: component.mouseDown,
+			mousemove: component.mouseMove,
+			mouseup: component.mouseUp,
 		};
 		if (scrolling) {
-			handlers.scroll = this.drawVisiblePages;
+			handlers.scroll = component.drawVisiblePages;
 		}
 
 		return createElement(
@@ -194,135 +259,172 @@ Vue.component('pageView', {
 		);
 	},
 	watch: {
-		selectedItem(newItem) {
+		selectedItem(newItem: LookupItem | null) {
+
+			const component: PageViewComponent = this as any;
+			if (newItem == null || component.currentPageId == null) {
+				return;
+			}
+
 			// TODO: consider drawing a second transparent canvas over the main canvas, that includes
 			// just the highlight box.  Saves redrawing the entire page on simple highlight change.
-			const currentPage = store.get.lookupToItem(this.currentPageLookup);
-			if (currentPage && currentPage.stretchedStep) {
+			const currentPage = store.get.page(component.currentPageId);
+			if (currentPage?.stretchedStep) {
 				// If selected item is in a stretched step on current page, scroll to current page
-				const stretchedStep = {type: 'step', id: currentPage.stretchedStep.stepID};
+				const stretchedStep = {
+					type: 'step' as ItemTypeNames,
+					id: currentPage.stretchedStep.stepID,
+				};
 				if (store.get.isDescendent(newItem, stretchedStep)) {
-					this.scrollToPage(currentPage);
+					component.scrollToPage(currentPage.id);
 					return;
 				}
 			}
 			const newPage = store.get.pageForItem(newItem);
 			if (newPage) {
-				this.scrollToPage(newPage);
+				component.scrollToPage(newPage.id);
 			} else {
-				this.drawVisiblePages();
+				component.drawVisiblePages();
 			}
 		},
 	},
 	methods: {
 		forceUpdate() {
+			const component: PageViewComponent = this as any;
 			const pageSize = store.state.template.page;
-			if ((this.pageSize.width !== pageSize.width) || (this.pageSize.height !== pageSize.height)) {
-				this.pageSize.width = store.state.template.page.width;
-				this.pageSize.height = store.state.template.page.height;
+			if (
+				(component.pageSize.width !== pageSize.width)
+				|| (component.pageSize.height !== pageSize.height)
+			) {
+				component.pageSize.width = store.state.template.page.width;
+				component.pageSize.height = store.state.template.page.height;
 			}
 			const latestPageCount = store.get.pageCount();
-			if (this.pageCount !== latestPageCount) {
-				this.pageCount = latestPageCount;
+			if (component.pageCount !== latestPageCount) {
+				component.pageCount = latestPageCount;
 			}
 
-			this.pageLockStatus = [];
+			component.pageLockStatus = [];
 			if (latestPageCount > 0) {
-				store.state.pages.forEach(page => (this.pageLockStatus[page.id] = page.locked));
+				store.state.pages.forEach(page => (component.pageLockStatus[page.id] = page.locked));
 
 				Vue.nextTick(() => {
-					this.drawVisiblePages();
+					component.drawVisiblePages();
 				});
 			}
 		},
-		mouseDown(e) {
-			if (e.button !== 0 || (e.target.nodeName !== 'CANVAS' && !e.target.className.includes('guide'))) {
+		mouseDown(e: MouseEvent) {
+			if (e.button !== 0 || e.target == null) {
+				return;
+			}
+			const target: HTMLElement = e.target as HTMLElement;
+			if (target.nodeName !== 'CANVAS' && !target.className.includes('guide')) {
 				return;
 			}
 
 			// Record mouse down pos so we can check if mouse up is close enough to
 			// down to trigger a 'click' for selection
-			this.mouseDownPt = {x: e.offsetX, y: e.offsetY};
-			if (e.target.className.includes('guide')) {
-				this.mouseDragItem = {
-					guide: this.$refs[e.target.dataset.id],
+			const component: PageViewComponent = this as any;
+			component.mouseDownPt = {x: e.offsetX, y: e.offsetY};
+			if (target.className.includes('guide') && target.dataset.id != null) {
+				component.mouseDragItem = {
+					type: 'guide',
+					guide: component.$refs[target.dataset.id],
+					moved: false,
 					x: e.screenX,
 					y: e.screenY,
 				};
-			} else if (this.selectedItem) {
-				const item = store.get.lookupToItem(this.selectedItem);
-				const page = getPageForCanvas(e.target);
+			} else if (component.selectedItem) {
+				const item = store.get.lookupToItem(component.selectedItem);
+				const page = getPageForCanvas(target);
 				if (item && store.get.isMoveable(item)
-					&& inHighlightBox(e.offsetX, e.offsetY, item, this.pageSize, page)
+					&& inHighlightBox(e.offsetX, e.offsetY, item, component.pageSize, page)
 				) {
 					// If mouse down is inside a selected item, store item & down pos in case mouse
 					// move follows, to support dragging items
-					this.mouseDragItem = {item, x: e.screenX, y: e.screenY};
+					component.mouseDragItem = {
+						type: 'item',
+						item,
+						moved: false,
+						x: e.screenX,
+						y: e.screenY,
+					};
 				}
 			}
 		},
-		mouseMove(e) {
-			if (e.buttons !== 1) {
+		mouseMove(e: MouseEvent) {
+			if (e.buttons !== 1 || e.target == null) {
 				return;
 			}
-			if (!this.mouseDragItem
-				|| (e.target.nodeName !== 'CANVAS' && !e.target.className.includes('guide'))
+			const target: HTMLElement = e.target as HTMLElement;
+			const component: PageViewComponent = this as any;
+			if (component.mouseDragItem == null
+				|| (target.nodeName !== 'CANVAS' && !target.className.includes('guide'))
 			) {
 				return;
 			}
-			const dx = Math.floor(e.screenX - this.mouseDragItem.x);
-			const dy = Math.floor(e.screenY - this.mouseDragItem.y);
+			const dx = Math.floor(e.screenX - component.mouseDragItem.x);
+			const dy = Math.floor(e.screenY - component.mouseDragItem.y);
 			if (dx === 0 && dy === 0) {
 				return;
 			}
 
 			const up = {x: e.offsetX, y: e.offsetY};
-			if (this.mouseDragItem.guide) {
+			if (component.mouseDragItem.type === 'guide') {
 				// TODO: transient bug: sometimes dragging a guide will put up the 'stop error cursor'
 				// and stop all mouse movements...
-				this.mouseDragItem.guide.moveBy(dx, dy);
-			} else if (this.mouseDownPt && _.geom.distance(this.mouseDownPt, up) > 5) {
+				component.mouseDragItem.guide.moveBy(dx, dy);
+			} else if (component.mouseDownPt
+				&& _.geom.distance(component.mouseDownPt, up) > 5
+				&& component.mouseDragItem.type === 'item'
+			) {
 				// TODO: Update parent bounding boxes for children like CSI, submodel, etc
-				store.mutations.item.reposition({item: this.mouseDragItem.item, dx, dy});
-				this.mouseDragItem.moved = true;
-				this.drawVisiblePages();
+				store.mutations.item.reposition({item: component.mouseDragItem.item, dx, dy});
+				component.mouseDragItem.moved = true;
+				component.drawVisiblePages();
 			}
-			this.mouseDragItem.x = e.screenX;
-			this.mouseDragItem.y = e.screenY;
+			component.mouseDragItem.x = e.screenX;
+			component.mouseDragItem.y = e.screenY;
 		},
-		mouseUp(e) {
-			if (e.button !== 0) {
+		mouseUp(e: MouseEvent) {
+			if (e.button !== 0 || e.target == null) {
 				return;
 			}
-			if (this.mouseDownPt
-				&& (this.mouseDragItem == null || !this.mouseDragItem.moved)
-				&& e.target.nodeName === 'CANVAS'
+			const target: HTMLElement = e.target as HTMLElement;
+			const component: PageViewComponent = this as any;
+			if (component.mouseDownPt
+				&& (component.mouseDragItem == null || !component.mouseDragItem.moved)
+				&& target.nodeName === 'CANVAS'
 			) {
 				// If mouse down + mouse up with nothing moved, handle as if 'click' for selection
-				const page = getPageForCanvas(e.target);
-				const target = findClickTargetInPage(page, e.offsetX, e.offsetY);
-				if (target) {
-					this.app.setSelected(target, page);
+				const page = getPageForCanvas(target);
+				const clickTarget = findClickTargetInPage(page, e.offsetX, e.offsetY);
+				if (clickTarget) {
+					component.app.setSelected(clickTarget, page);
 				} else {
-					this.app.clearSelected();
+					component.app.clearSelected();
 				}
-			} else if (this.mouseDragItem && this.mouseDragItem.guide) {
-				this.mouseDragItem.guide.savePosition();
-			} else if (this.mouseDragItem && this.mouseDragItem.moved) {
+			} else if (component.mouseDragItem?.type === 'guide') {
+				component.mouseDragItem.guide.savePosition();
+			} else if (component.mouseDragItem?.type === 'item' && component.mouseDragItem.moved) {
 				// Mouse drag is complete; add undo event to stack
-				const item = this.tr('glossary.' + this.mouseDragItem.item.type.toLowerCase());
-				const undoText = this.tr('action.edit.item.move.undo_@mf', {item});
+				const item = component.tr('glossary.' + component.mouseDragItem.item.type.toLowerCase());
+				const undoText = component.tr('action.edit.item.move.undo_@mf', {item});
 				undoStack.commit('', null, undoText);
-			} else if (e.target.nodeName !== 'CANVAS') {
-				this.app.clearSelected();
+			} else if (target.nodeName !== 'CANVAS') {
+				component.app.clearSelected();
 			}
-			this.mouseDownPt = this.mouseDragItem = null;
+			component.mouseDownPt = component.mouseDragItem = null;
 		},
 		pageUp() {
-			let prevPage = store.get.prevPage(this.currentPageLookup);
-			if (this.isFacingView) {
-				const page = store.get.page(this.currentPageLookup);
-				if (!_.isEven(page.number)) {
+			const component: PageViewComponent = this as any;
+			if (component.currentPageId == null) {
+				return;
+			}
+			let prevPage = store.get.prevPage({type: 'page', id: component.currentPageId});
+			if (component.isFacingView) {
+				const page = store.get.page(component.currentPageId);
+				if (!_.isEven(page.number) && prevPage != null) {
 					const prevPrevPage = store.get.prevPage(prevPage);
 					if (prevPrevPage) {
 						prevPage = prevPrevPage;
@@ -330,15 +432,19 @@ Vue.component('pageView', {
 				}
 			}
 			if (prevPage) {
-				this.app.clearSelected();
-				this.app.setCurrentPage(prevPage);
+				component.app.clearSelected();
+				component.app.setCurrentPage(prevPage);
 			}
 		},
 		pageDown() {
-			let nextPage = store.get.nextPage(this.currentPageLookup);
-			if (this.isFacingView) {
-				const page = store.get.page(this.currentPageLookup);
-				if (page.number > 0 && _.isEven(page.number)) {
+			const component: PageViewComponent = this as any;
+			if (component.currentPageId == null) {
+				return;
+			}
+			let nextPage = store.get.nextPage({type: 'page', id: component.currentPageId});
+			if (component.isFacingView) {
+				const page = store.get.page(component.currentPageId);
+				if (nextPage != null && page.number > 0 && _.isEven(page.number)) {
 					const nextNextPage = store.get.nextPage(nextPage);
 					if (nextNextPage) {
 						nextPage = nextNextPage;
@@ -346,22 +452,19 @@ Vue.component('pageView', {
 				}
 			}
 			if (nextPage) {
-				this.app.clearSelected();
-				this.app.setCurrentPage(nextPage);
+				component.app.clearSelected();
+				component.app.setCurrentPage(nextPage);
 			}
 		},
 		// This will trigger a full visible page redraw
-		scrollToPage(page) {
+		scrollToPage(pageId: number) {
 			Vue.nextTick(() => {
-				if (!this.isScrollingView) {
-					this.drawVisiblePages();
+				const component: PageViewComponent = this as any;
+				if (!component.isScrollingView) {
+					component.drawVisiblePages();
 					return;
 				}
-				page = store.get.lookupToItem(page);
-				if (!page) {
-					return;
-				}
-				const canvas = getCanvasForPage(page);
+				const canvas = getCanvasForPage(pageId);
 				if (!canvas) {
 					return;
 				}
@@ -371,16 +474,16 @@ Vue.component('pageView', {
 				}
 				const dy = ((container.offsetHeight - canvas.offsetHeight) / 2) - multiPagePadding;
 				// TODO: this parent element lookup is hideously fragile and hideous
-				let newScroll;
-				if (this.isFacingView) {
-					newScroll = canvas.parentElement.parentElement.parentElement.offsetTop - dy;
+				let newScroll: number;
+				if (component.isFacingView) {
+					newScroll = (canvas.parentElement?.parentElement?.parentElement?.offsetTop ?? 0) - dy;
 				} else {
-					newScroll = canvas.parentElement.parentElement.offsetTop - dy;
+					newScroll = (canvas.parentElement?.parentElement?.offsetTop ?? 0) - dy;
 				}
 				newScroll = Math.max(0, Math.floor(newScroll));
 				if (container.scrollTop === newScroll) {
 					// If scrollTop doesn't change, it doesn't trigger a scroll event
-					this.drawVisiblePages();
+					component.drawVisiblePages();
 				} else {
 					// This triggers a scroll event, which will redraw visible pages
 					container.scrollTop = newScroll;
@@ -389,38 +492,38 @@ Vue.component('pageView', {
 		},
 		drawVisiblePages() {
 			// TODO: this gets called a lot; try caching some of this in the component or somewhere
+			const component: PageViewComponent = this as any;
 			const container = document.getElementById('rightSubPane');
 			if (container == null) {
 				return;
 			}
 			const containerHeight = container.offsetHeight;
-			const containerTop = container.parentElement.offsetTop;
-			document.querySelectorAll('canvas[id^="pageCanvas"]').forEach(canvas => {
-				const box = canvas.getBoundingClientRect();
-				const y = box.y - containerTop;
-				if (y < containerHeight && (y + box.height) > 0) {
-					const page = getPageForCanvas(canvas);
-					this.drawPage(page, canvas);
-				}
-			});
+			const containerTop = container.parentElement?.offsetTop ?? 0;
+			document.querySelectorAll<HTMLCanvasElement>('canvas[id^="pageCanvas"]')
+				.forEach(canvas => {
+					const box = canvas.getBoundingClientRect();
+					const y = box.y - containerTop;
+					if (y < containerHeight && (y + box.height) > 0) {
+						component.drawPage(canvas);
+					}
+				});
 		},
-		drawPage(page, canvas) {
-			page = store.get.lookupToItem(page);
-			if (page == null) {
-				// This happens if, say, a page is deleted without updating current page (like in undo / redo)
-				return;
+		drawPage(canvas: HTMLCanvasElement) {
+			const component: PageViewComponent = this as any;
+			const page = getPageForCanvas(canvas);
+			if (page != null) {
+				Draw.page(page, canvas, {selectedItem: component.selectedItem});
 			}
-			if (canvas == null) {
-				canvas = getCanvasForPage(page);
-			}
-			if (canvas == null) {
-				// Can't find canvas for this page; ignore draw.  Happens when changing between view modes
-				return;
-			}
-			Draw.page(page, canvas, {selectedItem: this.selectedItem});
 		},
-		pageCoordsToCanvasCoords(point) {
-			const canvas = getCanvasForPage(this.currentPageLookup);
+		pageCoordsToCanvasCoords(point: Point) {
+			const component: PageViewComponent = this as any;
+			if (component.currentPageId == null) {
+				return {x: 0, y: 0};
+			}
+			const canvas = getCanvasForPage(component.currentPageId);
+			if (canvas == null) {
+				return {x: 0, y: 0};
+			}
 			const box = canvas.getBoundingClientRect();
 			return {
 				x: Math.floor(point.x - box.x),
@@ -430,84 +533,107 @@ Vue.component('pageView', {
 	},
 	computed: {
 		isFacingView() {
-			return this.facingPage
-				&& (this.currentPageLookup == null
-					|| !store.get.isTemplatePage(this.currentPageLookup));
+			const component: PageViewComponent = this as any;
+			return component.facingPage
+				&& (component.currentPageId == null
+					|| !store.get.isTemplatePage(component.currentPageId));
 		},
 		isScrollingView() {
-			return this.scroll && this.pageCount > 1
-				&& (this.currentPageLookup == null
-					|| !store.get.isTemplatePage(this.currentPageLookup));
+			const component: PageViewComponent = this as any;
+			return component.scroll && component.pageCount > 1
+				&& (component.currentPageId == null
+					|| !store.get.isTemplatePage(component.currentPageId));
 		},
 	},
 });
 
-function getPairedPages(page) {
-	page = store.get.lookupToItem(page);
-	if (!page) {
+function getPairedPages(pageId: number | null): (number | null)[] {
+	if (pageId == null) {
 		return [];
-	} else if (store.get.isTitlePage(page)) {
-		return [null, page];
+	}
+	const page = store.get.page(pageId);
+	if (store.get.isTitlePage(page)) {
+		return [null, page.id];
 	} else if (_.isEven(page.number)) {
-		return [page, store.get.nextPage(page)];
+		const nextPage = store.get.nextPage(page);
+		return [page.id, nextPage?.id ?? null];
 	}
 	const prevPage = store.get.prevPage(page);
-	return [store.get.isTemplatePage(prevPage) ? null : prevPage, page];
+	if (prevPage == null) {
+		return [null, page.id];
+	}
+	return [store.get.isTemplatePage(prevPage) ? null : (prevPage.id ?? null, page.id)];
 }
 
-function setPageLocked(pageID) {
-	if (pageID == null) {
+function setPageLocked(pageId: number): (locked?: boolean) => void {
+	if (pageId == null) {
 		return function() {};
 	}
 	return function(locked) {
-		const opts = {page: {type: 'page', id: pageID}, locked};
+		const opts = {page: {type: 'page', id: pageId}, locked};
 		undoStack.commit('page.setLocked', opts, locked ? 'Lock Page' : 'Unlock Page');
 	};
 }
 
-function getPageOffset() {
+function getPageOffset(): number {
 	const pageHeight = store.state.template.page.height;
 	const container = document.getElementById('rightSubPane');
 	return container ? (container.offsetHeight - pageHeight) / 2 : 0;
 }
 
-function getCanvasID(page) {
-	return page ? `pageCanvas_${page.type}_${page.id}` : '';
+function getCanvasID(pageId: number): string {
+	return `pageCanvas_${pageId}`;
 }
 
-function getPageForCanvas(canvas) {
-	const [, type, id] = canvas.id.split('_');
-	return store.get.lookupToItem({type, id: parseInt(id, 10)});
+function getPageForCanvas(canvas: HTMLElement): Page {
+	const [, id] = canvas.id.split('_');
+	return store.get.page(parseInt(id, 10));
 }
 
-function getCanvasForPage(page) {
-	return document.getElementById(getCanvasID(page));
+function getCanvasForPage(pageId: number): HTMLElement | null {
+	return document.getElementById(getCanvasID(pageId));
 }
 
-function inHighlightBox(x, y, t, pageSize, page) {
+function inBox(x: number, y: number, box: Box | null): boolean {
+	if (box == null) {
+		return false;
+	}
+	return (x > box.x)
+		&& (x < (box.x + box.width))
+		&& (y > box.y)
+		&& (y < (box.y + box.height));
+}
+
+function inHighlightBox(
+	x: number,
+	y: number,
+	t: LookupItem,
+	pageSize: Size,
+	page?: Page | null
+): boolean {
 	const box = store.get.highlightBox(t, pageSize, page);
-	return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
+	return inBox(x, y, box);
 }
 
-function inBox(x, y, t) {
+function inTargetBox(x: number, y: number, t: LookupItem): boolean {
 	const box = store.get.targetBox(t);
-	return x > box.x && x < (box.x + box.width) && y > box.y && y < (box.y + box.height);
+	return inBox(x, y, box);
 }
 
 // TODO: abstract details in here better.  Shouldn't have to add more code here for each simple box container
 // TODO: stepChildren is a good start; need to make stepChildren recursively return all ancestors,
 // and check them all automatically here
-function findClickTargetInStep(step, mx, my) {
+function findClickTargetInStep(step: Step, mx: number, my: number): ItemTypes | null {
 
 	if (step.csiID != null) {
 		const csi = store.get.csi(step.csiID);
 		for (let i = 0; i < csi.annotations.length; i++) {
 			const a = store.get.annotation(csi.annotations[i]);
-			if (inBox(mx, my, a)) {
+			if (inTargetBox(mx, my, a)) {
 				return a;
 			}
 		}
-		if (step.csiID != null && inBox(mx, my, csi)) {
+		if (step.csiID != null && inTargetBox(mx, my, csi)) {
 			return csi;
 		}
 	}
@@ -523,16 +649,18 @@ function findClickTargetInStep(step, mx, my) {
 	if (step.submodelImages.length) {
 		for (let i = 0; i < step.submodelImages.length; i++) {
 			const submodelImage = store.get.submodelImage(step.submodelImages[i]);
-			if (inBox(mx, my, submodelImage)) {
+			if (inTargetBox(mx, my, submodelImage)) {
 				if (submodelImage.quantityLabelID != null) {
 					const quantityLabel = store.get.quantityLabel(submodelImage.quantityLabelID);
-					if (inBox(mx, my, quantityLabel)) {
+					if (inTargetBox(mx, my, quantityLabel)) {
 						return quantityLabel;
 					}
 				}
-				const submodelCSI = store.get.csi(submodelImage.csiID);
-				if (inBox(mx, my, submodelCSI)) {
-					return submodelCSI;
+				if (submodelImage.csiID != null) {
+					const submodelCSI = store.get.csi(submodelImage.csiID);
+					if (inTargetBox(mx, my, submodelCSI)) {
+						return submodelCSI;
+					}
 				}
 				return submodelImage;
 			}
@@ -540,14 +668,14 @@ function findClickTargetInStep(step, mx, my) {
 	}
 	if (step.pliID != null && store.state.plisVisible) {
 		const pli = store.get.pli(step.pliID);
-		if (inBox(mx, my, pli)) {
+		if (inTargetBox(mx, my, pli)) {
 			for (let i = 0; i < pli.pliItems.length; i++) {
 				const pliItem = store.get.pliItem(pli.pliItems[i]);
-				if (inBox(mx, my, pliItem)) {
+				if (inTargetBox(mx, my, pliItem)) {
 					return pliItem;
 				}
 				const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-				if (inBox(mx, my, quantityLabel)) {
+				if (inTargetBox(mx, my, quantityLabel)) {
 					return quantityLabel;
 				}
 			}
@@ -557,7 +685,7 @@ function findClickTargetInStep(step, mx, my) {
 	if (step.callouts.length) {
 		for (let i = 0; i < step.callouts.length; i++) {
 			const callout = store.get.callout(step.callouts[i]);
-			if (inBox(mx, my, callout)) {
+			if (inTargetBox(mx, my, callout)) {
 				for (let j = 0; j < callout.steps.length; j++) {
 					const calloutStep = store.get.step(callout.steps[j]);
 					const innerTarget = findClickTargetInStep(calloutStep, mx, my);
@@ -569,7 +697,7 @@ function findClickTargetInStep(step, mx, my) {
 			}
 			for (let k = 0; k < callout.calloutArrows.length; k++) {
 				const arrow = store.get.calloutArrow(callout.calloutArrows[k]);
-				if (inBox(mx, my, arrow)) {
+				if (inTargetBox(mx, my, arrow)) {
 					return arrow;
 				}
 			}
@@ -577,40 +705,39 @@ function findClickTargetInStep(step, mx, my) {
 	}
 	const children = store.get.stepChildren(step);
 	for (let i = 0; i < children.length; i++) {
-		if (inBox(mx, my, children[i])) {
+		if (inTargetBox(mx, my, children[i])) {
 			return children[i];
 		}
 	}
-	if (inBox(mx, my, step)) {
+	if (inTargetBox(mx, my, step)) {
 		return step;
 	}
 	return null;
 }
 
-function findClickTargetInPage(page, mx, my) {
-	page = store.get.lookupToItem(page);
+function findClickTargetInPage(page: Page, mx: number, my: number): ItemTypes | null {
 	if (!page) {
 		return null;
 	}
 	if (page.numberLabelID != null) {
 		const lbl = store.get.numberLabel(page.numberLabelID);
-		if (inBox(mx, my, lbl)) {
+		if (inTargetBox(mx, my, lbl)) {
 			return lbl;
 		}
 	}
 	for (let i = 0; i < page.pliItems.length; i++) {
 		const pliItem = store.get.pliItem(page.pliItems[i]);
-		if (inBox(mx, my, pliItem)) {
+		if (inTargetBox(mx, my, pliItem)) {
 			return pliItem;
 		}
 		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-		if (inBox(mx, my, quantityLabel)) {
+		if (inTargetBox(mx, my, quantityLabel)) {
 			return quantityLabel;
 		}
 	}
 	for (let i = 0; i < page.annotations.length; i++) {
 		const a = store.get.annotation(page.annotations[i]);
-		if (inBox(mx, my, a)) {
+		if (inTargetBox(mx, my, a)) {
 			return a;
 		}
 	}
@@ -619,7 +746,7 @@ function findClickTargetInPage(page, mx, my) {
 
 		let box = _.geom.bbox([divider.p1, divider.p2]);
 		box = _.geom.expandBox(box, 8, 8);
-		if (inBox(mx, my, {...divider, ...box})) {
+		if (inTargetBox(mx, my, {...divider, ...box})) {
 			return divider;
 		}
 	}
