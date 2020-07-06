@@ -5,11 +5,11 @@ import store from './store';
 import cache from './cache';
 import LDParse from './ld_parse';
 import uiState from './ui_state';
-import {isSize, isPoint, isBox, isPointItem} from './type_helpers';
+import {isSize, isPoint, isPointItem} from './type_helpers';
 
 interface DrawConfig {
 	hiResScale?: number;
-	selectedItem?: ItemTypes;
+	selectedItem?: LookupItem | null;
 	noCache?: boolean;
 	noGrid?: boolean;
 }
@@ -326,7 +326,7 @@ export const Draw: DrawInterface = {
 		ctx.restore();
 
 		// Draw highlight box around the selected page item, if any
-		if (config.selectedItem) {
+		if (config.selectedItem != null) {
 			let doHighlight = false;
 			const itemPage = store.get.pageForItem(config.selectedItem);
 			if (_.itemEq(itemPage, page)) {
@@ -341,7 +341,7 @@ export const Draw: DrawInterface = {
 			}
 			if (doHighlight) {
 				const box = store.get.highlightBox(config.selectedItem, template, page);
-				if (isBox(box)) {
+				if (box != null) {
 					drawHighlight(ctx, box);
 				}
 			}
@@ -459,7 +459,9 @@ function drawSubmodelImage(
 }
 
 function drawCSI(
-	csiId: number, ctx: CanvasRenderingContext2D, {hiResScale = 1, selectedItem, noCache}: DrawConfig
+	csiId: number,
+	ctx: CanvasRenderingContext2D,
+	{hiResScale = 1, selectedItem, noCache}: DrawConfig
 ) {
 	const csi = store.get.csi(csiId);
 	if (csi == null) {
@@ -476,9 +478,10 @@ function drawCSI(
 
 	ctx.save();
 	ctx.scale(1 / hiResScale, 1 / hiResScale);
-	const havePart = (selectedItem != null)
-		&& (selectedItem.type === 'part')
-		&& (selectedItem.stepID === step.id);
+	let havePart = false;
+	if (selectedItem?.type === 'part') {
+		havePart = ((selectedItem as PartItem).stepID === step.id);
+	}
 	const selectedPartIDs = (havePart && selectedItem) ? [selectedItem.id] : null;
 	const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
 	const res = store.render[renderer](

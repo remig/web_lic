@@ -3,11 +3,6 @@
 import _ from './util';
 import Storage from './storage';
 
-interface GuideInterface {
-	orientation: 'horizontal' | 'vertical';
-	position: number;
-}
-
 interface UIStateInterface {
 	locale: string | null;
 	lastUsedVersion: string | null;

@@ -1376,7 +1376,9 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					const opts = {modelFilename: selectedItem.filename, destStep, doLayout: true};
 					undoStack.commit('submodel.convertToCallout', opts, tr(this.text));
 					app.clearSelected();
-					app.setCurrentPage(store.get.pageForItem(destStep));
+					if (destStep.id != null) {
+						app.setCurrentPage(store.get.pageForItem({type: 'step', id: destStep.id}));
+					}
 				}
 			},
 		},

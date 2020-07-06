@@ -105,9 +105,9 @@ export interface GetterInterface {
 	parent(itemLookup: LookupItem): ItemTypes | null;
 	isDescendent(itemLookup: LookupItem, ancestorLookup: LookupItem): boolean;
 	childList(): ItemTypeNames[];
-	stepChildren(step: LookupItem): Item[];
+	stepChildren(step: LookupItem): ItemTypes[];
 	hasChildren(itemLookup: LookupItem): boolean;
-	children(itemLookup: LookupItem, childTypeList?: ItemTypeNames[]): Item[];
+	children(itemLookup: LookupItem, childTypeList?: ItemTypeNames[]): ItemTypes[];
 	pageForItem(item: any): Page;
 	submodels(): SubmodelIdentifier[];
 	topLevelTreeNodes(): any[];
@@ -119,7 +119,7 @@ export interface GetterInterface {
 	itemToLookup(item: Item): LookupItem | null;
 	coords: {
 		pageToItem(
-			{x, y}: {x: number, y: number},
+			{x, y}: Point,
 			itemLookup: LookupItem | null,
 		): Point;
 		itemToPage(itemLookup: LookupItem): Point;
@@ -134,8 +134,8 @@ export interface GetterInterface {
 	highlightBox(
 		itemLookup: LookupItem,
 		pageSize: {width: number, height: number},
-		currentPage: Page
-	): Box | {display: 'none'} | null;
+		currentPage?: Page | null
+	): Box | null;
 }
 
 export const Getters: GetterInterface = {
@@ -510,7 +510,7 @@ export const Getters: GetterInterface = {
 	children(itemLookup: LookupItem, childTypeList?: ItemTypeNames[]) {
 
 		// TODO: clean up 'submodel' as an item type vs. entry in getters
-		function getItem(itemType: ItemTypeNames, id: number): Item {
+		function getItem(itemType: ItemTypeNames, id: number): ItemTypes {
 			return (store.get as any)[itemType](id);
 		}
 
@@ -518,7 +518,7 @@ export const Getters: GetterInterface = {
 		if (item == null) {
 			return [];
 		}
-		const children: Item[] = [];
+		const children: ItemTypes[] = [];
 		const foo = (childTypeList == null) ? store.get.childList() : childTypeList;
 		foo.forEach((childType: ItemTypeNames) => {
 			const childIDList = getChildIDList(item, childType);
@@ -675,10 +675,7 @@ export const Getters: GetterInterface = {
 	},
 	coords: {
 		// x & y are in page coordinates; transform to item coordinates
-		pageToItem(
-			{x, y}: {x: number, y: number},
-			itemLookup: LookupItem | null,
-		) {
+		pageToItem({x, y}, itemLookup) {
 			let item = store.get.lookupToItem(itemLookup);
 			while (item && hasProperty<PointedItem>(item, 'x')) {
 				x -= item.x || 0;
@@ -767,14 +764,10 @@ export const Getters: GetterInterface = {
 		}
 		return box;
 	},
-	highlightBox(
-		itemLookup: LookupItem,
-		pageSize: {width: number, height: number},
-		currentPage: Page
-	) {
+	highlightBox(itemLookup, pageSize, currentPage) {
 		const item = store.get.lookupToItem(itemLookup);
-		if (!item || item.type === 'part') {
-			return {display: 'none'};
+		if (item == null || item.type === 'part') {
+			return null;
 		}
 		const type = item.type;
 		const page = store.get.pageForItem(item);
@@ -783,7 +776,12 @@ export const Getters: GetterInterface = {
 		}
 		let box;
 		if (item.type === 'page') {
-			box = {x: 5, y: 5, width: pageSize.width - 9, height: pageSize.height - 9};
+			box = {
+				x: 5,
+				y: 5,
+				width: pageSize.width - 9,
+				height: pageSize.height - 9,
+			};
 		} else if (item.type === 'divider') {
 			// TODO: when divider is rewritten to just a list of points, get rid of this
 			let pointBox = _.geom.bbox([item.p1, item.p2]);
@@ -806,7 +804,7 @@ export const Getters: GetterInterface = {
 			return null;
 		}
 		let dx = 0;
-		if (currentPage && currentPage.stretchedStep) {
+		if (currentPage?.stretchedStep) {
 			const stretchedStep = store.get.step(currentPage.stretchedStep.stepID);
 			if (stretchedStep && store.get.isDescendent(item, stretchedStep)) {
 				dx = currentPage.stretchedStep.leftOffset;

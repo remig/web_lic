@@ -219,7 +219,7 @@ interface Page extends PLIItemParent, NumberedItem, StepParent {
 	needsLayout: boolean;
 	numberLabelID: number | null;
 	pliItems: number[];
-	stretchedStep: any;
+	stretchedStep: any;  // stepID: number
 }
 
 interface PLI extends PLIItemParent, BoxedItem {
@@ -402,6 +402,11 @@ interface Template {
 		part1;
 		part2;
 	};
+}
+
+interface GuideInterface {
+	orientation: 'horizontal' | 'vertical';
+	position: number;
 }
 
 interface StateInterface {

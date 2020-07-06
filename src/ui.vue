@@ -38,7 +38,7 @@
 					ref="pageView"
 					:app="this"
 					:selected-item="selectedItemLookup"
-					:current-page-lookup="currentPageLookup"
+					:current-page-id="currentPageId"
 				/>
 				<getting-started-panel v-if="!haveModel()" :app="this" />
 				<template-panel
@@ -127,7 +127,7 @@ const UI = {
 		return {
 			// Store transient UI state data here.  Do *not* store state items here; Vue turns these
 			// into observers, which destroys performance for big stores like we have here
-			currentPageLookup: null,
+			currentPageId: null,
 			selectedItemLookup: null,
 			statusText: '',
 			busyText: '',
@@ -205,7 +205,7 @@ const UI = {
 					store.saveLocal();
 
 					const firstPage = store.get.firstPage();
-					this.currentPageLookup = store.get.itemToLookup(firstPage);
+					this.currentPageId = firstPage.id;
 					undoStack.saveBaseState();
 					this.forceUIUpdate();
 
@@ -235,7 +235,7 @@ const UI = {
 			store.load(content);
 			this.filename = store.state.licFilename;
 			const firstPage = store.get.firstPage();
-			this.currentPageLookup = store.get.itemToLookup(firstPage);
+			this.currentPageId = firstPage.id;
 			store.saveLocal();
 			undoStack.saveBaseState();
 			this.clearSelected();
@@ -301,15 +301,15 @@ const UI = {
 			});
 		},
 		setCurrentPage(page) {
-			if (!_.itemEq(page, this.currentPageLookup)) {
-				this.currentPageLookup = store.get.itemToLookup(page);
+			if (page.id !== this.currentPageId) {
+				this.currentPageId = page.id;
 				this.$refs.pageView.scrollToPage(page);
 			}
 		},
 		setSelected(target, page) {
 			this.closeMenus();
 			if (_.itemEq(target, this.selectedItemLookup)
-				&& (!page || _.itemEq(page, this.currentPageLookup))
+				&& (page == null || page.id === this.currentPageId)
 			) {
 				return;
 			}
@@ -321,19 +321,16 @@ const UI = {
 			} else {
 				targetPage = store.get.pageForItem(target);
 			}
-			if (targetPage && !_.itemEq(targetPage, this.currentPageLookup)) {
-				this.currentPageLookup = store.get.itemToLookup(targetPage);
+			if (targetPage != null && targetPage.id !== this.currentPageId) {
+				this.currentPageId = targetPage.id;
 			}
 			this.selectedItemLookup = store.get.itemToLookup(target);
 			NavTree.selectItem(target);
 		},
 		clearSelected() {
 			this.contextMenu = null;
-			const selItem = this.selectedItemLookup;
 			this.selectedItemLookup = null;
-			if (selItem && selItem.type === 'part') {
-				this.drawCurrentPage();
-			}
+			this.drawCurrentPage();
 			NavTree.clearSelected();
 		},
 		updateProgress: (() => {
@@ -388,7 +385,7 @@ const UI = {
 		},
 		clearState() {
 			this.clearSelected();
-			this.currentPageLookup = null;
+			this.currentPageId = null;
 			this.statusText = '';
 			this.updateProgress({clear: true});
 			this.contextMenu = null;
@@ -403,9 +400,9 @@ const UI = {
 			this.lastRightClickPos.y = e.clientY;
 			this.contextMenu = null;
 			if (this.selectedItemLookup != null
-				&& this.currentPageLookup != null
+				&& this.currentPageId != null
 				// Template page doesn't have any right click menus
-				&& !store.get.isTemplatePage(this.currentPageLookup)
+				&& !store.get.isTemplatePage(this.currentPageId)
 			) {
 				Vue.nextTick(() => {
 					// Delay menu creation so that earlier menu clear has time to take effect
@@ -523,7 +520,7 @@ const UI = {
 			uiState.set('pageView', {facingPage, scroll});
 
 			if (scroll) {
-				this.$refs.pageView.scrollToPage(this.currentPageLookup);
+				this.$refs.pageView.scrollToPage(this.currentPageId);
 			} else {
 				Vue.nextTick(() => {
 					this.$refs.pageView.drawVisiblePages();
@@ -531,13 +528,13 @@ const UI = {
 			}
 		},
 		drawCurrentPage() {
-			if (this.currentPageLookup != null) {
-				let page = store.get.lookupToItem(this.currentPageLookup);
+			if (this.currentPageId != null) {
+				let page = store.get.page(this.currentPageId);
 				if (page == null) {
 					// This happens if, say, the current page is deleted without
 					// updating the current page first, like during undo / redo
 					page = store.get.firstPage();
-					this.currentPageLookup = store.get.itemToLookup(page);
+					this.currentPageId = page.id;
 				}
 				Vue.nextTick(() => {
 					this.$refs.pageView.drawVisiblePages();
@@ -556,9 +553,9 @@ const UI = {
 			return Menu(this);
 		},
 		isTemplatePageCurrent() {
-			return (this.currentPageLookup == null)
+			return (this.currentPageId == null)
 				? false
-				: store.get.isTemplatePage(this.currentPageLookup);
+				: store.get.isTemplatePage(this.currentPageId);
 		},
 	},
 	async mounted() {
