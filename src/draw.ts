@@ -296,7 +296,7 @@ export const Draw: DrawInterface = {
 
 		page.steps.forEach(id => drawStep(id, ctx, config));
 
-		if (page.stretchedStep) {
+		if (page.stretchedStep != null) {
 			ctx.save();
 			ctx.translate(Math.floor(page.stretchedStep.leftOffset), 0);
 			drawStep(page.stretchedStep.stepID, ctx, config);
@@ -331,12 +331,10 @@ export const Draw: DrawInterface = {
 			const itemPage = store.get.pageForItem(config.selectedItem);
 			if (_.itemEq(itemPage, page)) {
 				doHighlight = true;
-			} else if (page.stretchedStep) {
+			} else if (page.stretchedStep != null) {
 				const stretchedStep = store.get.step(page.stretchedStep.stepID);
-				if (stretchedStep) {
-					if (store.get.isDescendent(config.selectedItem, stretchedStep)) {
-						doHighlight = true;
-					}
+				if (store.get.isDescendent(config.selectedItem, stretchedStep)) {
+					doHighlight = true;
 				}
 			}
 			if (doHighlight) {

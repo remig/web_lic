@@ -269,7 +269,7 @@ Vue.component('pageView', {
 			// TODO: consider drawing a second transparent canvas over the main canvas, that includes
 			// just the highlight box.  Saves redrawing the entire page on simple highlight change.
 			const currentPage = store.get.page(component.currentPageId);
-			if (currentPage?.stretchedStep) {
+			if (currentPage?.stretchedStep != null) {
 				// If selected item is in a stretched step on current page, scroll to current page
 				const stretchedStep = {
 					type: 'step' as ItemTypeNames,
@@ -559,10 +559,10 @@ function getPairedPages(pageId: number | null): (number | null)[] {
 		return [page.id, nextPage?.id ?? null];
 	}
 	const prevPage = store.get.prevPage(page);
-	if (prevPage == null) {
+	if (prevPage == null || store.get.isTemplatePage(prevPage)) {
 		return [null, page.id];
 	}
-	return [store.get.isTemplatePage(prevPage) ? null : (prevPage.id ?? null, page.id)];
+	return [prevPage.id, page.id];
 }
 
 function setPageLocked(pageId: number): (locked?: boolean) => void {
@@ -757,7 +757,7 @@ function findClickTargetInPage(page: Page, mx: number, my: number): ItemTypes | 
 			return innerTarget;
 		}
 	}
-	if (page.stretchedStep) {
+	if (page.stretchedStep != null) {
 		const step = store.get.step(page.stretchedStep.stepID);
 		const dx = page.stretchedStep.leftOffset;
 		const innerTarget = findClickTargetInStep(step, mx - dx, my);

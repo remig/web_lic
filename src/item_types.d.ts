@@ -219,7 +219,10 @@ interface Page extends PLIItemParent, NumberedItem, StepParent {
 	needsLayout: boolean;
 	numberLabelID: number | null;
 	pliItems: number[];
-	stretchedStep: any;  // stepID: number
+	stretchedStep: {
+		stepID: number;
+		leftOffset: number;
+	} | null;
 }
 
 interface PLI extends PLIItemParent, BoxedItem {

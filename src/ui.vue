@@ -96,6 +96,7 @@
 // - Convert alligator tail to callout, merge step 4 & 5; callout grid layout busted, steps 2 & 3 collide
 // - Title Page CSI rotation is broken
 // - Insert a new first page then add a step to it they try moving a part to step: crash
+// - No way to unstretch a stretched step
 
 /* global Split: false */
 import Vue from 'vue';
@@ -303,7 +304,7 @@ const UI = {
 		setCurrentPage(page) {
 			if (page.id !== this.currentPageId) {
 				this.currentPageId = page.id;
-				this.$refs.pageView.scrollToPage(page);
+				this.$refs.pageView.scrollToPage(page.id);
 			}
 		},
 		setSelected(target, page) {

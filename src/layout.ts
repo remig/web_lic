@@ -391,7 +391,9 @@ const Layout: LayoutInterface = {
 			box.width *= (step.stretchedPages.length + 1);
 			step.stretchedPages.forEach((pageID, idx) => {
 				const page = store.get.page(pageID);
-				page.stretchedStep.leftOffset = -(idx + 1) * pageWidth;
+				if (page.stretchedStep != null) {
+					page.stretchedStep.leftOffset = -(idx + 1) * pageWidth;
+				}
 			});
 		}
 

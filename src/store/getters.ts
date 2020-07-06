@@ -804,9 +804,9 @@ export const Getters: GetterInterface = {
 			return null;
 		}
 		let dx = 0;
-		if (currentPage?.stretchedStep) {
+		if (currentPage?.stretchedStep != null) {
 			const stretchedStep = store.get.step(currentPage.stretchedStep.stepID);
-			if (stretchedStep && store.get.isDescendent(item, stretchedStep)) {
+			if (store.get.isDescendent(item, stretchedStep)) {
 				dx = currentPage.stretchedStep.leftOffset;
 			}
 		}
