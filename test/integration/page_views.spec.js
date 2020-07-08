@@ -1,6 +1,6 @@
 /* eslint-disable max-len, no-unreachable */
 
-describe('Test Callouts', () => {
+describe('Test Page Views', () => {
 
 	beforeEach(cy.reloadLicPage);
 
@@ -8,7 +8,7 @@ describe('Test Callouts', () => {
 		cy.importAlligator({use1Step: true});
 		cy.get('#rightSubPane canvas')
 			.should('have.length', 1)
-			.first().should('have.id', 'pageCanvas_page_42');
+			.first().should('have.id', 'pageCanvas_43');
 		cy.get('#rightSubPane .pageLockIcon')
 			.should('have.length', 1)
 			.first().should('have.class', 'fa-lock-open');
@@ -19,7 +19,7 @@ describe('Test Callouts', () => {
 		cy.get('#show_one_page_menu').click();
 		cy.get('#rightSubPane canvas')
 			.should('have.length', 1)
-			.first().should('have.id', 'pageCanvas_page_42');
+			.first().should('have.id', 'pageCanvas_43');
 		cy.get('#rightSubPane .pageLockIcon')
 			.should('have.length', 1)
 			.first().should('have.class', 'fa-lock-open');
@@ -32,14 +32,14 @@ describe('Test Callouts', () => {
 			.should('have.length', 2)
 			.first().should('have.id', '');
 		cy.get('#rightSubPane canvas')
-			.last().should('have.id', 'pageCanvas_page_42');
+			.last().should('have.id', 'pageCanvas_43');
 
 		cy.get('#rightSubPane').trigger('keyup', {key: 'PageDown'});
 		cy.get('#rightSubPane canvas')
 			.should('have.length', 2)
-			.first().should('have.id', 'pageCanvas_page_1');
+			.first().should('have.id', 'pageCanvas_1');
 		cy.get('#rightSubPane canvas')
-			.last().should('have.id', 'pageCanvas_page_2');
+			.last().should('have.id', 'pageCanvas_2');
 
 		// One page scrolling
 		cy.get('#view_menu').click();

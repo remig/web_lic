@@ -206,8 +206,8 @@ const menu = [
 			shown: () => enableIfModel() && store.get.titlePage() == null,
 			cb() {
 				undoStack.commit('titlePage.add', {}, tr(this.text()));
-				app.clearSelected();
 				app.setCurrentPage(store.get.firstPage());
+				app.clearSelected();
 			},
 		},
 		{
@@ -219,8 +219,8 @@ const menu = [
 			shown: () => enableIfModel() && store.get.titlePage() != null,
 			cb() {
 				undoStack.commit('titlePage.delete', {}, tr(this.text()));
-				app.clearSelected();
 				app.setCurrentPage(store.get.firstBasicPage());
+				app.clearSelected();
 			},
 		},
 		{

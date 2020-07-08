@@ -530,12 +530,12 @@ const UI = {
 		},
 		drawCurrentPage() {
 			if (this.currentPageId != null) {
-				let page = store.get.page(this.currentPageId);
+				let page = store.get.lookupToItem(this.currentPageId, 'page');
 				if (page == null) {
 					// This happens if, say, the current page is deleted without
 					// updating the current page first, like during undo / redo
 					page = store.get.firstPage();
-					this.currentPageId = page.id;
+					this.currentPageId = page ? page.id : null;
 				}
 				Vue.nextTick(() => {
 					this.$refs.pageView.drawVisiblePages();

@@ -1,13 +1,13 @@
 /* eslint-disable max-len, no-unreachable */
 
-describe('Test rotate things ', () => {
+describe('Test Rotating Things ', () => {
 
 	beforeEach(cy.reloadLicPage);
 
 	it('Custom Rotation on CSI, with correct Rotate Icon', () => {
 		cy.importAlligator({excludeTitlePage: true, use1Step: true});
 
-		cy.get('#pageCanvas_page_1').click(450, 400).rightclick();
+		cy.get('#pageCanvas_1').click(450, 400).rightclick();
 		cy.get('#csi_rotate_cmenu').click();
 		cy.get('#csi_rotate_custom_cmenu').click();
 
@@ -23,7 +23,7 @@ describe('Test rotate things ', () => {
 		});
 
 		// Remove rotate icon; rotation should remain
-		cy.get('#pageCanvas_page_1').click(450, 400).rightclick();
+		cy.get('#pageCanvas_1').click(450, 400).rightclick();
 		cy.get('#csi_rotate_cmenu').click();
 		cy.get('#csi_rotate_custom_cmenu').click();
 		cy.getByTestId('rotate-add-icon', ' input').should('be.checked');

@@ -121,7 +121,9 @@ export const BookMutations: BookMutationInterface = {
 			// and all children, that are not in this book
 			const originalState = _.cloneDeep(store.state);
 			const pagesToDelete = store.state.pages.filter(page => {
-				return page.parent != null && page.parent.id !== book.id;
+				return page.parent != null
+					&& page.parent.id !== book.id
+					&& page.subtype !== 'templatePage';
 			});
 			pagesToDelete.forEach(page => {
 				store.mutations.page.delete({page, deleteSteps: true, doNotRenumber: true});
