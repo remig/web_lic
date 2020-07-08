@@ -4,7 +4,7 @@ import {hasProperty} from '../type_helpers';
 import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
-import {isTemplateType, isNotNull} from '../type_helpers';
+import {isTemplateType, isPointListItem, isNotNull} from '../type_helpers';
 
 function getter<T extends ItemTypes>(s: ItemTypeNames) {
 	return (itemLookup: number | LookupItem) => {
@@ -110,7 +110,7 @@ export interface GetterInterface {
 	children(itemLookup: LookupItem, childTypeList?: ItemTypeNames[]): ItemTypes[];
 	pageForItem(item: any): Page;
 	submodels(): SubmodelIdentifier[];
-	topLevelTreeNodes(): any[];
+	topLevelTreeNodes(): ItemTypes[];
 	nextItemID(item: ItemTypeNames): number
 	nextItemID(item: LookupItem): number
 	itemByNumber(type: ItemTypeNames, number: number): Item | null;
@@ -129,8 +129,8 @@ export interface GetterInterface {
 			relativeTo?: LookupItem | null
 		): Point;
 	},
-	targetBoxFromPoints(targetLookup: LookupItem): Box | null;
-	targetBox(targetLookup: LookupItem): Box | null;
+	targetBoxFromPoints(targetLookup: LookupItem): Box;
+	targetBox(targetLookup: LookupItem): Box;
 	highlightBox(
 		itemLookup: LookupItem,
 		pageSize: {width: number, height: number},
@@ -515,7 +515,7 @@ export const Getters: GetterInterface = {
 		}
 
 		const item = store.get.lookupToItem(itemLookup);
-		if (item == null) {
+		if (item == null || item.type === 'part' || item.type === 'submodel') {
 			return [];
 		}
 		const children: ItemTypes[] = [];
@@ -599,14 +599,16 @@ export const Getters: GetterInterface = {
 				...store.state.books,
 			].filter(el => el);
 		}
-		const nodes: any[] = store.get.pageList();
-		store.get.submodels().forEach((submodel: SubmodelIdentifier) => {
+		const nodes: (Page | SubmodelItem)[] = store.get.pageList();
+		const submodels = store.get.submodels();
+		submodels.forEach((submodel: SubmodelIdentifier) => {
 			const page = store.get.pageForItem({id: submodel.stepID, type: 'step'});
 			const pageIndex = nodes.indexOf(page);
-			const submodelNode = {
+			const submodelNode: SubmodelItem = {
 				...submodel,
 				type: 'submodel',
 				id: nodes.length,
+				parent: page,
 			};
 			_.insert(nodes, submodelNode, pageIndex);
 		});
@@ -716,11 +718,7 @@ export const Getters: GetterInterface = {
 			};
 		},
 	},
-	targetBoxFromPoints(targetLookup: LookupItem) {
-		const t = store.get.lookupToItem(targetLookup);
-		if (!hasProperty<PointListItem>(t, 'points')) {
-			return null;
-		}
+	targetBoxFromPoints(t: PointListItem) {
 		const parent = store.get.parent(t);
 		const points = t.points.map(pointID => {
 			const pt = store.get.point(pointID);
@@ -730,9 +728,9 @@ export const Getters: GetterInterface = {
 		}).filter((p): p is Point => p != null);
 		return _.geom.expandBox(_.geom.bbox(points), 8, 8);
 	},
-	targetBox(targetLookup: LookupItem) {
+	targetBox(targetLookup) {
 		let t: any = store.get.lookupToItem(targetLookup);
-		if (t?.points?.length > 0) {
+		if (isPointListItem(t) && t.points.length > 0) {
 			return store.get.targetBoxFromPoints(t);
 		}
 
@@ -789,10 +787,12 @@ export const Getters: GetterInterface = {
 			box = store.get.targetBox({...item, ...pointBox});
 		} else if (item.type === 'pliItem') {  // Special case: pliItem box should include its quantity label
 			box = store.get.targetBox(item);
-			const lbl = store.get.quantityLabel(item.quantityLabelID);
-			const lblBox = (lbl == null) ? null : store.get.targetBox(lbl);
-			if (box && lblBox) {
-				box = _.geom.bbox([box, lblBox]);
+			if (item.quantityLabelID != null) {
+				const lbl = store.get.quantityLabel(item.quantityLabelID);
+				const lblBox = store.get.targetBox(lbl);
+				if (box && lblBox) {
+					box = _.geom.bbox([box, lblBox]);
+				}
 			}
 		} else {
 			box = store.get.targetBox(item);

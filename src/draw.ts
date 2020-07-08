@@ -551,11 +551,11 @@ function drawPLIItem(
 	}
 	ctx.restore();
 
-	const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-	if (quantityLabel == null) {
+	if (pliItem.quantityLabelID == null) {
 		return;
 	}
 
+	const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 	const template = store.state.template.pliItem.quantityLabel;
 	ctx.fillStyle = template.color;
 	ctx.font = template.font;

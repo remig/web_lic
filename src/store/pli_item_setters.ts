@@ -35,8 +35,12 @@ export const PLIItemMutations: PLIItemMutationInterface = {
 	},
 	delete({pliItem}) {
 		const item = store.get.pliItem(pliItem);
-		if (item) {
-			store.mutations.item.delete({item: {type: 'quantityLabel', id: item.quantityLabelID}});
+		if (item != null) {
+			if (item.quantityLabelID != null) {
+				store.mutations.item.delete({
+					item: {type: 'quantityLabel', id: item.quantityLabelID},
+				});
+			}
 			store.mutations.item.delete({item});
 		}
 	},
@@ -47,8 +51,8 @@ export const PLIItemMutations: PLIItemMutationInterface = {
 		}
 		item.quantity = quantity;
 		// New label might be bigger / smaller than before; calculate new size
-		const quantityLabel = store.get.quantityLabel(item.quantityLabelID);
-		if (quantityLabel != null) {
+		if (item.quantityLabelID != null) {
+			const quantityLabel = store.get.quantityLabel(item.quantityLabelID);
 			const font: string = store.state.template.pliItem.quantityLabel.font;
 			Layout.quantityLabel(quantityLabel, font, 'x' + item.quantity);
 		}

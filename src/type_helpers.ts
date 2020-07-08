@@ -54,6 +54,10 @@ export function isStepParent(t: any): t is StepParent {
 	return t.hasOwnProperty('steps');
 }
 
+export function isQuantityLabelParent(t: any): t is QuantityLabelParent {
+	return t.hasOwnProperty('quantity');
+}
+
 export function isNotNull<T>(v: T | null): v is T {
 	return v != null;
 }

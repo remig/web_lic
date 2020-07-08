@@ -6,15 +6,18 @@ import uiState from './ui_state';
 import EventBus from './event_bus';
 import LDParse from './ld_parse';
 import {tr} from './translations';
+import {isQuantityLabelParent} from './type_helpers';
 
-let lastSelectedId, invisibleNodeTypes, expandedNodes;
+let lastSelectedId: string | null;
+let invisibleNodeTypes: Set<string>;
+let expandedNodes: Set<string>;
 
 (function loadUIState() {
 
 	expandedNodes = new Set(uiState.get('navTree.expandedNodes'));
 
 	invisibleNodeTypes = new Set();
-	const checkedItems = uiState.get('navTree.checkedItems');
+	const checkedItems: {[key: string]: boolean} = uiState.get('navTree.checkedItems');
 	for (const key in checkedItems) {
 		if (checkedItems.hasOwnProperty(key)
 			&& !checkedItems[key]
@@ -25,9 +28,10 @@ let lastSelectedId, invisibleNodeTypes, expandedNodes;
 	}
 })();
 
-function nodeToItem(node) {
-	const id = node.id.split('_');
-	const res = {type: id[1], id: parseInt(id[2], 10)};
+function nodeIdToItem(nodeId: string): any {
+	const id = nodeId.split('_');
+	const type = id[1] as ItemTypeNames;
+	const res: any = {type, id: parseInt(id[2], 10)};
 	if (id.length > 3) {
 		res.stepID = parseInt(id[3], 10);
 	}
@@ -37,9 +41,9 @@ function nodeToItem(node) {
 	return res;
 }
 
-function nicePartName(filename) {
-	const part = LDParse.partDictionary[filename];
-	if (!part || !part.name) {
+function nicePartName(filename: string): string {
+	const part: AbstractPart = LDParse.partDictionary[filename];
+	if (part == null || !part.name) {
 		return 'Unknown Part';
 	} else if (part.isSubModel) {
 		return part.name.replace(/\.(mpd|ldr)/ig, '');
@@ -47,18 +51,22 @@ function nicePartName(filename) {
 	return part.name.replace(' x ', 'x');
 }
 
-function niceColorName(colorCode) {
+function niceColorName(colorCode: number): string {
 	const name = LDParse.getColor(colorCode, 'name');
 	return name ? name.replace(/_/g, ' ') : '';
 }
 
-function getItemId(item) {
-	return [item.type, item.id, item.stepID, item.filename]
-		.filter(el => el != null)
-		.join('_');
+function getItemId(item: ItemTypes) {
+	const fields: string[] = [item.type, item.id.toString()];
+	if (item.type === 'part') {
+		fields.push(item.stepID.toString());
+	} else if (item.type === 'submodel') {
+		fields.push(item.filename);
+	}
+	return fields.join('_');
 }
 
-function getItemText(t) {
+function getItemText(t: ItemTypes): string {
 	if (!t || !t.type) {
 		return '';
 	} else if (t.type === 'book') {
@@ -83,7 +91,11 @@ function getItemText(t) {
 	} else if (t.type === 'pliItem') {
 		return `${nicePartName(t.filename)} - ${niceColorName(t.colorCode)}`;
 	} else if (t.type === 'quantityLabel') {
-		return tr('glossary.quantitylabel_count_@c', store.get.parent(t).quantity);
+		const parent = store.get.parent(t);
+		if (isQuantityLabelParent(parent)) {
+			return tr('glossary.quantitylabel_count_@c', parent.quantity);
+		}
+		return tr('glossary.quantitylabel');
 	} else if (t.type === 'part') {
 		const step = store.get.step(t.stepID);
 		const part = LDParse.model.get.partFromID(t.id, step.model.filename);
@@ -97,16 +109,16 @@ function getItemText(t) {
 	return tr('glossary.' + t.type.toLowerCase());
 }
 
-function getChildItems(item) {
+function getChildItems(item: ItemTypes): ItemTypes[] {
 
 	let children = store.get.children(item);
 
 	// Special case: draw step parts as children of CSI
 	if (item.type === 'csi') {
 		const parent = store.get.parent(item);
-		if (parent && Array.isArray(parent.parts)) {
-			const parts = parent.parts.map(part => {
-				return {id: part, stepID: parent.id, type: 'part'};
+		if (parent?.type === 'step') {
+			const parts = parent.parts.map(id => {
+				return {type: 'part', id, stepID: parent.id, parent} as PartItem;
 			});
 			children = children.concat(parts);
 		}
@@ -114,7 +126,7 @@ function getChildItems(item) {
 	return children;
 }
 
-function setArrowIcon(parent, state) {
+function setArrowIcon(parent: Element, state: 'open' | 'close'): void {
 	const icon = parent.querySelector(':scope > .treeIcon');
 	if (icon) {
 		if (state === 'open') {
@@ -127,7 +139,7 @@ function setArrowIcon(parent, state) {
 	}
 }
 
-function expandNode(node) {
+function expandNode(node: Element): void {
 	const childNode = node.querySelector(':scope > .treeChildren');
 	if (childNode) {
 		childNode.classList.remove('hidden');
@@ -137,7 +149,7 @@ function expandNode(node) {
 	setArrowIcon(node, 'open');
 }
 
-function collapseNode(node) {
+function collapseNode(node: Element): void {
 	const childNode = node.querySelector(':scope > .treeChildren');
 	if (childNode) {
 		childNode.classList.add('hidden');
@@ -147,7 +159,7 @@ function collapseNode(node) {
 	setArrowIcon(node, 'close');
 }
 
-function toggleNode(node) {
+function toggleNode(node: Element): void {
 	if (expandedNodes.has(node.id)) {
 		collapseNode(node);
 	} else {
@@ -155,29 +167,29 @@ function toggleNode(node) {
 	}
 }
 
-function expandAncestors(node) {
-	let parent = node.parentNode;
+function expandAncestors(node: Element): void {
+	let parent = node.parentElement;
 	while (parent && !parent.classList.contains('treeScroll')) {
 		if (parent.classList.contains('treeParent')) {
 			expandNode(parent);
 		}
-		parent = parent.parentNode;
+		parent = parent.parentElement;
 	}
 }
 
-function handleClick(e) {
-	if (!e || !e.target || !e.target.parentNode) {
+function handleClick(e: MouseEvent): void {
+	const node: HTMLElement = e?.target as HTMLElement;
+	if (node == null || node.parentElement == null) {
 		return;
 	}
-	const node = e.target;
-	if (node.classList.contains('treeIcon')) {
-		toggleNode(node.parentNode);
+	if (node.classList.contains('treeIcon') && node.parentElement != null) {
+		toggleNode(node.parentElement);
 	} else if (node.classList.contains('treeText')) {
-		EventBus.$emit('set-selected', nodeToItem(node));
+		EventBus.$emit('set-selected', nodeIdToItem(node.id));
 	}
 }
 
-function createTree() {
+function createTree(): void {
 
 	const root = document.createElement('ul');
 	root.addEventListener('click', handleClick);
@@ -191,19 +203,21 @@ function createTree() {
 	});
 
 	const container = document.getElementById('nav-tree');
-	_.dom.emptyNode(container);
-	container.appendChild(root);
+	if (container != null) {
+		_.dom.emptyNode(container);
+		container.appendChild(root);
+	}
 }
 
-function createNode(item) {
+function createNode(item: ItemTypes): HTMLLIElement | null {
 
 	if (invisibleNodeTypes.has(item.type)) {
 		return null;
 	}
-
 	const container = document.createElement('li');
 	const children = getChildItems(item);
-	const childNodes = children.map(createNode).filter(Boolean);
+	const childNodes = children.map(createNode)
+		.filter((node): node is HTMLLIElement => node != null);
 
 	const textNode = _.dom.createElement('span', {
 		id: 'treeRow_' + getItemId(item),
@@ -231,7 +245,9 @@ function createNode(item) {
 	return container;
 }
 
-function expandToLevel(node, level, currentLevel) {
+function expandToLevel(
+	node: Element, level: number, currentLevel: number
+): void {
 
 	if (node.classList.contains('treeParent')) {
 		expandNode(node);
@@ -251,7 +267,7 @@ function expandToLevel(node, level, currentLevel) {
 	}
 }
 
-function collapseAll(node) {
+function collapseAll(node: Element) {
 	if (node.classList.contains('treeParent')) {
 		collapseNode(node);
 	}
@@ -263,11 +279,24 @@ function collapseAll(node) {
 	}
 }
 
-const api = {
+interface API {
+	update(): void;
+	selectItem(lookup: LookupItem): void;
+	clearSelected(): void;
+	expandToLevel(level: number): void;
+	collapseAll(): void;
+	setInvisibleNodeTypes(newTypes: (string)[]): void;
+}
+
+const api: API = {
 	update() {
 		createTree();
 	},
-	selectItem(item) {
+	selectItem(lookup) {
+		const item = store.get.lookupToItem(lookup);
+		if (item == null) {
+			return;
+		}
 		const id = 'treeRow_' + getItemId(item);
 		if (lastSelectedId) {
 			if (lastSelectedId === id) {
@@ -296,11 +325,15 @@ const api = {
 	},
 	expandToLevel(level) {
 		const container = document.getElementById('nav-tree');
-		expandToLevel(container.firstChild, level, 0);
+		if (container?.firstElementChild != null) {
+			expandToLevel(container.firstElementChild, level, 0);
+		}
 	},
 	collapseAll() {
 		const container = document.getElementById('nav-tree');
-		collapseAll(container.firstChild);
+		if (container?.firstElementChild != null) {
+			collapseAll(container.firstElementChild);
+		}
 	},
 	setInvisibleNodeTypes(newTypes) {
 		if (!_.isEqual(invisibleNodeTypes, newTypes)) {

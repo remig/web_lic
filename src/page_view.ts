@@ -674,9 +674,11 @@ function findClickTargetInStep(step: Step, mx: number, my: number): ItemTypes | 
 				if (inTargetBox(mx, my, pliItem)) {
 					return pliItem;
 				}
-				const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-				if (inTargetBox(mx, my, quantityLabel)) {
-					return quantityLabel;
+				if (pliItem.quantityLabelID != null) {
+					const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+					if (inTargetBox(mx, my, quantityLabel)) {
+						return quantityLabel;
+					}
 				}
 			}
 			return pli;
@@ -730,9 +732,11 @@ function findClickTargetInPage(page: Page, mx: number, my: number): ItemTypes | 
 		if (inTargetBox(mx, my, pliItem)) {
 			return pliItem;
 		}
-		const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-		if (inTargetBox(mx, my, quantityLabel)) {
-			return quantityLabel;
+		if (pliItem.quantityLabelID != null) {
+			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+			if (inTargetBox(mx, my, quantityLabel)) {
+				return quantityLabel;
+			}
 		}
 	}
 	for (let i = 0; i < page.annotations.length; i++) {

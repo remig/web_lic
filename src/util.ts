@@ -59,7 +59,7 @@ interface FontPartsInterface {
 }
 
 interface DOMInterface {
-	createElement(type: string, attrs: any, parent: any, text: string): HTMLElement;
+	createElement(type: string, attrs: any, parent: any, text?: string): HTMLElement;
 	emptyNode(node: HTMLElement): void;
 }
 

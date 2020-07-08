@@ -132,6 +132,11 @@ interface StepParent extends Item {
 	steps: number[];
 }
 
+interface QuantityLabelParent extends Item {
+	quantity: number;
+	quantityLabelID: number | null;
+}
+
 interface PointListItem extends Item {
 	points: number[];
 }
@@ -231,13 +236,11 @@ interface PLI extends PLIItemParent, BoxedItem {
 	innerContentOffset: Point;
 }
 
-interface PLIItem extends BoxedItem {
+interface PLIItem extends BoxedItem, QuantityLabelParent {
 	type: 'pliItem';
 	domID: string | null;
 	filename: string;
 	colorCode: number;
-	quantity: number;
-	quantityLabelID: number;
 	isDirty: boolean;
 }
 
@@ -274,13 +277,11 @@ interface Step extends NumberedItem, BoxedItem {
 	prevBookParts: number[] | null;
 }
 
-interface SubmodelImage extends BoxedItem {
+interface SubmodelImage extends BoxedItem, QuantityLabelParent {
 	type: 'submodelImage';
 	csiID: number | null;
 	innerContentOffset: Point;
 	modelFilename: string;
-	quantity: number;
-	quantityLabelID: number | null;
 }
 
 interface LabelTemplate {

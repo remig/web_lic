@@ -649,9 +649,12 @@ const Layout: LayoutInterface = {
 			pliItem.y = margin;
 
 			left += pliItem.width + margin;
-			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-			if (quantityLabel != null) {
-				maxHeight = Math.max(maxHeight, pliItem.height - qtyLabelOffset + quantityLabel.height);
+			if (pliItem.quantityLabelID != null) {
+				const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+				maxHeight = Math.max(
+					maxHeight,
+					pliItem.height - qtyLabelOffset + quantityLabel.height
+				);
 			}
 		}
 
@@ -670,11 +673,13 @@ const Layout: LayoutInterface = {
 
 			const font = store.state.template.pliItem.quantityLabel.font;
 			const lblSize = _.measureLabel(font, 'x' + pliItem.quantity);
-			const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-			quantityLabel.x = -qtyLabelOffset;
-			quantityLabel.y = pliSize.height;
-			quantityLabel.width = lblSize.width;
-			quantityLabel.height = lblSize.height;
+			if (pliItem.quantityLabelID != null) {
+				const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+				quantityLabel.x = -qtyLabelOffset;
+				quantityLabel.y = pliSize.height;
+				quantityLabel.width = lblSize.width;
+				quantityLabel.height = lblSize.height;
+			}
 		}
 	},
 
@@ -1032,13 +1037,15 @@ const Layout: LayoutInterface = {
 					x: pli.x + pliItem.x, y: pli.y + pliItem.y,
 					width: pliItem.width, height: pliItem.height,
 				});
-				const qtyLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-				boxes.push({
-					x: pli.x + pliItem.x + qtyLabel.x,
-					y: pli.y + pliItem.y + qtyLabel.y,
-					width: qtyLabel.width,
-					height: qtyLabel.height,
-				});
+				if (pliItem.quantityLabelID != null) {
+					const qtyLabel = store.get.quantityLabel(pliItem.quantityLabelID);
+					boxes.push({
+						x: pli.x + pliItem.x + qtyLabel.x,
+						y: pli.y + pliItem.y + qtyLabel.y,
+						width: qtyLabel.width,
+						height: qtyLabel.height,
+					});
+				}
 			});
 			Layout.adjustBoundingBox.item(pli, boxes, store.state.template.pli);
 		},
