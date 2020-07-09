@@ -117,7 +117,11 @@ interface Item extends LookupItem {
 interface PointedItem extends Item, Point {}
 
 interface BoxedItem extends Item, Box {
-	borderOffset?: Point;
+}
+
+interface BoxedOffsetItem extends Item, Box {
+	borderOffset: Point;
+	innerContentOffset: Point;
 }
 
 interface NumberedItem extends Item {
@@ -175,11 +179,9 @@ interface CalloutArrow extends PointListItem {
 	direction: Directions;
 }
 
-interface Callout extends StepParent, BoxedItem {
+interface Callout extends BoxedOffsetItem, StepParent {
 	type: 'callout';
-	borderOffset: Point;
 	calloutArrows: number[];
-	innerContentOffset: Point;
 	layout: Orientations;
 	position: Positions;
 }
@@ -230,10 +232,8 @@ interface Page extends PLIItemParent, NumberedItem, StepParent {
 	} | null;
 }
 
-interface PLI extends PLIItemParent, BoxedItem {
+interface PLI extends BoxedOffsetItem, PLIItemParent {
 	type: 'pli';
-	borderOffset: Point;
-	innerContentOffset: Point;
 }
 
 interface PLIItem extends BoxedItem, QuantityLabelParent {
@@ -277,10 +277,9 @@ interface Step extends NumberedItem, BoxedItem {
 	prevBookParts: number[] | null;
 }
 
-interface SubmodelImage extends BoxedItem, QuantityLabelParent {
+interface SubmodelImage extends BoxedOffsetItem, QuantityLabelParent {
 	type: 'submodelImage';
 	csiID: number | null;
-	innerContentOffset: Point;
 	modelFilename: string;
 }
 

@@ -33,7 +33,7 @@ export interface LayoutInterface {
 	quantityLabel(label: QuantityLabel, font: string, text: string): void,
 	mergeSteps(stepsToMerge: Step[], progressCallback: (s: string) => void): void,
 	adjustBoundingBox: {
-		item(item: BoxedItem, boxes: (Point | Box)[], template: any): void,
+		item(item: BoxedOffsetItem, boxes: (Point | Box)[], template: any): void,
 		stepUnused(item: LookupItem): void,
 		pli(item: LookupItem): void,
 		pliItem(item: LookupItem): void,

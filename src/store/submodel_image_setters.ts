@@ -23,6 +23,7 @@ export const submodelImageMutations: SubmodelImageMutationInterface = {
 				modelFilename,
 				quantity,
 				x: 0, y: 0, width: 0, height: 0,
+				borderOffset: {x: 0, y: 0},
 				innerContentOffset: {x: 0, y: 0},
 			}, parent},
 		);

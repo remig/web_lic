@@ -772,7 +772,7 @@ function buildGrid(grid: any, width: number, height: number) {
 }
 
 function drawRoundedRectItemStyled(
-	ctx: CanvasRenderingContext2D, item: any, r: number, style: StyleInterface,
+	ctx: CanvasRenderingContext2D, item: BoxedOffsetItem, r: number, style: StyleInterface,
 ) {
 	let {x, y, width, height} = item;
 	if (item.borderOffset) {
