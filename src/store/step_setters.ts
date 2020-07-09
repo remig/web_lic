@@ -156,6 +156,14 @@ export const StepMutations: StepMutationInterface = {
 			if (hasProperty<StepParent>(parent, 'steps')) {
 				stepList = parent.steps.map(store.get.step);
 			}
+		} else {
+			// Renumber all base steps across all pages
+			stepList = store.state.steps.filter(el => {
+				if (el.parent.type === 'page') {
+					return store.get.page(el.parent).subtype === 'page';
+				}
+				return false;
+			});
 		}
 		store.mutations.renumber(stepList);
 	},

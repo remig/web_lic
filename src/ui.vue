@@ -82,7 +82,7 @@
 // - Change page numbers to 'even left odd right' (or 'odd left even right') then append a page:
 //     pages after new page have badly positioned page numbers
 // - Fix import progress bar for models with one base model like basic x-wing
-// - Check localStorage.set to ensure it doesn't go over browser limit. Ifit does, use lzstring to compress
+// - Check localStorage.set to ensure it doesn't go over browser limit. If it does, use lzstring to compress
 // - Need submodel + bag breakdown page and final 'no step' complete model page
 // - Add double click on annotation support: pop up the 'edit annotation' dialog
 // - When edit annotation dialogs open, set focus somewhere useful
@@ -97,6 +97,7 @@
 // - Title Page CSI rotation is broken
 // - Insert a new first page then add a step to it they try moving a part to step: crash
 // - No way to unstretch a stretched step
+// - Merging the first step of a submodel with the second step loses the submodel image
 
 /* global Split: false */
 import Vue from 'vue';
