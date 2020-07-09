@@ -23,10 +23,9 @@
 	},
 	"license": "GPL-3.0-or-later",
 	"devDependencies": {
-		"@types/lodash": "^4.14.148",
+		"@types/lodash": "4.14.148",
 		"@typescript-eslint/eslint-plugin": "2.7.0",
 		"@typescript-eslint/parser": "2.7.0",
-		"babel-polyfill": "6.26.0",
 		"css-loader": "0.28.11",
 		"cypress": "3.5.0",
 		"eslint": "5.1.0",

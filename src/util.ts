@@ -1,11 +1,25 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from 'lodash';
-
-// These are used from lodash... not a lot...
-// isEmpty, get, cloneDeep, assign, isEqual, round, clamp, last, pullAt
-// forOwn, startCase, clone, each, some, unzip, chunk, range, count,
-// difference, template, set
+import assign from 'lodash/assign';
+import chunk from 'lodash/chunk';
+import clamp from 'lodash/clamp';
+import clone from 'lodash/clone';
+import cloneDeep from 'lodash/cloneDeep';
+import difference from 'lodash/difference';
+import each from 'lodash/each';
+import forOwn from 'lodash/forOwn';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import last from 'lodash/last';
+import pullAt from 'lodash/pullAt';
+import range from 'lodash/range';
+import round from 'lodash/round';
+import set from 'lodash/set';
+import some from 'lodash/some';
+import startCase from 'lodash/startCase';
+import template from 'lodash/template';
+import unzip from 'lodash/unzip';
 
 interface CacheInterface {
 	[key: string]: any
@@ -58,11 +72,6 @@ interface FontPartsInterface {
 	fontFamily?: string;
 }
 
-interface DOMInterface {
-	createElement(type: string, attrs: any, parent: any, text?: string): HTMLElement;
-	emptyNode(node: HTMLElement): void;
-}
-
 type UnitTypes = 'point' | 'in' | 'mm' | 'cm';
 
 interface UnitsInterface {
@@ -78,13 +87,7 @@ interface Version {
 	revision: number;
 }
 
-interface VersionInterface {
-	parse(v: string): Version;
-	nice(v: string): string;
-	isOldVersion(prev: string, current: string): boolean;
-}
-
-interface LoDashMixins extends _.LoDashStatic {
+interface UtilInterface {
 	equal(a: number, b: number, e:number): boolean;
 	isEven(n: number): boolean;
 	insert<T>(array: T[], item: T, idx: number): void;
@@ -100,22 +103,49 @@ interface LoDashMixins extends _.LoDashStatic {
 	): string;
 	degrees(radians: number): number;
 	radians(degrees: number): number;
-	dom: DOMInterface;
+	dom: {
+		createElement(type: string, attrs: any, parent: any, text?: string): HTMLElement;
+		emptyNode(node: HTMLElement): void;
+	},
 	units: UnitsInterface;
 	geom: GeomInterface;
-	version: VersionInterface;
+	version: {
+		parse(v: string): Version;
+		nice(v: string): string;
+		isOldVersion(prev: string, current: string): boolean;
+	},
 	sort: {
 		numeric: {
-			ascending(a: any, b: any): any;
-			descending(a: any, b: any): any;
+			ascending(a: any, b: any): number;
+			descending(a: any, b: any): number;
 		};
 	};
 	formatTime(start: number, end: number): string;
 	color: ColorInterface;
 	isBorderVisible(border: Border): boolean;
+	assign: typeof assign;
+	chunk: typeof chunk;
+	clamp: typeof clamp;
+	clone: typeof clone;
+	cloneDeep: typeof cloneDeep;
+	difference: typeof difference;
+	each: typeof each;
+	forOwn: typeof forOwn;
+	get: typeof get;
+	isEmpty: typeof isEmpty;
+	isEqual: typeof isEqual;
+	last: typeof last;
+	pullAt: typeof pullAt;
+	range: typeof range;
+	round: typeof round;
+	set: typeof set;
+	some: typeof some;
+	startCase: typeof startCase;
+	template: typeof template;
+	unzip: typeof unzip;
 }
 
-const mixin = {
+const api: UtilInterface = {
 	equal(a: number, b: number, e:number = 0.0001): boolean {
 		return Math.abs(a - b) < e;
 	},
@@ -151,7 +181,7 @@ const mixin = {
 		const labelSizeCache: CacheInterface = {};  // {font: {text: {width: 10, height: 20}}}
 		return function(font: string, text: string) {
 			if (labelSizeCache[font] && labelSizeCache[font][text]) {
-				return _.cloneDeep(labelSizeCache[font][text]);
+				return cloneDeep(labelSizeCache[font][text]);
 			}
 			const container = document.getElementById('fontMeasureContainer');
 			if (container && container.firstChild) {
@@ -161,7 +191,7 @@ const mixin = {
 				res = {width: Math.ceil(res.width), height: Math.ceil(res.height)};
 				labelSizeCache[font] = labelSizeCache[font] || {};
 				labelSizeCache[font][text] = res;
-				return _.cloneDeep(res);  // return a clone so we don't accidentally alter cached values
+				return cloneDeep(res);  // return a clone so we don't accidentally alter cached values
 			}
 			return null;
 		};
@@ -225,7 +255,7 @@ const mixin = {
 		{size, family, bold, italic}:
 		{size: number, family: string, bold: string, italic: string}
 	) {
-		return mixin.fontPartsToFont({
+		return api.fontPartsToFont({
 			fontSize: size + 'pt',
 			fontFamily: family,
 			fontWeight: bold ? 'bold' : '',
@@ -238,11 +268,8 @@ const mixin = {
 	radians(degrees: number): number {
 		return degrees * Math.PI / 180;
 	},
-	dom: (() => {
-
-		function dom() {}
-
-		dom.createElement = function(type: string, attrs: any, parent: any, text: string) {
+	dom: {
+		createElement(type: string, attrs: any, parent: any, text: string) {
 			const node = document.createElement(type);
 			for (const key in attrs) {
 				if (attrs.hasOwnProperty(key)) {
@@ -256,17 +283,15 @@ const mixin = {
 				parent.appendChild(node);
 			}
 			return node;
-		};
-
-		dom.emptyNode = function(node: HTMLElement) {
+		},
+		emptyNode(node: HTMLElement) {
 			if (node) {
 				while (node.firstChild) {
 					node.removeChild(node.firstChild);
 				}
 			}
-		};
-		return dom;
-	})(),
+		},
+	},
 	units: (() => {
 		const unitConversions = {  // this conversion factor * pixel count = units
 			point: 0.75,
@@ -282,12 +307,12 @@ const mixin = {
 			return unitCount / unitConversions[newUnits];
 		};
 		units.pointsToUnits = function(pointCount: number, newUnits: UnitTypes) {
-			const pixels = mixin.units.unitsToPixels(pointCount, 'point');
-			return mixin.units.pixelsToUnits(pixels, newUnits);
+			const pixels = api.units.unitsToPixels(pointCount, 'point');
+			return api.units.pixelsToUnits(pixels, newUnits);
 		};
 		units.unitToPoints = function(unitCount: number, newUnits: UnitTypes) {
-			const pixels = mixin.units.unitsToPixels(unitCount, newUnits);
-			return mixin.units.pixelsToUnits(pixels, 'point');
+			const pixels = api.units.unitsToPixels(unitCount, newUnits);
+			return api.units.pixelsToUnits(pixels, 'point');
 		};
 		return units;
 	})(),
@@ -323,7 +348,7 @@ const mixin = {
 			};
 		};
 		geom.expandBox = function(box: Box, minWidth: number, minHeight: number) {
-			box = _.cloneDeep(box);
+			box = cloneDeep(box);
 			if (Math.floor(box.width) < 1) {
 				box.width = minWidth;
 				box.x -= minWidth / 2;
@@ -377,46 +402,40 @@ const mixin = {
 		};
 		return geom;
 	})(),
-	version: (() => {
-		function version() {}
-		version.parse = (v: string): Version => {
+	version: {
+		parse(v: string): Version {
 			const revs: number[] = (v || '').split('.').map(w => parseInt(w, 10));
 			return {
 				major: revs[0] || 0,
 				minor: revs[1] || 0,
 				revision: revs[2] || 0,
 			};
-		};
-		version.nice = (v: string): string => {
-			const ver = mixin.version.parse(v);
+		},
+		nice(v: string): string {
+			const ver = api.version.parse(v);
 			return `${ver.major}.${ver.minor}`;
-		};
-		version.isOldVersion = (prev: string, current: string) => {
-			const prevRev = mixin.version.parse(prev);
-			const curRev = mixin.version.parse(current);
+		},
+		isOldVersion(prev: string, current: string) {
+			const prevRev = api.version.parse(prev);
+			const curRev = api.version.parse(current);
 			if (prevRev.major !== curRev.major) {
 				return prevRev.major < curRev.major;
 			} else if (prevRev.minor !== curRev.minor) {
 				return prevRev.minor < curRev.minor;
 			}
 			return prevRev.revision < curRev.revision;
-		};
-		return version;
-	})(),
-	sort: (() => {
-		function sort() {}
-		sort.numeric = () => {
-			function numeric() {}
-			numeric.ascending = (a: any, b: any) => {
+		},
+	},
+	sort: {
+		numeric: {
+			ascending(a: any, b: any): number {
 				return a - b;
-			};
-			numeric.descending = (a: any, b: any) => {
+			},
+			descending(a: any, b: any): number {
 				return b - a;
-			};
-			return numeric;
-		};
-		return sort;
-	})(),
+			},
+		},
+	},
 	formatTime(start: number, end: number): string {
 		const t = end - start;
 		if (t >= 1000) {
@@ -424,9 +443,8 @@ const mixin = {
 		}
 		return t + 'ms';
 	},
-	color: (() => {
-		function color() {}
-		color.toRGB = (() => {
+	color: {
+		toRGB: (() => {
 			const rgbLookupCache: CacheInterface = {
 				'#000000': [0, 0, 0],
 			};
@@ -471,8 +489,8 @@ const mixin = {
 				};
 				return res;
 			};
-		})();
-		color.toVec4 = (colorString: string, alpha: number) => {
+		})(),
+		toVec4(colorString: string, alpha: number) {
 			if (!colorString || typeof colorString !== 'string') {
 				return [0, 0, 0, 0];
 			}
@@ -484,7 +502,7 @@ const mixin = {
 				b = parseInt(colorString.substr(4, 2), 16) / 255;
 				a = (255 - (alpha || 0)) / 255;
 			} else {
-				const localColor = mixin.color.toRGB(colorString);
+				const localColor = api.color.toRGB(colorString);
 				r = localColor.r / 255;
 				g = localColor.g / 255;
 				b = localColor.b / 255;
@@ -492,43 +510,60 @@ const mixin = {
 					? (localColor.a == null ? 1 : localColor.a)
 					: alpha;
 			}
-			return [_.round(r, 4), _.round(g, 4), _.round(b, 4), _.round(a, 4)];
-		};
-		color.luma = (colorString: any, isUnitColor: boolean) => {
+			return [round(r, 4), round(g, 4), round(b, 4), round(a, 4)];
+		},
+		luma(colorString: any, isUnitColor: boolean) {
 			if (!Array.isArray(colorString)) {
-				const colorObj = mixin.color.toRGB(colorString);
+				const colorObj = api.color.toRGB(colorString);
 				colorString = [colorObj.r, colorObj.g, colorObj.b];
 			}
 			const scale = isUnitColor ? 1 : 255;
 			return (0.2126 * ((colorString[0] / scale) ** 2.2))
 				+ (0.7151 * ((colorString[1] / scale) ** 2.2))
 				+ (0.0721 * ((colorString[2] / scale) ** 2.2));
-		};
-		color.opposite = (colorString: string) => {
-			return (mixin.color.luma(colorString, false) < 0.18) ? 'white' : 'black';
-		};
-		color.isVisible = (colorString?: string | null) => {
+		},
+		opposite(colorString: string) {
+			return (api.color.luma(colorString, false) < 0.18) ? 'white' : 'black';
+		},
+		isVisible(colorString?: string | null) {
 			if (!colorString || typeof colorString !== 'string') {
 				return false;
 			}
-			const colorObj = mixin.color.toRGB(colorString);
+			const colorObj = api.color.toRGB(colorString);
 			if (colorObj.hasOwnProperty('a') && colorObj.a === 0) {
 				return false;
 			}
 			return true;
-		};
-		return color;
-	})(),
+		},
+	},
 	isBorderVisible(border: Border) {
 		if (!border || !border.width || border.width < 1 ||
 			!border.color || typeof border.color !== 'string'
 		) {
 			return false;
 		}
-		return mixin.color.isVisible(border.color);
+		return api.color.isVisible(border.color);
 	},
+	assign,
+	chunk,
+	clamp,
+	clone,
+	cloneDeep,
+	difference,
+	each,
+	forOwn,
+	get,
+	isEmpty,
+	isEqual,
+	last,
+	pullAt,
+	range,
+	round,
+	set,
+	some,
+	startCase,
+	template,
+	unzip,
 };
 
-_.mixin(mixin);
-
-export default <LoDashMixins>_;
+export default api;
