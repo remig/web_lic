@@ -225,7 +225,7 @@ describe('Test multi book ', () => {
 		cy.get('#treeParent_book_1 > .treeChildren').children().should('have.length', 25);
 	});
 
-	it.only('Split Alligator into separate files', () => {
+	it('Split Alligator into separate files', () => {
 		cy.importAlligator({use1Step: true});
 
 		// Split into multiple books with default multi-book settings

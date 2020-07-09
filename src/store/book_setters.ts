@@ -97,6 +97,7 @@ export const BookMutations: BookMutationInterface = {
 			const visitedModels = new Set();
 			book.pages
 				.map(store.get.page)
+				.filter(page => page.subtype === 'page')
 				.map(page => (page || {}).steps)
 				.flat()
 				.map(store.get.step)
