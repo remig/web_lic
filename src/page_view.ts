@@ -98,7 +98,7 @@ Vue.component('pageView', {
 		}
 
 		function renderOnePage(
-			idx: number, pageId: number | null, locked: boolean
+			idx: number, pageId: number | null, locked: boolean,
 		): VNode {
 
 			let lockIcon: VNode | undefined;
@@ -113,7 +113,7 @@ Vue.component('pageView', {
 							'fas',
 							{'fa-lock': locked, 'fa-lock-open': !locked},
 						],
-					}
+					},
 				);
 				lockSwitch = createElement(
 					'el-switch',
@@ -121,7 +121,7 @@ Vue.component('pageView', {
 						props: {width: 20, value: locked},
 						'class': 'pageLockSwitch',
 						on: {input: setPageLocked(pageId)},
-					}
+					},
 				);
 
 				const guides: GuideInterface[] = uiState.get('guides');
@@ -137,7 +137,7 @@ Vue.component('pageView', {
 								id: guideId,
 								...props,
 							},
-						}
+						},
 					);
 				});
 
@@ -145,7 +145,7 @@ Vue.component('pageView', {
 					guideVNode = createElement(
 						'div',
 						{'class': ['pageGuideContainer']},
-						guideVNodeList
+						guideVNodeList,
 					);
 				}
 			}
@@ -159,7 +159,7 @@ Vue.component('pageView', {
 						height: pageHeight,
 					},
 					'class': ['pageCanvas'],
-				}
+				},
 			);
 
 			const canvasHolder = createElement(
@@ -175,13 +175,13 @@ Vue.component('pageView', {
 						visibility: (pageId == null) ? 'hidden' : null,
 					},
 				},
-				[canvas as any, guideVNode as any]
+				[canvas as any, guideVNode as any],
 			);
 
 			return createElement(
 				'div',
 				{style: {position: 'relative', display: facing ? 'inline' : null}},
-				[canvasHolder as any, lockIcon as any, lockSwitch as any]
+				[canvasHolder as any, lockIcon as any, lockSwitch as any],
 			);
 		}
 
@@ -236,7 +236,7 @@ Vue.component('pageView', {
 					height: scrolling ? null : pageHeight + 'px',
 				},
 			},
-			containerList
+			containerList,
 		);
 
 		const handlers: any = {
@@ -255,7 +255,7 @@ Vue.component('pageView', {
 				attrs: {id: 'rightSubPane'},
 				on: handlers,
 			},
-			[subRoot]
+			[subRoot],
 		);
 	},
 	watch: {
@@ -609,7 +609,7 @@ function inHighlightBox(
 	y: number,
 	t: LookupItem,
 	pageSize: Size,
-	page?: Page | null
+	page?: Page | null,
 ): boolean {
 	const box = store.get.highlightBox(t, pageSize, page);
 	return inBox(x, y, box);

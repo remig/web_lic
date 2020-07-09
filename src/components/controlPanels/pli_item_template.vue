@@ -13,7 +13,7 @@ export default {
 			{
 				props: {templateEntry: 'pliItem'},
 				on: {'new-values': this.newValues},
-			}
+			},
 		);
 	},
 	methods: {

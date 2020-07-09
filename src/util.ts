@@ -253,7 +253,7 @@ const api: UtilInterface = {
 	},
 	fontString(
 		{size, family, bold, italic}:
-		{size: number, family: string, bold: string, italic: string}
+		{size: number, family: string, bold: string, italic: string},
 	) {
 		return api.fontPartsToFont({
 			fontSize: size + 'pt',

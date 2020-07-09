@@ -246,7 +246,7 @@ function createNode(item: ItemTypes): HTMLLIElement | null {
 }
 
 function expandToLevel(
-	node: Element, level: number, currentLevel: number
+	node: Element, level: number, currentLevel: number,
 ): void {
 
 	if (node.classList.contains('treeParent')) {

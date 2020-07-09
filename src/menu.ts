@@ -269,7 +269,7 @@ const menu = [
 						undoStack.commit(
 							'book.divideInstructions',
 							opts,
-							tr('action.edit.multi_book.undo')
+							tr('action.edit.multi_book.undo'),
 						);
 						app.setCurrentPage(store.get.firstPage());
 					});

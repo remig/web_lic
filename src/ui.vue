@@ -496,7 +496,7 @@ const UI = {
 
 					if (dx !== 0 || dy !== 0) {
 						const undoText = this.tr('action.edit.item.move.undo_@mf',
-							{item: this.tr('glossary.' + selItem.type.toLowerCase())}
+							{item: this.tr('glossary.' + selItem.type.toLowerCase())},
 						);
 						undoStack.commit('item.reposition', {item, dx, dy}, undoText);
 					}

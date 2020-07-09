@@ -26,7 +26,7 @@ export const TemplatePageMutations: TemplatePageMutationInterface = {
 			await LDParse.loadRemotePart(modelData.part2.filename);
 		}
 		const page = store.mutations.page.add(
-			{subtype: 'templatePage', pageNumber: 0}
+			{subtype: 'templatePage', pageNumber: 0},
 		);
 
 		const step = store.mutations.step.add({stepNumber: 1, dest: page});

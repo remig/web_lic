@@ -658,7 +658,7 @@ export const Getters: GetterInterface = {
 		const itemList = getStateChildList<ItemTypes>(lookup.type);
 		if (itemList) {
 			return itemList.find(
-				(el: Item) => el.id === lookup.id
+				(el: Item) => el.id === lookup.id,
 			) || null;
 		}
 		return null;
@@ -699,7 +699,7 @@ export const Getters: GetterInterface = {
 		pointToPage(
 			xIn: number | PointItem,
 			y?: number,
-			relativeTo?: LookupItem | null
+			relativeTo?: LookupItem | null,
 		) {
 			let x;
 			if (typeof xIn === 'number') {

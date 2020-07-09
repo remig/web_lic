@@ -31,7 +31,7 @@ const drawArrowHead = (() => {
 
 	return function(
 		ctx: CanvasRenderingContext2D,
-		baseX: number, baseY: number, rotation?: number | Directions | null, scale?: number | number[]
+		baseX: number, baseY: number, rotation?: number | Directions | null, scale?: number | number[],
 	) {
 		const head = arrowDimensions.head, bodyWidth = 1.25;
 		ctx.save();
@@ -285,7 +285,7 @@ export const Draw: DrawInterface = {
 			// offset corner radius by border width so radius defines inner border radius
 			ctx, 0, 0, template.width, template.height,
 			template.border.cornerRadius + template.border.width,
-			rectStyle
+			rectStyle,
 		);
 
 		if (!config.noGrid && uiState.get('grid').enabled) {
@@ -403,7 +403,7 @@ function drawStep(stepId: number, ctx: CanvasRenderingContext2D, config: DrawCon
 }
 
 function drawSubmodelImage(
-	submodelImageId: number, ctx: CanvasRenderingContext2D, {hiResScale = 1, noCache}: DrawConfig
+	submodelImageId: number, ctx: CanvasRenderingContext2D, {hiResScale = 1, noCache}: DrawConfig,
 ) {
 	const submodelImage = store.get.submodelImage(submodelImageId);
 	if (submodelImage == null) {
@@ -425,14 +425,14 @@ function drawSubmodelImage(
 	ctx.save();
 	ctx.translate(
 		Math.floor(submodelImage.innerContentOffset.x),
-		Math.floor(submodelImage.innerContentOffset.y)
+		Math.floor(submodelImage.innerContentOffset.y),
 	);
 
 	ctx.save();
 	ctx.scale(1 / hiResScale, 1 / hiResScale);
 	const part = LDParse.model.get.abstractPart(submodelImage.modelFilename);
 	const renderResult = store.render.pli(
-		part.colorCode, part.filename, csi, hiResScale, noCache
+		part.colorCode, part.filename, csi, hiResScale, noCache,
 	);
 	if (renderResult) {
 		const x = Math.floor((submodelImage.x + csi.x) * hiResScale);
@@ -459,7 +459,7 @@ function drawSubmodelImage(
 function drawCSI(
 	csiId: number,
 	ctx: CanvasRenderingContext2D,
-	{hiResScale = 1, selectedItem, noCache}: DrawConfig
+	{hiResScale = 1, selectedItem, noCache}: DrawConfig,
 ) {
 	const csi = store.get.csi(csiId);
 	if (csi == null) {
@@ -483,7 +483,7 @@ function drawCSI(
 	const selectedPartIDs = (havePart && selectedItem) ? [selectedItem.id] : null;
 	const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
 	const res = store.render[renderer](
-		localModel, step, csi, selectedPartIDs, hiResScale, noCache
+		localModel, step, csi, selectedPartIDs, hiResScale, noCache,
 	);
 	if (res && res.dx != null && res.dy != null) {
 		ctx.drawImage(res.container, Math.floor(-res.dx), Math.floor(-res.dy));
@@ -497,7 +497,7 @@ function drawCSI(
 }
 
 function drawPLI(
-	pliId: number, ctx: CanvasRenderingContext2D, {hiResScale, noCache}: DrawConfig
+	pliId: number, ctx: CanvasRenderingContext2D, {hiResScale, noCache}: DrawConfig,
 ) {
 	const pli = store.get.pli(pliId);
 	if (pli == null) {
@@ -532,7 +532,7 @@ function drawPLI(
 }
 
 function drawPLIItem(
-	pliItemId: number, ctx: CanvasRenderingContext2D, {hiResScale = 1, noCache}: DrawConfig
+	pliItemId: number, ctx: CanvasRenderingContext2D, {hiResScale = 1, noCache}: DrawConfig,
 ) {
 	const pliItem = store.get.pliItem(pliItemId);
 	if (pliItem == null) {
@@ -542,7 +542,7 @@ function drawPLIItem(
 	ctx.save();
 	ctx.scale(1 / hiResScale, 1 / hiResScale);
 	const renderResult = store.render.pli(
-		pliItem.colorCode, pliItem.filename, pliItem, hiResScale, noCache
+		pliItem.colorCode, pliItem.filename, pliItem, hiResScale, noCache,
 	);
 	if (renderResult) {
 		const x = Math.floor(pliItem.x) * hiResScale;
@@ -563,7 +563,7 @@ function drawPLIItem(
 	ctx.fillText(
 		'x' + pliItem.quantity,
 		pliItem.x + quantityLabel.x,
-		pliItem.y + quantityLabel.y
+		pliItem.y + quantityLabel.y,
 	);
 }
 
@@ -644,7 +644,7 @@ function drawRotateIcon(iconId: number, ctx: CanvasRenderingContext2D) {
 			ctx,
 			0, 0, 100, 94,
 			template.border.cornerRadius,
-			template.border.width
+			template.border.width,
 		);
 		ctx.fill();
 	}
@@ -655,7 +655,7 @@ function drawRotateIcon(iconId: number, ctx: CanvasRenderingContext2D) {
 			ctx,
 			0, 0, 100, 94,
 			template.border.cornerRadius,
-			template.border.width
+			template.border.width,
 		);
 	}
 	ctx.restore();
@@ -686,12 +686,12 @@ function drawRotateIcon(iconId: number, ctx: CanvasRenderingContext2D) {
 }
 
 function drawPageBackground(
-	cachedImage: HTMLImageElement, imageInfo: ImageTemplate, ctx: CanvasRenderingContext2D
+	cachedImage: HTMLImageElement, imageInfo: ImageTemplate, ctx: CanvasRenderingContext2D,
 ) {
 	if (imageInfo.x != null && imageInfo.y != null) {
 		ctx.drawImage(cachedImage,
 			imageInfo.x, imageInfo.y,
-			imageInfo.width, imageInfo.height
+			imageInfo.width, imageInfo.height,
 		);
 	} else {
 		ctx.drawImage(cachedImage, 0, 0);
@@ -772,7 +772,7 @@ function buildGrid(grid: any, width: number, height: number) {
 }
 
 function drawRoundedRectItemStyled(
-	ctx: CanvasRenderingContext2D, item: any, r: number, style: StyleInterface
+	ctx: CanvasRenderingContext2D, item: any, r: number, style: StyleInterface,
 ) {
 	let {x, y, width, height} = item;
 	if (item.borderOffset) {
@@ -791,7 +791,7 @@ function drawRoundedRectItemStyled(
 function drawRoundedRectStyled(
 	ctx: CanvasRenderingContext2D,
 	x: number, y: number, w: number, h: number, r: number,
-	style: StyleInterface
+	style: StyleInterface,
 ) {
 	ctx.save();
 	if (style.fillStyle && _.color.isVisible(style.fillStyle)) {
@@ -821,7 +821,7 @@ function isBorderVisible(border: Border): border is VisibleBorder {
 
 function drawRoundedRect(
 	ctx: CanvasRenderingContext2D,
-	x: number, y: number, w: number, h: number, r: number, lineWidth: number
+	x: number, y: number, w: number, h: number, r: number, lineWidth: number,
 ) {
 	// r defines the inner curve, but we're drawing from the middle, so offset r accordingly
 	// r += lineWidth / 2;  //Disabled for now because it doesn't look right.

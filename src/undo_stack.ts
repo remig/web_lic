@@ -72,7 +72,7 @@ const api = {
 		changeList: string | ActionChange | (MutationChange | ActionChange)[],
 		opts: any,
 		undoText: string,
-		clearCacheTargets?: ClearCacheTarget[] | null
+		clearCacheTargets?: ClearCacheTarget[] | null,
 	) {
 
 		let localChangeList: (MutationChange | ActionChange)[];
@@ -171,8 +171,8 @@ const api = {
 		return noTranslate(
 			tr(
 				'action.edit.undo.name_@c',
-				api.isUndoAvailable() ? state.stack[state.index].undoText : ''
-			)
+				api.isUndoAvailable() ? state.stack[state.index].undoText : '',
+			),
 		);
 	},
 
@@ -180,8 +180,8 @@ const api = {
 		return noTranslate(
 			tr(
 				'action.edit.redo.name_@c',
-				api.isRedoAvailable() ? state.stack[state.index + 1].undoText : ''
-			)
+				api.isRedoAvailable() ? state.stack[state.index + 1].undoText : '',
+			),
 		);
 	},
 };

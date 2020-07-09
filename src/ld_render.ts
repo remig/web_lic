@@ -190,7 +190,7 @@ function getCanvasBounds(canvas: HTMLCanvasElement, size: number) {
 function renderAndScaleToFit(
 	renderCb: (config: any) => HTMLCanvasElement,
 	containerId: string | HTMLCanvasElement,
-	config: any
+	config: any,
 ) {
 
 	const maxZooms = 5;
@@ -238,7 +238,7 @@ function renderAndScaleToFit(
 		bounds.x, bounds.y,
 		bounds.width + 1, bounds.height + 1,
 		config.dx || 0, config.dy || 0,
-		bounds.width + 1, bounds.height + 1
+		bounds.width + 1, bounds.height + 1,
 	);
 	return {
 		x: bounds.x,

@@ -67,8 +67,10 @@ function generateObjectList(part, modelView, colorCode, config) {
 			for (const key in buffers.coloredFaces) {
 				if (buffers.coloredFaces.hasOwnProperty(key)) {
 					addObject(
-						res.faces, buffers.coloredFaces[key],
-						modelView, LDParse.getColor(key, 'rgba')
+						res.faces,
+						buffers.coloredFaces[key],
+						modelView,
+						LDParse.getColor(key, 'rgba'),
 					);
 				}
 			}
@@ -294,16 +296,16 @@ function addLine(lineData, p, cp) {
 	lineData.next.push(p[3], p[4], p[5], p[3], p[4], p[5], p[0], p[1], p[2], p[0], p[1], p[2]);
 	lineData.indices.data.push(
 		idx + 2, idx + 1, idx,
-		idx + 3, idx + 1, idx + 2
+		idx + 3, idx + 1, idx + 2,
 	);
 	lineData.direction.push(-1, 1, -1, 1);
 	lineData.order.push(0, 0, 1, 1);
 	if (cp != null) {
 		lineData.condPointA.push(
-			cp[0], cp[1], cp[2], cp[0], cp[1], cp[2], cp[0], cp[1], cp[2], cp[0], cp[1], cp[2]
+			cp[0], cp[1], cp[2], cp[0], cp[1], cp[2], cp[0], cp[1], cp[2], cp[0], cp[1], cp[2],
 		);
 		lineData.condPointB.push(
-			cp[3], cp[4], cp[5], cp[3], cp[4], cp[5], cp[3], cp[4], cp[5], cp[3], cp[4], cp[5]
+			cp[3], cp[4], cp[5], cp[3], cp[4], cp[5], cp[3], cp[4], cp[5], cp[3], cp[4], cp[5],
 		);
 	}
 	lineData.indices.lastIndex += 4;
@@ -591,10 +593,10 @@ export default {
 
 		const faceProgram = twgl.createProgram(gl, faceShader, fragShader, ['position']);
 		const lineProgram = twgl.createProgram(gl, lineShader, fragShader,
-			['position', 'next', 'direction', 'order']
+			['position', 'next', 'direction', 'order'],
 		);
 		const condLineProgram = twgl.createProgram(gl, condLineShader, fragShader,
-			['position', 'next', 'direction', 'order', 'condPointA', 'condPointB']
+			['position', 'next', 'direction', 'order', 'condPointA', 'condPointB'],
 		);
 
 		programs = {

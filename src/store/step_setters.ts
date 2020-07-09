@@ -52,7 +52,7 @@ export interface StepMutationInterface {
 export const StepMutations: StepMutationInterface = {
 	add(
 		{dest, doLayout = false, model = null, stepNumber = null,
-			renumber = false, insertionIndex = -1, parentInsertionIndex = -1}
+			renumber = false, insertionIndex = -1, parentInsertionIndex = -1},
 	) {
 
 		// TODO: parent should never be null here
@@ -96,7 +96,7 @@ export const StepMutations: StepMutationInterface = {
 		return step;
 	},
 	delete(
-		{step, doNotRenumber = false, deleteParts = false, doLayout = false}
+		{step, doNotRenumber = false, deleteParts = false, doLayout = false},
 	) {
 		const item = store.get.step(step);
 		let page;
@@ -138,7 +138,7 @@ export const StepMutations: StepMutationInterface = {
 				const calloutStep = store.get.step(callout.steps[0]);
 				if (calloutStep != null && calloutStep.numberLabelID != null) {
 					store.mutations.item.delete(
-						{item: store.get.numberLabel(calloutStep.numberLabelID)}
+						{item: store.get.numberLabel(calloutStep.numberLabelID)},
 					);
 				}
 			}
@@ -250,7 +250,7 @@ export const StepMutations: StepMutationInterface = {
 				stepItem.callouts.map(calloutID => {
 					const callout = store.get.callout(calloutID);
 					return callout ? callout.position : 'left';
-				})
+				}),
 			);
 			position = availablePositions[0] || 'left';
 		}

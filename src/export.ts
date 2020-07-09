@@ -14,7 +14,7 @@ function exportInstructions(
 	exportType: 'PNG' | 'PDF',
 	hiResScale: number,
 	drawPageCallback: (page: Page, canvas: HTMLCanvasElement) => void,
-	doneCallback: (finishedCallback: any) => void
+	doneCallback: (finishedCallback: any) => void,
 ) {
 
 	app.busyText = tr(`dialog.busy_indicator.generating_${exportType}`);
@@ -59,7 +59,7 @@ function exportInstructions(
 				const time = _.formatTime(start, end);
 				app.statusText = tr(
 					`action.export.${exportType.toLowerCase()}.success_message_@mf`,
-					{exportType, time}
+					{exportType, time},
 				);
 			});
 		});
@@ -92,7 +92,7 @@ function generatePDF(app: any, store: Store, config?: PDFConfig) {
 	const doc = new jsPDF(
 		pageSize.width > pageSize.height ? 'landscape' : 'portrait',
 		'pt',
-		[pageSize.width, pageSize.height]
+		[pageSize.width, pageSize.height],
 	);
 
 	function drawPage(page: Page, canvas: HTMLCanvasElement) {
@@ -112,7 +112,7 @@ function generatePDF(app: any, store: Store, config?: PDFConfig) {
 }
 
 function generatePNGZip(
-	app: any, store: Store, hiResScale: number = 1, dpi: number = 96
+	app: any, store: Store, hiResScale: number = 1, dpi: number = 96,
 ) {
 
 	const fn = store.get.modelFilenameBase();

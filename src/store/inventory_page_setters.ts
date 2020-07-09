@@ -54,7 +54,7 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 		function buildPartList(model: Model) {
 			(model.parts || []).forEach((
 				{filename, colorCode}
-				: {filename: string, colorCode: number}
+				: {filename: string, colorCode: number},
 			) => {
 				if (LDParse.model.isSubmodel(filename)) {
 					buildPartList(LDParse.model.get.abstractPart(filename));
@@ -86,7 +86,7 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 		}
 		if (item.numberLabelID != null) {
 			store.mutations.item.delete(
-				{item: store.get.numberLabel(item.numberLabelID)}
+				{item: store.get.numberLabel(item.numberLabelID)},
 			);
 		}
 		store.mutations.item.deleteChildList({item, listType: 'pliItem'});

@@ -220,7 +220,7 @@ export default {
 			const info = this.imageInfo;
 			return _.equal(
 				info.originalWidth / info.originalHeight,
-				info.pageWidth / info.pageHeight
+				info.pageWidth / info.pageHeight,
 			);
 		},
 	},

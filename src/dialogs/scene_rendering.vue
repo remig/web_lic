@@ -47,7 +47,7 @@ import undoStack from '../undo_stack';
 import rotateBuilder from '../components/rotate.vue';
 import EventBus from '../event_bus';
 
-export default{
+export default {
 	components: {rotateBuilder},
 	data: function() {
 		this.originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
@@ -68,7 +68,7 @@ export default{
 				'sceneRendering.zoom',
 				this.values,
 				this.tr('dialog.scene_rendering.undo'),
-				['renderer']
+				['renderer'],
 			);
 			this.$emit('close');
 		},

@@ -21,7 +21,7 @@ export interface ItemMutationInterface {
 
 export const ItemMutations:ItemMutationInterface = {
 	add(
-		{item, parent, insertionIndex = -1, parentInsertionIndex = -1}
+		{item, parent, insertionIndex = -1, parentInsertionIndex = -1},
 	) {
 		item.id = store.get.nextItemID(item);
 		if (store.state.hasOwnProperty(item.type)) {
@@ -77,7 +77,7 @@ export const ItemMutations:ItemMutationInterface = {
 		}
 	},
 	reparent(
-		{item, newParent, parentInsertionIndex = -1}
+		{item, newParent, parentInsertionIndex = -1},
 	) {
 
 		const target = store.get.lookupToItem(item);

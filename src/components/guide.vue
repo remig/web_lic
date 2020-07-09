@@ -34,7 +34,7 @@ export default {
 				attrs: {'data-id': `guide-${this.id}`},
 				'class': ['guide', isVertical ? 'guide-vertical' : 'guide-horizontal'],
 				style,
-			}
+			},
 		);
 	},
 	methods: {

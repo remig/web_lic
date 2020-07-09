@@ -31,7 +31,7 @@ export const CSIMutations: CSIMutationInterface = {
 			csiItem.rotation = rotation;
 			csiItem.isDirty = true;
 			store.mutations.step.toggleRotateIcon(
-				{step: {type: 'step', id: csiItem.parent.id}, display: addRotateIcon}
+				{step: {type: 'step', id: csiItem.parent.id}, display: addRotateIcon},
 			);
 			if (doLayout) {
 				store.mutations.page.layout({page: store.get.pageForItem(csiItem)});

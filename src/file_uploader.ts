@@ -3,7 +3,7 @@
 export default function openFileHandler(
 	acceptFileTypes: string,
 	fileType: 'text' | 'dataURL',
-	callback: (src: string | ArrayBuffer | null, filename: string) => void
+	callback: (src: string | ArrayBuffer | null, filename: string) => void,
 ) {
 	const input = document.getElementById('openFileChooser') as HTMLInputElement;
 	if (input) {

@@ -107,7 +107,7 @@ const Layout: LayoutInterface = {
 				while (pageToRemove.pliItems.length) {
 					const id = pageToRemove.pliItems[0];
 					store.mutations.item.reparent(
-						{item: {type: 'pliItem', id}, newParent: firstPage}
+						{item: {type: 'pliItem', id}, newParent: firstPage},
 					);
 				}
 				store.mutations.inventoryPage.delete({page: pageToRemove});
@@ -653,7 +653,7 @@ const Layout: LayoutInterface = {
 				const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
 				maxHeight = Math.max(
 					maxHeight,
-					pliItem.height - qtyLabelOffset + quantityLabel.height
+					pliItem.height - qtyLabelOffset + quantityLabel.height,
 				);
 			}
 		}
@@ -973,7 +973,7 @@ const Layout: LayoutInterface = {
 					}
 				}
 				progressCallback(
-					tr('glossary.step_count_@c', stepsToMerge[0].number)
+					tr('glossary.step_count_@c', stepsToMerge[0].number),
 				);
 				_.pullAt(stepsToMerge, 0);
 				resolve();
@@ -1154,7 +1154,7 @@ function alignStepContent(page: Page) {
 					return (store.get.pli(step.pliID)).height;
 				}
 				return 0;
-			})
+			}),
 		);
 		stepList.forEach(step => {
 			if (step.csiID != null) {

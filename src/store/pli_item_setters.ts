@@ -15,7 +15,7 @@ export interface PLIItemMutationInterface {
 
 export const PLIItemMutations: PLIItemMutationInterface = {
 	add(
-		{parent, filename, colorCode, quantity = 1}
+		{parent, filename, colorCode, quantity = 1},
 	) {
 		const pliItem = store.mutations.item.add<PLIItem>({item: {
 			type: 'pliItem', id: -1, parent,

@@ -36,7 +36,7 @@
 import _ from '../util';
 import rotateBuilder from '../components/rotate.vue';
 
-export default{
+export default {
 	components: {rotateBuilder},
 	data: function() {
 		return {

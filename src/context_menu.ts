@@ -162,7 +162,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						undoStack.commit(
 							'page.layout',
 							{page: selectedItem, layout: 'vertical'},
-							tr('action.layout.vertical.undo')
+							tr('action.layout.vertical.undo'),
 						);
 					},
 				},
@@ -194,7 +194,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 								undoStack.commit(
 									'page.layout',
 									{page, layout: newValues},
-									tr('action.layout.by_row_and_column.undo')
+									tr('action.layout.by_row_and_column.undo'),
 								);
 							});
 							dialog.$on('cancel', () => {
@@ -232,7 +232,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						pageNumber: nextPage.number,
 						insertionIndex: store.state.pages.indexOf(nextPage),
 					},
-					tr(this.text)
+					tr(this.text),
 				);
 			},
 		},
@@ -247,7 +247,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						pageNumber: prevPage.number + 1,
 						insertionIndex: store.state.pages.indexOf(prevPage) + 1,
 					},
-					tr(this.text)
+					tr(this.text),
 				);
 			},
 		},
@@ -301,7 +301,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				undoStack.commit(
 					'page.delete',
 					{page},
-					tr('action.page.delete_this_blank_page.undo')
+					tr('action.page.delete_this_blank_page.undo'),
 				);
 				app.clearSelected();
 				app.setCurrentPage(nextPage);
@@ -357,7 +357,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 								undoStack.commit(
 									'page.layout',
 									{page, layout: newValues},
-									tr('action.layout.by_row_and_column.undo_step')
+									tr('action.layout.by_row_and_column.undo_step'),
 								);
 							});
 							dialog.$on('cancel', () => {
@@ -457,7 +457,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						undoStack.commit(
 							'step.moveToPreviousPage',
 							{step: selectedItem},
-							tr('action.step.move_to.previous_page.undo')
+							tr('action.step.move_to.previous_page.undo'),
 						);
 					},
 				},
@@ -480,7 +480,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						undoStack.commit(
 							'step.moveToNextPage',
 							{step: selectedItem},
-							tr('action.step.move_to.next_page.undo')
+							tr('action.step.move_to.next_page.undo'),
 						);
 					},
 				},
@@ -504,7 +504,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						undoStack.commit(
 							'step.mergeWithStep',
 							{srcStep, destStep},
-							tr('action.step.merge_with.previous_step.undo')
+							tr('action.step.merge_with.previous_step.undo'),
 						);
 						app.clearSelected();
 					},
@@ -521,7 +521,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						undoStack.commit(
 							'step.mergeWithStep',
 							{srcStep, destStep},
-							tr('action.step.merge_with.next_step.undo')
+							tr('action.step.merge_with.next_step.undo'),
 						);
 						app.clearSelected();
 					},
@@ -613,7 +613,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				undoStack.commit(
 					'step.toggleRotateIcon',
 					{step, display: true, doLayout: true},
-					tr(this.text)
+					tr(this.text),
 				);
 			},
 		},
@@ -628,7 +628,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				undoStack.commit(
 					'step.toggleRotateIcon',
 					{step, display: false, doLayout: true},
-					tr(this.text)
+					tr(this.text),
 				);
 			},
 		},
@@ -672,7 +672,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							'csi.rotate',
 							opts,
 							tr('action.csi.rotate.flip_upside_down.undo'),
-							[{type: 'csi', id: csi.id}]
+							[{type: 'csi', id: csi.id}],
 						);
 					},
 				},
@@ -687,7 +687,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							'csi.rotate',
 							opts,
 							tr('action.csi.rotate.rotate_front_to_back.undo'),
-							[{type: 'csi', id: csi.id}]
+							[{type: 'csi', id: csi.id}],
 						);
 					},
 				},
@@ -711,7 +711,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 									'csi.rotate',
 									{csi, ..._.cloneDeep(newValues), doLayout: true},
 									tr('action.csi.rotate.custom_rotation.undo'),
-									[csi]
+									[csi],
 								);
 							});
 							dialog.$on('cancel', () => {
@@ -748,7 +748,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							'csi.rotate',
 							opts,
 							tr('action.csi.rotate.remove_rotation.undo'),
-							[{type: 'csi', id: csi.id}]
+							[{type: 'csi', id: csi.id}],
 						);
 					},
 				},
@@ -784,7 +784,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							'step.copyRotation',
 							{step, rotation, nextXSteps: newValue},
 							tr('action.csi.copy_rotation_to_next_steps.undo'),
-							csiList
+							csiList,
 						);
 					});
 					dialog.$on('cancel', () => {
@@ -848,7 +848,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							'csi.scale',
 							{csi, scale: newValue, doLayout: true},
 							tr('action.csi.scale.undo'),
-							[csi]
+							[csi],
 						);
 					});
 					dialog.$on('cancel', () => {
@@ -879,7 +879,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					'csi.scale',
 					{csi, scale: null, doLayout: true},
 					tr('action.csi.remove_scale.undo'),
-					[csi]
+					[csi],
 				);
 			},
 		},
@@ -951,7 +951,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						undoStack.commit(
 							changes, null,
 							tr('action.pli_item.rotate_part_list_image.undo'),
-							dirtyItems
+							dirtyItems,
 						);
 					});
 					dialog.$on('cancel', () => {
@@ -986,7 +986,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				undoStack.commit(
 					changes, null,
 					tr('action.pli_item.remove_part_list_image_rotate.undo'),
-					dirtyItems
+					dirtyItems,
 				);
 			},
 		},
@@ -1016,7 +1016,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						undoStack.commit(
 							changes, null,
 							tr('action.pli_item.scale_part_list_image.undo'),
-							dirtyItems
+							dirtyItems,
 						);
 					});
 					dialog.$on('cancel', () => {
@@ -1054,7 +1054,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				undoStack.commit(
 					changes, null,
 					tr('action.pli_item.remove_part_list_image_scale.undo'),
-					dirtyItems
+					dirtyItems,
 				);
 			},
 		},
@@ -1076,7 +1076,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 										undoStack.commit(
 											'pliItem.changeQuantity',
 											{pliItem, quantity: newValue},
-											tr('action.quantity_label.change_count.undo')
+											tr('action.quantity_label.change_count.undo'),
 										);
 									});
 									dialog.title = tr('dialog.change_part_count.title');
@@ -1126,7 +1126,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						undoStack.commit(
 							'annotation.set',
 							opts,
-							tr('action.annotation.change_text_and_style.undo')
+							tr('action.annotation.change_text_and_style.undo'),
 						);
 					});
 					dialog.title = tr('dialog.style_annotation.title');
@@ -1173,7 +1173,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							undoStack.commit(
 								'callout.layout',
 								opts,
-								tr('action.callout.position.undo')
+								tr('action.callout.position.undo'),
 							);
 						};
 					})(position),
@@ -1211,7 +1211,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 						};
 						undoStack.commit(
 							'callout.layout',
-							opts, tr('action.callout.layout.vertical.undo')
+							opts, tr('action.callout.layout.vertical.undo'),
 						);
 					},
 				},
@@ -1347,7 +1347,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 				undoStack.commit(
 					'item.delete',
 					{item: selectedItem},
-					tr('action.callout_arrow.delete_point.undo')
+					tr('action.callout_arrow.delete_point.undo'),
 				);
 				app.clearSelected();
 			},
@@ -1485,7 +1485,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							[
 								{type: 'csi', id: srcStep?.csiID},
 								{type: 'csi', id: destStep?.csiID},
-							]
+							],
 						);
 					},
 				},
@@ -1513,7 +1513,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							[
 								{type: 'csi', id: srcStep?.csiID},
 								{type: 'csi', id: destStep?.csiID},
-							]
+							],
 						);
 					},
 				},
@@ -1541,7 +1541,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					'part.addToCallout',
 					{partID: selectedItem.id, step, callout, doLayout: true},
 					tr('action.part.add_part_to_callout.undo'),
-					[{type: 'csi', id: targetStep?.csiID}]
+					[{type: 'csi', id: targetStep?.csiID}],
 				);
 			},
 		},
@@ -1572,7 +1572,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 								'part.addToCallout',
 								{partID: selectedItem.id, step, callout, doLayout: true},
 								tr('action.part.add_part_to_callout.undo'),
-								[{type: 'csi', id: targetStep?.csiID}]
+								[{type: 'csi', id: targetStep?.csiID}],
 							);
 						},
 					};
@@ -1596,7 +1596,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 					undoStack.commit(
 						'part.removeFromCallout',
 						{partID: selectedItem.id, step},
-						tr('action.part.remove_part_from_callout.undo')
+						tr('action.part.remove_part_from_callout.undo'),
 					);
 				}
 			},
@@ -1646,7 +1646,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 									[action, mutation],
 									null,
 									tr('action.part.change_part.position_and_rotation.undo'),
-									['csi']
+									['csi'],
 								);
 							});
 							dialog.$on('cancel', () => {
@@ -1696,7 +1696,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 									change,
 									null,
 									tr('dialog.ld_color_picker.action'),
-									['csi', 'pliItem']
+									['csi', 'pliItem'],
 								);
 							});
 						});
@@ -1730,7 +1730,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 									undoStack.commit(
 										change, null,
 										tr('action.part.change_part.to_different_part.undo'),
-										['csi']
+										['csi'],
 									);
 								});
 							});
@@ -1755,7 +1755,7 @@ const contextMenu: {[key: string]: ContextMenuEntry} = {
 							];
 							undoStack.commit(
 								changes, null,
-								tr('action.part.change_part.duplicate.undo'), ['csi']
+								tr('action.part.change_part.duplicate.undo'), ['csi'],
 							);
 						}
 					},
@@ -1800,7 +1800,7 @@ function rotateArrowTip(direction: Directions) {
 		undoStack.commit(
 			'calloutArrow.rotateTip',
 			{arrow, direction},
-			tr('action.callout_arrow.rotate_tip.undo')
+			tr('action.callout_arrow.rotate_tip.undo'),
 		);
 	};
 }
@@ -1836,7 +1836,7 @@ function displacePart(direction: DisplaceDirection) {
 					'part.displace',
 					{partID: selectedItem.id, step, direction},
 					tr('action.part.displace_part.undo_@mf', {direction: directionName}),
-					[{type: 'csi', id: step.csiID}]
+					[{type: 'csi', id: step.csiID}],
 				);
 			}
 		}
@@ -1845,7 +1845,7 @@ function displacePart(direction: DisplaceDirection) {
 
 function filterMenu(
 	menu: (ContextMenuEntryInterface | ContextMenuSeparator)[],
-	selectedItem: LookupItem
+	selectedItem: LookupItem,
 ) {
 	// Filter out invisible menu entries here so that if menu ends up empty, we don't draw anything in the UI
 	// Removing some entries might leave extraneous separators; remove them too

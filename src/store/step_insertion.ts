@@ -9,7 +9,7 @@ import _ from '../util';
 export default function(
 	model: Model,
 	{partsPerStep = 10}
-	: {partsPerStep?: number}
+	: {partsPerStep?: number},
 ) {
 	const partIndices = (model.parts || []).map((el, idx) => idx);
 	return _.chunk(partIndices, partsPerStep)

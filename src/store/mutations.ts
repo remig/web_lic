@@ -142,7 +142,7 @@ export const Mutations: MutationInterface = {
 	sceneRendering: {
 		set(
 			{zoom, edgeWidth, rotation, refresh = false}
-			: {zoom: number, edgeWidth: number, rotation: any[], refresh: boolean}
+			: {zoom: number, edgeWidth: number, rotation: any[], refresh: boolean},
 		) {
 			store.state.template.sceneRendering.zoom = zoom;
 			store.state.template.sceneRendering.edgeWidth = edgeWidth;
@@ -203,7 +203,7 @@ export const Mutations: MutationInterface = {
 	},
 	addInitialPages(
 		{modelFilename, lastStepNumber = {num: 1}, partsPerStep}
-		: {modelFilename?: string, lastStepNumber: {num: number}, partsPerStep?: number}
+		: {modelFilename?: string, lastStepNumber: {num: number}, partsPerStep?: number},
 	) {
 
 		if (!modelFilename) {
@@ -238,7 +238,7 @@ export const Mutations: MutationInterface = {
 				return LDParse.model.isSubmodel(localModel.parts[pID].filename);
 			});
 			const submodelFilenames = new Set<string>(
-				submodelIDs.map((pID: number) => localModel.parts[pID].filename)
+				submodelIDs.map((pID: number) => localModel.parts[pID].filename),
 			);
 
 			const submodelPagesAdded: number[][] = [];
@@ -301,7 +301,7 @@ export const Mutations: MutationInterface = {
 		});
 	},
 	async mergeInitialPages(progressCallback: any) {
-		return new Promise(async function(resolve) {
+		return new Promise(resolve => {
 			window.setTimeout(async function() {
 				let stepSet: Step[] = [], prevModelName;
 				const steps = store.state.steps.filter((step: any) => {

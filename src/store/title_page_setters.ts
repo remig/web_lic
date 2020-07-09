@@ -8,7 +8,7 @@ function addOneTitlePage(parent?: Book) {
 	let insertionIndex = 1;
 	if (parent) {
 		insertionIndex = store.state.pages.findIndex(
-			(page: Page) => page.id === parent.pages[0]
+			(page: Page) => page.id === parent.pages[0],
 		);
 	}
 	const page = store.mutations.page.add({
