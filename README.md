@@ -22,7 +22,9 @@ Lic is intended to be a complete replacement for the aging and no longer maintai
 
 Lic is built using [Vue.js](https://vuejs.org/).  Models and parts are rendered with WebGL.  This is a purely client side application; there is no server side anything - beyond a web server to serve the initial content, of course.
 
-Lic is totally free and open source.  You are welcome to use Lic for any project, for-profit or otherwise.  If you have any questions, find any bugs, or need any features, please open an [issue on GitHub](https://github.com/remig/web_lic/issues), or [email me](mailto:lic@bugeyedmonkeys.com). Your feedback is the main force driving Lic forward!
+The most recent version of Lic will always be available publicly [here](http://bugeyedmonkeys.com/lic/). This public version of the website is free to use for any instruction creation needs, for-profit or otherwise. Lic's source code is copyright © Remi Gagne; it is not open source, and cannot be used outside of Lic itself.
+
+If you have any questions, find any bugs, or need any features, please open an [issue on GitHub](https://github.com/remig/web_lic/issues), or [email me](mailto:lic@bugeyedmonkeys.com). Your feedback is the main force driving Lic forward!
 
 For more information see [the Wiki](https://github.com/remig/web_lic/wiki), which covers [running Lic locally](https://github.com/remig/web_lic/wiki/Running-Lic-Locally) and [translating Lic](https://github.com/remig/web_lic/wiki/Translating-Lic).
 
