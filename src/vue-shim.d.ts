@@ -33,7 +33,7 @@ declare interface jsPDF {
 		size: number[]
 	): this;
 	addImage(
-		data: any, type: 'PNG', x: number, y: number, width: number, height: number
+		data: any, type: 'PNG' | 'JPEG', x: number, y: number, width: number, height: number
 	);
 	addPage(width: number, height: number);
 	save(filename: string);
