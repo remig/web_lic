@@ -135,9 +135,9 @@ export default {
 		},
 		ok() {
 			const storeOp = {
-				root: cache.stateCache,
+				root: cache.get('uiState', 'gridPath'),
 				op: 'replace',
-				path: '/uiState/gridPath',
+				path: '/',
 				value: null,
 			};
 			const root = uiState.getCurrentState(), op = 'replace', path = '/grid';
