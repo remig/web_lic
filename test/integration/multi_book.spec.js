@@ -134,8 +134,8 @@ describe('Test multi book ', () => {
 				'Page Numbers are correct'
 			);
 			assert.equal(state.pages.filter(p => p.subtype === 'titlePage').length, 2, 'Two title pages');
-			assert.equal(lic.app.currentPageLookup.id, 43, 'Selected page is the first title page');
-			const firstPage = lic.store.get.page(lic.app.currentPageLookup.id);
+			assert.equal(lic.app.currentPageId, 43, 'Selected page is the first title page');
+			const firstPage = lic.store.get.page(lic.app.currentPageId);
 			assert.equal(firstPage.subtype, 'titlePage');
 			assert.equal(firstPage.number, 1);
 		});
@@ -157,8 +157,8 @@ describe('Test multi book ', () => {
 				'Page Numbers are correct'
 			);
 			assert.equal(state.pages.filter(p => p.subtype === 'titlePage').length, 0, 'Zero title pages');
-			assert.equal(lic.app.currentPageLookup.id, 1, 'Selected page is the first page');
-			const firstPage = lic.store.get.page(lic.app.currentPageLookup.id);
+			assert.equal(lic.app.currentPageId, 1, 'Selected page is the first page');
+			const firstPage = lic.store.get.page(lic.app.currentPageId);
 			assert.equal(firstPage.subtype, 'page');
 			assert.equal(firstPage.number, 1);
 		});
@@ -214,8 +214,8 @@ describe('Test multi book ', () => {
 				'Page Numbers are correct'
 			);
 			assert.equal(state.pages.filter(p => p.subtype === 'titlePage').length, 2, 'Two title pages');
-			assert.equal(lic.app.currentPageLookup.id, 43, 'Selected page is the first title page');
-			const firstPage = lic.store.get.page(lic.app.currentPageLookup.id);
+			assert.equal(lic.app.currentPageId, 43, 'Selected page is the first title page');
+			const firstPage = lic.store.get.page(lic.app.currentPageId);
 			assert.equal(firstPage.subtype, 'titlePage');
 			assert.equal(firstPage.number, 1);
 		});

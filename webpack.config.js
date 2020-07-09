@@ -12,15 +12,23 @@ const rules = [
 		options: {hotReload: false}
 	},
 	{
+		test: /\.tsx?$/,
+		loader: 'ts-loader',
+		exclude: /node_modules/,
+		options: {
+			appendTsSuffixTo: [/\.vue$/]
+		}
+	},
+	{
 		test: /\.css$/,
-		use: [
+		loader: [
 			'vue-style-loader',
 			'css-loader'
 		]
 	},
 	{
-		test: /\.(js|vue)$/,
-		exclude: [/node_modules/, /dialog\.js/],
+		test: /\.(js|ts|vue)$/,
+		exclude: [/node_modules/],
 		loader: 'eslint-loader',
 		options: {
 			failOnWarning: false,
@@ -35,7 +43,7 @@ const rules = [
 
 module.exports = [{
 	name: 'local',
-	entry: './src/ui.js',
+	entry: './src/app.ts',
 	output: {
 		filename: 'bundle.js',
 		chunkFilename: '[name].bundle.js',
@@ -46,11 +54,12 @@ module.exports = [{
 	module: {rules},
 	plugins: [new VueLoaderPlugin()],
 	devtool: 'source-map',
-	watch: true,
-	devServer: {contentBase: './'}
+	resolve: {
+		extensions: ['.ts', '.js', '.vue']
+	}
 }, {
 	name: 'prod',
-	entry: './src/ui.js',
+	entry: './src/app.ts',
 	output: {
 		filename: 'bundle.js',
 		path: path.resolve(__dirname, 'dist'),
@@ -59,10 +68,17 @@ module.exports = [{
 	mode: 'production',
 	module: {rules},
 	plugins: [
+		new webpack.NormalModuleReplacementPlugin(
+			/element-ui[\/\\]lib[\/\\]locale[\/\\]lang[\/\\]zh-CN/,
+			'element-ui/lib/locale/lang/en'
+		),
 		new VueLoaderPlugin(),
 		new UglifyJSPlugin({sourceMap: false}),
 		new webpack.DefinePlugin({
 			'process.env.NODE_ENV': JSON.stringify('production')
 		})
-	]
+	],
+	resolve: {
+		extensions: ['.ts', '.js', '.vue']
+	}
 }];

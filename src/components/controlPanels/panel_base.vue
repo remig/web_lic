@@ -14,7 +14,7 @@
 <script>
 
 export default {
-	props: ['title', 'labelWidth']
+	props: ['title', 'labelWidth'],
 };
 
 </script>

@@ -41,7 +41,7 @@
 
 <script>
 
-/* global Vue: false */
+import Vue from 'vue';
 import _ from '../util';
 import LDParse from '../ld_parse';
 import openFileHandler from '../file_uploader';
@@ -59,7 +59,7 @@ export default {
 		return {
 			enablePartSend: window.location.host.toLowerCase().includes('bugeyedmonkeys'),
 			missingPartsData: buildMissingPartsTable(),
-			loadedPartContent: {}  // key: filename, value: LDraw content string
+			loadedPartContent: {},  // key: filename, value: LDraw content string
 		};
 	},
 	methods: {
@@ -103,7 +103,7 @@ export default {
 			return this.missingPartsData[filename].uploaded
 				&& this.enablePartSend
 				&& this.loadedPartContent[filename] != null;
-		}
+		},
 	},
 	computed: {
 		stillHaveMissingParts() {
@@ -113,8 +113,8 @@ export default {
 			return this.stillHaveMissingParts
 				? this.tr('dialog.missing_parts.proceed')
 				: this.tr('dialog.ok');
-		}
-	}
+		},
+	},
 };
 </script>
 

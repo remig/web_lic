@@ -5,8 +5,8 @@
 		<h4>{{title()}}</h4>
 		<div class="panel-group">
 			<component
-				ref="currentTemplateRef"
 				:is="currentTemplatePanel"
+				ref="currentTemplateRef"
 				:selected-item="selectedItem"
 				:template-entry="templateEntry"
 				@new-values="newValues"
@@ -17,7 +17,7 @@
 
 <script>
 
-/* global Vue: false */
+import Vue from 'vue';
 import _ from '../util';
 import store from '../store';
 import undoStack from '../undo_stack';
@@ -38,7 +38,7 @@ const componentLookup = {
 	page: [pageTemplatePanel, ''],
 	csi: {
 		step: [csiTemplatePanel, 'step.csi'],
-		submodelImage: [csiTemplatePanel, 'submodelImage.csi']
+		submodelImage: [csiTemplatePanel, 'submodelImage.csi'],
 	},
 	pliItem: [pliItemTemplatePanel, ''],
 	pli: [pliTemplatePanel, ''],
@@ -51,13 +51,13 @@ const componentLookup = {
 		page: [pageNumberTemplatePanel, ''],
 		step: {
 			callout: [fontPanel, 'callout.step.numberLabel'],
-			'default': [fontPanel, 'step.numberLabel']
-		}
+			'default': [fontPanel, 'step.numberLabel'],
+		},
 	},
 	quantityLabel: {
 		submodelImage: [fontPanel, 'submodelImage.quantityLabel'],
-		pliItem: [fontPanel, 'pliItem.quantityLabel']
-	}
+		pliItem: [fontPanel, 'pliItem.quantityLabel'],
+	},
 };
 
 function getCurrentTemplate(selectedItem) {
@@ -89,14 +89,14 @@ export default {
 		return {
 			currentTemplatePanel: res[0],
 			templateEntry: res[1],
-			lastEdit: null
+			lastEdit: null,
 		};
 	},
 	watch: {
 		selectedItem() {
 			this.applyChanges();
 			this.setCurrentTemplate(this.selectedItem);
-		}
+		},
 	},
 	methods: {
 		newValues(opts) {
@@ -151,12 +151,12 @@ export default {
 					this.templateEntry = res[1];
 				});
 			}
-		}
+		},
 	},
 	beforeDestroy() {
 		// Catch changes if user switches from template panel directly to nav tree or new page via keyboard
 		this.applyChanges();
-	}
+	},
 };
 
 </script>

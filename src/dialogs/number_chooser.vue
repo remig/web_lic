@@ -40,22 +40,22 @@ export default {
 			bodyText: '',
 			min: 0,
 			max: 100,
-			step: 1
+			step: 1,
 		};
 	},
 	methods: {
 		updateValues() {
-			this.$emit('update', {...this.$data});
+			this.$emit('update', this.$data.value);
 		},
 		ok() {
-			this.$emit('ok', {...this.$data});
+			this.$emit('ok', this.$data.value);
 			this.$emit('close');
 		},
 		cancel() {
 			this.$emit('cancel');
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

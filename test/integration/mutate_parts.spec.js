@@ -1,15 +1,15 @@
 /* eslint-disable max-len, no-unreachable */
 
-describe('Test rotate things ', () => {
+describe('Test Deleting Parts ', () => {
 
 	beforeEach(cy.reloadLicPage);
 
 	it('Delete the last part in a step', () => {
 		cy.importTrivial({excludeTitlePage: true, excludePartListPage: true});
-		cy.get('#pageCanvas_page_1').click(220, 250).rightclick();
+		cy.get('#pageCanvas_1').click(220, 250).rightclick();
 		cy.get('#csi_select_part_cmenu').click();
 		cy.get('#select_part_0_cmenu').click();
-		cy.get('#pageCanvas_page_1').rightclick();
+		cy.get('#pageCanvas_1').rightclick();
 		cy.get('#part_change_name_cmenu').click();
 		cy.get('#part_delete_cmenu').click();
 		cy.queryLic(lic => {
@@ -25,10 +25,10 @@ describe('Test rotate things ', () => {
 	it('Delete the last part in a step with instructions', () => {
 		cy.importTrivial({excludeTitlePage: true});
 
-		cy.get('#pageCanvas_page_1').click(220, 250).rightclick();
+		cy.get('#pageCanvas_1').click(220, 250).rightclick();
 		cy.get('#csi_select_part_cmenu').click();
 		cy.get('#select_part_0_cmenu').click();
-		cy.get('#pageCanvas_page_1').rightclick();
+		cy.get('#pageCanvas_1').rightclick();
 		cy.get('#part_change_name_cmenu').click();
 		cy.get('#part_delete_cmenu').click();
 		cy.queryLic(lic => {

@@ -18,80 +18,16 @@
 	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 	<link rel="stylesheet" href="static/style.css">
 
-	<script src='https://cdn.jsdelivr.net/g/lodash@4.17.4'></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.3.5/split.min.js"></script>
 	<script src="https://unpkg.com/fast-json-patch@2.0.6/dist/fast-json-patch.js"></script>
-	<script src="https://unpkg.com/element-ui@2.4.1/lib/index.js"></script>
-	<script src="https://unpkg.com/element-ui@2.4.1/lib/umd/locale/en.js"></script>
 </head>
 <body>
 
-	<div id="container" @click="closeMenus()">
+	<div id="app"></div>
 
-		<div id="busyOverlay" :class="{hidden: busyText === ''}" v-cloak>
-			<!--<div id="busyText">{{busyText}}<div id="spinner"></div></div>-->
-			<div id="busyContainer">
-				<div class="busyText">{{busyText}}</div>
-				<div class="progress">
-					<div id="progressbar" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
-				</div>
-			</div>
-		</div>
-
-		<nav-bar
-			id="navMenu"
-			:menu-entry-list="navBarContent"
-			:filename="{name: filename, isDirty}"
-			ref="navMenuComponent"
-			@close-menus="closeMenus"
-		></nav-bar>
-
-		<div class="mainBody" @contextmenu.stop.prevent="rightClick($event)">
-
-			<div id="leftPane" class="split split-horizontal">
-				<nav-tree-container
-					ref="navTreeContainer"
-					:current-item="selectedItemLookup"
-					@select-item="setSelected"
-				></nav-tree-container>
-			</div>
-
-			<div id="rightPane" class="split split-horizontal">
-				<page-view
-					ref="pageView"
-					:app="this"
-					:selected-item="selectedItemLookup"
-					:current-page-lookup="currentPageLookup"
-				></page-view>
-				<getting-started-panel v-if="!haveModel()" :app="this"></getting-started-panel>
-				<template-panel
-					v-if="isTemplatePageCurrent"
-					id="templatePanelContainer"
-					ref="templatePanel"
-					:app="this"
-					:selected-item="selectedItemLookup"
-				></template-panel>
-			</div>
-
-		</div>
-
-		<popup-menu
-			id="contextMenu"
-			class="dropdown"
-			tabindex="-1"
-			:menu-entries="contextMenu"
-			:selected-item="selectedItemLookup"
-			ref="contextMenuComponent"
-		></popup-menu>
-
-		<dialog-manager></dialog-manager>
-
-		<div id="statusBar" v-cloak >{{statusText}}</div>
-	</div>
 	<div id="offscreenCache" class="offscreen">
 		<input type="file" name="openFileChooser" id="openFileChooser">
 		<svg xmlns="http://www.w3.org/2000/svg">

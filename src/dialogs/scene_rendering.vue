@@ -45,12 +45,14 @@ import _ from '../util';
 import store from '../store';
 import undoStack from '../undo_stack';
 import rotateBuilder from '../components/rotate.vue';
+import EventBus from '../event_bus';
 
-export default{
+export default {
 	components: {rotateBuilder},
 	data: function() {
+		this.originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
 		return {
-			values: _.cloneDeep(store.state.template.sceneRendering)
+			values: _.cloneDeep(store.state.template.sceneRendering),
 		};
 	},
 	methods: {
@@ -59,27 +61,23 @@ export default{
 				this.values.rotation = newRotation;
 			}
 			store.mutations.sceneRendering.set({...this.values, refresh: true});
-			this.app.redrawUI(true);
-		},
-		show(app) {
-			this.originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
-			this.app = app;
+			EventBus.$emit('redraw-ui', {clearSelection: true});
 		},
 		ok() {
 			undoStack.commit(
 				'sceneRendering.zoom',
 				this.values,
 				this.tr('dialog.scene_rendering.undo'),
-				['renderer']
+				['renderer'],
 			);
 			this.$emit('close');
 		},
 		cancel() {
 			store.mutations.sceneRendering.set({...this.originalRenderState, refresh: true});
-			this.app.redrawUI(true);
+			EventBus.$emit('redraw-ui', {clearSelection: true});
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

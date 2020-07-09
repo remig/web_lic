@@ -30,7 +30,7 @@ export default {
 			newString: null,
 			title: '',
 			label: '',
-			width: '500px'
+			width: '500px',
 		};
 	},
 	methods: {
@@ -44,8 +44,8 @@ export default {
 		cancel() {
 			this.$emit('cancel');
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

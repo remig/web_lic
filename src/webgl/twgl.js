@@ -104,7 +104,7 @@ const twgl = (function() {
 		initBuffer,
 		initIndexBuffer,
 		createShader,
-		createProgram
+		createProgram,
 	};
 })();
 
@@ -278,7 +278,7 @@ const v3 = twgl.v3 = (function() {
 		negate,
 		normalize,
 		setDefaultType,
-		subtract
+		subtract,
 	};
 
 })();
@@ -1226,7 +1226,7 @@ twgl.m4 = (function() {
 		transformPoint,
 		translate,
 		translation,
-		transpose
+		transpose,
 	};
 })();
 

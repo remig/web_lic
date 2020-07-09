@@ -7,7 +7,7 @@
 		class="transformPartDialog"
 	>
 		<el-form :inline="true" label-width="40px">
-			<el-form-item :label="tr('dialog.transform_part.position')" label-width="90px"/>
+			<el-form-item :label="tr('dialog.transform_part.position')" label-width="90px" />
 			<el-form-item :label="tr('glossary.x')">
 				<input
 					ref="set_focus"
@@ -35,7 +35,7 @@
 			</el-form-item>
 		</el-form>
 		<el-form :inline="true" label-width="40px">
-			<el-form-item :label="tr('dialog.transform_part.rotation')" label-width="90px"/>
+			<el-form-item :label="tr('dialog.transform_part.rotation')" label-width="90px" />
 			<el-form-item :label="tr('glossary.x')">
 				<input
 					v-model.number="rotation.x"
@@ -70,14 +70,14 @@
 
 <script>
 
-export default{
+export default {
 	data: function() {
 		return {
 			title: '',
 			rotation: {x: 0, y: 0, z: 0},
 			position: {x: 0, y: 0, z: 0},
 			addRotateIcon: true,
-			showRotateIconCheckbox: true
+			showRotateIconCheckbox: true,
 		};
 	},
 	methods: {
@@ -91,8 +91,8 @@ export default{
 		cancel() {
 			this.$emit('cancel', this.$data);
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

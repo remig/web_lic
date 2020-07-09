@@ -4,8 +4,8 @@
 	<ul class="dropdown-menu">
 		<li
 			v-for="entry in visibleMenuEntries()"
-			:key="entry.id"
 			:id="entry.id"
+			:key="entry.id"
 			:class="entryClasses(entry)"
 		>
 			<a
@@ -37,8 +37,8 @@
 
 <script>
 
+import Vue from 'vue';
 import _ from '../util';
-/* global Vue: false */
 
 function hideSubMenus() {
 	document.querySelectorAll('.dropdown-submenu.open').forEach(el => {
@@ -116,7 +116,7 @@ export default {
 				'dropdown-submenu': entry.children,
 				disabled: entry.enabled && this.selectedItem != null
 					? !entry.enabled(this.selectedItem)
-					: false
+					: false,
 			};
 		},
 		visibleMenuEntries() {
@@ -135,8 +135,8 @@ export default {
 				}
 				return true;
 			});
-		}
-	}
+		},
+	},
 };
 
 </script>

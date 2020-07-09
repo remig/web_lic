@@ -27,7 +27,7 @@
 							:command="el"
 						>
 							{{tr(el.name)}}
-							<i v-if="el.checked" class="fas fa-check"/>
+							<i v-if="el.checked" class="fas fa-check" />
 						</el-dropdown-item>
 					</template>
 				</el-dropdown-menu>
@@ -61,7 +61,7 @@ const treeElementList = [
 	{name: 'nav_tree.quantity_labels', value: 'quantityLabel', checked: true, child: true},
 	{name: 'nav_tree.dividers', value: 'divider', checked: true, child: true},
 	{name: 'divider'},
-	{name: 'nav_tree.group_parts', value: 'group_parts', checked: false}
+	{name: 'nav_tree.group_parts', value: 'group_parts', checked: false},
 ];
 
 const checkedItems = uiState.get('navTree.checkedItems');
@@ -78,7 +78,7 @@ export default {
 		return {
 			checkedElements: treeElementList,
 			expandedLevel: 0,
-			expandLeveInitialized: false
+			expandLeveInitialized: false,
 		};
 	},
 	methods: {
@@ -139,8 +139,8 @@ export default {
 		collapse() {
 			this.expandedLevel = 0;
 			NavTree.collapseAll();
-		}
-	}
+		},
+	},
 };
 
 </script>

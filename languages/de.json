@@ -35,7 +35,8 @@
         "annotation": "Objekt",
         "callout": "Callout",
         "ctrl": "Strg",
-        "arrow": "Pfeil"
+		"arrow": "Pfeil",
+		"point": "Punkt"
     },
 	"action": {
         "file": {

@@ -61,7 +61,7 @@ export default {
 		return {
 			aspectRatio: 0,
 			newState: uiState.get('dialog.export.pdf'),  // dpi & units
-			pageSize: {width: 0, height: 0}  // stored in this.units
+			pageSize: {width: 0, height: 0},  // stored in this.units
 		};
 	},
 	methods: {
@@ -93,15 +93,15 @@ export default {
 				units: this.newState.units,
 				pageSize: {
 					width: _.units.unitToPoints(this.pageSize.width, units),
-					height: _.units.unitToPoints(this.pageSize.height, units)
-				}
+					height: _.units.unitToPoints(this.pageSize.height, units),
+				},
 			});
 			this.$emit('close');
 		},
 		cancel() {
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

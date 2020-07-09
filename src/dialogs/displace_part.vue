@@ -51,30 +51,30 @@
 
 <script>
 
-export default{
+export default {
 	data: function() {
 		return {
 			values: {
 				partDistance: 0,
 				arrowOffset: 0,
 				arrowLength: 0,
-				arrowRotation: 0
-			}
+				arrowRotation: 0,
+			},
 		};
 	},
 	methods: {
 		updateValues() {
-			this.$emit('update', this.values);
+			this.$emit('update', {...this.values});
 		},
 		ok() {
-			this.$emit('ok', this.values);
+			this.$emit('ok', {...this.values});
 			this.$emit('close');
 		},
 		cancel() {
-			this.$emit('cancel', this.values);
+			this.$emit('cancel', {...this.values});
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

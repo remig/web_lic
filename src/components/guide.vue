@@ -12,7 +12,7 @@ export default {
 	props: ['position', 'orientation', 'pageSize', 'id'],
 	data() {
 		return {
-			originalPosition: this.position
+			originalPosition: this.position,
 		};
 	},
 	render(createElement) {
@@ -33,8 +33,8 @@ export default {
 			{
 				attrs: {'data-id': `guide-${this.id}`},
 				'class': ['guide', isVertical ? 'guide-vertical' : 'guide-horizontal'],
-				style
-			}
+				style,
+			},
 		);
 	},
 	methods: {
@@ -60,8 +60,8 @@ export default {
 			this.originalPosition = position;
 			const change = uiState.mutations.guides.setPosition(this.id, position);
 			undoStack.commit(change, null, 'Move Guide');
-		}
-	}
+		},
+	},
 };
 </script>
 

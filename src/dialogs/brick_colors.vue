@@ -9,16 +9,24 @@
 		<table class="el-table brickColorTable">
 			<tr>
 				<th>{{tr('dialog.brick_colors.ld_code')}}</th>
-				<th style="text-align: left;">{{tr('dialog.brick_colors.name')}}</th>
-				<th>{{tr('glossary.color')}}</th>
-				<th>{{tr('dialog.brick_colors.edge_color')}}</th>
+				<th style="text-align: left;">
+					{{tr('dialog.brick_colors.name')}}
+				</th>
+				<th>
+					{{tr('glossary.color')}}
+				</th>
+				<th>
+					{{tr('dialog.brick_colors.edge_color')}}
+				</th>
 			</tr>
 		</table>
 		<div class="brickColorTableScroll">
 			<table class="el-table brickColorTable">
 				<tr v-for="row in colorData" :key="row.id" class="brickColorRow">
 					<td>{{row.id}}</td>
-					<td style="text-align: left;">{{_.startCase(row.name)}}</td>
+					<td style="text-align: left;">
+						{{_.startCase(row.name)}}
+					</td>
 					<td>
 						<el-color-picker v-model="row.color" color-format="hex" />
 					</td>
@@ -36,37 +44,44 @@
 	</licDialog>
 </template>
 
-<script>
+<script lang="ts">
 
+import Vue from 'vue';
 import _ from '../util';
 import store from '../store';
 import LDParse from '../ld_parse';
 import Storage from '../storage';
 import backwardCompat from '../backward_compat';
+import EventBus from '../event_bus';
+
 const customColors = Storage.get.customBrickColors();
 
-function buildColorTable() {
-	const colors = [];
-	_.forOwn(LDParse.colorTable, (v, k) => {
-		if (v.color < 0 || v.edge < 0) {
-			return;
-		}
-		k = parseInt(k, 10);
-		const customColor = customColors[k] || {};
+interface colorRow {
+	id: LDrawColorCode;
+	name: string;
+	color: string;
+	edge: string;
+}
+
+function buildColorTable(): colorRow[] {
+	const colors: colorRow[] = [];
+	_.forOwn(LDParse.colorTable, (v: ColorTableEntry, k: string) => {
+		const id = parseInt(k, 10);
+		const customColor = customColors[id] || {};
 		colors.push({
-			id: k,
+			id,
 			name: v.name,
 			color: customColor.color || v.color,
-			edge: customColor.edge || v.edge
+			edge: customColor.edge || v.edge,
 		});
 	});
 	return colors;
 }
 
-export default {
-	data: function() {
+export default Vue.extend({
+	data() {
 		return {
-			colorData: buildColorTable()
+			colorData: buildColorTable(),
 		};
 	},
 	methods: {
@@ -101,7 +116,7 @@ export default {
 			Storage.replace.customBrickColors(fixedColors);
 			store.mutations.csi.markAllDirty();
 			store.mutations.pliItem.markAllDirty();
-			this.$root.redrawUI();
+			EventBus.$emit('redraw-ui');
 		},
 		reset() {
 			this.colorData.forEach(el => {
@@ -112,9 +127,10 @@ export default {
 		},
 		cancel() {
 			this.$emit('close');
-		}
-	}
-};
+		},
+	},
+});
+
 </script>
 
 <style>

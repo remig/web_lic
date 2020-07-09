@@ -14,8 +14,8 @@
 			</el-form-item>
 			<el-form-item>
 				<input
-					:disabled="autoRows"
 					v-model.number="values.rows"
+					:disabled="autoRows"
 					type="number"
 					min="1"
 					class="form-control"
@@ -31,8 +31,8 @@
 			</el-form-item>
 			<el-form-item>
 				<input
-					:disabled="autoCols"
 					v-model.number="values.cols"
+					:disabled="autoCols"
 					type="number"
 					min="1"
 					class="form-control"
@@ -67,7 +67,7 @@
 
 <script>
 
-export default{
+export default {
 	data: function() {
 		return {
 			autoRows: true,
@@ -75,8 +75,8 @@ export default{
 			values: {
 				rows: 0,
 				cols: 0,
-				direction: 'vertical'
-			}
+				direction: 'vertical',
+			},
 		};
 	},
 	methods: {
@@ -104,17 +104,17 @@ export default{
 		cancel() {
 			this.$emit('cancel', this.actualValues);
 			this.$emit('close');
-		}
+		},
 	},
 	computed: {
 		actualValues() {
 			return {
 				rows: this.autoRows ? 'auto' : this.values.rows,
 				cols: this.autoCols ? 'auto' : this.values.cols,
-				direction: this.values.direction
+				direction: this.values.direction,
 			};
-		}
-	}
+		},
+	},
 };
 </script>
 

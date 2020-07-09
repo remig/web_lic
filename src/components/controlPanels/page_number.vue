@@ -9,11 +9,11 @@
 					@change="updatePosition"
 				>
 					<el-option
-						v-for="position in positions"
-						:key="position"
-						:value="position"
+						v-for="positionItem in positions"
+						:key="positionItem"
+						:value="positionItem"
 					>
-						{{tr('template.page_number.positions.' + position)}}
+						{{tr('template.page_number.positions.' + positionItem)}}
 					</el-option>
 				</el-select>
 			</el-form-item>
@@ -40,7 +40,7 @@ export default {
 	data() {
 		return {
 			position: store.state.template.page.numberLabel.position,
-			positions: ['right', 'left', 'even-left', 'even-right']
+			positions: ['right', 'left', 'even-left', 'even-right'],
 		};
 	},
 	methods: {
@@ -50,8 +50,8 @@ export default {
 		},
 		newValues() {
 			this.$emit('new-values', 'pagenumber');
-		}
-	}
+		},
+	},
 };
 
 </script>

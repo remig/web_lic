@@ -1,7 +1,11 @@
 module.exports = {
+    "parser": "vue-eslint-parser",
 	"parserOptions": {
+        "parser": "@typescript-eslint/parser",
+        "project": "./tsconfig.json",
 		"ecmaVersion": 9,
-		"sourceType": "module"
+        "sourceType": "module",
+        "extraFileExtensions": [".vue"]
 	},
 	"env": {
 		"commonjs": true
@@ -11,7 +15,8 @@ module.exports = {
 		"plugin:vue/recommended"
 	],
 	"plugins": [
-		"no-only-tests"
+        "@typescript-eslint",
+        "no-only-tests"
 	],
 	"rules": {
 		"accessor-pairs": "error",
@@ -23,9 +28,9 @@ module.exports = {
 		"block-spacing": ["error", "never"],
 		"brace-style": ["error", "1tbs", {"allowSingleLine": true}],
 		"class-methods-use-this": "error",
-		"comma-dangle": ["warn", "never"],
+		"comma-dangle": ["warn", "always-multiline"],
 		"comma-spacing": "error",
-		"complexity": ["error", 36],  // TODO: reduce this over time
+		"complexity": ["error", 45],  // TODO: reduce this over time
 		"computed-property-spacing": ["warn", "never"],
 		"consistent-return": "error",
 		"curly": "error",
@@ -37,7 +42,7 @@ module.exports = {
 		"for-direction": "error",
 		"func-call-spacing": "error",
 		"guard-for-in": "error",
-		"indent": ["warn", "tab", {"SwitchCase": 1}],
+		"indent": "off",
 		"init-declarations": "off",
 		"key-spacing": "warn",
 		"keyword-spacing": "error",
@@ -111,9 +116,9 @@ module.exports = {
 		"no-undefined": "error",
 		"no-unmodified-loop-condition": "error",
 		"no-unreachable": "warn",
-		"no-unused-expressions": "warn",
+		"no-unused-expressions": "off",
 		"no-unused-labels": "warn",
-		"no-unused-vars": "warn",
+		"no-unused-vars": "off",
 		"no-use-before-define": ["error", { "functions": false}],
 		"no-useless-call": "error",
 		"no-useless-concat": "error",
@@ -135,10 +140,17 @@ module.exports = {
 		"space-in-parens": ["warn", "never"],
 		"space-infix-ops": "warn",
 		"space-unary-ops": "warn",
+		"@typescript-eslint/indent": ["warn", "tab", {"SwitchCase": 1}],
+		"@typescript-eslint/no-unused-vars": "warn",
+		"@typescript-eslint/no-unused-expressions": "warn",
 		"wrap-iife": [2, "inside", {"functionPrototypeMethods": true}],
 		"vue/attribute-hyphenation": ["warn", "always", {"ignore": ["onSubmit"]}],
+		"vue/attributes-order": "warn",
+		"vue/html-closing-bracket-spacing": "warn",
 		"vue/mustache-interpolation-spacing": [2, "never"],
 		"vue/max-attributes-per-line": [2, {"singleline": 20}],
+		"vue/no-v-html": "off",
+		"vue/no-use-v-if-with-v-for": "warn",
 		"vue/require-prop-types": "off",
 		"vue/require-default-prop": "off",
 		"vue/order-in-components": ["error", {"order": ["el", "name", "parent", "template", "functional", "delimiters", "comments", "filters", "directives", "components", "extends", "mixins", "inheritAttrs", "model", ["props", "propsData"], "data", "render", "watch", "methods", "computed", "LIFECYCLE_HOOKS", "renderError"]}],

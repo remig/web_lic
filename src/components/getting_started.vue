@@ -67,17 +67,17 @@ export default {
 		},
 		hideMessage() {
 			document.querySelector('.gettingStarted').classList.add('hidden');
-		}
+		},
 	},
 	computed: {
 		demoModels() {
 			return [
 				{id: 'trivial', fn: 'trivial_model.ldr'},
 				{id: 'alligator', fn: '20015 - Alligator.mpd'},
-				{id: 'xwing', fn: '7140 - X-Wing Fighter.mpd'}
+				{id: 'xwing', fn: '7140 - X-Wing Fighter.mpd'},
 			];
-		}
-	}
+		},
+	},
 };
 
 </script>

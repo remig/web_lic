@@ -96,7 +96,7 @@
 <script>
 
 import _ from '../util';
-import store from '../store';
+import cache from '../cache';
 import undoStack from '../undo_stack';
 import uiState from '../ui_state';
 
@@ -106,7 +106,7 @@ export default {
 		return {
 			useAutoColor: true,
 			lineColor: '',
-			newState: uiState.get('grid')
+			newState: uiState.get('grid'),
 		};
 	},
 	methods: {
@@ -126,7 +126,7 @@ export default {
 				this.newState.line.color = this.lineColor;
 			}
 			uiState.set('grid', _.cloneDeep(this.newState));
-			store.cache.set('uiState', 'gridPath', null);
+			cache.set('uiState', 'gridPath', null);
 			this.app.drawCurrentPage();
 		},
 		updateColor(newColor) {
@@ -135,32 +135,32 @@ export default {
 		},
 		ok() {
 			const storeOp = {
-				root: store.cache.stateCache,
+				root: cache.get('uiState', 'gridPath'),
 				op: 'replace',
-				path: '/uiState/gridPath',
-				value: null
+				path: '/',
+				value: null,
 			};
 			const root = uiState.getCurrentState(), op = 'replace', path = '/grid';
 			const change = {
 				redo: [
 					{root, op, path, value: _.cloneDeep(this.newState)},
-					storeOp
+					storeOp,
 				],
 				undo: [
 					{root, op, path, value: this.originalState},
-					storeOp
-				]
+					storeOp,
+				],
 			};
 			undoStack.commit(change, null, 'Style Grid');
 			this.$emit('close');
 		},
 		cancel() {
 			uiState.set('grid', this.originalState);
-			store.cache.set('uiState', 'gridPath', null);
+			cache.set('uiState', 'gridPath', null);
 			this.app.drawCurrentPage();
 			this.$emit('close');
-		}
-	}
+		},
+	},
 };
 </script>
 

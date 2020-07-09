@@ -9,8 +9,8 @@
 		<el-form label-width="100px">
 			<el-form-item :label="tr('dialog.style.label_text')">
 				<el-input
-					:rows="2"
 					v-model="text"
+					:rows="2"
 					type="textarea"
 				/>
 			</el-form-item>
@@ -20,11 +20,11 @@
 				>
 					<el-option-group v-for="group in familyNames" :key="group.label">
 						<el-option
-							v-for="font in group.options"
-							:key="font"
-							:value="font"
+							v-for="fontItem in group.options"
+							:key="fontItem"
+							:value="fontItem"
 						>
-							{{font}}
+							{{fontItem}}
 						</el-option>
 					</el-option-group>
 				</el-select>
@@ -85,7 +85,7 @@ export default {
 			size: 0,
 			bold: false,
 			italic: false,
-			underline: false
+			underline: false,
 		};
 	},
 	methods: {
@@ -103,17 +103,17 @@ export default {
 			this.$emit('ok', {
 				text: this.text,
 				font: _.fontString(this),
-				color: this.color
+				color: this.color,
 			});
 			this.$emit('close');
 		},
 		cancel() {
 			this.$emit('close');
-		}
+		},
 	},
 	computed: {
-		familyNames: fontNameDialog.methods.getFamilyNames
-	}
+		familyNames: fontNameDialog.methods.getFamilyNames,
+	},
 };
 </script>
 

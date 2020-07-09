@@ -44,7 +44,7 @@
 export default {
 	data: function() {
 		return {
-			content: {}
+			content: {},
 		};
 	},
 	methods: {
@@ -57,14 +57,14 @@ export default {
 		},
 		cancel() {
 			this.$emit('close');
-		}
+		},
 	},
 	async mounted() {
 		const content = await fetch('whats_new.json');
 		if (content && content.ok) {
 			this.content = await content.json();
 		}
-	}
+	},
 };
 
 </script>

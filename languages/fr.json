@@ -35,7 +35,8 @@
         "annotation": "Annotation",
         "callout": "Légende",
         "ctrl": "Ctrl",
-        "arrow": "Flèche"
+		"arrow": "Flèche",
+		"point": "Point"
     },
 	"action": {
         "file": {

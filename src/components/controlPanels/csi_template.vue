@@ -35,8 +35,8 @@ export default {
 		newValues() {
 			store.get.csi(this.selectedItem).isDirty = true;
 			this.$emit('new-values', {type: 'csi', noLayout: true});
-		}
-	}
+		},
+	},
 };
 
 </script>

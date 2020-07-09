@@ -32,37 +32,55 @@
 				<table class="anchor-table">
 					<tbody>
 						<tr>
-							<td><el-radio-button label="top_left">
-								{{tr('dialog.resize_image.anchors.top_left')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="top">
-								{{tr('dialog.resize_image.anchors.top')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="top_right">
-								{{tr('dialog.resize_image.anchors.top_right')}}
-							</el-radio-button></td>
+							<td>
+								<el-radio-button label="top_left">
+									{{tr('dialog.resize_image.anchors.top_left')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="top">
+									{{tr('dialog.resize_image.anchors.top')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="top_right">
+									{{tr('dialog.resize_image.anchors.top_right')}}
+								</el-radio-button>
+							</td>
 						</tr>
 						<tr>
-							<td><el-radio-button label="left">
-								{{tr('dialog.resize_image.anchors.left')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="center">
-								{{tr('dialog.resize_image.anchors.center')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="right">
-								{{tr('dialog.resize_image.anchors.right')}}
-							</el-radio-button></td>
+							<td>
+								<el-radio-button label="left">
+									{{tr('dialog.resize_image.anchors.left')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="center">
+									{{tr('dialog.resize_image.anchors.center')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="right">
+									{{tr('dialog.resize_image.anchors.right')}}
+								</el-radio-button>
+							</td>
 						</tr>
 						<tr>
-							<td><el-radio-button label="bottom_left">
-								{{tr('dialog.resize_image.anchors.bottom_left')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="bottom">
-								{{tr('dialog.resize_image.anchors.bottom')}}
-							</el-radio-button></td>
-							<td><el-radio-button label="bottom_right">
-								{{tr('dialog.resize_image.anchors.bottom_right')}}
-							</el-radio-button></td>
+							<td>
+								<el-radio-button label="bottom_left">
+									{{tr('dialog.resize_image.anchors.bottom_left')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="bottom">
+									{{tr('dialog.resize_image.anchors.bottom')}}
+								</el-radio-button>
+							</td>
+							<td>
+								<el-radio-button label="bottom_right">
+									{{tr('dialog.resize_image.anchors.bottom_right')}}
+								</el-radio-button>
+							</td>
 						</tr>
 					</tbody>
 				</table>
@@ -79,9 +97,6 @@
 
 import _ from '../util';
 import store from '../store';
-import LocaleManager from '../components/translate.vue';
-
-const tr = LocaleManager.translate;
 
 const anchorOffsets = {
 	top_left: {x: 0, y: 0},
@@ -92,7 +107,7 @@ const anchorOffsets = {
 	right: {x: 1, y: 0.5},
 	bottom_left: {x: 0, y: 1},
 	bottom: {x: 0.5, y: 1},
-	bottom_right: {x: 1, y: 1}
+	bottom_right: {x: 1, y: 1},
 };
 
 export default {
@@ -109,8 +124,8 @@ export default {
 				preserveAspectRatio: true,
 				anchorPosition: 'top_left',
 				pageWidth: page.width,
-				pageHeight: page.height
-			}
+				pageHeight: page.height,
+			},
 		};
 	},
 	methods: {
@@ -167,14 +182,14 @@ export default {
 		cancel() {
 			this.$emit('cancel');
 			this.$emit('close');
-		}
+		},
 	},
 	computed: {
 		anchorPositionList() {
 			return [
 				'top_left', 'top', 'top_right',
 				'left', 'center', 'right',
-				'bottom_left', 'bottom', 'bottom_right'
+				'bottom_left', 'bottom', 'bottom_right',
 			];
 		},
 		isImageTooBig() {
@@ -183,10 +198,10 @@ export default {
 				|| info.originalHeight > info.pageHeight;
 		},
 		bodyText() {
-			return tr(`dialog.resize_image.${this.isImageTooBig ? 'too_big' : 'too_small'}`);
+			return this.tr(`dialog.resize_image.${this.isImageTooBig ? 'too_big' : 'too_small'}`);
 		},
 		resizeText() {
-			return tr(`dialog.resize_image.${this.isImageTooBig ? 'shrink' : 'stretch'}`);
+			return this.tr(`dialog.resize_image.${this.isImageTooBig ? 'shrink' : 'stretch'}`);
 		},
 		needAspectRatioUI() {
 			if (this.imageInfo.preserveSize || this.aspectRatiosMatch) {
@@ -203,12 +218,12 @@ export default {
 		},
 		aspectRatiosMatch() {
 			const info = this.imageInfo;
-			return _.eq(
+			return _.equal(
 				info.originalWidth / info.originalHeight,
-				info.pageWidth / info.pageHeight
+				info.pageWidth / info.pageHeight,
 			);
-		}
-	}
+		},
+	},
 };
 </script>
 
