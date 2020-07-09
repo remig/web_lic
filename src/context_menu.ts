@@ -24,7 +24,9 @@ interface ContextMenuEntryInterface {
 	selectedItem?: LookupItem;  // TODO: Is this necessary
 }
 
-function isSeparator(menuEntry: any): menuEntry is ContextMenuSeparator {
+function isSeparator(
+	menuEntry: ContextMenuSeparator | ContextMenuEntryInterface,
+): menuEntry is ContextMenuSeparator {
 	return menuEntry.text === 'separator';
 }
 
