@@ -299,20 +299,8 @@ function parseComment(abstractPart, line) {
 	const command = line[1];
 	if (command === 'FILE') {
 		// NYI
-	} else if (command === 'ROTSTEP') {
-		// NYI
-	} else if (command === 'STEP') {
-		if (abstractPart.steps == null) {
-			abstractPart.steps = [];
-			abstractPart.steps.lastPart = 0;
-		}
-		if (abstractPart.parts) {
-			abstractPart.steps.push({
-				parts: abstractPart.parts.slice(abstractPart.steps.lastPart)
-					.map((v, i) => i + abstractPart.steps.lastPart),
-			});
-			abstractPart.steps.lastPart = abstractPart.parts.length;
-		}
+	} else if (command === 'ROTSTEP' || command === 'STEP') {
+		parseStep(abstractPart, command, line);
 	} else if (command === '!LEOCAD') {
 		// LeoCAD annotation
 		if (line.length >= 4) {
@@ -330,6 +318,33 @@ function parseComment(abstractPart, line) {
 				}
 			}
 		}
+	}
+}
+
+function parseStep(abstractPart, command, line) {
+	// initialize abstractPart properties if no steps currently exist
+	if (abstractPart.steps == null) {
+		abstractPart.steps = [];
+		abstractPart.steps.lastPart = 0;
+	}
+	// handle edge case if parts before this step were not included in a step (to prevent orphaned bricks)
+	if (abstractPart.parts) {
+		// store the rotation data
+		let rotation = null;
+		if (command === 'ROTSTEP') {
+			rotation = {
+				x: parseFloat(line[2]),
+				y: parseFloat(line[3]),
+				z: parseFloat(line[4]),
+				type: line[5],
+			};
+		}
+		abstractPart.steps.push({
+			parts: abstractPart.parts.slice(abstractPart.steps.lastPart)
+				.map((v, i) => i + abstractPart.steps.lastPart),
+			rotation: rotation,
+		});
+		abstractPart.steps.lastPart = abstractPart.parts.length;
 	}
 }
 

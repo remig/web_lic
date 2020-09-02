@@ -424,7 +424,8 @@ const UI = {
 			this.$refs.contextMenuComponent.hide();
 			this.$refs.navMenuComponent.hide();
 		},
-		globalKeyPress(e) {
+		globalKeyPress(e, metaKeyDown) {
+			// console.log(this.metaKeyDown, e.key);
 			this.closeMenus();
 			const selItem = this.selectedItemLookup;
 			if (e.key === 'PageDown') {
@@ -435,7 +436,7 @@ const UI = {
 				DialogManager.ok();
 			} else if (e.key === 'Escape') {
 				DialogManager.cancel();
-			} else if (e.key === 'Delete') {
+			} else if (e.key === 'Delete' || e.key === 'Backspace') {
 				if (selItem
 					&& !store.get.isTemplatePage(store.get.pageForItem(selItem))
 					&& store.mutations[selItem.type]
@@ -504,7 +505,7 @@ const UI = {
 			} else {
 				// Check if key is a menu shortcut
 				const menu = this.navBarContent;
-				const key = (e.ctrlKey ? 'ctrl+' : '') + e.key;
+				const key = ((e.ctrlKey || metaKeyDown) ? 'ctrl+' : '') + e.key;
 				for (let i = 0; i < menu.length; i++) {
 					for (let j = 0; j < menu[i].children.length; j++) {
 						const entry = menu[i].children[j];
@@ -569,9 +570,13 @@ const UI = {
 		// TODO: show template page always, even when no model loaded.
 		// 		This lets you import a model with the desired template already in place.
 		document.body.addEventListener('keyup', e => {
-			this.globalKeyPress(e);
+			this.globalKeyPress(e, false);
 		});
-
+		document.body.addEventListener('keydown', e => {
+			if (e.metaKey && e.key !== 'Meta') {
+				this.globalKeyPress(e, true);
+			}
+		});
 		document.body.addEventListener('keydown', e => {
 			if ((e.key === 'PageDown' || e.key === 'PageUp'
 				|| e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey))

@@ -231,7 +231,7 @@ export const Mutations: MutationInterface = {
 
 		const pagesAdded: number[] = [];
 
-		localModel.steps.forEach((modelStep: any) => {
+		localModel.steps.forEach((modelStep: any, index: number) => {
 
 			const parts = _.cloneDeep(modelStep.parts || []);
 			const submodelIDs = parts.filter((pID: number) => {
@@ -263,6 +263,43 @@ export const Mutations: MutationInterface = {
 			step.parts = parts;
 			if (modelFilename) {
 				step.model.filename = modelFilename;
+			}
+			if (modelStep.rotation != null && step.csiID != null) {
+				const globalRotation = store.state.template.sceneRendering.rotation;
+				const csi = store.get.csi(step.csiID);
+				const previousStep = localModel.steps[index - 1];
+				// handle absolute ROTSTEP command
+				if (modelStep.rotation.type === 'ABS') {
+					// record rotations on the csi
+					csi.rotation = [
+						{axis: 'x', angle: modelStep.rotation.x},
+						{axis: 'y', angle: modelStep.rotation.y},
+						{axis: 'z', angle: modelStep.rotation.z},
+					];
+					// apply global rotations
+					for (index = 0; index < globalRotation.length; index++) {
+						csi.rotation.unshift(
+							{axis: globalRotation[index].axis, angle: -globalRotation[index].angle},
+						);
+					}
+					// check for previous step with rotation
+					if (previousStep != null && previousStep.rotation != null) {
+						// compare rotations for total change above 5 degrees
+						if (Math.abs(previousStep.rotation.x - modelStep.rotation.x) +
+								Math.abs(previousStep.rotation.y - modelStep.rotation.y) +
+								Math.abs(previousStep.rotation.z - modelStep.rotation.z) > 5) {
+							// toggle rotation icon
+							store.mutations.step.toggleRotateIcon({step, display: true});
+						}
+					}
+				// // handle relative ROTSTEP command
+				// } else if (modelStep.rotation.type == 'REL') {
+				// 	csi.rotation = [
+				// 		{axis: 'x', angle: modelStep.rotation.x},
+				// 		{axis: 'y', angle: modelStep.rotation.y},
+				// 		{axis: 'z', angle: modelStep.rotation.z},
+				// 	];
+				}
 			}
 
 			submodelPagesAdded.forEach((submodelPageGroup: number[]) => {
