@@ -134,10 +134,10 @@ function generateObjectList(part, modelView, colorCode, config) {
 					parentColorCode: colorCode,
 				};
 				const newObject = generateObjectList(abstractPart, partMatrix, newColorCode, localConfig);
-				res.faces.push(...newObject.faces);
-				res.lines.push(...newObject.lines);
-				res.condLines.push(...newObject.condLines);
-				res.alphaFaces.push(...newObject.alphaFaces);
+				concatArray(newObject.faces, res.faces);
+				concatArray(newObject.lines, res.lines);
+				concatArray(newObject.condLines, res.condLines);
+				concatArray(newObject.alphaFaces, res.alphaFaces);
 			}
 		} else if (part.parts) {
 			for (let i = 0; i < part.parts.length; i++) {
@@ -155,14 +155,23 @@ function generateObjectList(part, modelView, colorCode, config) {
 				};
 
 				const newObject = generateObjectList(abstractPart, partMatrix, newColorCode, localConfig);
-				res.faces.push(...newObject.faces);
-				res.lines.push(...newObject.lines);
-				res.condLines.push(...newObject.condLines);
-				res.alphaFaces.push(...newObject.alphaFaces);
+				concatArray(newObject.faces, res.faces);
+				concatArray(newObject.lines, res.lines);
+				concatArray(newObject.condLines, res.condLines);
+				concatArray(newObject.alphaFaces, res.alphaFaces);
 			}
 		}
 	}
 	return res;
+}
+
+function concatArray(from, to) {
+	let j = 0;
+	const len = from.length;
+	while (j < len) {
+		to.push(from[j]);
+		j++;
+	}
 }
 
 // Actually render the list of objects to the global gl canvas
