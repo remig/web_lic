@@ -15,18 +15,18 @@ declare module 'element-ui/lib/locale/lang/en' {}
 // TODO: Find proper external types for these global libraries
 declare function saveAs(blob: any, filename: string): void;
 
-declare interface JSZip {
+declare interface IJSZip {
 	new (): this;
-	(): JSZip;
-	prototype: JSZip;
-	folder(name: string): JSZip;
+	(): IJSZip;
+	prototype: IJSZip;
+	folder(name: string): IJSZip;
 	file(path: string, data: string, config?: {base64: boolean}): any;
 	generateAsync(options: any): any;
 }
 
-declare const JSZip: JSZip;
+declare const JSZip: IJSZip;
 
-declare interface jsPDF {
+declare interface IjsPDF {
 	new (
 		orientation: 'landscape' | 'portrait',
 		unit: 'pt',
@@ -34,22 +34,22 @@ declare interface jsPDF {
 	): this;
 	addImage(
 		data: any, type: 'PNG' | 'JPEG', x: number, y: number, width: number, height: number
-	);
-	addPage(width: number, height: number);
-	save(filename: string);
+	): void;
+	addPage(width: number, height: number): void;
+	save(filename: string): void;
 }
 
-declare const jsPDF: jsPDF;
+declare const jsPDF: IjsPDF;
 
 interface jsonpatchOperation {
 	op: string, path: string, value?: any;
 }
 
-declare interface jsonpatch {
+declare interface Ijsonpatch {
 	applyOperation<T>(
 		root: T,
 		action: jsonpatchOperation
-	);
+	): void;
 }
 
-declare const jsonpatch: jsonpatch;
+declare const jsonpatch: Ijsonpatch;

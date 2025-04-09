@@ -2,6 +2,7 @@
 
 import _ from './util';
 import Storage from './storage';
+import {type GuideInterface} from './item_types';
 
 interface UIStateInterface {
 	locale: string | null;

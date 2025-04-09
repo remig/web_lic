@@ -150,6 +150,7 @@ module.exports = {
 		"vue/mustache-interpolation-spacing": [2, "never"],
 		"vue/max-attributes-per-line": [2, {"singleline": 20}],
 		"vue/no-v-html": "off",
+		'vue/multi-word-component-names': 'off',
 		"vue/no-use-v-if-with-v-for": "warn",
 		"vue/require-prop-types": "off",
 		"vue/require-default-prop": "off",

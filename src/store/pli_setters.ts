@@ -1,6 +1,7 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import store from '../store';
+import {type LookupItem, type Part, type PLI} from '../item_types';
 
 export interface PLIMutationInterface {
 	add({parent}: {parent: LookupItem}): void;

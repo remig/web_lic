@@ -4,6 +4,7 @@ import _ from '../util';
 import store from '../store';
 import cache from '../cache';
 import Layout from '../layout';
+import {type AnnotationTypes, type LookupItem, type Annotation, type PointItem} from '../item_types';
 
 export interface AnnotationMutationInterface {
 	add(

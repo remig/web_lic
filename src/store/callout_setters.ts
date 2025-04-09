@@ -2,6 +2,9 @@
 
 import _ from '../util';
 import store from '../store';
+import {
+	type Callout, type LookupItem, type Positions, type Orientations, type NumberLabel,
+} from '../item_types';
 
 export interface CalloutMutationInterface {
 	add(

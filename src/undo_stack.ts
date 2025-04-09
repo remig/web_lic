@@ -5,6 +5,7 @@
 import _ from './util';
 import store from './store';
 import {tr, noTranslate} from './translations';
+import {type CSI, type PLIItem} from './item_types';
 
 // stack is an array of state
 // undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone
@@ -12,27 +13,6 @@ import {tr, noTranslate} from './translations';
 // TODO: don't let this grow unbound. Support max undo stack size.
 // TODO: Need performance metrics for decent max stack size.
 // TODO: check if previous undo stack entry has same text as newest one; if so, merge them (if sensical)
-
-interface UndoState {
-	stack: UndoStackEntry[];
-	index: number;
-	localStorageTimer: any;
-	onChangeCB?: (() => void) | null;
-}
-
-interface UndoStackEntry {
-	state: any;
-	actionList?: ActionChange[];
-	undoText?: string | null;
-	clearCacheTargets?: ClearCacheTarget[] | null;
-}
-
-const state: UndoState = {
-	stack: [],
-	index: -1,
-	localStorageTimer: null,
-	onChangeCB: null,
-};
 
 interface UndoRedoAction {
 	root: any, op: string, path: string, value?: any
@@ -43,14 +23,35 @@ interface ActionChange {
 	redo: UndoRedoAction[],
 }
 
+type ClearCacheTarget =
+	{type: 'csi', id?: number | null} | {type: 'pliItem', id?: number | null}
+	| CSI | PLIItem | 'csi' |'pliItem' | 'renderer';
+
+interface UndoStackEntry {
+	state: any;
+	actionList?: ActionChange[];
+	undoText?: string | null;
+	clearCacheTargets?: ClearCacheTarget[] | null;
+}
+
+interface UndoState {
+	stack: UndoStackEntry[];
+	index: number;
+	localStorageTimer: any;
+	onChangeCB?: (() => void) | null;
+}
+
+const state: UndoState = {
+	stack: [],
+	index: -1,
+	localStorageTimer: null,
+	onChangeCB: null,
+};
+
 interface MutationChange {
 	mutation: string,
 	opts: any,
 }
-
-type ClearCacheTarget =
-	{type: 'csi', id?: number | null} | {type: 'pliItem', id?: number | null}
-	| CSI | PLIItem | 'csi' |'pliItem' | 'renderer';
 
 const api = {
 
@@ -218,10 +219,10 @@ function performUndoRedoAction(undoOrRedo: 'undo' | 'redo', newIndex: number) {
 function performClearCacheTargets(prevIndex: number, newIndex: number) {
 	const clearCacheTargets = [], stack = state.stack;
 	if (stack[prevIndex]?.clearCacheTargets) {
-		clearCacheTargets.push(...stack[prevIndex].clearCacheTargets);
+		clearCacheTargets.push(...(stack[prevIndex].clearCacheTargets ?? []));
 	}
 	if (stack[newIndex]?.clearCacheTargets) {
-		clearCacheTargets.push(...stack[newIndex].clearCacheTargets);
+		clearCacheTargets.push(...(stack[newIndex].clearCacheTargets ?? []));
 	}
 	clearCacheTargets.forEach(item => {
 		if (typeof item === 'string') {

@@ -7,6 +7,9 @@ import EventBus from './event_bus';
 import LDParse from './ld_parse';
 import {tr} from './translations';
 import {isQuantityLabelParent} from './type_helpers';
+import {
+	type ItemTypeNames, type ItemTypes, type LookupItem, type AbstractPart, type PartItem,
+} from './item_types';
 
 let lastSelectedId: string | null;
 let invisibleNodeTypes: Set<string>;

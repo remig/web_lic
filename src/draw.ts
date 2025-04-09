@@ -6,6 +6,10 @@ import cache from './cache';
 import LDParse from './ld_parse';
 import uiState from './ui_state';
 import {isSize, isPoint, isPointItem} from './type_helpers';
+import {
+	type LookupItem, type Page, type Directions, type Border, type Point, type PointItem,
+	type Annotation, type PartItem, type ImageTemplate, type Box, type BoxedOffsetItem,
+} from './item_types';
 
 interface DrawConfig {
 	hiResScale?: number;

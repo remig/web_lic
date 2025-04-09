@@ -4,6 +4,10 @@ import _ from '../util';
 import store from '../store';
 import uiState from '../ui_state';
 import Layout from '../layout';
+import {
+	type LookupItem, type PageSubtypes, type Page, type Orientations, type GridLayout, type Book,
+	type NumberLabel,
+} from '../item_types';
 
 export interface PageMutationInterface {
 	add({

@@ -1,18 +1,18 @@
-type Directions = 'up' | 'right' | 'down' | 'left';
-type Positions = 'top' | 'right' | 'bottom' | 'left';
-type Orientations = 'horizontal' | 'vertical'
-type Anchors =
+export type Directions = 'up' | 'right' | 'down' | 'left';
+export type Positions = 'top' | 'right' | 'bottom' | 'left';
+export type Orientations = 'horizontal' | 'vertical'
+export type Anchors =
 	'top_left' | 'top' | 'top_right'
 	| 'left' | 'center' | 'right'
 	| 'bottom_left' | 'bottom' | 'bottom_right';
 
-type LDrawColorCode = number;
+export type LDrawColorCode = number;
 
-type LDrawPartFilename = string;
+export type LDrawPartFilename = string;
 
-type Primitive = number[];
+export type Primitive = number[];
 
-interface AbstractPart {
+export interface AbstractPart {
 	filename: string;
 	name: string;
 	parts: any[];
@@ -20,13 +20,13 @@ interface AbstractPart {
 	isSubModel?: boolean;
 }
 
-interface Part {
+export interface Part {
 	filename: string;
 	matrix: number[];
 	colorCode?: number;
 }
 
-interface Model {
+export interface Model {
 	filename: string;
 	name: string;
 	parts: any[];
@@ -35,14 +35,14 @@ interface Model {
 	parentStepID?: number;
 }
 
-type PartDictionary = {[key: string]: AbstractPart | Model};
+export type PartDictionary = {[key: string]: AbstractPart | Model};
 
-interface StepModel {
+export interface StepModel {
 	filename: string;
 	parentStepID: number | null;
 }
 
-interface ColorTableEntry {
+export interface ColorTableEntry {
 	name: string;
 	color: string;
 	edge: string;
@@ -50,39 +50,39 @@ interface ColorTableEntry {
 	edgeRgba: string;
 }
 
-interface Point {
+export interface Point {
 	x: number;
 	y: number;
 }
 
-interface Size {
+export interface Size {
 	width: number;
 	height: number;
 }
 
-interface Border {
+export interface Border {
 	width: number;
 	color: string | null;
 }
 
-interface Box extends Point, Size {}
+export interface Box extends Point, Size {}
 
-interface Rotation {
+export interface Rotation {
 	axis: 'x' | 'y' | 'z';
 	angle: number;
 }
 
-interface PLITransform {
+export interface PLITransform {
 	rotation: Rotation[];
 	scale: number;
 }
 
-interface Alignment {
+export interface Alignment {
 	align: 'left' | 'right';
 	valign: 'top' | 'bottom';
 }
 
-interface DisplacedPart {
+export interface DisplacedPart {
 	partID: number;
 	direction: Directions;
 	arrowLength?: number;
@@ -91,72 +91,65 @@ interface DisplacedPart {
 	partDistance?: number;
 }
 
-type AnnotationTypes = 'label' | 'arrow' | 'stairStepArrow' | 'image';
+export type AnnotationTypes = 'label' | 'arrow' | 'stairStepArrow' | 'image';
 
-type ItemTypeNames =
+export type ItemTypeNames =
 	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
 	| 'numberLabel'| 'page' | 'part' | 'pli' | 'pliItem' | 'point'
 	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodel' | 'submodelImage';
 
-type TemplateTypeNames = keyof Template;
-
-type ItemTypes =
-	Annotation | Book | Callout | CalloutArrow | CSI | Divider
-	| NumberLabel | Page | PartItem | PLI | PLIItem | PointItem
-	| QuantityLabel | RotateIcon | Step | SubmodelItem | SubmodelImage;
-
-interface LookupItem {
+export interface LookupItem {
 	id: number;
 	type: ItemTypeNames;
 }
 
-interface Item extends LookupItem {
+export interface Item extends LookupItem {
 	parent: LookupItem;
 }
 
-interface PointedItem extends Item, Point {}
+export interface PointedItem extends Item, Point {}
 
-interface BoxedItem extends Item, Box {
+export interface BoxedItem extends Item, Box {
 }
 
-interface BoxedOffsetItem extends Item, Box {
+export interface BoxedOffsetItem extends Item, Box {
 	borderOffset: Point;
 	innerContentOffset: Point;
 }
 
-interface NumberedItem extends Item {
+export interface NumberedItem extends Item {
 	number: number;
 }
 
-interface PLIItemParent extends Item {
+export interface PLIItemParent extends Item {
 	pliItems: number[];
 }
 
-interface StepParent extends Item {
+export interface StepParent extends Item {
 	steps: number[];
 }
 
-interface QuantityLabelParent extends Item {
+export interface QuantityLabelParent extends Item {
 	quantity: number;
 	quantityLabelID: number | null;
 }
 
-interface PointListItem extends Item {
+export interface PointListItem extends Item {
 	points: number[];
 }
 
-interface PartItem extends Item {
+export interface PartItem extends Item {
 	type: 'part';
 	stepID: number;
 }
 
-interface SubmodelItem extends Item {
+export interface SubmodelItem extends Item {
 	type: 'submodel';
 	stepID: number;
 	filename: string;
 }
 
-interface Annotation extends BoxedItem, Alignment, PointListItem {
+export interface Annotation extends BoxedItem, Alignment, PointListItem {
 	type: 'annotation';
 	annotationType: AnnotationTypes;
 	color: string;
@@ -169,24 +162,24 @@ interface Annotation extends BoxedItem, Alignment, PointListItem {
 	border?: Border | null;
 }
 
-interface Book extends NumberedItem {
+export interface Book extends NumberedItem {
 	type: 'book';
 	pages: number[];
 }
 
-interface CalloutArrow extends PointListItem {
+export interface CalloutArrow extends PointListItem {
 	type: 'calloutArrow';
 	direction: Directions;
 }
 
-interface Callout extends BoxedOffsetItem, StepParent {
+export interface Callout extends BoxedOffsetItem, StepParent {
 	type: 'callout';
 	calloutArrows: number[];
 	layout: Orientations;
 	position: Positions;
 }
 
-interface CSI extends BoxedItem {
+export interface CSI extends BoxedItem {
 	type: 'csi';
 	annotations: number[];
 	autoScale: number | null;
@@ -196,25 +189,25 @@ interface CSI extends BoxedItem {
 	isDirty: boolean;
 }
 
-interface Divider extends Item {
+export interface Divider extends Item {
 	type: 'divider';
 	p1: Point;
 	p2: Point;
 }
 
-interface NumberLabel extends BoxedItem, Alignment {
+export interface NumberLabel extends BoxedItem, Alignment {
 	type: 'numberLabel';
 }
 
-type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
+export type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
 
-interface GridLayout {
+export interface GridLayout {
 	rows: number | 'auto';
 	cols: number | 'auto';
 	direction: Orientations;
 }
 
-interface Page extends PLIItemParent, NumberedItem, StepParent {
+export interface Page extends PLIItemParent, NumberedItem, StepParent {
 	type: 'page';
 	subtype: PageSubtypes;
 	annotations: number[];
@@ -232,11 +225,11 @@ interface Page extends PLIItemParent, NumberedItem, StepParent {
 	} | null;
 }
 
-interface PLI extends BoxedOffsetItem, PLIItemParent {
+export interface PLI extends BoxedOffsetItem, PLIItemParent {
 	type: 'pli';
 }
 
-interface PLIItem extends BoxedItem, QuantityLabelParent {
+export interface PLIItem extends BoxedItem, QuantityLabelParent {
 	type: 'pliItem';
 	domID: string | null;
 	filename: string;
@@ -244,21 +237,21 @@ interface PLIItem extends BoxedItem, QuantityLabelParent {
 	isDirty: boolean;
 }
 
-interface PointItem extends PointedItem {
+export interface PointItem extends PointedItem {
 	type: 'point';
 	relativeTo: LookupItem | null;
 }
 
-interface QuantityLabel extends BoxedItem, Alignment {
+export interface QuantityLabel extends BoxedItem, Alignment {
 	type: 'quantityLabel';
 }
 
-interface RotateIcon extends BoxedItem {
+export interface RotateIcon extends BoxedItem {
 	type: 'rotateIcon';
 	scale: number;
 }
 
-interface Step extends NumberedItem, BoxedItem {
+export interface Step extends NumberedItem, BoxedItem {
 	type: 'step';
 	annotations: number[];
 	callouts: number[];
@@ -277,26 +270,26 @@ interface Step extends NumberedItem, BoxedItem {
 	prevBookParts: number[] | null;
 }
 
-interface SubmodelImage extends BoxedOffsetItem, QuantityLabelParent {
+export interface SubmodelImage extends BoxedOffsetItem, QuantityLabelParent {
 	type: 'submodelImage';
 	csiID: number | null;
 	modelFilename: string;
 }
 
-interface LabelTemplate {
+export interface LabelTemplate {
 	font: string;
 	color: string;
 }
 
-interface RoundBorderTemplate extends Border {
+export interface RoundBorderTemplate extends Border {
 	cornerRadius: number;
 }
 
-interface FillTemplate {
+export interface FillTemplate {
 	color: string | null;
 }
 
-interface ImageTemplate {
+export interface ImageTemplate {
 	x: number;
 	y: number;
 	width: number;
@@ -304,9 +297,14 @@ interface ImageTemplate {
 	src: string;
 }
 
-interface BaseTemplate { }
+export type ItemTypes =
+	Annotation | Book | Callout | CalloutArrow | CSI | Divider
+	| NumberLabel | Page | PartItem | PLI | PLIItem | PointItem
+	| QuantityLabel | RotateIcon | Step | SubmodelItem | SubmodelImage;
 
-interface PageTemplate extends BaseTemplate {
+export interface BaseTemplate { }
+
+export interface PageTemplate extends BaseTemplate {
 	width: number;
 	height: number;
 	sizePreset: null;
@@ -324,7 +322,7 @@ interface PageTemplate extends BaseTemplate {
 	border: RoundBorderTemplate;
 }
 
-interface StepTemplate extends BaseTemplate {
+export interface StepTemplate extends BaseTemplate {
 	innerMargin: number;
 	csi: {
 		scale: number;
@@ -337,7 +335,7 @@ interface StepTemplate extends BaseTemplate {
 	numberLabel: LabelTemplate;
 }
 
-interface SubmodelTemplate extends BaseTemplate {
+export interface SubmodelTemplate extends BaseTemplate {
 	innerMargin: number;
 	maxHeight: number;
 	csi: {
@@ -349,20 +347,20 @@ interface SubmodelTemplate extends BaseTemplate {
 	quantityLabel: LabelTemplate;
 }
 
-interface PLITemplate extends BaseTemplate {
+export interface PLITemplate extends BaseTemplate {
 	innerMargin: number;
 	includeSubmodels: boolean;
 	fill: FillTemplate;
 	border: RoundBorderTemplate;
 }
 
-interface PLIItemTemplate extends BaseTemplate {
+export interface PLIItemTemplate extends BaseTemplate {
 	scale: number;
 	rotation: Rotation[];
 	quantityLabel: LabelTemplate;
 }
 
-interface CalloutTemplate extends BaseTemplate {
+export interface CalloutTemplate extends BaseTemplate {
 	innerMargin: number;
 	fill: FillTemplate;
 	border: RoundBorderTemplate;
@@ -375,7 +373,7 @@ interface CalloutTemplate extends BaseTemplate {
 	};
 }
 
-interface Template {
+export interface Template {
 
 	page: PageTemplate;
 	step: StepTemplate;
@@ -401,18 +399,20 @@ interface Template {
 	};
 	useBlackStudFaces: boolean;
 	modelData: {
-		model;
-		part1;
-		part2;
+		model: any;
+		part1: any;
+		part2: any;
 	};
 }
 
-interface GuideInterface {
+export type TemplateTypeNames = keyof Template;
+
+export interface GuideInterface {
 	orientation: 'horizontal' | 'vertical';
 	position: number;
 }
 
-interface StateInterface {
+export interface StateInterface {
 	annotations: Annotation[];
 	books: Book[];
 	calloutArrows: CalloutArrow[];
@@ -434,7 +434,7 @@ interface StateInterface {
 	template: Template;
 }
 
-interface SaveFileContent {
+export interface SaveFileContent {
 	version: string;
 	partDictionary: PartDictionary;
 	colorTable: any;

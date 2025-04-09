@@ -3,6 +3,7 @@
 import _ from '../util';
 import store from '../store';
 import {isPointListItem} from '../type_helpers';
+import {type PointItem, type LookupItem, type CalloutArrow, type Directions} from '../item_types';
 
 export interface CalloutArrowMutationInterface {
 	add({parent}: {parent: LookupItem}): CalloutArrow;

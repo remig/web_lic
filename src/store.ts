@@ -4,6 +4,7 @@
 
 import _ from './util';
 import cache from './cache';
+import {type Model, type StateInterface, type SaveFileContent} from './item_types';
 import {RendererInterface, Renderer} from './store/render';
 import {GetterInterface, Getters} from './store/getters';
 import {MutationInterface, Mutations} from './store/mutations';

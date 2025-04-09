@@ -8,6 +8,10 @@ import undoStack from './undo_stack';
 import uiState from './ui_state';
 import Guide from './components/guide.vue';
 import EventBus from './event_bus';
+import {
+	type LookupItem, type Size, type Step, type ItemTypes, type Page, type Point, type GuideInterface,
+	type ItemTypeNames, type Box,
+} from './item_types';
 
 const multiPagePadding = 15;
 
@@ -62,7 +66,7 @@ interface PageViewComponent {
 	} | null;
 }
 
-Vue.component('pageView', {
+Vue.component('PageView', {
 	props: ['app', 'selectedItem', 'currentPageId'],
 	data() {
 

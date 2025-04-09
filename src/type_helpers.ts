@@ -1,6 +1,15 @@
+/* eslint-disable no-redeclare */
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import defaultTemplate from './template';
+import {
+	type Item, type Annotation, type Book, type CSI, type Divider, type Page, type Callout,
+	type CalloutArrow, type NumberLabel, type PLI, type PartItem, type PLIItem, type Box,
+	type PointItem, type QuantityLabel, type Step, type SubmodelImage, type RotateIcon,
+	type SubmodelItem, type ItemTypeNames, type LookupItem, type Size, type Point,
+	type PointListItem, type StepParent, type QuantityLabelParent, type BaseTemplate,
+	type Template,
+} from './item_types';
 
 export function hasProperty<T extends Item>(item: Item | null, prop: string): item is T {
 	return (item != null) && item.hasOwnProperty(prop);

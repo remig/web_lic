@@ -7,6 +7,9 @@ import LDParse from '../ld_parse';
 import LDRender from '../ld_render';
 import Layout from '../layout';
 import StepInsertion from '../store/step_insertion';
+import {
+	type LookupItem, type Point, type Divider, type Rotation, type RotateIcon, type PLITransform, type Step,
+} from '../item_types';
 
 import {AnnotationMutationInterface, AnnotationMutations} from '../store/annotation_setters';
 import {BookMutationInterface, BookMutations} from '../store/book_setters';
@@ -165,7 +168,7 @@ export const Mutations: MutationInterface = {
 				transform = store.state.pliTransforms[filename] = {} as PLITransform;
 			}
 			if (_.isEmpty(rotation) || rotation == null) {
-				delete transform.rotation;
+				delete (transform as any).rotation;
 			} else {
 				transform.rotation = rotation.filter(el => el.angle !== 0);
 			}
@@ -179,7 +182,7 @@ export const Mutations: MutationInterface = {
 				transform = store.state.pliTransforms[filename] = {} as PLITransform;
 			}
 			if (_.isEmpty(scale) || scale == null || scale === 1) {
-				delete transform.scale;
+				delete (transform as any).scale;
 			} else {
 				transform.scale = scale;
 			}

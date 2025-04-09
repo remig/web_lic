@@ -8,6 +8,7 @@ import Storage from './storage';
 import * as translate from './translations';
 import uiState from './ui_state';
 import DialogManager from './dialog';
+import type {Orientations} from './item_types';
 
 let app: any;
 const tr = translate.tr;

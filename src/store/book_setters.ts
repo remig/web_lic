@@ -11,6 +11,7 @@ import store from '../store';
 import Layout from '../layout';
 import LDParse from '../ld_parse';
 import packageInfo from '../../package.json';
+import {type Book, type LookupItem} from '../item_types';
 
 interface PageSpan {
 	start: number;

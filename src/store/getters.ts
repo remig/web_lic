@@ -5,6 +5,17 @@ import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
 import {isTemplateType, isPointListItem, isNotNull} from '../type_helpers';
+import {
+	type LookupItem, type ItemTypes, type ItemTypeNames,
+	type Item, type Annotation, type Book, type Callout,
+	type CalloutArrow, type CSI, type Divider, type NumberLabel,
+	type Page, type PLI, type PLIItem, type PointItem,
+	type QuantityLabel, type RotateIcon, type Step,
+	type SubmodelImage, type Part, type LDrawPartFilename,
+	type PLITransform, type NumberedItem, type Point,
+	type Box, type StepParent, type AbstractPart, type PLIItemParent,
+	type SubmodelItem, type PointedItem, type PointListItem,
+} from '../item_types';
 
 function getter<T extends ItemTypes>(s: ItemTypeNames) {
 	return (itemLookup: number | LookupItem) => {

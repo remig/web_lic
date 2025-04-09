@@ -1,4 +1,5 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
+import {type Template} from './item_types';
 
 const part1 = {
 	colorCode: 1, filename: '3001.dat',

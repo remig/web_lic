@@ -3,6 +3,7 @@
 import _ from '../util';
 import store from '../store';
 import LDParse from '../ld_parse';
+import {type LookupItem, type Directions} from '../item_types';
 
 export interface PartMutationInterface {
 	displace({

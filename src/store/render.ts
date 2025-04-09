@@ -2,6 +2,7 @@
 
 import store from '../store';
 import LDRender from '../ld_render';
+import {type CSI, type PLIItem, type ItemTypes, type Step} from '../item_types';
 
 const canvasCache = (function() {
 	let cache: {[key: string]: HTMLCanvasElement} = {};
@@ -116,7 +117,7 @@ export const Renderer: RendererInterface = {
 			}
 			container = container || canvasCache.create(csi.domID);
 			LDRender.renderModel(localModel, container, config);
-			delete csi.isDirty;
+			delete (csi as any).isDirty;
 		}
 		return {width: container.width, height: container.height, dx: 0, dy: 0, container};
 	},
@@ -159,7 +160,7 @@ export const Renderer: RendererInterface = {
 			};
 			container = container || canvasCache.create(item.domID || '');
 			LDRender.renderPart(colorCode, filename, container, config);
-			delete item.isDirty;
+			delete (item as any).isDirty;
 		}
 		return {width: container.width, height: container.height, container};
 	},

@@ -1,10 +1,11 @@
+/* eslint-disable vue/one-component-per-file */
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import Vue from 'vue';
 import {Dialog, Tooltip} from 'element-ui';
 
 // Change defaults for common Element components
-Vue.component('licDialog', {
+Vue.component('LicDialog', {
 	mixins: [Dialog],
 	props: {
 		modal: {
@@ -22,7 +23,7 @@ Vue.component('licDialog', {
 	},
 });
 
-Vue.component('licTooltip', {
+Vue.component('LicTooltip', {
 	mixins: [Tooltip],
 	props: {
 		openDelay: {

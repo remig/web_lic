@@ -1,6 +1,7 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 let stateCache: {[key: string]: any} = {};
+import {type LookupItem} from './item_types';
 
 interface Cache {
 	get(item: string | LookupItem, key: string, defaultValue?: any): any;

@@ -1,5 +1,7 @@
+/* eslint-disable no-redeclare */
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 import Vue, {VNode} from 'vue';
+import {type Anchors, type Rotation, type GridLayout} from './item_types';
 
 type DialogEvent = 'ok' | 'cancel' | 'update';
 export interface DialogInterface {
@@ -147,7 +149,7 @@ type DialogNames =
 	| 'gridDialog' | 'pdfExportDialog' | 'pngExportDialog' | 'styleDialog' | 'importModelDialog'
 	| 'whatsNewDialog' | 'aboutLicDialog' | 'resizeImageDialog' | 'multiBookDialog';
 
-Vue.component('dialogManager', {
+Vue.component('DialogManager', {
 	components: {
 		localeChooserDialog: () => import(
 			/* webpackChunkName: "localeChooserDialog" */

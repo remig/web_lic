@@ -5,6 +5,7 @@ import _ from '../util';
 import store from '../store';
 import LDParse from '../ld_parse';
 import Layout from '../layout';
+import {type PLIItem, type LookupItem, type Part, type Model} from '../item_types';
 
 function findPLIItem(filename: string, colorCode: number): PLIItem | undefined {
 	return store.state.pliItems.find(pliItem => {

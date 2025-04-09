@@ -3,7 +3,7 @@
 const path = require('path');
 const {VueLoaderPlugin} = require('vue-loader');
 const webpack = require('webpack');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const rules = [
 	{
@@ -67,13 +67,16 @@ module.exports = [{
 	},
 	mode: 'production',
 	module: {rules},
+    optimization: {
+        minimize: true,
+        minimizer: [new TerserPlugin()],
+    },
 	plugins: [
 		new webpack.NormalModuleReplacementPlugin(
 			/element-ui[\/\\]lib[\/\\]locale[\/\\]lang[\/\\]zh-CN/,
 			'element-ui/lib/locale/lang/en'
 		),
 		new VueLoaderPlugin(),
-		new UglifyJSPlugin({sourceMap: false}),
 		new webpack.DefinePlugin({
 			'process.env.NODE_ENV': JSON.stringify('production')
 		})

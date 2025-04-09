@@ -1,6 +1,11 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import {hasProperty, isItemSpecificType} from '../type_helpers';
+import {
+	type LookupItem, type StepModel, type Box, type Step,
+	type Orientations, type Rotation, type NumberLabel,
+	type StepParent, type Positions,
+} from '../item_types';
 import _ from '../util';
 import store from '../store';
 import Layout from '../layout';

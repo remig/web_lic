@@ -5,6 +5,12 @@ import LDParse from './ld_parse';
 import store from './store';
 import {tr} from './translations';
 import {isBox, isNotNull} from './type_helpers';
+import {
+	type Box, type LookupItem, type Page, type Orientations,
+	type GridLayout, type Step, type BoxedOffsetItem, type Point,
+	type SubmodelImage, type CSI, type PLI, type Directions, type Size,
+	type PLIItem, type Callout, type Annotation, type QuantityLabel, type PageSubtypes,
+} from './item_types';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
@@ -90,7 +96,7 @@ const Layout: LayoutInterface = {
 		pageCountAnnotation.x = (pageSize.width - pageCountAnnotation.width) / 2;
 		pageCountAnnotation.y = step.y + step.height + ((step.y - pageCountAnnotation.height) / 2);
 
-		delete page.needsLayout;
+		delete (page as any).needsLayout;
 	},
 
 	allInventoryPages() {
@@ -235,7 +241,7 @@ const Layout: LayoutInterface = {
 			}
 		});
 
-		delete page.needsLayout;
+		delete (page as any).needsLayout;
 	},
 
 	page(page, layout = 'horizontal') {
@@ -346,7 +352,7 @@ const Layout: LayoutInterface = {
 			alignStepContent(page);
 		}
 
-		delete page.needsLayout;
+		delete (page as any).needsLayout;
 	},
 
 	pageNumber(page) {
@@ -506,6 +512,9 @@ const Layout: LayoutInterface = {
 						parent: step,
 						x: 0, y: 0,
 					});
+				}
+				if (annotation == null) {
+					return;
 				}
 				annotation.direction = 'right';
 				const base = store.get.point(annotation.points[0]);
@@ -954,7 +963,7 @@ const Layout: LayoutInterface = {
 	async mergeSteps(stepsToMerge, progressCallback) {
 
 		async function mergeOneStep() {
-			return new Promise(resolve => window.setTimeout(() => {
+			return new Promise<void>(resolve => window.setTimeout(() => {
 				const step = stepsToMerge[0];
 				const originalPage = store.get.pageForItem(step);
 				const prevPage = store.get.prevBasicPage(originalPage);

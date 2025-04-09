@@ -2,6 +2,7 @@
 
 import store from '../store';
 import Layout from '../layout';
+import {type PLIItem, type LookupItem, type QuantityLabel} from '../item_types';
 
 export interface PLIItemMutationInterface {
 	add(

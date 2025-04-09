@@ -1,7 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import uiState from './ui_state';
+import {type ColorTableEntry} from './item_types';
 
+// eslint-disable-next-line no-shadow
 enum StorageKeys {
 	model = 'lic_model',
 	ui = 'ui_defaults',
@@ -86,7 +88,7 @@ function createReplace(k: StorageKeys) {
 		try {
 			localStorage.setItem(k, JSON.stringify(json));
 		} catch (e) {
-			if (e && e.name === 'QuotaExceededError') {
+			if (e && typeof e === 'object' && 'name' in e && e.name === 'QuotaExceededError') {
 				// TODO: use compression to save this giant state
 				return json;
 			}

@@ -3,6 +3,7 @@
 import store from '../store';
 import {tr} from '../translations';
 import LDParse from '../ld_parse';
+import {type Annotation, type Book, type Page} from '../item_types';
 
 function addOneTitlePage(parent?: Book) {
 	let insertionIndex = 1;
@@ -58,8 +59,8 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 	delete() {
 		store.state.pages
 			.map(store.get.page)
-			.filter((page): page is Page => page != null && page.subtype === 'titlePage')
-			.forEach((page: Page) => {
+			.filter((page) => page != null && page.subtype === 'titlePage')
+			.forEach((page) => {
 				store.mutations.item.deleteChildList({item: page, listType: 'step'});
 				store.mutations.page.delete({page});
 			});

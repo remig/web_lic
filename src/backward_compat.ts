@@ -2,6 +2,10 @@
 
 import _ from './util';
 import defaultTemplate from './template';
+import {
+	type Rotation, type Template, type Page, type StateInterface, type ItemTypeNames,
+	type SaveFileContent,
+} from './item_types';
 
 // 'fixOldFoo' state is anything before the big version 0.45
 // Anything older than the latest version but newer than 0.44 must still

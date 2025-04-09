@@ -7,6 +7,7 @@ import {Draw} from './draw';
 import {changeDpiDataUrl} from './changedpi';
 import {tr} from './translations';
 import {Store} from './store';
+import {Page} from './item_types';
 
 function exportInstructions(
 	app: any,
@@ -20,7 +21,7 @@ function exportInstructions(
 	app.busyText = tr(`dialog.busy_indicator.generating_${exportType}`);
 
 	async function exportPage(page: Page, canvas: HTMLCanvasElement) {
-		return new Promise(resolve => window.setTimeout(() => {
+		return new Promise<void>(resolve => window.setTimeout(() => {
 			if (!page) {
 				resolve();
 				return;

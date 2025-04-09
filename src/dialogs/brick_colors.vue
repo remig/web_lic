@@ -53,6 +53,7 @@ import LDParse from '../ld_parse';
 import Storage from '../storage';
 import backwardCompat from '../backward_compat';
 import EventBus from '../event_bus';
+import {type LDrawColorCode, type ColorTableEntry} from '../item_types';
 
 const customColors = Storage.get.customBrickColors();
 
@@ -90,21 +91,21 @@ export default Vue.extend({
 				const ldColor = LDParse.colorTable[el.id];
 				let customColor = customColors[el.id];
 				if (ldColor.color === el.color && customColor) {
-					delete customColor.color;
-					delete customColor.rgba;
+					delete (customColor as any).color;
+					delete (customColor as any).rgba;
 				} else if (ldColor.color !== el.color) {
 					customColor = customColors[el.id] = customColors[el.id] || {};
 					customColor.color = el.color;
 				}
 				if (ldColor.edge === el.edge && customColor) {
-					delete customColor.edge;
-					delete customColor.edgeRgba;
+					delete (customColor as any).edge;
+					delete (customColor as any).edgeRgba;
 				} else if (ldColor.edge !== el.edge) {
 					customColor = customColors[el.id] = customColors[el.id] || {};
 					customColor.edge = el.edge;
 				}
 				if (_.isEmpty(customColor)) {
-					delete customColors[el.id];
+					delete (customColors as any)[el.id];
 				}
 			});
 			this.applyChange();
