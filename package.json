@@ -3,13 +3,13 @@
 	"version": "0.48.0",
 	"description": "Create an instruction book from a 3D model",
 	"scripts": {
-		"build": "webpack --config webpack.config.js --display-error-details --config-name local",
-		"start": "webpack-dev-server --config webpack.config.js --display-error-details --config-name local",
-		"prod": "webpack --config webpack.config.js --config-name prod",
+		"typecheck": "tsc --version && tsc -b",
+		"lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+		"start": "vite",
+		"build": "tsc --version && tsc -b && npm run lint && vite build",
+		"preview": "vite preview",
 		"test": "npx cypress open",
-		"deploy": "npm run prod && python deploy.py",
-		"stats": "webpack --config webpack.config.js --config-name prod --profile --json > stats.json",
-		"profile": "webpack-bundle-analyzer stats.json"
+		"deploy": "npm run build && python deploy.py"
 	},
 	"keywords": [],
 	"author": {
@@ -26,28 +26,24 @@
 		"@types/lodash": "4.14.157",
 		"@typescript-eslint/eslint-plugin": "6.1.0",
 		"@typescript-eslint/parser": "6.1.0",
-		"css-loader": "3.6.0",
+		"@vitejs/plugin-vue2": "2.3.3",
 		"cypress": "4.10.0",
 		"eslint": "7.4.0",
-		"eslint-loader": "4.0.2",
 		"eslint-plugin-no-only-tests": "2.4.0",
 		"eslint-plugin-vue": "9.33.0",
 		"jszip": "3.5.0",
 		"terser-webpack-plugin": "4.2.3",
-		"ts-loader": "8.0.0",
 		"typescript": "5.1.6",
+		"vite": "6.2.5",
+		"vite-plugin-glsl": "1.4.0",
+		"vite-tsconfig-paths": "5.1.4",
 		"vue-loader": "15.9.3",
 		"vue-style-loader": "4.1.2",
-		"vue-template-compiler": "2.6.11",
-		"webpack": "4.43.0",
-		"webpack-bundle-analyzer": "3.8.0",
-		"webpack-cli": "3.3.12",
-		"webpack-dev-server": "3.11.0",
-		"webpack-glsl-loader": "1.0.1"
+		"vue-template-compiler": "2.7.0"
 	},
 	"dependencies": {
 		"element-ui": "2.13.2",
 		"lodash": "4.17.19",
-		"vue": "2.6.11"
+		"vue": "2.7.0"
 	}
 }

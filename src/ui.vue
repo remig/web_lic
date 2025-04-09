@@ -449,7 +449,7 @@ const UI = {
 					try {
 						this.clearSelected();
 						undoStack.commit(`${selItem.type}.delete`, opts, undoText);
-					} catch (error) {  // eslint-disable-line no-empty
+					} catch (error) {
 						// TODO: Intentionally empty; need to change each store.mutation.foo.delete that
 						// throws an error if delete can't happen to just returning instead.
 					}

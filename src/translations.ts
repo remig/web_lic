@@ -3,6 +3,10 @@
 import _ from './util';
 import uiState from './ui_state';
 import LanguageList from '../languages/languages.json';
+// TODO: for now, hardcode all known languages. Ugh.
+import English from '../languages/en.json';
+import French from '../languages/fr.json';
+import German from '../languages/de.json';
 
 LanguageList.sort((a, b) => {
 	if (a.language < b.language) {
@@ -29,9 +33,10 @@ interface LoadedLanguageType {
 	[key: string]: any;
 }
 
-// Always load English; fall back on this if a different language is missing a key
 const loadedLanguages: LoadedLanguageType = {
-	en: require('../languages/en.json'),
+	en: English,
+	fr: French,
+	de: German,
 };
 
 function __tr(locale: string, key: string, args: any[]) {
@@ -107,11 +112,6 @@ function setLocale(locale: LocaleType) {
 	}
 	currentLocale = locale;
 	uiState.set('locale', locale);
-	if (!(loadedLanguages.hasOwnProperty(locale))) {
-		// TODO: loading languages via require means all languages are included in the compiled bundle,
-		// so need to switch to ajax and load only what we need
-		loadedLanguages[locale] = require(`../languages/${locale}.json`);
-	}
 }
 
 function restoreLanguage() {

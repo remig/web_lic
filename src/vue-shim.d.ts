@@ -4,7 +4,7 @@ declare module '*.vue' {
 }
 
 declare module 'vue/types/vue' {
-	interface VueConstructor<Vue> {
+	interface VueConstructor {
 		tr: any,
 		_: any
 	}
