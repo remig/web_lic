@@ -1,6 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-/* global jsPDF: false, JSZip: false, saveAs: false */
+import JSZip from 'jszip';
+import {jsPDF} from 'jspdf';
+import {saveAs} from 'file-saver';
 
 import _ from './util';
 import {Draw} from './draw';
@@ -100,7 +102,7 @@ function generatePDF(app: any, store: Store, config?: PDFConfig) {
 		const data = canvas.toDataURL('image/jpeg');
 		doc.addImage(data, 'JPEG', 0, 0, pageSize.width, pageSize.height);
 		if (!store.get.isLastPage(page)) {
-			doc.addPage(pageSize.width, pageSize.height);
+			doc.addPage([pageSize.width, pageSize.height]);
 		}
 	}
 
@@ -121,6 +123,9 @@ function generatePNGZip(
 	const imgFolder = zip.folder(fn);
 
 	function drawPage(page: Page, canvas: HTMLCanvasElement) {
+		if (!imgFolder) {
+			throw 'failed to create zip';
+		}
 		const pageName = (page.subtype === 'titlePage')
 			? 'Page 1 Title Page.png'
 			: `Page ${page.number}.png`;

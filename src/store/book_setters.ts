@@ -1,10 +1,11 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-/* global JSZip: false, saveAs: false */
-
 // TODO: In 'File' menu, add "Save each book as a separate file" which
 // will divide multi-book instruction file into separate smaller instruction
 // files, one per book, and download them in a zip file
+
+import JSZip from 'jszip';
+import {saveAs} from 'file-saver';
 
 import _ from '../util';
 import store from '../store';
@@ -93,6 +94,9 @@ export const BookMutations: BookMutationInterface = {
 		const fn = modelName + '_instruction_books';
 		const zip = new JSZip();
 		const fileFolder = zip.folder(fn);
+		if (!fileFolder) {
+			throw 'failed to create zip';
+		}
 
 		function addPartsFromPreviousSteps(book: Book) {
 			const visitedModels = new Set();

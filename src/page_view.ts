@@ -174,9 +174,9 @@ Vue.component('PageView', {
 						{oddNumberedPage: facing && !_.isEven(idx)},
 					],
 					style: {
-						marginTop: scrolling ? multiPagePadding + 'px' : null,
-						marginBottom: scrolling ? multiPagePadding + 'px' : null,
-						visibility: (pageId == null) ? 'hidden' : null,
+						marginTop: scrolling ? multiPagePadding + 'px' : undefined,
+						marginBottom: scrolling ? multiPagePadding + 'px' : undefined,
+						visibility: (pageId == null) ? 'hidden' : undefined,
 					},
 				},
 				[canvas as any, guideVNode as any],
@@ -184,7 +184,7 @@ Vue.component('PageView', {
 
 			return createElement(
 				'div',
-				{style: {position: 'relative', display: facing ? 'inline' : null}},
+				{style: {position: 'relative', display: facing ? 'inline' : undefined}},
 				[canvasHolder as any, lockIcon as any, lockSwitch as any],
 			);
 		}
@@ -237,7 +237,7 @@ Vue.component('PageView', {
 				'class': 'pageViewContainer',
 				style: {
 					width: facing ? pageWidth + pageWidth + 70 + 'px' : pageWidth + 'px',
-					height: scrolling ? null : pageHeight + 'px',
+					height: scrolling ? undefined : pageHeight + 'px',
 				},
 			},
 			containerList,

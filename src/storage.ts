@@ -3,7 +3,6 @@
 import uiState from './ui_state';
 import {type ColorTableEntry} from './item_types';
 
-// eslint-disable-next-line no-shadow
 enum StorageKeys {
 	model = 'lic_model',
 	ui = 'ui_defaults',

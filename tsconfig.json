@@ -12,9 +12,7 @@
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
 		"skipLibCheck": true,
-
 		"strict": true,
-
 		"alwaysStrict": true,
 		"noImplicitReturns": true,
 		"noImplicitAny": true,
@@ -25,9 +23,6 @@
 		"strictFunctionTypes": true,
 		"downlevelIteration": true,
 	},
-	"types": [
-		"webpack-env"
-	],
 	"lib": [
 		"esnext",
 		"dom",

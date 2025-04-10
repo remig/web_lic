@@ -1,6 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-/* global saveAs: false */
+import {saveAs} from 'file-saver';
 
 import _ from './util';
 import cache from './cache';

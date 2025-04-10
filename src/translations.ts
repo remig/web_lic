@@ -17,10 +17,7 @@ LanguageList.sort((a, b) => {
 	return 0;
 });
 
-const tuple = <T extends string[]>(...args: T) => args;
-const LocaleList = tuple(...LanguageList.map(e => e.code));
-type LocaleType = typeof LocaleList[number];
-let currentLocale: LocaleType;
+let currentLocale: string;
 
 const noTranslateKey = '_tr_';
 
@@ -84,7 +81,7 @@ function translate(key: string, ...args: any[]): string {
 	if (currentLocale && currentLocale !== 'en') {
 		try {
 			res = __tr(currentLocale, key, args);
-		} catch (e) {
+		} catch {
 			console.log(`Locale ${currentLocale} missing translation key: ${key}`);  // eslint-disable-line no-console, max-len
 			res = null;
 		}
@@ -92,7 +89,7 @@ function translate(key: string, ...args: any[]): string {
 	if (res == null) {  // If anything goes wrong with the non-english lookup, fallback to english
 		try {
 			res = __tr('en', key, args);
-		} catch (e) {
+		} catch {
 			throw 'Invalid translation key lookup: ' + key;
 		}
 	}
@@ -106,7 +103,7 @@ function getLocale() {
 	return currentLocale;
 }
 
-function setLocale(locale: LocaleType) {
+function setLocale(locale: string) {
 	if (locale == null) {
 		return;
 	}

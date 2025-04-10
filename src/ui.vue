@@ -99,8 +99,9 @@
 // - No way to unstretch a stretched step
 // - Merging the first step of a submodel with the second step loses the submodel image
 
-/* global Split: false */
 import Vue from 'vue';
+import Split from 'split.js';
+
 import _ from './util';
 import uiState from './ui_state';
 import store from './store';
@@ -449,7 +450,7 @@ const UI = {
 					try {
 						this.clearSelected();
 						undoStack.commit(`${selItem.type}.delete`, opts, undoText);
-					} catch (error) {
+					} catch {
 						// TODO: Intentionally empty; need to change each store.mutation.foo.delete that
 						// throws an error if delete can't happen to just returning instead.
 					}
@@ -596,7 +597,7 @@ const UI = {
 
 				Storage.replace.ui(uiState.getCurrentState());
 
-				if (0 && this && this.isDirty) {
+				if (this && this.isDirty) {
 					const msg = 'You have unsaved changes. Leave anyway?';
 					e.returnValue = msg;
 					return msg;

@@ -15,7 +15,7 @@ module.exports = {
 		'no-only-tests',
 	],
 	overrides: [
-		{files: ["*.ts", "*.vue", "*.js"]}
+		{files: ["*.ts", "*.js"]}, {files: ["*.vue"], processor: "vue/.vue"}
 	],
 	ignorePatterns: ['static', 'dist', 'test', '.eslintrc.js'],
 	rules: {
@@ -113,7 +113,7 @@ module.exports = {
 		'no-sequences': 'error',
 		'no-shadow': 'error',
 		'no-trailing-spaces': 'warn',
-		'no-undefined': 'error',
+		// 'no-undefined': 'error',
 		'no-unmodified-loop-condition': 'error',
 		'no-unreachable': 'warn',
 		'no-unused-expressions': 'off',
@@ -140,7 +140,6 @@ module.exports = {
 		'space-in-parens': ['warn', 'never'],
 		'space-infix-ops': 'warn',
 		'space-unary-ops': 'warn',
-		'@typescript-eslint/indent': ['warn', 'tab', {SwitchCase: 1}],
 		'@typescript-eslint/no-unused-vars': 'warn',
 		'@typescript-eslint/no-unused-expressions': 'warn',
 		'wrap-iife': [2, 'inside', {functionPrototypeMethods: true}],

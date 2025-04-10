@@ -348,9 +348,9 @@ const Layout: LayoutInterface = {
 			: 'horizontal';
 		Layout.dividers(page, layoutDirection, rows, cols, pageSize);
 
-		if (0 && store.state.plisVisible) {
-			alignStepContent(page);
-		}
+		// if (store.state.plisVisible) {
+		// 	alignStepContent(page);
+		// }
 
 		delete (page as any).needsLayout;
 	},
@@ -1144,7 +1144,7 @@ function getMargin(margin: number) {
 
 // TODO: should push callouts down too
 // TODO: this duplicates a lot of step layout logic, badly. eg: it doesn't push content below step numbers
-function alignStepContent(page: Page) {
+export function alignStepContent(page: Page) {
 	const margin = getMargin(store.state.template.step.innerMargin);
 	const steps = page.steps.map(stepID => store.get.step(stepID));
 	if (steps.length < 2 || typeof page.actualLayout !== 'object'

@@ -1,6 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-/* global jsonpatch: false */
+import * as jsonpatch from 'fast-json-patch';
 
 import _ from './util';
 import store from './store';
@@ -96,7 +96,7 @@ const api = {
 				}
 			} else if (isAction(change)) {
 				change.redo.forEach((action: UndoRedoAction) => {
-					jsonpatch.applyOperation(action.root, action);
+					jsonpatch.applyOperation(action.root, action as any);
 				});
 			}
 		});
@@ -204,7 +204,7 @@ function performUndoRedoAction(undoOrRedo: 'undo' | 'redo', newIndex: number) {
 	const actionStack = (undoOrRedo === 'undo') ? state.stack[state.index] : newStack;
 	(actionStack.actionList || []).forEach((action: any) => {
 		action[undoOrRedo].forEach((subAction: UndoRedoAction) => {
-			jsonpatch.applyOperation(subAction.root, subAction);
+			jsonpatch.applyOperation(subAction.root, subAction as any);
 		});
 	});
 
