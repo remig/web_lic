@@ -1,0 +1,60 @@
+lic-button {
+    display: inline-block;
+}
+
+lic-button .lic-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    font-size: 14px;
+    line-height: 1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    color: #606266;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+lic-button .lic-btn:hover {
+    color: #409eff;
+    border-color: #c6e2ff;
+    background: #ecf5ff;
+}
+
+lic-button[type="primary"] .lic-btn,
+lic-button[type="ok"] .lic-btn {
+    background: #409eff;
+    border-color: #409eff;
+    color: #fff;
+}
+
+lic-button[type="primary"] .lic-btn:hover,
+lic-button[type="ok"] .lic-btn:hover {
+    background: #66b1ff;
+    border-color: #66b1ff;
+}
+
+lic-button[type="text"] .lic-btn {
+    border-color: transparent;
+    background: transparent;
+    color: #409eff;
+    padding: 8px 0;
+}
+
+lic-button[size="small"] .lic-btn {
+    padding: 5px 11px;
+    font-size: 12px;
+}
+
+lic-button .lic-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+lic-button .lic-btn:disabled:hover {
+    color: inherit;
+    border-color: #dcdfe6;
+    background: #fff;
+}
