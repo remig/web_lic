@@ -109,20 +109,9 @@
 				</licTooltip>
 			</el-radio-group>
 		</div>
-		<span slot="footer" class="dialog-footer">
-			<el-button
-				data-testid="multi-book-cancel"
-				@click="cancel"
-			>
-				{{tr("dialog.cancel")}}
-			</el-button>
-			<el-button
-				type="primary"
-				data-testid="multi-book-ok"
-				@click="ok()"
-			>
-				{{tr("dialog.ok")}}
-			</el-button>
+		<span slot="footer">
+			<lic-button type="cancel" data-testid="multi-book-cancel" @click="cancel" />
+			<lic-button type="ok" data-testid="multi-book-ok" @click="ok" />
 		</span>
 	</licDialog>
 </template>

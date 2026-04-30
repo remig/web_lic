@@ -58,9 +58,9 @@
 				</el-radio>
 			</el-form-item>
 		</el-form>
-		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
+		<span slot="footer">
+			<lic-button type="cancel" @click="cancel" />
+			<lic-button type="ok" @click="ok" />
 		</span>
 	</licDialog>
 </template>

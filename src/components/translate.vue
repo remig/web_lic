@@ -18,8 +18,8 @@
 				:value="item.code"
 			/>
 		</el-select>
-		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="ok()">{{tr('dialog.ok')}}</el-button>
+		<span slot="footer">
+			<lic-button type="ok" @click="ok" />
 		</span>
 	</licDialog>
 </template>

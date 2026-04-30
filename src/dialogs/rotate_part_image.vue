@@ -24,9 +24,9 @@
 				</el-checkbox>
 			</el-form-item>
 		</el-form>
-		<span slot="footer" class="dialog-footer">
-			<el-button data-testid="rotate-cancel" @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" data-testid="rotate-ok" @click="ok()">{{tr("dialog.ok")}}</el-button>
+		<span slot="footer">
+			<lic-button type="cancel" data-testid="rotate-cancel" @click="cancel" />
+			<lic-button type="ok" data-testid="rotate-ok" @click="ok" />
 		</span>
 	</licDialog>
 </template>

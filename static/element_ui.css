@@ -1560,9 +1560,15 @@
 
 .el-dialog__footer {
     padding: 10px 20px 20px;
-    text-align: right;
     -webkit-box-sizing: border-box;
     box-sizing: border-box
+}
+
+.el-dialog__footer>span {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 .el-dialog--center {

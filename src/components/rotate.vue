@@ -23,9 +23,9 @@
 						@input="updateValues"
 					>
 				</el-form-item>
-				<el-button class="icon" icon="fas fa-minus" @click="removeRotation(idx)" />
+				<lic-button icon="fas fa-minus" @click="removeRotation(idx)" />
 			</el-form>
-			<el-button class="icon" icon="fas fa-plus" @click="addRotation" />
+			<lic-button icon="fas fa-plus" @click="addRotation" />
 		</div>
 	</el-form>
 </template>
@@ -78,7 +78,7 @@ export default {
 	width: 70px;
 }
 
-.rotationBuilder .icon {
+.rotationBuilder button {
 	padding: 9px 10px;
 }
 

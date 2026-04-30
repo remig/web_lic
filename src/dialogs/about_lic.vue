@@ -44,8 +44,8 @@
 				<a href="mailto:lic@bugeyedmonkeys.com">Remi Gagne</a>
 			</p>
 		</div>
-		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="cancel">{{tr("dialog.ok")}}</el-button>
+		<span slot="footer">
+			<lic-button type="cancel" @click="cancel" />
 		</span>
 	</licDialog>
 </template>

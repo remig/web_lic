@@ -55,14 +55,8 @@
 				</el-dropdown-menu>
 			</el-dropdown>
 		</el-row>
-		<span slot="footer" class="dialog-footer">
-			<el-button
-				type="primary"
-				data-testid="import-ok"
-				@click="ok()"
-			>
-				{{tr("dialog.ok")}}
-			</el-button>
+		<span slot="footer">
+			<lic-button type="ok" data-testid="import-ok" @click="ok" />
 		</span>
 	</licDialog>
 </template>

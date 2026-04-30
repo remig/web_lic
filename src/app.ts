@@ -3,6 +3,7 @@ import ElementUI from 'element-ui';
 import locale from 'element-ui/lib/locale/lang/en';
 // import 'element-ui/lib/theme-chalk/index.css';  // TODO: Make this work
 import './components/element_extensions';
+import './components/lit_widgets/lic_button';
 
 import UI from './ui.vue';
 import _ from './util';

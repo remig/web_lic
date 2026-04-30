@@ -33,8 +33,8 @@
 				</td>
 			</tr>
 		</table>
-		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="ok()">{{okText}}</el-button>
+		<span slot="footer">
+			<lic-button type="ok" @click="ok" />
 		</span>
 	</licDialog>
 </template>

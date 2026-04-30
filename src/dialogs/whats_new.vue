@@ -33,8 +33,8 @@
 				</ul>
 			</div>
 		</div>
-		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="cancel">{{tr("dialog.ok")}}</el-button>
+		<span slot="footer">
+			<lic-button type="ok" @click="cancel" />
 		</span>
 	</licDialog>
 </template>
