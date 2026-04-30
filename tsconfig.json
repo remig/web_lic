@@ -5,7 +5,12 @@
 		"allowJs": true,
 		"target": "es6",
 		"module": "esnext",
-		"lib": ["dom", "es6", "es2019", "scripthost"],
+		"lib": [
+			"dom",
+			"es6",
+			"es2019",
+			"scripthost"
+		],
 		"isolatedModules": true,
 		"importHelpers": true,
 		"moduleResolution": "node",
@@ -22,6 +27,7 @@
 		"strictBindCallApply": true,
 		"strictFunctionTypes": true,
 		"downlevelIteration": true,
+		"experimentalDecorators": true,
 	},
 	"lib": [
 		"esnext",
@@ -30,7 +36,7 @@
 		"scripthost"
 	],
 	"include": [
-		"./src/**/*"
+		"src"
 	],
 	"exclude": [
 		"node_modules"

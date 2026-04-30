@@ -4,10 +4,12 @@ declare module '*.vue' {
 }
 
 declare module 'vue/types/vue' {
-	interface VueConstructor {
+	interface Vue {
 		tr: any,
 		_: any
 	}
 }
 
 declare module 'element-ui/lib/locale/lang/en' {}
+
+declare module '*.css' {}
