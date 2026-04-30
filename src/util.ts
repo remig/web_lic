@@ -20,7 +20,7 @@ import some from 'lodash/some';
 import startCase from 'lodash/startCase';
 import template from 'lodash/template';
 import unzip from 'lodash/unzip';
-import {type Point, type Border, type Box, type Size} from './item_types';
+import {type Point, type Border, type Box} from './item_types';
 
 interface CacheInterface {
 	[key: string]: any
@@ -28,59 +28,7 @@ interface CacheInterface {
 
 type EdgeList = 'top' | 'right' | 'bottom' | 'left';
 
-interface ArrowInterface {
-	head: {
-		length: number;
-		width: number;
-		insetDepth: number;
-	},
-	body: {
-		width: number,
-	},
-}
-
-interface GeomInterface {
-	bbox(points: (Point | Box)[]): Box;
-	expandBox(box: Box, minWidth: number, minHeight: number): Box;
-	moveBoxEdge(box: Box, edge: EdgeList, dt: number): void;
-	distance(p1: number | Point, p2: number | Point): number;
-	midpoint(p1: Point, p2: Point): Point;
-	arrow(): ArrowInterface;
-}
-
-interface RGBColor {
-	r: number;
-	g: number;
-	b: number;
-	a: number | null;
-	toString(): string;
-}
-
-interface ColorInterface {
-	toRGB(colorString: string): RGBColor;
-	toVec4(colorString: string, alpha: number): number[];
-	luma(colorString: any, isUnitColor: boolean): number;
-	opposite(colorString: string): 'white' | 'black';
-	isVisible(colorString?: string | null): boolean;
-}
-
-interface FontPartsInterface {
-	fontStyle?: string;
-	fontVariant?: string;
-	fontWeight?: string;
-	fontStretch?: string;
-	fontSize?: string;
-	fontFamily?: string;
-}
-
 type UnitTypes = 'point' | 'in' | 'mm' | 'cm';
-
-interface UnitsInterface {
-	pixelsToUnits(pixelCount: number, newUnits: UnitTypes): number;
-	unitsToPixels(unitCount: number, newUnits: UnitTypes): number;
-	pointsToUnits(pointCount: number, newUnits: UnitTypes): number;
-	unitToPoints(unitCount: number, newUnits: UnitTypes): number;
-}
 
 interface Version {
 	major: number;
@@ -88,65 +36,7 @@ interface Version {
 	revision: number;
 }
 
-interface UtilInterface {
-	equal(a: number, b: number, e:number): boolean;
-	isEven(n: number): boolean;
-	insert<T>(array: T[], item: T, idx: number): void;
-	deleteItem<T>(array: T[], item: T): void;
-	count<T>(array: T[], search: T): number;
-	itemEq(a: any, b: any): boolean;
-	measureLabel(font: string, text: string): Size;
-	fontToFontParts(font: string): FontPartsInterface;
-	fontPartsToFont(font: FontPartsInterface): string;
-	fontString(
-		{size, family, bold, italic}:
-		{size: number, family: string, bold: string, italic: string}
-	): string;
-	degrees(radians: number): number;
-	radians(degrees: number): number;
-	dom: {
-		createElement(type: string, attrs: any, parent: any, text?: string): HTMLElement;
-		emptyNode(node: HTMLElement): void;
-	},
-	units: UnitsInterface;
-	geom: GeomInterface;
-	version: {
-		parse(v: string): Version;
-		nice(v: string): string;
-		isOldVersion(prev: string, current: string): boolean;
-	},
-	sort: {
-		numeric: {
-			ascending(a: any, b: any): number;
-			descending(a: any, b: any): number;
-		};
-	};
-	formatTime(start: number, end: number): string;
-	color: ColorInterface;
-	isBorderVisible(border: Border): boolean;
-	assign: typeof assign;
-	chunk: typeof chunk;
-	clamp: typeof clamp;
-	clone: typeof clone;
-	cloneDeep: typeof cloneDeep;
-	difference: typeof difference;
-	each: typeof each;
-	forOwn: typeof forOwn;
-	get: typeof get;
-	isEmpty: typeof isEmpty;
-	isEqual: typeof isEqual;
-	last: typeof last;
-	pullAt: typeof pullAt;
-	range: typeof range;
-	round: typeof round;
-	set: typeof set;
-	some: typeof some;
-	startCase: typeof startCase;
-	template: typeof template;
-	unzip: typeof unzip;
-}
-
-const api: UtilInterface = {
+const api = {
 	equal(a: number, b: number, e:number = 0.0001): boolean {
 		return Math.abs(a - b) < e;
 	},
@@ -270,7 +160,7 @@ const api: UtilInterface = {
 		return degrees * Math.PI / 180;
 	},
 	dom: {
-		createElement(type: string, attrs: any, parent: any, text: string) {
+		createElement(type: string, attrs: any, parent: any, text?: string) {
 			const node = document.createElement(type);
 			for (const key in attrs) {
 				if (attrs.hasOwnProperty(key)) {
@@ -565,6 +455,6 @@ const api: UtilInterface = {
 	startCase,
 	template,
 	unzip,
-};
+} as const;
 
 export default api;
