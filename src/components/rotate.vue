@@ -1,82 +1,92 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<el-form class="rotationBuilder">
-		<el-form-item v-if="title" :label="title" />
-		<div class="rotationListBox">
-			<el-form v-for="(rot, idx) in rotation" :key="'rotation_' + idx" :inline="true">
-				<el-form-item :label="includeLabels ? tr('dialog.rotation.axis') : ''" class="axisInput">
-					<el-select v-model="rot.axis" data-testid="rotate-axis-select" @change="updateValues">
-						<el-option key="x" label="X" value="x" />
-						<el-option key="y" label="Y" value="y" />
-						<el-option key="z" label="Z" value="z" />
-					</el-select>
-				</el-form-item>
-				<el-form-item :label="includeLabels ? tr('dialog.rotation.angle') : ''" class="angleInput">
-					<input
-						v-model.number="rot.angle"
-						type="number"
-						min="-360"
-						max="360"
-						class="form-control"
-						data-testid="rotate-angle-input"
-						@input="updateValues"
-					>
-				</el-form-item>
-				<el-button class="icon" icon="fas fa-minus" @click="removeRotation(idx)" />
-			</el-form>
-			<el-button class="icon" icon="fas fa-plus" @click="addRotation" />
+	<div class="rotationBuilder">
+		<div v-if="props.title" class="panel-row">
+			{{props.title}}
 		</div>
-	</el-form>
+		<div class="rotationListBox">
+			<div
+				v-for="(rot, idx) in rotation"
+				:key="'rotation_' + idx"
+				class="flex-row rotation-row"
+				style="gap: 12px;"
+			>
+				<span v-if="props.includeLabels">{{tr('dialog.rotation.axis')}}</span>
+				<LicSelect
+					v-model="rot.axis"
+					:options="axisOptions"
+					class="axis-select"
+					data-testid="rotate-axis-select"
+					@change="updateValues"
+				/>
+				<span v-if="props.includeLabels">{{tr('dialog.rotation.angle')}}</span>
+				<input
+					v-model.number="rot.angle"
+					type="number"
+					min="-360"
+					max="360"
+					class="form-control"
+					data-testid="rotate-angle-input"
+					@input="updateValues"
+				>
+				<LicButton class="icon" icon="fas fa-minus" @click="removeRotation(idx)" />
+			</div>
+			<LicButton class="icon" icon="fas fa-plus" @click="addRotation" />
+		</div>
+	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {ref, watch} from 'vue';
+import LicButton from '@/components/base/LicButton.vue';
+import LicSelect from '@/components/base/LicSelect.vue';
+
+const axisOptions = [
+	{value: 'x', label: 'X'},
+	{value: 'y', label: 'Y'},
+	{value: 'z', label: 'Z'},
+];
 import _ from '../util';
 import {tr} from '../translations';
+import {type Rotation} from '../item_types';
 
-export default {
-	props: {
-		title: {type: String, 'default': tr('dialog.rotation.title')},
-		initialRotation: {type: Array},
-		includeLabels: {type: Boolean, 'default': true},
-	},
-	data() {
-		return {
-			rotation: _.cloneDeep(this.initialRotation || []),
-		};
-	},
-	watch: {
-		initialRotation() {
-			this.rotation = _.cloneDeep(this.initialRotation || []);
-		},
-	},
-	methods: {
-		updateValues() {
-			this.$emit('new-values', _.cloneDeep(this.rotation));
-		},
-		addRotation() {
-			this.rotation.push({axis: 'x', angle: 0});
-			this.updateValues();
-		},
-		removeRotation(idx) {
-			this.rotation.splice(idx, 1);
-			this.updateValues();
-		},
-	},
-};
+const props = withDefaults(defineProps<{
+	title?: string;
+	initialRotation?: Rotation[];
+	includeLabels?: boolean;
+}>(), {
+	title: () => tr('dialog.rotation.title'),
+	initialRotation: () => [],
+	includeLabels: true,
+});
+
+const emit = defineEmits<{(e: 'new-values', rotation: Rotation[]): void}>();
+
+const rotation = ref<Rotation[]>(_.cloneDeep(props.initialRotation));
+
+watch(() => props.initialRotation, newVal => {
+	rotation.value = _.cloneDeep(newVal ?? []);
+});
+
+function updateValues() {
+	emit('new-values', _.cloneDeep(rotation.value));
+}
+
+function addRotation() {
+	rotation.value.push({axis: 'x', angle: 0});
+	updateValues();
+}
+
+function removeRotation(idx: number) {
+	rotation.value.splice(idx, 1);
+	updateValues();
+}
 
 </script>
 
 <style>
-
-.axisInput > .el-form-item__content {
-	width: 60px;
-}
-
-.angleInput > .el-form-item__content {
-	width: 70px;
-}
 
 .rotationBuilder .icon {
 	padding: 9px 10px;
@@ -87,5 +97,20 @@ export default {
 	border-radius: 4px;
 	padding: 15px 0 10px 15px;
 	margin-bottom: 10px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #606266;
+}
+
+.rotation-row {
+	margin-bottom: 8px;
+}
+
+.rotationBuilder input[type="number"] {
+	width: 70px;
+}
+
+.axis-select .lic-btn {
+	width: 50px;
 }
 </style>

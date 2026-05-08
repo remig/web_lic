@@ -1,16 +1,13 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base :title="title" label-width="120px">
-		<el-form-item :label="tr('glossary.color')">
-			<el-color-picker
-				v-model="color"
-				show-alpha
-				@active-change="updateColor"
-				@change="updateValues"
-			/>
-		</el-form-item>
-		<el-form-item :label="tr('template.border.line_width')">
+	<panel-base :title="title" style="--label-width: 120px">
+		<div class="label-input-row">
+			{{tr('glossary.color')}}
+			<LicColorPicker v-model="color" show-alpha @change="updateValues" />
+		</div>
+		<label class="label-input-row">
+			{{tr('template.border.line_width')}}
 			<input
 				v-model.number="width"
 				type="number"
@@ -18,8 +15,9 @@
 				class="form-control"
 				@input="updateValues"
 			>
-		</el-form-item>
-		<el-form-item v-if="cornerRadius != null" :label="tr('template.border.corner_radius')">
+		</label>
+		<label v-if="cornerRadius != null" class="label-input-row">
+			{{tr('template.border.corner_radius')}}
 			<input
 				v-model.number="cornerRadius"
 				type="number"
@@ -27,8 +25,9 @@
 				class="form-control"
 				@input="updateValues"
 			>
-		</el-form-item>
-		<el-form-item v-if="innerMargin != null" :label="tr('template.border.margin')">
+		</label>
+		<label v-if="innerMargin != null" class="label-input-row">
+			{{tr('template.border.margin')}}
 			<input
 				v-model.number="innerMargin"
 				type="number"
@@ -36,7 +35,7 @@
 				class="form-control"
 				@input="updateValues"
 			>
-		</el-form-item>
+		</label>
 	</panel-base>
 </template>
 
@@ -45,9 +44,10 @@
 import _ from '../../util';
 import store from '../../store';
 import PanelBase from './panel_base.vue';
+import LicColorPicker from '../base/LicColorPicker.vue';
 
 export default {
-	components: {PanelBase},
+	components: {PanelBase, LicColorPicker},
 	props: {
 		templateEntry: {type: String, required: true},
 		title: {type: String, 'default': 'template.border.title'},
@@ -62,10 +62,6 @@ export default {
 		};
 	},
 	methods: {
-		updateColor(newColor) {
-			this.color = (newColor === 'transparent') ? null : newColor;
-			this.updateValues();
-		},
 		updateValues() {
 			const template = _.get(store.state.template, this.templateEntry);
 			template.border.width = this.width;

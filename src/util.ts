@@ -73,7 +73,7 @@ interface FontPartsInterface {
 	fontFamily?: string;
 }
 
-type UnitTypes = 'point' | 'in' | 'mm' | 'cm';
+export type UnitTypes = 'point' | 'in' | 'mm' | 'cm';
 
 interface UnitsInterface {
 	pixelsToUnits(pixelCount: number, newUnits: UnitTypes): number;

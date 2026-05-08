@@ -1,64 +1,61 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<licDialog
+	<LicDialog
 		:title="title"
 		:width="width"
 	>
-		<el-form onSubmit="return false;">
-			<el-form-item :label="label" class="string_chooser_input">
-				<input
-					ref="set_focus"
-					v-model="newString"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-		</el-form>
-		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
-		</span>
-	</licDialog>
+		<label class="label-input-row">
+			{{labelText}}
+			<input
+				ref="set_focus"
+				v-model="newString"
+				class="form-control"
+				@input="updateValues"
+			>
+		</label>
+		<template #footer>
+			<LicButton type="cancel" @click="cancel" />
+			<LicButton type="ok" @click="ok" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
-export default {
-	data: function() {
-		return {
-			newString: null,
-			title: '',
-			label: '',
-			width: '500px',
-		};
-	},
-	methods: {
-		updateValues() {
-			this.$emit('update', {...this.$data});
-		},
-		ok() {
-			this.$emit('ok', this.newString);
-			this.$emit('close');
-		},
-		cancel() {
-			this.$emit('cancel');
-			this.$emit('close');
-		},
-	},
-};
+import {ref} from 'vue';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
+
+const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+
+const newString = ref<string | null>(null);
+const title = ref('');
+const labelText = ref('');
+const width = ref('500px');
+
+defineExpose({newString, title, label: labelText, width});
+
+function updateValues() {
+	emit('update', {
+		newString: newString.value,
+		title: title.value,
+		label: labelText.value,
+		width: width.value,
+	});
+}
+
+function ok() {
+	emit('ok', newString.value);
+	emit('close');
+}
+
+function cancel() {
+	emit('cancel');
+	emit('close');
+}
+
 </script>
 
 <style>
-
-.string_chooser_input {
-	display: flex;
-}
-
-.string_chooser_input .el-form-item__content {
-	display: inline-block;
-	padding-top: 3px;
-	flex-grow: 1;
-}
-
 </style>

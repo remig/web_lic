@@ -1,14 +1,14 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 <template>
-	<licDialog
-		:title="tr('dialog.multi_book.title')"
+	<LicDialog
+		:title="t('dialog.multi_book.title')"
 		:width="dialogWidth"
 		class="multiBookDialog"
 	>
 		<div>
 			<span>
-				{{tr('dialog.multi_book.split_count')}}
+				{{t('dialog.multi_book.split_count')}}
 			</span>
 			<input
 				v-model.number="bookCount"
@@ -24,7 +24,7 @@
 				<thead>
 					<tr>
 						<th v-for="book in bookDivisions" :key="`book_${book.bookNumber}`">
-							{{tr('dialog.multi_book.book_n_@c', book.bookNumber)}}
+							{{t('dialog.multi_book.book_n_@c', book.bookNumber)}}
 						</th>
 					</tr>
 				</thead>
@@ -32,10 +32,10 @@
 					<tr>
 						<td v-for="(book, idx) in bookDivisions" :key="`page_${book.pages.start}`">
 							<template v-if="idx === bookDivisions.length - 1">
-								{{tr('dialog.multi_book.pages_n_@mf', book.pages)}}
+								{{t('dialog.multi_book.pages_n_@mf', book.pages)}}
 							</template>
 							<template v-else>
-								{{tr('dialog.multi_book.pages_n_start_@c', book.pages.start)}}
+								{{t('dialog.multi_book.pages_n_start_@c', book.pages.start)}}
 								<input
 									v-model.number="book.pages.end"
 									:min="book.pages.start"
@@ -48,7 +48,7 @@
 					</tr>
 					<tr>
 						<td v-for="book in bookDivisions" :key="`step_${book.steps.start}`">
-							{{tr('dialog.multi_book.steps_n_@mf', book.steps)}}
+							{{t('dialog.multi_book.steps_n_@mf', book.steps)}}
 						</td>
 					</tr>
 				</tbody>
@@ -56,93 +56,119 @@
 		</div>
 
 		<div class="form-row">
-			<el-checkbox v-model="includeTitlePages" class="check-row" data-testid="multi-book-title-pages">
-				{{tr('dialog.multi_book.include_title_page')}}
-			</el-checkbox>
-			<el-checkbox v-model="noSplitSubmodels" data-testid="multi-book-no-split-submodels">
-				{{tr('dialog.multi_book.split_submodels')}}
-			</el-checkbox>
+			<label class="lic-checkbox check-row">
+				<input v-model="includeTitlePages" type="checkbox" data-testid="multi-book-title-pages">
+				{{t('dialog.multi_book.include_title_page')}}
+			</label>
+			<label class="lic-checkbox">
+				<input v-model="noSplitSubmodels" type="checkbox" data-testid="multi-book-no-split-submodels">
+				{{t('dialog.multi_book.split_submodels')}}
+			</label>
 		</div>
 
 		<div class="form-row">
-			<el-radio-group v-model="firstPageNumber">
-				<licTooltip>
-					<div
-						slot="content"
-						v-html="tr('dialog.multi_book.page_numbering.start_page_1.tooltip')"
-					/>
-					<el-radio label="start_page_1" data-testid="multi-book-page-start-1">
-						{{tr('dialog.multi_book.page_numbering.start_page_1.text')}}
-					</el-radio>
-				</licTooltip>
-				<licTooltip>
-					<div
-						slot="content"
-						v-html="tr('dialog.multi_book.page_numbering.preserve_page_count.tooltip')"
-					/>
-					<el-radio label="preserve_page_count" data-testid="multi-book-page-start-old">
-						{{tr('dialog.multi_book.page_numbering.preserve_page_count.text')}}
-					</el-radio>
-				</licTooltip>
-			</el-radio-group>
+			<LicTooltip>
+				<div
+					slot="content"
+					v-html="t('dialog.multi_book.page_numbering.start_page_1.tooltip')"
+				/>
+				<label class="lic-radio">
+					<input
+						type="radio"
+						name="firstPageNumber"
+						value="start_page_1"
+						:checked="firstPageNumber === 'start_page_1'"
+						data-testid="multi-book-page-start-1"
+						@change="firstPageNumber = 'start_page_1'"
+					>
+					{{t('dialog.multi_book.page_numbering.start_page_1.text')}}
+				</label>
+			</LicTooltip>
+			<LicTooltip>
+				<div
+					slot="content"
+					v-html="t('dialog.multi_book.page_numbering.preserve_page_count.tooltip')"
+				/>
+				<label class="lic-radio">
+					<input
+						type="radio"
+						name="firstPageNumber"
+						value="preserve_page_count"
+						:checked="firstPageNumber === 'preserve_page_count'"
+						data-testid="multi-book-page-start-old"
+						@change="firstPageNumber = 'preserve_page_count'"
+					>
+					{{t('dialog.multi_book.page_numbering.preserve_page_count.text')}}
+				</label>
+			</LicTooltip>
 		</div>
 
 		<div class="form-row">
-			<el-radio-group v-model="fileSplit">
-				<licTooltip>
-					<div
-						slot="content"
-						v-html="tr('dialog.multi_book.file_split.one_file.tooltip')"
-					/>
-					<el-radio label="one_file" data-testid="multi-book-one-lic-file">
-						{{tr('dialog.multi_book.file_split.one_file.text')}}
-					</el-radio>
-				</licTooltip>
-				<licTooltip>
-					<div
-						slot="content"
-						v-html="tr('dialog.multi_book.file_split.separate_files.tooltip')"
-					/>
-					<el-radio label="separate_files" data-testid="multi-book-many-lic-files">
-						{{tr('dialog.multi_book.file_split.separate_files.text')}}
-					</el-radio>
-				</licTooltip>
-			</el-radio-group>
+			<LicTooltip>
+				<div
+					slot="content"
+					v-html="t('dialog.multi_book.file_split.one_file.tooltip')"
+				/>
+				<label class="lic-radio">
+					<input
+						type="radio"
+						name="fileSplit"
+						value="one_file"
+						:checked="fileSplit === 'one_file'"
+						data-testid="multi-book-one-lic-file"
+						@change="fileSplit = 'one_file'"
+					>
+					{{t('dialog.multi_book.file_split.one_file.text')}}
+				</label>
+			</LicTooltip>
+			<LicTooltip>
+				<div
+					slot="content"
+					v-html="t('dialog.multi_book.file_split.separate_files.tooltip')"
+				/>
+				<label class="lic-radio">
+					<input
+						type="radio"
+						name="fileSplit"
+						value="separate_files"
+						:checked="fileSplit === 'separate_files'"
+						data-testid="multi-book-many-lic-files"
+						@change="fileSplit = 'separate_files'"
+					>
+					{{t('dialog.multi_book.file_split.separate_files.text')}}
+				</label>
+			</LicTooltip>
 		</div>
-		<span slot="footer" class="dialog-footer">
-			<el-button
-				data-testid="multi-book-cancel"
-				@click="cancel"
-			>
-				{{tr("dialog.cancel")}}
-			</el-button>
-			<el-button
-				type="primary"
-				data-testid="multi-book-ok"
-				@click="ok()"
-			>
-				{{tr("dialog.ok")}}
-			</el-button>
-		</span>
-	</licDialog>
+		<template #footer>
+			<LicButton type="cancel" data-testid="multi-book-cancel" @click="cancel" />
+			<LicButton type="ok" data-testid="multi-book-ok" @click="ok" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {ref, computed} from 'vue';
+import {tr as t} from '@/translations';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
+import LicTooltip from '@/components/base/LicTooltip.vue';
 import _ from '../util';
 import store from '../store';
 import uiState from '../ui_state';
 
-function pageSpreadToStepSpread(pageSpread) {
+const emit = defineEmits(['ok', 'cancel', 'close']);
+
+function pageSpreadToStepSpread(pageSpread: {start: number; end: number}) {
 	if (pageSpread.start === pageSpread.end) {
-		const page = store.get.itemByNumber('page', pageSpread.start);
+		const page = store.get.itemByNumber('page', pageSpread.start) as any;
 		const startStep = store.get.step(page.steps[0]);
-		const endStep = store.get.step(_.last(page.steps));
+		const endStep = store.get.step(_.last(page.steps) as any);
 		if (startStep == null || endStep == null) {
 			return null;
 		}
 	}
-	let startPage = store.get.itemByNumber('page', pageSpread.start);
+	let startPage: any = store.get.itemByNumber('page', pageSpread.start);
 	while (startPage && startPage.subtype !== 'page') {
 		startPage = store.get.nextPage(startPage);
 	}
@@ -151,30 +177,30 @@ function pageSpreadToStepSpread(pageSpread) {
 	}
 	const startStep = store.get.step(startPage.steps[0]);
 
-	let endPage = store.get.itemByNumber('page', pageSpread.end);
+	let endPage: any = store.get.itemByNumber('page', pageSpread.end);
 	while (endPage && endPage.subtype !== 'page') {
 		endPage = store.get.prevPage(endPage);
 	}
 	if (endPage == null) {
 		return null;
 	}
-	const endStep = store.get.step(_.last(endPage.steps));
+	const endStep = store.get.step(_.last(endPage.steps) as any);
 
-	return {start: startStep.number, end: endStep.number};
+	return {start: (startStep as any).number, end: (endStep as any).number};
 }
 
 // Can't split in the middle of a sub model, and can't split between
 // the last step of a submodel and its placement in its parent model
 // So, given a page number, return true if the last step on that page is in the
 // main model or in a different submodel than the first step in the next page
-function isPageSplitValid(pageNumber) {
-	const page = store.get.itemByNumber('page', pageNumber);
-	const lastStep = store.get.step(_.last(page.steps));
+function isPageSplitValid(pageNumber: number) {
+	const page = store.get.itemByNumber('page', pageNumber) as any;
+	const lastStep = store.get.step(_.last(page.steps) as any) as any;
 	if (lastStep.model.parentStepID == null) {
 		return true;
 	}
-	const nextPage = store.get.nextPage(page);
-	const firstStep = store.get.step(nextPage.steps[0]);
+	const nextPage = store.get.nextPage(page) as any;
+	const firstStep = store.get.step(nextPage.steps[0]) as any;
 	if (lastStep.model.parentStepID === firstStep.model.parentStepID) {
 		return false;  // split steps are in same submodel
 	}
@@ -185,34 +211,34 @@ function isPageSplitValid(pageNumber) {
 	return true;
 }
 
-function calculateBookSplits(bookCount, pageCount, noSplitSubmodels) {
-	const bookDivisions = [];
-	const pagesPerBook = Math.ceil(pageCount / bookCount);
+function calculateBookSplits(bookCountVal: number, pageCountVal: number, noSplitSubmodelsVal: boolean) {
+	const bookDivisionsResult: any[] = [];
+	const pagesPerBook = Math.ceil(pageCountVal / bookCountVal);
 
-	for (let i = 0; i < bookCount; i++) {
+	for (let i = 0; i < bookCountVal; i++) {
 		const pages = {
 			start: (i * pagesPerBook) + 1,
-			end: Math.min(((i + 1) * pagesPerBook), pageCount),
+			end: Math.min(((i + 1) * pagesPerBook), pageCountVal),
 		};
 		const steps = pageSpreadToStepSpread(pages);
-		bookDivisions.push({bookNumber: i + 1, pages, steps});
+		bookDivisionsResult.push({bookNumber: i + 1, pages, steps});
 	}
-	_.last(bookDivisions).pages.end = pageCount;
+	_.last(bookDivisionsResult).pages.end = pageCountVal;
 
-	function splitOffset(i) {
+	function splitOffset(i: number) {
 		return Math.ceil(i / 2) * (_.isEven(i) ? 1 : -1);
 	}
 
 	// TODO: with a lot of books, this doesn't always work
-	if (noSplitSubmodels) {
+	if (noSplitSubmodelsVal) {
 		// Move each step division forward / backward to nearest submodel completion step
-		for (let i = 0; i < bookDivisions.length - 1; i++) {
-			const division = bookDivisions[i];
+		for (let i = 0; i < bookDivisionsResult.length - 1; i++) {
+			const division = bookDivisionsResult[i];
 			if (division.isInvalid) {
 				continue;
 			}
 			const firstValidPage = division.pages.start;
-			const lastPageNumber = store.get.lastPage().number;
+			const lastPageNumber = (store.get.lastPage() as any).number;
 
 			const pageSplitNumber = division.pages.end;
 			let split = 0, newPageSplit = pageSplitNumber + splitOffset(split);
@@ -232,7 +258,7 @@ function calculateBookSplits(bookCount, pageCount, noSplitSubmodels) {
 					division.pages.end = newPageSplit;
 					division.steps = pageSpreadToStepSpread(division.pages);
 
-					const nextDivision = bookDivisions[i + 1];
+					const nextDivision = bookDivisionsResult[i + 1];
 					nextDivision.pages.start = newPageSplit + 1;
 					if (nextDivision.pages.end <= nextDivision.pages.start) {
 						// split went past the entire next book; mark next book for deletion
@@ -245,81 +271,70 @@ function calculateBookSplits(bookCount, pageCount, noSplitSubmodels) {
 	}
 
 	// Merge any invalid divisions into the previous (or next) division
-	for (let i = 0; i < bookDivisions.length; i++) {
-		const division = bookDivisions[i];
+	for (let i = 0; i < bookDivisionsResult.length; i++) {
+		const division = bookDivisionsResult[i];
 		if (division.isInvalid) {
 			if (i === 0) {
-				bookDivisions[1].pages.start = division.pages.start;
-				bookDivisions[1].steps = pageSpreadToStepSpread(bookDivisions[1].pages);
+				bookDivisionsResult[1].pages.start = division.pages.start;
+				bookDivisionsResult[1].steps = pageSpreadToStepSpread(bookDivisionsResult[1].pages);
 			} else {
-				bookDivisions[i - 1].pages.end = division.pages.start;
-				bookDivisions[i - 1].steps = pageSpreadToStepSpread(bookDivisions[i - 1].pages);
+				bookDivisionsResult[i - 1].pages.end = division.pages.start;
+				bookDivisionsResult[i - 1].steps = pageSpreadToStepSpread(bookDivisionsResult[i - 1].pages);
 			}
 		}
 	}
 
-	return bookDivisions.filter(division => {
-		return !division.isInvalid;
-	});
+	return bookDivisionsResult.filter(division => !division.isInvalid);
 }
 
-export default {
-	data: function() {
-		const bookCount = 2;
-		const pageCount = store.get.pageCount();
-		const bookDivisions = calculateBookSplits(bookCount, pageCount, true);
-		return {
-			bookCount,
-			pageCount,
-			bookDivisions,
-			includeTitlePages: true,
-			noSplitSubmodels: true,
-			// firstPageNumber: start_page_1 or preserve_page_count
-			firstPageNumber: uiState.get('dialog.multiBook.firstPageNumber'),
-			fileSplit: 'one_file',  // or separate_files
-		};
-	},
-	methods: {
-		updatePageStart() {
-			for (let i = 0; i < this.bookDivisions.length - 1; i++) {
-				const pageEnd = this.bookDivisions[i].pages.end;
-				this.bookDivisions[i + 1].pages.start = pageEnd + 1;
-			}
-			for (let i = 0; i < this.bookDivisions.length; i++) {
-				const division = this.bookDivisions[i];
-				division.steps = pageSpreadToStepSpread(division.pages);
-			}
-		},
-		updateBookCount() {
-			this.bookDivisions = calculateBookSplits(this.bookCount, this.pageCount, this.noSplitSubmodels);
-		},
-		ok() {
-			uiState.set('dialog.multiBook.firstPageNumber', this.firstPageNumber);
-			this.$emit('ok', {
-				bookDivisions: _.cloneDeep(this.bookDivisions),
-				includeTitlePages: this.includeTitlePages,
-				noSplitSubmodels: this.noSplitSubmodels,
-				firstPageNumber: this.firstPageNumber,
-				fileSplit: this.fileSplit,
-			});
-			this.$emit('close');
-		},
-		cancel() {
-			this.$emit('cancel');
-			this.$emit('close');
-		},
-	},
-	computed: {
-		dialogWidth() {
-			return Math.max(450, this.bookDivisions.length * 150) + 'px';
-		},
-	},
-};
+const pageCount = store.get.pageCount();
+const bookCount = ref(2);
+const bookDivisions = ref(calculateBookSplits(2, pageCount, true));
+const includeTitlePages = ref(true);
+const noSplitSubmodels = ref(true);
+// firstPageNumber: start_page_1 or preserve_page_count
+const firstPageNumber = ref(uiState.get('dialog.multiBook.firstPageNumber'));
+const fileSplit = ref('one_file');  // or separate_files
+
+const dialogWidth = computed(() => Math.max(450, bookDivisions.value.length * 150) + 'px');
+
+function updatePageStart() {
+	for (let i = 0; i < bookDivisions.value.length - 1; i++) {
+		const pageEnd = bookDivisions.value[i].pages.end;
+		bookDivisions.value[i + 1].pages.start = pageEnd + 1;
+	}
+	for (let i = 0; i < bookDivisions.value.length; i++) {
+		const division = bookDivisions.value[i];
+		division.steps = pageSpreadToStepSpread(division.pages);
+	}
+}
+
+function updateBookCount() {
+	bookDivisions.value = calculateBookSplits(bookCount.value, pageCount, noSplitSubmodels.value);
+}
+
+function ok() {
+	uiState.set('dialog.multiBook.firstPageNumber', firstPageNumber.value);
+	emit('ok', {
+		bookDivisions: _.cloneDeep(bookDivisions.value),
+		includeTitlePages: includeTitlePages.value,
+		noSplitSubmodels: noSplitSubmodels.value,
+		firstPageNumber: firstPageNumber.value,
+		fileSplit: fileSplit.value,
+	});
+	emit('close');
+}
+
+function cancel() {
+	emit('cancel');
+	emit('close');
+}
+
 </script>
 
 <style>
 
-.multiBookDialog .el-dialog__body > div {
+.multiBookDialog .body > div {
 	display: inline-block;
 	margin: 12px;
 	width: 100%;
@@ -339,10 +354,6 @@ export default {
 
 .multiBookDialog th {
 	text-align: center;
-}
-
-.multiBookDialog .el-radio {
-	margin-bottom: 10px;
 }
 
 .multiBookDialog .page-number-input {

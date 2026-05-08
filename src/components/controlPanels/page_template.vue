@@ -2,41 +2,40 @@
 
 <template>
 	<div>
-		<panel-base title="template.page.title" label-width="100px">
-			<el-form-item label-width="0">
-				<el-select :value="sizePreset.format" @change="updatePagePreset">
-					<el-option
-						key="custom"
-						:label="tr('template.page.formats.custom')"
-						value="custom"
-					/>
-					<el-option
-						v-for="(value, key) in pageSizeLookups"
-						:key="key"
-						:label="tr(`template.page.formats.${key}`)"
-						:value="key"
-					/>
-				</el-select>
-			</el-form-item>
-			<el-form-item label-width="0">
-				<el-radio
-					v-model="sizePreset.orientation"
-					:disabled="haveCustomFormat"
-					label="horizontal"
-					@change="updateOrientation"
-				>
+		<panel-base title="template.page.title" style="--label-width: 100px">
+			<div class="panel-row">
+				<LicSelect
+					:value="sizePreset.format"
+					:options="pageFormatOptions"
+					@change="updatePagePreset"
+				/>
+			</div>
+			<div class="flex-row panel-row">
+				<label class="lic-radio">
+					<input
+						type="radio"
+						name="orientation"
+						:disabled="haveCustomFormat"
+						value="horizontal"
+						:checked="sizePreset.orientation === 'horizontal'"
+						@change="updateOrientation('horizontal')"
+					>
 					{{tr('template.page.orientation.landscape')}}
-				</el-radio>
-				<el-radio
-					v-model="sizePreset.orientation"
-					:disabled="haveCustomFormat"
-					label="vertical"
-					@change="updateOrientation"
-				>
+				</label>
+				<label class="lic-radio">
+					<input
+						type="radio"
+						name="orientation"
+						:disabled="haveCustomFormat"
+						value="vertical"
+						:checked="sizePreset.orientation === 'vertical'"
+						@change="updateOrientation('vertical')"
+					>
 					{{tr('template.page.orientation.portrait')}}
-				</el-radio>
-			</el-form-item>
-			<el-form-item :label="tr('template.page.width')">
+				</label>
+			</div>
+			<label class="label-input-row">
+				{{tr('template.page.width')}}
 				<input
 					v-model.number="width"
 					:disabled="!haveCustomFormat"
@@ -45,32 +44,34 @@
 					class="form-control"
 					@input="updateValues"
 				>
-			</el-form-item>
-			<el-form-item :label="tr('template.page.height')">
+			</label>
+			<label class="label-input-row">
+				{{tr('template.page.height')}}
 				<input
 					v-model.number="height"
 					:disabled="!haveCustomFormat"
 					type="number"
 					min="0"
-					class="form-control col-sm-10"
+					class="form-control"
 					@input="updateValues"
 				>
-			</el-form-item>
-			<el-form-item label-width="0px">
-				<el-checkbox
-					v-model="maintainAspectRatio"
-					:disabled="!haveCustomFormat"
-					class="wrap-checkbox"
-					@change="changeAspectRatio"
-				>
+			</label>
+			<div class="panel-row">
+				<label class="lic-checkbox">
+					<input
+						v-model="maintainAspectRatio"
+						type="checkbox"
+						:disabled="!haveCustomFormat"
+						@change="changeAspectRatio"
+					>
 					{{tr("template.page.aspect_ratio_@mf", {aspect_ratio: aspectRatio.toFixed(2)})}}
-				</el-checkbox>
-			</el-form-item>
-			<el-form-item label-width="0px" class="pageSizeInfo">
+				</label>
+			</div>
+			<div class="panel-row">
 				<div v-html="tr('template.page.printed_size')" />
 				<div v-html="tr('template.page.centimeter_size_@mf', printedSize('cm'))" />
 				<div v-html="tr('template.page.inch_size_@mf', printedSize('in'))" />
-			</el-form-item>
+			</div>
 		</panel-base>
 		<fill-panel
 			template-entry="page"
@@ -83,16 +84,19 @@
 	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
-import _ from '../../util';
+import {ref, computed} from 'vue';
+import {tr} from '@/translations';
+import _, {type UnitTypes} from '../../util';
 import store from '../../store';
 import FillPanel from './fill.vue';
 import BorderPanel from './border.vue';
 import PanelBase from './panel_base.vue';
 import EventBus from '../../event_bus';
+import LicSelect from '../base/LicSelect.vue';
 
-const pageSizeLookups = {  // [width, height] in pixels
+const pageSizeLookups: Record<string, [number, number]> = {
 	a3: [1123, 1587],
 	a4: [794, 1123],
 	a5: [559, 794],
@@ -102,93 +106,92 @@ const pageSizeLookups = {  // [width, height] in pixels
 	'junior-legal': [480, 768],
 };
 
-// TODO: add UI to set default page layout (horizontal vs. vertical , row / cols, etc)
-// TODO: should add UI to choose whether to redo layout or just extend canvas
-// TODO: need to re-layout title page too, on some operations like page resize
-export default {
-	components: {PanelBase, FillPanel, BorderPanel},
-	data() {
-		const template = store.state.template.page;
-		return {
-			width: template.width,
-			height: template.height,
-			pageSizeLookups,
-			sizePreset: {
-				format: (template.sizePreset || {}).format || 'custom',
-				orientation: (template.sizePreset || {}).orientation || 'vertical',
-			},
-			aspectRatio: template.width / template.height,
-			maintainAspectRatio: true,
-		};
-	},
-	methods: {
-		changeAspectRatio() {
-			this.height = Math.floor(this.width / this.aspectRatio);
-			this.updateValues();
-		},
-		newValues() {
-			EventBus.$emit('page-resize');
-			this.$emit('new-values', 'page');
-		},
-		updatePagePreset(newPagePreset) {
-			this.sizePreset.format = newPagePreset;
-			if (newPagePreset !== 'custom') {
-				this.maintainAspectRatio = false;
-				const pageSize = pageSizeLookups[newPagePreset];
-				if (this.sizePreset.orientation === 'vertical') {
-					this.width = pageSize[0];
-					this.height = pageSize[1];
-				} else {
-					this.width = pageSize[1];
-					this.height = pageSize[0];
-				}
-				this.aspectRatio = this.width / this.height;
+const pageFormatOptions = [
+	{value: 'custom', label: tr('template.page.formats.custom')},
+	...Object.keys(pageSizeLookups).map(key => ({value: key, label: tr(`template.page.formats.${key}`)})),
+];
+
+const template = store.state.template.page;
+
+const width = ref(template.width);
+const height = ref(template.height);
+const sizePreset = ref({
+	format: template.sizePreset?.format ?? 'custom',
+	orientation: template.sizePreset?.orientation ?? 'vertical',
+});
+const aspectRatio = ref(template.width / template.height);
+const maintainAspectRatio = ref(true);
+
+const emit = defineEmits(['new-values']);
+
+const haveCustomFormat = computed(() => sizePreset.value.format === 'custom');
+
+function printedSize(unit: UnitTypes) {
+	return {
+		width: _.round(_.units.pixelsToUnits(width.value, unit), 2),
+		height: _.round(_.units.pixelsToUnits(height.value, unit), 2),
+	};
+}
+
+function changeAspectRatio() {
+	height.value = Math.floor(width.value / aspectRatio.value);
+	updateValues();
+}
+
+function newValues() {
+	EventBus.$emit('page-resize');
+	emit('new-values', 'page');
+}
+
+function updatePagePreset(newPagePreset: string) {
+	sizePreset.value.format = newPagePreset;
+	if (newPagePreset !== 'custom') {
+		maintainAspectRatio.value = false;
+		const pageSize = pageSizeLookups[newPagePreset];
+		if (sizePreset.value.orientation === 'vertical') {
+			width.value = pageSize[0];
+			height.value = pageSize[1];
+		} else {
+			width.value = pageSize[1];
+			height.value = pageSize[0];
+		}
+		aspectRatio.value = width.value / height.value;
+	}
+	updateValues();
+}
+
+function updateOrientation(newOrientation: string) {
+	sizePreset.value.orientation = newOrientation;
+	const tmp = width.value;
+	width.value = height.value;
+	height.value = tmp;
+	aspectRatio.value = 1 / aspectRatio.value;
+	updateValues();
+}
+
+function updateValues() {
+	const page = store.state.template.page;
+	let haveChange = false;
+	if (width.value !== page.width || height.value !== page.height) {
+		if (maintainAspectRatio.value) {
+			if (width.value !== page.width) {
+				height.value = Math.floor(width.value / aspectRatio.value);
+			} else if (height.value !== page.height) {
+				width.value = Math.floor(height.value * aspectRatio.value);
 			}
-			this.updateValues();
-		},
-		updateOrientation() {
-			const tmp = this.width;
-			this.width = this.height;
-			this.height = tmp;
-			this.aspectRatio = 1 / this.aspectRatio;
-			this.updateValues();
-		},
-		updateValues() {
-			const template = store.state.template.page;
-			let haveChange = false;
-			if (this.width !== template.width || this.height !== template.height) {
-				if (this.maintainAspectRatio) {
-					if (this.width !== template.width) {
-						this.height = Math.floor(this.width / this.aspectRatio);
-					} else if (this.height !== template.height) {
-						this.width = Math.floor(this.height * this.aspectRatio);
-					}
-				}
-				template.width = this.width;
-				template.height = this.height;
-				haveChange = true;
-			}
-			if (!_.isEqual(template.sizePreset, this.sizePreset)) {
-				template.sizePreset = {...this.sizePreset};
-				haveChange = true;
-			}
-			if (haveChange) {
-				this.newValues();
-			}
-		},
-		printedSize(unit) {
-			return {
-				width: _.round(_.units.pixelsToUnits(this.width, unit), 2),
-				height: _.round(_.units.pixelsToUnits(this.height, unit), 2),
-			};
-		},
-	},
-	computed: {
-		haveCustomFormat() {
-			return this.sizePreset.format === 'custom';
-		},
-	},
-};
+		}
+		page.width = width.value;
+		page.height = height.value;
+		haveChange = true;
+	}
+	if (!_.isEqual(page.sizePreset, sizePreset.value)) {
+		page.sizePreset = {...sizePreset.value};
+		haveChange = true;
+	}
+	if (haveChange) {
+		newValues();
+	}
+}
 
 </script>
 

@@ -307,7 +307,7 @@ export interface BaseTemplate { }
 export interface PageTemplate extends BaseTemplate {
 	width: number;
 	height: number;
-	sizePreset: null;
+	sizePreset: {format: string; orientation: string} | null;
 	innerMargin: number;
 	numberLabel: {
 		font: string;

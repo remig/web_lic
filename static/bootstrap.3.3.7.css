@@ -3275,13 +3275,6 @@ input[type=search] {
     box-sizing: border-box
 }
 
-input[type=checkbox],
-input[type=radio] {
-    margin: 4px 0 0;
-    margin-top: 1px\9;
-    line-height: normal
-}
-
 input[type=file] {
     display: block
 }
@@ -7876,7 +7869,6 @@ button.close {
     margin: 1px;
     text-indent: -999px;
     cursor: pointer;
-    background-color: #000\9;
     background-color: rgba(0, 0, 0, 0);
     border: 1px solid #fff;
     border-radius: 10px

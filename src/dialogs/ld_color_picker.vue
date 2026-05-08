@@ -1,19 +1,19 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<licDialog
-		:title="tr('dialog.ld_color_picker.title')"
+	<LicDialog
+		:title="t('dialog.ld_color_picker.title')"
 		class="ldColorPickerDialog"
 		width="500px"
 	>
 		<table class="el-table brickColorTable">
 			<tr>
-				<th>{{tr('dialog.ld_color_picker.ld_code')}}</th>
+				<th>{{t('dialog.ld_color_picker.ld_code')}}</th>
 				<th style="text-align: left;">
-					{{tr('dialog.ld_color_picker.name')}}
+					{{t('dialog.ld_color_picker.name')}}
 				</th>
 				<th style="text-align: left;">
-					{{tr('dialog.ld_color_picker.choose')}}
+					{{t('dialog.ld_color_picker.choose')}}
 				</th>
 			</tr>
 		</table>
@@ -32,29 +32,36 @@
 				</tr>
 			</table>
 		</div>
-		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-		</span>
-	</licDialog>
+		<template #footer>
+			<LicButton type="cancel" @click="emit('close')" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {ref} from 'vue';
+import {tr as t} from '@/translations';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
 import _ from '../util';
 import LDParse from '../ld_parse';
 import Storage from '../storage';
+
+const emit = defineEmits(['ok', 'close']);
+
 const customColors = Storage.get.customBrickColors();
 
 function buildColorTable() {
-	const colors = [];
+	const colors: {id: number; name: string; color: string; edge: string}[] = [];
 	_.forOwn(LDParse.colorTable, (v, k) => {
 		if (v.color < 0 || v.edge < 0) {
 			return;
 		}
-		k = parseInt(k, 10);
-		const customColor = customColors[k] || {};
+		const id = parseInt(k, 10);
+		const customColor = customColors[id] || {};
 		colors.push({
-			id: k,
+			id,
 			name: v.name,
 			color: customColor.color || v.color,
 			edge: customColor.edge || v.edge,
@@ -63,22 +70,13 @@ function buildColorTable() {
 	return colors;
 }
 
-export default {
-	data: function() {
-		return {
-			colorData: buildColorTable(),
-		};
-	},
-	methods: {
-		pick(colorCode) {
-			this.$emit('ok', colorCode);
-			this.$emit('close');
-		},
-		cancel() {
-			this.$emit('close');
-		},
-	},
-};
+const colorData = ref(buildColorTable());
+
+function pick(colorCode: number) {
+	emit('ok', colorCode);
+	emit('close');
+}
+
 </script>
 
 <style>
@@ -87,15 +85,18 @@ export default {
 	table-layout: fixed;
 }
 
-.ldColorPickerDialog td:nth-of-type(1), .ldColorPickerDialog th:nth-of-type(1) {
+.ldColorPickerDialog td:nth-of-type(1),
+.ldColorPickerDialog th:nth-of-type(1) {
 	width: 100px;
 }
 
-.ldColorPickerDialog td:nth-of-type(2), .ldColorPickerDialog th:nth-of-type(2) {
+.ldColorPickerDialog td:nth-of-type(2),
+.ldColorPickerDialog th:nth-of-type(2) {
 	width: 140px;
 }
 
-.ldColorPickerDialog td:nth-of-type(3), .ldColorPickerDialog th:nth-of-type(3) {
+.ldColorPickerDialog td:nth-of-type(3),
+.ldColorPickerDialog th:nth-of-type(3) {
 	width: 50px;
 }
 
@@ -116,25 +117,17 @@ export default {
 	border-radius: 2px;
 }
 
-.ldColorPickerDialog .el-dialog__body {
-	max-height: 70vh;
-}
-
 .brickColorTableScroll {
-	max-height: 65vh;
+	max-height: 55vh;
 	overflow-x: hidden;
 	overflow-y: scroll;
 }
 
-.ldColorPickerDialog .el-table th, .ldColorPickerDialog .el-table td {
+.ldColorPickerDialog .el-table th,
+.ldColorPickerDialog .el-table td {
 	padding: 5px 0;
 	text-align: center;
 	overflow: hidden;
 }
 
-.ldColorPickerDialog .el-color-picker {
-	height: 34px;
-}
-
 </style>
-

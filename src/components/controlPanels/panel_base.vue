@@ -4,9 +4,7 @@
 	<div class="panel-template">
 		<h5>{{tr(title)}}</h5>
 		<div class="panel-body">
-			<el-form :label-width="labelWidth" label-position="left">
-				<slot />
-			</el-form>
+			<slot />
 		</div>
 	</div>
 </template>
@@ -14,7 +12,7 @@
 <script>
 
 export default {
-	props: ['title', 'labelWidth'],
+	props: ['title'],
 };
 
 </script>

@@ -1,127 +1,144 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<licDialog
-		:title="tr('dialog.page_layout.title')"
-		width="500px"
+	<LicDialog
+		:title="t('dialog.page_layout.title')"
+		width="400px"
 		class="pageLayoutDialog"
 	>
-		<el-form :inline="true" label-width="100px" onSubmit="return false;">
-			<el-form-item :label="tr('dialog.page_layout.rows')">
-				<el-checkbox v-model="autoRows" @change="updateValues">
-					{{tr('glossary.auto')}}
-				</el-checkbox>
-			</el-form-item>
-			<el-form-item>
+		<div class="flex-row panel-row">
+			<span class="page-layout-label">{{t('dialog.page_layout.rows')}}</span>
+			<label class="lic-checkbox">
+				<input v-model="autoRows" type="checkbox" @change="updateValues">
+				{{t('glossary.auto')}}
+			</label>
+			<input
+				v-model.number="values.rows"
+				:disabled="autoRows"
+				type="number"
+				min="1"
+				class="form-control"
+				@input="updateValues"
+			>
+		</div>
+		<div class="flex-row panel-row">
+			<span class="page-layout-label">{{t('dialog.page_layout.cols')}}</span>
+			<label class="lic-checkbox">
+				<input v-model="autoCols" type="checkbox" @change="updateValues">
+				{{t('glossary.auto')}}
+			</label>
+			<input
+				v-model.number="values.cols"
+				:disabled="autoCols"
+				type="number"
+				min="1"
+				class="form-control"
+				@input="updateValues"
+			>
+		</div>
+		<div class="flex-row panel-row">
+			<span class="page-layout-label">{{t('dialog.page_layout.orientation')}}</span>
+			<label class="lic-radio">
 				<input
-					v-model.number="values.rows"
-					:disabled="autoRows"
-					type="number"
-					min="1"
-					class="form-control"
-					@input="updateValues"
+					type="radio"
+					name="direction"
+					value="horizontal"
+					:checked="values.direction === 'horizontal'"
+					@change="setDirection('horizontal')"
 				>
-			</el-form-item>
-		</el-form>
-		<el-form :inline="true" label-width="100px" onSubmit="return false;">
-			<el-form-item :label="tr('dialog.page_layout.cols')">
-				<el-checkbox v-model="autoCols" @change="updateValues">
-					{{tr('glossary.auto')}}
-				</el-checkbox>
-			</el-form-item>
-			<el-form-item>
+				{{t('dialog.page_layout.horizontal')}}
+			</label>
+			<label class="lic-radio">
 				<input
-					v-model.number="values.cols"
-					:disabled="autoCols"
-					type="number"
-					min="1"
-					class="form-control"
-					@input="updateValues"
+					type="radio"
+					name="direction"
+					value="vertical"
+					:checked="values.direction === 'vertical'"
+					@change="setDirection('vertical')"
 				>
-			</el-form-item>
-		</el-form>
-		<el-form :inline="true" label-width="100px" onSubmit="return false;">
-			<el-form-item :label="tr('dialog.page_layout.orientation')">
-				<el-radio
-					v-model="values.direction"
-					label="horizontal"
-					@change="updateValues"
-				>
-					{{tr('dialog.page_layout.horizontal')}}
-				</el-radio>
-				<el-radio
-					v-model="values.direction"
-					label="vertical"
-					@change="updateValues"
-				>
-					{{tr('dialog.page_layout.vertical')}}
-				</el-radio>
-			</el-form-item>
-		</el-form>
-		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
-		</span>
-	</licDialog>
+				{{t('dialog.page_layout.vertical')}}
+			</label>
+		</div>
+		<template #footer>
+			<LicButton type="cancel" @click="cancel" />
+			<LicButton type="ok" @click="ok" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
-export default {
-	data: function() {
-		return {
-			autoRows: true,
-			autoCols: true,
-			values: {
-				rows: 0,
-				cols: 0,
-				direction: 'vertical',
-			},
-		};
-	},
-	methods: {
-		show() {
-			if (this.values.rows === 'auto') {
-				this.values.rows = 1;
-				this.autoRows = true;
-			} else {
-				this.autoRows = false;
-			}
-			if (this.values.cols === 'auto') {
-				this.values.cols = 1;
-				this.autoCols = true;
-			} else {
-				this.autoCols = false;
-			}
-		},
-		updateValues() {
-			this.$emit('update', this.actualValues);
-		},
-		ok() {
-			this.$emit('ok', this.actualValues);
-			this.$emit('close');
-		},
-		cancel() {
-			this.$emit('cancel', this.actualValues);
-			this.$emit('close');
-		},
-	},
-	computed: {
-		actualValues() {
-			return {
-				rows: this.autoRows ? 'auto' : this.values.rows,
-				cols: this.autoCols ? 'auto' : this.values.cols,
-				direction: this.values.direction,
-			};
-		},
-	},
-};
+import {ref, reactive, computed} from 'vue';
+import {tr as t} from '@/translations';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
+import {type GridLayout, type Orientations} from '../item_types';
+
+const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+
+const autoRows = ref(true);
+const autoCols = ref(true);
+const values = reactive<GridLayout>({
+	rows: 0,
+	cols: 0,
+	direction: 'vertical',
+});
+
+const actualValues = computed<GridLayout>(() => ({
+	rows: autoRows.value ? 'auto' : values.rows,
+	cols: autoCols.value ? 'auto' : values.cols,
+	direction: values.direction,
+}));
+
+function show() {
+	if (values.rows === 'auto') {
+		values.rows = 1;
+		autoRows.value = true;
+	} else {
+		autoRows.value = false;
+	}
+	if (values.cols === 'auto') {
+		values.cols = 1;
+		autoCols.value = true;
+	} else {
+		autoCols.value = false;
+	}
+}
+
+function setDirection(dir: Orientations) {
+	values.direction = dir;
+	updateValues();
+}
+
+function updateValues() {
+	emit('update', actualValues.value);
+}
+
+function ok() {
+	emit('ok', actualValues.value);
+	emit('close');
+}
+
+function cancel() {
+	emit('cancel', actualValues.value);
+	emit('close');
+}
+
+defineExpose({autoRows, autoCols, values, show});
+
 </script>
 
 <style>
 
-.pageLayoutDialog input {
-	width: 90px;
+.pageLayoutDialog {
+	input {
+		width: 90px;
+	}
+}
+
+.page-layout-label {
+	width: 80px;
+	flex-shrink: 0;
 }
 
 </style>

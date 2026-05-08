@@ -1,8 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base title="template.transform.title" label-width="80px">
-		<el-form-item :label="tr('template.transform.scale')">
+	<panel-base title="template.transform.title" style="--label-width: 80px">
+		<label class="label-input-row">
+			{{tr('template.transform.scale')}}
 			<input
 				v-model.number="scale"
 				type="number"
@@ -12,7 +13,7 @@
 				class="form-control"
 				@input="updateValues"
 			>
-		</el-form-item>
+		</label>
 		<rotate-builder
 			:initial-rotation="rotation"
 			:include-labels="false"

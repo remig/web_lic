@@ -3,35 +3,26 @@
 <template>
 	<div id="tree">
 		<div class="treeButtons">
-			<el-button icon="fas fa-expand-arrows-alt" @click="expand" />
-			<el-button icon="fas fa-compress" @click="collapse" />
-			<el-dropdown
-				id="treeShowHideMenu"
-				:hide-on-click="false"
-				size="mini"
-				trigger="click"
-				placement="bottom-start"
-				@command="checkItem"
-			>
-				<span class="el-dropdown-link">{{tr('nav_tree.show')}}</span>
-				<el-dropdown-menu slot="dropdown" class="treeShowHideDropdown">
-					<template v-for="(el, idx) in checkedElements">
-						<el-dropdown-item
-							v-if="el.name === 'divider'"
-							:key="`${el}_${idx}`"
-							:divided="true"
-						/>
-						<el-dropdown-item
-							v-else
-							:key="`${el}_${idx}`"
-							:command="el"
-						>
-							{{tr(el.name)}}
-							<i v-if="el.checked" class="fas fa-check" />
-						</el-dropdown-item>
-					</template>
-				</el-dropdown-menu>
-			</el-dropdown>
+			<LicButton icon="fas fa-expand-arrows-alt" @click="expand" />
+			<LicButton icon="fas fa-compress" @click="collapse" />
+			<LicDropdown :label="tr('nav_tree.show')">
+				<template v-for="(el, idx) in checkedElements">
+					<div
+						v-if="el.name === 'divider'"
+						:key="`divider_${idx}`"
+						class="lic-dropdown-divider"
+					/>
+					<div
+						v-else
+						:key="`item_${idx}`"
+						class="lic-dropdown-item"
+						@click="checkItem(el)"
+					>
+						{{tr(el.name)}}
+						<i v-if="el.checked" class="fas fa-check" />
+					</div>
+				</template>
+			</LicDropdown>
 		</div>
 		<div id="nav-tree" class="treeScroll" />
 	</div>
@@ -43,6 +34,8 @@
 import uiState from '../ui_state';
 import store from '../store';
 import NavTree from '../navtree';
+import LicButton from '@/components/base/LicButton.vue';
+import LicDropdown from '@/components/base/LicDropdown.vue';
 
 const treeElementList = [
 	{name: 'nav_tree.all', value: 'all', checked: true},
@@ -72,6 +65,7 @@ if (checkedItems) {
 // TODO: need to scroll nav tree up / down whenever selected item changes, to ensure it's always in view
 export default {
 	name: 'NavTreeContainer',
+	components: {LicButton, LicDropdown},
 	props: ['currentItem'],
 	data() {
 		this.store = store;
@@ -155,32 +149,17 @@ export default {
 
 .treeButtons {
 	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
 	padding: 10px;
 	min-width: 110px;
 	border-bottom: 1px solid #AAA;
 }
 
-.treeButtons > button {
-	align-self: flex-end;
-	margin-left: auto;
-	font-size: 8pt;
+.treeButtons button {
 	margin-right: 6px;
-	padding: 6px 7px;
-}
-
-.treeButtons .el-dropdown {
-	float: right;
-	height: 24px;
-	font-size: 10pt;
-	padding: 2px 5px;
-}
-
-.treeShowHideDropdown {
-	min-width: 190px;
-}
-
-.treeShowHideDropdown i {
-	padding-top: 5px;
+	font-size: 8pt !important;
+	padding: 6px 7px !important;
 }
 
 .treeScroll {

@@ -11,9 +11,7 @@ export interface DialogInterface {
 
 // Can't export type information from a vue file, so must
 // declare each dialog's property interface here. Ugh.
-interface LocaleChooserDialog extends DialogInterface {
-	visible: boolean;
-}
+type LocaleChooserDialog = DialogInterface;
 
 interface StringChooserDialog extends DialogInterface {
 	newString: string;

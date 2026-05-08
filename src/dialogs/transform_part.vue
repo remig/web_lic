@@ -1,14 +1,14 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<licDialog
-		:title="tr('dialog.transform_part.title')"
+	<LicDialog
+		:title="t('dialog.transform_part.title')"
 		width="600px"
 		class="transformPartDialog"
 	>
-		<el-form :inline="true" label-width="40px">
-			<el-form-item :label="tr('dialog.transform_part.position')" label-width="90px" />
-			<el-form-item :label="tr('glossary.x')">
+		<div class="flex-row panel-row" style="gap: 30px;">
+			<span class="transform-section">{{t('dialog.transform_part.position')}}</span>
+			<label class="flex-row">{{t('glossary.x')}}
 				<input
 					ref="set_focus"
 					v-model.number="position.x"
@@ -16,90 +16,87 @@
 					class="form-control"
 					@input="updateValues"
 				>
-			</el-form-item>
-			<el-form-item :label="tr('glossary.y')">
-				<input
-					v-model.number="position.y"
-					type="number"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-			<el-form-item :label="tr('glossary.z')">
-				<input
-					v-model.number="position.z"
-					type="number"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-		</el-form>
-		<el-form :inline="true" label-width="40px">
-			<el-form-item :label="tr('dialog.transform_part.rotation')" label-width="90px" />
-			<el-form-item :label="tr('glossary.x')">
-				<input
-					v-model.number="rotation.x"
-					type="number"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-			<el-form-item :label="tr('glossary.y')">
-				<input
-					v-model.number="rotation.y"
-					type="number"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-			<el-form-item :label="tr('glossary.z')">
-				<input
-					v-model.number="rotation.z"
-					type="number"
-					class="form-control"
-					@input="updateValues"
-				>
-			</el-form-item>
-		</el-form>
-		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
-		</span>
-	</licDialog>
+			</label>
+			<label class="flex-row">{{t('glossary.y')}}
+				<input v-model.number="position.y" type="number" class="form-control" @input="updateValues">
+			</label>
+			<label class="flex-row">{{t('glossary.z')}}
+				<input v-model.number="position.z" type="number" class="form-control" @input="updateValues">
+			</label>
+		</div>
+		<div class="flex-row panel-row" style="gap: 30px;">
+			<span class="transform-section">{{t('dialog.transform_part.rotation')}}</span>
+			<label class="flex-row">{{t('glossary.x')}}
+				<input v-model.number="rotation.x" type="number" class="form-control" @input="updateValues">
+			</label>
+			<label class="flex-row">{{t('glossary.y')}}
+				<input v-model.number="rotation.y" type="number" class="form-control" @input="updateValues">
+			</label>
+			<label class="flex-row">{{t('glossary.z')}}
+				<input v-model.number="rotation.z" type="number" class="form-control" @input="updateValues">
+			</label>
+		</div>
+		<template #footer>
+			<LicButton type="cancel" @click="cancel" />
+			<LicButton type="ok" @click="ok" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
-export default {
-	data: function() {
-		return {
-			title: '',
-			rotation: {x: 0, y: 0, z: 0},
-			position: {x: 0, y: 0, z: 0},
-			addRotateIcon: true,
-			showRotateIconCheckbox: true,
-		};
-	},
-	methods: {
-		updateValues() {
-			this.$emit('update', this.$data);
-		},
-		ok() {
-			this.$emit('ok', this.$data);
-			this.$emit('close');
-		},
-		cancel() {
-			this.$emit('cancel', this.$data);
-			this.$emit('close');
-		},
-	},
-};
+import {ref} from 'vue';
+import {tr as t} from '@/translations';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
+
+const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+
+const title = ref('');
+const rotation = ref({x: 0, y: 0, z: 0});
+const position = ref({x: 0, y: 0, z: 0});
+const addRotateIcon = ref(true);
+const showRotateIconCheckbox = ref(true);
+
+defineExpose({title, rotation, position, addRotateIcon, showRotateIconCheckbox});
+
+function currentProps() {
+	return {
+		title: title.value,
+		rotation: rotation.value,
+		position: position.value,
+		addRotateIcon: addRotateIcon.value,
+		showRotateIconCheckbox: showRotateIconCheckbox.value,
+	};
+}
+
+function updateValues() {
+	emit('update', currentProps());
+}
+
+function ok() {
+	emit('ok', currentProps());
+	emit('close');
+}
+
+function cancel() {
+	emit('cancel');
+	emit('close');
+}
+
 </script>
 
 <style>
 
-.transformPartDialog input {
-	width: 80px;
+.transformPartDialog {
+	input {
+		width: 90px;
+	}
+}
+
+.transform-section {
+	width: 70px;
+	flex-shrink: 0;
 }
 
 </style>

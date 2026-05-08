@@ -1,84 +1,74 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<licDialog
+	<LicDialog
 		:title="title"
 		width="400px"
 		class="rotatePartImageDialog"
 	>
-		<el-form :inline="true" label-width="50px">
-			<rotate-builder
-				:initial-rotation="rotation"
-				title=""
-				@new-values="updateValues"
-			/>
-		</el-form>
-		<el-form v-if="showRotateIconCheckbox" :inline="true" label-width="180px">
-			<el-form-item>
-				<el-checkbox
+		<rotate-builder
+			:initial-rotation="rotation"
+			title=""
+			@new-values="updateValues"
+		/>
+		<div v-if="showRotateIconCheckbox" class="panel-row">
+			<label class="lic-checkbox">
+				<input
 					v-model="addRotateIcon"
+					type="checkbox"
 					data-testid="rotate-add-icon"
-					@change="updateValues"
+					@change="emit('update', currentData())"
 				>
-					{{tr('dialog.rotate_part_image.add_rotate_icon')}}
-				</el-checkbox>
-			</el-form-item>
-		</el-form>
-		<span slot="footer" class="dialog-footer">
-			<el-button data-testid="rotate-cancel" @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" data-testid="rotate-ok" @click="ok()">{{tr("dialog.ok")}}</el-button>
-		</span>
-	</licDialog>
+				{{tr('dialog.rotate_part_image.add_rotate_icon')}}
+			</label>
+		</div>
+		<template #footer>
+			<LicButton type="cancel" data-testid="rotate-cancel" @click="cancel" />
+			<LicButton type="ok" data-testid="rotate-ok" @click="ok" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
-import _ from '../util';
-import rotateBuilder from '../components/rotate.vue';
+import {ref} from 'vue';
+import {tr} from '@/translations';
+import {type Rotation} from '@/item_types';
+import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
+import rotateBuilder from '@/components/rotate.vue';
 
-export default {
-	components: {rotateBuilder},
-	data: function() {
-		return {
-			title: '',
-			addRotateIcon: true,
-			showRotateIconCheckbox: true,
-			initialRotation: [],
-		};
-	},
-	methods: {
-		updateValues(newRotation) {
-			if (newRotation && Array.isArray(newRotation)) {
-				this.$data.rotation = newRotation;
-			}
-			this.$emit('update', this.$data);
-		},
-		ok() {
-			this.$emit('ok', this.$data);
-			this.$emit('close');
-		},
-		cancel() {
-			this.$emit('cancel', this.$data);
-			this.$emit('close');
-		},
-	},
-	computed: {
-		rotation: {
-			get() {
-				return this.initialRotation;
-			},
-			set(newRotation) {
-				this.$data.rotation = this.initialRotation = _.cloneDeep(newRotation);
-			},
-		},
-	},
-};
+const title = ref('');
+const addRotateIcon = ref(true);
+const showRotateIconCheckbox = ref(true);
+const rotation = ref<Rotation[]>([]);
+
+const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+
+defineExpose({title, addRotateIcon, showRotateIconCheckbox, rotation});
+
+function currentData() {
+	return {title: title.value, addRotateIcon: addRotateIcon.value, rotation: rotation.value};
+}
+
+function updateValues(newRotation: Rotation[]) {
+	rotation.value = newRotation;
+	emit('update', currentData());
+}
+
+function ok() {
+	emit('ok', currentData());
+	emit('close');
+}
+
+function cancel() {
+	emit('cancel', currentData());
+	emit('close');
+}
+
 </script>
 
 <style>
 
-.rotatePartImageDialog .el-checkbox {
-	font-weight: 700;
-}
 
 </style>

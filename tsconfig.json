@@ -5,10 +5,13 @@
 		"allowJs": true,
 		"target": "es6",
 		"module": "esnext",
-		"lib": ["dom", "es6", "es2019", "scripthost"],
+		"lib": ["dom", "es6", "es2019", "scripthost", "esnext", "dom.iterable"],
 		"isolatedModules": true,
 		"importHelpers": true,
-		"moduleResolution": "node",
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
 		"skipLibCheck": true,
@@ -21,14 +24,7 @@
 		"strictPropertyInitialization": true,
 		"strictBindCallApply": true,
 		"strictFunctionTypes": true,
-		"downlevelIteration": true,
 	},
-	"lib": [
-		"esnext",
-		"dom",
-		"dom.iterable",
-		"scripthost"
-	],
 	"include": [
 		"./src/**/*"
 	],

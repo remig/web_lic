@@ -1,12 +1,13 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<licDialog
+	<LicDialog
 		:title="title"
 		:width="width"
 	>
-		<el-form onSubmit="return false;">
-			<el-form-item :label="label" class="number_chooser_input">
+		<label class="label-input-row">
+			{{labelText}}
+			<div>
 				<input
 					ref="set_focus"
 					v-model.number="value"
@@ -18,57 +19,51 @@
 					@input="updateValues"
 				>
 				<div v-if="bodyText" style="margin-top: 15px" v-html="bodyText" />
-			</el-form-item>
-		</el-form>
-		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok">{{tr("dialog.ok")}}</el-button>
-		</span>
-	</licDialog>
+			</div>
+		</label>
+		<template #footer>
+			<LicButton type="cancel" @click="cancel" />
+			<LicButton type="ok" @click="ok" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
 // TODO: Need to implement my own better looking number input, with nice scroll buttons.
-export default {
-	data: function() {
-		return {
-			value: null,
-			title: '',
-			label: '',
-			width: '500px',
-			bodyText: '',
-			min: 0,
-			max: 100,
-			step: 1,
-		};
-	},
-	methods: {
-		updateValues() {
-			this.$emit('update', this.$data.value);
-		},
-		ok() {
-			this.$emit('ok', this.$data.value);
-			this.$emit('close');
-		},
-		cancel() {
-			this.$emit('cancel');
-			this.$emit('close');
-		},
-	},
-};
+
+import {ref} from 'vue';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
+
+const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+
+const value = ref<number | null>(null);
+const title = ref('');
+const labelText = ref('');
+const width = ref('500px');
+const bodyText = ref('');
+const min = ref(0);
+const max = ref(100);
+const step = ref(1);
+
+defineExpose({value, title, label: labelText, width, bodyText, min, max, step});
+
+function updateValues() {
+	emit('update', value.value);
+}
+
+function ok() {
+	emit('ok', value.value);
+	emit('close');
+}
+
+function cancel() {
+	emit('cancel');
+	emit('close');
+}
+
 </script>
 
 <style>
-
-.number_chooser_input {
-	display: flex;
-}
-
-.number_chooser_input .el-form-item__content {
-	display: inline-block;
-	padding-top: 3px;
-	flex-grow: 1;
-}
-
 </style>

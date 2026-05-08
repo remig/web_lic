@@ -1,84 +1,90 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<licDialog
-		:title="tr('dialog.scene_rendering.title')"
+	<LicDialog
+		:title="t('dialog.scene_rendering.title')"
 		width="420px"
 		class="sceneRenderingDialog"
 	>
-		<el-form label-width="180px">
-			<el-form-item :label="tr('dialog.scene_rendering.edge_width')">
+		<div style="--label-width: 180px">
+			<label class="label-input-row">
+				{{t('dialog.scene_rendering.edge_width')}}
 				<input
 					v-model.number="values.edgeWidth"
 					type="number"
 					min="0"
 					max="10"
 					class="form-control sceneRenderingInput"
-					@input="updateValues"
+					@input="applyValues"
 				>
-			</el-form-item>
-			<el-form-item :label="tr('dialog.scene_rendering.zoom')">
+			</label>
+			<label class="label-input-row">
+				{{t('dialog.scene_rendering.zoom')}}
 				<input
 					ref="set_focus"
 					v-model.number="values.zoom"
 					type="number"
 					class="form-control sceneRenderingInput"
-					@input="updateValues"
+					@input="applyValues"
 				>
-			</el-form-item>
+			</label>
 			<rotateBuilder
-				:title="tr('dialog.scene_rendering.rotate_title')"
+				:title="t('dialog.scene_rendering.rotate_title')"
 				:initial-rotation="values.rotation"
-				@new-values="updateValues"
+				@new-values="applyRotation"
 			/>
-		</el-form>
-		<span slot="footer" class="dialog-footer">
-			<el-button @click="cancel">{{tr("dialog.cancel")}}</el-button>
-			<el-button type="primary" @click="ok()">{{tr("dialog.ok")}}</el-button>
-		</span>
-	</licDialog>
+		</div>
+		<template #footer>
+			<LicButton type="cancel" @click="cancel" />
+			<LicButton type="ok" @click="ok" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {reactive} from 'vue';
+import {tr as t} from '@/translations';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
+import rotateBuilder from '../components/rotate.vue';
 import _ from '../util';
 import store from '../store';
 import undoStack from '../undo_stack';
-import rotateBuilder from '../components/rotate.vue';
 import EventBus from '../event_bus';
+import {type Rotation} from '../item_types';
 
-export default {
-	components: {rotateBuilder},
-	data: function() {
-		this.originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
-		return {
-			values: _.cloneDeep(store.state.template.sceneRendering),
-		};
-	},
-	methods: {
-		updateValues(newRotation) {
-			if (newRotation && Array.isArray(newRotation)) {
-				this.values.rotation = newRotation;
-			}
-			store.mutations.sceneRendering.set({...this.values, refresh: true});
-			EventBus.$emit('redraw-ui', {clearSelection: true});
-		},
-		ok() {
-			undoStack.commit(
-				'sceneRendering.zoom',
-				this.values,
-				this.tr('dialog.scene_rendering.undo'),
-				['renderer'],
-			);
-			this.$emit('close');
-		},
-		cancel() {
-			store.mutations.sceneRendering.set({...this.originalRenderState, refresh: true});
-			EventBus.$emit('redraw-ui', {clearSelection: true});
-			this.$emit('close');
-		},
-	},
-};
+const emit = defineEmits(['close']);
+
+const values = reactive(_.cloneDeep(store.state.template.sceneRendering));
+const originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
+
+function applyValues() {
+	store.mutations.sceneRendering.set({...values, refresh: true});
+	EventBus.$emit('redraw-ui', {clearSelection: true});
+}
+
+function applyRotation(newRotation: Rotation[]) {
+	values.rotation = newRotation;
+	applyValues();
+}
+
+function ok() {
+	undoStack.commit(
+		'sceneRendering.zoom',
+		{...values},
+		t('dialog.scene_rendering.undo'),
+		['renderer'],
+	);
+	emit('close');
+}
+
+function cancel() {
+	store.mutations.sceneRendering.set({...originalRenderState, refresh: true});
+	EventBus.$emit('redraw-ui', {clearSelection: true});
+	emit('close');
+}
+
 </script>
 
 <style>

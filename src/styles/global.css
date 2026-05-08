@@ -1,0 +1,171 @@
+/* Global styles for native form elements styled to match Element UI */
+
+.flex-row {
+	display: flex;
+	flex-direction: row;
+	gap: 8px;
+	align-items: center;
+}
+
+.panel-row {
+	margin-bottom: 15px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #606266;
+}
+
+.label-input-row {
+	display: grid;
+	grid-template-columns: var(--label-width, 100px) 1fr;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 10px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #606266;
+}
+
+.lic-radio {
+	display: inline-flex;
+	gap: 8px;
+	cursor: pointer;
+	font-size: 14px;
+	color: #606266;
+	line-height: 1;
+	font-weight: 500;
+
+	input[type="radio"] {
+		appearance: none;
+		-webkit-appearance: none;
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		border: 1px solid #dcdfe6;
+		background: #fff;
+		cursor: pointer;
+		flex-shrink: 0;
+		position: relative;
+		translate: 0 -1px; /* fix to account for small mathematical vs optical font alignment */
+		transition: border-color 0.2s;
+		outline: none;
+
+		&:checked {
+			border-color: #409eff;
+
+			&::after {
+				content: '';
+				display: block;
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: #409eff;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+			}
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			border-color: #c0c4cc;
+			background: #f5f7fa;
+
+			&:checked::after {
+				background: #c0c4cc;
+			}
+		}
+	}
+
+	&:has(input:disabled) {
+		cursor: not-allowed;
+		color: #c0c4cc;
+	}
+}
+
+.lic-checkbox {
+	display: inline-flex;
+	gap: 8px;
+	align-items: center;
+	cursor: pointer;
+	font-size: 14px;
+	color: #606266;
+	font-weight: 500;
+	line-height: 1;
+
+	input[type="checkbox"] {
+		appearance: none;
+		-webkit-appearance: none;
+		width: 14px;
+		height: 14px;
+		border-radius: 2px;
+		border: 1px solid #dcdfe6;
+		background: #fff;
+		cursor: pointer;
+		flex-shrink: 0;
+		position: relative;
+		translate: 0 -1px; /* fix to account for small mathematical vs optical font alignment */
+		transition: background 0.2s, border-color 0.2s;
+		outline: none;
+
+		&:checked {
+			background: #409eff;
+			border-color: #409eff;
+
+			&::after {
+				content: '';
+				display: block;
+				width: 4px;
+				height: 6px;
+				border: 2px solid #fff;
+				border-top: none;
+				border-left: none;
+				position: absolute;
+				top: 1.5px;
+				left: 4.5px;
+				transform: rotate(45deg);
+			}
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			border-color: #c0c4cc;
+			background: #f5f7fa;
+
+			&:checked {
+				background: #c0c4cc;
+			}
+		}
+	}
+
+	&:has(input:disabled) {
+		cursor: not-allowed;
+		color: #c0c4cc;
+	}
+}
+
+.lic-toggle-btn {
+	width: 36px;
+	padding: 9px 12px;
+	border-radius: 3px;
+	border: 1px solid #dcdfe6;
+	background: #fff;
+	color: #606266;
+	cursor: pointer;
+	font-size: 14px;
+	line-height: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+
+	&:hover {
+		border-color: #c0c4cc;
+		background: #f5f7fa;
+	}
+
+	&.active {
+		background: #409eff;
+		border-color: #409eff;
+		color: #fff;
+	}
+}

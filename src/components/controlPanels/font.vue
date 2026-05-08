@@ -1,48 +1,35 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base title="glossary.font" label-width="70px">
-		<el-form-item label-width="0px">
-			<el-select
-				v-model="family"
-				@visible-change="cacheFontName"
-				@change="updateFontName"
-			>
-				<el-option-group v-for="group in familyNames" :key="group.label">
-					<el-option
-						v-for="font in group.options"
-						:key="font"
-						:value="font"
-					>
-						{{font}}
-					</el-option>
-				</el-option-group>
-			</el-select>
-		</el-form-item>
-		<el-form-item label-width="0px">
-			<el-checkbox-button
-				v-model="bold"
-				class="fontStyleButton"
-				@change="updateValues()"
+	<panel-base title="glossary.font" style="--label-width: 70px">
+		<div class="panel-row">
+			<LicSelectFontName v-model="family" @change="updateValues" />
+		</div>
+		<div class="panel-row flex-row">
+			<button
+				type="button"
+				:class="['lic-toggle-btn', { active: bold }]"
+				@click="bold = !bold; updateValues()"
 			>
 				<strong>{{tr('template.font.bold_character')}}</strong>
-			</el-checkbox-button>
-			<el-checkbox-button
-				v-model="italic"
-				class="fontStyleButton"
-				@change="updateValues()"
+			</button>
+			<button
+				type="button"
+				:class="['lic-toggle-btn', { active: italic }]"
+				@click="italic = !italic; updateValues()"
 			>
 				<em>{{tr('template.font.italic_character')}}</em>
-			</el-checkbox-button>
-			<!-- <el-checkbox-button
-				v-model="underline"
-				class="fontStyleButton"
-				@change="updateValues()"
+			</button>
+			<!-- <button
+				type="button"
+				:class="['lic-toggle-btn', { active: underline }]"
+				@click="underline = !underline; updateValues()"
 			>
 				<u>{{tr('template.font.underline_character')}}</u>
-			</el-checkbox-button> -->
-		</el-form-item>
-		<el-form-item :label="tr('glossary.size')">
+			</button> -->
+		</div>
+		<label class="label-input-row">
+			{{tr('glossary.size')}}
 			<input
 				v-model.number="size"
 				type="number"
@@ -50,15 +37,11 @@
 				class="form-control"
 				@input="updateValues"
 			>
-		</el-form-item>
-		<el-form-item :label="tr('glossary.color')">
-			<el-color-picker
-				v-model="color"
-				show-alpha
-				@active-change="updateColor"
-				@change="updateValues"
-			/>
-		</el-form-item>
+		</label>
+		<div class="label-input-row">
+			{{tr('glossary.color')}}
+			<LicColorPicker v-model="color" show-alpha @change="updateValues" />
+		</div>
 	</panel-base>
 </template>
 
@@ -66,21 +49,17 @@
 
 import _ from '../../util';
 import store from '../../store';
-import DialogManager from '../../dialog';
-import fontNameDialog from '../../dialogs/font_name.vue';
 import PanelBase from './panel_base.vue';
-
-const getFamilyNames = fontNameDialog.methods.getFamilyNames;
-const addCustomFont = fontNameDialog.methods.addCustomFont;
+import LicColorPicker from '../base/LicColorPicker.vue';
+import LicSelectFontName from '../base/LicSelectFontName.vue';
 
 // TODO: support underlining fonts in general
 export default {
-	components: {PanelBase},
+	components: {PanelBase, LicColorPicker, LicSelectFontName},
 	props: ['templateEntry'],
 	data() {
 		const template = _.get(store.state.template, this.templateEntry);
 		const fontParts = _.fontToFontParts(template.font);
-		addCustomFont(fontParts.fontFamily);
 		return {
 			family: fontParts.fontFamily,
 			size: parseInt(fontParts.fontSize, 10),
@@ -88,37 +67,9 @@ export default {
 			italic: fontParts.fontStyle === 'italic',
 			underline: false,
 			color: template.color,
-			familyNames: getFamilyNames(),
 		};
 	},
 	methods: {
-		cacheFontName(show) {
-			if (show) {
-				this._lastFontFamily = this.family;
-			}
-		},
-		updateFontName() {
-			if (this.family === 'Custom...') {
-				DialogManager(fontNameDialog, dialog => {
-					dialog.$on('ok', fontName => {
-						this.family = fontName;
-						this.familyNames = getFamilyNames();
-						this.updateValues();
-					});
-					dialog.$on('cancel', () => {
-						this.family = this._lastFontFamily;
-					});
-					dialog.font = _.fontString(this);
-					dialog.fontName = '';
-				});
-			} else {
-				this.updateValues();
-			}
-		},
-		updateColor(newColor) {
-			this.color = (newColor === 'transparent') ? null : newColor;
-			this.updateValues();
-		},
 		updateValues() {
 			const template = _.get(store.state.template, this.templateEntry);
 			template.font = _.fontString(this);

@@ -1,34 +1,27 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 <template>
-	<licDialog
-		id="locale_chooser_dialog"
-		:title="tr('dialog.locale_chooser.title')"
-		:modal="true"
-		:show-close="false"
-		:visible="visible"
+	<LicDialog
+		:title="t('dialog.locale_chooser.title')"
 		width="400px"
 	>
-		<el-select id="localeChooserSelect" v-model="chosenLocaleCode" @change="changeLanguage">
-			<el-option
-				v-for="item in languageList"
-				:id="`locale_${item.code}`"
-				:key="item.code"
-				:label="item.language"
-				:value="item.code"
-			/>
-		</el-select>
-		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="ok()">{{tr('dialog.ok')}}</el-button>
-		</span>
-	</licDialog>
+		<LicSelect
+			id="localeChooserSelect"
+			v-model="chosenLocaleCode"
+			:options="localeOptions"
+			@change="changeLanguage"
+		/>
+		<template #footer>
+			<LicButton type="ok" @click="ok" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script lang="ts">
 
+import * as translate from '../translations';
 import DialogManager from '../dialog';
 import EventBus from '../event_bus';
-import * as translate from '../translations';
 
 async function pickLanguage() {
 	const currentLocale = translate.getLocale();
@@ -37,32 +30,35 @@ async function pickLanguage() {
 			EventBus.$emit('redraw-ui');
 		}
 	} else {
-		await DialogManager('localeChooserDialog', dialog => {
-			dialog.visible = true;
-		});
+		await DialogManager('localeChooserDialog');
 	}
 }
 
-export default {
-	data() {
-		return {
-			visible: false,
-			chosenLocaleCode: 'en',
-			languageList: translate.LanguageList,
-		};
-	},
-	methods: {
-		ok() {
-			this.visible = false;
-			translate.setLocale(this.chosenLocaleCode);
-			this.$emit('close');
-		},
-		changeLanguage() {
-			translate.setLocale(this.chosenLocaleCode);
-			EventBus.$emit('redraw-ui');
-		},
-	},
-	pickLanguage,
-};
+export default {pickLanguage};
+
+</script>
+
+<script setup lang="ts">
+
+import {ref} from 'vue';
+import {tr as t} from '../translations';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
+import LicSelect from '@/components/base/LicSelect.vue';
+
+const emit = defineEmits(['close']);
+
+const chosenLocaleCode = ref('en');
+const localeOptions = translate.LanguageList.map(item => ({value: item.code, label: item.language}));
+
+function ok() {
+	translate.setLocale(chosenLocaleCode.value);
+	emit('close');
+}
+
+function changeLanguage() {
+	translate.setLocale(chosenLocaleCode.value);
+	EventBus.$emit('redraw-ui');
+}
 
 </script>

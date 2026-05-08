@@ -17,7 +17,7 @@ module.exports = {
 	overrides: [
 		{files: ["*.ts", "*.js"]}, {files: ["*.vue"], processor: "vue/.vue"}
 	],
-	ignorePatterns: ['static', 'dist', 'test', '.eslintrc.js'],
+	ignorePatterns: ['static', 'dist', 'test', '.eslintrc.js', '**/*.css'],
 	rules: {
 		'accessor-pairs': 'error',
 		'array-bracket-newline': ['error', 'consistent'],

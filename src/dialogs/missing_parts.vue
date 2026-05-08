@@ -1,14 +1,14 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<licDialog
-		:title="tr('dialog.missing_parts.title')"
+	<LicDialog
+		:title="t('dialog.missing_parts.title')"
 		class="missingPartsDialog"
 		width="550px"
 	>
 		<div
 			class="subheading"
-			v-html="tr('dialog.missing_parts.subtitle')"
+			v-html="t('dialog.missing_parts.subtitle')"
 		/>
 		<table class="missingPartsTable">
 			<tr v-for="(value, filename) in missingPartsData" :key="filename" class="missingPartRow">
@@ -18,146 +18,155 @@
 				</td>
 				<td>{{partCount(value.count)}}</td>
 				<td>
-					<licTooltip v-if="showSendButton(filename)">
+					<LicTooltip v-if="showSendButton(filename)">
 						<div
 							slot="content"
-							v-html="tr('dialog.missing_parts.send_to_remote.tooltip')"
+							v-html="t('dialog.missing_parts.send_to_remote.tooltip')"
 						/>
-						<el-button @click="sendToRemote(filename)">
-							{{tr("dialog.missing_parts.send_to_remote.title")}}
-						</el-button>
-					</licTooltip>
-					<el-button v-else-if="!value.uploaded" @click="upload(filename)">
-						{{tr("glossary.import")}}
-					</el-button>
+						<LicButton @click="sendToRemote(filename)">
+							{{t("dialog.missing_parts.send_to_remote.title")}}
+						</LicButton>
+					</LicTooltip>
+					<LicButton v-else-if="!value.uploaded" @click="upload(filename)">
+						{{t("glossary.import")}}
+					</LicButton>
 				</td>
 			</tr>
 		</table>
-		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="ok()">{{okText}}</el-button>
-		</span>
-	</licDialog>
+		<template #footer>
+			<LicButton type="primary" @click="ok">
+				{{okText}}
+			</LicButton>
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
-import Vue from 'vue';
+import {reactive, computed, set} from 'vue';
+import {tr as t} from '@/translations';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
+import LicTooltip from '@/components/base/LicTooltip.vue';
 import _ from '../util';
 import LDParse from '../ld_parse';
 import openFileHandler from '../file_uploader';
 
-function buildMissingPartsTable() {
+const emit = defineEmits(['close']);
+
+type PartEntry = {uploaded: boolean; count: number};
+type MissingPartsData = Record<string, PartEntry>;
+type LoadedContent = Record<string, string | null>;
+
+function buildMissingPartsTable(): MissingPartsData {
 	const missingParts = _.cloneDeep(LDParse.missingParts);
-	_.forOwn(missingParts, (value, key) => {
-		missingParts[key] = {uploaded: false, count: value};
+	const result: MissingPartsData = {};
+	_.forOwn(missingParts, (value: number, key: string) => {
+		result[key] = {uploaded: false, count: value};
 	});
-	return missingParts;
+	return result;
 }
 
-export default {
-	data: function() {
-		return {
-			enablePartSend: window.location.host.toLowerCase().includes('bugeyedmonkeys'),
-			missingPartsData: buildMissingPartsTable(),
-			loadedPartContent: {},  // key: filename, value: LDraw content string
-		};
-	},
-	methods: {
-		ok() {
-			if (this.stillHaveMissingParts) {
-				LDParse.model.removeMissingParts();
-			}
-			this.$emit('close');
-		},
-		upload(filename) {
-			openFileHandler('.dat, .ldr, .mpd', 'text', content => {
-				LDParse.loadPartContent(content).then(() => {
-					this.loadedPartContent[filename] = content;
-					this.missingPartsData[filename].uploaded = true;
-					_.each(LDParse.missingParts, (count, fn) => {
-						if (!(fn in this.missingPartsData)) {
-							Vue.set(this.missingPartsData, fn, {uploaded: false, count});
-						}
-					});
-				});
+const enablePartSend = window.location.host.toLowerCase().includes('bugeyedmonkeys');
+const missingPartsData = reactive<MissingPartsData>(buildMissingPartsTable());
+const loadedPartContent = reactive<LoadedContent>({});
+
+const stillHaveMissingParts = computed(() => _.some(missingPartsData, p => !p.uploaded));
+
+const okText = computed(() => stillHaveMissingParts.value
+	? t('dialog.missing_parts.proceed')
+	: t('dialog.ok'),
+);
+
+function partCount(count: number) {
+	return t('dialog.missing_parts.used_@mf', {count});
+}
+
+function showSendButton(filename: string) {
+	return missingPartsData[filename].uploaded
+		&& enablePartSend
+		&& loadedPartContent[filename] != null;
+}
+
+function ok() {
+	if (stillHaveMissingParts.value) {
+		LDParse.model.removeMissingParts();
+	}
+	emit('close');
+}
+
+function upload(filename: string) {
+	openFileHandler('.dat, .ldr, .mpd', 'text', (content: string | ArrayBuffer | null) => {
+		LDParse.loadPartContent(content as string).then(() => {
+			set(loadedPartContent, filename, content);
+			missingPartsData[filename].uploaded = true;
+			_.each(LDParse.missingParts, (count: number, fn: string) => {
+				if (!(fn in missingPartsData)) {
+					set(missingPartsData, fn, {uploaded: false, count});
+				}
 			});
-		},
-		sendToRemote(filename) {
-			if (this.enablePartSend) {
-				const xhr = new XMLHttpRequest();
-				xhr.open('POST', 'http://bugeyedmonkeys.com/lic/upload_part.php', true);
-				xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-				const content = `&content=filename: ${filename}\n`
-					+ '------------------------------\n'
-					+ `${this.loadedPartContent[filename]}\n`
-					+ '------------------------------';
-				xhr.send(content);
-			}
-			this.loadedPartContent[filename] = null;
-			this.$forceUpdate();
-		},
-		partCount(count) {
-			return this.tr('dialog.missing_parts.used_@mf', {count});
-		},
-		showSendButton(filename) {
-			return this.missingPartsData[filename].uploaded
-				&& this.enablePartSend
-				&& this.loadedPartContent[filename] != null;
-		},
-	},
-	computed: {
-		stillHaveMissingParts() {
-			return _.some(this.missingPartsData, p => !p.uploaded);
-		},
-		okText() {
-			return this.stillHaveMissingParts
-				? this.tr('dialog.missing_parts.proceed')
-				: this.tr('dialog.ok');
-		},
-	},
-};
+		});
+	});
+}
+
+function sendToRemote(filename: string) {
+	if (enablePartSend) {
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', 'http://bugeyedmonkeys.com/lic/upload_part.php', true);
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		const content = `&content=filename: ${filename}\n`
+			+ '------------------------------\n'
+			+ `${loadedPartContent[filename]}\n`
+			+ '------------------------------';
+		xhr.send(content);
+	}
+	loadedPartContent[filename] = null;
+}
+
 </script>
 
 <style>
 
-.missingPartsDialog .subheading {
-	padding-bottom: 20px;
-	border-bottom: 1px solid #ddd;
-	margin-bottom: 20px;
+.missingPartsDialog {
+	.subheading {
+		padding-bottom: 20px;
+		border-bottom: 1px solid #ddd;
+		margin-bottom: 20px;
+	}
+
+	.body {
+		max-height: 70vh;
+	}
 }
 
 .missingPartsTable {
 	table-layout: fixed;
 	width: 100%;
-}
 
-.missingPartsTable tr {
-	height: 50px;
-}
+	tr {
+		height: 50px;
+	}
 
-.missingPartsTable td {
-	text-align: center;
-}
+	td {
+		text-align: center;
+	}
 
-.missingPartsTable i {
-	color: #00c700;
-	margin-right: 10px;
-}
+	i {
+		color: #00c700;
+		margin-right: 10px;
+	}
 
-.missingPartsTable td:nth-of-type(1) {
-	text-align: right;
-}
+	td:nth-of-type(1) {
+		text-align: right;
+	}
 
-.missingPartsTable td:nth-of-type(2) {
-	width: 125px;
-}
+	td:nth-of-type(2) {
+		width: 125px;
+	}
 
-.missingPartsTable td:nth-of-type(3) {
-	width: 200px;
-}
-
-.missingPartsDialog .el-dialog__body {
-	max-height: 70vh;
+	td:nth-of-type(3) {
+		width: 200px;
+	}
 }
 
 </style>

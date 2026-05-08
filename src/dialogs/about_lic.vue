@@ -1,11 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<licDialog
-		id="about_lic_dialog"
-		:modal="true"
+	<LicDialog
 		:title="tr('dialog.about_lic.title')"
-		class="aboutLicDialog"
 		width="700px"
 	>
 		<div>
@@ -44,38 +41,32 @@
 				<a href="mailto:lic@bugeyedmonkeys.com">Remi Gagne</a>
 			</p>
 		</div>
-		<span slot="footer" class="dialog-footer">
-			<el-button type="primary" @click="cancel">{{tr("dialog.ok")}}</el-button>
-		</span>
-	</licDialog>
+		<template #footer>
+			<LicButton type="ok" @click="emit('close')" />
+		</template>
+	</LicDialog>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {tr} from '../translations';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicButton from '@/components/base/LicButton.vue';
 import packageInfo from '../../package.json';
 
-export default {
-	data() {
-		return {
-			version: packageInfo.version,
-		};
-	},
-	methods: {
-		cancel() {
-			this.$emit('close');
-		},
-	},
-};
+const emit = defineEmits(['close']);
+
+const version = packageInfo.version;
 
 </script>
 
 <style>
 
-.aboutLicDialog ul {
+ul {
 	padding-left: 30px;
 }
 
-.aboutLicDialog p {
+p {
 	line-height: 25px;
 }
 

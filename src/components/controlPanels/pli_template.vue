@@ -2,15 +2,17 @@
 
 <template>
 	<div>
-		<panel-base title="template.pli.content" label-width="100px">
-			<el-form-item label-width="0px">
-				<el-checkbox
-					v-model="includeSubmodels"
-					@change="updateValues"
-				>
+		<panel-base title="template.pli.content">
+			<div class="panel-row">
+				<label class="lic-checkbox">
+					<input
+						v-model="includeSubmodels"
+						type="checkbox"
+						@change="updateValues"
+					>
 					{{tr('template.pli.include_submodels')}}
-				</el-checkbox>
-			</el-form-item>
+				</label>
+			</div>
 		</panel-base>
 		<fill-panel
 			template-entry="pli"
