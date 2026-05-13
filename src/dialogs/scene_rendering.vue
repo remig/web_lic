@@ -44,7 +44,7 @@
 <script setup lang="ts">
 
 import {reactive} from 'vue';
-import {tr as t} from '@/translations';
+import {t} from '@/translations';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 import rotateBuilder from '../components/rotate.vue';
@@ -61,7 +61,7 @@ const originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
 
 function applyValues() {
 	store.mutations.sceneRendering.set({...values, refresh: true});
-	EventBus.$emit('redraw-ui', {clearSelection: true});
+	EventBus.emit('redraw-ui', {clearSelection: true});
 }
 
 function applyRotation(newRotation: Rotation[]) {
@@ -81,7 +81,7 @@ function ok() {
 
 function cancel() {
 	store.mutations.sceneRendering.set({...originalRenderState, refresh: true});
-	EventBus.$emit('redraw-ui', {clearSelection: true});
+	EventBus.emit('redraw-ui', {clearSelection: true});
 	emit('close');
 }
 

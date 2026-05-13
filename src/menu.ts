@@ -1,17 +1,19 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import _ from './util';
+import * as FileOps from './file_ops';
+import * as SelectionOps from './selection_ops';
+import * as UiOps from './ui_ops';
 import InstructionExporter from './export';
 import store from './store';
 import undoStack from './undo_stack';
 import Storage from './storage';
-import * as translate from './translations';
+import * as translate from '@/translations';
+import {t} from '@/translations';
 import uiState from './ui_state';
 import DialogManager from './dialog';
 import type {Orientations} from './item_types';
-
-let app: any;
-const tr = translate.tr;
+import EventBus from './event_bus';
 
 function enableIfModel() {
 	return store != null && store.model != null;
@@ -24,7 +26,7 @@ function toggleGrid() {
 		redo: [{root, op, path, value: !value}],
 		undo: [{root, op, path, value}],
 	};
-	const text = tr('action.view.grid.' + (value ? 'hide' : 'show') + '.undo');
+	const text = t('action.view.grid.' + (value ? 'hide' : 'show') + '.undo');
 	undoStack.commit(change, null, text);
 }
 
@@ -37,7 +39,7 @@ function addGuide(orientation: Orientations) {
 			redo: [{root, op: 'add', path: '/-', value: {orientation, position}}],
 			undo: [{root, op: 'remove', path: `/${root.length}`}],
 		};
-		undoStack.commit(change, null, tr(`action.view.guides.add_${orientation}.undo`));
+		undoStack.commit(change, null, t(`action.view.guides.add_${orientation}.undo`));
 	};
 }
 
@@ -50,7 +52,7 @@ function removeGuides() {
 		redo: [{root, op, path, value: []}],
 		undo: [{root, op, path, value: originalGuides}],
 	};
-	undoStack.commit(change, null, tr('action.view.guides.remove.undo'));
+	undoStack.commit(change, null, t('action.view.guides.remove.undo'));
 }
 
 const menu = [
@@ -58,7 +60,7 @@ const menu = [
 		{
 			text: 'action.file.open_lic.name',
 			id: 'open_menu',
-			cb: () => app.openLicFile(),
+			cb: FileOps.openLicFile,
 		},
 		{
 			text: 'action.file.open_lic_recent.name',
@@ -70,26 +72,26 @@ const menu = [
 			text: 'action.file.close.name',
 			id: 'close_menu',
 			enabled: enableIfModel,
-			cb: () => app.closeModel(),
+			cb: FileOps.closeModel,
 		},
 		{
 			text: 'action.file.save.name',
 			id: 'save_menu',
 			shortcut: 'ctrl+s',
 			enabled: enableIfModel,
-			cb: () => app.save(),
+			cb: FileOps.save,
 		},
 		{
 			text: 'action.file.save_as.name',
 			id: 'save_as_menu',
 			enabled: enableIfModel,
-			cb: () => app.saveAs(),
+			cb: FileOps.saveAs,
 		},
 		{text: 'separator'},
 		{
 			text: 'action.file.import_model.name',
 			id: 'import_custom_model_menu',
-			cb: () => app.importCustomModel(),
+			cb: FileOps.importCustomModel,
 		},
 		{
 			text: 'action.file.import_builtin_model.name',
@@ -98,22 +100,22 @@ const menu = [
 				{
 					text: 'action.file.import_builtin_model.models.trivial',
 					id: 'import_trivial_model_menu',
-					cb: () => app.importBuiltInModel('trivial_model.ldr'),
+					cb: () => FileOps.importBuiltInModel('trivial_model.ldr'),
 				},
 				{
 					text: 'action.file.import_builtin_model.models.alligator',
 					id: 'import_alligator_menu',
-					cb: () => app.importBuiltInModel('20015 - Alligator.mpd'),
+					cb: () => FileOps.importBuiltInModel('20015 - Alligator.mpd'),
 				},
 				{
 					text: 'action.file.import_builtin_model.models.xwing',
 					id: 'import_xwing_menu',
-					cb: () => app.importBuiltInModel('7140 - X-Wing Fighter.mpd'),
+					cb: () => FileOps.importBuiltInModel('7140 - X-Wing Fighter.mpd'),
 				},
 				{
 					text: 'action.file.import_builtin_model.models.lab',
 					id: 'import_mobile_lab_menu',
-					cb: () => app.importBuiltInModel('6901 - Mobile Lab.mpd'),
+					cb: () => FileOps.importBuiltInModel('6901 - Mobile Lab.mpd'),
 				},
 			],
 		},
@@ -126,17 +128,17 @@ const menu = [
 				{
 					text: 'action.file.template.save.name',
 					id: 'save_template_menu',
-					cb: () => app.saveTemplate(),
+					cb: FileOps.saveTemplate,
 				},
 				{
 					text: 'action.file.template.save_as.name',
 					id: 'save_template_as_menu',
-					cb: () => app.saveTemplateAs(),
+					cb: FileOps.saveTemplateAs,
 				},
 				{
 					text: 'action.file.template.load.name',
 					id: 'load_template_menu',
-					cb: () => app.importTemplate(),
+					cb: FileOps.importTemplate,
 				},
 				{
 					text: 'action.file.template.load_builtin.name',
@@ -148,7 +150,7 @@ const menu = [
 					text: 'action.file.template.reset.name',
 					id: 'reset_template_menu',
 					cb() {
-						const text = tr('action.file.template.reset.undo');
+						const text = t('action.file.template.reset.undo');
 						undoStack.commit('templatePage.reset', null, text, ['csi', 'pliItem']);
 					},
 				},
@@ -165,7 +167,7 @@ const menu = [
 						id: `language_${language.code}_menu`,
 						cb() {
 							translate.setLocale(language.code);
-							app.redrawUI();
+							UiOps.redrawUI();
 						},
 					};
 				});
@@ -175,10 +177,10 @@ const menu = [
 			text: 'action.file.clear_cache.name',
 			id: 'clear_cache_menu',
 			cb() {
-				app.closeModel();
+				FileOps.closeModel();
 				uiState.resetUIState();
 				Storage.clear.everything();
-				app.redrawUI();
+				UiOps.redrawUI();
 			},
 		},
 	]},
@@ -206,9 +208,9 @@ const menu = [
 			id: 'add_title_page_menu',
 			shown: () => enableIfModel() && store.get.titlePage() == null,
 			cb() {
-				undoStack.commit('titlePage.add', {}, tr(this.text()));
-				app.setCurrentPage(store.get.firstPage());
-				app.clearSelected();
+				undoStack.commit('titlePage.add', {}, t(this.text()));
+				SelectionOps.setCurrentPage(store.get.firstPage());
+				SelectionOps.clearSelected();
 			},
 		},
 		{
@@ -219,9 +221,9 @@ const menu = [
 			id: 'remove_title_page_menu',
 			shown: () => enableIfModel() && store.get.titlePage() != null,
 			cb() {
-				undoStack.commit('titlePage.delete', {}, tr(this.text()));
-				app.setCurrentPage(store.get.firstBasicPage());
-				app.clearSelected();
+				undoStack.commit('titlePage.delete', {}, t(this.text()));
+				SelectionOps.setCurrentPage(store.get.firstBasicPage());
+				SelectionOps.clearSelected();
 			},
 		},
 		{
@@ -229,7 +231,7 @@ const menu = [
 			id: 'show_pli_menu',
 			shown: () => enableIfModel() && !store.state.plisVisible,
 			cb() {
-				undoStack.commit('pli.toggleVisibility', {visible: true}, tr(this.text));
+				undoStack.commit('pli.toggleVisibility', {visible: true}, t(this.text));
 			},
 		},
 		{
@@ -237,7 +239,7 @@ const menu = [
 			id: 'hide_pli_menu',
 			shown: () => enableIfModel() && store.state.plisVisible,
 			cb() {
-				undoStack.commit('pli.toggleVisibility', {visible: false}, tr(this.text));
+				undoStack.commit('pli.toggleVisibility', {visible: false}, t(this.text));
 			},
 		},
 		{
@@ -245,9 +247,9 @@ const menu = [
 			id: 'add_inventory_page_menu',
 			shown: () => enableIfModel() && !store.get.inventoryPages().length,
 			cb() {
-				app.clearSelected();
-				undoStack.commit('inventoryPage.add', null, tr(this.text));
-				app.setCurrentPage(store.get.inventoryPages()[0]);
+				SelectionOps.clearSelected();
+				undoStack.commit('inventoryPage.add', null, t(this.text));
+				SelectionOps.setCurrentPage(store.get.inventoryPages()[0]);
 			},
 		},
 		{
@@ -255,9 +257,9 @@ const menu = [
 			id: 'hide_inventory_page_menu',
 			shown: () => enableIfModel() && store.get.inventoryPages().length,
 			cb() {
-				app.clearSelected();
-				undoStack.commit('inventoryPage.deleteAll', null, tr(this.text));
-				app.setCurrentPage(store.get.lastBasicPage());
+				SelectionOps.clearSelected();
+				undoStack.commit('inventoryPage.deleteAll', null, t(this.text));
+				SelectionOps.setCurrentPage(store.get.lastBasicPage());
 			},
 		},
 		{
@@ -270,9 +272,9 @@ const menu = [
 						undoStack.commit(
 							'book.divideInstructions',
 							opts,
-							tr('action.edit.multi_book.undo'),
+							t('action.edit.multi_book.undo'),
 						);
-						app.setCurrentPage(store.get.firstPage());
+						SelectionOps.setCurrentPage(store.get.firstPage());
 					});
 				});
 			},
@@ -299,24 +301,24 @@ const menu = [
 				{
 					text: 'action.view.show_pages.one.name',
 					id: 'show_one_page_menu',
-					cb: () => app.setPageView({facingPage: false, scroll: false}),
+					cb: () => EventBus.emit('set-page-view', {facingPage: false, scroll: false}),
 				},
 				{
 					text: 'action.view.show_pages.two.name',
 					id: 'show_two_pages_menu',
 					enabled: false,
-					cb: () => app.setPageView({facingPage: true, scroll: false}),
+					cb: () => EventBus.emit('set-page-view', {facingPage: true, scroll: false}),
 				},
 				{
 					text: 'action.view.show_pages.one_scroll.name',
 					id: 'show_one_scroll_menu',
-					cb: () => app.setPageView({facingPage: false, scroll: true}),
+					cb: () => EventBus.emit('set-page-view', {facingPage: false, scroll: true}),
 				},
 				{
 					text: 'action.view.show_pages.two_scroll.name',
 					id: 'show_two_scroll_menu',
 					enabled: false,
-					cb: () => app.setPageView({facingPage: true, scroll: true}),
+					cb: () => EventBus.emit('set-page-view', {facingPage: true, scroll: true}),
 				},
 			],
 		},
@@ -350,7 +352,7 @@ const menu = [
 					id: 'customize_grid_menu',
 					cb() {
 						DialogManager('gridDialog', dialog => {
-							dialog.show(app);
+							dialog.show();
 						});
 					},
 				},
@@ -384,7 +386,7 @@ const menu = [
 			text: 'action.export.pdf.name',
 			id: 'export_pdf_menu',
 			enabled: enableIfModel,
-			cb: () => InstructionExporter.generatePDF(app, store),
+			cb: () => InstructionExporter.generatePDF(store),
 		},
 		{
 			text: 'action.export.hi_res_pdf.name',
@@ -393,7 +395,7 @@ const menu = [
 			cb() {
 				DialogManager('pdfExportDialog', dialog => {
 					dialog.$on('ok', (newValues: any) => {
-						InstructionExporter.generatePDF(app, store, newValues);
+						InstructionExporter.generatePDF(store, newValues);
 					});
 					dialog.show(store.state.template.page);
 				});
@@ -403,7 +405,7 @@ const menu = [
 			text: 'action.export.png.name',
 			id: 'export_png_menu',
 			enabled: enableIfModel,
-			cb: () => InstructionExporter.generatePNGZip(app, store),
+			cb: () => InstructionExporter.generatePNGZip(store),
 		},
 		{
 			text: 'action.export.hi_res_png.name',
@@ -412,7 +414,7 @@ const menu = [
 			cb() {
 				DialogManager('pngExportDialog', dialog => {
 					dialog.$on('ok', (newValues: any) => {
-						InstructionExporter.generatePNGZip(app, store, newValues.scale, newValues.dpi);
+						InstructionExporter.generatePNGZip(store, newValues.scale, newValues.dpi);
 					});
 					const pageSize = store.state.template.page;
 					dialog.show({width: pageSize.width, height: pageSize.height});
@@ -420,9 +422,8 @@ const menu = [
 			},
 		},
 	]},
-];
+] as const;
 
-export default function Menu(localApp: any) {
-	app = localApp;
+export default function Menu() {
 	return menu;
 }

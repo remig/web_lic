@@ -3,15 +3,15 @@
 <template>
 	<panel-base :title="title" class="fillTemplate" style="--label-width: 80px">
 		<div class="label-input-row">
-			{{tr('glossary.color')}}
+			{{t('glossary.color')}}
 			<LicColorPicker v-model="color" show-alpha @change="updateValues" />
 		</div>
 		<div v-if="gradient != null" class="label-input-row">
-			{{tr('template.fill.gradient')}}
+			{{t('template.fill.gradient')}}
 			<span>NYI</span>
 		</div>
 		<div v-if="imageFilename != null" class="label-input-row">
-			{{tr('template.fill.image')}}
+			{{t('template.fill.image')}}
 			<div class="flex-row">
 				<LicButton
 					v-if="imageFilename"
@@ -50,7 +50,7 @@ import openFileHandler from '../../file_uploader';
 import DialogManager from '../../dialog';
 import PanelBase from './panel_base.vue';
 import {readDpi} from '../../changedpi';
-import {tr} from '../../translations';
+import {t} from '../../translations';
 
 const props = withDefaults(defineProps<{
 	templateEntry: string;

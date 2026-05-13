@@ -3,11 +3,11 @@
 <template>
 	<panel-base :title="title" style="--label-width: 120px">
 		<div class="label-input-row">
-			{{tr('glossary.color')}}
+			{{t('glossary.color')}}
 			<LicColorPicker v-model="color" show-alpha @change="updateValues" />
 		</div>
 		<label class="label-input-row">
-			{{tr('template.border.line_width')}}
+			{{t('template.border.line_width')}}
 			<input
 				v-model.number="width"
 				type="number"
@@ -17,7 +17,7 @@
 			>
 		</label>
 		<label v-if="cornerRadius != null" class="label-input-row">
-			{{tr('template.border.corner_radius')}}
+			{{t('template.border.corner_radius')}}
 			<input
 				v-model.number="cornerRadius"
 				type="number"
@@ -27,7 +27,7 @@
 			>
 		</label>
 		<label v-if="innerMargin != null" class="label-input-row">
-			{{tr('template.border.margin')}}
+			{{t('template.border.margin')}}
 			<input
 				v-model.number="innerMargin"
 				type="number"
@@ -39,38 +39,35 @@
 	</panel-base>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {ref} from 'vue';
+import {t} from '@/translations';
 import _ from '../../util';
 import store from '../../store';
 import PanelBase from './panel_base.vue';
 import LicColorPicker from '../base/LicColorPicker.vue';
 
-export default {
-	components: {PanelBase, LicColorPicker},
-	props: {
-		templateEntry: {type: String, required: true},
-		title: {type: String, 'default': 'template.border.title'},
-	},
-	data() {
-		const template = _.get(store.state.template, this.templateEntry);
-		return {
-			width: template.border.width || 0,
-			color: template.border.color,
-			cornerRadius: template.border.cornerRadius,
-			innerMargin: template.innerMargin == null ? null : template.innerMargin * 100,
-		};
-	},
-	methods: {
-		updateValues() {
-			const template = _.get(store.state.template, this.templateEntry);
-			template.border.width = this.width;
-			template.border.color = this.color;
-			template.border.cornerRadius = this.cornerRadius;
-			template.innerMargin = this.innerMargin == null ? null : this.innerMargin / 100;
-			this.$emit('new-values', this.templateEntry);
-		},
-	},
-};
+const props = withDefaults(defineProps<{
+	templateEntry: string;
+	title?: string;
+}>(), {title: 'template.border.title'});
+
+const emit = defineEmits(['new-values']);
+
+const template = _.get(store.state.template, props.templateEntry);
+const width = ref(template.border.width || 0);
+const color = ref(template.border.color);
+const cornerRadius = ref(template.border.cornerRadius);
+const innerMargin = ref(template.innerMargin == null ? null : template.innerMargin * 100);
+
+function updateValues() {
+	const tpl = _.get(store.state.template, props.templateEntry);
+	tpl.border.width = width.value;
+	tpl.border.color = color.value;
+	tpl.border.cornerRadius = cornerRadius.value;
+	tpl.innerMargin = innerMargin.value == null ? null : innerMargin.value / 100;
+	emit('new-values', props.templateEntry);
+}
 
 </script>

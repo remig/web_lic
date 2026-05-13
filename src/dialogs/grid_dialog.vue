@@ -101,7 +101,7 @@
 <script setup lang="ts">
 
 import {ref} from 'vue';
-import {tr as t} from '@/translations';
+import {t} from '@/translations';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 import LicColorPicker from '@/components/base/LicColorPicker.vue';
@@ -109,6 +109,7 @@ import _ from '../util';
 import cache from '../cache';
 import undoStack from '../undo_stack';
 import uiState from '../ui_state';
+import * as UiOps from '../ui_ops';
 
 const emit = defineEmits(['close']);
 
@@ -116,16 +117,14 @@ const useAutoColor = ref(true);
 const lineColor = ref('');
 const newState = ref(uiState.get('grid'));
 let originalState: any = null;
-let app: any = null;
 
-function show(appRef: any) {
+function show() {
 	const grid = uiState.get('grid');
 	const color = grid.line.color;
 	useAutoColor.value = (color === 'auto');
 	lineColor.value = (color === 'auto') ? 'rgb(0, 0, 0)' : _.color.toRGB(color).toString();
 	newState.value = _.cloneDeep(grid);
 	originalState = grid;
-	app = appRef;
 }
 
 function update() {
@@ -136,7 +135,7 @@ function update() {
 	}
 	uiState.set('grid', _.cloneDeep(newState.value));
 	cache.set('uiState', 'gridPath', null);
-	app.drawCurrentPage();
+	UiOps.drawCurrentPage();
 }
 
 function updateColor(newColor: string) {
@@ -145,31 +144,23 @@ function updateColor(newColor: string) {
 }
 
 function ok() {
-	const storeOp = {
-		root: cache.get('uiState', 'gridPath'),
-		op: 'replace',
-		path: '/',
-		value: null,
-	};
 	const root = uiState.getCurrentState(), op = 'replace', path = '/grid';
-	const change = {
-		redo: [
-			{root, op, path, value: _.cloneDeep(newState.value)},
-			storeOp,
-		],
-		undo: [
-			{root, op, path, value: originalState},
-			storeOp,
-		],
-	};
-	undoStack.commit(change, null, 'Style Grid');
+	const redo = [{root, op, path, value: _.cloneDeep(newState.value)}];
+	const undo = [{root, op, path, value: originalState}];
+	const gridPathCache = cache.get('uiState', 'gridPath');
+	if (gridPathCache != null) {
+		const storeOp = {root: gridPathCache, op: 'replace', path: '/', value: null};
+		redo.push(storeOp);
+		undo.push(storeOp);
+	}
+	undoStack.commit({redo, undo}, null, 'Style Grid');
 	emit('close');
 }
 
 function cancel() {
 	uiState.set('grid', originalState);
 	cache.set('uiState', 'gridPath', null);
-	app.drawCurrentPage();
+	UiOps.drawCurrentPage();
 	emit('close');
 }
 

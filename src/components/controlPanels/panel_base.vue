@@ -2,17 +2,17 @@
 
 <template>
 	<div class="panel-template">
-		<h5>{{tr(title)}}</h5>
+		<h5>{{t(title)}}</h5>
 		<div class="panel-body">
 			<slot />
 		</div>
 	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
-export default {
-	props: ['title'],
-};
+import {t} from '@/translations';
+
+defineProps<{title: string}>();
 
 </script>

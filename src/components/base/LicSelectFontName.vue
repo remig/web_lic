@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import {ref, computed, watch} from 'vue';
-import {tr as t} from '@/translations';
+import {t} from '@/translations';
 import Storage from '@/storage';
 import LicSelect from './LicSelect.vue';
 import LicDialog from './LicDialog.vue';

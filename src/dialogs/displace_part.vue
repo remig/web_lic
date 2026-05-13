@@ -2,32 +2,32 @@
 
 <template>
 	<LicDialog
-		:title="tr('dialog.displace_part.title')"
+		:title="t('dialog.displace_part.title')"
 		width="480px"
 	>
 		<div class="displace-grid">
-			<span>{{tr('dialog.displace_part.part_distance')}}</span>
+			<span>{{t('dialog.displace_part.part_distance')}}</span>
 			<input
 				v-model.number="values.partDistance"
 				type="number"
 				class="form-control"
 				@input="updateValues"
 			>
-			<span class="displace-second-label">{{tr('dialog.displace_part.arrow_length')}}</span>
+			<span class="displace-second-label">{{t('dialog.displace_part.arrow_length')}}</span>
 			<input
 				v-model.number="values.arrowLength"
 				type="number"
 				class="form-control"
 				@input="updateValues"
 			>
-			<span>{{tr('dialog.displace_part.arrow_distance')}}</span>
+			<span>{{t('dialog.displace_part.arrow_distance')}}</span>
 			<input
 				v-model.number="values.arrowOffset"
 				type="number"
 				class="form-control"
 				@input="updateValues"
 			>
-			<span class="displace-second-label">{{tr('dialog.displace_part.arrow_rotation')}}</span>
+			<span class="displace-second-label">{{t('dialog.displace_part.arrow_rotation')}}</span>
 			<input
 				v-model.number="values.arrowRotation"
 				type="number"
@@ -45,7 +45,7 @@
 <script setup lang="ts">
 
 import {ref} from 'vue';
-import {tr} from '@/translations';
+import {t} from '@/translations';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 

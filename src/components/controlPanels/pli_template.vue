@@ -10,7 +10,7 @@
 						type="checkbox"
 						@change="updateValues"
 					>
-					{{tr('template.pli.include_submodels')}}
+					{{t('template.pli.include_submodels')}}
 				</label>
 			</div>
 		</panel-base>
@@ -25,32 +25,29 @@
 	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {ref} from 'vue';
+import {t} from '@/translations';
 import store from '../../store';
 import PanelBase from './panel_base.vue';
 import FillPanel from './fill.vue';
 import BorderPanel from './border.vue';
 
-export default {
-	components: {PanelBase, FillPanel, BorderPanel},
-	data() {
-		return {
-			includeSubmodels: store.state.template.pli.includeSubmodels,
-		};
-	},
-	methods: {
-		newValues() {
-			this.$emit('new-values', 'pli');
-		},
-		updateValues() {
-			const template = store.state.template.pli;
-			if (this.includeSubmodels !== template.includeSubmodels) {
-				template.includeSubmodels = this.includeSubmodels;
-				this.$emit('new-values', 'pli');
-			}
-		},
-	},
-};
+const emit = defineEmits(['new-values']);
+
+const includeSubmodels = ref(store.state.template.pli.includeSubmodels);
+
+function newValues() {
+	emit('new-values', 'pli');
+}
+
+function updateValues() {
+	const template = store.state.template.pli;
+	if (includeSubmodels.value !== template.includeSubmodels) {
+		template.includeSubmodels = includeSubmodels.value;
+		emit('new-values', 'pli');
+	}
+}
 
 </script>

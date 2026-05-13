@@ -140,7 +140,7 @@ const defaultState: UIStateInterface = {
 		width: 1,
 		color: 'black',
 	},
-};
+} as const;
 
 Storage.initialize(defaultState);
 
@@ -179,7 +179,7 @@ const api = {
 			},
 		},
 	},
-};
+} as const;
 
 // Load UI state from storage just once here. uiState module itself keeps a copy for fast lookup everywhere
 api.setUIState(Storage.get.ui());

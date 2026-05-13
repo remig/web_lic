@@ -12,7 +12,7 @@
 				class="flex-row rotation-row"
 				style="gap: 12px;"
 			>
-				<span v-if="props.includeLabels">{{tr('dialog.rotation.axis')}}</span>
+				<span v-if="props.includeLabels">{{t('dialog.rotation.axis')}}</span>
 				<LicSelect
 					v-model="rot.axis"
 					:options="axisOptions"
@@ -20,7 +20,7 @@
 					data-testid="rotate-axis-select"
 					@change="updateValues"
 				/>
-				<span v-if="props.includeLabels">{{tr('dialog.rotation.angle')}}</span>
+				<span v-if="props.includeLabels">{{t('dialog.rotation.angle')}}</span>
 				<input
 					v-model.number="rot.angle"
 					type="number"
@@ -43,21 +43,22 @@ import {ref, watch} from 'vue';
 import LicButton from '@/components/base/LicButton.vue';
 import LicSelect from '@/components/base/LicSelect.vue';
 
+import _ from '../util';
+import {t} from '../translations';
+import {type Rotation} from '../item_types';
+
 const axisOptions = [
 	{value: 'x', label: 'X'},
 	{value: 'y', label: 'Y'},
 	{value: 'z', label: 'Z'},
 ];
-import _ from '../util';
-import {tr} from '../translations';
-import {type Rotation} from '../item_types';
 
 const props = withDefaults(defineProps<{
 	title?: string;
 	initialRotation?: Rotation[];
 	includeLabels?: boolean;
 }>(), {
-	title: () => tr('dialog.rotation.title'),
+	title: () => t('dialog.rotation.title'),
 	initialRotation: () => [],
 	includeLabels: true,
 });

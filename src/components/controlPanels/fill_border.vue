@@ -13,21 +13,16 @@
 	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
 import FillPanel from './fill.vue';
 import BorderPanel from './border.vue';
 
-export default {
-	components: {FillPanel, BorderPanel},
-	props: {
-		templateEntry: {type: String, required: true},
-	},
-	methods: {
-		newValues() {
-			this.$emit('new-values', this.templateEntry);
-		},
-	},
-};
+const props = defineProps<{templateEntry: string}>();
+const emit = defineEmits(['new-values']);
+
+function newValues() {
+	emit('new-values', props.templateEntry);
+}
 
 </script>

@@ -47,8 +47,8 @@ export interface Store {
 	resetState(): void;
 	load(content: SaveFileContent): void;
 	saveLocal(): void;
-	saveToFile(filename?: string, jsonIndent?: number): void;
-	saveTemplate(filename?: string, jsonIndent?: number): void;
+	saveToFile(filename?: string, jsonIndent?: string | number): void;
+	saveTemplate(filename?: string, jsonIndent?: string | number): void;
 	render: RendererInterface;
 	get: GetterInterface;
 	mutations: MutationInterface;
@@ -93,12 +93,12 @@ const store: Store = {
 		console.log('Updating local storage');  // eslint-disable-line no-console
 		Storage.replace.model(content);
 	},
-	saveToFile(filename?: string, jsonIndent?: number) {
+	saveToFile(filename?: string, jsonIndent?: string | number) {
 		const content = getSaveContent();
 		filename = (filename || store.state.licFilename || 'filename') + '.lic';
 		saveJSON(content, filename, jsonIndent);
 	},
-	saveTemplate(filename?: string, jsonIndent?: number) {
+	saveTemplate(filename?: string, jsonIndent?: string | number) {
 		const content = {
 			version: packageInfo.version,
 			template: store.state.template,
@@ -121,7 +121,7 @@ function getSaveContent(): SaveFileContent {
 	};
 }
 
-function saveJSON(json: object, filename: string, jsonIndent?: number): void {
+function saveJSON(json: object, filename: string, jsonIndent?: string | number): void {
 	const content = JSON.stringify(json, null, jsonIndent);
 	const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
 	saveAs(blob, filename);

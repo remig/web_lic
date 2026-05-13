@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import store from '../store';
-import {tr} from '../translations';
+import {t} from '@/translations';
 import LDParse from '../ld_parse';
 import {type Annotation, type Book, type Page} from '../item_types';
 
@@ -96,9 +96,9 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 						throw 'Trying to find a nice annotation for a non-existent Book';
 					}
 					const bookNumber = parentBook.number;
-					text = tr('title_page.book_model_info_@mf', {bookNumber, partCount, pageCount});
+					text = t('title_page.book_model_info_@mf', {bookNumber, partCount, pageCount});
 				} else {
-					text = tr('title_page.model_info_@mf', {partCount, pageCount});
+					text = t('title_page.model_info_@mf', {partCount, pageCount});
 				}
 				store.mutations.annotation.set({annotation, newProperties: {text}});
 			}

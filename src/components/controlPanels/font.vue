@@ -11,25 +11,25 @@
 				:class="['lic-toggle-btn', { active: bold }]"
 				@click="bold = !bold; updateValues()"
 			>
-				<strong>{{tr('template.font.bold_character')}}</strong>
+				<strong>{{t('template.font.bold_character')}}</strong>
 			</button>
 			<button
 				type="button"
 				:class="['lic-toggle-btn', { active: italic }]"
 				@click="italic = !italic; updateValues()"
 			>
-				<em>{{tr('template.font.italic_character')}}</em>
+				<em>{{t('template.font.italic_character')}}</em>
 			</button>
 			<!-- <button
 				type="button"
 				:class="['lic-toggle-btn', { active: underline }]"
 				@click="underline = !underline; updateValues()"
 			>
-				<u>{{tr('template.font.underline_character')}}</u>
+				<u>{{t('template.font.underline_character')}}</u>
 			</button> -->
 		</div>
 		<label class="label-input-row">
-			{{tr('glossary.size')}}
+			{{t('glossary.size')}}
 			<input
 				v-model.number="size"
 				type="number"
@@ -39,14 +39,16 @@
 			>
 		</label>
 		<div class="label-input-row">
-			{{tr('glossary.color')}}
+			{{t('glossary.color')}}
 			<LicColorPicker v-model="color" show-alpha @change="updateValues" />
 		</div>
 	</panel-base>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {ref} from 'vue';
+import {t} from '@/translations';
 import _ from '../../util';
 import store from '../../store';
 import PanelBase from './panel_base.vue';
@@ -54,29 +56,24 @@ import LicColorPicker from '../base/LicColorPicker.vue';
 import LicSelectFontName from '../base/LicSelectFontName.vue';
 
 // TODO: support underlining fonts in general
-export default {
-	components: {PanelBase, LicColorPicker, LicSelectFontName},
-	props: ['templateEntry'],
-	data() {
-		const template = _.get(store.state.template, this.templateEntry);
-		const fontParts = _.fontToFontParts(template.font);
-		return {
-			family: fontParts.fontFamily,
-			size: parseInt(fontParts.fontSize, 10),
-			bold: fontParts.fontWeight === 'bold',
-			italic: fontParts.fontStyle === 'italic',
-			underline: false,
-			color: template.color,
-		};
-	},
-	methods: {
-		updateValues() {
-			const template = _.get(store.state.template, this.templateEntry);
-			template.font = _.fontString(this);
-			template.color = this.color;
-			this.$emit('new-values', this.templateEntry);
-		},
-	},
-};
+
+const props = defineProps<{templateEntry: string}>();
+const emit = defineEmits(['new-values']);
+
+const template = _.get(store.state.template, props.templateEntry);
+const fontParts = _.fontToFontParts(template.font);
+
+const family = ref(fontParts.fontFamily ?? '');
+const size = ref(parseInt(fontParts.fontSize ?? '0', 10));
+const bold = ref(fontParts.fontWeight === 'bold');
+const italic = ref(fontParts.fontStyle === 'italic');
+const color = ref(template.color);
+
+function updateValues() {
+	const tpl = _.get(store.state.template, props.templateEntry);
+	tpl.font = _.fontString({size: size.value, family: family.value, bold: bold.value, italic: italic.value});
+	tpl.color = color.value;
+	emit('new-values', props.templateEntry);
+}
 
 </script>

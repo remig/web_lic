@@ -5,6 +5,8 @@ module.exports = {
 		ecmaVersion: 9,
 		sourceType: 'module',
 		extraFileExtensions: ['.vue'],
+		project: true,
+		tsconfigRootDir: __dirname,
 	},
 	'extends': [
 		'eslint:recommended',
@@ -17,7 +19,7 @@ module.exports = {
 	overrides: [
 		{files: ["*.ts", "*.js"]}, {files: ["*.vue"], processor: "vue/.vue"}
 	],
-	ignorePatterns: ['static', 'dist', 'test', '.eslintrc.js', '**/*.css'],
+	ignorePatterns: ['static', 'dist', 'test', '.eslintrc.js', 'vite.config.ts', '**/*.css'],
 	rules: {
 		'accessor-pairs': 'error',
 		'array-bracket-newline': ['error', 'consistent'],
@@ -140,7 +142,8 @@ module.exports = {
 		'space-in-parens': ['warn', 'never'],
 		'space-infix-ops': 'warn',
 		'space-unary-ops': 'warn',
-		'@typescript-eslint/no-unused-vars': 'warn',
+		'@typescript-eslint/await-thenable': 'warn',
+		'@typescript-eslint/no-unused-vars': ['warn', {varsIgnorePattern: '^_', argsIgnorePattern: '^_'}],
 		'@typescript-eslint/no-unused-expressions': 'warn',
 		'wrap-iife': [2, 'inside', {functionPrototypeMethods: true}],
 		'vue/attribute-hyphenation': ['warn', 'always', {ignore: ['onSubmit']}],

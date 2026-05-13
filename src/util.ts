@@ -100,7 +100,7 @@ interface UtilInterface {
 	fontPartsToFont(font: FontPartsInterface): string;
 	fontString(
 		{size, family, bold, italic}:
-		{size: number, family: string, bold: string, italic: string}
+		{size: number, family: string, bold: boolean, italic: boolean}
 	): string;
 	degrees(radians: number): number;
 	radians(degrees: number): number;
@@ -254,7 +254,7 @@ const api: UtilInterface = {
 	},
 	fontString(
 		{size, family, bold, italic}:
-		{size: number, family: string, bold: string, italic: string},
+		{size: number, family: string, bold: boolean, italic: boolean},
 	) {
 		return api.fontPartsToFont({
 			fontSize: size + 'pt',
@@ -565,6 +565,6 @@ const api: UtilInterface = {
 	startCase,
 	template,
 	unzip,
-};
+} as const;
 
 export default api;

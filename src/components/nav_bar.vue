@@ -17,7 +17,7 @@
 					aria-expanded="false"
 					@click.prevent.stop="triggerMenu($event)"
 				>
-					{{tr(menu.text)}}
+					{{t(menu.text)}}
 					<span class="caret" />
 				</a>
 				<popup-menu :menu-entries="menu.children" selected-item="" />
@@ -48,39 +48,52 @@
 	</nav>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {getCurrentInstance, onMounted, onUnmounted} from 'vue';
+import EventBus from '../event_bus';
+import {t} from '@/translations';
 import _ from '../util';
 import packageInfo from '../../package.json';
 import DialogManager from '../dialog';
 import PopupMenu from './popup_menu.vue';
 
-export default {
-	components: {PopupMenu},
-	props: ['menuEntryList', 'filename'],
-	methods: {
-		forceUpdate() {
-			this.$forceUpdate();
-			this.$children.forEach(el => el.forceUpdate());
-		},
-		showAbout() {
-			DialogManager('aboutLicDialog');
-		},
-		hide() {
-			document.querySelectorAll('.dropdown.open').forEach(el => {
-				el.classList.remove('open');
-			});
-		},
-		triggerMenu(e) {
-			this.$emit('close-menus');
-			e.target.parentElement.classList.add('open');
-		},
-	},
-	computed: {
-		version() {
-			return _.version.nice(packageInfo.version);  // major.minor is enough for public consumption
-		},
-	},
-};
+defineProps<{menuEntryList: any[]; filename: {name: string; isDirty: boolean} | null | undefined}>();
+const emit = defineEmits<{(e: 'close-menus'): void}>();
+
+const instance = getCurrentInstance();
+const version = _.version.nice(packageInfo.version);
+
+function forceUpdate() {
+	instance?.proxy?.$forceUpdate();
+	(instance?.proxy as any)?.$children?.forEach((el: any) => el.forceUpdate?.());
+}
+
+function showAbout() {
+	DialogManager('aboutLicDialog');
+}
+
+function hide() {
+	document.querySelectorAll('.dropdown.open').forEach(el => {
+		el.classList.remove('open');
+	});
+}
+
+function triggerMenu(e: MouseEvent) {
+	emit('close-menus');
+	(e.target as HTMLElement).parentElement?.classList.add('open');
+}
+
+onMounted(() => {
+	EventBus.on('hide-menus', hide);
+	EventBus.on('force-update', forceUpdate);
+});
+
+onUnmounted(() => {
+	EventBus.off('hide-menus', hide);
+	EventBus.off('force-update', forceUpdate);
+});
+
+defineExpose({forceUpdate, hide});
 
 </script>

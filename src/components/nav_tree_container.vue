@@ -5,7 +5,7 @@
 		<div class="treeButtons">
 			<LicButton icon="fas fa-expand-arrows-alt" @click="expand" />
 			<LicButton icon="fas fa-compress" @click="collapse" />
-			<LicDropdown :label="tr('nav_tree.show')">
+			<LicDropdown :label="t('nav_tree.show')">
 				<template v-for="(el, idx) in checkedElements">
 					<div
 						v-if="el.name === 'divider'"
@@ -18,7 +18,7 @@
 						class="lic-dropdown-item"
 						@click="checkItem(el)"
 					>
-						{{tr(el.name)}}
+						{{t(el.name)}}
 						<i v-if="el.checked" class="fas fa-check" />
 					</div>
 				</template>
@@ -28,16 +28,21 @@
 	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
-
+import {ref, getCurrentInstance, onMounted, onUnmounted} from 'vue';
+import {t} from '@/translations';
 import uiState from '../ui_state';
-import store from '../store';
 import NavTree from '../navtree';
 import LicButton from '@/components/base/LicButton.vue';
 import LicDropdown from '@/components/base/LicDropdown.vue';
+import EventBus from '@/event_bus';
 
-const treeElementList = [
+// TODO: need to scroll nav tree up / down whenever selected item changes, to ensure it's always in view
+
+const instance = getCurrentInstance();
+
+const treeElementList: {name: string; value?: string; checked?: boolean; child?: boolean}[] = [
 	{name: 'nav_tree.all', value: 'all', checked: true},
 	{name: 'nav_tree.page_step_part', value: 'page_step_part', checked: false},
 	{name: 'divider'},
@@ -57,85 +62,95 @@ const treeElementList = [
 	{name: 'nav_tree.group_parts', value: 'group_parts', checked: false},
 ];
 
-const checkedItems = uiState.get('navTree.checkedItems');
-if (checkedItems) {
-	treeElementList.forEach(el => (el.checked = checkedItems[el.value]));
+const savedCheckedItems = uiState.get('navTree.checkedItems');
+if (savedCheckedItems) {
+	treeElementList.forEach(el => {el.checked = savedCheckedItems[el.value as string];});
 }
 
-// TODO: need to scroll nav tree up / down whenever selected item changes, to ensure it's always in view
-export default {
-	name: 'NavTreeContainer',
-	components: {LicButton, LicDropdown},
-	props: ['currentItem'],
-	data() {
-		this.store = store;
-		return {
-			checkedElements: treeElementList,
-			expandedLevel: 0,
-			expandLeveInitialized: false,
-		};
-	},
-	methods: {
-		forceUpdate() {
-			this.$forceUpdate();
-		},
-		updateCheckState() {
+const checkedElements = ref(treeElementList);
+let expandedLevel = 0;
 
-			const checkedItemList = this.checkedElements
-				.filter(el => !el.checked && el.child)
-				.map(el => el.value);
-			NavTree.setInvisibleNodeTypes(checkedItemList);
+function forceUpdate() {
+	instance?.proxy?.$forceUpdate();
+}
 
-			this.checkedElements.forEach(el => {
-				uiState.set('navTree.checkedItems.' + el.value, el.checked);
-			});
-		},
-		checkItem(item) {
-			if (!item) {
-				return;
-			}
-			item.checked = !item.checked;
-			if (item.value === 'all') {
-				this[item.checked ? 'checkAll' : 'checkPageStepParts']();
-			} else if (item.value === 'page_step_part') {
-				this[item.checked ? 'checkPageStepParts' : 'checkAll']();
-			// } else if (item.name === 'Group Parts By Type') {
-			} else {
-				this.updateCheckState();
-			}
-		},
-		checkAll() {
-			this.checkedElements.forEach(el => {
-				if (el.hasOwnProperty('child') || el.value === 'all') {
-					el.checked = true;
-				} else if (el.value === 'page_step_part') {
-					el.checked = false;
-				}
-			});
-			this.updateCheckState();
-		},
-		checkPageStepParts() {
-			this.checkedElements.forEach(el => {
-				if (el.value === 'step' || el.value === 'csi'
-					|| el.value === 'part' || el.value === 'page_step_part'
-				) {
-					el.checked = true;
-				} else if (el.hasOwnProperty('child') || el.value === 'all') {
-					el.checked = false;
-				}
-			});
-			this.updateCheckState();
-		},
-		expand() {
-			this.expandedLevel += 1;
-			NavTree.expandToLevel(this.expandedLevel);
-		},
-		collapse() {
-			this.expandedLevel = 0;
-			NavTree.collapseAll();
-		},
-	},
-};
+function updateCheckState() {
+	const checkedItemList = checkedElements.value
+		.filter(el => !el.checked && el.child)
+		.map(el => el.value)
+		.filter((v): v is string => v != null);
+	NavTree.setInvisibleNodeTypes(checkedItemList);
+	checkedElements.value.forEach(el => {
+		uiState.set('navTree.checkedItems.' + el.value, el.checked);
+	});
+}
+
+function checkAll() {
+	checkedElements.value.forEach(el => {
+		if ('child' in el || el.value === 'all') {
+			el.checked = true;
+		} else if (el.value === 'page_step_part') {
+			el.checked = false;
+		}
+	});
+	updateCheckState();
+}
+
+function checkPageStepParts() {
+	checkedElements.value.forEach(el => {
+		if (el.value === 'step' || el.value === 'csi'
+			|| el.value === 'part' || el.value === 'page_step_part'
+		) {
+			el.checked = true;
+		} else if ('child' in el || el.value === 'all') {
+			el.checked = false;
+		}
+	});
+	updateCheckState();
+}
+
+function checkItem(item: {value?: string; checked?: boolean} | null) {
+	if (!item) {
+		return;
+	}
+	item.checked = !item.checked;
+	if (item.value === 'all') {
+		if (item.checked) {
+			checkAll();
+		} else {
+			checkPageStepParts();
+		}
+	} else if (item.value === 'page_step_part') {
+		if (item.checked) {
+			checkPageStepParts();
+		} else {
+			checkAll();
+		}
+	// } else if (item.name === 'Group Parts By Type') {
+	} else {
+		updateCheckState();
+	}
+}
+
+function expand() {
+	expandedLevel += 1;
+	NavTree.expandToLevel(expandedLevel);
+}
+
+function collapse() {
+	expandedLevel = 0;
+	NavTree.collapseAll();
+}
+
+onMounted(() => {
+	EventBus.on('force-update', forceUpdate);
+});
+
+onUnmounted(() => {
+	EventBus.off('force-update', forceUpdate);
+});
+
+defineExpose({forceUpdate});
 
 </script>
 

@@ -6,7 +6,7 @@ import LDParse from '../ld_parse';
 import defaultTemplate from '../template';
 
 export interface TemplatePageMutationInterface {
-	add(): void;
+	add(): Promise<void>;
 	set({entry, value}: {entry: any, value: any}): void;
 	load({template}: {template: any}): void;
 	reset(): void;

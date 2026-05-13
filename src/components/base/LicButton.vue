@@ -2,7 +2,7 @@
 
 <script setup lang="ts">
 import {computed} from 'vue';
-import {tr} from '@/translations';
+import {t} from '@/translations';
 
 type NamedType = 'ok' | 'cancel' | 'reset';
 type ButtonType = NamedType | 'primary' | 'text';
@@ -19,7 +19,7 @@ const emit = defineEmits(['click']);
 const named = computed(() =>
 	props.type != null && props.type in NAMED ? NAMED[props.type as NamedType] : null,
 );
-const label = computed(() => named.value ? tr(named.value.key) : null);
+const label = computed(() => named.value ? t(named.value.key) : null);
 const styleClass = computed(() => named.value?.style ?? props.type ?? 'default');
 </script>
 
@@ -46,6 +46,11 @@ const styleClass = computed(() => named.value?.style ?? props.type ?? 'default')
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
+}
+
+.lic-btn:focus,
+.lic-btn:focus-visible {
+	outline: none;
 }
 
 .lic-btn:hover {

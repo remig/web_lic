@@ -4,7 +4,7 @@ import * as jsonpatch from 'fast-json-patch';
 
 import _ from './util';
 import store from './store';
-import {tr, noTranslate} from './translations';
+import {t, noTranslate} from './translations';
 import {type CSI, type PLIItem} from './item_types';
 
 // stack is an array of state
@@ -170,7 +170,7 @@ const api = {
 
 	undoText() {
 		return noTranslate(
-			tr(
+			t(
 				'action.edit.undo.name_@c',
 				api.isUndoAvailable() ? state.stack[state.index].undoText : '',
 			),
@@ -179,7 +179,7 @@ const api = {
 
 	redoText() {
 		return noTranslate(
-			tr(
+			t(
 				'action.edit.redo.name_@c',
 				api.isRedoAvailable() ? state.stack[state.index + 1].undoText : '',
 			),

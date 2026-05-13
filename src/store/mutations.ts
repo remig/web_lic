@@ -2,7 +2,7 @@
 
 import _ from '../util';
 import store from '../store';
-import {tr} from '../translations';
+import {t} from '@/translations';
 import LDParse from '../ld_parse';
 import LDRender from '../ld_render';
 import Layout from '../layout';
@@ -72,7 +72,7 @@ export interface MutationInterface {
 	renumber(itemList: any[], start?: number): void,
 	addInitialPages(
 		{modelFilename, lastStepNumber, partsPerStep}
-		: {modelFilename?: string, lastStepNumber: {num: number}, partsPerStep?: number}
+		: {modelFilename?: string, lastStepNumber?: {num: number}, partsPerStep?: number}
 	): number[],
 	addInitialSubmodelImages(): void,
 	mergeInitialPages(progressCallback: any): void,
@@ -349,7 +349,7 @@ export const Mutations: MutationInterface = {
 				});
 				progressCallback({
 					stepCount: steps.length,
-					text: tr('glossary.step_count_@c', 0),
+					text: t('glossary.step_count_@c', 0),
 				});
 				for (let i = 0; i < steps.length; i++) {
 					const step = steps[i];

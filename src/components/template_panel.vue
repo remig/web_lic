@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<div class="container" @click.stop="">
+	<div class="container" @click.stop>
 		<h4>{{title()}}</h4>
 		<div class="panel-group">
 			<component
@@ -15,9 +15,10 @@
 	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
-import Vue from 'vue';
+import {ref, watch, nextTick, onBeforeUnmount, getCurrentInstance, onMounted, onUnmounted} from 'vue';
+import {t} from '@/translations';
 import _ from '../util';
 import store from '../store';
 import undoStack from '../undo_stack';
@@ -30,11 +31,21 @@ import pliTemplatePanel from './controlPanels/pli_template.vue';
 import pliItemTemplatePanel from './controlPanels/pli_item_template.vue';
 import pageNumberTemplatePanel from './controlPanels/page_number.vue';
 import rotateIconTemplatePanel from './controlPanels/rotate_icon_template.vue';
+import * as UiOps from '../ui_ops';
+import EventBus from '@/event_bus';
+
+const props = defineProps<{selectedItem: any;}>();
+
+const instance = getCurrentInstance();
+const currentTemplateRef = ref<any>(null);
+const currentTemplatePanel = ref<any>(null);
+const templateEntry = ref<string | null>(null);
+const lastEdit = ref<any>(null);
 
 // Top level keys match the basic type of the selected item
 // First level child keys match the basic type of the selected item's parent
 // Second level child keys match the basic type of the selected item's parent's parent (grandparent)
-const componentLookup = {
+const componentLookup: any = {
 	page: [pageTemplatePanel, ''],
 	csi: {
 		step: [csiTemplatePanel, 'step.csi'],
@@ -60,7 +71,7 @@ const componentLookup = {
 	},
 };
 
-function getCurrentTemplate(selectedItem) {
+function getTemplate(selectedItem: any) {
 	if (!selectedItem) {
 		return null;
 	}
@@ -68,7 +79,7 @@ function getCurrentTemplate(selectedItem) {
 	if (type in componentLookup) {
 		const lookup = componentLookup[type];
 		const parent = store.get.parent(selectedItem);
-		const grandparent = store.get.parent(parent);
+		const grandparent = parent ? store.get.parent(parent) : null;
 		if (parent && parent.type in lookup) {
 			if (grandparent && grandparent.type in lookup[parent.type]) {
 				return lookup[parent.type][grandparent.type];
@@ -82,81 +93,88 @@ function getCurrentTemplate(selectedItem) {
 	return null;
 }
 
-export default {
-	props: ['selectedItem', 'app'],
-	data() {
-		const res = getCurrentTemplate(this.selectedItem) || [];
-		return {
-			currentTemplatePanel: res[0],
-			templateEntry: res[1],
-			lastEdit: null,
-		};
-	},
-	watch: {
-		selectedItem() {
-			this.applyChanges();
-			this.setCurrentTemplate(this.selectedItem);
-		},
-	},
-	methods: {
-		newValues(opts) {
-			this.lastEdit = (typeof opts === 'string') ? {type: opts} : opts;
-			if (!opts.noLayout) {
-				store.get.templatePage().needsLayout = true;
+function title() {
+	return props.selectedItem
+		? t('glossary.' + props.selectedItem.type.toLowerCase())
+		: t('template.select_page_item');
+}
+
+function newValues(opts: any) {
+	lastEdit.value = (typeof opts === 'string') ? {type: opts} : opts;
+	if (!opts.noLayout) {
+		store.get.templatePage().needsLayout = true;
+	}
+	UiOps.drawCurrentPage();
+}
+
+function applyChanges() {
+	// TODO: Make sure something actually changed before pushing to the undo stack
+	// eg: add then immediately remove an image...
+	if (lastEdit.value) {
+		if (typeof currentTemplateRef.value?.apply === 'function') {
+			currentTemplateRef.value.apply();
+		} else {
+			if (!lastEdit.value.noLayout) {
+				store.mutations.page.markAllDirty();
 			}
-			this.app.drawCurrentPage();
-		},
-		applyChanges() {
-			// TODO: Make sure something actually changed before pushing to the undo stack
-			// eg: add then immediately remove an image...
-			if (this.lastEdit) {
-				if (typeof this.$refs.currentTemplateRef.apply === 'function') {
-					this.$refs.currentTemplateRef.apply();
-				} else {
-					if (!this.lastEdit.noLayout) {
-						store.mutations.page.markAllDirty();
-					}
-					let item = _.last(this.lastEdit.type.split('.'));
-					item = this.tr('glossary.' + item.toLowerCase());
-					const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
-					undoStack.commit('', null, undoText);
-				}
-				this.lastEdit = null;
-			}
-		},
-		applyDirtyAction(entryType) {
-			const item = this.tr('glossary.' + entryType.toLowerCase());
-			const undoText = this.tr('action.edit.template.change.undo_@mf', {item});
-			undoStack.commit('', null, undoText, [entryType, 'page']);
-		},
-		title() {
-			return this.selectedItem
-				? this.tr('glossary.' + this.selectedItem.type.toLowerCase())
-				: this.tr('template.select_page_item');
-		},
-		forceUpdate() {
-			this.setCurrentTemplate();
-			this.$forceUpdate();
-			if (this.$refs.currentTemplateRef) {
-				this.$refs.currentTemplateRef.$forceUpdate();
-				this.$refs.currentTemplateRef.$children.forEach(el => el.$forceUpdate());
-			}
-		},
-		setCurrentTemplate() {
-			this.currentTemplatePanel = this.templateEntry = null;
-			const res = getCurrentTemplate(this.selectedItem);
-			if (res) {
-				Vue.nextTick(() => {
-					this.currentTemplatePanel = res[0];
-					this.templateEntry = res[1];
-				});
-			}
-		},
-	},
-	beforeDestroy() {
-		// Catch changes if user switches from template panel directly to nav tree or new page via keyboard
-		this.applyChanges();
-	},
-};
+			const parts: string[] = lastEdit.value.type.split('.');
+			const item = t('glossary.' + (_.last(parts) || '').toLowerCase());
+			const undoText = t('action.edit.template.change.undo_@mf', {item});
+			undoStack.commit('', null, undoText);
+		}
+		lastEdit.value = null;
+	}
+}
+
+function applyDirtyAction(entryType: string) {
+	const item = t('glossary.' + entryType.toLowerCase());
+	const undoText = t('action.edit.template.change.undo_@mf', {item});
+	undoStack.commit('', null, undoText, [entryType, 'page'] as any);
+}
+
+function setCurrentTemplate() {
+	currentTemplatePanel.value = null;
+	templateEntry.value = null;
+	const res = getTemplate(props.selectedItem);
+	if (res) {
+		nextTick(() => {
+			currentTemplatePanel.value = res[0];
+			templateEntry.value = res[1];
+		});
+	}
+}
+
+function forceUpdate() {
+	setCurrentTemplate();
+	instance?.proxy?.$forceUpdate();
+	if (currentTemplateRef.value) {
+		currentTemplateRef.value.$forceUpdate?.();
+		currentTemplateRef.value.$children?.forEach((el: any) => el.$forceUpdate?.());
+	}
+}
+
+watch(() => props.selectedItem, () => {
+	applyChanges();
+	setCurrentTemplate();
+});
+
+onBeforeUnmount(() => {
+	// Catch changes if user switches from template panel directly to nav tree or new page via keyboard
+	applyChanges();
+});
+
+const initRes = getTemplate(props.selectedItem) || [];
+currentTemplatePanel.value = initRes[0] ?? null;
+templateEntry.value = initRes[1] ?? null;
+
+onMounted(() => {
+	EventBus.on('force-update', forceUpdate);
+});
+
+onUnmounted(() => {
+	EventBus.off('force-update', forceUpdate);
+});
+
+defineExpose({forceUpdate, applyDirtyAction});
 
 </script>

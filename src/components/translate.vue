@@ -27,7 +27,7 @@ async function pickLanguage() {
 	const currentLocale = translate.getLocale();
 	if (currentLocale != null || translate.LanguageList.length < 2) {
 		if (currentLocale != null) {
-			EventBus.$emit('redraw-ui');
+			EventBus.emit('redraw-ui', {});
 		}
 	} else {
 		await DialogManager('localeChooserDialog');
@@ -41,7 +41,7 @@ export default {pickLanguage};
 <script setup lang="ts">
 
 import {ref} from 'vue';
-import {tr as t} from '../translations';
+import {t} from '../translations';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 import LicSelect from '@/components/base/LicSelect.vue';
@@ -58,7 +58,7 @@ function ok() {
 
 function changeLanguage() {
 	translate.setLocale(chosenLocaleCode.value);
-	EventBus.$emit('redraw-ui');
+	EventBus.emit('redraw-ui', {});
 }
 
 </script>

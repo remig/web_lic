@@ -7,12 +7,12 @@ import {saveAs} from 'file-saver';
 import _ from './util';
 import {Draw} from './draw';
 import {changeDpiDataUrl} from './changedpi';
-import {tr} from './translations';
+import {t} from './translations';
+import {statusText, busyText, updateProgress} from './ui_reactive_state';
 import {Store} from './store';
 import {Page} from './item_types';
 
 function exportInstructions(
-	app: any,
 	store: Store,
 	exportType: 'PNG' | 'PDF',
 	hiResScale: number,
@@ -20,7 +20,7 @@ function exportInstructions(
 	doneCallback: (finishedCallback: any) => void,
 ) {
 
-	app.busyText = tr(`dialog.busy_indicator.generating_${exportType}`);
+	busyText.value = t(`dialog.busy_indicator.generating_${exportType}`);
 
 	async function exportPage(page: Page, canvas: HTMLCanvasElement) {
 		return new Promise<void>(resolve => window.setTimeout(() => {
@@ -35,7 +35,7 @@ function exportInstructions(
 
 			drawPageCallback(page, canvas);
 
-			app.updateProgress(`Page ${page.number || 0}`);
+			updateProgress(`Page ${page.number || 0}`);
 			resolve();
 		// Need 100ms delay to give browser time to redraw itself and update the progress bar.  Sucks.
 		}, 100));
@@ -54,13 +54,13 @@ function exportInstructions(
 		canvas.height = (store.state?.template?.page?.height ?? 0) * hiResScale;
 
 		const pages = store.state.pages.slice(1);  // Skip template page
-		app.updateProgress({stepCount: pages.length, text: 'Page 0'});
+		updateProgress({stepCount: pages.length, text: 'Page 0'});
 		exportPages(pages, canvas).then(() => {
 			doneCallback(() => {
-				app.updateProgress({clear: true});
+				updateProgress({clear: true});
 				const end = Date.now();
 				const time = _.formatTime(start, end);
-				app.statusText = tr(
+				statusText.value = t(
 					`action.export.${exportType.toLowerCase()}.success_message_@mf`,
 					{exportType, time},
 				);
@@ -74,7 +74,7 @@ interface PDFConfig {
 	pageSize: {width: number, height: number}
 }
 
-function generatePDF(app: any, store: Store, config?: PDFConfig) {
+function generatePDF(store: Store, config?: PDFConfig) {
 
 	// draw PDF in points so it comes out the exact same size as the current page, with images at 96 dpi
 	let hiResScale = 1;
@@ -111,12 +111,10 @@ function generatePDF(app: any, store: Store, config?: PDFConfig) {
 		finishedCallback();
 	}
 
-	exportInstructions(app, store, 'PDF', hiResScale, drawPage, done);
+	exportInstructions(store, 'PDF', hiResScale, drawPage, done);
 }
 
-function generatePNGZip(
-	app: any, store: Store, hiResScale: number = 1, dpi: number = 96,
-) {
+function generatePNGZip(store: Store, hiResScale: number = 1, dpi: number = 96) {
 
 	const fn = store.get.modelFilenameBase();
 	const zip = new JSZip();
@@ -143,7 +141,7 @@ function generatePNGZip(
 			.then(finishedCallback);
 	}
 
-	exportInstructions(app, store, 'PNG', hiResScale, drawPage, done);
+	exportInstructions(store, 'PNG', hiResScale, drawPage, done);
 }
 
 export default {generatePDF, generatePNGZip};

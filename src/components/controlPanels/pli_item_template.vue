@@ -1,31 +1,30 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-<script>
+<template>
+	<TransformPanel template-entry="pliItem" @new-values="newValues" />
+</template>
 
+<script setup lang="ts">
+
+import {getCurrentInstance} from 'vue';
 import store from '../../store';
-import transformPanel from './transform.vue';
+import TransformPanel from './transform.vue';
 
-export default {
-	props: ['selectedItem', 'app'],
-	render(createElement) {
-		return createElement(
-			transformPanel,
-			{
-				props: {templateEntry: 'pliItem'},
-				on: {'new-values': this.newValues},
-			},
-		);
-	},
-	methods: {
-		apply() {
-			this.$parent.applyDirtyAction('pliItem');
-		},
-		newValues() {
-			const pli = store.get.parent(this.selectedItem);
-			pli.pliItems.forEach(id => (store.get.pliItem(id).isDirty = true));
-			this.$emit('new-values', 'pliitem');
-		},
-	},
-};
+const props = defineProps<{selectedItem: any}>();
+const emit = defineEmits(['new-values']);
+
+const instance = getCurrentInstance();
+
+function apply() {
+	(instance?.proxy?.$parent as any)?.applyDirtyAction('pliItem');
+}
+
+function newValues() {
+	const pli = store.get.parent(props.selectedItem) as any;
+	pli?.pliItems.forEach((id: any) => (store.get.pliItem(id).isDirty = true));
+	emit('new-values', 'pliitem');
+}
+
+defineExpose({apply});
 
 </script>

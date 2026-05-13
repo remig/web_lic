@@ -20,7 +20,7 @@
 						:checked="sizePreset.orientation === 'horizontal'"
 						@change="updateOrientation('horizontal')"
 					>
-					{{tr('template.page.orientation.landscape')}}
+					{{t('template.page.orientation.landscape')}}
 				</label>
 				<label class="lic-radio">
 					<input
@@ -31,11 +31,11 @@
 						:checked="sizePreset.orientation === 'vertical'"
 						@change="updateOrientation('vertical')"
 					>
-					{{tr('template.page.orientation.portrait')}}
+					{{t('template.page.orientation.portrait')}}
 				</label>
 			</div>
 			<label class="label-input-row">
-				{{tr('template.page.width')}}
+				{{t('template.page.width')}}
 				<input
 					v-model.number="width"
 					:disabled="!haveCustomFormat"
@@ -46,7 +46,7 @@
 				>
 			</label>
 			<label class="label-input-row">
-				{{tr('template.page.height')}}
+				{{t('template.page.height')}}
 				<input
 					v-model.number="height"
 					:disabled="!haveCustomFormat"
@@ -64,13 +64,13 @@
 						:disabled="!haveCustomFormat"
 						@change="changeAspectRatio"
 					>
-					{{tr("template.page.aspect_ratio_@mf", {aspect_ratio: aspectRatio.toFixed(2)})}}
+					{{t("template.page.aspect_ratio_@mf", {aspect_ratio: aspectRatio.toFixed(2)})}}
 				</label>
 			</div>
 			<div class="panel-row">
-				<div v-html="tr('template.page.printed_size')" />
-				<div v-html="tr('template.page.centimeter_size_@mf', printedSize('cm'))" />
-				<div v-html="tr('template.page.inch_size_@mf', printedSize('in'))" />
+				<div v-html="t('template.page.printed_size')" />
+				<div v-html="t('template.page.centimeter_size_@mf', printedSize('cm'))" />
+				<div v-html="t('template.page.inch_size_@mf', printedSize('in'))" />
 			</div>
 		</panel-base>
 		<fill-panel
@@ -87,7 +87,7 @@
 <script setup lang="ts">
 
 import {ref, computed} from 'vue';
-import {tr} from '@/translations';
+import {t} from '@/translations';
 import _, {type UnitTypes} from '../../util';
 import store from '../../store';
 import FillPanel from './fill.vue';
@@ -107,8 +107,8 @@ const pageSizeLookups: Record<string, [number, number]> = {
 };
 
 const pageFormatOptions = [
-	{value: 'custom', label: tr('template.page.formats.custom')},
-	...Object.keys(pageSizeLookups).map(key => ({value: key, label: tr(`template.page.formats.${key}`)})),
+	{value: 'custom', label: t('template.page.formats.custom')},
+	...Object.keys(pageSizeLookups).map(key => ({value: key, label: t(`template.page.formats.${key}`)})),
 ];
 
 const template = store.state.template.page;
@@ -139,7 +139,7 @@ function changeAspectRatio() {
 }
 
 function newValues() {
-	EventBus.$emit('page-resize');
+	EventBus.emit('page-resize');
 	emit('new-values', 'page');
 }
 

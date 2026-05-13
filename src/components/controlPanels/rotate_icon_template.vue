@@ -18,18 +18,15 @@
 	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
 import FillPanel from './fill.vue';
 import BorderPanel from './border.vue';
 
-export default {
-	components: {FillPanel, BorderPanel},
-	methods: {
-		newValues() {
-			this.$emit('new-values', 'rotateicon');
-		},
-	},
-};
+const emit = defineEmits(['new-values']);
+
+function newValues() {
+	emit('new-values', 'rotateicon');
+}
 
 </script>

@@ -3,7 +3,7 @@
 <template>
 	<panel-base title="template.transform.title" style="--label-width: 80px">
 		<label class="label-input-row">
-			{{tr('template.transform.scale')}}
+			{{t('template.transform.scale')}}
 			<input
 				v-model.number="scale"
 				type="number"
@@ -23,37 +23,30 @@
 	</panel-base>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {ref, computed} from 'vue';
+import {t} from '@/translations';
 import _ from '../../util';
 import store from '../../store';
 import PanelBase from './panel_base.vue';
 import RotateBuilder from '../rotate.vue';
 
-export default {
-	components: {PanelBase, RotateBuilder},
-	props: ['templateEntry'],
-	data() {
-		return {
-			scale: _.get(store.state.template, this.templateEntry).scale,
-		};
-	},
-	methods: {
-		updateValues(newRotation) {
-			// TODO: only emit if something actually changed
-			const transform = _.get(store.state.template, this.templateEntry);
-			if (newRotation && Array.isArray(newRotation)) {
-				transform.rotation = newRotation;
-			}
-			transform.scale = this.scale;
-			this.$emit('new-values');
-		},
-	},
-	computed: {
-		rotation() {
-			return _.get(store.state.template, this.templateEntry).rotation;
-		},
-	},
-};
+const props = defineProps<{templateEntry: string}>();
+const emit = defineEmits(['new-values']);
+
+const scale = ref(_.get(store.state.template, props.templateEntry).scale);
+
+const rotation = computed(() => _.get(store.state.template, props.templateEntry).rotation);
+
+function updateValues(newRotation?: unknown) {
+	// TODO: only emit if something actually changed
+	const transform = _.get(store.state.template, props.templateEntry);
+	if (newRotation && Array.isArray(newRotation)) {
+		transform.rotation = newRotation;
+	}
+	transform.scale = scale.value;
+	emit('new-values');
+}
 
 </script>

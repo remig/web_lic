@@ -19,7 +19,7 @@
 					data-testid="rotate-add-icon"
 					@change="emit('update', currentData())"
 				>
-				{{tr('dialog.rotate_part_image.add_rotate_icon')}}
+				{{t('dialog.rotate_part_image.add_rotate_icon')}}
 			</label>
 		</div>
 		<template #footer>
@@ -32,7 +32,7 @@
 <script setup lang="ts">
 
 import {ref} from 'vue';
-import {tr} from '@/translations';
+import {t} from '@/translations';
 import {type Rotation} from '@/item_types';
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';

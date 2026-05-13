@@ -1,68 +1,58 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-<script>
+<template>
+	<div
+		ref="el"
+		:data-id="`guide-${id}`"
+		:class="['guide', orientation === 'vertical' ? 'guide-vertical' : 'guide-horizontal']"
+		:style="orientation === 'vertical'
+			? {left: position + 'px', height: (pageSize.height + 20) + 'px'}
+			: {top: position + 'px', width: (pageSize.width + 20) + 'px'}"
+	/>
+</template>
 
+<script setup lang="ts">
+
+import {ref} from 'vue';
 import _ from '../util';
 import undoStack from '../undo_stack';
 import uiState from '../ui_state';
 
-export default {
+const props = defineProps<{
+	position: number;
+	orientation: string;
+	pageSize: {width: number; height: number};
+	id: number;
+}>();
 
-	name: 'Guide',
-	props: ['position', 'orientation', 'pageSize', 'id'],
-	data() {
-		return {
-			originalPosition: this.position,
-		};
-	},
-	render(createElement) {
+const el = ref<HTMLElement | null>(null);
 
-		// TODO: Make guides bigger so they're easier to drag around
-		const isVertical = (this.orientation === 'vertical');
+function moveBy(dx: number, dy: number) {
+	// TOOD: Improve performance here to cut down guide drag flicker
+	if (props.orientation === 'vertical') {
+		let left = parseFloat(el.value!.style.left) + dx;
+		left = _.clamp(left, 0, props.pageSize.width);
+		document.querySelectorAll(`[data-id="guide-${props.id}"]`).forEach(guideEl => {
+			(guideEl as HTMLElement).style.left = left + 'px';
+		});
+	} else {
+		let top = parseFloat(el.value!.style.top) + dy;
+		top = _.clamp(top, 0, props.pageSize.height);
+		document.querySelectorAll(`[data-id="guide-${props.id}"]`).forEach(guideEl => {
+			(guideEl as HTMLElement).style.top = top + 'px';
+		});
+	}
+}
 
-		const style = {};
-		if (isVertical) {
-			style.left = this.position + 'px';
-			style.height = this.pageSize.height + 20 + 'px';
-		} else {
-			style.top = this.position + 'px';
-			style.width = this.pageSize.width + 20 + 'px';
-		}
-		return createElement(
-			'div',
-			{
-				attrs: {'data-id': `guide-${this.id}`},
-				'class': ['guide', isVertical ? 'guide-vertical' : 'guide-horizontal'],
-				style,
-			},
-		);
-	},
-	methods: {
-		moveBy(dx, dy) {
-			// TOOD: Improve performance here to cut down guide drag flicker
-			if (this.orientation === 'vertical') {
-				let left = parseFloat(this.$el.style.left) + dx;
-				left = _.clamp(left, 0, this.pageSize.width) + 'px';
-				document.querySelectorAll(`[data-id="guide-${this.id}"]`).forEach(el => {
-					el.style.left = left;
-				});
-			} else {
-				let top = parseFloat(this.$el.style.top) + dy;
-				top = _.clamp(top, 0, this.pageSize.height) + 'px';
-				document.querySelectorAll(`[data-id="guide-${this.id}"]`).forEach(el => {
-					el.style.top = top;
-				});
-			}
-		},
-		savePosition() {
-			const attr = (this.orientation === 'vertical') ? 'left' : 'top';
-			const position = parseFloat(this.$el.style[attr]);
-			this.originalPosition = position;
-			const change = uiState.mutations.guides.setPosition(this.id, position);
-			undoStack.commit(change, null, 'Move Guide');
-		},
-	},
-};
+function savePosition() {
+	const attr = (props.orientation === 'vertical') ? 'left' : 'top';
+	const position = parseFloat(el.value!.style[attr]);
+	const change = uiState.mutations.guides.setPosition(props.id, position);
+	undoStack.commit(change, null, 'Move Guide');
+}
+
+defineExpose({moveBy, savePosition});
+
 </script>
 
 <style>

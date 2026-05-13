@@ -2,12 +2,12 @@
 
 <template>
 	<LicDialog
-		:title="tr('dialog.resize_image.title')"
+		:title="t('dialog.resize_image.title')"
 		width="500px"
 	>
 		<div>{{bodyText}}</div>
 		<div v-if="imageInfo.dpi > 96">
-			{{tr('dialog.resize_image.high_dpi_@mf', {dpi: imageInfo.dpi})}}
+			{{t('dialog.resize_image.high_dpi_@mf', {dpi: imageInfo.dpi})}}
 		</div>
 		<div>
 			<div class="flex-row">
@@ -27,7 +27,7 @@
 						:checked="imageInfo.preserveSize"
 						@change="imageInfo.preserveSize = true; updateValues()"
 					>
-					{{tr('dialog.resize_image.do_nothing')}}
+					{{t('dialog.resize_image.do_nothing')}}
 				</label>
 			</div>
 		</div>
@@ -38,12 +38,12 @@
 					type="checkbox"
 					@change="updateValues"
 				>
-				{{tr('dialog.resize_image.preserve_aspect_ratio')}}
+				{{t('dialog.resize_image.preserve_aspect_ratio')}}
 			</label>
 		</div>
 		<div v-if="needPositionUI" class="position-picker">
 			<div>
-				{{tr('dialog.resize_image.anchor_text')}}
+				{{t('dialog.resize_image.anchor_text')}}
 			</div>
 			<div class="anchor-grid">
 				<div
@@ -66,7 +66,7 @@
 <script setup lang="ts">
 
 import {ref, computed} from 'vue';
-import {tr} from '@/translations';
+import {t} from '@/translations';
 import {type Anchors} from '@/item_types';
 import _ from '../util';
 import store from '../store';
@@ -83,19 +83,19 @@ const anchorOffsets: Record<Anchors, {x: number; y: number}> = {
 	bottom_left: {x: 0, y: 1},
 	bottom: {x: 0.5, y: 1},
 	bottom_right: {x: 1, y: 1},
-};
+} as const;
 
 const anchorPositions: {value: Anchors; label: string}[] = [
-	{value: 'top_left', label: tr('dialog.resize_image.anchors.top_left')},
-	{value: 'top', label: tr('dialog.resize_image.anchors.top')},
-	{value: 'top_right', label: tr('dialog.resize_image.anchors.top_right')},
-	{value: 'left', label: tr('dialog.resize_image.anchors.left')},
-	{value: 'center', label: tr('dialog.resize_image.anchors.center')},
-	{value: 'right', label: tr('dialog.resize_image.anchors.right')},
-	{value: 'bottom_left', label: tr('dialog.resize_image.anchors.bottom_left')},
-	{value: 'bottom', label: tr('dialog.resize_image.anchors.bottom')},
-	{value: 'bottom_right', label: tr('dialog.resize_image.anchors.bottom_right')},
-];
+	{value: 'top_left', label: t('dialog.resize_image.anchors.top_left')},
+	{value: 'top', label: t('dialog.resize_image.anchors.top')},
+	{value: 'top_right', label: t('dialog.resize_image.anchors.top_right')},
+	{value: 'left', label: t('dialog.resize_image.anchors.left')},
+	{value: 'center', label: t('dialog.resize_image.anchors.center')},
+	{value: 'right', label: t('dialog.resize_image.anchors.right')},
+	{value: 'bottom_left', label: t('dialog.resize_image.anchors.bottom_left')},
+	{value: 'bottom', label: t('dialog.resize_image.anchors.bottom')},
+	{value: 'bottom_right', label: t('dialog.resize_image.anchors.bottom_right')},
+] as const;
 
 const page = store.state.template.page;
 const imageInfo = ref({
@@ -128,11 +128,11 @@ const isImageTooBig = computed(() => {
 });
 
 const bodyText = computed(() =>
-	tr(`dialog.resize_image.${isImageTooBig.value ? 'too_big' : 'too_small'}`),
+	t(`dialog.resize_image.${isImageTooBig.value ? 'too_big' : 'too_small'}`),
 );
 
 const resizeText = computed(() =>
-	tr(`dialog.resize_image.${isImageTooBig.value ? 'shrink' : 'stretch'}`),
+	t(`dialog.resize_image.${isImageTooBig.value ? 'shrink' : 'stretch'}`),
 );
 
 const needAspectRatioUI = computed(() =>

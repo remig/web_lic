@@ -3,7 +3,7 @@
 import _ from './util';
 import LDParse from './ld_parse';
 import store from './store';
-import {tr} from './translations';
+import {t} from './translations';
 import {isBox, isNotNull} from './type_helpers';
 import {
 	type Box, type LookupItem, type Page, type Orientations,
@@ -16,41 +16,9 @@ const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
 const qtyLabelOffset = 5;  // TODO: this belongs in the template
 
-export interface LayoutInterface {
+const Layout = {
 
-	book(item: LookupItem): void,
-	titlePage(item: LookupItem): void,
-	allInventoryPages(): void,
-	// Lays out a single inventory page. Any pli items on the page that don't fit are ignored
-	inventoryPage(page: Page, box: Box): void,
-	page(page: Page, layout?: Orientations | GridLayout): void,
-	pageNumber(page: Page): void,
-	step(step: Step, box: Box, pageMargin?: number): void,
-	submodelImage(submodelImage: SubmodelImage, box: Box): void,
-	csi(csi: CSI, box: Box): void,
-	pli(pli: PLI): void,
-	pliItem(pliItem: PLIItem): void,
-	callout(callout: Callout, box: Box): void,
-	calloutArrow(callout: Callout): void,
-	subSteps(step: Step, stepBox: Box): void,
-	templatePageDividers(page: Page, box: Box): void,
-	dividers(target: Page | Step, layoutDirection: Orientations, rows: number, cols: number, box: Box): void,
-	label(label: Annotation): void,
-	quantityLabel(label: QuantityLabel, font: string, text: string): void,
-	mergeSteps(stepsToMerge: Step[], progressCallback: (s: string) => void): void,
-	adjustBoundingBox: {
-		item(item: BoxedOffsetItem, boxes: (Point | Box)[], template: any): void,
-		stepUnused(item: LookupItem): void,
-		pli(item: LookupItem): void,
-		pliItem(item: LookupItem): void,
-		callout(item: LookupItem): void,
-		quantityLabel(item: LookupItem): void,
-	},
-}
-
-const Layout: LayoutInterface = {
-
-	book(item) {
+	book(item: LookupItem): void {
 		const book = store.get.book(item);
 		for (let i = 0; i < book.pages.length; i++) {
 			const page = store.get.page(book.pages[i]);
@@ -59,7 +27,7 @@ const Layout: LayoutInterface = {
 			}
 		}
 	},
-	titlePage(item) {
+	titlePage(item: LookupItem): void {
 		const page = store.get.page(item);
 		const pageSize = store.state.template.page;
 		const step = store.get.step(page.steps[0]);
@@ -99,7 +67,7 @@ const Layout: LayoutInterface = {
 		delete (page as any).needsLayout;
 	},
 
-	allInventoryPages() {
+	allInventoryPages(): void {
 
 		// If we already have multiple inventory pages, move all pliItems to the first page,
 		// then delete all but the first page and redo layout across entire part list,
@@ -147,7 +115,7 @@ const Layout: LayoutInterface = {
 	},
 
 	// Lays out a single inventory page. Any pli items on the page that don't fit are ignored
-	inventoryPage(page, box) {
+	inventoryPage(page: Page, box: Box): void {
 
 		// Start with a big list of unsorted pli items with no size or position info.
 		const pliItems = page.pliItems.map(store.get.pliItem);
@@ -244,7 +212,7 @@ const Layout: LayoutInterface = {
 		delete (page as any).needsLayout;
 	},
 
-	page(page, layout = 'horizontal') {
+	page(page: Page, layout: Orientations | GridLayout = 'horizontal'): void {
 
 		if (page.subtype === 'titlePage') {
 			Layout.titlePage(page);
@@ -349,13 +317,13 @@ const Layout: LayoutInterface = {
 		Layout.dividers(page, layoutDirection, rows, cols, pageSize);
 
 		// if (store.state.plisVisible) {
-		// 	alignStepContent(page);
+		// 	_alignStepContent(page);
 		// }
 
 		delete (page as any).needsLayout;
 	},
 
-	pageNumber(page) {
+	pageNumber(page: Page): void {
 		if (page.numberLabelID == null) {
 			return;
 		}
@@ -388,7 +356,7 @@ const Layout: LayoutInterface = {
 		}
 	},
 
-	step(step, box, pageMargin) {
+	step(step: Step, box: Box, pageMargin?: number): void {
 
 		const csi = (step.csiID == null) ? null : store.get.csi(step.csiID);
 
@@ -560,7 +528,7 @@ const Layout: LayoutInterface = {
 		}
 	},
 
-	submodelImage(submodelImage, box) {
+	submodelImage(submodelImage: SubmodelImage, box: Box): void {
 
 		// TODO: can only shrink multiple submodels in one step so much, might need to lay out horizontally
 		// TODO: make submodel boxes the same size as PLI boxes if new 'make PLIs same size' option is checked
@@ -615,7 +583,7 @@ const Layout: LayoutInterface = {
 		}
 	},
 
-	csi(csi, box) {
+	csi(csi: CSI, box: Box): void {
 		// Draw CSI centered in box
 		const step = store.get.parent(csi) as Step;
 		const localModel = LDParse.model.get.abstractPart(step.model.filename);
@@ -626,7 +594,7 @@ const Layout: LayoutInterface = {
 		csi.height = csiSize.height;
 	},
 
-	pli(pli) {
+	pli(pli: PLI): void {
 
 		// TOOD: if generated PLI is too big (say, > 30% of page), auto shrink the big items
 		let pliItems = pli.pliItems;
@@ -672,7 +640,7 @@ const Layout: LayoutInterface = {
 		pli.height = borderWidth + margin + maxHeight + margin + borderWidth;
 	},
 
-	pliItem(pliItem) {
+	pliItem(pliItem: PLIItem): void {
 		// TODO: auto shrink big pliItems, like we already do in submodelImages()
 		const pliSize = store.render.pli(pliItem.colorCode, pliItem.filename, pliItem);
 		if (pliSize != null) {
@@ -692,7 +660,7 @@ const Layout: LayoutInterface = {
 		}
 	},
 
-	callout(callout, box) {
+	callout(callout: Callout, box: Box): void {
 		// TODO: add horizontal / vertical layout options to callout
 		const borderWidth = store.state.template.callout.border.width;
 		const margin = getMargin(store.state.template.callout.innerMargin);
@@ -794,7 +762,7 @@ const Layout: LayoutInterface = {
 		}
 	},
 
-	calloutArrow(callout) {
+	calloutArrow(callout: Callout): void {
 
 		const arrow = store.get.calloutArrow(callout.calloutArrows[0]);
 
@@ -866,7 +834,7 @@ const Layout: LayoutInterface = {
 		}
 	},
 
-	subSteps(step, stepBox) {
+	subSteps(step: Step, stepBox: Box): void {
 		// TODO: sub steps should be able to span multiple pages
 		// TODO: this dupes a lot of logic from page.layout; abstract both to a generic 'grid' layout call
 		const stepCount = step.steps.length;
@@ -895,7 +863,7 @@ const Layout: LayoutInterface = {
 		Layout.dividers(step, step.subStepLayout, rows, cols, stepBox);
 	},
 
-	templatePageDividers(page, box) {
+	templatePageDividers(page: Page, box: Box): void {
 		const template = store.state.template.page;
 		const margin = getMargin(template.innerMargin);
 		const step = store.get.step(page.steps[0]);
@@ -911,7 +879,7 @@ const Layout: LayoutInterface = {
 		});
 	},
 
-	dividers(target, layoutDirection, rows, cols, box) {
+	dividers(target: Page | Step, layoutDirection: Orientations, rows: number, cols: number, box: Box): void {
 
 		// Delete any dividers already on the target, then re-add new ones in the right places
 		store.mutations.item.deleteChildList({item: target, listType: 'divider'});
@@ -948,19 +916,19 @@ const Layout: LayoutInterface = {
 		}
 	},
 
-	label(label) {
+	label(label: Annotation): void {
 		const labelSize = _.measureLabel(label.font, label.text);
 		label.width = labelSize.width;
 		label.height = labelSize.height;
 	},
 
-	quantityLabel(label, font, text) {
+	quantityLabel(label: QuantityLabel, font: string, text: string): void {
 		const labelSize = _.measureLabel(font, text);
 		label.width = labelSize.width;
 		label.height = labelSize.height;
 	},
 
-	async mergeSteps(stepsToMerge, progressCallback) {
+	async mergeSteps(stepsToMerge: Step[], progressCallback: (s: string) => void): Promise<void> {
 
 		async function mergeOneStep() {
 			return new Promise<void>(resolve => window.setTimeout(() => {
@@ -982,7 +950,7 @@ const Layout: LayoutInterface = {
 					}
 				}
 				progressCallback(
-					tr('glossary.step_count_@c', stepsToMerge[0].number),
+					t('glossary.step_count_@c', stepsToMerge[0].number),
 				);
 				_.pullAt(stepsToMerge, 0);
 				resolve();
@@ -997,7 +965,7 @@ const Layout: LayoutInterface = {
 	},
 
 	adjustBoundingBox: {
-		item(item, boxes, template) {
+		item(item: BoxedOffsetItem, boxes: (Point | Box)[], template: any): void {
 			const borderWidth = template.border ? template.border.width : 0;
 			const margin = getMargin(template.innerMargin);
 			const bbox = _.geom.bbox(boxes);
@@ -1008,7 +976,7 @@ const Layout: LayoutInterface = {
 			item.height = borderWidth + margin + bbox.height + margin + borderWidth;
 		},
 
-		stepUnused(item) {
+		stepUnused(item: LookupItem): void {
 			const step = store.get.step(item);
 			const children = store.get.stepChildren(step);
 			const boxes: Box[] = [];
@@ -1037,7 +1005,7 @@ const Layout: LayoutInterface = {
 			}
 		},
 
-		pli(item) {
+		pli(item: LookupItem): void {
 			const boxes: Box[] = [];
 			const pli = store.get.pli(item);
 			pli.pliItems.forEach(itemID => {
@@ -1059,14 +1027,14 @@ const Layout: LayoutInterface = {
 			Layout.adjustBoundingBox.item(pli, boxes, store.state.template.pli);
 		},
 
-		pliItem(item) {
+		pliItem(item: LookupItem): void {
 			const pliItem = store.get.pliItem(item);
 			if (pliItem.parent.type === 'pli') {
 				Layout.adjustBoundingBox.pli(pliItem.parent);
 			}
 		},
 
-		callout(item) {
+		callout(item: LookupItem): void {
 			const callout = store.get.callout(item);
 			const boxes: Box[] = [];
 			callout.steps.forEach(itemID => {
@@ -1084,7 +1052,7 @@ const Layout: LayoutInterface = {
 			Layout.calloutArrow(callout);
 		},
 
-		quantityLabel(item) {
+		quantityLabel(item: LookupItem): void {
 			const labelItem = store.get.quantityLabel(item);
 			const parent = store.get.parent(labelItem);
 			if (parent != null) {
@@ -1092,7 +1060,7 @@ const Layout: LayoutInterface = {
 			}
 		},
 	},
-};
+} as const;
 
 // This is only used for 'inside-out' type layouts, which are only used in callouts for now
 function measureStep(step: Step) {
@@ -1142,9 +1110,36 @@ function getMargin(margin: number) {
 	return margin * Math.max(pageSize.width, pageSize.height);
 }
 
+function isStepTooSmall(stepID: number) {
+	const step = store.get.step(stepID);
+	if (step.csiID == null) {
+		return false;
+	}
+	const csi = store.get.csi(step.csiID);
+	const pli = (store.state.plisVisible && step.pliID != null) ? store.get.pli(step.pliID) : null;
+	const pliHeight = pli ? pli.height : 0;
+	const submodelSpace = {width: 0, height: 0};
+	step.submodelImages.forEach(submodelImageID => {
+		const submodelImage = store.get.submodelImage(submodelImageID);
+		submodelSpace.width = Math.max(submodelImage.width * 1.05, submodelSpace.width);
+		submodelSpace.height += submodelImage.height;
+	});
+
+	if (step.width < csi.width * 1.1) {
+		return true;
+	} else if (pli && step.width < pli.width * 1.05) {
+		return true;
+	} else if (step.width < submodelSpace.width) {
+		return true;
+	} else if (step.height < (submodelSpace.height + pliHeight + csi.height) * 1.2) {
+		return true;
+	}
+	return false;
+}
+
 // TODO: should push callouts down too
 // TODO: this duplicates a lot of step layout logic, badly. eg: it doesn't push content below step numbers
-export function alignStepContent(page: Page) {
+function _alignStepContent(page: Page) {
 	const margin = getMargin(store.state.template.step.innerMargin);
 	const steps = page.steps.map(stepID => store.get.step(stepID));
 	if (steps.length < 2 || typeof page.actualLayout !== 'object'
@@ -1176,33 +1171,6 @@ export function alignStepContent(page: Page) {
 			}
 		});
 	});
-}
-
-function isStepTooSmall(stepID: number) {
-	const step = store.get.step(stepID);
-	if (step.csiID == null) {
-		return false;
-	}
-	const csi = store.get.csi(step.csiID);
-	const pli = (store.state.plisVisible && step.pliID != null) ? store.get.pli(step.pliID) : null;
-	const pliHeight = pli ? pli.height : 0;
-	const submodelSpace = {width: 0, height: 0};
-	step.submodelImages.forEach(submodelImageID => {
-		const submodelImage = store.get.submodelImage(submodelImageID);
-		submodelSpace.width = Math.max(submodelImage.width * 1.05, submodelSpace.width);
-		submodelSpace.height += submodelImage.height;
-	});
-
-	if (step.width < csi.width * 1.1) {
-		return true;
-	} else if (pli && step.width < pli.width * 1.05) {
-		return true;
-	} else if (step.width < submodelSpace.width) {
-		return true;
-	} else if (step.height < (submodelSpace.height + pliHeight + csi.height) * 1.2) {
-		return true;
-	}
-	return false;
 }
 
 export default Layout;

@@ -47,7 +47,7 @@
 
 import {ref} from 'vue';
 import _ from '../util';
-import {tr as t} from '@/translations';
+import {t} from '@/translations';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 import LicColorPicker from '@/components/base/LicColorPicker.vue';
@@ -92,7 +92,7 @@ function applyChange() {
 	Storage.replace.customBrickColors(fixedColors);
 	store.mutations.csi.markAllDirty();
 	store.mutations.pliItem.markAllDirty();
-	EventBus.$emit('redraw-ui');
+	EventBus.emit('redraw-ui', {});
 }
 
 function ok() {

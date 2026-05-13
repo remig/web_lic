@@ -4,34 +4,41 @@
 	<div class="gettingStarted panel panel-default">
 		<div class="panel-heading">
 			<div class="pull-right close">
-				<a :title="tr('dialog.welcome.close_tooltip')" @click.prevent="hideMessage()">
+				<a :title="t('dialog.welcome.close_tooltip')" @click.prevent="hideMessage()">
 					<i class="fas fa-times fa-lg" />
 				</a>
 			</div>
-			<h4>{{tr('dialog.welcome.title')}}</h4>
+			<h4>{{t('dialog.welcome.title')}}</h4>
 		</div>
 		<ul class="list-group" data-testid="get-started-list">
 			<li class="list-group-item">
-				<a class="lineLink" data-testid="get-started-import" @click.prevent="importCustomModel">
+				<a
+					class="lineLink"
+					data-testid="get-started-import"
+					@click.prevent="FileOps.importCustomModel"
+				>
 					<i class="far fa-edit fa-2x fa-pull-left" />
-					{{tr('dialog.welcome.import')}}
+					{{t('dialog.welcome.import')}}
 				</a>
 			</li>
 			<li class="list-group-item">
-				<a class="lineLink" data-testid="get-started-open" @click.prevent="open">
+				<a class="lineLink" data-testid="get-started-open" @click.prevent="FileOps.openLicFile">
 					<i class="far fa-save fa-2x fa-pull-left" />
-					{{tr('dialog.welcome.open')}}
+					{{t('dialog.welcome.open')}}
 				</a>
 			</li>
 			<li class="list-group-item">
 				<span class="lineLink">
 					<i class="fas fa-file-upload fa-2x fa-pull-left" />
-					{{tr('dialog.welcome.test')}}
+					{{t('dialog.welcome.test')}}
 				</span>
 				<ul class="list-inline">
 					<li v-for="entry in demoModels" :key="entry.id">
-						<a :data-testid="`import-${entry.id}`" @click.prevent="importModel(entry.fn)">
-							{{tr('dialog.welcome.models.' + entry.id)}}
+						<a
+							:data-testid="`import-${entry.id}`"
+							@click.prevent="FileOps.importBuiltInModel(entry.fn)"
+						>
+							{{t('dialog.welcome.models.' + entry.id)}}
 						</a>
 					</li>
 				</ul>
@@ -39,46 +46,32 @@
 			<li class="list-group-item">
 				<a class="lineLink" data-testid="get-started-learn" @click.prevent="showAbout">
 					<i class="fas fa-question-circle fa-2x fa-pull-left" />
-					{{tr('dialog.welcome.learn')}}
+					{{t('dialog.welcome.learn')}}
 				</a>
 			</li>
 		</ul>
 	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
+import {t} from '@/translations';
 import DialogManager from '../dialog';
+import * as FileOps from '../file_ops';
 
-export default {
-	props: ['app'],
-	methods: {
-		importCustomModel() {
-			this.app.importCustomModel();
-		},
-		open() {
-			this.app.openLicFile();
-		},
-		importModel(fn) {
-			this.app.importBuiltInModel(fn);
-		},
-		showAbout() {
-			DialogManager('aboutLicDialog');
-		},
-		hideMessage() {
-			document.querySelector('.gettingStarted').classList.add('hidden');
-		},
-	},
-	computed: {
-		demoModels() {
-			return [
-				{id: 'trivial', fn: 'trivial_model.ldr'},
-				{id: 'alligator', fn: '20015 - Alligator.mpd'},
-				{id: 'xwing', fn: '7140 - X-Wing Fighter.mpd'},
-			];
-		},
-	},
-};
+const demoModels = [
+	{id: 'trivial', fn: 'trivial_model.ldr'},
+	{id: 'alligator', fn: '20015 - Alligator.mpd'},
+	{id: 'xwing', fn: '7140 - X-Wing Fighter.mpd'},
+];
+
+function showAbout() {
+	DialogManager('aboutLicDialog');
+}
+
+function hideMessage() {
+	document.querySelector('.gettingStarted')?.classList.add('hidden');
+}
 
 </script>
 

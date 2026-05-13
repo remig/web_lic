@@ -5,7 +5,7 @@ import store from './store';
 import uiState from './ui_state';
 import EventBus from './event_bus';
 import LDParse from './ld_parse';
-import {tr} from './translations';
+import {t} from './translations';
 import {isQuantityLabelParent} from './type_helpers';
 import {
 	type ItemTypeNames, type ItemTypes, type LookupItem, type AbstractPart, type PartItem,
@@ -69,39 +69,39 @@ function getItemId(item: ItemTypes) {
 	return fields.join('_');
 }
 
-function getItemText(t: ItemTypes): string {
-	if (!t || !t.type) {
+function getItemText(itemType: ItemTypes): string {
+	if (!itemType || !itemType.type) {
 		return '';
-	} else if (t.type === 'book') {
-		return tr('glossary.book_count_@c', t.number);
-	} else if (t.type === 'page') {
-		if (t.subtype === 'page') {
-			return tr('glossary.page_count_@c', t.number);
-		} else if (t.subtype === 'inventoryPage') {
-			return tr('glossary.inventorypage', t.number);
+	} else if (itemType.type === 'book') {
+		return t('glossary.book_count_@c', itemType.number);
+	} else if (itemType.type === 'page') {
+		if (itemType.subtype === 'page') {
+			return t('glossary.page_count_@c', itemType.number);
+		} else if (itemType.subtype === 'inventoryPage') {
+			return t('glossary.inventorypage', itemType.number);
 		}
-		return tr('glossary.' + t.subtype.toLowerCase());
-	} else if (t.type === 'step') {
-		return (t.number == null)
-			? tr('glossary.step')
-			: tr('glossary.step_count_@c', t.number);
-	} else if (t.type === 'submodel') {
-		return t.filename;
-	} else if (t.type === 'annotation') {
-		return tr(`action.annotation.types.${t.annotationType}`);
-	} else if (t.type === 'callout') {
-		return tr('glossary.callout') + ' ' + tr('glossary.' + t.position);
-	} else if (t.type === 'pliItem') {
-		return `${nicePartName(t.filename)} - ${niceColorName(t.colorCode)}`;
-	} else if (t.type === 'quantityLabel') {
-		const parent = store.get.parent(t);
+		return t('glossary.' + itemType.subtype.toLowerCase());
+	} else if (itemType.type === 'step') {
+		return (itemType.number == null)
+			? t('glossary.step')
+			: t('glossary.step_count_@c', itemType.number);
+	} else if (itemType.type === 'submodel') {
+		return itemType.filename;
+	} else if (itemType.type === 'annotation') {
+		return t(`action.annotation.types.${itemType.annotationType}`);
+	} else if (itemType.type === 'callout') {
+		return t('glossary.callout') + ' ' + t('glossary.' + itemType.position);
+	} else if (itemType.type === 'pliItem') {
+		return `${nicePartName(itemType.filename)} - ${niceColorName(itemType.colorCode)}`;
+	} else if (itemType.type === 'quantityLabel') {
+		const parent = store.get.parent(itemType);
 		if (isQuantityLabelParent(parent)) {
-			return tr('glossary.quantitylabel_count_@c', parent.quantity);
+			return t('glossary.quantitylabel_count_@c', parent.quantity);
 		}
-		return tr('glossary.quantitylabel');
-	} else if (t.type === 'part') {
-		const step = store.get.step(t.stepID);
-		const part = LDParse.model.get.partFromID(t.id, step.model.filename);
+		return t('glossary.quantitylabel');
+	} else if (itemType.type === 'part') {
+		const step = store.get.step(itemType.stepID);
+		const part = LDParse.model.get.partFromID(itemType.id, step.model.filename);
 		const partName = nicePartName(part.filename);
 		const partColor = niceColorName(part.colorCode);
 		if (partColor) {
@@ -109,7 +109,7 @@ function getItemText(t: ItemTypes): string {
 		}
 		return `${partName}`;
 	}
-	return tr('glossary.' + t.type.toLowerCase());
+	return t('glossary.' + itemType.type.toLowerCase());
 }
 
 function getChildItems(item: ItemTypes): ItemTypes[] {
@@ -188,7 +188,7 @@ function handleClick(e: MouseEvent): void {
 	if (node.classList.contains('treeIcon') && node.parentElement != null) {
 		toggleNode(node.parentElement);
 	} else if (node.classList.contains('treeText')) {
-		EventBus.$emit('set-selected', nodeIdToItem(node.id));
+		EventBus.emit('set-selected', nodeIdToItem(node.id));
 	}
 }
 
@@ -281,6 +281,8 @@ function collapseAll(node: Element) {
 		}
 	}
 }
+
+EventBus.on('force-update', createTree);
 
 interface API {
 	update(): void;

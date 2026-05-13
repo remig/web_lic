@@ -1,11 +1,20 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import Vue from 'vue';
-const EventBus = new Vue();
-export default EventBus;
+import mitt from 'mitt';
+import type {LookupItem} from './item_types';
 
-// supported events:
-// set-selected(item)
-// state-change
-// page-resize
-// redraw-ui
+type Events = {
+    'draw-current-page': void;
+    'force-update': void;
+    'hide-menus': void;
+    'key-press': {key: string};
+	'page-resize': void;
+	'redraw-ui': {clearSelection?: boolean};
+    'scroll-to-page': {pageId: number};
+    'set-page-view': {facingPage: boolean, scroll: boolean};
+	'set-selected': LookupItem;
+    'show-menu': {e: MouseEvent};
+};
+
+const EventBus = mitt<Events>();
+export default EventBus;
