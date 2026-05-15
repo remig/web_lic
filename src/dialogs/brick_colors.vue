@@ -37,7 +37,7 @@
 		</div>
 		<template #footer>
 			<LicButton type="reset" @click="reset" />
-			<LicButton type="cancel" @click="emit('close')" />
+			<LicButton type="cancel" @click="emit('cancel')" />
 			<LicButton type="ok" @click="ok" />
 		</template>
 	</LicDialog>
@@ -58,7 +58,7 @@ import backwardCompat from '../backward_compat';
 import EventBus from '../event_bus';
 import {type LDrawColorCode, type ColorTableEntry} from '../item_types';
 
-const emit = defineEmits(['close']);
+const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 
 const customColors = Storage.get.customBrickColors();
 
@@ -118,7 +118,7 @@ function ok() {
 		}
 	});
 	applyChange();
-	emit('close');
+	emit('ok');
 }
 
 function reset() {

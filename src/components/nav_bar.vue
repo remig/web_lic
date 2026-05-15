@@ -39,7 +39,7 @@
 			<li>
 				<a
 					class="clickable"
-					@click.prevent.stop="showAbout"
+					@click.prevent.stop="showAboutLicDialog"
 				>
 					Web Lic {{version}}
 				</a>
@@ -55,7 +55,7 @@ import EventBus from '../event_bus';
 import {t} from '@/translations';
 import _ from '../util';
 import packageInfo from '../../package.json';
-import DialogManager from '../dialog';
+import {showAboutLicDialog} from '../dialog';
 import PopupMenu from './popup_menu.vue';
 
 defineProps<{menuEntryList: any[]; filename: {name: string; isDirty: boolean} | null | undefined}>();
@@ -67,10 +67,6 @@ const version = _.version.nice(packageInfo.version);
 function forceUpdate() {
 	instance?.proxy?.$forceUpdate();
 	(instance?.proxy as any)?.$children?.forEach((el: any) => el.forceUpdate?.());
-}
-
-function showAbout() {
-	DialogManager('aboutLicDialog');
 }
 
 function hide() {

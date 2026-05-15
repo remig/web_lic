@@ -32,7 +32,7 @@
 			</div>
 		</div>
 		<template #footer>
-			<LicButton type="ok" @click="emit('close')" />
+			<LicButton type="ok" @click="emit('ok')" />
 		</template>
 	</LicDialog>
 </template>
@@ -44,7 +44,7 @@ import {t} from '@/translations';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 
-const emit = defineEmits(['close']);
+const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 
 const content = ref<any[]>([]);
 

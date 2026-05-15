@@ -54,7 +54,7 @@ import undoStack from '../undo_stack';
 import EventBus from '../event_bus';
 import {type Rotation} from '../item_types';
 
-const emit = defineEmits(['close']);
+const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 
 const values = reactive(_.cloneDeep(store.state.template.sceneRendering));
 const originalRenderState = _.cloneDeep(store.state.template.sceneRendering);
@@ -76,13 +76,13 @@ function ok() {
 		t('dialog.scene_rendering.undo'),
 		['renderer'],
 	);
-	emit('close');
+	emit('ok');
 }
 
 function cancel() {
 	store.mutations.sceneRendering.set({...originalRenderState, refresh: true});
 	EventBus.emit('redraw-ui', {clearSelection: true});
-	emit('close');
+	emit('cancel');
 }
 
 </script>

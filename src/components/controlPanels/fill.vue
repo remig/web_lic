@@ -47,7 +47,7 @@ import _ from '../../util';
 import store from '../../store';
 import cache from '../../cache';
 import openFileHandler from '../../file_uploader';
-import DialogManager from '../../dialog';
+import {showResizeImageDialog} from '../../dialog';
 import PanelBase from './panel_base.vue';
 import {readDpi} from '../../changedpi';
 import {t} from '../../translations';
@@ -98,29 +98,41 @@ function pickImage() {
 		imageFilename.value = filename;
 
 		const image = new Image();
-		image.onload = () => {
+		image.onload = async() => {
 			if (props.templateEntry === 'page') {
 				if (image.width !== template.width || image.height !== template.height) {
-					DialogManager('resizeImageDialog', (dialog: any) => {
-						dialog.$on('update', (newImageInfo: any) => {
-							template.fill.image = newImageInfo;
-							updateValues();
-						});
-						dialog.$on('ok', (newImageInfo: any) => {
-							template.fill.image = newImageInfo;
-							updateValues();
-						});
-						dialog.$on('cancel', () => {
-							template.fill.image = originalFillImage;
-							imageFilename.value = prevImageFilename;
-							updateValues();
-						});
-						const imgInfo = template.fill.image;
-						imgInfo.width = imgInfo.originalWidth = image.width;
-						imgInfo.height = imgInfo.originalHeight = image.height;
-						_.assign(dialog.imageInfo, template.fill.image);
-						dialog.updateImageInfo();
-					});
+					const imgInfo = template.fill.image;
+					imgInfo.width = imgInfo.originalWidth = image.width;
+					imgInfo.height = imgInfo.originalHeight = image.height;
+					const result = await showResizeImageDialog(
+						{
+							initialImageInfo: {
+								x: 0,
+								y: 0,
+								preserveSize: false,
+								preserveAspectRatio: true,
+								anchorPosition: 'center',
+								...imgInfo,
+								pageWidth: template.width,
+								pageHeight: template.height,
+							},
+						},
+						{
+							onUpdate: (newImageInfo) => {
+								template.fill.image = newImageInfo;
+								updateValues();
+							},
+							onCancel: () => {
+								template.fill.image = originalFillImage;
+								imageFilename.value = prevImageFilename;
+								updateValues();
+							},
+						},
+					);
+					if (result != null) {
+						template.fill.image = result;
+						updateValues();
+					}
 				}
 			}
 			cache.set('page', 'backgroundImage', image);

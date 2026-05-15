@@ -50,38 +50,32 @@ import {t} from '@/translations';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 
-const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+interface TransformValues {
+	rotation: {x: number; y: number; z: number};
+	position: {x: number; y: number; z: number};
+}
 
-const title = ref('');
-const rotation = ref({x: 0, y: 0, z: 0});
-const position = ref({x: 0, y: 0, z: 0});
-const addRotateIcon = ref(true);
-const showRotateIconCheckbox = ref(true);
+const props = defineProps<TransformValues>();
+// eslint-disable-next-line max-len
+const emit = defineEmits<{(e: 'update', v: TransformValues): void; (e: 'ok', v: TransformValues): void; (e: 'cancel'): void}>();
 
-defineExpose({title, rotation, position, addRotateIcon, showRotateIconCheckbox});
+const rotation = ref({...props.rotation});
+const position = ref({...props.position});
 
-function currentProps() {
-	return {
-		title: title.value,
-		rotation: rotation.value,
-		position: position.value,
-		addRotateIcon: addRotateIcon.value,
-		showRotateIconCheckbox: showRotateIconCheckbox.value,
-	};
+function currentValues(): TransformValues {
+	return {rotation: rotation.value, position: position.value};
 }
 
 function updateValues() {
-	emit('update', currentProps());
+	emit('update', currentValues());
 }
 
 function ok() {
-	emit('ok', currentProps());
-	emit('close');
+	emit('ok', currentValues());
 }
 
 function cancel() {
 	emit('cancel');
-	emit('close');
 }
 
 </script>

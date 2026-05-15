@@ -38,17 +38,31 @@ import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
 import rotateBuilder from '@/components/rotate.vue';
 
-const title = ref('');
-const addRotateIcon = ref(true);
-const showRotateIconCheckbox = ref(true);
-const rotation = ref<Rotation[]>([]);
+interface RotateResult {
+	title: string;
+	addRotateIcon: boolean;
+	rotation: Rotation[];
+}
 
-const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+const props = defineProps<{
+	title: string;
+	rotation: Rotation[] | null;
+	addRotateIcon?: boolean;
+	showRotateIconCheckbox?: boolean;
+}>();
+// eslint-disable-next-line max-len
+const emit = defineEmits<{(e: 'update', v: RotateResult): void; (e: 'ok', v: RotateResult): void; (e: 'cancel'): void}>();
 
-defineExpose({title, addRotateIcon, showRotateIconCheckbox, rotation});
+const addRotateIcon = ref(props.addRotateIcon ?? true);
+const showRotateIconCheckbox = ref(props.showRotateIconCheckbox ?? true);
+const rotation = ref<Rotation[]>(props.rotation ?? []);
 
-function currentData() {
-	return {title: title.value, addRotateIcon: addRotateIcon.value, rotation: rotation.value};
+function currentData(): RotateResult {
+	return {
+		title: props.title,
+		addRotateIcon: addRotateIcon.value,
+		rotation: rotation.value,
+	};
 }
 
 function updateValues(newRotation: Rotation[]) {
@@ -58,12 +72,10 @@ function updateValues(newRotation: Rotation[]) {
 
 function ok() {
 	emit('ok', currentData());
-	emit('close');
 }
 
 function cancel() {
-	emit('cancel', currentData());
-	emit('close');
+	emit('cancel');
 }
 
 </script>

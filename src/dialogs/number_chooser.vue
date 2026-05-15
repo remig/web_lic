@@ -3,17 +3,17 @@
 <template>
 	<LicDialog
 		:title="title"
-		:width="width"
+		:width="width ?? '500px'"
 	>
 		<label class="label-input-row">
-			{{labelText}}
+			{{label}}
 			<div>
 				<input
 					ref="set_focus"
-					v-model.number="value"
-					:min="min"
-					:max="max"
-					:step="step"
+					v-model.number="currentValue"
+					:min="min ?? 0"
+					:max="max ?? 100"
+					:step="step ?? 1"
 					type="number"
 					class="form-control"
 					@input="updateValues"
@@ -36,31 +36,31 @@ import {ref} from 'vue';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 
-const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+const props = defineProps<{
+	title: string;
+	label?: string;
+	initialValue?: number | null;
+	min?: number;
+	max?: number;
+	step?: number;
+	bodyText?: string;
+	width?: string;
+}>();
+// eslint-disable-next-line max-len
+const emit = defineEmits<{(e: 'update', value: number): void; (e: 'ok', value: number): void; (e: 'cancel'): void}>();
 
-const value = ref<number | null>(null);
-const title = ref('');
-const labelText = ref('');
-const width = ref('500px');
-const bodyText = ref('');
-const min = ref(0);
-const max = ref(100);
-const step = ref(1);
-
-defineExpose({value, title, label: labelText, width, bodyText, min, max, step});
+const currentValue = ref(props.initialValue ?? 0);
 
 function updateValues() {
-	emit('update', value.value);
+	emit('update', currentValue.value);
 }
 
 function ok() {
-	emit('ok', value.value);
-	emit('close');
+	emit('ok', currentValue.value);
 }
 
 function cancel() {
 	emit('cancel');
-	emit('close');
 }
 
 </script>

@@ -46,7 +46,7 @@
 			</label>
 		</div>
 		<template #footer>
-			<LicButton type="cancel" @click="emit('close')" />
+			<LicButton type="cancel" @click="emit('cancel')" />
 			<LicButton type="ok" @click="ok" />
 		</template>
 	</LicDialog>
@@ -62,20 +62,23 @@ import LicSelect from '@/components/base/LicSelect.vue';
 import _, {type UnitTypes} from '../util';
 import uiState from '../ui_state';
 
-const emit = defineEmits(['ok', 'close']);
+interface PdfExportResult {
+	dpi: number;
+	units: UnitTypes;
+	pageSize: {width: number; height: number};
+}
+
+const props = defineProps<{pageSizeInPixels: {width: number; height: number}}>();
+const emit = defineEmits<{(e: 'ok', v: PdfExportResult): void; (e: 'cancel'): void}>();
 
 const unitOptions = ['point', 'mm', 'cm', 'in'].map(u => ({value: u, label: u}));
 
 const newState = reactive(uiState.get('dialog.export.pdf'));  // dpi & units
-const pageSize = reactive({width: 0, height: 0});  // stored in newState.units
-let aspectRatio = 0;
-
-function show(pageSizeInPixels: {width: number; height: number}) {
-	const units = newState.units;
-	pageSize.width = _.units.pixelsToUnits(pageSizeInPixels.width, units);
-	pageSize.height = _.units.pixelsToUnits(pageSizeInPixels.height, units);
-	aspectRatio = pageSizeInPixels.width / pageSizeInPixels.height;
-}
+const pageSize = reactive({
+	width: _.units.pixelsToUnits(props.pageSizeInPixels.width, newState.units),
+	height: _.units.pixelsToUnits(props.pageSizeInPixels.height, newState.units),
+});
+const aspectRatio = props.pageSizeInPixels.width / props.pageSizeInPixels.height;
 
 function updateWidth(event: Event) {
 	pageSize.width = _.round(parseFloat((event.target as HTMLInputElement).value), 2);
@@ -105,17 +108,16 @@ function ok() {
 			height: _.units.unitToPoints(pageSize.height, units),
 		},
 	});
-	emit('close');
 }
-
-defineExpose({show});
 
 </script>
 
 <style>
 
-.pdfExportDialog input {
-	width: 95px;
+.pdfExportDialog {
+	input {
+		width: 95px;
+	}
 }
 
 </style>

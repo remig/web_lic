@@ -4,6 +4,7 @@
 	<LicDialog
 		:title="t('dialog.about_lic.title')"
 		width="700px"
+		class="aboutLicDialog"
 	>
 		<div>
 			<h4>{{t('dialog.about_lic.version_@mf', {version})}}</h4>
@@ -42,7 +43,7 @@
 			</p>
 		</div>
 		<template #footer>
-			<LicButton type="ok" @click="emit('close')" />
+			<LicButton type="ok" @click="emit('ok')" />
 		</template>
 	</LicDialog>
 </template>
@@ -54,7 +55,7 @@ import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 import packageInfo from '../../package.json';
 
-const emit = defineEmits(['close']);
+const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 
 const version = packageInfo.version;
 
@@ -62,12 +63,14 @@ const version = packageInfo.version;
 
 <style>
 
-ul {
-	padding-left: 30px;
-}
+.aboutLicDialog {
+	ul {
+		padding-left: 30px;
+	}
 
-p {
-	line-height: 25px;
+	p {
+		line-height: 25px;
+	}
 }
 
 </style>

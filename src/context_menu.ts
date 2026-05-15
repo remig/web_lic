@@ -6,11 +6,11 @@ import LicGL from './webgl/licgl';
 import store from './store';
 import undoStack from './undo_stack';
 import openFileHandler from './file_uploader';
-import DialogManager from './dialog';
+import * as DialogManager from './dialog';
 import {t, noTranslate} from './translations';
 import {isItemSpecificType, isStepParent} from './type_helpers';
 import {
-	type LookupItem, type Directions, type Page, type Rotation, type Step, type CSI, type AbstractPart,
+	type LookupItem, type Directions, type Page, type Rotation, type Step, type CSI,
 } from './item_types';
 import * as SelectionOps from './selection_ops';
 import * as ReactiveState from './ui_reactive_state';
@@ -190,40 +190,36 @@ const contextMenu = {
 					// TODO: don't allow insufficient row / col layouts that hide steps
 					text: 'action.layout.by_row_and_column.name',
 					id: 'page_layout_rc_cmenu',
-					cb(selectedItem: LookupItem) {
+					async cb(selectedItem: LookupItem) {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.cloneDeep(page.layout);
 
 						SelectionOps.clearSelected();
 						UiOps.redrawUI(true);
 
-						DialogManager('pageLayoutDialog', dialog => {
-							dialog.$on('ok', newValues => {
-								undoStack.commit(
-									'page.layout',
-									{page, layout: newValues},
-									t('action.layout.by_row_and_column.undo'),
-								);
-							});
-							dialog.$on('cancel', () => {
-								store.mutations.page.layout({page, layout: originalLayout});
-								UiOps.redrawUI(true);
-							});
-							dialog.$on('update', newValues => {
-								store.mutations.page.layout({page, layout: newValues});
-								UiOps.redrawUI(true);
-							});
-							// TODO: move these setters and 'show' call into single 'setValues' method
-							if (typeof originalLayout === 'string') {
-								dialog.values.rows = dialog.values.cols = 'auto';
-								dialog.values.direction = originalLayout;
-							} else {
-								dialog.values.rows = originalLayout.rows;
-								dialog.values.cols = originalLayout.cols;
-								dialog.values.direction = originalLayout.direction;
-							}
-							dialog.show();
-						});
+						const initialLayout = typeof originalLayout === 'string'
+							? {rows: 'auto' as const, cols: 'auto' as const, direction: originalLayout}
+							: originalLayout;
+						const result = await DialogManager.showPageLayoutDialog(
+							{initialLayout},
+							{
+								onUpdate: newValues => {
+									store.mutations.page.layout({page, layout: newValues});
+									UiOps.redrawUI(true);
+								},
+								onCancel: () => {
+									store.mutations.page.layout({page, layout: originalLayout});
+									UiOps.redrawUI(true);
+								},
+							},
+						);
+						if (result != null) {
+							undoStack.commit(
+								'page.layout',
+								{page, layout: result},
+								t('action.layout.by_row_and_column.undo'),
+							);
+						}
 					},
 				},
 			],
@@ -353,39 +349,40 @@ const contextMenu = {
 				{
 					text: 'action.layout.by_row_and_column.name',
 					id: 'step_layout_rc_cmenu',
-					cb(selectedItem: LookupItem) {
+					async cb(selectedItem: LookupItem) {
 						const page = store.get.page(selectedItem);
 						const originalLayout = _.cloneDeep(page.layout);
 
 						SelectionOps.clearSelected();
 						UiOps.redrawUI(true);
 
-						DialogManager('pageLayoutDialog', dialog => {
-							dialog.$on('ok', newValues => {
-								undoStack.commit(
-									'page.layout',
-									{page, layout: newValues},
-									t('action.layout.by_row_and_column.undo_step'),
-								);
-							});
-							dialog.$on('cancel', () => {
-								store.mutations.page.layout({page, layout: originalLayout});
-								UiOps.redrawUI(true);
-							});
-							dialog.$on('update', newValues => {
-								store.mutations.page.layout({page, layout: newValues});
-								UiOps.redrawUI(true);
-							});
-							if (typeof originalLayout === 'string') {
-								dialog.values.rows = dialog.values.cols = 2;
-								dialog.values.direction = originalLayout;
-							} else {
-								dialog.values.cols = originalLayout.cols;
-								dialog.values.rows = originalLayout.rows;
-								dialog.values.direction = originalLayout.direction || 'vertical';
-							}
-							dialog.show({x: 400, y: 150});
-						});
+						const initialLayout = typeof originalLayout === 'string'
+							? {rows: 2, cols: 2, direction: originalLayout}
+							: {
+								rows: originalLayout.rows,
+								cols: originalLayout.cols,
+								direction: originalLayout.direction || 'vertical' as const,
+							};
+						const result = await DialogManager.showPageLayoutDialog(
+							{initialLayout},
+							{
+								onUpdate: newValues => {
+									store.mutations.page.layout({page, layout: newValues});
+									UiOps.redrawUI(true);
+								},
+								onCancel: () => {
+									store.mutations.page.layout({page, layout: originalLayout});
+									UiOps.redrawUI(true);
+								},
+							},
+						);
+						if (result != null) {
+							undoStack.commit(
+								'page.layout',
+								{page, layout: result},
+								t('action.layout.by_row_and_column.undo_step'),
+							);
+						}
 					},
 				},
 			],
@@ -702,7 +699,7 @@ const contextMenu = {
 				{
 					text: 'action.csi.rotate.custom_rotation.name',
 					id: 'csi_rotate_custom_cmenu',
-					cb(selectedItem: LookupItem) {
+					async cb(selectedItem: LookupItem) {
 						const csi = store.get.csi(selectedItem.id);
 						const parent = store.get.lookupToItem(csi.parent);
 						const originalRotation = _.cloneDeep(csi.rotation);
@@ -713,31 +710,35 @@ const contextMenu = {
 						csi.rotation = initialRotation;
 
 						SelectionOps.clearSelected();
-						DialogManager('rotatePartImageDialog', dialog => {
-							dialog.$on('ok', newValues => {
-								undoStack.commit(
-									'csi.rotate',
-									{csi, ..._.cloneDeep(newValues), doLayout: true},
-									t('action.csi.rotate.custom_rotation.undo'),
-									[csi],
-								);
-							});
-							dialog.$on('cancel', () => {
-								csi.rotation = originalRotation;
-								csi.isDirty = true;
-								UiOps.redrawUI(true);
-							});
-							dialog.$on('update', newValues => {
-								csi.rotation = newValues.rotation;
-								csi.isDirty = true;
-								UiOps.redrawUI(true);
-							});
-							dialog.title = t('dialog.rotate_part_image.title_csi');
-							dialog.rotation = initialRotation;
-							if (isItemSpecificType(parent, 'step')) {
-								dialog.addRotateIcon = parent.rotateIconID != null;
-							}
-						});
+						const result = await DialogManager.showRotatePartImageDialog(
+							{
+								title: t('dialog.rotate_part_image.title_csi'),
+								rotation: initialRotation,
+								addRotateIcon: isItemSpecificType(parent, 'step')
+									? parent.rotateIconID != null
+									: true,
+							},
+							{
+								onUpdate: newValues => {
+									csi.rotation = newValues.rotation;
+									csi.isDirty = true;
+									UiOps.redrawUI(true);
+								},
+								onCancel: () => {
+									csi.rotation = originalRotation;
+									csi.isDirty = true;
+									UiOps.redrawUI(true);
+								},
+							},
+						);
+						if (result != null) {
+							undoStack.commit(
+								'csi.rotate',
+								{csi, ..._.cloneDeep(result), doLayout: true},
+								t('action.csi.rotate.custom_rotation.undo'),
+								[csi],
+							);
+						}
 					},
 				},
 				{
@@ -769,7 +770,7 @@ const contextMenu = {
 				const csi = store.get.csi(selectedItem);
 				return (csi?.rotation?.length ?? 0) > 0;
 			},
-			cb(selectedItem: LookupItem) {
+			async cb(selectedItem: LookupItem) {
 				// TODO: this doesn't re-layout pages after applying changes. Must check all affected pages.
 				// TODO: If next step spinner is spun up then back down, need to undo some rotations
 				// TODO: If selected csi step has a rotate icon, add one to the last rotated csi too
@@ -781,60 +782,65 @@ const contextMenu = {
 				SelectionOps.clearSelected();
 				UiOps.redrawUI(true);
 
-				DialogManager('numberChooserDialog', dialog => {
-					dialog.$on('ok', newValue => {
-						const csiList: ({type: 'csi', id: number})[] = originalRotations
-							.filter(el => el != null)
-							.map((unused, id) => {
-								return {type: 'csi', id};
-							});
-						undoStack.commit(
-							'step.copyRotation',
-							{step, rotation, nextXSteps: newValue},
-							t('action.csi.copy_rotation_to_next_steps.undo'),
-							csiList,
-						);
-					});
-					dialog.$on('cancel', () => {
-						originalRotations.forEach((rot, csiID) => {
-							const csi = store.get.csi(csiID);
-							if (csi) {
-								csi.rotation = (rot === 'none') ? null : rot;
-								csi.isDirty = true;
-							}
-						});
-						UiOps.redrawUI(true);
-					});
-					dialog.$on('update', newValue => {
-						let csi: CSI;
-						let nextStep: Step | null = step;
-						for (let i = 0; i < newValue; i++) {
-							if (nextStep) {
-								nextStep = store.get.nextStep(nextStep);
-							}
-							if (nextStep?.csiID) {
-								csi = store.get.csi(nextStep.csiID);
-								if (originalRotations[csi.id] == null) {
-									originalRotations[csi.id] = (csi.rotation == null)
-										? 'none'
-										: csi.rotation;
+				const newValue = await DialogManager.showNumberChooserDialog(
+					{
+						title: t('dialog.copy_csi_rotation.title'),
+						label: t('dialog.copy_csi_rotation.label'),
+						initialValue: 0,
+						min: 0,
+					},
+					{
+						onUpdate: updateValue => {
+							let csi: CSI;
+							let nextStep: Step | null = step;
+							for (let i = 0; i < updateValue; i++) {
+								if (nextStep) {
+									nextStep = store.get.nextStep(nextStep);
 								}
-								csi.isDirty = true;
-								csi.rotation = rotation;
+								if (nextStep?.csiID) {
+									csi = store.get.csi(nextStep.csiID);
+									if (originalRotations[csi.id] == null) {
+										originalRotations[csi.id] = (csi.rotation == null)
+											? 'none'
+											: csi.rotation;
+									}
+									csi.isDirty = true;
+									csi.rotation = rotation;
+								}
 							}
-						}
-						UiOps.redrawUI(true);
-					});
-					dialog.title = t('dialog.copy_csi_rotation.title');
-					dialog.label = t('dialog.copy_csi_rotation.label');
-					dialog.min = dialog.value = 0;
-				});
+							UiOps.redrawUI(true);
+						},
+						onCancel: () => {
+							originalRotations.forEach((rot, csiID) => {
+								const csi = store.get.csi(csiID);
+								if (csi) {
+									csi.rotation = (rot === 'none') ? null : rot;
+									csi.isDirty = true;
+								}
+							});
+							UiOps.redrawUI(true);
+						},
+					},
+				);
+				if (newValue != null) {
+					const csiList: ({type: 'csi', id: number})[] = originalRotations
+						.filter(el => el != null)
+						.map((_unused, id) => {
+							return {type: 'csi', id};
+						});
+					undoStack.commit(
+						'step.copyRotation',
+						{step, rotation, nextXSteps: newValue},
+						t('action.csi.copy_rotation_to_next_steps.undo'),
+						csiList,
+					);
+				}
 			},
 		},
 		{
 			text: 'action.csi.scale.name',
 			id: 'csi_scale_cmenu',
-			cb(selectedItem: LookupItem) {
+			async cb(selectedItem: LookupItem) {
 				const csi = store.get.csi(selectedItem.id);
 				const originalScale = csi.scale;
 				let initialScale = originalScale;
@@ -845,33 +851,36 @@ const contextMenu = {
 						initialScale = store.get.templateForItem(selectedItem).scale;
 					}
 				}
-				DialogManager('numberChooserDialog', dialog => {
-					dialog.$on('update', newValue => {
-						csi.scale = clampScale(newValue);
-						csi.isDirty = true;
-						UiOps.redrawUI(true);
-					});
-					dialog.$on('ok', newValue => {
-						undoStack.commit(
-							'csi.scale',
-							{csi, scale: newValue, doLayout: true},
-							t('action.csi.scale.undo'),
-							[csi],
-						);
-					});
-					dialog.$on('cancel', () => {
-						csi.scale = originalScale;
-						csi.isDirty = true;
-						UiOps.redrawUI(true);
-					});
-					dialog.title = t('dialog.scale_csi.title');
-					dialog.label = t('dialog.scale_csi.label');
-					dialog.min = 0;
-					dialog.max = clampScale.max;
-					dialog.step = 0.1;
-					dialog.bodyText = '';
-					dialog.value = initialScale;
-				});
+				const newValue = await DialogManager.showNumberChooserDialog(
+					{
+						title: t('dialog.scale_csi.title'),
+						label: t('dialog.scale_csi.label'),
+						initialValue: initialScale,
+						min: 0,
+						max: clampScale.max,
+						step: 0.1,
+					},
+					{
+						onUpdate: updateValue => {
+							csi.scale = clampScale(updateValue);
+							csi.isDirty = true;
+							UiOps.redrawUI(true);
+						},
+						onCancel: () => {
+							csi.scale = originalScale;
+							csi.isDirty = true;
+							UiOps.redrawUI(true);
+						},
+					},
+				);
+				if (newValue != null) {
+					undoStack.commit(
+						'csi.scale',
+						{csi, scale: newValue, doLayout: true},
+						t('action.csi.scale.undo'),
+						[csi],
+					);
+				}
 			},
 		},
 		{
@@ -932,7 +941,7 @@ const contextMenu = {
 		{
 			text: 'action.pli_item.rotate_part_list_image.name',
 			id: 'pli_rotate_cmenu',
-			cb(selectedItem: LookupItem) {
+			async cb(selectedItem: LookupItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				const originalRotation = store.get.pliTransform(filename).rotation;
@@ -942,35 +951,39 @@ const contextMenu = {
 				}
 
 				SelectionOps.clearSelected();
-				DialogManager('rotatePartImageDialog', dialog => {
-					dialog.$on('update', newValues => {
-						store.mutations.pliTransform.rotate(filename, newValues.rotation);
-						store.mutations.pliItem.markAllDirty(filename);
-						UiOps.redrawUI(true);
+				const result = await DialogManager.showRotatePartImageDialog(
+					{
+						title: t('dialog.rotate_part_image.title_pli'),
+						rotation: initialRotation,
+						showRotateIconCheckbox: false,
+					},
+					{
+						onUpdate: newValues => {
+							store.mutations.pliTransform.rotate(filename, newValues.rotation);
+							store.mutations.pliItem.markAllDirty(filename);
+							UiOps.redrawUI(true);
+						},
+						onCancel: () => {
+							store.mutations.pliTransform.rotate(filename, originalRotation);
+							store.mutations.pliItem.markAllDirty(filename);
+							UiOps.redrawUI(true);
+						},
+					},
+				);
+				if (result != null) {
+					const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
+					const changes = dirtyItems.map(item => {
+						return {
+							mutation: 'page.layout',
+							opts: {page: store.get.pageForItem(item)},
+						};
 					});
-					dialog.$on('ok', () => {
-						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						const changes = dirtyItems.map(item => {
-							return {
-								mutation: 'page.layout',
-								opts: {page: store.get.pageForItem(item)},
-							};
-						});
-						undoStack.commit(
-							changes, null,
-							t('action.pli_item.rotate_part_list_image.undo'),
-							dirtyItems,
-						);
-					});
-					dialog.$on('cancel', () => {
-						store.mutations.pliTransform.rotate(filename, originalRotation);
-						store.mutations.pliItem.markAllDirty(filename);
-						UiOps.redrawUI(true);
-					});
-					dialog.title = t('dialog.rotate_part_image.title_pli');
-					dialog.showRotateIconCheckbox = false;
-					dialog.rotation = initialRotation;
-				});
+					undoStack.commit(
+						changes, null,
+						t('action.pli_item.rotate_part_list_image.undo'),
+						dirtyItems,
+					);
+				}
 			},
 		},
 		{
@@ -1001,44 +1014,47 @@ const contextMenu = {
 		{
 			text: 'action.pli_item.scale_part_list_image.name',
 			id: 'pli_scale_cmenu',
-			cb(selectedItem: LookupItem) {
+			async cb(selectedItem: LookupItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				const originalScale = store.get.pliTransform(filename).scale;
 
-				DialogManager('numberChooserDialog', dialog => {
-					dialog.$on('update', newValue => {
-						const scale = clampScale(newValue);
-						store.mutations.pliTransform.scale(filename, scale);
-						store.mutations.pliItem.markAllDirty(filename);
-						UiOps.redrawUI(true);
+				const newValue = await DialogManager.showNumberChooserDialog(
+					{
+						title: t('dialog.scale_pli.title'),
+						initialValue: originalScale || 1,
+						min: 0,
+						max: clampScale.max,
+						step: 0.1,
+					},
+					{
+						onUpdate: updateValue => {
+							const scale = clampScale(updateValue);
+							store.mutations.pliTransform.scale(filename, scale);
+							store.mutations.pliItem.markAllDirty(filename);
+							UiOps.redrawUI(true);
+						},
+						onCancel: () => {
+							store.mutations.pliTransform.scale(filename, originalScale);
+							store.mutations.pliItem.markAllDirty(filename);
+							UiOps.redrawUI(true);
+						},
+					},
+				);
+				if (newValue != null) {
+					const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
+					const changes = dirtyItems.map(item => {
+						return {
+							mutation: 'page.layout',
+							opts: {page: store.get.pageForItem(item)},
+						};
 					});
-					dialog.$on('ok', () => {
-						const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-						const changes = dirtyItems.map(item => {
-							return {
-								mutation: 'page.layout',
-								opts: {page: store.get.pageForItem(item)},
-							};
-						});
-						undoStack.commit(
-							changes, null,
-							t('action.pli_item.scale_part_list_image.undo'),
-							dirtyItems,
-						);
-					});
-					dialog.$on('cancel', () => {
-						store.mutations.pliTransform.scale(filename, originalScale);
-						store.mutations.pliItem.markAllDirty(filename);
-						UiOps.redrawUI(true);
-					});
-					dialog.title = t('dialog.scale_pli.title');
-					dialog.min = 0;
-					dialog.max = clampScale.max;
-					dialog.step = 0.1;
-					dialog.bodyText = '';
-					dialog.value = originalScale || 1;
-				});
+					undoStack.commit(
+						changes, null,
+						t('action.pli_item.scale_part_list_image.undo'),
+						dirtyItems,
+					);
+				}
 			},
 		},
 		{
@@ -1076,21 +1092,21 @@ const contextMenu = {
 					{
 						text: 'action.quantity_label.change_count.name',
 						id: 'qtylabel_change_cmenu',
-						cb(selItem: LookupItem) {
+						async cb(selItem: LookupItem) {
 							const pliItem = store.get.parent(selItem);
 							if (isItemSpecificType(pliItem, 'pliItem')) {
-								DialogManager('numberChooserDialog', dialog => {
-									dialog.$on('ok', newValue => {
-										undoStack.commit(
-											'pliItem.changeQuantity',
-											{pliItem, quantity: newValue},
-											t('action.quantity_label.change_count.undo'),
-										);
-									});
-									dialog.title = t('dialog.change_part_count.title');
-									dialog.label = t('dialog.change_part_count.label');
-									dialog.value = pliItem.quantity;
+								const newValue = await DialogManager.showNumberChooserDialog({
+									title: t('dialog.change_part_count.title'),
+									label: t('dialog.change_part_count.label'),
+									initialValue: pliItem.quantity,
 								});
+								if (newValue != null) {
+									undoStack.commit(
+										'pliItem.changeQuantity',
+										{pliItem, quantity: newValue},
+										t('action.quantity_label.change_count.undo'),
+									);
+								}
 							}
 						},
 					},
@@ -1126,23 +1142,21 @@ const contextMenu = {
 				const annotation = store.get.annotation(selectedItem);
 				return annotation && annotation.annotationType === 'label';
 			},
-			cb(selectedItem) {
+			async cb(selectedItem) {
 				const annotation = store.get.annotation(selectedItem);
-				DialogManager('styleDialog', dialog => {
-					dialog.$on('ok', newProperties => {
-						const opts = {annotation, newProperties};
-						undoStack.commit(
-							'annotation.set',
-							opts,
-							t('action.annotation.change_text_and_style.undo'),
-						);
-					});
-					dialog.title = t('dialog.style_annotation.title');
-					dialog.text = annotation.text;
-					dialog.color = annotation.color;
-					dialog.font = annotation.font;
-					dialog.show();
+				const result = await DialogManager.showStyleDialog({
+					title: t('dialog.style_annotation.title'),
+					text: annotation.text,
+					color: annotation.color,
+					font: annotation.font,
 				});
+				if (result != null) {
+					undoStack.commit(
+						'annotation.set',
+						{annotation, newProperties: result},
+						t('action.annotation.change_text_and_style.undo'),
+					);
+				}
 			},
 		};
 
@@ -1304,30 +1318,34 @@ const contextMenu = {
 		{
 			text: 'action.divider.resize.name',
 			id: 'divider_resize_cmenu',
-			cb(selectedItem: LookupItem) {
+			async cb(selectedItem: LookupItem) {
 				const divider = store.get.divider(selectedItem);
 				const bbox = _.geom.bbox([divider.p1, divider.p2]);
 				// TODO: store divider orientation in divider itself
 				const originalSize = (bbox.height === 0) ? bbox.width : bbox.height;
 
-				DialogManager('numberChooserDialog', dialog => {
-					dialog.$on('update', newValue => {
-						store.mutations.divider.setLength({divider, newLength: newValue});
-						UiOps.drawCurrentPage();
-					});
-					dialog.$on('ok', () => {
-						undoStack.commit('', null, t('action.divider.resize.undo'));
-					});
-					dialog.$on('cancel', () => {
-						store.mutations.divider.setLength({divider, newLength: originalSize});
-						UiOps.drawCurrentPage();
-					});
-					dialog.title = t('dialog.resize_page_divider.title');
-					dialog.min = 1;
-					dialog.max = 10000;
-					dialog.step = 1;
-					dialog.value = originalSize;
-				});
+				const newValue = await DialogManager.showNumberChooserDialog(
+					{
+						title: t('dialog.resize_page_divider.title'),
+						initialValue: originalSize,
+						min: 1,
+						max: 10000,
+						step: 1,
+					},
+					{
+						onUpdate: updateValue => {
+							store.mutations.divider.setLength({divider, newLength: updateValue});
+							UiOps.drawCurrentPage();
+						},
+						onCancel: () => {
+							store.mutations.divider.setLength({divider, newLength: originalSize});
+							UiOps.drawCurrentPage();
+						},
+					},
+				);
+				if (newValue != null) {
+					undoStack.commit('', null, t('action.divider.resize.undo'));
+				}
 			},
 		},
 		{
@@ -1418,7 +1436,7 @@ const contextMenu = {
 				}
 				return false;
 			},
-			cb(selectedItem: LookupItem) {
+			async cb(selectedItem: LookupItem) {
 				if (!isItemSpecificType(selectedItem, 'part')) {
 					return;
 				}
@@ -1440,23 +1458,25 @@ const contextMenu = {
 				const originalDisplacement = _.clone(displacement);
 
 				SelectionOps.clearSelected();
-				DialogManager('displacePartDialog', dialog => {
-					dialog.$on('ok', () => {
-						undoStack.commit('part.displace', {step, ...displacement},
-							t('action.part.adjust_displacement.undo'));
-					});
-					dialog.$on('cancel', () => {
-						Object.assign(match, originalDisplacement);
-						csi.isDirty = true;
-						UiOps.redrawUI(true);
-					});
-					dialog.$on('update', newValues => {
-						Object.assign(match, newValues);
-						csi.isDirty = true;
-						UiOps.redrawUI(true);
-					});
-					dialog.values = {...displacement};
-				});
+				const finalValues = await DialogManager.showDisplacePartDialog(
+					{initialValues: displacement},
+					{
+						onUpdate: newValues => {
+							Object.assign(match, newValues);
+							csi.isDirty = true;
+							UiOps.redrawUI(true);
+						},
+						onCancel: () => {
+							Object.assign(match, originalDisplacement);
+							csi.isDirty = true;
+							UiOps.redrawUI(true);
+						},
+					},
+				);
+				if (finalValues != null) {
+					undoStack.commit('part.displace', {step, ...finalValues},
+						t('action.part.adjust_displacement.undo'));
+				}
 			},
 		},
 		{
@@ -1622,7 +1642,7 @@ const contextMenu = {
 				{
 					text: 'action.part.change_part.position_and_rotation.name',
 					id: 'part_change_pos_cmenu',
-					cb(selectedItem: LookupItem) {
+					async cb(selectedItem: LookupItem) {
 						if (!isItemSpecificType(selectedItem, 'part')) {
 							return;
 						}
@@ -1634,117 +1654,114 @@ const contextMenu = {
 						const part = LDParse.model.get.partFromID(selectedItem.id, step.model.filename);
 						const originalMatrix = _.cloneDeep(part.matrix);
 						const transform = LicGL.decomposeLDMatrix(part.matrix);
-						DialogManager('transformPartDialog', dialog => {
-							dialog.$on('update', newTransform => {
-								part.matrix = LicGL.composeLDMatrix(newTransform);
-								csi.isDirty = true;
-								UiOps.redrawUI(true);
+						const result = await DialogManager.showTransformPartDialog(
+							{rotation: transform.rotation, position: transform.position},
+							{
+								onUpdate: newTransform => {
+									part.matrix = LicGL.composeLDMatrix(newTransform);
+									csi.isDirty = true;
+									UiOps.redrawUI(true);
+								},
+								onCancel: () => {
+									part.matrix = originalMatrix;
+									csi.isDirty = true;
+									UiOps.redrawUI(true);
+								},
+							},
+						);
+						if (result != null) {
+							part.matrix = originalMatrix;
+							const matrix = LicGL.composeLDMatrix(result);
+							const action = LDParse.getAction.matrix({
+								filename: step.model.filename,
+								partID: selectedItem.id,
+								matrix,
 							});
-							dialog.$on('ok', newTransform => {
-								part.matrix = originalMatrix;
-								const matrix = LicGL.composeLDMatrix(newTransform);
-								const action = LDParse.getAction.matrix({
-									filename: step.model.filename,
-									partID: selectedItem.id,
-									matrix,
-								});
-								const page = store.get.pageForItem(step);
-								const mutation = {mutation: 'page.layout', opts: {page}};
-								undoStack.commit(
-									[action, mutation],
-									null,
-									t('action.part.change_part.position_and_rotation.undo'),
-									['csi'],
-								);
-							});
-							dialog.$on('cancel', () => {
-								part.matrix = originalMatrix;
-								csi.isDirty = true;
-								UiOps.redrawUI(true);
-							});
-							dialog.rotation = transform.rotation;
-							dialog.position = transform.position;
-						});
+							const page = store.get.pageForItem(step);
+							undoStack.commit(
+								[action, {mutation: 'page.layout', opts: {page}}],
+								null,
+								t('action.part.change_part.position_and_rotation.undo'),
+								['csi'],
+							);
+						}
 					},
 				},
 				{
 					text: 'action.part.change_part.color.name',
 					id: 'part_change_color_cmenu',
-					cb(selectedItem: LookupItem) {
-						DialogManager('ldColorPickerDialog', dialog => {
-							dialog.$on('ok', newColorCode => {
-								if (!isItemSpecificType(selectedItem, 'part')) {
-									return;
-								}
-								const step = store.get.step({type: 'step', id: selectedItem.stepID});
-								const pli = {type: 'pli', id: step.pliID};
-								const action = LDParse.getAction.partColor({
-									filename: step.model.filename,
-									partID: selectedItem.id,
-									color: newColorCode,
-								});
-								const change = [
-									action,
-									{mutation: 'pli.syncContent', opts: {pli, doLayout: true}},
-								];
-								if (store.get.inventoryPages().length) {
-									const part = store.get.part(selectedItem.id, step);
-									change.push({mutation: 'inventoryPage.removePart', opts: {
-										filename: part.filename,
-										colorCode: part.colorCode,
-										doLayout: false,
-									}});
-									change.push({mutation: 'inventoryPage.addPart', opts: {
-										filename: part.filename,
-										colorCode: newColorCode,
-										doLayout: true,
-									}});
-								}
-								undoStack.commit(
-									change,
-									null,
-									t('dialog.ld_color_picker.action'),
-									['csi', 'pliItem'],
-								);
-							});
+					async cb(selectedItem: LookupItem) {
+						const newColorCode = await DialogManager.showLdColorPickerDialog();
+						if (newColorCode == null || !isItemSpecificType(selectedItem, 'part')) {
+							return;
+						}
+						const step = store.get.step({type: 'step', id: selectedItem.stepID});
+						const pli = {type: 'pli', id: step.pliID};
+						const action = LDParse.getAction.partColor({
+							filename: step.model.filename,
+							partID: selectedItem.id,
+							color: newColorCode,
 						});
+						const change = [
+							action,
+							{mutation: 'pli.syncContent', opts: {pli, doLayout: true}},
+						];
+						if (store.get.inventoryPages().length) {
+							const part = store.get.part(selectedItem.id, step);
+							change.push({mutation: 'inventoryPage.removePart', opts: {
+								filename: part.filename,
+								colorCode: part.colorCode,
+								doLayout: false,
+							}});
+							change.push({mutation: 'inventoryPage.addPart', opts: {
+								filename: part.filename,
+								colorCode: newColorCode,
+								doLayout: true,
+							}});
+						}
+						undoStack.commit(
+							change,
+							null,
+							t('dialog.ld_color_picker.action'),
+							['csi', 'pliItem'],
+						);
 					},
 				},
 				{
 					text: 'action.part.change_part.to_different_part.name',
 					id: 'part_change_part_cmenu',
-					cb(selectedItem: LookupItem) {
+					async cb(selectedItem: LookupItem) {
 						if (!isItemSpecificType(selectedItem, 'part')) {
 							return;
 						}
-						DialogManager('stringChooserDialog', dialog => {
-							dialog.$on('ok', filename => {
-								(LDParse.loadRemotePart(filename)).then((abstractPart: AbstractPart) => {
-									if (!abstractPart) {
-										return;
-									}
-									store.mutations.csi.markAllDirty();
-									const step = store.get.step(selectedItem.stepID);
-									const pli = {type: 'pli', id: step.pliID};
-									const newFilename = abstractPart.filename;
-									const change = [
-										LDParse.getAction.filename({
-											filename: step.model.filename,
-											partID: selectedItem.id,
-											newFilename,
-										}),
-										{mutation: 'pli.syncContent', opts: {pli, doLayout: true}},
-									];
-									undoStack.commit(
-										change, null,
-										t('action.part.change_part.to_different_part.undo'),
-										['csi'],
-									);
-								});
-							});
-							dialog.title = t('dialog.change_part.title');
-							dialog.label = t('dialog.change_part.label');
+						const filename = await DialogManager.showStringChooserDialog({
+							title: t('dialog.change_part.title'),
+							label: t('dialog.change_part.label'),
 						});
+						if (filename == null) {
+							return;
+						}
+						const abstractPart = await LDParse.loadRemotePart(filename);
+						if (!abstractPart) {
+							return;
+						}
+						store.mutations.csi.markAllDirty();
+						const step = store.get.step(selectedItem.stepID);
+						const pli = {type: 'pli', id: step.pliID};
+						const newFilename = abstractPart.filename;
+						const change = [
+							LDParse.getAction.filename({
+								filename: step.model.filename,
+								partID: selectedItem.id,
+								newFilename,
+							}),
+							{mutation: 'pli.syncContent', opts: {pli, doLayout: true}},
+						];
+						undoStack.commit(
+							change, null,
+							t('action.part.change_part.to_different_part.undo'),
+							['csi'],
+						);
 					},
 				},
 				{

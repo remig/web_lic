@@ -46,7 +46,7 @@
 			</div>
 		</div>
 		<template #footer>
-			<LicButton type="cancel" @click="emit('close')" />
+			<LicButton type="cancel" @click="emit('cancel')" />
 			<LicButton type="ok" @click="ok" />
 		</template>
 	</LicDialog>
@@ -61,9 +61,15 @@ import LicButton from '@/components/base/LicButton.vue';
 import _ from '../util';
 import uiState from '../ui_state';
 
-const emit = defineEmits(['ok', 'close']);
+interface PngExportResult {
+	scale: number;
+	dpi: number;
+}
 
-const pageSize = ref({width: 0, height: 0});
+const props = defineProps<{pageSizeInPixels: {width: number; height: number}}>();
+const emit = defineEmits<{(e: 'ok', v: PngExportResult): void; (e: 'cancel'): void}>();
+
+const pageSize = ref(_.clone(props.pageSizeInPixels));
 const scale = ref(uiState.get('dialog.export.images.scale'));
 const dpi = ref(uiState.get('dialog.export.images.dpi') || 96);
 const maintainPrintSize = ref(uiState.get('dialog.export.images.maintainPrintSize'));
@@ -88,10 +94,6 @@ const scaledPrintSize = computed(() => {
 	};
 });
 
-function show(newPageSize: {width: number; height: number}) {
-	pageSize.value = _.clone(newPageSize);
-}
-
 function updateScale() {
 	if (maintainPrintSize.value) {
 		dpi.value = 96 * scale.value;
@@ -109,9 +111,6 @@ function ok() {
 	uiState.get('dialog.export.images').dpi = dpi.value;
 	uiState.get('dialog.export.images').maintainPrintSize = maintainPrintSize.value;
 	emit('ok', {scale: scale.value, dpi: dpi.value});
-	emit('close');
 }
-
-defineExpose({show});
 
 </script>

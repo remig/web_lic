@@ -52,7 +52,7 @@ import _ from '../util';
 import LDParse from '../ld_parse';
 import openFileHandler from '../file_uploader';
 
-const emit = defineEmits(['close']);
+const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 
 type PartEntry = {uploaded: boolean; count: number};
 type MissingPartsData = Record<string, PartEntry>;
@@ -92,7 +92,7 @@ function ok() {
 	if (stillHaveMissingParts.value) {
 		LDParse.model.removeMissingParts();
 	}
-	emit('close');
+	emit('ok');
 }
 
 function upload(filename: string) {

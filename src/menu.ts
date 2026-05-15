@@ -8,10 +8,10 @@ import InstructionExporter from './export';
 import store from './store';
 import undoStack from './undo_stack';
 import Storage from './storage';
+import * as DialogManager from './dialog';
 import * as translate from '@/translations';
 import {t} from '@/translations';
 import uiState from './ui_state';
-import DialogManager from './dialog';
 import type {Orientations} from './item_types';
 import EventBus from './event_bus';
 
@@ -266,17 +266,16 @@ const menu = [
 			text: 'action.edit.multi_book.name',
 			id: 'multi_book_menu',
 			shown: enableIfModel,
-			cb() {
-				DialogManager('multiBookDialog', dialog => {
-					dialog.$on('ok', (opts: any) => {
-						undoStack.commit(
-							'book.divideInstructions',
-							opts,
-							t('action.edit.multi_book.undo'),
-						);
-						SelectionOps.setCurrentPage(store.get.firstPage());
-					});
-				});
+			async cb() {
+				const opts = await DialogManager.showMultiBookDialog();
+				if (opts != null) {
+					undoStack.commit(
+						'book.divideInstructions',
+						opts,
+						t('action.edit.multi_book.undo'),
+					);
+					SelectionOps.setCurrentPage(store.get.firstPage());
+				}
 			},
 		},
 		{text: 'action.edit.snap.name', id: 'edit_snap_menu', enabled: () => false, cb() {}},
@@ -284,12 +283,12 @@ const menu = [
 			text: 'action.edit.scene_rendering.name',
 			id: 'scene_rendering_menu',
 			shown: enableIfModel,
-			cb: () => DialogManager('sceneRenderingDialog'),
+			cb: DialogManager.showSceneRenderingDialog,
 		},
 		{
 			text: 'action.edit.brick_colors.name',
 			id: 'edit_brick_colors_menu',
-			cb: () => DialogManager('brickColorDialog'),
+			cb: DialogManager.showBrickColorDialog,
 		},
 	]},
 	{text: 'action.view.name', id: 'view_menu', children: [
@@ -350,11 +349,7 @@ const menu = [
 				{
 					text: 'action.view.grid.customize.name',
 					id: 'customize_grid_menu',
-					cb() {
-						DialogManager('gridDialog', dialog => {
-							dialog.show();
-						});
-					},
+					cb: DialogManager.showGridDialog,
 				},
 			],
 		},
@@ -392,13 +387,12 @@ const menu = [
 			text: 'action.export.hi_res_pdf.name',
 			id: 'export_hi_pdf_menu',
 			enabled: enableIfModel,
-			cb() {
-				DialogManager('pdfExportDialog', dialog => {
-					dialog.$on('ok', (newValues: any) => {
-						InstructionExporter.generatePDF(store, newValues);
-					});
-					dialog.show(store.state.template.page);
-				});
+			async cb() {
+				const result =
+					await DialogManager.showPdfExportDialog({pageSizeInPixels: store.state.template.page});
+				if (result != null) {
+					InstructionExporter.generatePDF(store, result);
+				}
 			},
 		},
 		{
@@ -411,14 +405,12 @@ const menu = [
 			text: 'action.export.hi_res_png.name',
 			id: 'export_hi_png_menu',
 			enabled: enableIfModel,
-			cb() {
-				DialogManager('pngExportDialog', dialog => {
-					dialog.$on('ok', (newValues: any) => {
-						InstructionExporter.generatePNGZip(store, newValues.scale, newValues.dpi);
-					});
-					const pageSize = store.state.template.page;
-					dialog.show({width: pageSize.width, height: pageSize.height});
-				});
+			async cb() {
+				const result =
+					await DialogManager.showPngExportDialog({pageSizeInPixels: store.state.template.page});
+				if (result != null) {
+					InstructionExporter.generatePNGZip(store, result.scale, result.dpi);
+				}
 			},
 		},
 	]},

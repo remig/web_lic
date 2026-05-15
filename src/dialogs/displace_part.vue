@@ -49,16 +49,18 @@ import {t} from '@/translations';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 
-const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+interface DisplacePartValues {
+	partDistance: number;
+	arrowOffset: number;
+	arrowLength: number;
+	arrowRotation: number;
+}
 
-const values = ref({
-	partDistance: 0,
-	arrowOffset: 0,
-	arrowLength: 0,
-	arrowRotation: 0,
-});
+const props = defineProps<{initialValues: DisplacePartValues}>();
+// eslint-disable-next-line max-len
+const emit = defineEmits<{(e: 'update', vals: DisplacePartValues): void; (e: 'ok', vals: DisplacePartValues): void; (e: 'cancel'): void}>();
 
-defineExpose({values});
+const values = ref({...props.initialValues});
 
 function updateValues() {
 	emit('update', {...values.value});
@@ -66,12 +68,10 @@ function updateValues() {
 
 function ok() {
 	emit('ok', {...values.value});
-	emit('close');
 }
 
 function cancel() {
-	emit('cancel', {...values.value});
-	emit('close');
+	emit('cancel');
 }
 
 </script>

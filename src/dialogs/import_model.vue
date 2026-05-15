@@ -66,10 +66,19 @@ import LicButton from '@/components/base/LicButton.vue';
 import LicDropdown from '@/components/base/LicDropdown.vue';
 import uiState from '@/ui_state';
 
-const emit = defineEmits(['ok', 'close']);
+interface ImportModelResult {
+	partsPerStep: number | null;
+	stepsPerPage: number;
+	useMaxSteps: boolean;
+	include: {pli: boolean; partListPage: boolean; titlePage: boolean};
+}
 
-const includePartsPerStep = ref(false);
+const props = defineProps<{includePartsPerStep: boolean; partsPerStep: number | null}>();
+const emit = defineEmits<{(e: 'ok', v: ImportModelResult): void; (e: 'cancel'): void}>();
+
+const includePartsPerStep = ref(props.includePartsPerStep);
 const newState = ref(uiState.get('dialog.importModel'));
+newState.value.partsPerStep = props.partsPerStep;
 
 function checkIncludeItem(item: string | number) {
 	const key = String(item);
@@ -78,10 +87,7 @@ function checkIncludeItem(item: string | number) {
 
 function ok() {
 	emit('ok', newState.value);
-	emit('close');
 }
-
-defineExpose({includePartsPerStep, newState});
 
 </script>
 

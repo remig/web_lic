@@ -44,7 +44,7 @@
 				</ul>
 			</li>
 			<li class="list-group-item">
-				<a class="lineLink" data-testid="get-started-learn" @click.prevent="showAbout">
+				<a class="lineLink" data-testid="get-started-learn" @click.prevent="showAboutLicDialog">
 					<i class="fas fa-question-circle fa-2x fa-pull-left" />
 					{{t('dialog.welcome.learn')}}
 				</a>
@@ -56,7 +56,7 @@
 <script setup lang="ts">
 
 import {t} from '@/translations';
-import DialogManager from '../dialog';
+import {showAboutLicDialog} from '../dialog';
 import * as FileOps from '../file_ops';
 
 const demoModels = [
@@ -64,10 +64,6 @@ const demoModels = [
 	{id: 'alligator', fn: '20015 - Alligator.mpd'},
 	{id: 'xwing', fn: '7140 - X-Wing Fighter.mpd'},
 ];
-
-function showAbout() {
-	DialogManager('aboutLicDialog');
-}
 
 function hideMessage() {
 	document.querySelector('.gettingStarted')?.classList.add('hidden');

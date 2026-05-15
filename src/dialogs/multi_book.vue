@@ -157,7 +157,15 @@ import _ from '../util';
 import store from '../store';
 import uiState from '../ui_state';
 
-const emit = defineEmits(['ok', 'cancel', 'close']);
+interface MultiBookResult {
+	bookDivisions: any[];
+	includeTitlePages: boolean;
+	noSplitSubmodels: boolean;
+	firstPageNumber: string;
+	fileSplit: string;
+}
+
+const emit = defineEmits<{(e: 'ok', v: MultiBookResult): void; (e: 'cancel'): void}>();
 
 function pageSpreadToStepSpread(pageSpread: {start: number; end: number}) {
 	if (pageSpread.start === pageSpread.end) {
@@ -322,52 +330,52 @@ function ok() {
 		firstPageNumber: firstPageNumber.value,
 		fileSplit: fileSplit.value,
 	});
-	emit('close');
 }
 
 function cancel() {
 	emit('cancel');
-	emit('close');
 }
 
 </script>
 
 <style>
 
-.multiBookDialog .body > div {
-	display: inline-block;
-	margin: 12px;
-	width: 100%;
-}
+.multiBookDialog {
+	.body > div {
+		display: inline-block;
+		margin: 12px;
+		width: 100%;
+	}
 
-.multiBookDialog input {
-	display: inline-block;
-	width: 75px;
-	height: 30px;
-	margin-left: 10px;
-}
+	input {
+		display: inline-block;
+		width: 75px;
+		height: 30px;
+		margin-left: 10px;
+	}
 
-.multiBookDialog .book-split-table {
-	width: 100%;
-	text-align: center;
-}
+	.book-split-table {
+		width: 100%;
+		text-align: center;
+	}
 
-.multiBookDialog th {
-	text-align: center;
-}
+	th {
+		text-align: center;
+	}
 
-.multiBookDialog .page-number-input {
-	margin-left: 0;
-	width: 56px;
-	padding: 6px;
-}
+	.page-number-input {
+		margin-left: 0;
+		width: 56px;
+		padding: 6px;
+	}
 
-.multiBookDialog .form-row {
-	max-width: 400px;
-}
+	.form-row {
+		max-width: 400px;
+	}
 
-.multiBookDialog .check-row {
-	margin-bottom: 10px;
+	.check-row {
+		margin-bottom: 10px;
+	}
 }
 
 </style>

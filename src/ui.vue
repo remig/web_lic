@@ -47,8 +47,6 @@
 			:selected-item="selectedItemLookup"
 		/>
 
-		<dialog-manager />
-
 		<div v-cloak id="statusBar">
 			{{statusText}}
 		</div>
@@ -89,7 +87,7 @@
 import Split from 'split.js';
 
 import _ from './util';
-import {t} from './translations';
+import {t, getLocale, LanguageList} from './translations';
 import * as ReactiveState from './ui_reactive_state';
 import * as FileOps from './file_ops';
 import * as SelectionOps from './selection_ops';
@@ -100,9 +98,8 @@ import undoStack from './undo_stack';
 import LDParse from './ld_parse';
 import Menu from './menu';
 import Storage from './storage';
-import LocaleManager from './components/translate.vue';
 import packageInfo from '../package.json';
-import DialogManager from './dialog';
+import {showLocaleChooserDialog, showWhatsNewDialog} from './dialog';
 import NavBar from './components/nav_bar.vue';
 import NavTreeContainer from './components/nav_tree_container.vue';
 import PopupMenu from './components/popup_menu.vue';
@@ -129,11 +126,7 @@ const UI = {
 			EventBus.emit('key-press', {key: e.key});
 
 			const selItem = this.selectedItemLookup;
-			if (e.key === 'Enter') {
-				DialogManager.ok();
-			} else if (e.key === 'Escape') {
-				DialogManager.cancel();
-			} else if (e.key === 'Delete' || e.key === 'Backspace') {
+			if (e.key === 'Delete' || e.key === 'Backspace') {
 				if (selItem
 					&& !store.get.isTemplatePage(store.get.pageForItem(selItem))
 					&& store.mutations[selItem.type]
@@ -334,10 +327,12 @@ const UI = {
 		});
 
 		if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
-			await DialogManager('whatsNewDialog');
+			await showWhatsNewDialog();
 		}
 
-		await LocaleManager.pickLanguage();
+		if (getLocale() == null && LanguageList.length >= 2) {
+			await showLocaleChooserDialog();
+		}
 
 		LDParse.setCustomColorTable(Storage.get.customBrickColors());
 

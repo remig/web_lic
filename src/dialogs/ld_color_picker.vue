@@ -33,7 +33,7 @@
 			</table>
 		</div>
 		<template #footer>
-			<LicButton type="cancel" @click="emit('close')" />
+			<LicButton type="cancel" @click="emit('cancel')" />
 		</template>
 	</LicDialog>
 </template>
@@ -48,7 +48,7 @@ import _ from '../util';
 import LDParse from '../ld_parse';
 import Storage from '../storage';
 
-const emit = defineEmits(['ok', 'close']);
+const emit = defineEmits<{(e: 'ok', colorCode: number): void; (e: 'cancel'): void}>();
 
 const customColors = Storage.get.customBrickColors();
 
@@ -74,7 +74,6 @@ const colorData = ref(buildColorTable());
 
 function pick(colorCode: number) {
 	emit('ok', colorCode);
-	emit('close');
 }
 
 </script>

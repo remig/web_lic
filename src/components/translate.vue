@@ -17,47 +17,27 @@
 	</LicDialog>
 </template>
 
-<script lang="ts">
-
-import * as translate from '../translations';
-import DialogManager from '../dialog';
-import EventBus from '../event_bus';
-
-async function pickLanguage() {
-	const currentLocale = translate.getLocale();
-	if (currentLocale != null || translate.LanguageList.length < 2) {
-		if (currentLocale != null) {
-			EventBus.emit('redraw-ui', {});
-		}
-	} else {
-		await DialogManager('localeChooserDialog');
-	}
-}
-
-export default {pickLanguage};
-
-</script>
-
 <script setup lang="ts">
 
 import {ref} from 'vue';
-import {t} from '../translations';
+import {t, setLocale, LanguageList} from '../translations';
+import EventBus from '../event_bus';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 import LicSelect from '@/components/base/LicSelect.vue';
 
-const emit = defineEmits(['close']);
+const emit = defineEmits<{(e: 'ok'): void}>();
 
 const chosenLocaleCode = ref('en');
-const localeOptions = translate.LanguageList.map(item => ({value: item.code, label: item.language}));
+const localeOptions = LanguageList.map(item => ({value: item.code, label: item.language}));
 
 function ok() {
-	translate.setLocale(chosenLocaleCode.value);
-	emit('close');
+	setLocale(chosenLocaleCode.value);
+	emit('ok');
 }
 
 function changeLanguage() {
-	translate.setLocale(chosenLocaleCode.value);
+	setLocale(chosenLocaleCode.value);
 	EventBus.emit('redraw-ui', {});
 }
 

@@ -4,6 +4,7 @@
 	<LicDialog
 		:title="t('dialog.resize_image.title')"
 		width="500px"
+		class="resizeImageDialog"
 	>
 		<div>{{bodyText}}</div>
 		<div v-if="imageInfo.dpi > 96">
@@ -69,7 +70,6 @@ import {ref, computed} from 'vue';
 import {t} from '@/translations';
 import {type Anchors} from '@/item_types';
 import _ from '../util';
-import store from '../store';
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
 
@@ -97,21 +97,29 @@ const anchorPositions: {value: Anchors; label: string}[] = [
 	{value: 'bottom_right', label: t('dialog.resize_image.anchors.bottom_right')},
 ] as const;
 
-const page = store.state.template.page;
-const imageInfo = ref({
-	filename: '',
-	src: null as string | null,
-	width: 0, originalWidth: 0,
-	height: 0, originalHeight: 0,
-	x: 0, y: 0, dpi: 0,
-	preserveSize: true,
-	preserveAspectRatio: true,
-	anchorPosition: 'top_left' as Anchors,
-	pageWidth: page.width,
-	pageHeight: page.height,
-});
+interface ResizeImageInfo {
+	filename: string;
+	src: string | null;
+	width: number;
+	originalWidth: number;
+	height: number;
+	originalHeight: number;
+	x: number;
+	y: number;
+	dpi: number;
+	preserveSize: boolean;
+	preserveAspectRatio: boolean;
+	anchorPosition: Anchors;
+	pageWidth: number;
+	pageHeight: number;
+}
 
-const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+const props = defineProps<{initialImageInfo: ResizeImageInfo}>();
+// eslint-disable-next-line max-len
+const emit = defineEmits<{(e: 'update', v: ResizeImageInfo): void; (e: 'ok', v: ResizeImageInfo): void; (e: 'cancel'): void}>();
+
+const imageInfo = ref({...props.initialImageInfo});
+updateImageInfo();
 
 const aspectRatiosMatch = computed(() => {
 	const info = imageInfo.value;
@@ -199,23 +207,21 @@ function updateValues() {
 function ok() {
 	updateImageInfo();
 	emit('ok', _.clone(imageInfo.value));
-	emit('close');
 }
 
 function cancel() {
 	emit('cancel');
-	emit('close');
 }
-
-defineExpose({imageInfo, updateImageInfo});
 
 </script>
 
 <style>
 
-.body > div {
-	display: inline-block;
-	margin: 10px;
+.resizeImageDialog {
+	.body > div {
+		display: inline-block;
+		margin: 10px;
+	}
 }
 
 .anchor-grid {
@@ -234,15 +240,15 @@ defineExpose({imageInfo, updateImageInfo});
 	border-bottom: 1px solid #c7c7c7;
 	color: #606266;
 	font-size: 13px;
-}
 
-.anchor-cell:hover {
-	color: #409eff;
-}
+	&:hover {
+		color: #409eff;
+	}
 
-.anchor-cell.selected {
-	background: #409eff;
-	color: #fff;
+	&.selected {
+		background: #409eff;
+		color: #fff;
+	}
 }
 
 </style>

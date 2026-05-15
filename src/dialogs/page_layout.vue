@@ -74,14 +74,16 @@ import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
 import {type GridLayout, type Orientations} from '../item_types';
 
-const emit = defineEmits(['update', 'ok', 'cancel', 'close']);
+const props = defineProps<{initialLayout: GridLayout}>();
+// eslint-disable-next-line max-len
+const emit = defineEmits<{(e: 'update', v: GridLayout): void; (e: 'ok', v: GridLayout): void; (e: 'cancel'): void}>();
 
-const autoRows = ref(true);
-const autoCols = ref(true);
-const values = reactive<GridLayout>({
-	rows: 0,
-	cols: 0,
-	direction: 'vertical',
+const autoRows = ref(props.initialLayout.rows === 'auto');
+const autoCols = ref(props.initialLayout.cols === 'auto');
+const values = reactive({
+	rows: props.initialLayout.rows === 'auto' ? 1 : props.initialLayout.rows as number,
+	cols: props.initialLayout.cols === 'auto' ? 1 : props.initialLayout.cols as number,
+	direction: props.initialLayout.direction,
 });
 
 const actualValues = computed<GridLayout>(() => ({
@@ -89,21 +91,6 @@ const actualValues = computed<GridLayout>(() => ({
 	cols: autoCols.value ? 'auto' : values.cols,
 	direction: values.direction,
 }));
-
-function show() {
-	if (values.rows === 'auto') {
-		values.rows = 1;
-		autoRows.value = true;
-	} else {
-		autoRows.value = false;
-	}
-	if (values.cols === 'auto') {
-		values.cols = 1;
-		autoCols.value = true;
-	} else {
-		autoCols.value = false;
-	}
-}
 
 function setDirection(dir: Orientations) {
 	values.direction = dir;
@@ -116,15 +103,11 @@ function updateValues() {
 
 function ok() {
 	emit('ok', actualValues.value);
-	emit('close');
 }
 
 function cancel() {
-	emit('cancel', actualValues.value);
-	emit('close');
+	emit('cancel');
 }
-
-defineExpose({autoRows, autoCols, values, show});
 
 </script>
 

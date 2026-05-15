@@ -46,7 +46,7 @@
 			</div>
 		</div>
 		<template #footer>
-			<LicButton type="cancel" @click="emit('close')" />
+			<LicButton type="cancel" @click="emit('cancel')" />
 			<LicButton type="ok" @click="ok" />
 		</template>
 	</LicDialog>
@@ -62,27 +62,22 @@ import LicColorPicker from '@/components/base/LicColorPicker.vue';
 import LicSelectFontName from '@/components/base/LicSelectFontName.vue';
 import _ from '../util';
 
-const emit = defineEmits(['ok', 'close']);
-
-const title = ref(t('dialog.style.title'));
-const text = ref('');
-const color = ref('');
-const font = ref('');
-const family = ref('');
-const size = ref(0);
-const bold = ref(false);
-const italic = ref(false);
-const underline = ref(false);
-
-function show() {
-	color.value = _.color.toRGB(color.value).toString();
-	const fontParts = _.fontToFontParts(font.value);
-	family.value = fontParts.fontFamily ?? '';
-	size.value = parseInt(fontParts.fontSize ?? '0', 10);
-	bold.value = fontParts.fontWeight === 'bold';
-	italic.value = fontParts.fontStyle === 'italic';
-	underline.value = false;
+interface StyleResult {
+	text: string;
+	font: string;
+	color: string;
 }
+
+const props = defineProps<{title: string; text: string; color: string; font: string}>();
+const emit = defineEmits<{(e: 'ok', v: StyleResult): void; (e: 'cancel'): void}>();
+
+const fontParts = _.fontToFontParts(props.font);
+const text = ref(props.text);
+const color = ref(_.color.toRGB(props.color).toString());
+const family = ref(fontParts.fontFamily ?? '');
+const size = ref(parseInt(fontParts.fontSize ?? '0', 10));
+const bold = ref(fontParts.fontWeight === 'bold');
+const italic = ref(fontParts.fontStyle === 'italic');
 
 function ok() {
 	emit('ok', {
@@ -95,17 +90,16 @@ function ok() {
 		}) ?? '',
 		color: color.value,
 	});
-	emit('close');
 }
-
-defineExpose({title, text, color, font, show});
 
 </script>
 
 <style>
 
-.styleDialog .size-input {
-	width: 75px;
+.styleDialog {
+	.size-input {
+		width: 75px;
+	}
 }
 
 </style>

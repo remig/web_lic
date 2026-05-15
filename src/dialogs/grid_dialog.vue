@@ -111,21 +111,14 @@ import undoStack from '../undo_stack';
 import uiState from '../ui_state';
 import * as UiOps from '../ui_ops';
 
-const emit = defineEmits(['close']);
+const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 
-const useAutoColor = ref(true);
-const lineColor = ref('');
-const newState = ref(uiState.get('grid'));
-let originalState: any = null;
-
-function show() {
-	const grid = uiState.get('grid');
-	const color = grid.line.color;
-	useAutoColor.value = (color === 'auto');
-	lineColor.value = (color === 'auto') ? 'rgb(0, 0, 0)' : _.color.toRGB(color).toString();
-	newState.value = _.cloneDeep(grid);
-	originalState = grid;
-}
+const grid = uiState.get('grid');
+const useAutoColor = ref(grid.line.color === 'auto');
+const autoLineColor = 'rgb(0, 0, 0)';
+const lineColor = ref(grid.line.color === 'auto' ? autoLineColor : _.color.toRGB(grid.line.color).toString());
+const newState = ref(_.cloneDeep(grid));
+const originalState = grid;
 
 function update() {
 	if (useAutoColor.value) {
@@ -154,17 +147,15 @@ function ok() {
 		undo.push(storeOp);
 	}
 	undoStack.commit({redo, undo}, null, 'Style Grid');
-	emit('close');
+	emit('ok');
 }
 
 function cancel() {
 	uiState.set('grid', originalState);
 	cache.set('uiState', 'gridPath', null);
 	UiOps.drawCurrentPage();
-	emit('close');
+	emit('cancel');
 }
-
-defineExpose({show});
 
 </script>
 
