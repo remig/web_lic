@@ -2,7 +2,10 @@ import js from '@eslint/js';
 import pluginVue from 'eslint-plugin-vue';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import { defineConfig } from "eslint/config";
+import fs from "fs";
 import globals from 'globals';
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 // @ts-ignore - no type declarations for this package
 import noOnlyTests from 'eslint-plugin-no-only-tests';
 
@@ -11,13 +14,13 @@ const projectRoot = new URL('.', import.meta.url).pathname;
 
 const tsSpecificRules = {
 	'@typescript-eslint/await-thenable': 'warn',
-	'@typescript-eslint/no-unused-vars': ['warn', {varsIgnorePattern: '^_', argsIgnorePattern: '^_'}],
+	'@typescript-eslint/no-unused-vars': ['warn', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
 	'@typescript-eslint/no-unused-expressions': 'warn',
 	'no-unused-vars': 'off',  // defer to @typescript-eslint/no-unused-vars for TS files
-} as const;
+};
 
 const vueSpecificRules = {
-	'vue/attribute-hyphenation': ['warn', 'always', {ignore: ['onSubmit']}],
+	'vue/attribute-hyphenation': ['warn', 'always', { ignore: ['onSubmit'] }],
 	'vue/no-v-html': 'off',
 	'vue/multi-word-component-names': 'off',
 	'vue/no-use-v-if-with-v-for': 'warn',
@@ -25,7 +28,15 @@ const vueSpecificRules = {
 	'vue/require-default-prop': 'off',
 } as const;
 
-export default [
+// Path & list of all folders in the code base, used to group codebase folder imports together & separate from 3rd party imports
+const srcPath = new URL('./src', import.meta.url).pathname;
+const baseFolders = fs
+	.readdirSync(srcPath, { withFileTypes: true })
+	.filter((dirent) => dirent.isDirectory())
+	.map(({ name }) => name)
+	.join("|");
+
+export default defineConfig([
 	{
 		ignores: [
 			'static/**', 'dist/**', 'test/**',
@@ -54,7 +65,7 @@ export default [
 			curly: 'error',
 			'default-case': 'off',
 			'dot-notation': 'error',
-			eqeqeq: ['error', 'always', {'null': 'never'}],
+			eqeqeq: ['error', 'always', { 'null': 'never' }],
 			'for-direction': 'error',
 			'guard-for-in': 'error',
 			'init-declarations': 'off',
@@ -120,7 +131,7 @@ export default [
 			'no-unreachable': 'warn',
 			'no-unused-expressions': 'off',
 			'no-unused-labels': 'warn',
-			'no-use-before-define': ['error', {functions: false}],
+			'no-use-before-define': ['error', { functions: false }],
 			'no-useless-call': 'error',
 			'no-useless-concat': 'error',
 			'no-useless-escape': 'error',
@@ -132,7 +143,7 @@ export default [
 			radix: 'error',
 		},
 	},
-	...pluginVue.configs['flat/essential'],
+	...pluginVue.configs['flat/essential'] as any,
 	// Vue-specific rules
 	{
 		files: ['**/*.vue'],
@@ -169,4 +180,26 @@ export default [
 		},
 		rules: tsSpecificRules,
 	},
-];
+	// Sort imports better than eslint's default import sorting
+	{
+		plugins: {
+			"simple-import-sort": simpleImportSort,
+		},
+		rules: {
+			"simple-import-sort/imports": [
+				"error",
+				{
+					groups: [
+						["^react$", "^"], // React imports, then anything not matched below (mainly external node_module imports)
+						[`^(${baseFolders})`], // all folders under 'src'
+						[".*components.*"], // custom internal components
+						[".*assets.*"], // custom internal assets
+						["^\\.", "^\\u0000"], // relative imports
+						[".*css"], // .css imports
+					],
+				},
+			],
+			"simple-import-sort/exports": "error",
+		},
+	},
+]);

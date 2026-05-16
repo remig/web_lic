@@ -1,0 +1,28 @@
+{
+	"compilerOptions": {
+		"target": "es2022",
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"lib": ["es2022"],
+		"types": ["node"],
+		"skipLibCheck": true,
+		"strict": true,
+		"alwaysStrict": true,
+		"noImplicitReturns": true,
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+		"strictBindCallApply": true,
+		"strictFunctionTypes": true,
+		"composite": true,
+		"tsBuildInfoFile": "./dist/.tsbuildinfo-node"
+	},
+	"include": [
+		"./eslint.config.ts",
+		"./vite.config.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}

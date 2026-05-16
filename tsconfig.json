@@ -1,34 +1,11 @@
 {
-	"compilerOptions": {
-		"outDir": "./dist",
-		"sourceMap": true,
-		"allowJs": true,
-		"target": "es6",
-		"module": "esnext",
-		"lib": ["dom", "es6", "es2019", "scripthost", "esnext", "dom.iterable"],
-		"isolatedModules": true,
-		"importHelpers": true,
-		"paths": {
-			"@/*": ["./src/*"]
+	"files": [],
+	"references": [
+		{
+			"path": "./tsconfig.app.json"
 		},
-		"moduleResolution": "bundler",
-		"resolveJsonModule": true,
-		"allowSyntheticDefaultImports": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"alwaysStrict": true,
-		"noImplicitReturns": true,
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"strictNullChecks": true,
-		"strictPropertyInitialization": true,
-		"strictBindCallApply": true,
-		"strictFunctionTypes": true,
-	},
-	"include": [
-		"./src/**/*"
-	],
-	"exclude": [
-		"node_modules"
+		{
+			"path": "./tsconfig.node.json"
+		}
 	]
 }
