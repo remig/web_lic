@@ -79,8 +79,8 @@ export interface Rotation {
 }
 
 export interface PLITransform {
-	rotation: Rotation[];
-	scale: number;
+	rotation?: Rotation[];
+	scale?: number;
 }
 
 export interface Alignment {

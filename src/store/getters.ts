@@ -652,10 +652,32 @@ export const Getters = {
 		const points = targetLookup.points
 			.map((pointID) => {
 				const pt = store.get.point(pointID);
-				return pt ? store.get.coords.pointToPage(pt.x, pt.y, pt.relativeTo || parent) : null;
+				if (!pt) {
+					return null;
+				}
+				let x = pt.x,
+					y = pt.y;
+				let t: any = store.get.lookupToItem(pt.relativeTo ?? parent);
+				while (t) {
+					if (t.innerContentOffset) {
+						x += t.innerContentOffset.x || 0;
+						y += t.innerContentOffset.y || 0;
+					}
+					x += t.x || 0;
+					y += t.y || 0;
+					t = store.get.parent(t);
+				}
+				return { x, y };
 			})
 			.filter((p): p is Types.Point => p != null);
-		return _.geom.expandBox(_.geom.bbox(points), 8, 8);
+		const bbox = _.geom.bbox(points);
+		const pad = 5;
+		return {
+			x: bbox.x - pad - 1,
+			y: bbox.y - pad - 1,
+			width: bbox.width + pad * 2,
+			height: bbox.height + pad * 2,
+		};
 	},
 	targetBox(targetLookup: Types.LookupItem): Types.Box {
 		let t: any = store.get.lookupToItem(targetLookup);

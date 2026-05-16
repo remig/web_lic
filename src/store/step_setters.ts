@@ -185,7 +185,7 @@ export const StepMutations = {
 				return false;
 			});
 		}
-		store.mutations.renumber(stepList);
+		store.mutations.renumber(stepList, 1);
 	},
 	renumberAll(): void {
 		// Renumber all base steps across all pages
@@ -196,7 +196,7 @@ export const StepMutations = {
 			}
 			return false;
 		});
-		store.mutations.renumber(stepList);
+		store.mutations.renumber(stepList, 1);
 	},
 	layout({ step, box }: { step: LookupItem; box: Box }): void {
 		const stepItem = store.get.step(step);

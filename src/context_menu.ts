@@ -965,7 +965,7 @@ const contextMenu = {
 			async cb(selectedItem: LookupItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				const originalRotation = store.get.pliTransform(filename).rotation;
+				const originalRotation = store.get.pliTransform(filename).rotation ?? null;
 				let initialRotation = originalRotation;
 				if (initialRotation == null) {
 					initialRotation = store.get.templateForItem(selectedItem).rotation;
@@ -975,7 +975,7 @@ const contextMenu = {
 				const result = await DialogManager.showRotatePartImageDialog(
 					{
 						title: t('dialog.rotate_part_image.title_pli'),
-						rotation: initialRotation,
+						rotation: initialRotation ?? null,
 						showRotateIconCheckbox: false,
 					},
 					{
@@ -1040,12 +1040,12 @@ const contextMenu = {
 			async cb(selectedItem: LookupItem) {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
-				const originalScale = store.get.pliTransform(filename).scale;
+				const originalScale = store.get.pliTransform(filename).scale ?? null;
 
 				const newValue = await DialogManager.showNumberChooserDialog(
 					{
 						title: t('dialog.scale_pli.title'),
-						initialValue: originalScale || 1,
+						initialValue: originalScale ?? 1,
 						min: 0,
 						max: clampScale.max,
 						step: 0.1,

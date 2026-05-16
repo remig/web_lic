@@ -19,7 +19,7 @@
 import { computed, onUnmounted, ref } from 'vue';
 import { ChromePicker } from 'vue-color';
 
-import 'vue-color/vue2/style.css';
+import 'vue-color/style.css';
 
 const POPUP_W = 225;
 const POPUP_H = 290;

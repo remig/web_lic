@@ -5,7 +5,6 @@ import { t } from '@/translations';
 import {
 	type Divider,
 	type LookupItem,
-	type PLITransform,
 	type Point,
 	type RotateIcon,
 	type Rotation,
@@ -144,10 +143,10 @@ export const Mutations = {
 		rotate(filename: string, rotation: Rotation[] | null): void {
 			let transform = store.state.pliTransforms[filename];
 			if (!transform) {
-				transform = store.state.pliTransforms[filename] = {} as PLITransform;
+				transform = store.state.pliTransforms[filename] = {};
 			}
 			if (_.isEmpty(rotation) || rotation == null) {
-				delete (transform as any).rotation;
+				delete transform.rotation;
 			} else {
 				transform.rotation = rotation.filter((el) => el.angle !== 0);
 			}
@@ -158,10 +157,10 @@ export const Mutations = {
 		scale(filename: string, scale: number | null): void {
 			let transform = store.state.pliTransforms[filename];
 			if (!transform) {
-				transform = store.state.pliTransforms[filename] = {} as PLITransform;
+				transform = store.state.pliTransforms[filename] = {};
 			}
-			if (_.isEmpty(scale) || scale == null || scale === 1) {
-				delete (transform as any).scale;
+			if (scale == null || scale === 1) {
+				delete transform.scale;
 			} else {
 				transform.scale = scale;
 			}
@@ -175,8 +174,10 @@ export const Mutations = {
 		itemList.forEach((el) => {
 			if (el && el.number != null) {
 				if (prevNumber == null) {
-					el.number = start;
-				} else if (prevNumber != null && prevNumber !== el.number - 1) {
+					if (start != null) {
+						el.number = start;
+					}
+				} else if (prevNumber !== el.number - 1) {
 					el.number = prevNumber + 1;
 				}
 				prevNumber = el.number;
