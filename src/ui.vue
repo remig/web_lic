@@ -28,7 +28,7 @@
 
 			<div id="rightPane" class="split split-horizontal">
 				<page-view />
-				<getting-started-panel v-if="!haveModel()" />
+				<getting-started-panel v-if="!haveModel() && !isTemplatePageCurrent" />
 				<template-panel
 					v-if="isTemplatePageCurrent"
 					id="templatePanelContainer"
@@ -302,6 +302,9 @@ onMounted(async () => {
 	const localModel = Storage.get.model();
 	if (!_.isEmpty(localModel)) {
 		FileOps.openLicFileFromContent(localModel);
+	} else {
+		await FileOps.ensureTemplatePage();
+		UiOps.forceUIUpdate();
 	}
 });
 

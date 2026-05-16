@@ -78,7 +78,7 @@ const menu = [
 				text: 'action.file.close.name',
 				id: 'close_menu',
 				enabled: enableIfModel,
-				cb: FileOps.closeModel,
+				cb: FileOps.closeModelAndReturnToStart,
 			},
 			{
 				text: 'action.file.save.name',
@@ -183,7 +183,7 @@ const menu = [
 				text: 'action.file.clear_cache.name',
 				id: 'clear_cache_menu',
 				cb() {
-					FileOps.closeModel();
+					FileOps.closeModelAndReturnToStart();
 					uiState.resetUIState();
 					Storage.clear.everything();
 					UiOps.redrawUI();

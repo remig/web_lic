@@ -244,7 +244,7 @@ function forceUpdate() {
 	}
 	pageLockStatus.value = [];
 	guides.value = uiState.get('guides');
-	if (latestPageCount > 0) {
+	if (store.state.pages.length > 0) {
 		store.state.pages.forEach((page: Page) => (pageLockStatus.value[page.id] = page.locked));
 		nextTick(() => {
 			drawVisiblePages();

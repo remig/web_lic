@@ -6,6 +6,7 @@ import backwardCompat from './backward_compat';
 import { showImportModelDialog, showMissingPartsDialog, showStringChooserDialog } from './dialog';
 import openFileHandler from './file_uploader';
 import LDParse from './ld_parse';
+import LDRender from './ld_render';
 import * as SelectionOps from './selection_ops';
 import Storage from './storage';
 import { store } from './store';
@@ -42,7 +43,7 @@ export async function importModel(modelGenerator: () => Promise<any>) {
 		await showMissingPartsDialog();
 	}
 
-	await store.mutations.templatePage.add();
+	await ensureTemplatePage();
 	store.setModel(model);
 	ReactiveState.filename.value = store.state.licFilename;
 	store.render.adjustCameraZoom();
@@ -185,4 +186,18 @@ export function closeModel() {
 	nextTick(() => {
 		SelectionOps.clearSelected();
 	});
+}
+
+export async function closeModelAndReturnToStart(): Promise<void> {
+	closeModel();
+	await store.mutations.templatePage.add();
+	LDRender.setModel(store.state.template.modelData.model);
+}
+
+export async function ensureTemplatePage(): Promise<void> {
+	if (!store.get.templatePage()) {
+		await LDParse.loadLDConfig();
+		await store.mutations.templatePage.add();
+		LDRender.setModel(store.state.template.modelData.model);
+	}
 }
