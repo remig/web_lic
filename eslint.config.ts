@@ -3,6 +3,7 @@ import pluginVue from 'eslint-plugin-vue';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import { defineConfig } from "eslint/config";
+import prettierPlugin from "eslint-plugin-prettier/recommended";
 import fs from "fs";
 import globals from 'globals';
 import simpleImportSort from "eslint-plugin-simple-import-sort";
@@ -202,4 +203,8 @@ export default defineConfig([
 			"simple-import-sort/exports": "error",
 		},
 	},
+
+	prettierPlugin,
+
+	{ rules: { curly: ["error", "all"] } },
 ]);
