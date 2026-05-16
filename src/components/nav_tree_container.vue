@@ -30,13 +30,15 @@
 
 <script setup lang="ts">
 
-import {ref, getCurrentInstance, onMounted, onUnmounted} from 'vue';
+import EventBus from '@/event_bus';
 import {t} from '@/translations';
-import uiState from '../ui_state';
-import NavTree from '../navtree';
+import {getCurrentInstance, onMounted, onUnmounted,ref} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
 import LicDropdown from '@/components/base/LicDropdown.vue';
-import EventBus from '@/event_bus';
+
+import NavTree from '../navtree';
+import uiState from '../ui_state';
 
 // TODO: need to scroll nav tree up / down whenever selected item changes, to ensure it's always in view
 

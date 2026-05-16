@@ -66,12 +66,14 @@
 
 <script setup lang="ts">
 
-import {ref, computed} from 'vue';
-import {t} from '@/translations';
 import {type Anchors} from '@/item_types';
-import _ from '../util';
+import {t} from '@/translations';
+import {computed,ref} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
+
+import _ from '../util';
 
 const anchorOffsets: Record<Anchors, {x: number; y: number}> = {
 	top_left: {x: 0, y: 0},

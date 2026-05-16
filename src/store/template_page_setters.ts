@@ -1,9 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from '../util';
-import store from '../store';
 import LDParse from '../ld_parse';
+import store from '../store';
 import defaultTemplate from '../template';
+import _ from '../util';
 
 export interface TemplatePageMutationInterface {
 	add(): Promise<void>;

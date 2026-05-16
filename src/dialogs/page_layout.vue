@@ -68,10 +68,12 @@
 
 <script setup lang="ts">
 
-import {ref, reactive, computed} from 'vue';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
+import {computed,reactive, ref} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
+
 import {type GridLayout, type Orientations} from '../item_types';
 
 const props = defineProps<{initialLayout: GridLayout}>();

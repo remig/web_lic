@@ -26,7 +26,8 @@
 
 <script setup lang="ts">
 
-import {ref, computed} from 'vue';
+import {computed,ref} from 'vue';
+
 import LicDropdown from './LicDropdown.vue';
 
 const props = defineProps<{

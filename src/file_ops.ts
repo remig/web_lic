@@ -1,18 +1,19 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import {nextTick} from 'vue';
-import {t} from './translations';
-import _ from './util';
-import store from './store';
-import undoStack from './undo_stack';
-import Storage from './storage';
+
+import backwardCompat from './backward_compat';
+import {showImportModelDialog,showMissingPartsDialog, showStringChooserDialog} from './dialog';
 import openFileHandler from './file_uploader';
 import LDParse from './ld_parse';
-import backwardCompat from './backward_compat';
-import {showStringChooserDialog, showMissingPartsDialog, showImportModelDialog} from './dialog';
-import * as ReactiveState from './ui_reactive_state';
 import * as SelectionOps from './selection_ops';
+import Storage from './storage';
+import store from './store';
+import {t} from './translations';
 import * as UiOps from './ui_ops';
+import * as ReactiveState from './ui_reactive_state';
+import undoStack from './undo_stack';
+import _ from './util';
 
 export function importBuiltInModel(url: string) {
 	importModel(() => LDParse.loadRemotePart('./static/models/' + url, ReactiveState.updateProgress));

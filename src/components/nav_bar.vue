@@ -50,12 +50,13 @@
 
 <script setup lang="ts">
 
-import {getCurrentInstance, onMounted, onUnmounted} from 'vue';
-import EventBus from '../event_bus';
 import {t} from '@/translations';
-import _ from '../util';
+import {getCurrentInstance, onMounted, onUnmounted} from 'vue';
+
 import packageInfo from '../../package.json';
 import {showAboutLicDialog} from '../dialog';
+import EventBus from '../event_bus';
+import _ from '../util';
 import PopupMenu from './popup_menu.vue';
 
 defineProps<{menuEntryList: any[]; filename: {name: string; isDirty: boolean} | null | undefined}>();

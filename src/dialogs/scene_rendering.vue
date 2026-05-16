@@ -43,16 +43,18 @@
 
 <script setup lang="ts">
 
-import {reactive} from 'vue';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
-import LicButton from '@/components/base/LicButton.vue';
+import {reactive} from 'vue';
+
 import rotateBuilder from '../components/rotate.vue';
-import _ from '../util';
-import store from '../store';
-import undoStack from '../undo_stack';
+import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
+
 import EventBus from '../event_bus';
 import {type Rotation} from '../item_types';
+import store from '../store';
+import undoStack from '../undo_stack';
+import _ from '../util';
 
 const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 

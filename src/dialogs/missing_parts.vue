@@ -44,14 +44,16 @@
 
 <script setup lang="ts">
 
-import {ref, computed} from 'vue';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
+import {computed,ref} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
 import LicTooltip from '@/components/base/LicTooltip.vue';
-import _ from '../util';
-import LDParse from '../ld_parse';
+
 import openFileHandler from '../file_uploader';
+import LDParse from '../ld_parse';
+import _ from '../util';
 
 const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 

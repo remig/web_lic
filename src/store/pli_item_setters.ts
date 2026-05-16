@@ -1,8 +1,8 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import store from '../store';
+import {type LookupItem, type PLIItem, type QuantityLabel} from '../item_types';
 import Layout from '../layout';
-import {type PLIItem, type LookupItem, type QuantityLabel} from '../item_types';
+import store from '../store';
 
 export interface PLIItemMutationInterface {
 	add(

@@ -44,13 +44,15 @@
 
 <script setup lang="ts">
 
-import {ref} from 'vue';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
+import {ref} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
-import _ from '../util';
+import LicDialog from '@/components/base/LicDialog.vue';
+
 import LDParse from '../ld_parse';
 import Storage from '../storage';
+import _ from '../util';
 
 const emit = defineEmits<{(e: 'ok', colorCode: number): void; (e: 'cancel'): void}>();
 

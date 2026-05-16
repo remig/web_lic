@@ -20,11 +20,13 @@
 <script setup lang="ts">
 
 import {ref} from 'vue';
-import {t, setLocale, LanguageList} from '../translations';
-import EventBus from '../event_bus';
-import LicDialog from '@/components/base/LicDialog.vue';
+
 import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
 import LicSelect from '@/components/base/LicSelect.vue';
+
+import EventBus from '../event_bus';
+import {LanguageList,setLocale, t} from '../translations';
 
 const emit = defineEmits<{(e: 'ok'): void}>();
 

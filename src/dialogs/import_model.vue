@@ -59,12 +59,13 @@
 
 <script setup lang="ts">
 
-import {ref} from 'vue';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
-import LicButton from '@/components/base/LicButton.vue';
-import LicDropdown from '@/components/base/LicDropdown.vue';
 import uiState from '@/ui_state';
+import {ref} from 'vue';
+
+import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
+import LicDropdown from '@/components/base/LicDropdown.vue';
 
 interface ImportModelResult {
 	partsPerStep?: number;

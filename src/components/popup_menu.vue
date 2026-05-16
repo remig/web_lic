@@ -43,10 +43,11 @@ export default {name: 'PopupMenu'};
 
 <script setup lang="ts">
 
-import {nextTick, getCurrentInstance, onMounted, onUnmounted} from 'vue';
-import {t} from '@/translations';
-import _ from '../util';
 import EventBus from '@/event_bus';
+import {t} from '@/translations';
+import {getCurrentInstance, nextTick, onMounted, onUnmounted} from 'vue';
+
+import _ from '../util';
 
 const props = defineProps<{menuEntries?: any[] | null; selectedItem: any}>();
 

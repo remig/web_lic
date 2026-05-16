@@ -1,10 +1,10 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from '../util';
-import store from '../store';
 import {
-	type Callout, type LookupItem, type Positions, type Orientations, type NumberLabel,
-} from '../item_types';
+	type Callout, type LookupItem, type NumberLabel,
+type Orientations, type Positions, } from '../item_types';
+import store from '../store';
+import _ from '../util';
 
 export interface CalloutMutationInterface {
 	add(

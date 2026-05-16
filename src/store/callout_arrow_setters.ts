@@ -1,9 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from '../util';
+import {type CalloutArrow, type Directions,type LookupItem, type PointItem} from '../item_types';
 import store from '../store';
 import {isPointListItem} from '../type_helpers';
-import {type PointItem, type LookupItem, type CalloutArrow, type Directions} from '../item_types';
+import _ from '../util';
 
 export interface CalloutArrowMutationInterface {
 	add({parent}: {parent: LookupItem}): CalloutArrow;

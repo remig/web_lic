@@ -1,21 +1,21 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {hasProperty} from '../type_helpers';
-import _ from '../util';
+import {
+type AbstractPart, type Annotation, type Book, 	type Box, type Callout,
+	type CalloutArrow, type CSI, type Divider, 	type Item, type ItemTypeNames,
+type ItemTypes, type LDrawPartFilename,
+	type LookupItem, type NumberedItem, type NumberLabel,
+	type Page, type Part, type PLI, type PLIItem, type PLIItemParent,
+	type PLITransform, type Point,
+type PointedItem, type PointItem,
+type PointListItem,
+	type QuantityLabel, type RotateIcon, type Step,
+type StepParent, 	type SubmodelImage, 	type SubmodelItem, } from '../item_types';
 import LDParse from '../ld_parse';
 import store from '../store';
-import {isTemplateType, isPointListItem, isNotNull} from '../type_helpers';
-import {
-	type LookupItem, type ItemTypes, type ItemTypeNames,
-	type Item, type Annotation, type Book, type Callout,
-	type CalloutArrow, type CSI, type Divider, type NumberLabel,
-	type Page, type PLI, type PLIItem, type PointItem,
-	type QuantityLabel, type RotateIcon, type Step,
-	type SubmodelImage, type Part, type LDrawPartFilename,
-	type PLITransform, type NumberedItem, type Point,
-	type Box, type StepParent, type AbstractPart, type PLIItemParent,
-	type SubmodelItem, type PointedItem, type PointListItem,
-} from '../item_types';
+import {hasProperty} from '../type_helpers';
+import {isNotNull,isPointListItem, isTemplateType} from '../type_helpers';
+import _ from '../util';
 
 function getter<T extends ItemTypes>(s: ItemTypeNames) {
 	return (itemLookup: number | LookupItem) => {

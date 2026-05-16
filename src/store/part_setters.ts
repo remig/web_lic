@@ -1,9 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from '../util';
-import store from '../store';
+import {type Directions,type LookupItem} from '../item_types';
 import LDParse from '../ld_parse';
-import {type LookupItem, type Directions} from '../item_types';
+import store from '../store';
+import _ from '../util';
 
 export interface PartMutationInterface {
 	displace({

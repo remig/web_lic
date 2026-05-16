@@ -1,9 +1,10 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import store from '../store';
 import {t} from '@/translations';
-import LDParse from '../ld_parse';
+
 import {type Annotation, type Book, type Page} from '../item_types';
+import LDParse from '../ld_parse';
+import store from '../store';
 
 function addOneTitlePage(parent?: Book) {
 	let insertionIndex = 1;

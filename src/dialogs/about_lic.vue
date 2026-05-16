@@ -50,10 +50,11 @@
 
 <script setup lang="ts">
 
-import {t} from '../translations';
-import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
+
 import packageInfo from '../../package.json';
+import {t} from '../translations';
 
 const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 

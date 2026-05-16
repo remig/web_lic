@@ -1,16 +1,16 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import JSZip from 'jszip';
-import {jsPDF} from 'jspdf';
 import {saveAs} from 'file-saver';
+import {jsPDF} from 'jspdf';
+import JSZip from 'jszip';
 
-import _ from './util';
-import {Draw} from './draw';
 import {changeDpiDataUrl} from './changedpi';
-import {t} from './translations';
-import {statusText, busyText, updateProgress} from './ui_reactive_state';
-import {Store} from './store';
+import {Draw} from './draw';
 import {Page} from './item_types';
+import {Store} from './store';
+import {t} from './translations';
+import {busyText, statusText, updateProgress} from './ui_reactive_state';
+import _ from './util';
 
 function exportInstructions(
 	store: Store,

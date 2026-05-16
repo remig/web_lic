@@ -1,8 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import store from '../store';
+import {type CSI, type ItemTypes, type PLIItem, type Step} from '../item_types';
 import LDRender from '../ld_render';
-import {type CSI, type PLIItem, type ItemTypes, type Step} from '../item_types';
+import store from '../store';
 
 const canvasCache = (function() {
 	let cache: {[key: string]: HTMLCanvasElement} = {};

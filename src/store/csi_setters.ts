@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import store from '../store';
 import {type CSI, type LookupItem, type Rotation} from '../item_types';
+import store from '../store';
 
 export interface CSIMutationInterface {
 	add({parent}: {parent: LookupItem}): CSI;

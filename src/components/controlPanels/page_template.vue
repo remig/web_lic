@@ -86,15 +86,16 @@
 
 <script setup lang="ts">
 
-import {ref, computed} from 'vue';
 import {t} from '@/translations';
-import _, {type UnitTypes} from '../../util';
-import store from '../../store';
-import FillPanel from './fill.vue';
-import BorderPanel from './border.vue';
-import PanelBase from './panel_base.vue';
+import {computed,ref} from 'vue';
+
 import EventBus from '../../event_bus';
+import store from '../../store';
+import _, {type UnitTypes} from '../../util';
 import LicSelect from '../base/LicSelect.vue';
+import BorderPanel from './border.vue';
+import FillPanel from './fill.vue';
+import PanelBase from './panel_base.vue';
 
 const pageSizeLookups: Record<string, [number, number]> = {
 	a3: [1123, 1587],

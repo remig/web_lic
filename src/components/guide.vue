@@ -14,9 +14,10 @@
 <script setup lang="ts">
 
 import {ref} from 'vue';
-import _ from '../util';
-import undoStack from '../undo_stack';
+
 import uiState from '../ui_state';
+import undoStack from '../undo_stack';
+import _ from '../util';
 
 const props = defineProps<{
 	position: number;

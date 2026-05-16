@@ -1,12 +1,12 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
+import {
+type Item,
+type ItemTypeNames, 	type ItemTypes, type LookupItem, type PointedItem, type PointListItem, } from '../item_types';
+import Layout from '../layout';
+import store from '../store';
 import {hasProperty, isItemSpecificType} from '../type_helpers';
 import _ from '../util';
-import store from '../store';
-import Layout from '../layout';
-import {
-	type ItemTypes, type LookupItem, type ItemTypeNames, type PointListItem, type PointedItem, type Item,
-} from '../item_types';
 
 export interface ItemMutationInterface {
 	add<T extends ItemTypes>(

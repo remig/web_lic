@@ -1,16 +1,16 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from './util';
+import {
+type Annotation, 	type Box, type BoxedOffsetItem, type Callout, type CSI, type Directions, 	type GridLayout, type LookupItem, type Orientations,
+type Page, type PageSubtypes,
+type PLI, 	type PLIItem, type Point,
+type QuantityLabel, type Size,
+type Step, 	type SubmodelImage, } from './item_types';
 import LDParse from './ld_parse';
 import store from './store';
 import {t} from './translations';
 import {isBox, isNotNull} from './type_helpers';
-import {
-	type Box, type LookupItem, type Page, type Orientations,
-	type GridLayout, type Step, type BoxedOffsetItem, type Point,
-	type SubmodelImage, type CSI, type PLI, type Directions, type Size,
-	type PLIItem, type Callout, type Annotation, type QuantityLabel, type PageSubtypes,
-} from './item_types';
+import _ from './util';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width

@@ -1,9 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from './util';
-import LDParse from './ld_parse';
-import LicGL from './webgl/licgl';
 import {type Box} from './item_types';
+import LDParse from './ld_parse';
+import _ from './util';
+import LicGL from './webgl/licgl';
 
 const measurementCanvas = document.createElement('canvas');
 const renderState = {

@@ -1,32 +1,32 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import _ from '../util';
-import store from '../store';
 import {t} from '@/translations';
+
+import {
+type Divider, 	type LookupItem, type PLITransform, type Point, type RotateIcon, type Rotation, type Step,
+} from '../item_types';
+import Layout from '../layout';
 import LDParse from '../ld_parse';
 import LDRender from '../ld_render';
-import Layout from '../layout';
-import StepInsertion from '../store/step_insertion';
-import {
-	type LookupItem, type Point, type Divider, type Rotation, type RotateIcon, type PLITransform, type Step,
-} from '../item_types';
-
+import store from '../store';
 import {AnnotationMutationInterface, AnnotationMutations} from '../store/annotation_setters';
 import {BookMutationInterface, BookMutations} from '../store/book_setters';
-import {CalloutMutationInterface, CalloutMutations} from '../store/callout_setters';
 import {CalloutArrowMutationInterface, CalloutArrowMutations} from '../store/callout_arrow_setters';
+import {CalloutMutationInterface, CalloutMutations} from '../store/callout_setters';
 import {CSIMutationInterface, CSIMutations} from '../store/csi_setters';
 import {InventoryPageMutationInterface, InventoryPageMutations} from '../store/inventory_page_setters';
 import {ItemMutationInterface, ItemMutations} from '../store/item_setters';
 import {PageMutationInterface, PageMutations} from '../store/page_setters';
 import {PartMutationInterface, PartMutations} from '../store/part_setters';
-import {PLIMutationInterface, PLIMutations} from '../store/pli_setters';
 import {PLIItemMutationInterface, PLIItemMutations} from '../store/pli_item_setters';
+import {PLIMutationInterface, PLIMutations} from '../store/pli_setters';
+import StepInsertion from '../store/step_insertion';
 import {StepMutationInterface, StepMutations} from '../store/step_setters';
-import {SubmodelMutationInterface, SubmodelMutations} from '../store/submodel_setters';
 import {SubmodelImageMutationInterface, submodelImageMutations} from '../store/submodel_image_setters';
+import {SubmodelMutationInterface, SubmodelMutations} from '../store/submodel_setters';
 import {TemplatePageMutationInterface, TemplatePageMutations} from '../store/template_page_setters';
 import {TitlePageMutationInterface, TitlePageMutations} from '../store/title_page_setters';
+import _ from '../util';
 
 export interface MutationInterface {
 	annotation: AnnotationMutationInterface,

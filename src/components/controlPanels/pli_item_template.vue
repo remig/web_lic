@@ -7,6 +7,7 @@
 <script setup lang="ts">
 
 import {getCurrentInstance} from 'vue';
+
 import store from '../../store';
 import TransformPanel from './transform.vue';
 

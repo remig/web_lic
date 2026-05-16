@@ -21,8 +21,9 @@
 
 <script setup lang="ts">
 
-import {ref, computed, onUnmounted} from 'vue';
+import {computed, onUnmounted,ref} from 'vue';
 import {ChromePicker} from 'vue-color';
+
 import 'vue-color/vue2/style.css';
 
 const POPUP_W = 225;

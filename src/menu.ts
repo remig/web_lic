@@ -1,19 +1,20 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import _ from './util';
-import * as FileOps from './file_ops';
-import * as SelectionOps from './selection_ops';
-import * as UiOps from './ui_ops';
-import InstructionExporter from './export';
-import store from './store';
-import undoStack from './undo_stack';
-import Storage from './storage';
-import * as DialogManager from './dialog';
 import * as translate from '@/translations';
 import {t} from '@/translations';
-import uiState from './ui_state';
-import type {Orientations} from './item_types';
+
+import * as DialogManager from './dialog';
 import EventBus from './event_bus';
+import InstructionExporter from './export';
+import * as FileOps from './file_ops';
+import type {Orientations} from './item_types';
+import * as SelectionOps from './selection_ops';
+import Storage from './storage';
+import store from './store';
+import * as UiOps from './ui_ops';
+import uiState from './ui_state';
+import undoStack from './undo_stack';
+import _ from './util';
 
 function enableIfModel() {
 	return store != null && store.model != null;

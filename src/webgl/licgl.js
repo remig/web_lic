@@ -3,16 +3,15 @@
 // Everything in this file gets called *a lot*, and with a *lot* of data.
 // Keep everthing fast, at the expense of some readability.
 
-import faceShaderSource from './faceShader.glsl';
-import lineShaderSource from './lineShader.glsl';
-import condLineShaderSource from './condLineShader.glsl';
-import fragmentShaderSource from './fragmentShader.glsl';
-import twgl from './twgl';
-import Arrows from './arrows';
-
-import _ from '../util';
 import LDParse from '../ld_parse';
 import store from '../store';
+import _ from '../util';
+import Arrows from './arrows';
+import condLineShaderSource from './condLineShader.glsl';
+import faceShaderSource from './faceShader.glsl';
+import fragmentShaderSource from './fragmentShader.glsl';
+import lineShaderSource from './lineShader.glsl';
+import twgl from './twgl';
 
 const selectedPartBoxColor = [1, 0, 0, 1];
 const selectedPartAlpha = 0.5;

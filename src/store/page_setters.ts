@@ -1,13 +1,13 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import _ from '../util';
+import {
+type Book,
+type GridLayout, 	type LookupItem, 	type NumberLabel,
+type Orientations, type Page, type PageSubtypes, } from '../item_types';
+import Layout from '../layout';
 import store from '../store';
 import uiState from '../ui_state';
-import Layout from '../layout';
-import {
-	type LookupItem, type PageSubtypes, type Page, type Orientations, type GridLayout, type Book,
-	type NumberLabel,
-} from '../item_types';
+import _ from '../util';
 
 export interface PageMutationInterface {
 	add({

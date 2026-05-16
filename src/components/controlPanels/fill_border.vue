@@ -15,8 +15,8 @@
 
 <script setup lang="ts">
 
-import FillPanel from './fill.vue';
 import BorderPanel from './border.vue';
+import FillPanel from './fill.vue';
 
 const props = defineProps<{templateEntry: string}>();
 const emit = defineEmits(['new-values']);

@@ -2,18 +2,17 @@
 
 import {saveAs} from 'file-saver';
 
-import _ from './util';
+import packageInfo from '../package.json';
 import cache from './cache';
-import {type Model, type StateInterface, type SaveFileContent} from './item_types';
-import {RendererInterface, Renderer} from './store/render';
-import {GetterInterface, Getters} from './store/getters';
-import {MutationInterface, Mutations} from './store/mutations';
-
+import {type Model, type SaveFileContent,type StateInterface} from './item_types';
 import LDParse from './ld_parse';
 import LDRender from './ld_render';
-import defaultTemplate from './template';
 import Storage from './storage';
-import packageInfo from '../package.json';
+import {GetterInterface, Getters} from './store/getters';
+import {MutationInterface, Mutations} from './store/mutations';
+import {Renderer,RendererInterface} from './store/render';
+import defaultTemplate from './template';
+import _ from './util';
 
 const emptyState = {
 	annotations: [],

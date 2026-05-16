@@ -1,11 +1,11 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
+import {type LookupItem, type Model,type Part, type PLIItem} from '../item_types';
+import Layout from '../layout';
+import LDParse from '../ld_parse';
+import store from '../store';
 import {isItemSpecificType} from '../type_helpers';
 import _ from '../util';
-import store from '../store';
-import LDParse from '../ld_parse';
-import Layout from '../layout';
-import {type PLIItem, type LookupItem, type Part, type Model} from '../item_types';
 
 function findPLIItem(filename: string, colorCode: number): PLIItem | undefined {
 	return store.state.pliItems.find(pliItem => {

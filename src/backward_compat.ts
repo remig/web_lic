@@ -1,11 +1,12 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from './util';
-import defaultTemplate from './template';
 import {
-	type Rotation, type Template, type Page, type StateInterface, type ItemTypeNames,
-	type SaveFileContent,
+	type ItemTypeNames,
+	type Page, 	type Rotation, 	type SaveFileContent,
+	type StateInterface, type Template,
 } from './item_types';
+import defaultTemplate from './template';
+import _ from './util';
 
 // 'fixOldFoo' state is anything before the big version 0.45
 // Anything older than the latest version but newer than 0.44 must still

@@ -18,9 +18,10 @@
 <script setup lang="ts">
 
 import {getCurrentInstance} from 'vue';
+
 import store from '../../store';
-import TransformPanel from './transform.vue';
 import FillPanel from './fill.vue';
+import TransformPanel from './transform.vue';
 
 const props = defineProps<{selectedItem: any; templateEntry: string}>();
 const emit = defineEmits(['new-values']);

@@ -32,12 +32,13 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, watch} from 'vue';
-import {t} from '@/translations';
 import Storage from '@/storage';
-import LicSelect from './LicSelect.vue';
-import LicDialog from './LicDialog.vue';
+import {t} from '@/translations';
+import {computed, ref, watch} from 'vue';
+
 import LicButton from './LicButton.vue';
+import LicDialog from './LicDialog.vue';
+import LicSelect from './LicSelect.vue';
 
 const BASE_FAMILIES = ['Helvetica', 'Times New Roman'];
 

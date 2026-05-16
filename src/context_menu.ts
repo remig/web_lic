@@ -1,20 +1,20 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from './util';
-import LDParse from './ld_parse';
-import LicGL from './webgl/licgl';
-import store from './store';
-import undoStack from './undo_stack';
-import openFileHandler from './file_uploader';
 import * as DialogManager from './dialog';
-import {t, noTranslate} from './translations';
-import {isItemSpecificType, isStepParent} from './type_helpers';
+import openFileHandler from './file_uploader';
 import {
-	type LookupItem, type Directions, type Page, type Rotation, type Step, type CSI,
-} from './item_types';
+type CSI,
+type Directions, 	type LookupItem, type Page, type Rotation, type Step, } from './item_types';
+import LDParse from './ld_parse';
 import * as SelectionOps from './selection_ops';
-import * as ReactiveState from './ui_reactive_state';
+import store from './store';
+import {noTranslate,t} from './translations';
+import {isItemSpecificType, isStepParent} from './type_helpers';
 import * as UiOps from './ui_ops';
+import * as ReactiveState from './ui_reactive_state';
+import undoStack from './undo_stack';
+import _ from './util';
+import LicGL from './webgl/licgl';
 
 interface ContextMenuSeparator {
 	text: 'separator'

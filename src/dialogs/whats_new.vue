@@ -39,10 +39,11 @@
 
 <script setup lang="ts">
 
-import {ref, onMounted} from 'vue';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
+import {onMounted,ref} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
 
 const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 

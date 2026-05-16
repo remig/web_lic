@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2026 Remi Gagne */
 
 <script setup lang="ts">
-import {ref, onMounted} from 'vue';
+import {onMounted,ref} from 'vue';
 
 const props = withDefaults(defineProps<{
 	title?: string;

@@ -54,12 +54,14 @@
 
 <script setup lang="ts">
 
-import {ref} from 'vue';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
+import {ref} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
 import LicColorPicker from '@/components/base/LicColorPicker.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
 import LicSelectFontName from '@/components/base/LicSelectFontName.vue';
+
 import _ from '../util';
 
 interface StyleResult {

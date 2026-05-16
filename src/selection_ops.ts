@@ -1,13 +1,14 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import {nextTick} from 'vue';
-import _ from './util';
-import store from './store';
-import NavTree from './navtree';
+
 import ContextMenu from './context_menu';
-import * as ReactiveState from './ui_reactive_state';
-import * as UiOps from './ui_ops';
 import EventBus from './event_bus';
+import NavTree from './navtree';
+import store from './store';
+import * as UiOps from './ui_ops';
+import * as ReactiveState from './ui_reactive_state';
+import _ from './util';
 
 export function setCurrentPage(page: any) {
 	if (page.id !== ReactiveState.currentPageId.value) {

@@ -4,15 +4,15 @@
 // will divide multi-book instruction file into separate smaller instruction
 // files, one per book, and download them in a zip file
 
-import JSZip from 'jszip';
 import {saveAs} from 'file-saver';
+import JSZip from 'jszip';
 
-import _ from '../util';
-import store from '../store';
-import Layout from '../layout';
-import LDParse from '../ld_parse';
 import packageInfo from '../../package.json';
 import {type Book, type LookupItem} from '../item_types';
+import Layout from '../layout';
+import LDParse from '../ld_parse';
+import store from '../store';
+import _ from '../util';
 
 interface PageSpan {
 	start: number;

@@ -1,27 +1,29 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 import {createApp} from 'vue';
-import {type Anchors, type Rotation, type GridLayout} from './item_types';
-import {type UnitTypes} from './util';
-import StringChooser from './dialogs/string_chooser.vue';
-import NumberChooser from './dialogs/number_chooser.vue';
-import SceneRendering from './dialogs/scene_rendering.vue';
+
 import LocaleChooser from './components/translate.vue';
-import LdColorPicker from './dialogs/ld_color_picker.vue';
-import DisplacePart from './dialogs/displace_part.vue';
-import RotatePartImage from './dialogs/rotate_part_image.vue';
-import TransformPart from './dialogs/transform_part.vue';
-import PageLayout from './dialogs/page_layout.vue';
+
+import AboutLic from './dialogs/about_lic.vue';
 import BrickColors from './dialogs/brick_colors.vue';
-import GridDialog from './dialogs/grid_dialog.vue';
+import DisplacePart from './dialogs/displace_part.vue';
 import ExportPdf from './dialogs/export_pdf.vue';
 import ExportPng from './dialogs/export_png.vue';
-import StyleVue from './dialogs/style.vue';
-import MissingParts from './dialogs/missing_parts.vue';
+import GridDialog from './dialogs/grid_dialog.vue';
 import ImportModel from './dialogs/import_model.vue';
-import WhatsNew from './dialogs/whats_new.vue';
-import AboutLic from './dialogs/about_lic.vue';
-import ResizeImage from './dialogs/resize_image.vue';
+import LdColorPicker from './dialogs/ld_color_picker.vue';
+import MissingParts from './dialogs/missing_parts.vue';
 import MultiBook from './dialogs/multi_book.vue';
+import NumberChooser from './dialogs/number_chooser.vue';
+import PageLayout from './dialogs/page_layout.vue';
+import ResizeImage from './dialogs/resize_image.vue';
+import RotatePartImage from './dialogs/rotate_part_image.vue';
+import SceneRendering from './dialogs/scene_rendering.vue';
+import StringChooser from './dialogs/string_chooser.vue';
+import StyleVue from './dialogs/style.vue';
+import TransformPart from './dialogs/transform_part.vue';
+import WhatsNew from './dialogs/whats_new.vue';
+import {type Anchors, type GridLayout,type Rotation} from './item_types';
+import {type UnitTypes} from './util';
 
 type ExtraOn = {[event: string]: ((...args: any[]) => void) | undefined};
 

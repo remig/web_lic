@@ -40,17 +40,18 @@
 
 <script setup lang="ts">
 
-import {ref, computed} from 'vue';
-import LicColorPicker from '../base/LicColorPicker.vue';
-import LicButton from '../base/LicButton.vue';
-import _ from '../../util';
-import store from '../../store';
+import {computed,ref} from 'vue';
+
 import cache from '../../cache';
-import openFileHandler from '../../file_uploader';
-import {showResizeImageDialog} from '../../dialog';
-import PanelBase from './panel_base.vue';
 import {readDpi} from '../../changedpi';
+import {showResizeImageDialog} from '../../dialog';
+import openFileHandler from '../../file_uploader';
+import store from '../../store';
 import {t} from '../../translations';
+import _ from '../../util';
+import LicButton from '../base/LicButton.vue';
+import LicColorPicker from '../base/LicColorPicker.vue';
+import PanelBase from './panel_base.vue';
 
 const props = withDefaults(defineProps<{
 	templateEntry: string;

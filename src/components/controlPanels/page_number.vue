@@ -16,12 +16,13 @@
 
 <script setup lang="ts">
 
-import {ref} from 'vue';
 import {t} from '@/translations';
+import {ref} from 'vue';
+
 import store from '../../store';
-import PanelBase from './panel_base.vue';
-import FontPanel from './font.vue';
 import LicSelect from '../base/LicSelect.vue';
+import FontPanel from './font.vue';
+import PanelBase from './panel_base.vue';
 
 // TODO: add UI to choose default page layout
 // TODO: add UI to choose whether to redo layout or just extend canvas

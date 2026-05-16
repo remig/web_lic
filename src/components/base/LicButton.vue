@@ -1,8 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <script setup lang="ts">
-import {computed} from 'vue';
 import {t} from '@/translations';
+import {computed} from 'vue';
 
 type NamedType = 'ok' | 'cancel' | 'reset';
 type ButtonType = NamedType | 'primary' | 'text';

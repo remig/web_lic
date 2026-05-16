@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import uiState from './ui_state';
 import {type ColorTableEntry} from './item_types';
+import uiState from './ui_state';
 
 enum StorageKeys {
 	model = 'lic_model',

@@ -1,15 +1,15 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from './util';
-import store from './store';
 import cache from './cache';
-import LDParse from './ld_parse';
-import uiState from './ui_state';
-import {isSize, isPoint, isPointItem} from './type_helpers';
 import {
-	type LookupItem, type Page, type Directions, type Border, type Point, type PointItem,
-	type Annotation, type PartItem, type ImageTemplate, type Box, type BoxedOffsetItem,
+	type Annotation, type Border, type Box, type BoxedOffsetItem,
+type Directions, type ImageTemplate, 	type LookupItem, type Page, type PartItem, type Point, type PointItem,
 } from './item_types';
+import LDParse from './ld_parse';
+import store from './store';
+import {isPoint, isPointItem,isSize} from './type_helpers';
+import uiState from './ui_state';
+import _ from './util';
 
 interface DrawConfig {
 	hiResScale?: number;

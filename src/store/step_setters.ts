@@ -1,15 +1,15 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {hasProperty, isItemSpecificType} from '../type_helpers';
 import {
-	type LookupItem, type StepModel, type Box, type Step,
-	type Orientations, type Rotation, type NumberLabel,
-	type StepParent, type Positions,
-} from '../item_types';
-import _ from '../util';
-import store from '../store';
+type Box, 	type LookupItem, type NumberLabel,
+	type Orientations, type Positions,
+type Rotation, type Step,
+type StepModel, 	type StepParent, } from '../item_types';
 import Layout from '../layout';
 import LDParse from '../ld_parse';
+import store from '../store';
+import {hasProperty, isItemSpecificType} from '../type_helpers';
+import _ from '../util';
 
 export interface StepMutationInterface {
 	add(

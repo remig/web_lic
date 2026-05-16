@@ -49,18 +49,20 @@
 
 <script setup lang="ts">
 
-import {ref} from 'vue';
-import _ from '../util';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
+import {ref} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
 import LicColorPicker from '@/components/base/LicColorPicker.vue';
-import store from '../store';
-import LDParse from '../ld_parse';
-import Storage from '../storage';
+import LicDialog from '@/components/base/LicDialog.vue';
+
 import backwardCompat from '../backward_compat';
 import EventBus from '../event_bus';
-import {type LDrawColorCode, type ColorTableEntry} from '../item_types';
+import {type ColorTableEntry,type LDrawColorCode} from '../item_types';
+import LDParse from '../ld_parse';
+import Storage from '../storage';
+import store from '../store';
+import _ from '../util';
 
 const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
 

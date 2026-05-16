@@ -56,6 +56,7 @@
 <script setup lang="ts">
 
 import {t} from '@/translations';
+
 import {showAboutLicDialog} from '../dialog';
 import * as FileOps from '../file_ops';
 

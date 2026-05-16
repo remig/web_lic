@@ -20,7 +20,8 @@ import some from 'lodash/some';
 import startCase from 'lodash/startCase';
 import template from 'lodash/template';
 import unzip from 'lodash/unzip';
-import {type Point, type Border, type Box, type Size} from './item_types';
+
+import {type Border, type Box, type Point, type Size} from './item_types';
 
 interface CacheInterface {
 	[key: string]: any

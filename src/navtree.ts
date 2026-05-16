@@ -1,15 +1,15 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import _ from './util';
-import store from './store';
-import uiState from './ui_state';
 import EventBus from './event_bus';
+import {
+type AbstractPart, 	type ItemTypeNames, type ItemTypes, type LookupItem, type PartItem,
+} from './item_types';
 import LDParse from './ld_parse';
+import store from './store';
 import {t} from './translations';
 import {isQuantityLabelParent} from './type_helpers';
-import {
-	type ItemTypeNames, type ItemTypes, type LookupItem, type AbstractPart, type PartItem,
-} from './item_types';
+import uiState from './ui_state';
+import _ from './util';
 
 let lastSelectedId: string | null;
 let invisibleNodeTypes: Set<string>;

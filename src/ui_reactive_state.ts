@@ -1,6 +1,6 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import {ref, reactive} from 'vue';
+import {reactive,ref} from 'vue';
 
 export const statusText = ref('');
 export const busyText = ref('');

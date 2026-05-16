@@ -15,7 +15,8 @@
 
 <script setup lang="ts">
 
-import {ref, onUnmounted} from 'vue';
+import {onUnmounted,ref} from 'vue';
+
 import LicButton from './LicButton.vue';
 
 defineProps<{label: string}>();

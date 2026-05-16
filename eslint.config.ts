@@ -155,7 +155,7 @@ export default defineConfig([
 		languageOptions: {
 			parser: tsParser,
 			parserOptions: {
-				project: true,
+				projectService: true,
 				tsconfigRootDir: projectRoot,
 			},
 		},
@@ -171,7 +171,7 @@ export default defineConfig([
 			parserOptions: {
 				parser: tsParser,
 				extraFileExtensions: ['.vue'],
-				project: true,
+				projectService: true,
 				tsconfigRootDir: projectRoot,
 			},
 		},

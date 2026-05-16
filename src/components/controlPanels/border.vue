@@ -41,12 +41,13 @@
 
 <script setup lang="ts">
 
-import {ref} from 'vue';
 import {t} from '@/translations';
-import _ from '../../util';
+import {ref} from 'vue';
+
 import store from '../../store';
-import PanelBase from './panel_base.vue';
+import _ from '../../util';
 import LicColorPicker from '../base/LicColorPicker.vue';
+import PanelBase from './panel_base.vue';
 
 const props = withDefaults(defineProps<{
 	templateEntry: string;

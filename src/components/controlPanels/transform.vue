@@ -25,12 +25,13 @@
 
 <script setup lang="ts">
 
-import {ref, computed} from 'vue';
 import {t} from '@/translations';
-import _ from '../../util';
+import {computed,ref} from 'vue';
+
 import store from '../../store';
-import PanelBase from './panel_base.vue';
+import _ from '../../util';
 import RotateBuilder from '../rotate.vue';
+import PanelBase from './panel_base.vue';
 
 const props = defineProps<{templateEntry: string}>();
 const emit = defineEmits(['new-values']);

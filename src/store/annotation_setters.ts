@@ -1,10 +1,10 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from '../util';
-import store from '../store';
 import cache from '../cache';
+import {type Annotation, type AnnotationTypes, type LookupItem, type PointItem} from '../item_types';
 import Layout from '../layout';
-import {type AnnotationTypes, type LookupItem, type Annotation, type PointItem} from '../item_types';
+import store from '../store';
+import _ from '../util';
 
 export interface AnnotationMutationInterface {
 	add(

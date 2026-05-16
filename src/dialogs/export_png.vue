@@ -54,12 +54,14 @@
 
 <script setup lang="ts">
 
-import {ref, computed} from 'vue';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
+import {computed,ref} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
-import _ from '../util';
+import LicDialog from '@/components/base/LicDialog.vue';
+
 import uiState from '../ui_state';
+import _ from '../util';
 
 interface PngExportResult {
 	scale: number;

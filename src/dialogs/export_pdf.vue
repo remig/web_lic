@@ -54,13 +54,15 @@
 
 <script setup lang="ts">
 
-import {reactive} from 'vue';
 import {t} from '@/translations';
-import LicDialog from '@/components/base/LicDialog.vue';
+import {reactive} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
 import LicSelect from '@/components/base/LicSelect.vue';
-import _, {type UnitTypes} from '../util';
+
 import uiState from '../ui_state';
+import _, {type UnitTypes} from '../util';
 
 interface PdfExportResult {
 	dpi: number;

@@ -1,6 +1,7 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import mitt from 'mitt';
+
 import type {LookupItem} from './item_types';
 
 type Events = {

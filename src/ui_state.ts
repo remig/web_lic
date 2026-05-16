@@ -1,8 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from './util';
-import Storage from './storage';
 import {type GuideInterface} from './item_types';
+import Storage from './storage';
+import _ from './util';
 
 interface UIStateInterface {
 	locale: string | null;

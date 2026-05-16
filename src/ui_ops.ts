@@ -1,11 +1,12 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import {nextTick} from 'vue';
-import store from './store';
-import * as ReactiveState from './ui_reactive_state';
-import * as SelectionOps from './selection_ops';
+
 import EventBus from './event_bus';
 import {Point} from './item_types';
+import * as SelectionOps from './selection_ops';
+import store from './store';
+import * as ReactiveState from './ui_reactive_state';
 
 export function haveModel(): boolean {
 	return store != null && store.model != null;

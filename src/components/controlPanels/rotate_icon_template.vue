@@ -20,8 +20,8 @@
 
 <script setup lang="ts">
 
-import FillPanel from './fill.vue';
 import BorderPanel from './border.vue';
+import FillPanel from './fill.vue';
 
 const emit = defineEmits(['new-values']);
 

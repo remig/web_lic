@@ -27,12 +27,13 @@
 
 <script setup lang="ts">
 
-import {ref} from 'vue';
 import {t} from '@/translations';
+import {ref} from 'vue';
+
 import store from '../../store';
-import PanelBase from './panel_base.vue';
-import FillPanel from './fill.vue';
 import BorderPanel from './border.vue';
+import FillPanel from './fill.vue';
+import PanelBase from './panel_base.vue';
 
 const emit = defineEmits(['new-values']);
 

@@ -2,10 +2,10 @@
 
 import * as jsonpatch from 'fast-json-patch';
 
-import _ from './util';
-import store from './store';
-import {t, noTranslate} from './translations';
 import {type CSI, type PLIItem} from './item_types';
+import store from './store';
+import {noTranslate,t} from './translations';
+import _ from './util';
 
 // stack is an array of state
 // undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone

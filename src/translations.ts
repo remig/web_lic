@@ -1,12 +1,12 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import _ from './util';
-import uiState from './ui_state';
-import LanguageList from '../languages/languages.json';
+import German from '../languages/de.json';
 // TODO: for now, hardcode all known languages. Ugh.
 import English from '../languages/en.json';
 import French from '../languages/fr.json';
-import German from '../languages/de.json';
+import LanguageList from '../languages/languages.json';
+import uiState from './ui_state';
+import _ from './util';
 
 LanguageList.sort((a, b) => {
 	if (a.language < b.language) {
@@ -122,9 +122,9 @@ function noTranslate(str: string) {
 restoreLanguage();
 
 export {
-	translate as t,
 	getLocale,
-	setLocale,
 	LanguageList,
 	noTranslate,
+	setLocale,
+	translate as t,
 };

@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from '../util';
 import {type Model} from '../item_types';
+import _ from '../util';
 
 // Given a model with no steps, return an array of arays of parts that make up each step
 // returns the same step array structure as LDParse generates:

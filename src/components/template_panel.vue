@@ -17,22 +17,23 @@
 
 <script setup lang="ts">
 
-import {ref, watch, nextTick, onBeforeUnmount, getCurrentInstance, onMounted, onUnmounted} from 'vue';
-import {t} from '@/translations';
-import _ from '../util';
-import store from '../store';
-import undoStack from '../undo_stack';
-import borderPanel from './controlPanels/border.vue';
-import fontPanel from './controlPanels/font.vue';
-import fillAndBorderTemplatePanel from './controlPanels/fill_border.vue';
-import pageTemplatePanel from './controlPanels/page_template.vue';
-import csiTemplatePanel from './controlPanels/csi_template.vue';
-import pliTemplatePanel from './controlPanels/pli_template.vue';
-import pliItemTemplatePanel from './controlPanels/pli_item_template.vue';
-import pageNumberTemplatePanel from './controlPanels/page_number.vue';
-import rotateIconTemplatePanel from './controlPanels/rotate_icon_template.vue';
-import * as UiOps from '../ui_ops';
 import EventBus from '@/event_bus';
+import {t} from '@/translations';
+import {getCurrentInstance, nextTick, onBeforeUnmount, onMounted, onUnmounted,ref, watch} from 'vue';
+
+import store from '../store';
+import * as UiOps from '../ui_ops';
+import undoStack from '../undo_stack';
+import _ from '../util';
+import borderPanel from './controlPanels/border.vue';
+import csiTemplatePanel from './controlPanels/csi_template.vue';
+import fillAndBorderTemplatePanel from './controlPanels/fill_border.vue';
+import fontPanel from './controlPanels/font.vue';
+import pageNumberTemplatePanel from './controlPanels/page_number.vue';
+import pageTemplatePanel from './controlPanels/page_template.vue';
+import pliItemTemplatePanel from './controlPanels/pli_item_template.vue';
+import pliTemplatePanel from './controlPanels/pli_template.vue';
+import rotateIconTemplatePanel from './controlPanels/rotate_icon_template.vue';
 
 const props = defineProps<{selectedItem: any;}>();
 

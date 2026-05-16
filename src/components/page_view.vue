@@ -68,21 +68,22 @@
 </template>
 
 <script setup lang="ts">
-import {nextTick, ref, computed, watch, onMounted, onBeforeUnmount} from 'vue';
-import _ from '../util';
-import * as SelectionOps from '../selection_ops';
+import {computed, nextTick, onBeforeUnmount,onMounted, ref, watch} from 'vue';
+
 import {Draw} from '../draw';
-import store from '../store';
-import undoStack from '../undo_stack';
-import uiState from '../ui_state';
-import Guide from './guide.vue';
 import EventBus from '../event_bus';
-import {t} from '../translations';
-import {selectedItemLookup, currentPageId as currentPageIdRef} from '../ui_reactive_state';
 import {
-	type LookupItem, type Size, type Step, type ItemTypes, type Page, type Point, type GuideInterface,
-	type ItemTypeNames, type Box,
-} from '../item_types';
+type Box,
+type GuideInterface,
+	type ItemTypeNames, type ItemTypes, 	type LookupItem, type Page, type Point, type Size, type Step, } from '../item_types';
+import * as SelectionOps from '../selection_ops';
+import store from '../store';
+import {t} from '../translations';
+import {currentPageId as currentPageIdRef,selectedItemLookup} from '../ui_reactive_state';
+import uiState from '../ui_state';
+import undoStack from '../undo_stack';
+import _ from '../util';
+import Guide from './guide.vue';
 
 type MouseDragItem = {
 	type: 'guide';

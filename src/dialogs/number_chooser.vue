@@ -33,8 +33,9 @@
 // TODO: Need to implement my own better looking number input, with nice scroll buttons.
 
 import {ref} from 'vue';
-import LicDialog from '@/components/base/LicDialog.vue';
+
 import LicButton from '@/components/base/LicButton.vue';
+import LicDialog from '@/components/base/LicDialog.vue';
 
 const props = defineProps<{
 	title: string;

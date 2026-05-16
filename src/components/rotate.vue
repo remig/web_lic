@@ -40,12 +40,13 @@
 <script setup lang="ts">
 
 import {ref, watch} from 'vue';
+
 import LicButton from '@/components/base/LicButton.vue';
 import LicSelect from '@/components/base/LicSelect.vue';
 
-import _ from '../util';
-import {t} from '../translations';
 import {type Rotation} from '../item_types';
+import {t} from '../translations';
+import _ from '../util';
 
 const axisOptions = [
 	{value: 'x', label: 'X'},

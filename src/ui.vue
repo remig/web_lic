@@ -84,29 +84,31 @@
 // - No way to unstretch a stretched step
 // - Merging the first step of a submodel with the second step loses the submodel image
 
-import {ref, computed, onMounted} from 'vue';
 import Split from 'split.js';
-import _ from './util';
-import {t, getLocale, LanguageList} from './translations';
-import * as ReactiveState from './ui_reactive_state';
-import * as FileOps from './file_ops';
-import * as SelectionOps from './selection_ops';
-import * as UiOps from './ui_ops';
-import uiState from './ui_state';
-import store from './store';
-import undoStack from './undo_stack';
-import LDParse from './ld_parse';
-import Menu from './menu';
-import Storage from './storage';
-import packageInfo from '../package.json';
-import {showLocaleChooserDialog, showWhatsNewDialog} from './dialog';
+import {computed, onMounted,ref} from 'vue';
+
+import GettingStartedPanel from './components/getting_started.vue';
 import NavBar from './components/nav_bar.vue';
 import NavTreeContainer from './components/nav_tree_container.vue';
+import PageView from './components/page_view.vue';
 import PopupMenu from './components/popup_menu.vue';
 import TemplatePanel from './components/template_panel.vue';
-import GettingStartedPanel from './components/getting_started.vue';
-import PageView from './components/page_view.vue';
+
+import packageInfo from '../package.json';
+import {showLocaleChooserDialog, showWhatsNewDialog} from './dialog';
 import EventBus from './event_bus';
+import * as FileOps from './file_ops';
+import LDParse from './ld_parse';
+import Menu from './menu';
+import * as SelectionOps from './selection_ops';
+import Storage from './storage';
+import store from './store';
+import {getLocale, LanguageList,t} from './translations';
+import * as UiOps from './ui_ops';
+import * as ReactiveState from './ui_reactive_state';
+import uiState from './ui_state';
+import undoStack from './undo_stack';
+import _ from './util';
 
 const disableLocalStorage = ref(false);  // allow tests to turn local storage off
 
