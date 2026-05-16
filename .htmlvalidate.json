@@ -1,0 +1,11 @@
+{
+	"plugins": ["html-validate-vue"],
+	"elements": ["html5"],
+	"transform": {
+		"^.*\\.vue$": "html-validate-vue"
+	},
+	"rules": {
+		"element-permitted-content": "error",
+		"prefer-tbody": "error"
+	}
+}

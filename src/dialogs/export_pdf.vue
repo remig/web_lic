@@ -31,7 +31,7 @@
 					<LicSelect :value="newState.units" :options="unitOptions" @change="updateUnits" />
 				</div>
 			</div>
-			<label class="label-input-row">
+			<div class="label-input-row">
 				{{t('dialog.export_hi_res_pdf.image_res')}}
 				<div class="flex-row">
 					<input
@@ -43,7 +43,7 @@
 					>
 					<span>{{t("dialog.export_hi_res_pdf.dpi")}}</span>
 				</div>
-			</label>
+			</div>
 		</div>
 		<template #footer>
 			<LicButton type="cancel" @click="emit('cancel')" />

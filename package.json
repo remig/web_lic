@@ -4,7 +4,7 @@
 	"description": "Create an instruction book from a 3D model",
 	"scripts": {
 		"typecheck": "vue-tsc --version && vue-tsc -b",
-		"lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+		"lint": "eslint . --report-unused-disable-directives --max-warnings 0 && html-validate \"src/**/*.vue\"",
 		"start": "vite",
 		"build": "tsc --version && tsc -b && npm run lint && vite build",
 		"preview": "vite preview",
@@ -27,18 +27,17 @@
 		"@types/lodash": "4.14.157",
 		"@typescript-eslint/eslint-plugin": "8.29.1",
 		"@typescript-eslint/parser": "8.29.1",
-		"@vitejs/plugin-vue2": "2.3.3",
+		"@vitejs/plugin-vue": "^5.0.0",
 		"cypress": "4.10.0",
 		"eslint": "8.57.1",
 		"eslint-plugin-no-only-tests": "2.4.0",
 		"eslint-plugin-vue": "9.33.0",
+		"html-validate": "10.11.3",
+		"html-validate-vue": "8.2.0",
 		"typescript": "5.8.3",
 		"vite": "6.2.5",
 		"vite-plugin-glsl": "1.4.0",
 		"vite-tsconfig-paths": "5.1.4",
-		"vue-loader": "15.9.3",
-		"vue-style-loader": "4.1.2",
-		"vue-template-compiler": "2.7.0",
 		"vue-tsc": "2.2.8"
 	},
 	"dependencies": {
@@ -49,7 +48,7 @@
 		"lodash": "4.17.19",
 		"mitt": "3.0.1",
 		"split.js": "1.6.5",
-		"vue": "2.7.0",
+		"vue": "^3.5.0",
 		"vue-color": "3.3.3"
 	}
 }

@@ -1,5 +1,5 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
-import Vue from 'vue';
+import {createApp} from 'vue';
 import {type Anchors, type Rotation, type GridLayout} from './item_types';
 import {type UnitTypes} from './util';
 import StringChooser from './dialogs/string_chooser.vue';
@@ -33,29 +33,28 @@ function mountDialog<Props extends object, Result>(
 	return new Promise(resolve => {
 		const el = document.createElement('div');
 		document.body.appendChild(el);
-		const filteredExtra = Object.fromEntries(
-			Object.entries(extraOn ?? {}).filter(([, v]) => v !== undefined),
-		);
-		const vm = new Vue({
-			el,
-			render: h => h(Component, {
-				props,
-				on: {
-					...filteredExtra,
-					ok: (val: Result) => {
-						vm.$destroy();
-						vm.$el?.remove();
-						resolve(val);
-					},
-					cancel: () => {
-						(extraOn?.cancel as (() => void) | undefined)?.();
-						vm.$destroy();
-						vm.$el?.remove();
-						resolve(null);
-					},
-				},
-			}),
+		const eventProps: Record<string, any> = {};
+		for (const [key, handler] of Object.entries(extraOn ?? {})) {
+			if (handler !== undefined && key !== 'cancel') {
+				eventProps['on' + key.charAt(0).toUpperCase() + key.slice(1)] = handler;
+			}
+		}
+		const app = createApp(Component, {
+			...props,
+			...eventProps,
+			onOk: (val: Result) => {
+				app.unmount();
+				el.remove();
+				resolve(val);
+			},
+			onCancel: () => {
+				(extraOn?.cancel as (() => void) | undefined)?.();
+				app.unmount();
+				el.remove();
+				resolve(null);
+			},
 		});
+		app.mount(el);
 	});
 }
 

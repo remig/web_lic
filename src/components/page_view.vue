@@ -45,7 +45,7 @@
 							<guide
 								v-for="(guideProps, guideId) in guides"
 								:id="guideId"
-								:ref="'guide-' + guideId"
+								:ref="guideRef(guideId)"
 								:key="guideId"
 								:page-size="pageSize"
 								:offset="{left: 0, top: 0}"
@@ -67,8 +67,8 @@
 	</div>
 </template>
 
-<script lang="ts">
-import {nextTick, defineComponent} from 'vue';
+<script setup lang="ts">
+import {nextTick, ref, computed, watch, onMounted, onBeforeUnmount} from 'vue';
 import _ from '../util';
 import * as SelectionOps from '../selection_ops';
 import {Draw} from '../draw';
@@ -100,365 +100,378 @@ type MouseDragItem = {
 
 const multiPagePadding = 15;
 
-export default defineComponent({
-	name: 'PageView',
-	components: {Guide},
-	props: [],
-	data() {
-		return {
-			pageSize: {
-				width: store.state.template.page.width,
-				height: store.state.template.page.height,
-			} as Size,
-			pageCount: 0,
-			pageLockStatus: [] as boolean[],
-			facingPage: uiState.get('pageView.facingPage') as boolean,
-			scroll: uiState.get('pageView.scroll') as boolean,
-			mouseDownPt: null as Point | null,
-			mouseDragItem: null as MouseDragItem,
-			guides: uiState.get('guides') as GuideInterface[],
-			multiPagePadding,
-		};
-	},
-	watch: {
-		selectedItem(newItem: LookupItem | null) {
-			if (newItem == null || this.currentPageId == null) {
-				return;
-			}
-			const currentPage = store.get.page(this.currentPageId);
-			if (currentPage?.stretchedStep != null) {
-				const stretchedStep = {
-					type: 'step' as ItemTypeNames,
-					id: currentPage.stretchedStep.stepID,
-				};
-				if (store.get.isDescendent(newItem, stretchedStep)) {
-					this.scrollToPage(currentPage.id);
-					return;
-				}
-			}
-			const newPage = store.get.pageForItem(newItem);
-			if (newPage) {
-				this.scrollToPage(newPage.id);
-			} else {
-				this.drawVisiblePages();
-			}
-		},
-	},
-	methods: {
-		isTemplatePage(pageId: number): boolean {
-			return store.get.page(pageId).subtype === 'templatePage';
-		},
-		getCanvasID(pageId: number): string {
-			return getCanvasID(pageId);
-		},
-		togglePageLock(pageId: number) {
-			const locked = this.pageLockStatus[pageId];
-			setPageLocked(pageId)(!locked);
-		},
-		onScroll() {
-			if (this.isScrollingView) {
-				this.drawVisiblePages();
-			}
-		},
-		forceUpdate() {
-			const pageSize = store.state.template.page;
-			if (
-				(this.pageSize.width !== pageSize.width)
-				|| (this.pageSize.height !== pageSize.height)
-			) {
-				this.pageSize.width = pageSize.width;
-				this.pageSize.height = pageSize.height;
-			}
-			const latestPageCount = store.get.pageCount();
-			if (this.pageCount !== latestPageCount) {
-				this.pageCount = latestPageCount;
-			}
-			this.pageLockStatus = [];
-			this.guides = uiState.get('guides');
-			if (latestPageCount > 0) {
-				store.state.pages.forEach((page: Page) => (this.pageLockStatus[page.id] = page.locked));
-				nextTick(() => {
-					this.drawVisiblePages();
-				});
-			}
-		},
-		mouseDown(e: MouseEvent) {
-			if (e.button !== 0 || e.target == null) {
-				return;
-			}
-			const target: HTMLElement = e.target as HTMLElement;
-			if (target.nodeName !== 'CANVAS' && !target.className.includes('guide')) {
-				return;
-			}
-			this.mouseDownPt = {x: e.offsetX, y: e.offsetY};
-			if (target.className.includes('guide') && target.dataset.id != null) {
-				this.mouseDragItem = {
-					type: 'guide',
-					guide: (this.$refs[target.dataset.id] as InstanceType<typeof Guide>[])[0],
-					moved: false,
-					x: e.screenX,
-					y: e.screenY,
-				};
-			} else if (this.selectedItem) {
-				const item = store.get.lookupToItem(this.selectedItem);
-				const page = getPageForCanvas(target);
-				if (item && store.get.isMoveable(item)
-					&& inHighlightBox(e.offsetX, e.offsetY, item, this.pageSize, page)
-				) {
-					this.mouseDragItem = {
-						type: 'item',
-						item,
-						moved: false,
-						x: e.screenX,
-						y: e.screenY,
-					};
-				}
-			}
-		},
-		mouseMove(e: MouseEvent) {
-			if (e.buttons !== 1 || e.target == null) {
-				return;
-			}
-			const target: HTMLElement = e.target as HTMLElement;
-			if (this.mouseDragItem == null
-				|| (target.nodeName !== 'CANVAS' && !target.className.includes('guide'))
-			) {
-				return;
-			}
-			const dx = Math.floor(e.screenX - this.mouseDragItem.x);
-			const dy = Math.floor(e.screenY - this.mouseDragItem.y);
-			if (dx === 0 && dy === 0) {
-				return;
-			}
-			const up = {x: e.offsetX, y: e.offsetY};
-			if (this.mouseDragItem.type === 'guide') {
-				this.mouseDragItem.guide.moveBy(dx, dy);
-			} else if (this.mouseDownPt
-				&& _.geom.distance(this.mouseDownPt, up) > 5
-				&& this.mouseDragItem.type === 'item'
-			) {
-				// TODO: Update parent bounding boxes for children like CSI, submodel, etc
-				store.mutations.item.reposition({item: this.mouseDragItem.item, dx, dy});
-				this.mouseDragItem.moved = true;
-				this.drawVisiblePages();
-			}
-			this.mouseDragItem.x = e.screenX;
-			this.mouseDragItem.y = e.screenY;
-		},
-		mouseUp(e: MouseEvent) {
-			if (e.button !== 0 || e.target == null) {
-				return;
-			}
-			const target: HTMLElement = e.target as HTMLElement;
-			if (this.mouseDownPt
-				&& (this.mouseDragItem == null || !this.mouseDragItem.moved)
-				&& target.nodeName === 'CANVAS'
-			) {
-				const page = getPageForCanvas(target);
-				if (page == null) {
-					return;
-				}
-				const clickTarget = findClickTargetInPage(page, e.offsetX, e.offsetY);
-				if (clickTarget) {
-					SelectionOps.setSelected(clickTarget, page);
-				} else {
-					SelectionOps.clearSelected();
-				}
-			} else if (this.mouseDragItem?.type === 'guide') {
-				this.mouseDragItem.guide.savePosition();
-			} else if (this.mouseDragItem?.type === 'item' && this.mouseDragItem.moved) {
-				const item = t('glossary.' + this.mouseDragItem.item.type.toLowerCase());
-				const undoText = t('action.edit.item.move.undo_@mf', {item});
-				undoStack.commit('', null, undoText);
-			} else if (target.nodeName !== 'CANVAS') {
-				SelectionOps.clearSelected();
-			}
-			this.mouseDownPt = this.mouseDragItem = null;
-		},
-		pageUp() {
-			if (this.currentPageId == null) {
-				return;
-			}
-			let prevPage = store.get.prevPage({type: 'page', id: this.currentPageId});
-			if (this.isFacingView) {
-				const page = store.get.page(this.currentPageId);
-				if (!_.isEven(page.number) && prevPage != null) {
-					const prevPrevPage = store.get.prevPage(prevPage);
-					if (prevPrevPage) {
-						prevPage = prevPrevPage;
-					}
-				}
-			}
-			if (prevPage) {
-				SelectionOps.clearSelected();
-				SelectionOps.setCurrentPage(prevPage);
-			}
-		},
-		pageDown() {
-			if (this.currentPageId == null) {
-				return;
-			}
-			let nextPage = store.get.nextPage({type: 'page', id: this.currentPageId});
-			if (this.isFacingView) {
-				const page = store.get.page(this.currentPageId);
-				if (nextPage != null && page.number > 0 && _.isEven(page.number)) {
-					const nextNextPage = store.get.nextPage(nextPage);
-					if (nextNextPage) {
-						nextPage = nextNextPage;
-					}
-				}
-			}
-			if (nextPage) {
-				SelectionOps.clearSelected();
-				SelectionOps.setCurrentPage(nextPage);
-			}
-		},
-		handleKeyPress({key}: {key: string}) {
-			if (key === 'PageDown') {
-				this.pageDown();
-			} else if (key === 'PageUp') {
-				this.pageUp();
-			}
-		},
-		// This will trigger a full visible page redraw
-		scrollToPage(pageId: number) {
-			nextTick(() => {
-				if (!this.isScrollingView) {
-					this.drawVisiblePages();
-					return;
-				}
-				const canvas = getCanvasForPage(pageId);
-				if (!canvas) {
-					return;
-				}
-				const container = document.getElementById('rightSubPane');
-				if (!container) {
-					return;
-				}
-				const dy = ((container.offsetHeight - canvas.offsetHeight) / 2) - multiPagePadding;
-				// TODO: this parent element lookup is hideously fragile and hideous
-				let newScroll: number;
-				if (this.isFacingView) {
-					newScroll = (canvas.parentElement?.parentElement?.parentElement?.offsetTop ?? 0) - dy;
-				} else {
-					newScroll = (canvas.parentElement?.parentElement?.offsetTop ?? 0) - dy;
-				}
-				newScroll = Math.max(0, Math.floor(newScroll));
-				if (container.scrollTop === newScroll) {
-					// If scrollTop doesn't change, it doesn't trigger a scroll event
-					this.drawVisiblePages();
-				} else {
-					// This triggers a scroll event, which will redraw visible pages
-					container.scrollTop = newScroll;
-				}
-			});
-		},
-		scrollToPageHandler({pageId}: {pageId: number}) {
-			this.scrollToPage(pageId);
-		},
-		drawVisiblePages() {
-			// TODO: this gets called a lot; try caching some of this in the component or somewhere
-			const container = document.getElementById('rightSubPane');
-			if (container == null) {
-				return;
-			}
-			const containerHeight = container.offsetHeight;
-			const containerTop = container.parentElement?.offsetTop ?? 0;
-			document.querySelectorAll<HTMLCanvasElement>('canvas[id^="pageCanvas"]')
-				.forEach(canvas => {
-					const box = canvas.getBoundingClientRect();
-					const y = box.y - containerTop;
-					if (y < containerHeight && (y + box.height) > 0) {
-						this.drawPage(canvas);
-					}
-				});
-		},
-		drawPage(canvas: HTMLCanvasElement) {
-			const page = getPageForCanvas(canvas);
-			if (page != null) {
-				Draw.page(page, canvas, {selectedItem: this.selectedItem});
-			}
-		},
-		setPageView({facingPage = false, scroll = false}) {
-			SelectionOps.clearSelected();
-			this.facingPage = facingPage;
-			this.scroll = scroll;
-			uiState.set('pageView', {facingPage, scroll});
+const pageSize = ref<Size>({
+	width: store.state.template.page.width,
+	height: store.state.template.page.height,
+});
+const pageCount = ref(0);
+const pageLockStatus = ref<boolean[]>([]);
+const facingPage = ref<boolean>(uiState.get('pageView.facingPage') as boolean);
+const scroll = ref<boolean>(uiState.get('pageView.scroll') as boolean);
+const guides = ref<GuideInterface[]>(uiState.get('guides') as GuideInterface[]);
 
-			if (scroll && this.currentPageId) {
-				this.scrollToPage(this.currentPageId);
-			} else {
-				nextTick(() => {
-					this.drawVisiblePages();
-				});
+// Not reactive - only used in mouse event handlers, never read in the template
+let mouseDownPt: Point | null = null;
+let mouseDragItem: MouseDragItem = null;
+
+// Guide instances collected via function-ref, keyed by 'guide-N' matching data-id
+const guideRefs: Record<string, InstanceType<typeof Guide>> = {};
+function guideRef(id: number) {
+	return (el: any) => {
+		const key = 'guide-' + id;
+		if (el) {
+			guideRefs[key] = el;
+		} else {
+			delete guideRefs[key];
+		}
+	};
+}
+
+const selectedItem = computed(() => selectedItemLookup.value);
+const currentPageId = computed(() => currentPageIdRef.value);
+
+const isFacingView = computed(() =>
+	facingPage.value
+	&& (currentPageId.value == null || !store.get.isTemplatePage(currentPageId.value)),
+);
+
+const isScrollingView = computed(() =>
+	scroll.value && pageCount.value > 1
+	&& (currentPageId.value == null || !store.get.isTemplatePage(currentPageId.value)),
+);
+
+const pageIDsToDraw = computed((): (number | null)[] => {
+	const curId = currentPageId.value;
+	if (curId != null && store.get.isTemplatePage(curId)) {
+		return [curId];
+	} else if (isScrollingView.value) {
+		const ids: (number | null)[] = store.get.pageList().map((p: Page) => p.id as number | null);
+		ids.shift();
+		if (isFacingView.value) {
+			ids.unshift(null);
+		}
+		return ids;
+	} else if (isFacingView.value) {
+		return getPairedPages(curId);
+	} else if (curId != null) {
+		return [curId];
+	}
+	return [];
+});
+
+const pageGroups = computed((): {pageId: number | null; idx: number}[][] => {
+	const ids = pageIDsToDraw.value;
+	if (isFacingView.value && isScrollingView.value) {
+		const result: {pageId: number | null; idx: number}[][] = [];
+		for (let i = 0; i < ids.length; i += 2) {
+			result.push(ids.slice(i, i + 2).map((pageId, j) => ({pageId, idx: i + j})));
+		}
+		return result;
+	}
+	return ids.map((pageId, idx) => [{pageId, idx}]);
+});
+
+const scrollPaddingHeight = computed(() => getPageOffset() - multiPagePadding);
+
+watch(selectedItem, (newItem: LookupItem | null) => {
+	if (newItem == null || currentPageId.value == null) {
+		return;
+	}
+	const currentPage = store.get.page(currentPageId.value);
+	if (currentPage?.stretchedStep != null) {
+		const stretchedStep = {
+			type: 'step' as ItemTypeNames,
+			id: currentPage.stretchedStep.stepID,
+		};
+		if (store.get.isDescendent(newItem, stretchedStep)) {
+			scrollToPage(currentPage.id);
+			return;
+		}
+	}
+	const newPage = store.get.pageForItem(newItem);
+	if (newPage) {
+		scrollToPage(newPage.id);
+	} else {
+		drawVisiblePages();
+	}
+});
+
+function isTemplatePage(pageId: number): boolean {
+	return store.get.isTemplatePage(pageId);
+}
+
+function getCanvasID(pageId: number): string {
+	return `pageCanvas_${pageId}`;
+}
+
+function togglePageLock(pageId: number) {
+	const locked = pageLockStatus.value[pageId];
+	setPageLocked(pageId)(!locked);
+}
+
+function onScroll() {
+	if (isScrollingView.value) {
+		drawVisiblePages();
+	}
+}
+
+function forceUpdate() {
+	const ps = store.state.template.page;
+	if (pageSize.value.width !== ps.width || pageSize.value.height !== ps.height) {
+		pageSize.value.width = ps.width;
+		pageSize.value.height = ps.height;
+	}
+	const latestPageCount = store.get.pageCount();
+	if (pageCount.value !== latestPageCount) {
+		pageCount.value = latestPageCount;
+	}
+	pageLockStatus.value = [];
+	guides.value = uiState.get('guides');
+	if (latestPageCount > 0) {
+		store.state.pages.forEach((page: Page) => (pageLockStatus.value[page.id] = page.locked));
+		nextTick(() => {
+			drawVisiblePages();
+		});
+	}
+}
+
+function mouseDown(e: MouseEvent) {
+	if (e.button !== 0 || e.target == null) {
+		return;
+	}
+	const target: HTMLElement = e.target as HTMLElement;
+	if (target.nodeName !== 'CANVAS' && !target.className.includes('guide')) {
+		return;
+	}
+	mouseDownPt = {x: e.offsetX, y: e.offsetY};
+	if (target.className.includes('guide') && target.dataset.id != null) {
+		mouseDragItem = {
+			type: 'guide',
+			guide: guideRefs[target.dataset.id],
+			moved: false,
+			x: e.screenX,
+			y: e.screenY,
+		};
+	} else if (selectedItem.value) {
+		const item = store.get.lookupToItem(selectedItem.value);
+		const page = getPageForCanvas(target);
+		if (item && store.get.isMoveable(item)
+			&& inHighlightBox(e.offsetX, e.offsetY, item, pageSize.value, page)
+		) {
+			mouseDragItem = {
+				type: 'item',
+				item,
+				moved: false,
+				x: e.screenX,
+				y: e.screenY,
+			};
+		}
+	}
+}
+
+function mouseMove(e: MouseEvent) {
+	if (e.buttons !== 1 || e.target == null) {
+		return;
+	}
+	const target: HTMLElement = e.target as HTMLElement;
+	if (mouseDragItem == null
+		|| (target.nodeName !== 'CANVAS' && !target.className.includes('guide'))
+	) {
+		return;
+	}
+	const dx = Math.floor(e.screenX - mouseDragItem.x);
+	const dy = Math.floor(e.screenY - mouseDragItem.y);
+	if (dx === 0 && dy === 0) {
+		return;
+	}
+	const up = {x: e.offsetX, y: e.offsetY};
+	if (mouseDragItem.type === 'guide') {
+		mouseDragItem.guide.moveBy(dx, dy);
+	} else if (mouseDownPt
+		&& _.geom.distance(mouseDownPt, up) > 5
+		&& mouseDragItem.type === 'item'
+	) {
+		// TODO: Update parent bounding boxes for children like CSI, submodel, etc
+		store.mutations.item.reposition({item: mouseDragItem.item, dx, dy});
+		mouseDragItem.moved = true;
+		drawVisiblePages();
+	}
+	mouseDragItem.x = e.screenX;
+	mouseDragItem.y = e.screenY;
+}
+
+function mouseUp(e: MouseEvent) {
+	if (e.button !== 0 || e.target == null) {
+		return;
+	}
+	const target: HTMLElement = e.target as HTMLElement;
+	if (mouseDownPt
+		&& (mouseDragItem == null || !mouseDragItem.moved)
+		&& target.nodeName === 'CANVAS'
+	) {
+		const page = getPageForCanvas(target);
+		if (page == null) {
+			return;
+		}
+		const clickTarget = findClickTargetInPage(page, e.offsetX, e.offsetY);
+		if (clickTarget) {
+			SelectionOps.setSelected(clickTarget, page);
+		} else {
+			SelectionOps.clearSelected();
+		}
+	} else if (mouseDragItem?.type === 'guide') {
+		mouseDragItem.guide.savePosition();
+	} else if (mouseDragItem?.type === 'item' && mouseDragItem.moved) {
+		const item = t('glossary.' + mouseDragItem.item.type.toLowerCase());
+		const undoText = t('action.edit.item.move.undo_@mf', {item});
+		undoStack.commit('', null, undoText);
+	} else if (target.nodeName !== 'CANVAS') {
+		SelectionOps.clearSelected();
+	}
+	mouseDownPt = null;
+	mouseDragItem = null;
+}
+
+function pageUp() {
+	if (currentPageId.value == null) {
+		return;
+	}
+	let prevPage = store.get.prevPage({type: 'page', id: currentPageId.value});
+	if (isFacingView.value) {
+		const page = store.get.page(currentPageId.value);
+		if (!_.isEven(page.number) && prevPage != null) {
+			const prevPrevPage = store.get.prevPage(prevPage);
+			if (prevPrevPage) {
+				prevPage = prevPrevPage;
 			}
-		},
-	},
-	computed: {
-		selectedItem(): LookupItem | null {
-			return selectedItemLookup.value;
-		},
-		currentPageId(): number | null {
-			return currentPageIdRef.value;
-		},
-		isFacingView(): boolean {
-			return this.facingPage
-				&& (this.currentPageId == null
-					|| !store.get.isTemplatePage(this.currentPageId));
-		},
-		isScrollingView(): boolean {
-			return this.scroll && this.pageCount > 1
-				&& (this.currentPageId == null
-					|| !store.get.isTemplatePage(this.currentPageId));
-		},
-		pageIDsToDraw(): (number | null)[] {
-			const currentPageId = this.currentPageId;
-			if (currentPageId != null && store.get.isTemplatePage(currentPageId)) {
-				return [currentPageId];
-			} else if (this.isScrollingView) {
-				const ids: (number | null)[] = store.get.pageList().map((p: Page) => p.id as number | null);
-				ids.shift();
-				if (this.isFacingView) {
-					ids.unshift(null);
-				}
-				return ids;
-			} else if (this.isFacingView) {
-				return getPairedPages(currentPageId);
-			} else if (currentPageId != null) {
-				return [currentPageId];
+		}
+	}
+	if (prevPage) {
+		SelectionOps.clearSelected();
+		SelectionOps.setCurrentPage(prevPage);
+	}
+}
+
+function pageDown() {
+	if (currentPageId.value == null) {
+		return;
+	}
+	let nextPage = store.get.nextPage({type: 'page', id: currentPageId.value});
+	if (isFacingView.value) {
+		const page = store.get.page(currentPageId.value);
+		if (nextPage != null && page.number > 0 && _.isEven(page.number)) {
+			const nextNextPage = store.get.nextPage(nextPage);
+			if (nextNextPage) {
+				nextPage = nextNextPage;
 			}
-			return [];
-		},
-		pageGroups(): {pageId: number | null; idx: number}[][] {
-			const ids = this.pageIDsToDraw;
-			if (this.isFacingView && this.isScrollingView) {
-				const result: {pageId: number | null; idx: number}[][] = [];
-				for (let i = 0; i < ids.length; i += 2) {
-					result.push(ids.slice(i, i + 2).map((pageId, j) => ({pageId, idx: i + j})));
-				}
-				return result;
+		}
+	}
+	if (nextPage) {
+		SelectionOps.clearSelected();
+		SelectionOps.setCurrentPage(nextPage);
+	}
+}
+
+function handleKeyPress({key}: {key: string}) {
+	if (key === 'PageDown') {
+		pageDown();
+	} else if (key === 'PageUp') {
+		pageUp();
+	}
+}
+
+// This will trigger a full visible page redraw
+function scrollToPage(pageId: number) {
+	nextTick(() => {
+		if (!isScrollingView.value) {
+			drawVisiblePages();
+			return;
+		}
+		const canvas = getCanvasForPage(pageId);
+		if (!canvas) {
+			return;
+		}
+		const container = document.getElementById('rightSubPane');
+		if (!container) {
+			return;
+		}
+		const dy = ((container.offsetHeight - canvas.offsetHeight) / 2) - multiPagePadding;
+		// TODO: this parent element lookup is hideously fragile and hideous
+		let newScroll: number;
+		if (isFacingView.value) {
+			newScroll = (canvas.parentElement?.parentElement?.parentElement?.offsetTop ?? 0) - dy;
+		} else {
+			newScroll = (canvas.parentElement?.parentElement?.offsetTop ?? 0) - dy;
+		}
+		newScroll = Math.max(0, Math.floor(newScroll));
+		if (container.scrollTop === newScroll) {
+			// If scrollTop doesn't change, it doesn't trigger a scroll event
+			drawVisiblePages();
+		} else {
+			// This triggers a scroll event, which will redraw visible pages
+			container.scrollTop = newScroll;
+		}
+	});
+}
+
+function scrollToPageHandler({pageId}: {pageId: number}) {
+	scrollToPage(pageId);
+}
+
+function drawVisiblePages() {
+	// TODO: this gets called a lot; try caching some of this in the component or somewhere
+	const container = document.getElementById('rightSubPane');
+	if (container == null) {
+		return;
+	}
+	const containerHeight = container.offsetHeight;
+	const containerTop = container.parentElement?.offsetTop ?? 0;
+	document.querySelectorAll<HTMLCanvasElement>('canvas[id^="pageCanvas"]')
+		.forEach(canvas => {
+			const box = canvas.getBoundingClientRect();
+			const y = box.y - containerTop;
+			if (y < containerHeight && (y + box.height) > 0) {
+				drawPage(canvas);
 			}
-			return ids.map((pageId, idx) => [{pageId, idx}]);
-		},
-		scrollPaddingHeight(): number {
-			return getPageOffset() - multiPagePadding;
-		},
-	},
-	mounted() {
-		EventBus.on('key-press', this.handleKeyPress);
-		EventBus.on('page-resize', this.forceUpdate);
-		EventBus.on('scroll-to-page', this.scrollToPageHandler);
-		EventBus.on('set-page-view', this.setPageView);
-		EventBus.on('draw-current-page', this.drawVisiblePages);
-		EventBus.on('force-update', this.forceUpdate);
-	},
-	beforeUnmount() {
-		EventBus.off('page-resize', this.forceUpdate);
-		EventBus.off('scroll-to-page', this.scrollToPageHandler);
-		EventBus.off('set-page-view', this.setPageView);
-		EventBus.off('draw-current-page', this.drawVisiblePages);
-		EventBus.off('force-update', this.forceUpdate);
-	},
+		});
+}
+
+function drawPage(canvas: HTMLCanvasElement) {
+	const page = getPageForCanvas(canvas);
+	if (page != null) {
+		Draw.page(page, canvas, {selectedItem: selectedItem.value});
+	}
+}
+
+function setPageView({facingPage: fp = false, scroll: sc = false}) {
+	SelectionOps.clearSelected();
+	facingPage.value = fp;
+	scroll.value = sc;
+	uiState.set('pageView', {facingPage: fp, scroll: sc});
+	if (sc && currentPageId.value) {
+		scrollToPage(currentPageId.value);
+	} else {
+		nextTick(() => {
+			drawVisiblePages();
+		});
+	}
+}
+
+onMounted(() => {
+	EventBus.on('key-press', handleKeyPress);
+	EventBus.on('page-resize', forceUpdate);
+	EventBus.on('scroll-to-page', scrollToPageHandler);
+	EventBus.on('set-page-view', setPageView);
+	EventBus.on('draw-current-page', drawVisiblePages);
+	EventBus.on('force-update', forceUpdate);
+});
+
+onBeforeUnmount(() => {
+	EventBus.off('page-resize', forceUpdate);
+	EventBus.off('scroll-to-page', scrollToPageHandler);
+	EventBus.off('set-page-view', setPageView);
+	EventBus.off('draw-current-page', drawVisiblePages);
+	EventBus.off('force-update', forceUpdate);
 });
 
 function getPairedPages(pageId: number | null): (number | null)[] {
@@ -495,10 +508,6 @@ function getPageOffset(): number {
 	return container ? (container.offsetHeight - pageHeight) / 2 : 0;
 }
 
-function getCanvasID(pageId: number): string {
-	return `pageCanvas_${pageId}`;
-}
-
 function getPageForCanvas(canvas: HTMLElement): Page | null {
 	const [, id] = canvas.id.split('_');
 	return store.get.lookupToItem(parseInt(id, 10), 'page') as Page | null;
@@ -522,10 +531,10 @@ function inHighlightBox(
 	x: number,
 	y: number,
 	item: LookupItem,
-	pageSize: Size,
+	size: Size,
 	page?: Page | null,
 ): boolean {
-	const box = store.get.highlightBox(item, pageSize, page);
+	const box = store.get.highlightBox(item, size, page);
 	return inBox(x, y, box);
 }
 

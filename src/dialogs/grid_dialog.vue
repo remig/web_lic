@@ -24,7 +24,7 @@
 					@input="update"
 				>
 			</label>
-			<label class="label-input-row">
+			<div class="label-input-row">
 				{{t('dialog.grid.offset')}}
 				<div class="flex-row">
 					<span class="gridInlineLabel">{{t("dialog.grid.offset_top")}}</span>
@@ -48,7 +48,7 @@
 						@input="update"
 					>
 				</div>
-			</label>
+			</div>
 			<hr>
 			<div class="label-input-row">
 				{{t('dialog.grid.line_style')}}

@@ -22,20 +22,20 @@
 				<strong>
 					{{t('dialog.about_lic.thanks')}}
 				</strong>
-				<ul>
-					<li>
-						{{t('dialog.about_lic.feedback')}}
-						<a href="https://www.flickr.com/photos/legohaulic/" target="_blank">Tyler Clites</a>
-						{{t('dialog.about_lic.and')}}
-						<a href="http://constructibles.net/" target="_blank">Jason Petrasich</a>
-					</li>
-					<li>
-						{{t('dialog.about_lic.german')}}
-						<a href="https://github.com/mried" target="_blank">mried</a>
-					</li>
-					<li>{{t('dialog.about_lic.french')}}Jean-Philippe Lechêne</li>
-				</ul>
 			</p>
+			<ul>
+				<li>
+					{{t('dialog.about_lic.feedback')}}
+					<a href="https://www.flickr.com/photos/legohaulic/" target="_blank">Tyler Clites</a>
+					{{t('dialog.about_lic.and')}}
+					<a href="http://constructibles.net/" target="_blank">Jason Petrasich</a>
+				</li>
+				<li>
+					{{t('dialog.about_lic.german')}}
+					<a href="https://github.com/mried" target="_blank">mried</a>
+				</li>
+				<li>{{t('dialog.about_lic.french')}}Jean-Philippe Lechêne</li>
+			</ul>
 			<br>
 			<p>
 				{{t('dialog.about_lic.copyright')}}

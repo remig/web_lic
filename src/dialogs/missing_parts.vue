@@ -11,27 +11,29 @@
 			v-html="t('dialog.missing_parts.subtitle')"
 		/>
 		<table class="missingPartsTable">
-			<tr v-for="(value, filename) in missingPartsData" :key="filename" class="missingPartRow">
-				<td>
-					<i v-if="value.uploaded" class="fas fa-check" />
-					{{filename}}
-				</td>
-				<td>{{partCount(value.count)}}</td>
-				<td>
-					<LicTooltip v-if="showSendButton(filename)">
-						<div
-							slot="content"
-							v-html="t('dialog.missing_parts.send_to_remote.tooltip')"
-						/>
-						<LicButton @click="sendToRemote(filename)">
-							{{t("dialog.missing_parts.send_to_remote.title")}}
+			<tbody>
+				<tr v-for="(value, filename) in missingPartsData" :key="filename" class="missingPartRow">
+					<td>
+						<i v-if="value.uploaded" class="fas fa-check" />
+						{{filename}}
+					</td>
+					<td>{{partCount(value.count)}}</td>
+					<td>
+						<LicTooltip v-if="showSendButton(filename)">
+							<div
+								slot="content"
+								v-html="t('dialog.missing_parts.send_to_remote.tooltip')"
+							/>
+							<LicButton @click="sendToRemote(filename)">
+								{{t("dialog.missing_parts.send_to_remote.title")}}
+							</LicButton>
+						</LicTooltip>
+						<LicButton v-else-if="!value.uploaded" @click="upload(filename)">
+							{{t("glossary.import")}}
 						</LicButton>
-					</LicTooltip>
-					<LicButton v-else-if="!value.uploaded" @click="upload(filename)">
-						{{t("glossary.import")}}
-					</LicButton>
-				</td>
-			</tr>
+					</td>
+				</tr>
+			</tbody>
 		</table>
 		<template #footer>
 			<LicButton type="primary" @click="ok">
@@ -43,7 +45,7 @@
 
 <script setup lang="ts">
 
-import {reactive, computed, set} from 'vue';
+import {ref, computed} from 'vue';
 import {t} from '@/translations';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicButton from '@/components/base/LicButton.vue';
@@ -68,10 +70,10 @@ function buildMissingPartsTable(): MissingPartsData {
 }
 
 const enablePartSend = window.location.host.toLowerCase().includes('bugeyedmonkeys');
-const missingPartsData = reactive<MissingPartsData>(buildMissingPartsTable());
-const loadedPartContent = reactive<LoadedContent>({});
+const missingPartsData = ref<MissingPartsData>(buildMissingPartsTable());
+const loadedPartContent = ref<LoadedContent>({});
 
-const stillHaveMissingParts = computed(() => _.some(missingPartsData, p => !p.uploaded));
+const stillHaveMissingParts = computed(() => _.some(missingPartsData.value, p => !p.uploaded));
 
 const okText = computed(() => stillHaveMissingParts.value
 	? t('dialog.missing_parts.proceed')
@@ -83,9 +85,9 @@ function partCount(count: number) {
 }
 
 function showSendButton(filename: string) {
-	return missingPartsData[filename].uploaded
+	return missingPartsData.value[filename].uploaded
 		&& enablePartSend
-		&& loadedPartContent[filename] != null;
+		&& loadedPartContent.value[filename] != null;
 }
 
 function ok() {
@@ -98,11 +100,11 @@ function ok() {
 function upload(filename: string) {
 	openFileHandler('.dat, .ldr, .mpd', 'text', (content: string | ArrayBuffer | null) => {
 		LDParse.loadPartContent(content as string).then(() => {
-			set(loadedPartContent, filename, content);
-			missingPartsData[filename].uploaded = true;
+			loadedPartContent.value = {...loadedPartContent.value, [filename]: content as string | null};
+			missingPartsData.value[filename].uploaded = true;
 			_.each(LDParse.missingParts, (count: number, fn: string) => {
-				if (!(fn in missingPartsData)) {
-					set(missingPartsData, fn, {uploaded: false, count});
+				if (!(fn in missingPartsData.value)) {
+					missingPartsData.value = {...missingPartsData.value, [fn]: {uploaded: false, count}};
 				}
 			});
 		});
@@ -116,11 +118,11 @@ function sendToRemote(filename: string) {
 		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		const content = `&content=filename: ${filename}\n`
 			+ '------------------------------\n'
-			+ `${loadedPartContent[filename]}\n`
+			+ `${loadedPartContent.value[filename]}\n`
 			+ '------------------------------';
 		xhr.send(content);
 	}
-	loadedPartContent[filename] = null;
+	loadedPartContent.value[filename] = null;
 }
 
 </script>

@@ -5,7 +5,7 @@
 		:title="title"
 		:width="width ?? '500px'"
 	>
-		<label class="label-input-row">
+		<div class="label-input-row">
 			{{label}}
 			<div>
 				<input
@@ -20,7 +20,7 @@
 				>
 				<div v-if="bodyText" style="margin-top: 15px" v-html="bodyText" />
 			</div>
-		</label>
+		</div>
 		<template #footer>
 			<LicButton type="cancel" @click="cancel" />
 			<LicButton type="ok" @click="ok" />

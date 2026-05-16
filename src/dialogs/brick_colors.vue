@@ -6,33 +6,37 @@
 		width="500px"
 	>
 		<table class="brickColorTable">
-			<tr>
-				<th>{{t('dialog.brick_colors.ld_code')}}</th>
-				<th style="text-align: left;">
-					{{t('dialog.brick_colors.name')}}
-				</th>
-				<th>
-					{{t('glossary.color')}}
-				</th>
-				<th>
-					{{t('dialog.brick_colors.edge_color')}}
-				</th>
-			</tr>
+			<thead>
+				<tr>
+					<th>{{t('dialog.brick_colors.ld_code')}}</th>
+					<th style="text-align: left;">
+						{{t('dialog.brick_colors.name')}}
+					</th>
+					<th>
+						{{t('glossary.color')}}
+					</th>
+					<th>
+						{{t('dialog.brick_colors.edge_color')}}
+					</th>
+				</tr>
+			</thead>
 		</table>
 		<div class="brickColorTableScroll">
 			<table class="brickColorTable">
-				<tr v-for="row in colorData" :key="row.id" class="brickColorRow">
-					<td>{{row.id}}</td>
-					<td style="text-align: left;">
-						{{_.startCase(row.name)}}
-					</td>
-					<td>
-						<LicColorPicker v-model="row.color" />
-					</td>
-					<td>
-						<LicColorPicker v-model="row.edge" />
-					</td>
-				</tr>
+				<tbody>
+					<tr v-for="row in colorData" :key="row.id" class="brickColorRow">
+						<td>{{row.id}}</td>
+						<td style="text-align: left;">
+							{{_.startCase(row.name)}}
+						</td>
+						<td>
+							<LicColorPicker v-model="row.color" />
+						</td>
+						<td>
+							<LicColorPicker v-model="row.edge" />
+						</td>
+					</tr>
+				</tbody>
 			</table>
 		</div>
 		<template #footer>
