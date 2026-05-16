@@ -6,7 +6,7 @@ import { type Annotation, type Book, type Page } from '../item_types';
 import LDParse from '../ld_parse';
 import { store } from '../store';
 
-function addOneTitlePage(parent?: Book) {
+function addOneTitlePage(parent: Book | null = null) {
 	let insertionIndex = 1;
 	if (parent) {
 		insertionIndex = store.state.pages.findIndex((page: Page) => page.id === parent.pages[0]);

@@ -49,7 +49,7 @@ export async function importModel(modelGenerator: () => Promise<any>) {
 
 	const partsPerStep = _.isEmpty(model.steps)
 		? _.clamp(Math.floor(LDParse.model.get.partCount(model) / 10), 1, 20)
-		: undefined;
+		: null;
 	const layoutChoices = await showImportModelDialog({
 		includePartsPerStep: partsPerStep != null,
 		partsPerStep,
@@ -65,7 +65,7 @@ export async function importModel(modelGenerator: () => Promise<any>) {
 		store.mutations.addInitialSubmodelImages();
 		if (layoutChoices.useMaxSteps) {
 			ReactiveState.busyText.value = t('dialog.busy_indicator.merging_steps');
-			store.mutations.mergeInitialPages(ReactiveState.updateProgress);
+			await store.mutations.mergeInitialPages(ReactiveState.updateProgress);
 		}
 		if (layoutChoices.include.partListPage) {
 			store.mutations.inventoryPage.add();

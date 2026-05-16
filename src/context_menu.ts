@@ -1567,7 +1567,7 @@ const contextMenu = {
 							t('action.part.move_part_to.previous_step.undo'),
 							[
 								{ type: 'csi', id: srcStep?.csiID },
-								{ type: 'csi', id: destStep?.csiID },
+								{ type: 'csi', id: destStep?.csiID ?? null },
 							],
 						);
 					},
@@ -1595,7 +1595,7 @@ const contextMenu = {
 							t('action.part.move_part_to.next_step.undo'),
 							[
 								{ type: 'csi', id: srcStep?.csiID },
-								{ type: 'csi', id: destStep?.csiID },
+								{ type: 'csi', id: destStep?.csiID ?? null },
 							],
 						);
 					},
@@ -1624,7 +1624,7 @@ const contextMenu = {
 					'part.addToCallout',
 					{ partID: selectedItem.id, step, callout, doLayout: true },
 					t('action.part.add_part_to_callout.undo'),
-					[{ type: 'csi', id: targetStep?.csiID }],
+					[{ type: 'csi', id: targetStep?.csiID ?? null }],
 				);
 			},
 		},
@@ -1655,7 +1655,7 @@ const contextMenu = {
 								'part.addToCallout',
 								{ partID: selectedItem.id, step, callout, doLayout: true },
 								t('action.part.add_part_to_callout.undo'),
-								[{ type: 'csi', id: targetStep?.csiID }],
+								[{ type: 'csi', id: targetStep?.csiID ?? null }],
 							);
 						},
 					};

@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base :title="title" class="fillTemplate" style="--label-width: 80px">
+	<panel-base :title="resolvedTitle" class="fillTemplate" style="--label-width: 80px">
 		<div class="label-input-row">
 			{{ t('glossary.color') }}
 			<LicColorPicker v-model="color" show-alpha @change="updateValues" />
@@ -56,6 +56,8 @@ const props = withDefaults(
 const emit = defineEmits<{
 	(e: 'new-values', val: { type: string; noLayout: boolean }): void;
 }>();
+
+const resolvedTitle = computed(() => props.title ?? 'template.fill.title');
 
 const fillTemplate = () => _.get(store.state.template, props.templateEntry).fill;
 

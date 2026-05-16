@@ -10,13 +10,12 @@ import {
 	type ImageTemplate,
 	type LookupItem,
 	type Page,
-	type PartItem,
 	type Point,
 	type PointItem,
 } from './item_types';
 import LDParse from './ld_parse';
 import { store } from './store';
-import { isPoint, isPointItem, isSize } from './type_helpers';
+import { isItemSpecificType, isPoint, isPointItem, isSize } from './type_helpers';
 import uiState from './ui_state';
 import _ from './util';
 
@@ -394,10 +393,9 @@ function drawStep(stepId: number, ctx: CanvasRenderingContext2D, config: DrawCon
 	if (step.numberLabelID != null) {
 		const lbl = store.get.numberLabel(step.numberLabelID);
 		if (lbl) {
-			const template =
-				step.parent.type === 'callout'
-					? store.state.template.callout.step
-					: store.state.template.step;
+			const template = isItemSpecificType(step.parent, 'callout')
+				? store.state.template.callout.step
+				: store.state.template.step;
 			ctx.fillStyle = template.numberLabel.color;
 			ctx.font = template.numberLabel.font;
 			ctx.textAlign = lbl.align || 'start';
@@ -421,7 +419,7 @@ function drawStep(stepId: number, ctx: CanvasRenderingContext2D, config: DrawCon
 function drawSubmodelImage(
 	submodelImageId: number,
 	ctx: CanvasRenderingContext2D,
-	{ hiResScale = 1, noCache }: DrawConfig,
+	config: DrawConfig,
 ) {
 	const submodelImage = store.get.submodelImage(submodelImageId);
 	if (submodelImage == null) {
@@ -446,10 +444,17 @@ function drawSubmodelImage(
 		Math.floor(submodelImage.innerContentOffset.y),
 	);
 
+	const hiResScale = config.hiResScale ?? 1;
 	ctx.save();
 	ctx.scale(1 / hiResScale, 1 / hiResScale);
 	const part = LDParse.model.get.abstractPart(submodelImage.modelFilename);
-	const renderResult = store.render.pli(part.colorCode, part.filename, csi, hiResScale, noCache);
+	const renderResult = store.render.pli(
+		part.colorCode,
+		part.filename,
+		csi,
+		hiResScale,
+		config.noCache,
+	);
 	if (renderResult) {
 		const x = Math.floor((submodelImage.x + csi.x) * hiResScale);
 		const y = Math.floor((submodelImage.y + csi.y) * hiResScale);
@@ -472,11 +477,7 @@ function drawSubmodelImage(
 	ctx.restore();
 }
 
-function drawCSI(
-	csiId: number,
-	ctx: CanvasRenderingContext2D,
-	{ hiResScale = 1, selectedItem, noCache }: DrawConfig,
-) {
+function drawCSI(csiId: number, ctx: CanvasRenderingContext2D, config: DrawConfig) {
 	const csi = store.get.csi(csiId);
 	if (csi == null) {
 		return;
@@ -490,15 +491,24 @@ function drawCSI(
 	ctx.save();
 	ctx.translate(Math.floor(csi.x), Math.floor(csi.y));
 
+	const hiResScale = config.hiResScale ?? 1;
+	const selectedItem = config.selectedItem ?? null;
 	ctx.save();
 	ctx.scale(1 / hiResScale, 1 / hiResScale);
 	let havePart = false;
-	if (selectedItem?.type === 'part') {
-		havePart = (selectedItem as PartItem).stepID === step.id;
+	if (isItemSpecificType(selectedItem, 'part')) {
+		havePart = selectedItem.stepID === step.id;
 	}
 	const selectedPartIDs = havePart && selectedItem ? [selectedItem.id] : null;
 	const renderer = selectedPartIDs == null ? 'csi' : 'csiWithSelection';
-	const res = store.render[renderer](localModel, step, csi, selectedPartIDs, hiResScale, noCache);
+	const res = store.render[renderer](
+		localModel,
+		step,
+		csi,
+		selectedPartIDs,
+		hiResScale,
+		config.noCache,
+	);
 	if (res && res.dx != null && res.dy != null) {
 		ctx.drawImage(res.container, Math.floor(-res.dx), Math.floor(-res.dy));
 	}
@@ -510,11 +520,7 @@ function drawCSI(
 	ctx.restore();
 }
 
-function drawPLI(
-	pliId: number,
-	ctx: CanvasRenderingContext2D,
-	{ hiResScale, noCache }: DrawConfig,
-) {
+function drawPLI(pliId: number, ctx: CanvasRenderingContext2D, config: DrawConfig) {
 	const pli = store.get.pli(pliId);
 	if (pli == null) {
 		return;
@@ -542,21 +548,18 @@ function drawPLI(
 	ctx.translate(Math.floor(pli.innerContentOffset.x), Math.floor(pli.innerContentOffset.y));
 	ctx.translate(Math.floor(pli.x), Math.floor(pli.y));
 	pliItems.forEach((idx) => {
-		drawPLIItem(idx, ctx, { hiResScale, noCache });
+		drawPLIItem(idx, ctx, config);
 	});
 	ctx.restore();
 }
 
-function drawPLIItem(
-	pliItemId: number,
-	ctx: CanvasRenderingContext2D,
-	{ hiResScale = 1, noCache }: DrawConfig,
-) {
+function drawPLIItem(pliItemId: number, ctx: CanvasRenderingContext2D, config: DrawConfig) {
 	const pliItem = store.get.pliItem(pliItemId);
 	if (pliItem == null) {
 		return;
 	}
 
+	const hiResScale = config.hiResScale ?? 1;
 	ctx.save();
 	ctx.scale(1 / hiResScale, 1 / hiResScale);
 	const renderResult = store.render.pli(
@@ -564,7 +567,7 @@ function drawPLIItem(
 		pliItem.filename,
 		pliItem,
 		hiResScale,
-		noCache,
+		config.noCache,
 	);
 	if (renderResult) {
 		const x = Math.floor(pliItem.x) * hiResScale;

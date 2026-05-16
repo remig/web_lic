@@ -80,7 +80,7 @@ const api = {
 		changeList: string | ActionChange | (MutationChange | ActionChange)[],
 		opts: any,
 		undoText: string,
-		clearCacheTargets?: ClearCacheTarget[] | null,
+		clearCacheTargets: ClearCacheTarget[] | null = null,
 	) {
 		let localChangeList: (MutationChange | ActionChange)[];
 		if (typeof changeList === 'string') {

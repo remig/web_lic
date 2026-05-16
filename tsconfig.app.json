@@ -5,25 +5,30 @@
 		"allowJs": true,
 		"target": "es6",
 		"module": "esnext",
-		"lib": ["dom", "es6", "es2019", "scripthost", "esnext", "dom.iterable"],
+		"lib": [
+			"dom",
+			"es6",
+			"es2019",
+			"scripthost",
+			"esnext",
+			"dom.iterable"
+		],
 		"isolatedModules": true,
 		"importHelpers": true,
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": [
+				"./src/*"
+			]
 		},
 		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
 		"skipLibCheck": true,
 		"strict": true,
-		"alwaysStrict": true,
 		"noImplicitReturns": true,
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"strictNullChecks": true,
-		"strictPropertyInitialization": true,
-		"strictBindCallApply": true,
-		"strictFunctionTypes": true,
+		"noImplicitOverride": true,
+		"noFallthroughCasesInSwitch": true,
+		"exactOptionalPropertyTypes": true,
 		"composite": true,
 		"tsBuildInfoFile": "./dist/.tsbuildinfo-app"
 	},

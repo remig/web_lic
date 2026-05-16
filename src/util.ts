@@ -23,9 +23,7 @@ import unzip from 'lodash/unzip';
 
 import { type Border, type Box, type Point, type Size } from './item_types';
 
-interface CacheInterface {
-	[key: string]: any;
-}
+type CacheInterface<T> = Record<string, T>;
 
 type EdgeList = 'top' | 'right' | 'bottom' | 'left';
 
@@ -40,29 +38,12 @@ interface ArrowInterface {
 	};
 }
 
-interface GeomInterface {
-	bbox(points: (Point | Box)[]): Box;
-	expandBox(box: Box, minWidth: number, minHeight: number): Box;
-	moveBoxEdge(box: Box, edge: EdgeList, dt: number): void;
-	distance(p1: number | Point, p2: number | Point): number;
-	midpoint(p1: Point, p2: Point): Point;
-	arrow(): ArrowInterface;
-}
-
 interface RGBColor {
 	r: number;
 	g: number;
 	b: number;
 	a: number | null;
 	toString(): string;
-}
-
-interface ColorInterface {
-	toRGB(colorString: string): RGBColor;
-	toVec4(colorString: string, alpha: number): number[];
-	luma(colorString: any, isUnitColor: boolean): number;
-	opposite(colorString: string): 'white' | 'black';
-	isVisible(colorString?: string | null): boolean;
 }
 
 interface FontPartsInterface {
@@ -76,85 +57,21 @@ interface FontPartsInterface {
 
 export type UnitTypes = 'point' | 'in' | 'mm' | 'cm';
 
-interface UnitsInterface {
-	pixelsToUnits(pixelCount: number, newUnits: UnitTypes): number;
-	unitsToPixels(unitCount: number, newUnits: UnitTypes): number;
-	pointsToUnits(pointCount: number, newUnits: UnitTypes): number;
-	unitToPoints(unitCount: number, newUnits: UnitTypes): number;
-}
-
 interface Version {
 	major: number;
 	minor: number;
 	revision: number;
 }
 
-interface UtilInterface {
-	equal(a: number, b: number, e: number): boolean;
-	isEven(n: number): boolean;
-	insert<T>(array: T[], item: T, idx: number): void;
-	deleteItem<T>(array: T[], item: T): void;
-	count<T>(array: T[], search: T): number;
-	itemEq(a: any, b: any): boolean;
-	measureLabel(font: string, text: string): Size;
-	fontToFontParts(font: string): FontPartsInterface;
-	fontPartsToFont(font: FontPartsInterface): string;
-	fontString({
-		size,
-		family,
-		bold,
-		italic,
-	}: {
-		size: number;
-		family: string;
-		bold: boolean;
-		italic: boolean;
-	}): string;
-	degrees(radians: number): number;
-	radians(degrees: number): number;
-	dom: {
-		createElement(type: string, attrs: any, parent: any, text?: string): HTMLElement;
-		emptyNode(node: HTMLElement): void;
-	};
-	units: UnitsInterface;
-	geom: GeomInterface;
-	version: {
-		parse(v: string): Version;
-		nice(v: string): string;
-		isOldVersion(prev: string, current: string): boolean;
-	};
-	sort: {
-		numeric: {
-			ascending(a: any, b: any): number;
-			descending(a: any, b: any): number;
-		};
-	};
-	formatTime(start: number, end: number): string;
-	color: ColorInterface;
-	isBorderVisible(border: Border): boolean;
-	assign: typeof assign;
-	chunk: typeof chunk;
-	clamp: typeof clamp;
-	clone: typeof clone;
-	cloneDeep: typeof cloneDeep;
-	difference: typeof difference;
-	each: typeof each;
-	forOwn: typeof forOwn;
-	get: typeof get;
-	isEmpty: typeof isEmpty;
-	isEqual: typeof isEqual;
-	last: typeof last;
-	pullAt: typeof pullAt;
-	range: typeof range;
-	round: typeof round;
-	set: typeof set;
-	some: typeof some;
-	startCase: typeof startCase;
-	template: typeof template;
-	unzip: typeof unzip;
-}
+const unitConversions = {
+	// this conversion factor * pixel count = units
+	point: 0.75,
+	in: 0.75 / 72,
+	mm: (0.75 / 72) * 25.4,
+	cm: (0.75 / 72) * 2.54,
+};
 
-const api: UtilInterface = {
+const api = {
 	equal(a: number, b: number, e: number = 0.0001): boolean {
 		return Math.abs(a - b) < e;
 	},
@@ -187,22 +104,23 @@ const api: UtilInterface = {
 		return a && b && a.id === b.id && a.type === b.type && a.stepID === b.stepID;
 	},
 	measureLabel: (() => {
-		const labelSizeCache: CacheInterface = {}; // {font: {text: {width: 10, height: 20}}}
-		return function (font: string, text: string) {
-			if (labelSizeCache[font] && labelSizeCache[font][text]) {
+		const labelSizeCache: CacheInterface<Record<string, Size>> = {}; // {font: {text: {width: 10, height: 20}}}
+		return function (font: string, text: string): Size {
+			if (labelSizeCache?.[font]?.[text] != null) {
 				return cloneDeep(labelSizeCache[font][text]);
 			}
 			const container = document.getElementById('fontMeasureContainer');
-			if (container && container.firstChild) {
-				container.style.font = font;
-				container.firstChild.textContent = text;
-				let res = (container as any).getBBox();
-				res = { width: Math.ceil(res.width), height: Math.ceil(res.height) };
-				labelSizeCache[font] = labelSizeCache[font] || {};
-				labelSizeCache[font][text] = res;
-				return cloneDeep(res); // return a clone so we don't accidentally alter cached values
+			if (!container?.firstChild) {
+				throw 'Trying to measure a label in a non-existent measure container';
 			}
-			return null;
+
+			container.style.font = font;
+			container.firstChild.textContent = text;
+			const bbox = (container as any).getBBox();
+			const res = { width: Math.ceil(bbox.width), height: Math.ceil(bbox.height) };
+			labelSizeCache[font] = labelSizeCache[font] || {};
+			labelSizeCache[font][text] = res;
+			return cloneDeep(res); // return a clone so we don't accidentally alter cached values
 		};
 	})(),
 	fontToFontParts: (() => {
@@ -213,7 +131,7 @@ const api: UtilInterface = {
 		// prettier-ignore
 		const stretchList = ['ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded'];
 
-		return function (font = '') {
+		return function (font: string = ''): FontPartsInterface {
 			const fullFontParts = {
 				fontStyle: '',
 				fontVariant: '',
@@ -263,7 +181,7 @@ const api: UtilInterface = {
 		fontStretch = '',
 		fontSize = '',
 		fontFamily = '',
-	} = {}) {
+	}: FontPartsInterface = {}): string {
 		return [fontStyle, fontVariant, fontWeight, fontStretch, fontSize, fontFamily.trim()]
 			.filter((el) => el !== '')
 			.join(' ')
@@ -279,7 +197,7 @@ const api: UtilInterface = {
 		family: string;
 		bold: boolean;
 		italic: boolean;
-	}) {
+	}): string {
 		return api.fontPartsToFont({
 			fontSize: size + 'pt',
 			fontFamily: family,
@@ -294,7 +212,7 @@ const api: UtilInterface = {
 		return (degrees * Math.PI) / 180;
 	},
 	dom: {
-		createElement(type: string, attrs: any, parent: any, text: string) {
+		createElement(type: string, attrs: any, parent: any, text?: string): HTMLElement {
 			const node = document.createElement(type);
 			for (const key in attrs) {
 				if (attrs.hasOwnProperty(key)) {
@@ -309,7 +227,7 @@ const api: UtilInterface = {
 			}
 			return node;
 		},
-		emptyNode(node: HTMLElement) {
+		emptyNode(node: HTMLElement): void {
 			if (node) {
 				while (node.firstChild) {
 					node.removeChild(node.firstChild);
@@ -317,42 +235,30 @@ const api: UtilInterface = {
 			}
 		},
 	},
-	units: (() => {
-		const unitConversions = {
-			// this conversion factor * pixel count = units
-			point: 0.75,
-			in: 0.75 / 72,
-			mm: (0.75 / 72) * 25.4,
-			cm: (0.75 / 72) * 2.54,
-		};
-		function units() {}
-		units.pixelsToUnits = function (pixelCount: number, newUnits: UnitTypes) {
+	units: {
+		pixelsToUnits(pixelCount: number, newUnits: UnitTypes): number {
 			return pixelCount * unitConversions[newUnits];
-		};
-		units.unitsToPixels = function (unitCount: number, newUnits: UnitTypes) {
+		},
+		unitsToPixels(unitCount: number, newUnits: UnitTypes): number {
 			return unitCount / unitConversions[newUnits];
-		};
-		units.pointsToUnits = function (pointCount: number, newUnits: UnitTypes) {
+		},
+		pointsToUnits(pointCount: number, newUnits: UnitTypes): number {
 			const pixels = api.units.unitsToPixels(pointCount, 'point');
 			return api.units.pixelsToUnits(pixels, newUnits);
-		};
-		units.unitToPoints = function (unitCount: number, newUnits: UnitTypes) {
+		},
+		unitToPoints(unitCount: number, newUnits: UnitTypes): number {
 			const pixels = api.units.unitsToPixels(unitCount, newUnits);
 			return api.units.pixelsToUnits(pixels, 'point');
-		};
-		return units;
-	})(),
-	geom: (() => {
-		function isPoint(point: any): point is Point {
+		},
+	},
+	geom: {
+		isPoint(point: any): point is Point {
 			return (point as Point).x != null && (point as Point).y != null;
-		}
-
-		function isBox(box: any): box is Box {
+		},
+		isBox(box: any): box is Box {
 			return (box as Box).width != null && (box as Box).height != null;
-		}
-
-		function geom() {}
-		geom.bbox = function (points: (Point | Box)[]): Box {
+		},
+		bbox(points: (Point | Box)[]): Box {
 			let minX = Infinity;
 			let minY = Infinity;
 			let maxX = -Infinity;
@@ -363,7 +269,7 @@ const api: UtilInterface = {
 				minY = Math.min(minY, p.y);
 				maxX = Math.max(maxX, p.x);
 				maxY = Math.max(maxY, p.y);
-				if (isBox(p)) {
+				if (api.geom.isBox(p)) {
 					maxX = Math.max(maxX, p.x + p.width);
 					maxY = Math.max(maxY, p.y + p.height);
 				}
@@ -374,8 +280,8 @@ const api: UtilInterface = {
 				width: maxX - minX,
 				height: maxY - minY,
 			};
-		};
-		geom.expandBox = function (box: Box, minWidth: number, minHeight: number) {
+		},
+		expandBox(box: Box, minWidth: number, minHeight: number): Box {
 			box = cloneDeep(box);
 			if (Math.floor(box.width) < 1) {
 				box.width = minWidth;
@@ -386,8 +292,8 @@ const api: UtilInterface = {
 				box.y -= minHeight / 2;
 			}
 			return box;
-		};
-		geom.moveBoxEdge = function (box: Box, edge: EdgeList, dt: number) {
+		},
+		moveBoxEdge(box: Box, edge: EdgeList, dt: number): void {
 			switch (edge) {
 				case 'top':
 					box.y += dt;
@@ -404,19 +310,19 @@ const api: UtilInterface = {
 					box.width -= dt;
 					break;
 			}
-		};
-		geom.distance = (p1: number | Point, p2: number | Point) => {
+		},
+		distance(p1: number | Point, p2: number | Point): number {
 			if (typeof p1 === 'number' && typeof p2 === 'number') {
 				return Math.abs(p1 - p2);
-			} else if (isPoint(p1) && isPoint(p2)) {
+			} else if (api.geom.isPoint(p1) && api.geom.isPoint(p2)) {
 				return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
 			}
 			return 0;
-		};
-		geom.midpoint = (p1: Point, p2: Point): Point => {
+		},
+		midpoint(p1: Point, p2: Point): Point {
 			return { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-		};
-		geom.arrow = () => {
+		},
+		arrow(): ArrowInterface {
 			return {
 				head: {
 					length: 30,
@@ -427,9 +333,8 @@ const api: UtilInterface = {
 					width: 1.25,
 				},
 			};
-		};
-		return geom;
-	})(),
+		},
+	},
 	version: {
 		parse(v: string): Version {
 			const revs: number[] = (v || '').split('.').map((w) => parseInt(w, 10));
@@ -443,7 +348,7 @@ const api: UtilInterface = {
 			const ver = api.version.parse(v);
 			return `${ver.major}.${ver.minor}`;
 		},
-		isOldVersion(prev: string, current: string) {
+		isOldVersion(prev: string, current: string): boolean {
 			const prevRev = api.version.parse(prev);
 			const curRev = api.version.parse(current);
 			if (prevRev.major !== curRev.major) {
@@ -473,11 +378,11 @@ const api: UtilInterface = {
 	},
 	color: {
 		toRGB: (() => {
-			const rgbLookupCache: CacheInterface = {
+			const rgbLookupCache: CacheInterface<number[]> = {
 				'#000000': [0, 0, 0],
 			};
-			return function (colorString: string) {
-				let rgb;
+			return function (colorString: string): RGBColor {
+				let rgb: number[];
 				if (rgbLookupCache[colorString]) {
 					rgb = rgbLookupCache[colorString];
 				} else {
@@ -493,23 +398,21 @@ const api: UtilInterface = {
 					parent.setAttribute('style', 'color: black;');
 
 					const div = document.getElementById('openFileChooser');
-					if (div != null) {
-						div.setAttribute('style', 'color: ' + colorString);
-						rgb = window.getComputedStyle(div).color;
-						if (rgb) {
-							const match = rgb.match(/[a-z]+\((.*)\)/i);
-							if (match && match.length > 0) {
-								rgb = match[1].split(',').map(parseFloat);
-							}
-							rgbLookupCache[colorString] = rgb;
-						}
+					if (!div) {
+						throw 'Trying to convert RGB in non-existent file chooser';
+					}
+					div.setAttribute('style', 'color: ' + colorString);
+					const rgbString = window.getComputedStyle(div).color;
+					const match = rgbString.match(/[a-z]+\((.*)\)/i);
+					if (match && match?.length > 0) {
+						rgb = match[1].split(',').map(parseFloat);
+						rgbLookupCache[colorString] = rgb;
+					} else {
+						throw `Trying to convert invalid RGB string: ${rgbString}`;
 					}
 				}
 
 				const res = { r: rgb[0], g: rgb[1], b: rgb[2], a: rgb[3] };
-				// if (rgb.length > 3) {
-				// 	res.a = rgb[3];
-				// }
 				res.toString = function () {
 					return this.a == null
 						? `rgb(${this.r}, ${this.g}, ${this.b})`
@@ -518,7 +421,7 @@ const api: UtilInterface = {
 				return res;
 			};
 		})(),
-		toVec4(colorString: string, alpha: number) {
+		toVec4(colorString: string, alpha: number): number[] {
 			if (!colorString || typeof colorString !== 'string') {
 				return [0, 0, 0, 0];
 			}
@@ -538,7 +441,7 @@ const api: UtilInterface = {
 			}
 			return [round(r, 4), round(g, 4), round(b, 4), round(a, 4)];
 		},
-		luma(colorString: any, isUnitColor: boolean) {
+		luma(colorString: any, isUnitColor: boolean): number {
 			if (!Array.isArray(colorString)) {
 				const colorObj = api.color.toRGB(colorString);
 				colorString = [colorObj.r, colorObj.g, colorObj.b];
@@ -550,10 +453,10 @@ const api: UtilInterface = {
 				0.0721 * (colorString[2] / scale) ** 2.2
 			);
 		},
-		opposite(colorString: string) {
+		opposite(colorString: string): 'white' | 'black' {
 			return api.color.luma(colorString, false) < 0.18 ? 'white' : 'black';
 		},
-		isVisible(colorString?: string | null) {
+		isVisible(colorString?: string | null): boolean {
 			if (!colorString || typeof colorString !== 'string') {
 				return false;
 			}
@@ -564,7 +467,7 @@ const api: UtilInterface = {
 			return true;
 		},
 	},
-	isBorderVisible(border: Border) {
+	isBorderVisible(border: Border): boolean {
 		if (
 			!border ||
 			!border.width ||

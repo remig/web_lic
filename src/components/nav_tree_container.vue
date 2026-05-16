@@ -30,8 +30,6 @@ import LicDropdown from '@/components/base/LicDropdown.vue';
 import NavTree from '../navtree';
 import uiState from '../ui_state';
 
-// TODO: need to scroll nav tree up / down whenever selected item changes, to ensure it's always in view
-
 const instance = getCurrentInstance();
 
 const treeElementList: {

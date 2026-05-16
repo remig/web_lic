@@ -320,6 +320,14 @@ const api: API = {
 			node.classList.add('treeSelected');
 			expandAncestors(node);
 			lastSelectedId = id;
+			const container = document.getElementById('nav-tree');
+			if (container) {
+				const nodeTop =
+					node.getBoundingClientRect().top -
+					container.getBoundingClientRect().top +
+					container.scrollTop;
+				container.scrollTop = nodeTop - container.clientHeight / 2 + node.offsetHeight / 2;
+			}
 		}
 	},
 	clearSelected() {

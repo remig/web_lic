@@ -227,12 +227,12 @@ export function showPageLayoutDialog(
 }
 
 interface ImportModelResult {
-	partsPerStep?: number;
+	partsPerStep: number | null;
 	stepsPerPage: number;
 	useMaxSteps: boolean;
 	include: { pli: boolean; partListPage: boolean; titlePage: boolean };
 }
-type ImportModelProps = { includePartsPerStep: boolean; partsPerStep?: number };
+type ImportModelProps = { includePartsPerStep: boolean; partsPerStep: number | null };
 
 export function showImportModelDialog(props: ImportModelProps): Promise<ImportModelResult | null> {
 	return mountDialog<ImportModelProps, ImportModelResult>(ImportModel, props);

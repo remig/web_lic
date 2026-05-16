@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<panel-base :title="title" style="--label-width: 120px">
+	<panel-base :title="resolvedTitle" style="--label-width: 120px">
 		<div class="label-input-row">
 			{{ t('glossary.color') }}
 			<LicColorPicker v-model="color" show-alpha @change="updateValues" />
@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { t } from '@/translations';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { store } from '../../store';
 import _ from '../../util';
@@ -57,6 +57,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits(['new-values']);
+
+const resolvedTitle = computed(() => props.title ?? 'template.border.title');
 
 const template = _.get(store.state.template, props.templateEntry);
 const width = ref(template.border.width || 0);

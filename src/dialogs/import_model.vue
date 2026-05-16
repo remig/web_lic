@@ -60,7 +60,7 @@ import LicDialog from '@/components/base/LicDialog.vue';
 import LicDropdown from '@/components/base/LicDropdown.vue';
 
 interface ImportModelResult {
-	partsPerStep?: number;
+	partsPerStep: number | null;
 	stepsPerPage: number;
 	useMaxSteps: boolean;
 	include: { pli: boolean; partListPage: boolean; titlePage: boolean };
@@ -68,7 +68,7 @@ interface ImportModelResult {
 
 const props = defineProps<{
 	includePartsPerStep: boolean;
-	partsPerStep?: number;
+	partsPerStep: number | null;
 }>();
 const emit = defineEmits<{
 	(e: 'ok', v: ImportModelResult): void;

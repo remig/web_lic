@@ -142,7 +142,7 @@ export const PartMutations = {
 	}: {
 		partID: number;
 		step: LookupItem;
-		doLayout?: boolean;
+		doLayout: boolean;
 	}): void {
 		// Remove part from the step its in and from the model entirely
 		const partStep = store.get.step(step);

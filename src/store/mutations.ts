@@ -26,7 +26,7 @@ import { PageMutations } from '../store/page_setters';
 import { PartMutations } from '../store/part_setters';
 import { PLIItemMutations } from '../store/pli_item_setters';
 import { PLIMutations } from '../store/pli_setters';
-import StepInsertion from '../store/step_insertion';
+import { StepInsertion } from '../store/step_insertion';
 import { StepMutations } from '../store/step_setters';
 import { SubmodelImageMutations } from '../store/submodel_image_setters';
 import { SubmodelMutations } from '../store/submodel_setters';
@@ -190,7 +190,7 @@ export const Mutations = {
 	}: {
 		modelFilename?: string;
 		lastStepNumber?: { num: number };
-		partsPerStep?: number;
+		partsPerStep: number | null;
 	}): number[] {
 		if (!modelFilename) {
 			modelFilename = store?.model?.filename;
@@ -208,7 +208,7 @@ export const Mutations = {
 			} else if (localModel === store?.model || store?.model?.hasAutoSteps) {
 				// Only auto-add steps to the main model, or to sub models if the main model itself
 				// needed auto-steps.
-				localModel.steps = StepInsertion(localModel, { partsPerStep });
+				localModel.steps = StepInsertion(localModel, partsPerStep);
 				if (store.model && localModel === store.model) {
 					store.model.hasAutoSteps = true;
 				}

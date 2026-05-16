@@ -1,6 +1,7 @@
 {
 	"name": "web_lic",
 	"version": "0.48.0",
+	"type": "module",
 	"description": "Create an instruction book from a 3D model",
 	"scripts": {
 		"typecheck": "vue-tsc --version && vue-tsc -b",
@@ -21,15 +22,14 @@
 		"type": "git",
 		"url": "https://github.com/remig/web_lic"
 	},
-	"license": "GPL-3.0-or-later",
 	"devDependencies": {
 		"@eslint/js": "10.0.1",
 		"@types/file-saver": "2.0.7",
-		"@types/lodash": "4.14.157",
+		"@types/lodash": "4.17.24",
 		"@types/node": "25.8.0",
 		"@typescript-eslint/eslint-plugin": "8.59.3",
 		"@typescript-eslint/parser": "8.59.3",
-		"@vitejs/plugin-vue": "^5.0.0",
+		"@vitejs/plugin-vue": "6.0.7",
 		"cypress": "4.10.0",
 		"eslint": "10.4.0",
 		"eslint-config-prettier": "10.1.8",
@@ -38,13 +38,13 @@
 		"eslint-plugin-simple-import-sort": "13.0.0",
 		"eslint-plugin-vue": "10.9.1",
 		"globals": "17.6.0",
-		"html-validate": "10.11.3",
-		"html-validate-vue": "8.2.0",
+		"html-validate": "11.1.0",
+		"html-validate-vue": "9.1.0",
 		"jiti": "2.7.0",
 		"prettier": "3.8.3",
 		"typescript": "5.8.3",
 		"vite": "6.2.5",
-		"vite-plugin-glsl": "1.4.0",
+		"vite-plugin-glsl": "1.6.0",
 		"vite-tsconfig-paths": "5.1.4",
 		"vue-eslint-parser": "10.4.0",
 		"vue-tsc": "2.2.8"
@@ -54,10 +54,10 @@
 		"file-saver": "2.0.5",
 		"jspdf": "3.0.1",
 		"jszip": "3.10.1",
-		"lodash": "4.17.19",
+		"lodash": "4.18.1",
 		"mitt": "3.0.1",
 		"split.js": "1.6.5",
-		"vue": "^3.5.0",
+		"vue": "3.5.34",
 		"vue-color": "3.3.3"
 	}
 }

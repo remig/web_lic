@@ -83,6 +83,7 @@
 </template>
 
 <script setup lang="ts">
+import { Size } from '@/item_types';
 import { t } from '@/translations';
 import { computed, ref } from 'vue';
 
@@ -127,7 +128,7 @@ const emit = defineEmits(['new-values']);
 
 const haveCustomFormat = computed(() => sizePreset.value.format === 'custom');
 
-function printedSize(unit: UnitTypes) {
+function printedSize(unit: UnitTypes): Size {
 	return {
 		width: _.round(_.units.pixelsToUnits(width.value, unit), 2),
 		height: _.round(_.units.pixelsToUnits(height.value, unit), 2),
