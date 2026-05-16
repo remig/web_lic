@@ -57,7 +57,6 @@ interface DisplacePartValues {
 }
 
 const props = defineProps<{initialValues: DisplacePartValues}>();
-// eslint-disable-next-line max-len
 const emit = defineEmits<{(e: 'update', vals: DisplacePartValues): void; (e: 'ok', vals: DisplacePartValues): void; (e: 'cancel'): void}>();
 
 const values = ref({...props.initialValues});

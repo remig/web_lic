@@ -56,7 +56,6 @@ interface TransformValues {
 }
 
 const props = defineProps<TransformValues>();
-// eslint-disable-next-line max-len
 const emit = defineEmits<{(e: 'update', v: TransformValues): void; (e: 'ok', v: TransformValues): void; (e: 'cancel'): void}>();
 
 const rotation = ref({...props.rotation});

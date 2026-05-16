@@ -46,7 +46,6 @@ const props = defineProps<{
 	bodyText?: string;
 	width?: string;
 }>();
-// eslint-disable-next-line max-len
 const emit = defineEmits<{(e: 'update', value: number): void; (e: 'ok', value: number): void; (e: 'cancel'): void}>();
 
 const currentValue = ref(props.initialValue ?? 0);

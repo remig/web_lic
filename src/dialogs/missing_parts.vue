@@ -20,10 +20,9 @@
 					<td>{{partCount(value.count)}}</td>
 					<td>
 						<LicTooltip v-if="showSendButton(filename)">
-							<div
-								slot="content"
-								v-html="t('dialog.missing_parts.send_to_remote.tooltip')"
-							/>
+							<template #content>
+								<div v-html="t('dialog.missing_parts.send_to_remote.tooltip')" />
+							</template>
 							<LicButton @click="sendToRemote(filename)">
 								{{t("dialog.missing_parts.send_to_remote.title")}}
 							</LicButton>

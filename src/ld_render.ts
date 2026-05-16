@@ -189,7 +189,6 @@ function getCanvasBounds(canvas: HTMLCanvasElement, size: number) {
 // Re-render the canvas returned from renderCb() at increasing zooms until the rendered
 // image is fully in the canvas, then draw the image to the chosen container
 function renderAndScaleToFit(
-	// eslint-disable-next-line no-shadow
 	renderCb: (config: any) => HTMLCanvasElement,
 	containerId: string | HTMLCanvasElement,
 	config: any,

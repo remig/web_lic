@@ -26,7 +26,6 @@ interface ContextMenuEntryInterface {
 	cb?: (selectedItem: LookupItem) => void;
 	enabled?: (selectedItem: LookupItem) => boolean;
 	shown?: (selectedItem: LookupItem) => boolean;
-	// eslint-disable-next-line no-use-before-define
 	children?: ContextMenuEntry;
 	selectedItem?: LookupItem;  // TODO: Is this necessary
 }

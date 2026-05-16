@@ -547,7 +547,6 @@ function importPart(part) {
 	}
 }
 
-/* eslint-disable computed-property-spacing */
 function LDMatrixToMatrix(m) {
 	const res = new Float32Array(16);
 	res[ 0] = m[3]; res[ 1] = m[6]; res[ 2] = m[ 9]; res[ 3] = 0;
@@ -563,7 +562,6 @@ function MatrixToLDMatrix(m) {
 		m[ 0], m[ 4], m[ 8], m[1], m[5], m[9], m[2], m[6], m[10],  // a - i
 	];
 }
-/* eslint-enable computed-property-spacing */
 
 function getPartDisplacement({direction, partDistance = 60}) {
 	switch (direction) {

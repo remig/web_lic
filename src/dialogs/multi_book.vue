@@ -68,10 +68,9 @@
 
 		<div class="form-row">
 			<LicTooltip>
-				<div
-					slot="content"
-					v-html="t('dialog.multi_book.page_numbering.start_page_1.tooltip')"
-				/>
+				<template #content>
+					<div v-html="t('dialog.multi_book.page_numbering.start_page_1.tooltip')" />
+				</template>
 				<label class="lic-radio">
 					<input
 						type="radio"
@@ -85,10 +84,9 @@
 				</label>
 			</LicTooltip>
 			<LicTooltip>
-				<div
-					slot="content"
-					v-html="t('dialog.multi_book.page_numbering.preserve_page_count.tooltip')"
-				/>
+				<template #content>
+					<div v-html="t('dialog.multi_book.page_numbering.preserve_page_count.tooltip')" />
+				</template>
 				<label class="lic-radio">
 					<input
 						type="radio"
@@ -105,10 +103,9 @@
 
 		<div class="form-row">
 			<LicTooltip>
-				<div
-					slot="content"
-					v-html="t('dialog.multi_book.file_split.one_file.tooltip')"
-				/>
+				<template #content>
+					<div v-html="t('dialog.multi_book.file_split.one_file.tooltip')" />
+				</template>
 				<label class="lic-radio">
 					<input
 						type="radio"
@@ -122,10 +119,9 @@
 				</label>
 			</LicTooltip>
 			<LicTooltip>
-				<div
-					slot="content"
-					v-html="t('dialog.multi_book.file_split.separate_files.tooltip')"
-				/>
+				<template #content>
+					<div v-html="t('dialog.multi_book.file_split.separate_files.tooltip')" />
+				</template>
 				<label class="lic-radio">
 					<input
 						type="radio"

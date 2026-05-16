@@ -115,7 +115,6 @@ interface ResizeImageInfo {
 }
 
 const props = defineProps<{initialImageInfo: ResizeImageInfo}>();
-// eslint-disable-next-line max-len
 const emit = defineEmits<{(e: 'update', v: ResizeImageInfo): void; (e: 'ok', v: ResizeImageInfo): void; (e: 'cancel'): void}>();
 
 const imageInfo = ref({...props.initialImageInfo});

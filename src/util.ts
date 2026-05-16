@@ -199,11 +199,9 @@ const api: UtilInterface = {
 	})(),
 	fontToFontParts: (() => {
 
-		/* eslint-disable max-len */
 		const boldList = ['bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
 		const sizeList = ['medium', 'xx-small', 'x-small', 'small', 'large', 'x-large', 'xx-large', 'smaller', 'larger'];
 		const stretchList = ['ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded'];
-		/* eslint-enable max-len */
 
 		return function(font = '') {
 			const fullFontParts = {

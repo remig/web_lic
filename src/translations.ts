@@ -82,7 +82,7 @@ function translate(key: string, ...args: any[]): string {
 		try {
 			res = __tr(currentLocale, key, args);
 		} catch {
-			console.log(`Locale ${currentLocale} missing translation key: ${key}`);  // eslint-disable-line no-console, max-len
+			console.log(`Locale ${currentLocale} missing translation key: ${key}`);  // eslint-disable-line no-console
 			res = null;
 		}
 	}

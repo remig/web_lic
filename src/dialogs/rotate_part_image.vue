@@ -50,7 +50,6 @@ const props = defineProps<{
 	addRotateIcon?: boolean;
 	showRotateIconCheckbox?: boolean;
 }>();
-// eslint-disable-next-line max-len
 const emit = defineEmits<{(e: 'update', v: RotateResult): void; (e: 'ok', v: RotateResult): void; (e: 'cancel'): void}>();
 
 const addRotateIcon = ref(props.addRotateIcon ?? true);

@@ -75,7 +75,6 @@ import LicButton from '@/components/base/LicButton.vue';
 import {type GridLayout, type Orientations} from '../item_types';
 
 const props = defineProps<{initialLayout: GridLayout}>();
-// eslint-disable-next-line max-len
 const emit = defineEmits<{(e: 'update', v: GridLayout): void; (e: 'ok', v: GridLayout): void; (e: 'cancel'): void}>();
 
 const autoRows = ref(props.initialLayout.rows === 'auto');
