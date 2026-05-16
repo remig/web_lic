@@ -1,9 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import { type LookupItem } from '../item_types';
-import store from '../store';
+import { store } from '../store';
 
-export interface SubmodelMutationInterface {
+export const SubmodelMutations = {
 	convertToCallout({
 		modelFilename,
 		destStep,
@@ -12,11 +12,7 @@ export interface SubmodelMutationInterface {
 		modelFilename: string;
 		destStep: LookupItem;
 		doLayout?: boolean;
-	}): void;
-}
-
-export const SubmodelMutations: SubmodelMutationInterface = {
-	convertToCallout({ modelFilename, destStep, doLayout }) {
+	}): void {
 		// Create a new callout in the step that this submodel is added to
 		const destStepItem = store.get.step(destStep);
 		if (destStepItem == null) {
@@ -90,4 +86,4 @@ export const SubmodelMutations: SubmodelMutationInterface = {
 			store.mutations.page.layout({ page: destStepItem.parent });
 		}
 	},
-};
+} as const;

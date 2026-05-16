@@ -13,105 +13,11 @@ import {
 } from '../item_types';
 import Layout from '../layout';
 import LDParse from '../ld_parse';
-import store from '../store';
+import { store } from '../store';
 import { hasProperty, isItemSpecificType } from '../type_helpers';
 import _ from '../util';
 
-export interface StepMutationInterface {
-	add({
-		dest,
-		doLayout,
-		model,
-		stepNumber,
-		renumber,
-		insertionIndex,
-		parentInsertionIndex,
-	}: {
-		dest: LookupItem;
-		doLayout?: boolean;
-		model?: StepModel;
-		stepNumber?: number;
-		renumber?: boolean;
-		insertionIndex?: number;
-		parentInsertionIndex?: number;
-	}): Step;
-	delete({
-		step,
-		doNotRenumber,
-		deleteParts,
-		doLayout,
-	}: {
-		step: LookupItem;
-		doNotRenumber?: boolean;
-		deleteParts?: boolean;
-		doLayout?: boolean;
-	}): void;
-	renumber(step: LookupItem): void;
-	renumberAll(): void;
-	layout({ step, box }: { step: LookupItem; box: Box }): void;
-	moveToPage({
-		step,
-		destPage,
-		parentInsertionIndex,
-	}: {
-		step: LookupItem;
-		destPage: LookupItem;
-		parentInsertionIndex?: number;
-	}): void;
-	moveToPreviousPage({ step }: { step: LookupItem }): void;
-	moveToNextPage({ step }: { step: LookupItem }): void;
-	mergeWithStep({ srcStep, destStep }: { srcStep: LookupItem; destStep: LookupItem }): void;
-	stretchToPage({
-		step,
-		stretchToPage,
-		doLayout,
-	}: {
-		step: LookupItem;
-		stretchToPage: LookupItem;
-		doLayout?: boolean;
-	}): void;
-	addCallout({ step }: { step: LookupItem }): void;
-	addSubStep({ step, doLayout }: { step: LookupItem; doLayout?: boolean }): void;
-	setSubStepLayout({
-		step,
-		layout,
-		doLayout,
-	}: {
-		step: LookupItem;
-		layout: Orientations;
-		doLayout?: boolean;
-	}): void;
-	toggleRotateIcon({
-		step,
-		display,
-		doLayout,
-	}: {
-		step: LookupItem;
-		display: boolean;
-		doLayout?: boolean;
-	}): void;
-	copyRotation({
-		step,
-		nextXSteps,
-		rotation,
-	}: {
-		step: LookupItem;
-		nextXSteps: number;
-		rotation: Rotation[];
-	}): void;
-	addPart({ step, partID }: { step: LookupItem; partID: number }): void;
-	removePart({
-		step,
-		partID,
-		doLayout,
-	}: {
-		step: LookupItem;
-		partID: number;
-		doLayout?: boolean;
-	}): void;
-}
-
-export const StepMutations: StepMutationInterface = {
+export const StepMutations = {
 	add({
 		dest,
 		doLayout = false,
@@ -120,7 +26,15 @@ export const StepMutations: StepMutationInterface = {
 		renumber = false,
 		insertionIndex = -1,
 		parentInsertionIndex = -1,
-	}) {
+	}: {
+		dest: LookupItem;
+		doLayout?: boolean;
+		model?: StepModel | null;
+		stepNumber?: number | null;
+		renumber?: boolean;
+		insertionIndex?: number;
+		parentInsertionIndex?: number;
+	}): Step {
 		// TODO: parent should never be null here
 		const parent = store.get.lookupToItem(dest) || { type: 'page', id: -1 };
 		const step = store.mutations.item.add<Step>({
@@ -185,7 +99,17 @@ export const StepMutations: StepMutationInterface = {
 		}
 		return step;
 	},
-	delete({ step, doNotRenumber = false, deleteParts = false, doLayout = false }) {
+	delete({
+		step,
+		doNotRenumber = false,
+		deleteParts = false,
+		doLayout = false,
+	}: {
+		step: LookupItem;
+		doNotRenumber?: boolean;
+		deleteParts?: boolean;
+		doLayout?: boolean;
+	}): void {
 		const item = store.get.step(step);
 		let page;
 		if (doLayout) {
@@ -243,7 +167,7 @@ export const StepMutations: StepMutationInterface = {
 			store.mutations.page.layout({ page });
 		}
 	},
-	renumber(step) {
+	renumber(step: LookupItem): void {
 		const stepItem = store.get.step(step || -1);
 		let stepList: (Step | null)[] = [];
 		if (stepItem.parent.type === 'step' || stepItem.parent.type === 'callout') {
@@ -263,7 +187,7 @@ export const StepMutations: StepMutationInterface = {
 		}
 		store.mutations.renumber(stepList);
 	},
-	renumberAll() {
+	renumberAll(): void {
 		// Renumber all base steps across all pages
 		const stepList = store.state.steps.filter((el) => {
 			if (el.parent && el.parent.type === 'page') {
@@ -274,11 +198,19 @@ export const StepMutations: StepMutationInterface = {
 		});
 		store.mutations.renumber(stepList);
 	},
-	layout({ step, box }) {
+	layout({ step, box }: { step: LookupItem; box: Box }): void {
 		const stepItem = store.get.step(step);
 		Layout.step(stepItem, box);
 	},
-	moveToPage({ step, destPage, parentInsertionIndex = 0 }) {
+	moveToPage({
+		step,
+		destPage,
+		parentInsertionIndex = 0,
+	}: {
+		step: LookupItem;
+		destPage: LookupItem;
+		parentInsertionIndex?: number;
+	}): void {
 		const item = store.get.step(step);
 		const currentPage = store.get.parent(item);
 		const destPageItem = store.get.page(destPage);
@@ -293,14 +225,14 @@ export const StepMutations: StepMutationInterface = {
 		store.mutations.page.layout({ page: currentPage });
 		store.mutations.page.layout({ page: destPageItem });
 	},
-	moveToPreviousPage({ step }) {
+	moveToPreviousPage({ step }: { step: LookupItem }): void {
 		const destPage = store.get.prevBasicPage(step);
 		if (destPage) {
 			const parentInsertionIndex = destPage.steps.length;
 			store.mutations.step.moveToPage({ step, destPage, parentInsertionIndex });
 		}
 	},
-	moveToNextPage({ step }) {
+	moveToNextPage({ step }: { step: LookupItem }): void {
 		const destPage = store.get.nextBasicPage(step);
 		if (destPage) {
 			store.mutations.step.moveToPage({
@@ -310,7 +242,7 @@ export const StepMutations: StepMutationInterface = {
 			});
 		}
 	},
-	mergeWithStep({ srcStep, destStep }) {
+	mergeWithStep({ srcStep, destStep }: { srcStep: LookupItem; destStep: LookupItem }): void {
 		const srcStepItem = store.get.step(srcStep);
 		const destStepItem = store.get.step(destStep);
 		_.cloneDeep(srcStepItem.parts).forEach((partID) => {
@@ -330,7 +262,15 @@ export const StepMutations: StepMutationInterface = {
 			store.mutations.page.layout({ page: destPage });
 		}
 	},
-	stretchToPage({ step, stretchToPage, doLayout }) {
+	stretchToPage({
+		step,
+		stretchToPage,
+		doLayout,
+	}: {
+		step: LookupItem;
+		stretchToPage: LookupItem;
+		doLayout?: boolean;
+	}): void {
 		const stepItem = store.get.step(step);
 		const destPage = store.get.page(stretchToPage);
 		destPage.stretchedStep = { stepID: stepItem.id, leftOffset: 0 };
@@ -340,7 +280,7 @@ export const StepMutations: StepMutationInterface = {
 			store.mutations.page.layout({ page: destPage });
 		}
 	},
-	addCallout({ step }) {
+	addCallout({ step }: { step: LookupItem }): void {
 		const stepItem = store.get.step(step);
 		stepItem.callouts = stepItem.callouts || [];
 		let position: Positions = 'left';
@@ -361,7 +301,7 @@ export const StepMutations: StepMutationInterface = {
 		});
 		store.mutations.page.layout({ page: store.get.pageForItem(stepItem) });
 	},
-	addSubStep({ step, doLayout }) {
+	addSubStep({ step, doLayout }: { step: LookupItem; doLayout?: boolean }): void {
 		const stepItem = store.get.step(step);
 		if (stepItem.csiID == null) {
 			return;
@@ -383,14 +323,30 @@ export const StepMutations: StepMutationInterface = {
 			store.mutations.page.layout({ page: store.get.pageForItem(stepItem) });
 		}
 	},
-	setSubStepLayout({ step, layout, doLayout }) {
+	setSubStepLayout({
+		step,
+		layout,
+		doLayout,
+	}: {
+		step: LookupItem;
+		layout: Orientations;
+		doLayout?: boolean;
+	}): void {
 		const stepItem = store.get.step(step);
 		stepItem.subStepLayout = layout;
 		if (doLayout) {
 			store.mutations.page.layout({ page: store.get.pageForItem(stepItem) });
 		}
 	},
-	toggleRotateIcon({ step, display, doLayout }) {
+	toggleRotateIcon({
+		step,
+		display,
+		doLayout,
+	}: {
+		step: LookupItem;
+		display: boolean;
+		doLayout?: boolean;
+	}): void {
 		const stepItem = store.get.step(step);
 		if (display && stepItem.rotateIconID == null) {
 			store.mutations.rotateIcon.add({ parent: stepItem });
@@ -404,7 +360,15 @@ export const StepMutations: StepMutationInterface = {
 			store.mutations.page.layout({ page: store.get.pageForItem(stepItem) });
 		}
 	},
-	copyRotation({ step, nextXSteps, rotation }) {
+	copyRotation({
+		step,
+		nextXSteps,
+		rotation,
+	}: {
+		step: LookupItem;
+		nextXSteps: number;
+		rotation: Rotation[];
+	}): void {
 		// Copy step's CSI rotation to next X steps
 		const stepItem = store.get.step(step);
 		let csi,
@@ -422,7 +386,7 @@ export const StepMutations: StepMutationInterface = {
 			}
 		}
 	},
-	addPart({ step, partID }) {
+	addPart({ step, partID }: { step: LookupItem; partID: number }): void {
 		const stepItem = store.get.step(step);
 		stepItem.parts.push(partID);
 		stepItem.parts.sort(_.sort.numeric.ascending);
@@ -432,7 +396,15 @@ export const StepMutations: StepMutationInterface = {
 			store.mutations.pli.addPart({ pli, part });
 		}
 	},
-	removePart({ step, partID, doLayout = false }) {
+	removePart({
+		step,
+		partID,
+		doLayout = false,
+	}: {
+		step: LookupItem;
+		partID: number;
+		doLayout?: boolean;
+	}): void {
 		const stepItem = store.get.step(step);
 		_.deleteItem(stepItem.parts, partID);
 		if (stepItem.pliID != null) {
@@ -444,4 +416,4 @@ export const StepMutations: StepMutationInterface = {
 			store.mutations.page.layout({ page: store.get.pageForItem(stepItem) });
 		}
 	},
-};
+} as const;

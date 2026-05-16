@@ -28,7 +28,7 @@ import {
 	watch,
 } from 'vue';
 
-import store from '../store';
+import { store } from '../store';
 import * as UiOps from '../ui_ops';
 import undoStack from '../undo_stack';
 import _ from '../util';

@@ -36,7 +36,7 @@ import cache from '../../cache';
 import { readDpi } from '../../changedpi';
 import { showResizeImageDialog } from '../../dialog';
 import openFileHandler from '../../file_uploader';
-import store from '../../store';
+import { store } from '../../store';
 import { t } from '../../translations';
 import _ from '../../util';
 import LicButton from '../base/LicButton.vue';

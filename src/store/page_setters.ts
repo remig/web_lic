@@ -10,42 +10,11 @@ import {
 	type PageSubtypes,
 } from '../item_types';
 import Layout from '../layout';
-import store from '../store';
+import { store } from '../store';
 import uiState from '../ui_state';
 import _ from '../util';
 
-export interface PageMutationInterface {
-	add({
-		pageNumber,
-		subtype,
-		doNotRenumber,
-		parent,
-		insertionIndex,
-		parentInsertionIndex,
-	}: {
-		pageNumber?: number | 'id';
-		subtype?: PageSubtypes;
-		doNotRenumber?: boolean;
-		parent?: LookupItem;
-		insertionIndex?: number;
-		parentInsertionIndex?: number;
-	}): Page;
-	delete({
-		page,
-		doNotRenumber,
-		deleteSteps,
-	}: {
-		page: LookupItem;
-		doNotRenumber?: boolean;
-		deleteSteps?: boolean;
-	}): void;
-	setLocked({ page, locked }: { page: LookupItem; locked: boolean }): void;
-	renumber(): void;
-	markAllDirty(): void;
-	layout({ page, layout }: { page: LookupItem; layout?: Orientations | GridLayout }): void;
-}
-
-export const PageMutations: PageMutationInterface = {
+export const PageMutations = {
 	add({
 		pageNumber,
 		subtype = 'page',
@@ -53,7 +22,14 @@ export const PageMutations: PageMutationInterface = {
 		parent = null,
 		insertionIndex = -1,
 		parentInsertionIndex = -1,
-	}) {
+	}: {
+		pageNumber?: number | 'id';
+		subtype?: PageSubtypes;
+		doNotRenumber?: boolean;
+		parent?: LookupItem | null;
+		insertionIndex?: number;
+		parentInsertionIndex?: number;
+	}): Page {
 		const pageSize = store.state.template.page;
 		const page = store.mutations.item.add<Page>({
 			item: {
@@ -110,7 +86,15 @@ export const PageMutations: PageMutationInterface = {
 
 		return page;
 	},
-	delete({ page, doNotRenumber = false, deleteSteps = false }) {
+	delete({
+		page,
+		doNotRenumber = false,
+		deleteSteps = false,
+	}: {
+		page: LookupItem;
+		doNotRenumber?: boolean;
+		deleteSteps?: boolean;
+	}): void {
 		const item = store.get.page(page);
 		if (item == null) {
 			return;
@@ -141,13 +125,13 @@ export const PageMutations: PageMutationInterface = {
 		}
 		store.mutations.titlePage.setPageCountLabels();
 	},
-	setLocked({ page, locked }) {
+	setLocked({ page, locked }: { page: LookupItem; locked: boolean }): void {
 		const item = store.get.page(page);
 		if (item) {
 			item.locked = locked;
 		}
 	},
-	renumber() {
+	renumber(): void {
 		if (store.state.books.length) {
 			const firstPageNumber = uiState.get('dialog.multiBook.firstPageNumber');
 			store.state.books.forEach((book) => {
@@ -173,14 +157,14 @@ export const PageMutations: PageMutationInterface = {
 			store.mutations.renumber(store.state.pages, 0);
 		}
 	},
-	markAllDirty() {
+	markAllDirty(): void {
 		store.state.pages.forEach((page) => (page.needsLayout = true));
 	},
-	layout({ page, layout }) {
+	layout({ page, layout }: { page: LookupItem; layout?: Orientations | GridLayout }): void {
 		// layout = 'horizontal' or 'vertical' or {rows, cols, direction}
 		const item = store.get.page(page);
 		if (item != null && !item.locked) {
 			Layout.page(item, layout || item.layout);
 		}
 	},
-};
+} as const;

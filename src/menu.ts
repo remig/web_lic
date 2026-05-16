@@ -10,7 +10,7 @@ import * as FileOps from './file_ops';
 import type { Orientations } from './item_types';
 import * as SelectionOps from './selection_ops';
 import Storage from './storage';
-import store from './store';
+import { store } from './store';
 import * as UiOps from './ui_ops';
 import uiState from './ui_state';
 import undoStack from './undo_stack';

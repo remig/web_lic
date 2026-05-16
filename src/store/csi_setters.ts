@@ -1,28 +1,10 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import { type CSI, type LookupItem, type Rotation } from '../item_types';
-import store from '../store';
+import { store } from '../store';
 
-export interface CSIMutationInterface {
-	add({ parent }: { parent: LookupItem }): CSI;
-	rotate({
-		csi,
-		rotation,
-		addRotateIcon,
-		doLayout,
-	}: {
-		csi: LookupItem;
-		rotation: Rotation[];
-		addRotateIcon: boolean;
-		doLayout: boolean;
-	}): void;
-	scale({ csi, scale, doLayout }: { csi: LookupItem; scale: number; doLayout: boolean }): void;
-	resetSize({ csi }: { csi: number | LookupItem }): void;
-	markAllDirty(): void;
-}
-
-export const CSIMutations: CSIMutationInterface = {
-	add({ parent }) {
+export const CSIMutations = {
+	add({ parent }: { parent: LookupItem }): CSI {
 		return store.mutations.item.add<CSI>({
 			item: {
 				type: 'csi',
@@ -42,7 +24,17 @@ export const CSIMutations: CSIMutationInterface = {
 			parent,
 		});
 	},
-	rotate({ csi, rotation, addRotateIcon, doLayout = false }) {
+	rotate({
+		csi,
+		rotation,
+		addRotateIcon,
+		doLayout = false,
+	}: {
+		csi: LookupItem;
+		rotation: Rotation[];
+		addRotateIcon: boolean;
+		doLayout: boolean;
+	}): void {
 		const csiItem = store.get.csi(csi);
 		if (csiItem != null) {
 			csiItem.rotation = rotation;
@@ -56,7 +48,15 @@ export const CSIMutations: CSIMutationInterface = {
 			}
 		}
 	},
-	scale({ csi, scale, doLayout = false }) {
+	scale({
+		csi,
+		scale,
+		doLayout = false,
+	}: {
+		csi: LookupItem;
+		scale: number;
+		doLayout: boolean;
+	}): void {
 		const csiItem = store.get.csi(csi);
 		if (csiItem != null) {
 			csiItem.scale = scale;
@@ -66,14 +66,14 @@ export const CSIMutations: CSIMutationInterface = {
 			}
 		}
 	},
-	resetSize({ csi }) {
+	resetSize({ csi }: { csi: number | LookupItem }): void {
 		const csiItem = store.get.csi(csi);
 		if (csiItem) {
 			csiItem.width = csiItem.height = 0;
 			csiItem.isDirty = true;
 		}
 	},
-	markAllDirty() {
+	markAllDirty(): void {
 		store.state.csis.forEach((csi) => (csi.isDirty = true));
 	},
-};
+} as const;

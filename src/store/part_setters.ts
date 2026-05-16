@@ -2,62 +2,10 @@
 
 import { type Directions, type LookupItem } from '../item_types';
 import LDParse from '../ld_parse';
-import store from '../store';
+import { store } from '../store';
 import _ from '../util';
 
-export interface PartMutationInterface {
-	displace({
-		partID,
-		step,
-		direction,
-		partDistance,
-		arrowOffset,
-		arrowLength,
-		arrowRotation,
-	}: {
-		partID: number;
-		step: LookupItem;
-		direction?: Directions;
-		partDistance?: number;
-		arrowOffset?: number;
-		arrowLength?: number;
-		arrowRotation?: number;
-	}): void;
-	moveToStep({
-		partID,
-		srcStep,
-		destStep,
-		doLayout,
-	}: {
-		partID: number;
-		srcStep: LookupItem;
-		destStep: LookupItem;
-		doLayout?: boolean;
-	}): void;
-	addToCallout({
-		partID,
-		step,
-		callout,
-		doLayout,
-	}: {
-		partID: number;
-		step: LookupItem;
-		callout: LookupItem;
-		doLayout?: boolean;
-	}): void;
-	removeFromCallout({ partID, step }: { partID: number; step: LookupItem }): void;
-	delete({
-		partID,
-		step,
-		doLayout,
-	}: {
-		partID: number;
-		step: LookupItem;
-		doLayout?: boolean;
-	}): void;
-}
-
-export const PartMutations: PartMutationInterface = {
+export const PartMutations = {
 	// If direction == null, remove displacement
 	displace({
 		partID,
@@ -67,7 +15,15 @@ export const PartMutations: PartMutationInterface = {
 		arrowOffset = 0,
 		arrowLength = 60,
 		arrowRotation = 0,
-	}) {
+	}: {
+		partID: number;
+		step: LookupItem;
+		direction?: Directions;
+		partDistance?: number;
+		arrowOffset?: number;
+		arrowLength?: number;
+		arrowRotation?: number;
+	}): void {
 		const stepItem = store.get.step(step);
 		if (stepItem == null || stepItem.csiID == null) {
 			return;
@@ -103,7 +59,17 @@ export const PartMutations: PartMutationInterface = {
 		// TODO: no need to layout entire page; can layout just the step containing the newly displaced part
 		store.mutations.page.layout({ page: store.get.pageForItem(stepItem) });
 	},
-	moveToStep({ partID, srcStep, destStep, doLayout = false }) {
+	moveToStep({
+		partID,
+		srcStep,
+		destStep,
+		doLayout = false,
+	}: {
+		partID: number;
+		srcStep: LookupItem;
+		destStep: LookupItem;
+		doLayout?: boolean;
+	}): void {
 		const srcStepItem = store.get.step(srcStep);
 		if (srcStepItem == null || srcStepItem.csiID == null) {
 			return;
@@ -127,7 +93,17 @@ export const PartMutations: PartMutationInterface = {
 			}
 		}
 	},
-	addToCallout({ partID, step, callout, doLayout = false }) {
+	addToCallout({
+		partID,
+		step,
+		callout,
+		doLayout = false,
+	}: {
+		partID: number;
+		step: LookupItem;
+		callout: LookupItem;
+		doLayout?: boolean;
+	}): void {
 		const stepItem = store.get.step(step);
 		const calloutItem = store.get.callout(callout);
 		if (stepItem == null || calloutItem == null) {
@@ -150,7 +126,7 @@ export const PartMutations: PartMutationInterface = {
 			store.mutations.page.layout({ page: stepItem.parent });
 		}
 	},
-	removeFromCallout({ partID, step }) {
+	removeFromCallout({ partID, step }: { partID: number; step: LookupItem }): void {
 		const stepItem = store.get.step(step);
 		if (stepItem == null || stepItem.csiID == null) {
 			return;
@@ -159,7 +135,15 @@ export const PartMutations: PartMutationInterface = {
 		store.mutations.csi.resetSize({ csi: stepItem.csiID });
 		store.mutations.page.layout({ page: store.get.pageForItem(stepItem) });
 	},
-	delete({ partID, step, doLayout }) {
+	delete({
+		partID,
+		step,
+		doLayout,
+	}: {
+		partID: number;
+		step: LookupItem;
+		doLayout?: boolean;
+	}): void {
 		// Remove part from the step its in and from the model entirely
 		const partStep = store.get.step(step);
 		if (partStep == null) {
@@ -184,4 +168,4 @@ export const PartMutations: PartMutationInterface = {
 				});
 			});
 	},
-};
+} as const;

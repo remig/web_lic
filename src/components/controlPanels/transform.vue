@@ -27,7 +27,7 @@
 import { t } from '@/translations';
 import { computed, ref } from 'vue';
 
-import store from '../../store';
+import { store } from '../../store';
 import _ from '../../util';
 import RotateBuilder from '../rotate.vue';
 import PanelBase from './panel_base.vue';

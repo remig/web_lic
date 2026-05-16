@@ -55,7 +55,7 @@
 import { t } from '@/translations';
 import { ref } from 'vue';
 
-import store from '../../store';
+import { store } from '../../store';
 import _ from '../../util';
 import LicColorPicker from '../base/LicColorPicker.vue';
 import LicSelectFontName from '../base/LicSelectFontName.vue';

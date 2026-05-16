@@ -15,7 +15,7 @@ import {
 	type PointItem,
 } from './item_types';
 import LDParse from './ld_parse';
-import store from './store';
+import { store } from './store';
 import { isPoint, isPointItem, isSize } from './type_helpers';
 import uiState from './ui_state';
 import _ from './util';

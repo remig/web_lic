@@ -11,51 +11,26 @@ import packageInfo from '../../package.json';
 import { type Book, type LookupItem } from '../item_types';
 import Layout from '../layout';
 import LDParse from '../ld_parse';
-import store from '../store';
+import { store } from '../store';
 import _ from '../util';
 
-interface PageSpan {
+export interface PageSpan {
 	start: number;
 	end: number;
 }
 
-interface BookDivision {
+export interface BookDivision {
 	bookNumber: number;
 	pages: PageSpan;
 	steps: PageSpan;
 }
 
-type FirstPageOptions = 'start_page_1' | 'preserve_page_count';
+export type FirstPageOptions = 'start_page_1' | 'preserve_page_count';
 
-type FileSplitOptions = 'separate_files' | 'one_file';
+export type FileSplitOptions = 'separate_files' | 'one_file';
 
-export interface BookMutationInterface {
-	add({ bookNumber, pages }: { bookNumber: number; pages: PageSpan }): Book;
-	delete(): void;
-	setBookPageNumbers({
-		book,
-		firstPageNumber,
-	}: {
-		book: LookupItem;
-		firstPageNumber: FirstPageOptions;
-	}): void;
-	splitFileByBook(): void;
-	divideInstructions({
-		bookDivisions,
-		firstPageNumber,
-		includeTitlePages,
-		fileSplit,
-	}: {
-		bookDivisions: BookDivision[];
-		firstPageNumber: FirstPageOptions;
-		includeTitlePages: boolean;
-		fileSplit: FileSplitOptions;
-	}): void;
-	layout({ book }: { book: LookupItem }): void;
-}
-
-export const BookMutations: BookMutationInterface = {
-	add({ bookNumber, pages }) {
+export const BookMutations = {
+	add({ bookNumber, pages }: { bookNumber: number; pages: PageSpan }): Book {
 		const pageNumbers = _.range(pages.start, pages.end + 1);
 		const pageList = pageNumbers.map((pageNumber) => {
 			return store.get.itemByNumber('page', pageNumber);
@@ -82,7 +57,13 @@ export const BookMutations: BookMutationInterface = {
 		return book;
 	},
 	delete() {},
-	setBookPageNumbers({ book, firstPageNumber }) {
+	setBookPageNumbers({
+		book,
+		firstPageNumber,
+	}: {
+		book: LookupItem;
+		firstPageNumber: FirstPageOptions;
+	}): void {
 		// firstPageNumber: 'start_page_1' or 'preserve_page_count'
 		const bookItem = store.get.book(book);
 		if (bookItem == null) {
@@ -168,7 +149,17 @@ export const BookMutations: BookMutationInterface = {
 		zip.generateAsync({ type: 'blob' }).then((zipContent: any) => saveAs(zipContent, fn + '.zip'));
 		store.replaceState(firstBookState);
 	},
-	divideInstructions({ bookDivisions, firstPageNumber, includeTitlePages, fileSplit }) {
+	divideInstructions({
+		bookDivisions,
+		firstPageNumber,
+		includeTitlePages,
+		fileSplit,
+	}: {
+		bookDivisions: BookDivision[];
+		firstPageNumber: FirstPageOptions;
+		includeTitlePages: boolean;
+		fileSplit: FileSplitOptions;
+	}): void {
 		//  bookDivisions: [{bookNumber: 1, pages: {start, end}, steps: {start, end}}]}
 		bookDivisions.forEach((book) => {
 			store.mutations.book.add(book);
@@ -188,10 +179,10 @@ export const BookMutations: BookMutationInterface = {
 			store.mutations.book.splitFileByBook();
 		}
 	},
-	layout({ book }) {
+	layout({ book }: { book: LookupItem }): void {
 		const item = store.get.book(book);
 		if (item) {
 			Layout.book(item);
 		}
 	},
-};
+} as const;

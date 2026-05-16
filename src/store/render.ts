@@ -2,7 +2,7 @@
 
 import { type CSI, type ItemTypes, type PLIItem, type Step } from '../item_types';
 import LDRender from '../ld_render';
-import store from '../store';
+import { store } from '../store';
 
 const canvasCache = (function () {
 	let cache: { [key: string]: HTMLCanvasElement } = {};
@@ -67,37 +67,15 @@ export interface RenderResult {
 	container: any;
 }
 
-export interface RendererInterface {
+export const Renderer = {
 	csi(
 		localModel: any,
 		step: Step,
 		csi: CSI,
 		selectedPartIDs?: number[] | null,
-		hiResScale?: number,
-		bypassCache?: boolean,
-	): RenderResult | null;
-	csiWithSelection(
-		localModel: any,
-		step: Step,
-		csi: CSI,
-		selectedPartIDs?: number[] | null,
-		hiResScale?: number,
-		bypassCache?: boolean,
-	): RenderResult | null;
-	pli(
-		colorCode: number,
-		filename: string,
-		item: CSI | PLIItem,
-		hiResScale?: number,
-		bypassCache?: boolean,
-	): RenderResult | null;
-	clearCanvasCache(): void;
-	removeCanvas(item: ItemTypes): void;
-	adjustCameraZoom(): void;
-}
-
-export const Renderer: RendererInterface = {
-	csi(localModel, step, csi, selectedPartIDs, hiResScale = 1, bypassCache = false) {
+		hiResScale: number = 1,
+		bypassCache: boolean = false,
+	): RenderResult | null {
 		if (csi.domID == null) {
 			csi.domID = `CSI_${step.csiID}`;
 			csi.isDirty = true;
@@ -133,7 +111,12 @@ export const Renderer: RendererInterface = {
 			container,
 		};
 	},
-	csiWithSelection(localModel, step, csi, selectedPartIDs) {
+	csiWithSelection(
+		localModel: any,
+		step: Step,
+		csi: CSI,
+		selectedPartIDs?: number[] | null,
+	): RenderResult | null {
 		const config = {
 			size: 1000,
 			zoom: getCSIScale(csi),
@@ -154,7 +137,13 @@ export const Renderer: RendererInterface = {
 			container,
 		};
 	},
-	pli(colorCode, filename, item, hiResScale = 1, bypassCache) {
+	pli(
+		colorCode: number,
+		filename: string,
+		item: CSI | PLIItem,
+		hiResScale: number = 1,
+		bypassCache?: boolean,
+	): RenderResult | null {
 		if (item.domID == null) {
 			item.domID = `PLI_${filename}_${colorCode}`;
 			item.isDirty = true;
@@ -175,10 +164,10 @@ export const Renderer: RendererInterface = {
 		}
 		return { width: container.width, height: container.height, container };
 	},
-	clearCanvasCache() {
+	clearCanvasCache(): void {
 		canvasCache.clear();
 	},
-	removeCanvas(item) {
+	removeCanvas(item: ItemTypes): void {
 		if (item.type === 'step') {
 			const domID = `CSI_${item.csiID}`;
 			const container = document.getElementById(domID);
@@ -187,7 +176,7 @@ export const Renderer: RendererInterface = {
 			}
 		}
 	},
-	adjustCameraZoom() {
+	adjustCameraZoom(): void {
 		if (store.model == null) {
 			return;
 		}

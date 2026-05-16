@@ -9,7 +9,7 @@ import {
 	type PartItem,
 } from './item_types';
 import LDParse from './ld_parse';
-import store from './store';
+import { store } from './store';
 import { t } from './translations';
 import { isQuantityLabelParent } from './type_helpers';
 import uiState from './ui_state';

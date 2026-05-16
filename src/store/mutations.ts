@@ -14,108 +14,34 @@ import {
 import Layout from '../layout';
 import LDParse from '../ld_parse';
 import LDRender from '../ld_render';
-import store from '../store';
-import { AnnotationMutationInterface, AnnotationMutations } from '../store/annotation_setters';
-import { BookMutationInterface, BookMutations } from '../store/book_setters';
-import {
-	CalloutArrowMutationInterface,
-	CalloutArrowMutations,
-} from '../store/callout_arrow_setters';
-import { CalloutMutationInterface, CalloutMutations } from '../store/callout_setters';
-import { CSIMutationInterface, CSIMutations } from '../store/csi_setters';
-import {
-	InventoryPageMutationInterface,
-	InventoryPageMutations,
-} from '../store/inventory_page_setters';
-import { ItemMutationInterface, ItemMutations } from '../store/item_setters';
-import { PageMutationInterface, PageMutations } from '../store/page_setters';
-import { PartMutationInterface, PartMutations } from '../store/part_setters';
-import { PLIItemMutationInterface, PLIItemMutations } from '../store/pli_item_setters';
-import { PLIMutationInterface, PLIMutations } from '../store/pli_setters';
+import { store } from '../store';
+import { AnnotationMutations } from '../store/annotation_setters';
+import { BookMutations } from '../store/book_setters';
+import { CalloutArrowMutations } from '../store/callout_arrow_setters';
+import { CalloutMutations } from '../store/callout_setters';
+import { CSIMutations } from '../store/csi_setters';
+import { InventoryPageMutations } from '../store/inventory_page_setters';
+import { ItemMutations } from '../store/item_setters';
+import { PageMutations } from '../store/page_setters';
+import { PartMutations } from '../store/part_setters';
+import { PLIItemMutations } from '../store/pli_item_setters';
+import { PLIMutations } from '../store/pli_setters';
 import StepInsertion from '../store/step_insertion';
-import { StepMutationInterface, StepMutations } from '../store/step_setters';
-import {
-	SubmodelImageMutationInterface,
-	submodelImageMutations,
-} from '../store/submodel_image_setters';
-import { SubmodelMutationInterface, SubmodelMutations } from '../store/submodel_setters';
-import {
-	TemplatePageMutationInterface,
-	TemplatePageMutations,
-} from '../store/template_page_setters';
-import { TitlePageMutationInterface, TitlePageMutations } from '../store/title_page_setters';
+import { StepMutations } from '../store/step_setters';
+import { SubmodelImageMutations } from '../store/submodel_image_setters';
+import { SubmodelMutations } from '../store/submodel_setters';
+import { TemplatePageMutations } from '../store/template_page_setters';
+import { TitlePageMutations } from '../store/title_page_setters';
 import _ from '../util';
 
-export interface MutationInterface {
-	annotation: AnnotationMutationInterface;
-	book: BookMutationInterface;
-	callout: CalloutMutationInterface;
-	calloutArrow: CalloutArrowMutationInterface;
-	csi: CSIMutationInterface;
-	divider: {
-		add({ parent, p1, p2 }: { parent: any; p1: Point; p2: Point }): Divider;
-		reposition({ item, dx, dy }: { item: LookupItem; dx: number; dy: number }): void;
-		setLength({ divider, newLength }: { divider: LookupItem; newLength: number }): void;
-		delete({ divider }: { divider: any }): void;
-	};
-	numberLabel: {};
-	page: PageMutationInterface;
-	titlePage: TitlePageMutationInterface;
-	pli: PLIMutationInterface;
-	pliItem: PLIItemMutationInterface;
-	item: ItemMutationInterface;
-	part: PartMutationInterface;
-	point: {};
-	quantityLabel: {};
-	rotateIcon: {
-		add({ parent }: { parent: LookupItem }): any;
-		delete({ rotateIcon }: { rotateIcon: LookupItem }): void;
-	};
-	step: StepMutationInterface;
-	submodel: SubmodelMutationInterface;
-	submodelImage: SubmodelImageMutationInterface;
-	templatePage: TemplatePageMutationInterface;
-	inventoryPage: InventoryPageMutationInterface;
-	sceneRendering: {
-		set({
-			zoom,
-			edgeWidth,
-			rotation,
-			refresh,
-		}: {
-			zoom: number;
-			edgeWidth: number;
-			rotation: any[];
-			refresh: boolean;
-		}): void;
-		refreshAll(): void;
-	};
-	pliTransform: {
-		rotate(filename: string, rotation: Rotation[] | null): void;
-		scale(filename: string, scale: number | null): void;
-	};
-	renumber(itemList: any[], start?: number): void;
-	addInitialPages({
-		modelFilename,
-		lastStepNumber,
-		partsPerStep,
-	}: {
-		modelFilename?: string;
-		lastStepNumber?: { num: number };
-		partsPerStep?: number;
-	}): number[];
-	addInitialSubmodelImages(): void;
-	mergeInitialPages(progressCallback: any): void;
-}
-
-export const Mutations: MutationInterface = {
+export const Mutations = {
 	annotation: AnnotationMutations,
 	book: BookMutations,
 	callout: CalloutMutations,
 	calloutArrow: CalloutArrowMutations,
 	csi: CSIMutations,
 	divider: {
-		add({ parent, p1, p2 }: { parent: any; p1: Point; p2: Point }) {
+		add({ parent, p1, p2 }: { parent: any; p1: Point; p2: Point }): Divider {
 			return store.mutations.item.add<Divider>({
 				item: {
 					type: 'divider',
@@ -127,7 +53,7 @@ export const Mutations: MutationInterface = {
 				parent,
 			});
 		},
-		reposition({ item, dx, dy }: { item: LookupItem; dx: number; dy: number }) {
+		reposition({ item, dx, dy }: { item: LookupItem; dx: number; dy: number }): void {
 			const divider = store.get.divider(item);
 			if (divider == null) {
 				throw 'Trying to reposition a non-existent Divider';
@@ -137,7 +63,7 @@ export const Mutations: MutationInterface = {
 			divider.p1.y += dy;
 			divider.p2.y += dy;
 		},
-		setLength({ divider, newLength }: { divider: LookupItem; newLength: number }) {
+		setLength({ divider, newLength }: { divider: LookupItem; newLength: number }): void {
 			const dividerItem = store.get.divider(divider);
 			if (dividerItem == null) {
 				throw 'Trying to set length of a non-existent Divider';
@@ -150,7 +76,7 @@ export const Mutations: MutationInterface = {
 				dividerItem.p2.y = dividerItem.p1.y + newLength;
 			}
 		},
-		delete({ divider }: { divider: any }) {
+		delete({ divider }: { divider: any }): void {
 			store.mutations.item.delete({ item: divider });
 		},
 	},
@@ -164,7 +90,7 @@ export const Mutations: MutationInterface = {
 	part: PartMutations,
 	quantityLabel: {},
 	rotateIcon: {
-		add({ parent }: { parent: LookupItem }) {
+		add({ parent }: { parent: LookupItem }): RotateIcon {
 			return store.mutations.item.add<RotateIcon>({
 				item: {
 					type: 'rotateIcon',
@@ -179,12 +105,12 @@ export const Mutations: MutationInterface = {
 				parent,
 			});
 		},
-		delete({ rotateIcon }: { rotateIcon: LookupItem }) {
+		delete({ rotateIcon }: { rotateIcon: LookupItem }): void {
 			store.mutations.item.delete({ item: rotateIcon });
 		},
 	},
 	step: StepMutations,
-	submodelImage: submodelImageMutations,
+	submodelImage: SubmodelImageMutations,
 	submodel: SubmodelMutations,
 	templatePage: TemplatePageMutations,
 	inventoryPage: InventoryPageMutations,
@@ -199,7 +125,7 @@ export const Mutations: MutationInterface = {
 			edgeWidth: number;
 			rotation: any[];
 			refresh: boolean;
-		}) {
+		}): void {
 			store.state.template.sceneRendering.zoom = zoom;
 			store.state.template.sceneRendering.edgeWidth = edgeWidth;
 			store.state.template.sceneRendering.rotation = _.cloneDeep(rotation);
@@ -207,7 +133,7 @@ export const Mutations: MutationInterface = {
 				store.mutations.sceneRendering.refreshAll();
 			}
 		},
-		refreshAll() {
+		refreshAll(): void {
 			LDRender.setRenderState(store.state.template.sceneRendering);
 			store.mutations.csi.markAllDirty();
 			store.mutations.pliItem.markAllDirty();
@@ -215,7 +141,7 @@ export const Mutations: MutationInterface = {
 		},
 	},
 	pliTransform: {
-		rotate(filename, rotation) {
+		rotate(filename: string, rotation: Rotation[] | null): void {
 			let transform = store.state.pliTransforms[filename];
 			if (!transform) {
 				transform = store.state.pliTransforms[filename] = {} as PLITransform;
@@ -229,7 +155,7 @@ export const Mutations: MutationInterface = {
 				delete store.state.pliTransforms[filename];
 			}
 		},
-		scale(filename, scale) {
+		scale(filename: string, scale: number | null): void {
 			let transform = store.state.pliTransforms[filename];
 			if (!transform) {
 				transform = store.state.pliTransforms[filename] = {} as PLITransform;
@@ -244,7 +170,7 @@ export const Mutations: MutationInterface = {
 			}
 		},
 	},
-	renumber(itemList: any[], start = 1) {
+	renumber(itemList: any[], start?: number): void {
 		let prevNumber: number | null;
 		itemList.forEach((el) => {
 			if (el && el.number != null) {
@@ -263,9 +189,9 @@ export const Mutations: MutationInterface = {
 		partsPerStep,
 	}: {
 		modelFilename?: string;
-		lastStepNumber: { num: number };
+		lastStepNumber?: { num: number };
 		partsPerStep?: number;
-	}) {
+	}): number[] {
 		if (!modelFilename) {
 			modelFilename = store?.model?.filename;
 		}
@@ -395,7 +321,7 @@ export const Mutations: MutationInterface = {
 		});
 		return pagesAdded;
 	},
-	addInitialSubmodelImages() {
+	addInitialSubmodelImages(): void {
 		store.get.submodels().forEach((submodel: any) => {
 			store.mutations.submodelImage.add({
 				parent: { id: submodel.stepID, type: 'step' },
@@ -404,7 +330,7 @@ export const Mutations: MutationInterface = {
 			});
 		});
 	},
-	async mergeInitialPages(progressCallback: any) {
+	async mergeInitialPages(progressCallback: any): Promise<void> {
 		return new Promise((resolve) => {
 			window.setTimeout(async function () {
 				let stepSet: Step[] = [],
@@ -435,4 +361,4 @@ export const Mutations: MutationInterface = {
 			}, 100);
 		});
 	},
-};
+} as const;

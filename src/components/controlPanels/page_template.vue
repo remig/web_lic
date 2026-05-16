@@ -87,7 +87,7 @@ import { t } from '@/translations';
 import { computed, ref } from 'vue';
 
 import EventBus from '../../event_bus';
-import store from '../../store';
+import { store } from '../../store';
 import _, { type UnitTypes } from '../../util';
 import LicSelect from '../base/LicSelect.vue';
 import BorderPanel from './border.vue';

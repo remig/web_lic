@@ -4,7 +4,7 @@ import { t } from '@/translations';
 
 import { type Annotation, type Book, type Page } from '../item_types';
 import LDParse from '../ld_parse';
-import store from '../store';
+import { store } from '../store';
 
 function addOneTitlePage(parent?: Book) {
 	let insertionIndex = 1;
@@ -38,23 +38,15 @@ function addOneTitlePage(parent?: Book) {
 	store.mutations.titlePage.addPageCountLabel(page);
 }
 
-export interface TitlePageMutationInterface {
-	add(): void;
-	delete(): void;
-	addTitleLabel(page: Page): Annotation;
-	setPageCountLabels(parent?: Book): void;
-	addPageCountLabel(page: Page, parent?: Book): Annotation;
-}
-
-export const TitlePageMutations: TitlePageMutationInterface = {
-	add() {
+export const TitlePageMutations = {
+	add(): void {
 		if (store.state.books.length > 1) {
 			store.state.books.forEach(addOneTitlePage);
 		} else {
 			addOneTitlePage();
 		}
 	},
-	delete() {
+	delete(): void {
 		store.state.pages
 			.map(store.get.page)
 			.filter((page) => page != null && page.subtype === 'titlePage')
@@ -63,7 +55,7 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 				store.mutations.page.delete({ page });
 			});
 	},
-	addTitleLabel(page) {
+	addTitleLabel(page: Page): Annotation {
 		return store.mutations.annotation.add({
 			annotationType: 'label',
 			properties: {
@@ -78,7 +70,7 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 			y: 0,
 		});
 	},
-	setPageCountLabels(parent) {
+	setPageCountLabels(parent?: Book): void {
 		// TODO: this is broken for multiple books
 		const titlePage = store.get.titlePage();
 		if (titlePage) {
@@ -108,7 +100,7 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 			}
 		}
 	},
-	addPageCountLabel(page, parent) {
+	addPageCountLabel(page: Page, parent?: Book): Annotation {
 		const annotation = store.mutations.annotation.add({
 			annotationType: 'label',
 			properties: {
@@ -127,4 +119,4 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 
 		return annotation;
 	},
-};
+} as const;

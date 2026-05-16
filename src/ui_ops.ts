@@ -5,7 +5,7 @@ import { nextTick } from 'vue';
 import EventBus from './event_bus';
 import { Point } from './item_types';
 import * as SelectionOps from './selection_ops';
-import store from './store';
+import { store } from './store';
 import * as ReactiveState from './ui_reactive_state';
 
 export function haveModel(): boolean {

@@ -87,7 +87,7 @@ import {
 	type Step,
 } from '../item_types';
 import * as SelectionOps from '../selection_ops';
-import store from '../store';
+import { store } from '../store';
 import { t } from '../translations';
 import { currentPageId as currentPageIdRef, selectedItemLookup } from '../ui_reactive_state';
 import uiState from '../ui_state';

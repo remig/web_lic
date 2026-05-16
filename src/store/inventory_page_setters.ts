@@ -3,7 +3,7 @@
 import { type LookupItem, type Model, type Part, type PLIItem } from '../item_types';
 import Layout from '../layout';
 import LDParse from '../ld_parse';
-import store from '../store';
+import { store } from '../store';
 import { isItemSpecificType } from '../type_helpers';
 import _ from '../util';
 
@@ -19,40 +19,12 @@ function findPLIItem(filename: string, colorCode: number): PLIItem | undefined {
 	});
 }
 
-export interface InventoryPageMutationInterface {
-	add(): void;
-	delete({ page }: { page: LookupItem }): void;
-	deleteAll(): void;
-	addPart({
-		filename,
-		colorCode,
-		part,
-		doLayout,
-	}: {
-		filename?: string;
-		colorCode?: number;
-		part?: Part;
-		doLayout: boolean;
-	}): void;
-	removePart({
-		filename,
-		colorCode,
-		part,
-		doLayout,
-	}: {
-		filename?: string;
-		colorCode?: number;
-		part: Part;
-		doLayout?: boolean;
-	}): void;
-}
-
 interface PartListEntry {
 	[key: string]: number;
 }
 
-export const InventoryPageMutations: InventoryPageMutationInterface = {
-	add() {
+export const InventoryPageMutations = {
+	add(): void {
 		// Add as many inventory pages as needed to fit all parts
 		if (store.model == null) {
 			return;
@@ -97,7 +69,7 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 
 		Layout.allInventoryPages();
 	},
-	delete({ page }) {
+	delete({ page }: { page: LookupItem }): void {
 		const item = store.get.page(page);
 		if (item == null) {
 			return;
@@ -110,13 +82,23 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 		store.mutations.item.deleteChildList({ item, listType: 'pliItem' });
 		store.mutations.item.delete({ item });
 	},
-	deleteAll() {
+	deleteAll(): void {
 		const pages = store.get.inventoryPages() || [];
 		pages.forEach((page) => {
 			store.mutations.inventoryPage.delete({ page });
 		});
 	},
-	addPart({ filename, colorCode, part, doLayout = false }) {
+	addPart({
+		filename,
+		colorCode,
+		part,
+		doLayout = false,
+	}: {
+		filename?: string;
+		colorCode?: number;
+		part?: Part;
+		doLayout: boolean;
+	}): void {
 		const page = store.get.inventoryPages()[0];
 		if (page == null) {
 			return;
@@ -151,7 +133,17 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 			store.mutations.page.layout({ page });
 		}
 	},
-	removePart({ filename, colorCode, part, doLayout = false }) {
+	removePart({
+		filename,
+		colorCode,
+		part,
+		doLayout = false,
+	}: {
+		filename?: string;
+		colorCode?: number;
+		part: Part;
+		doLayout?: boolean;
+	}): void {
 		const page = store.get.inventoryPages()[0];
 		if (page == null) {
 			return;
@@ -183,4 +175,4 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 			store.mutations.page.layout({ page });
 		}
 	},
-};
+} as const;

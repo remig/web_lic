@@ -47,7 +47,7 @@ import LicDialog from '@/components/base/LicDialog.vue';
 
 import EventBus from '../event_bus';
 import { type Rotation } from '../item_types';
-import store from '../store';
+import { store } from '../store';
 import undoStack from '../undo_stack';
 import _ from '../util';
 

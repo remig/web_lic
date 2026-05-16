@@ -1,20 +1,12 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import LDParse from '../ld_parse';
-import store from '../store';
+import { store } from '../store';
 import defaultTemplate from '../template';
 import _ from '../util';
 
-export interface TemplatePageMutationInterface {
-	add(): Promise<void>;
-	set({ entry, value }: { entry: any; value: any }): void;
-	load({ template }: { template: any }): void;
-	reset(): void;
-	setPageSize({ width, height }: { width: number; height: number }): void;
-}
-
-export const TemplatePageMutations: TemplatePageMutationInterface = {
-	async add() {
+export const TemplatePageMutations = {
+	async add(): Promise<void> {
 		const modelData = store.state.template.modelData;
 		if (!(modelData.model.filename in LDParse.partDictionary)) {
 			LDParse.partDictionary[modelData.model.filename] = modelData.model;
@@ -71,21 +63,21 @@ export const TemplatePageMutations: TemplatePageMutationInterface = {
 			}
 		});
 	},
-	set({ entry, value }) {
+	set({ entry, value }: { entry: any; value: any }): void {
 		const newEntry = _.get(store.state.template, entry);
 		_.assign(newEntry, value);
 	},
-	load({ template }) {
+	load({ template }: { template: any }): void {
 		store.state.template = template;
 		store.mutations.sceneRendering.refreshAll();
 	},
-	reset() {
+	reset(): void {
 		store.state.template = _.cloneDeep(defaultTemplate);
 		store.mutations.sceneRendering.refreshAll();
 	},
-	setPageSize({ width, height }) {
+	setPageSize({ width, height }: { width: number; height: number }): void {
 		store.state.template.page.width = width;
 		store.state.template.page.height = height;
 		store.mutations.page.markAllDirty();
 	},
-};
+} as const;

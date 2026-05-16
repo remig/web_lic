@@ -150,7 +150,7 @@ import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicTooltip from '@/components/base/LicTooltip.vue';
 
-import store from '../store';
+import { store } from '../store';
 import uiState from '../ui_state';
 import _ from '../util';
 

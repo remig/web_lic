@@ -99,7 +99,7 @@ import LDParse from './ld_parse';
 import Menu from './menu';
 import * as SelectionOps from './selection_ops';
 import Storage from './storage';
-import store from './store';
+import { store } from './store';
 import { getLocale, LanguageList, t } from './translations';
 import * as UiOps from './ui_ops';
 import * as ReactiveState from './ui_reactive_state';

@@ -57,7 +57,7 @@ import EventBus from '../event_bus';
 import { type ColorTableEntry, type LDrawColorCode } from '../item_types';
 import LDParse from '../ld_parse';
 import Storage from '../storage';
-import store from '../store';
+import { store } from '../store';
 import _ from '../util';
 
 const emit = defineEmits<{ (e: 'ok'): void; (e: 'cancel'): void }>();

@@ -21,7 +21,7 @@ import {
 	type SubmodelImage,
 } from './item_types';
 import LDParse from './ld_parse';
-import store from './store';
+import { store } from './store';
 import { t } from './translations';
 import { isBox, isNotNull } from './type_helpers';
 import _ from './util';

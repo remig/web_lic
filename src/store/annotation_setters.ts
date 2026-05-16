@@ -8,10 +8,10 @@ import {
 	type PointItem,
 } from '../item_types';
 import Layout from '../layout';
-import store from '../store';
+import { store } from '../store';
 import _ from '../util';
 
-export interface AnnotationMutationInterface {
+export const AnnotationMutations = {
 	add({
 		annotationType,
 		properties,
@@ -24,13 +24,7 @@ export interface AnnotationMutationInterface {
 		parent: LookupItem;
 		x: number;
 		y: number;
-	}): Annotation;
-	set({ annotation, newProperties }: { annotation: LookupItem; newProperties: any }): void;
-	delete({ annotation }: { annotation: LookupItem }): void;
-}
-
-export const AnnotationMutations: AnnotationMutationInterface = {
-	add({ annotationType, properties, parent, x, y }) {
+	}): Annotation {
 		const annotation = store.mutations.item.add<Annotation>({
 			item: {
 				type: 'annotation',
@@ -97,7 +91,7 @@ export const AnnotationMutations: AnnotationMutationInterface = {
 		}
 		return annotation;
 	},
-	set({ annotation, newProperties }) {
+	set({ annotation, newProperties }: { annotation: LookupItem; newProperties: any }): void {
 		const item = store.get.annotation(annotation);
 		if (item) {
 			const props = newProperties || {};
@@ -109,7 +103,7 @@ export const AnnotationMutations: AnnotationMutationInterface = {
 			}
 		}
 	},
-	delete({ annotation }) {
+	delete({ annotation }: { annotation: LookupItem }): void {
 		const item = store.get.annotation(annotation);
 		if (item) {
 			if (item.hasOwnProperty('points')) {
@@ -119,4 +113,4 @@ export const AnnotationMutations: AnnotationMutationInterface = {
 			store.mutations.item.delete({ item });
 		}
 	},
-};
+} as const;

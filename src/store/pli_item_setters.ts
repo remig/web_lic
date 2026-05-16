@@ -2,27 +2,20 @@
 
 import { type LookupItem, type PLIItem, type QuantityLabel } from '../item_types';
 import Layout from '../layout';
-import store from '../store';
+import { store } from '../store';
 
-export interface PLIItemMutationInterface {
+export const PLIItemMutations = {
 	add({
 		parent,
 		filename,
 		colorCode,
-		quantity,
+		quantity = 1,
 	}: {
 		parent: LookupItem;
 		filename: string;
 		colorCode: number;
 		quantity?: number;
-	}): PLIItem;
-	delete({ pliItem }: { pliItem: LookupItem }): void;
-	changeQuantity({ pliItem, quantity }: { pliItem: LookupItem; quantity: number }): void;
-	markAllDirty(filename?: string): void;
-}
-
-export const PLIItemMutations: PLIItemMutationInterface = {
-	add({ parent, filename, colorCode, quantity = 1 }) {
+	}): PLIItem {
 		const pliItem = store.mutations.item.add<PLIItem>({
 			item: {
 				type: 'pliItem',
@@ -59,7 +52,7 @@ export const PLIItemMutations: PLIItemMutationInterface = {
 
 		return pliItem;
 	},
-	delete({ pliItem }) {
+	delete({ pliItem }: { pliItem: LookupItem }): void {
 		const item = store.get.pliItem(pliItem);
 		if (item != null) {
 			if (item.quantityLabelID != null) {
@@ -70,7 +63,7 @@ export const PLIItemMutations: PLIItemMutationInterface = {
 			store.mutations.item.delete({ item });
 		}
 	},
-	changeQuantity({ pliItem, quantity }) {
+	changeQuantity({ pliItem, quantity }: { pliItem: LookupItem; quantity: number }): void {
 		const item = store.get.pliItem(pliItem);
 		if (item == null) {
 			return;
@@ -83,10 +76,10 @@ export const PLIItemMutations: PLIItemMutationInterface = {
 			Layout.quantityLabel(quantityLabel, font, 'x' + item.quantity);
 		}
 	},
-	markAllDirty(filename) {
+	markAllDirty(filename?: string): void {
 		const list = filename
 			? store.state.pliItems.filter((item) => item.filename === filename)
 			: store.state.pliItems;
 		list.forEach((item) => (item.isDirty = true));
 	},
-};
+} as const;

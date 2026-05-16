@@ -1,23 +1,18 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import { type LookupItem, type QuantityLabel, type SubmodelImage } from '../item_types';
-import store from '../store';
+import { store } from '../store';
 
-export interface SubmodelImageMutationInterface {
+export const SubmodelImageMutations = {
 	add({
 		parent,
 		modelFilename,
-		quantity,
+		quantity = 1,
 	}: {
 		parent: LookupItem;
 		modelFilename: string;
 		quantity?: number;
-	}): SubmodelImage;
-	delete({ submodelImage, doLayout }: { submodelImage: LookupItem; doLayout?: boolean }): void;
-}
-
-export const submodelImageMutations: SubmodelImageMutationInterface = {
-	add({ parent, modelFilename, quantity = 1 }) {
+	}): SubmodelImage {
 		// TODO: submodelImages don't have a CSI, they have a pliItem with no quantity label.  Fix that
 		const submodelImage = store.mutations.item.add<SubmodelImage>({
 			item: {
@@ -58,7 +53,13 @@ export const submodelImageMutations: SubmodelImageMutationInterface = {
 		}
 		return submodelImage;
 	},
-	delete({ submodelImage, doLayout = false }) {
+	delete({
+		submodelImage,
+		doLayout = false,
+	}: {
+		submodelImage: LookupItem;
+		doLayout?: boolean;
+	}): void {
 		const item = store.get.submodelImage(submodelImage);
 		if (item == null) {
 			return;
@@ -76,4 +77,4 @@ export const submodelImageMutations: SubmodelImageMutationInterface = {
 			store.mutations.page.layout({ page: store.get.pageForItem(item) });
 		}
 	},
-};
+} as const;

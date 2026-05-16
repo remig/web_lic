@@ -8,7 +8,7 @@ import openFileHandler from './file_uploader';
 import LDParse from './ld_parse';
 import * as SelectionOps from './selection_ops';
 import Storage from './storage';
-import store from './store';
+import { store } from './store';
 import { t } from './translations';
 import * as UiOps from './ui_ops';
 import * as ReactiveState from './ui_reactive_state';

@@ -1,19 +1,12 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import { type CalloutArrow, type Directions, type LookupItem, type PointItem } from '../item_types';
-import store from '../store';
+import { store } from '../store';
 import { isPointListItem } from '../type_helpers';
 import _ from '../util';
 
-export interface CalloutArrowMutationInterface {
-	add({ parent }: { parent: LookupItem }): CalloutArrow;
-	delete({ calloutArrow }: { calloutArrow: CalloutArrow }): void;
-	addPoint({ arrow }: { arrow: LookupItem }): void;
-	rotateTip({ arrow, direction }: { arrow: CalloutArrow; direction: Directions }): void;
-}
-
-export const CalloutArrowMutations: CalloutArrowMutationInterface = {
-	add({ parent }) {
+export const CalloutArrowMutations = {
+	add({ parent }: { parent: LookupItem }): CalloutArrow {
 		const arrow = store.mutations.item.add<CalloutArrow>({
 			item: {
 				type: 'calloutArrow',
@@ -51,12 +44,12 @@ export const CalloutArrowMutations: CalloutArrowMutationInterface = {
 
 		return arrow;
 	},
-	delete({ calloutArrow }) {
+	delete({ calloutArrow }: { calloutArrow: CalloutArrow }): void {
 		const item = calloutArrow;
 		store.mutations.item.deleteChildList({ item, listType: 'point' });
 		store.mutations.item.delete({ item });
 	},
-	addPoint({ arrow }) {
+	addPoint({ arrow }: { arrow: LookupItem }): void {
 		const arrowItem = store.get.lookupToItem(arrow);
 		if (arrowItem == null || !isPointListItem(arrowItem)) {
 			return;
@@ -82,10 +75,10 @@ export const CalloutArrowMutations: CalloutArrowMutationInterface = {
 			parentInsertionIndex,
 		});
 	},
-	rotateTip({ arrow, direction }) {
+	rotateTip({ arrow, direction }: { arrow: CalloutArrow; direction: Directions }): void {
 		const item = store.get.calloutArrow(arrow);
 		if (item != null) {
 			item.direction = direction;
 		}
 	},
-};
+} as const;

@@ -19,7 +19,7 @@
 import { t } from '@/translations';
 import { ref } from 'vue';
 
-import store from '../../store';
+import { store } from '../../store';
 import BorderPanel from './border.vue';
 import FillPanel from './fill.vue';
 import PanelBase from './panel_base.vue';

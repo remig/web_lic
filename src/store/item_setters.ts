@@ -9,38 +9,34 @@ import {
 	type PointListItem,
 } from '../item_types';
 import Layout from '../layout';
-import store from '../store';
+import { store } from '../store';
 import { hasProperty, isItemSpecificType } from '../type_helpers';
 import _ from '../util';
 
-export interface ItemMutationInterface {
+function hasListProperty(item: any, prop: ItemTypeNames): item is Item {
+	return item != null && item.hasOwnProperty(prop + 's');
+}
+
+function hasIDProperty(item: Item, prop: ItemTypeNames): item is Item {
+	return item != null && item.hasOwnProperty(prop + 'ID');
+}
+
+function getList(item: Item, listType: ItemTypeNames): number[] {
+	return (item as any)[listType + 's'];
+}
+
+export const ItemMutations = {
 	add<T extends ItemTypes>({
 		item,
 		parent,
-		insertionIndex,
-		parentInsertionIndex,
+		insertionIndex = -1,
+		parentInsertionIndex = -1,
 	}: {
 		item: T;
 		parent: LookupItem | null;
 		insertionIndex?: number;
 		parentInsertionIndex?: number;
-	}): T;
-	delete({ item }: { item: LookupItem | null }): void;
-	deleteChildList({ item, listType }: { item: LookupItem | null; listType: ItemTypeNames }): void;
-	reparent({
-		item,
-		newParent,
-		parentInsertionIndex,
-	}: {
-		item: LookupItem | null;
-		newParent: LookupItem | null;
-		parentInsertionIndex?: number;
-	}): void;
-	reposition({ item, dx, dy }: { item: LookupItem | LookupItem[]; dx: number; dy: number }): void;
-}
-
-export const ItemMutations: ItemMutationInterface = {
-	add({ item, parent, insertionIndex = -1, parentInsertionIndex = -1 }) {
+	}): T {
 		item.id = store.get.nextItemID(item);
 		if (store.state.hasOwnProperty(item.type)) {
 			// TODO: does this ever get hit?
@@ -61,7 +57,7 @@ export const ItemMutations: ItemMutationInterface = {
 		}
 		return item;
 	},
-	delete({ item }) {
+	delete({ item }: { item: LookupItem | null }): void {
 		const target = store.get.lookupToItem(item);
 		if (target == null) {
 			return;
@@ -76,7 +72,7 @@ export const ItemMutations: ItemMutationInterface = {
 			}
 		}
 	},
-	deleteChildList({ item, listType }) {
+	deleteChildList({ item, listType }: { item: LookupItem | null; listType: ItemTypeNames }): void {
 		const parent = store.get.lookupToItem(item);
 		if (parent == null || !hasListProperty(parent, listType)) {
 			return;
@@ -94,7 +90,15 @@ export const ItemMutations: ItemMutationInterface = {
 			});
 		}
 	},
-	reparent({ item, newParent, parentInsertionIndex = -1 }) {
+	reparent({
+		item,
+		newParent,
+		parentInsertionIndex = -1,
+	}: {
+		item: LookupItem | null;
+		newParent: LookupItem | null;
+		parentInsertionIndex?: number;
+	}): void {
 		const target = store.get.lookupToItem(item);
 		const newTarget = store.get.lookupToItem(newParent);
 		if (target == null || newTarget == null) {
@@ -120,7 +124,7 @@ export const ItemMutations: ItemMutationInterface = {
 			(newTarget as any)[target.type + 'ID'] = target.id;
 		}
 	},
-	reposition({ item, dx, dy }) {
+	reposition({ item, dx, dy }: { item: LookupItem | LookupItem[]; dx: number; dy: number }): void {
 		const items = Array.isArray(item) ? item : [item];
 		items.forEach((lookup) => {
 			const localItem = store.get.lookupToItem(lookup);
@@ -150,16 +154,4 @@ export const ItemMutations: ItemMutationInterface = {
 			}
 		});
 	},
-};
-
-function hasListProperty(item: any, prop: ItemTypeNames): item is Item {
-	return item != null && item.hasOwnProperty(prop + 's');
-}
-
-function hasIDProperty(item: Item, prop: ItemTypeNames): item is Item {
-	return item != null && item.hasOwnProperty(prop + 'ID');
-}
-
-function getList(item: Item, listType: ItemTypeNames): number[] {
-	return (item as any)[listType + 's'];
-}
+} as const;

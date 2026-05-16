@@ -1,46 +1,14 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {
-	type AbstractPart,
-	type Annotation,
-	type Book,
-	type Box,
-	type Callout,
-	type CalloutArrow,
-	type CSI,
-	type Divider,
-	type Item,
-	type ItemTypeNames,
-	type ItemTypes,
-	type LDrawPartFilename,
-	type LookupItem,
-	type NumberedItem,
-	type NumberLabel,
-	type Page,
-	type Part,
-	type PLI,
-	type PLIItem,
-	type PLIItemParent,
-	type PLITransform,
-	type Point,
-	type PointedItem,
-	type PointItem,
-	type PointListItem,
-	type QuantityLabel,
-	type RotateIcon,
-	type Step,
-	type StepParent,
-	type SubmodelImage,
-	type SubmodelItem,
-} from '../item_types';
+import * as Types from '../item_types';
 import LDParse from '../ld_parse';
-import store from '../store';
+import { store } from '../store';
 import { hasProperty } from '../type_helpers';
 import { isNotNull, isPointListItem, isTemplateType } from '../type_helpers';
 import _ from '../util';
 
-function getter<T extends ItemTypes>(s: ItemTypeNames) {
-	return (itemLookup: number | LookupItem) => {
+function getter<T extends Types.ItemTypes>(s: Types.ItemTypeNames) {
+	return (itemLookup: number | Types.LookupItem) => {
 		let res;
 		if (typeof itemLookup === 'number') {
 			res = store.get.lookupToItem({ type: s, id: itemLookup });
@@ -57,132 +25,42 @@ function getter<T extends ItemTypes>(s: ItemTypeNames) {
 	};
 }
 
-interface SubmodelIdentifier {
+export interface SubmodelIdentifier {
 	filename: string;
 	quantity: number;
 	stepID: number;
 }
 
-function getStateChildList<T extends Item>(childType: ItemTypeNames): T[] {
+function getStateChildList<T extends Types.Item>(childType: Types.ItemTypeNames): T[] {
 	return (store.state as any)[childType + 's'];
 }
 
-function getChildIDList(item: Item, childType: ItemTypeNames): number[] {
+function getChildIDList(item: Types.Item, childType: Types.ItemTypeNames): number[] {
 	return (item as any)[childType + 's'];
 }
 
-function getChildID(item: Item, childType: ItemTypeNames): number {
+function getChildID(item: Types.Item, childType: Types.ItemTypeNames): number {
 	return (item as any)[childType + 'ID'];
 }
 
-export interface GetterInterface {
-	annotation(id: LookupItem | number): Annotation;
-	book(id: LookupItem | number): Book;
-	callout(id: LookupItem | number): Callout;
-	calloutArrow(id: LookupItem | number): CalloutArrow;
-	csi(id: LookupItem | number): CSI;
-	divider(id: LookupItem | number): Divider;
-	numberLabel(id: LookupItem | number): NumberLabel;
-	page(id: LookupItem | number): Page;
-	pli(id: LookupItem | number): PLI;
-	pliItem(id: LookupItem | number): PLIItem;
-	point(id: LookupItem | number): PointItem;
-	quantityLabel(id: LookupItem | number): QuantityLabel;
-	rotateIcon(id: LookupItem | number): RotateIcon;
-	step(id: LookupItem | number): Step;
-	submodelImage(id: LookupItem | number): SubmodelImage;
+export const Getters = {
+	annotation: getter<Types.Annotation>('annotation'),
+	book: getter<Types.Book>('book'),
+	callout: getter<Types.Callout>('callout'),
+	calloutArrow: getter<Types.CalloutArrow>('calloutArrow'),
+	csi: getter<Types.CSI>('csi'),
+	divider: getter<Types.Divider>('divider'),
+	numberLabel: getter<Types.NumberLabel>('numberLabel'),
+	page: getter<Types.Page>('page'),
+	pli: getter<Types.PLI>('pli'),
+	pliItem: getter<Types.PLIItem>('pliItem'),
+	point: getter<Types.PointItem>('point'),
+	quantityLabel: getter<Types.QuantityLabel>('quantityLabel'),
+	rotateIcon: getter<Types.RotateIcon>('rotateIcon'),
+	step: getter<Types.Step>('step'),
+	submodelImage: getter<Types.SubmodelImage>('submodelImage'),
 
-	modelName(nice: boolean): string;
-	modelFilename(): string;
-	modelFilenameBase(ext?: string): string;
-	pageCount(): number;
-	isTitlePage(pageLookup: LookupItem): boolean;
-	titlePage(): Page | null;
-	isBasicPage(pageLookup: LookupItem): boolean;
-	basicPages(): Page[];
-	isInventoryPage(pageLookup: LookupItem): boolean;
-	inventoryPages(): Page[];
-	isFirstBasicPage(pageLookup: LookupItem): boolean;
-	isLastBasicPage(pageLookup: LookupItem): boolean;
-	isLastPage(page: LookupItem): boolean;
-	firstBasicPage(): Page | null;
-	lastBasicPage(): Page | null;
-	prevBasicPage(item: LookupItem): Page | null;
-	nextBasicPage(item: LookupItem): Page | null;
-	prevPage(item: LookupItem): Page | null;
-	nextPage(item: LookupItem): Page | null;
-	pageList(): Page[];
-	templatePage(): Page;
-	templateForItem(item: LookupItem): any;
-	isTemplatePage(pageLookup: number | LookupItem): boolean;
-	firstBookPage(bookLookup: LookupItem): Page;
-	firstPage(): Page | null;
-	lastPage(): Page | null;
-	adjacentStep(
-		stepLookup: LookupItem,
-		direction: 'prev' | 'next',
-		limitToSubmodel: boolean,
-	): Step | null;
-	prevStep(stepLookup: LookupItem, limitToSubmodel?: boolean): Step | null;
-	nextStep(stepLookup: LookupItem, limitToSubmodel?: boolean): Step | null;
-	part(partID: number, stepLookup: LookupItem): any;
-	partsInStep(stepLookup: LookupItem): Part[];
-	abstractPartsInStep(stepLookup: LookupItem): any[];
-	stepHasSubmodel(stepLookup: LookupItem): boolean;
-	partList(stepLookup: LookupItem): number[] | null;
-	matchingPLIItem(parentLookup: LookupItem, part: any): PLIItem | null;
-	pliItemIsSubmodel(pliItemLookup: LookupItem): boolean;
-	pliTransform(filename: LDrawPartFilename): PLITransform;
-	isMoveable(item: LookupItem): boolean;
-	prev<T extends NumberedItem>(itemLookup: LookupItem, itemList?: NumberedItem[]): T | null;
-	next<T extends NumberedItem>(itemLookup: LookupItem, itemList?: NumberedItem[]): T | null;
-	parent(itemLookup: LookupItem): ItemTypes | null;
-	isDescendent(itemLookup: LookupItem, ancestorLookup: LookupItem): boolean;
-	childList(): ItemTypeNames[];
-	stepChildren(step: LookupItem): ItemTypes[];
-	hasChildren(itemLookup: LookupItem): boolean;
-	children(itemLookup: LookupItem, childTypeList?: ItemTypeNames[]): ItemTypes[];
-	pageForItem(item: any): Page;
-	submodels(): SubmodelIdentifier[];
-	topLevelTreeNodes(): ItemTypes[];
-	nextItemID(item: ItemTypeNames): number;
-	nextItemID(item: LookupItem): number;
-	itemByNumber(type: ItemTypeNames, number: number): Item | null;
-	lookupToItem(lookup: LookupItem | null): ItemTypes | null;
-	lookupToItem(lookup: number, type: ItemTypeNames): ItemTypes | null;
-	itemToLookup(item: Item): LookupItem | null;
-	coords: {
-		pageToItem({ x, y }: Point, itemLookup: LookupItem | null): Point;
-		itemToPage(itemLookup: LookupItem): Point;
-		pointToPage(x: number | PointItem, y?: number, relativeTo?: LookupItem | null): Point;
-	};
-	targetBoxFromPoints(targetLookup: LookupItem): Box;
-	targetBox(targetLookup: LookupItem): Box;
-	highlightBox(
-		itemLookup: LookupItem,
-		pageSize: { width: number; height: number },
-		currentPage?: Page | null,
-	): Box | null;
-}
-
-export const Getters: GetterInterface = {
-	annotation: getter<Annotation>('annotation'),
-	book: getter<Book>('book'),
-	callout: getter<Callout>('callout'),
-	calloutArrow: getter<CalloutArrow>('calloutArrow'),
-	csi: getter<CSI>('csi'),
-	divider: getter<Divider>('divider'),
-	numberLabel: getter<NumberLabel>('numberLabel'),
-	page: getter<Page>('page'),
-	pli: getter<PLI>('pli'),
-	pliItem: getter<PLIItem>('pliItem'),
-	point: getter<PointItem>('point'),
-	quantityLabel: getter<QuantityLabel>('quantityLabel'),
-	rotateIcon: getter<RotateIcon>('rotateIcon'),
-	step: getter<Step>('step'),
-	submodelImage: getter<SubmodelImage>('submodelImage'),
-
-	modelName(nice: boolean) {
+	modelName(nice: boolean): string {
 		if (!store.model) {
 			return '';
 		} else if (store.model.name) {
@@ -194,89 +72,89 @@ export const Getters: GetterInterface = {
 		}
 		return name;
 	},
-	modelFilename() {
+	modelFilename(): string {
 		if (!store.model || !store.model.filename) {
 			return '';
 		}
 		return store.model.filename;
 	},
-	modelFilenameBase(ext = '') {
+	modelFilenameBase(ext = ''): string {
 		if (!store.model || !store.model.filename) {
 			return '';
 		}
 		return store.model.filename.split('.')[0] + ext;
 	},
-	pageCount() {
+	pageCount(): number {
 		return store.state.pages.length - 1; // never want to include template page here
 	},
-	isTitlePage(pageLookup: LookupItem) {
+	isTitlePage(pageLookup: Types.LookupItem): boolean {
 		const page = store.get.page(pageLookup);
 		return page.subtype === 'titlePage';
 	},
-	titlePage() {
+	titlePage(): Types.Page | null {
 		return store.state.pages.find(store.get.isTitlePage) || null;
 	},
-	isBasicPage(pageLookup: LookupItem) {
+	isBasicPage(pageLookup: Types.LookupItem): boolean {
 		const page = store.get.page(pageLookup);
 		return page.subtype === 'page';
 	},
-	basicPages() {
+	basicPages(): Types.Page[] {
 		return store.state.pages.filter(store.get.isBasicPage);
 	},
-	isInventoryPage(pageLookup: LookupItem) {
+	isInventoryPage(pageLookup: Types.LookupItem): boolean {
 		const page = store.get.page(pageLookup);
 		return page.subtype === 'inventoryPage';
 	},
-	inventoryPages() {
+	inventoryPages(): Types.Page[] {
 		return store.state.pages.filter(store.get.isInventoryPage);
 	},
-	isFirstBasicPage(pageLookup: LookupItem) {
+	isFirstBasicPage(pageLookup: Types.LookupItem): boolean {
 		const page = store.get.page(pageLookup);
 		const basicPages = store.get.basicPages();
 		return page.id === basicPages[0].id;
 	},
-	isLastBasicPage(pageLookup: LookupItem) {
+	isLastBasicPage(pageLookup: Types.LookupItem): boolean {
 		const page = store.get.page(pageLookup);
 		const lastPage = _.last(store.get.basicPages());
 		return lastPage != null && page.id === lastPage.id;
 	},
-	isLastPage(page: LookupItem) {
-		const lastPage = _.last(store.state.pages) as Page;
+	isLastPage(page: Types.LookupItem): boolean {
+		const lastPage = _.last(store.state.pages) as Types.Page;
 		return page != null && lastPage != null && page.id === lastPage.id;
 	},
-	firstBasicPage() {
+	firstBasicPage(): Types.Page | null {
 		return store.get.basicPages()[0] || null;
 	},
-	lastBasicPage() {
+	lastBasicPage(): Types.Page | null {
 		return _.last(store.get.basicPages()) || null;
 	},
-	prevBasicPage(item: LookupItem) {
+	prevBasicPage(item: Types.LookupItem): Types.Page | null {
 		const prevPage = store.get.prevPage(item);
 		return (prevPage || {}).subtype === 'page' ? prevPage : null;
 	},
-	nextBasicPage(item: LookupItem) {
+	nextBasicPage(item: Types.LookupItem): Types.Page | null {
 		const nextPage = store.get.nextPage(item);
 		return (nextPage || {}).subtype === 'page' ? nextPage : null;
 	},
-	prevPage(item: LookupItem) {
+	prevPage(item: Types.LookupItem): Types.Page | null {
 		const page = store.get.pageForItem(item);
 		const pageList = store.get.pageList();
 		const idx = pageList.indexOf(page);
 		return pageList[idx - 1] || null;
 	},
-	nextPage(item: LookupItem) {
+	nextPage(item: Types.LookupItem): Types.Page | null {
 		const page = store.get.pageForItem(item);
 		const pageList = store.get.pageList();
 		const idx = pageList.indexOf(page);
 		return pageList[idx + 1] || null;
 	},
-	pageList() {
+	pageList(): Types.Page[] {
 		return store.state.pages.filter((el: object) => el);
 	},
-	templatePage() {
+	templatePage(): Types.Page {
 		return store.state.pages[0];
 	},
-	templateForItem(item: LookupItem): any {
+	templateForItem(item: Types.LookupItem): any {
 		const template = store.state.template;
 		if (isTemplateType(item.type)) {
 			return template[item.type];
@@ -316,14 +194,14 @@ export const Getters: GetterInterface = {
 		}
 		return null;
 	},
-	isTemplatePage(pageLookup) {
+	isTemplatePage(pageLookup: number | Types.LookupItem): boolean {
 		const page =
 			typeof pageLookup === 'number'
 				? store.get.lookupToItem(pageLookup, 'page')
 				: store.get.lookupToItem(pageLookup);
 		return page != null && (page as any).subtype === 'templatePage';
 	},
-	firstBookPage(bookLookup: LookupItem) {
+	firstBookPage(bookLookup: Types.LookupItem): Types.Page {
 		const book = store.get.book(bookLookup);
 		const firstPage = store.get.page(book.pages[0]);
 		if (firstPage && firstPage.subtype === 'templatePage') {
@@ -331,22 +209,26 @@ export const Getters: GetterInterface = {
 		}
 		return firstPage;
 	},
-	firstPage() {
+	firstPage(): Types.Page | null {
 		return store.state.pages[1]; // first page should still ignore template page
 	},
-	lastPage() {
+	lastPage(): Types.Page | null {
 		return _.last(store.state.pages) || null;
 	},
-	adjacentStep(stepLookup: LookupItem, direction: 'prev' | 'next', limitToSubmodel: boolean) {
+	adjacentStep(
+		stepLookup: Types.LookupItem,
+		direction: 'prev' | 'next',
+		limitToSubmodel: boolean,
+	): Types.Step | null {
 		const step = store.get.step(stepLookup);
 		let itemList;
 		if (step.parent.type === 'step' || step.parent.type === 'callout') {
 			const parent = store.get.parent(step);
-			if (hasProperty<StepParent>(parent, 'steps')) {
+			if (hasProperty<Types.StepParent>(parent, 'steps')) {
 				itemList = parent.steps.map(store.get.step).filter(isNotNull);
 			}
 		}
-		let adjacentStep = store.get[direction]<Step>(step, itemList);
+		let adjacentStep = store.get[direction]<Types.Step>(step, itemList);
 		if (limitToSubmodel && itemList == null) {
 			while (
 				adjacentStep &&
@@ -358,37 +240,37 @@ export const Getters: GetterInterface = {
 		}
 		return adjacentStep;
 	},
-	prevStep(stepLookup: LookupItem, limitToSubmodel: boolean = false) {
+	prevStep(stepLookup: Types.LookupItem, limitToSubmodel: boolean = false): Types.Step | null {
 		return store.get.adjacentStep(stepLookup, 'prev', limitToSubmodel);
 	},
-	nextStep(stepLookup: LookupItem, limitToSubmodel: boolean = false) {
+	nextStep(stepLookup: Types.LookupItem, limitToSubmodel: boolean = false): Types.Step | null {
 		return store.get.adjacentStep(stepLookup, 'next', limitToSubmodel);
 	},
-	part(partID: number, stepLookup: LookupItem) {
+	part(partID: number, stepLookup: Types.LookupItem): any {
 		const step = store.get.step(stepLookup);
 		return LDParse.model.get.partFromID(partID, step.model.filename);
 	},
-	partsInStep(stepLookup: LookupItem) {
+	partsInStep(stepLookup: Types.LookupItem): Types.Part[] {
 		const step = store.get.step(stepLookup);
 		return (step.parts || []).map((partID: number) => {
 			return LDParse.model.get.partFromID(partID, step.model.filename);
 		});
 	},
-	abstractPartsInStep(stepLookup: LookupItem) {
+	abstractPartsInStep(stepLookup: Types.LookupItem): any[] {
 		const step = store.get.step(stepLookup);
 		const parts = store.get.partsInStep(step);
-		return parts.map((part: Part) => {
+		return parts.map((part: Types.Part) => {
 			return LDParse.model.get.abstractPart(part.filename);
 		});
 	},
-	stepHasSubmodel(stepLookup: LookupItem) {
+	stepHasSubmodel(stepLookup: Types.LookupItem): boolean {
 		const step = store.get.step(stepLookup);
 		const parts = store.get.abstractPartsInStep(step);
-		return parts.some((part: AbstractPart) => part.isSubModel);
+		return parts.some((part: Types.AbstractPart) => part.isSubModel);
 	},
-	partList(stepLookup: LookupItem) {
+	partList(stepLookup: Types.LookupItem): number[] | null {
 		// Return a list of part IDs for every part in this (and previous) step
-		let step: Step | null = store.get.step(stepLookup);
+		let step: Types.Step | null = store.get.step(stepLookup);
 		if (step.parts == null) {
 			return null;
 		}
@@ -408,9 +290,9 @@ export const Getters: GetterInterface = {
 	},
 
 	// Given a parent and a part, find a pliItem in the parent that matches the part filename & color (if any)
-	matchingPLIItem(parentLookup: LookupItem, part: Part) {
+	matchingPLIItem(parentLookup: Types.LookupItem, part: Types.Part): Types.PLIItem | null {
 		const parent = store.get.lookupToItem(parentLookup);
-		if (hasProperty<PLIItemParent>(parent, 'pliItems')) {
+		if (hasProperty<Types.PLIItemParent>(parent, 'pliItems')) {
 			return (
 				(parent.pliItems || []).map(store.get.pliItem).find((i) => {
 					return i && i.filename === part.filename && i.colorCode === part.colorCode;
@@ -419,11 +301,11 @@ export const Getters: GetterInterface = {
 		}
 		return null;
 	},
-	pliItemIsSubmodel(pliItemLookup: LookupItem) {
+	pliItemIsSubmodel(pliItemLookup: Types.LookupItem): boolean {
 		const pliItem = store.get.pliItem(pliItemLookup);
 		return LDParse.model.isSubmodel(pliItem.filename);
 	},
-	pliTransform(filename: LDrawPartFilename) {
+	pliTransform(filename: Types.LDrawPartFilename): Types.PLITransform {
 		return store.state.pliTransforms[filename] || {};
 	},
 	isMoveable: (() => {
@@ -441,22 +323,22 @@ export const Getters: GetterInterface = {
 			'point',
 			'rotateIcon',
 		];
-		return function (item: LookupItem) {
+		return function (item: Types.LookupItem): boolean {
 			if (store.get.isTemplatePage(store.get.pageForItem(item))) {
 				return false;
 			}
 			return moveableItems.includes(item.type);
 		};
 	})(),
-	prev<T>(itemLookup: LookupItem, itemList?: NumberedItem[]) {
+	prev<T>(itemLookup: Types.LookupItem, itemList?: Types.NumberedItem[]): T | null {
 		// Get the previous item in the specified item's list, based on
 		// item.number and matching types and parent types
 		const item = store.get.lookupToItem(itemLookup);
-		if (!item || !hasProperty<NumberedItem>(item, 'number')) {
+		if (!item || !hasProperty<Types.NumberedItem>(item, 'number')) {
 			return null;
 		}
-		const foo: NumberedItem[] = itemList || getStateChildList<NumberedItem>(item.type);
-		const foundItem = foo.find((el: NumberedItem) => {
+		const foo: Types.NumberedItem[] = itemList || getStateChildList<Types.NumberedItem>(item.type);
+		const foundItem = foo.find((el: Types.NumberedItem) => {
 			if (el.number !== item.number - 1 || el.type !== item.type) {
 				return false;
 			}
@@ -472,14 +354,14 @@ export const Getters: GetterInterface = {
 		});
 		return foundItem ? (foundItem as unknown as T) : null;
 	},
-	next<T>(itemLookup: LookupItem, itemList?: NumberedItem[]) {
+	next<T>(itemLookup: Types.LookupItem, itemList?: Types.NumberedItem[]): T | null {
 		// Get the next item in the specified item's list, based on
 		// item.number and matching types and parent types
 		const item = store.get.lookupToItem(itemLookup);
-		if (!item || !hasProperty<NumberedItem>(item, 'number')) {
+		if (!item || !hasProperty<Types.NumberedItem>(item, 'number')) {
 			return null;
 		}
-		const foo = itemList || getStateChildList<NumberedItem>(item.type);
+		const foo = itemList || getStateChildList<Types.NumberedItem>(item.type);
 		const foundItem = foo.find((el) => {
 			if (el == null || el.number !== item.number + 1 || el.type !== item.type) {
 				return false;
@@ -496,14 +378,14 @@ export const Getters: GetterInterface = {
 		});
 		return foundItem ? (foundItem as unknown as T) : null;
 	},
-	parent(itemLookup: LookupItem) {
+	parent(itemLookup: Types.LookupItem): Types.ItemTypes | null {
 		const item = store.get.lookupToItem(itemLookup);
 		if (item != null) {
 			return store.get.lookupToItem(item.parent);
 		}
 		return null;
 	},
-	isDescendent(itemLookup: LookupItem, ancestorLookup: LookupItem) {
+	isDescendent(itemLookup: Types.LookupItem, ancestorLookup: Types.LookupItem): boolean {
 		// Return true if item is a descendent or equal to ancestor
 		let item = store.get.lookupToItem(itemLookup);
 		const ancestor = store.get.lookupToItem(ancestorLookup);
@@ -515,8 +397,8 @@ export const Getters: GetterInterface = {
 		}
 		return false;
 	},
-	childList() {
-		const children: ItemTypeNames[] = [
+	childList(): Types.ItemTypeNames[] {
+		const children: Types.ItemTypeNames[] = [
 			'page',
 			'numberLabel',
 			'divider',
@@ -535,10 +417,10 @@ export const Getters: GetterInterface = {
 		}
 		return children;
 	},
-	stepChildren(step: LookupItem) {
+	stepChildren(step: Types.LookupItem): Types.ItemTypes[] {
 		return store.get.children(step, store.get.childList());
 	},
-	hasChildren(itemLookup: LookupItem) {
+	hasChildren(itemLookup: Types.LookupItem): boolean {
 		const item = store.get.lookupToItem(itemLookup);
 		if (!item) {
 			return false;
@@ -552,9 +434,9 @@ export const Getters: GetterInterface = {
 		}
 		return false;
 	},
-	children(itemLookup: LookupItem, childTypeList?: ItemTypeNames[]) {
+	children(itemLookup: Types.LookupItem, childTypeList?: Types.ItemTypeNames[]): Types.ItemTypes[] {
 		// TODO: clean up 'submodel' as an item type vs. entry in getters
-		function getItem(itemType: ItemTypeNames, id: number): ItemTypes {
+		function getItem(itemType: Types.ItemTypeNames, id: number): Types.ItemTypes {
 			return (store.get as any)[itemType](id);
 		}
 
@@ -562,9 +444,9 @@ export const Getters: GetterInterface = {
 		if (item == null || item.type === 'part' || item.type === 'submodel') {
 			return [];
 		}
-		const children: ItemTypes[] = [];
+		const children: Types.ItemTypes[] = [];
 		const foo = childTypeList == null ? store.get.childList() : childTypeList;
-		foo.forEach((childType: ItemTypeNames) => {
+		foo.forEach((childType: Types.ItemTypeNames) => {
 			const childIDList = getChildIDList(item, childType);
 			if (childIDList && childIDList.length) {
 				children.push(...childIDList.map((id: number) => getItem(childType, id)));
@@ -577,7 +459,7 @@ export const Getters: GetterInterface = {
 		});
 		return children;
 	},
-	pageForItem(item: any) {
+	pageForItem(item: any): Types.Page {
 		if (item && item.type === 'part') {
 			item = store.get.step(item.stepID);
 		}
@@ -596,14 +478,14 @@ export const Getters: GetterInterface = {
 		const mainModelFilename = store.model.filename;
 		const addedModelNames = new Set([mainModelFilename]);
 		store.state.steps
-			.filter((step: Step) => {
+			.filter((step: Types.Step) => {
 				if (step.parent.type === 'page' && step.model.filename !== mainModelFilename) {
 					const tmpPage = store.get.page(step.parent);
 					return tmpPage == null ? false : tmpPage.subtype === 'page';
 				}
 				return false;
 			})
-			.forEach((step: Step) => {
+			.forEach((step: Types.Step) => {
 				if (!addedModelNames.has(step.model.filename)) {
 					const modelHierarchy = [{ filename: step.model.filename, quantity: 1 }];
 					let parentStepID = step.model.parentStepID;
@@ -640,17 +522,17 @@ export const Getters: GetterInterface = {
 			});
 		return submodels;
 	},
-	topLevelTreeNodes() {
+	topLevelTreeNodes(): Types.ItemTypes[] {
 		// Return list of pages & submodels to be drawn in the nav tree
 		if (store.state.books.length) {
 			return [store.get.templatePage(), ...store.state.books].filter((el) => el);
 		}
-		const nodes: (Page | SubmodelItem)[] = store.get.pageList();
+		const nodes: (Types.Page | Types.SubmodelItem)[] = store.get.pageList();
 		const submodels = store.get.submodels();
 		submodels.forEach((submodel: SubmodelIdentifier) => {
 			const page = store.get.pageForItem({ id: submodel.stepID, type: 'step' });
 			const pageIndex = nodes.indexOf(page);
-			const submodelNode: SubmodelItem = {
+			const submodelNode: Types.SubmodelItem = {
 				...submodel,
 				type: 'submodel',
 				id: nodes.length,
@@ -660,10 +542,10 @@ export const Getters: GetterInterface = {
 		});
 		return nodes.filter((el: object) => el);
 	},
-	nextItemID(item: ItemTypeNames | LookupItem) {
-		// TODO: get rid of ItemTypeNames option in here; always call this with a non-null lookup
+	nextItemID(item: Types.ItemTypeNames | Types.LookupItem): number {
+		// TODO: get rid of Types.ItemTypeNames option in here; always call this with a non-null lookup
 		// Get the next unused ID in this item's list
-		let itemType: ItemTypeNames;
+		let itemType: Types.ItemTypeNames;
 		if (typeof item === 'string') {
 			itemType = item;
 		} else {
@@ -673,16 +555,19 @@ export const Getters: GetterInterface = {
 		if (_.isEmpty(itemList)) {
 			return 0;
 		}
-		return Math.max(...itemList.map((el: LookupItem) => el.id)) + 1;
+		return Math.max(...itemList.map((el: Types.LookupItem) => el.id)) + 1;
 	},
-	itemByNumber(type: ItemTypeNames, number: number) {
+	itemByNumber(type: Types.ItemTypeNames, number: number): Types.Item | null {
 		const itemList = getStateChildList(type);
 		if (itemList) {
 			return itemList.find((el: any) => el.number === number) || null;
 		}
 		return null;
 	},
-	lookupToItem(lookup: number | LookupItem | null, type?: ItemTypeNames): ItemTypes | null {
+	lookupToItem(
+		lookup: number | Types.LookupItem | null,
+		type?: Types.ItemTypeNames,
+	): Types.ItemTypes | null {
 		// Convert a {type, id} lookup object into the actual item it refers to
 		if (lookup == null) {
 			return null;
@@ -695,18 +580,18 @@ export const Getters: GetterInterface = {
 			lookup.hasOwnProperty('number') ||
 			lookup.hasOwnProperty('steps')
 		) {
-			return lookup as ItemTypes; // lookup is already an item
+			return lookup as Types.ItemTypes; // lookup is already an item
 		} else if (store.state.hasOwnProperty(lookup.type)) {
 			// TODO: do we ever get in here?  For what?
 			return (store.state as any)[lookup.type];
 		}
-		const itemList = getStateChildList<ItemTypes>(lookup.type);
+		const itemList = getStateChildList<Types.ItemTypes>(lookup.type);
 		if (itemList) {
-			return itemList.find((el: Item) => el.id === lookup.id) || null;
+			return itemList.find((el: Types.Item) => el.id === lookup.id) || null;
 		}
 		return null;
 	},
-	itemToLookup(item: Item) {
+	itemToLookup(item: Types.Item): Types.LookupItem | null {
 		// Create a {type, id} lookup object from the specified item
 		if (!item || item.type == null) {
 			return null;
@@ -721,16 +606,16 @@ export const Getters: GetterInterface = {
 	},
 	coords: {
 		// x & y are in page coordinates; transform to item coordinates
-		pageToItem({ x, y }, itemLookup) {
+		pageToItem({ x, y }: Types.Point, itemLookup: Types.LookupItem | null): Types.Point {
 			let item = store.get.lookupToItem(itemLookup);
-			while (item && hasProperty<PointedItem>(item, 'x')) {
+			while (item && hasProperty<Types.PointedItem>(item, 'x')) {
 				x -= item.x || 0;
 				y -= item.y || 0;
 				item = store.get.parent(item);
 			}
 			return { x, y };
 		},
-		itemToPage(itemLookup: LookupItem) {
+		itemToPage(itemLookup: Types.LookupItem): Types.Point {
 			// Find item's position on the page
 			let x = 0,
 				y = 0;
@@ -742,7 +627,11 @@ export const Getters: GetterInterface = {
 			}
 			return { x, y };
 		},
-		pointToPage(xIn: number | PointItem, y?: number, relativeTo?: LookupItem | null) {
+		pointToPage(
+			xIn: number | Types.PointItem,
+			y?: number,
+			relativeTo?: Types.LookupItem | null,
+		): Types.Point {
 			let x;
 			if (typeof xIn === 'number') {
 				x = xIn;
@@ -758,17 +647,17 @@ export const Getters: GetterInterface = {
 			};
 		},
 	},
-	targetBoxFromPoints(t: PointListItem) {
-		const parent = store.get.parent(t);
-		const points = t.points
+	targetBoxFromPoints(targetLookup: Types.PointListItem): Types.Box {
+		const parent = store.get.parent(targetLookup);
+		const points = targetLookup.points
 			.map((pointID) => {
 				const pt = store.get.point(pointID);
 				return pt ? store.get.coords.pointToPage(pt.x, pt.y, pt.relativeTo || parent) : null;
 			})
-			.filter((p): p is Point => p != null);
+			.filter((p): p is Types.Point => p != null);
 		return _.geom.expandBox(_.geom.bbox(points), 8, 8);
 	},
-	targetBox(targetLookup) {
+	targetBox(targetLookup: Types.LookupItem): Types.Box {
 		let t: any = store.get.lookupToItem(targetLookup);
 		if (isPointListItem(t) && t.points.length > 0) {
 			return store.get.targetBoxFromPoints(t);
@@ -802,7 +691,11 @@ export const Getters: GetterInterface = {
 		}
 		return box;
 	},
-	highlightBox(itemLookup, pageSize, currentPage) {
+	highlightBox(
+		itemLookup: Types.LookupItem,
+		pageSize: { width: number; height: number },
+		currentPage?: Types.Page | null,
+	): Types.Box | null {
 		const item = store.get.lookupToItem(itemLookup);
 		if (item == null || item.type === 'part') {
 			return null;
@@ -859,4 +752,4 @@ export const Getters: GetterInterface = {
 			height: pad + box.height + pad - 1,
 		};
 	},
-};
+} as const;

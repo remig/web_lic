@@ -8,9 +8,9 @@ import { type Model, type SaveFileContent, type StateInterface } from './item_ty
 import LDParse from './ld_parse';
 import LDRender from './ld_render';
 import Storage from './storage';
-import { GetterInterface, Getters } from './store/getters';
-import { MutationInterface, Mutations } from './store/mutations';
-import { Renderer, RendererInterface } from './store/render';
+import { Getters } from './store/getters';
+import { Mutations } from './store/mutations';
+import { Renderer } from './store/render';
 import defaultTemplate from './template';
 import _ from './util';
 
@@ -36,41 +36,24 @@ const emptyState = {
 	template: _.cloneDeep(defaultTemplate),
 };
 
-export interface Store {
-	version: string | null;
-	model: Model | null;
-	setModel(model: Model): void;
-	state: StateInterface;
-
-	replaceState(state: any): void;
-	resetState(): void;
-	load(content: SaveFileContent): void;
-	saveLocal(): void;
-	saveToFile(filename?: string, jsonIndent?: string | number): void;
-	saveTemplate(filename?: string, jsonIndent?: string | number): void;
-	render: RendererInterface;
-	get: GetterInterface;
-	mutations: MutationInterface;
-}
-
-const store: Store = {
-	version: null, // The version of Lic that created this state
+export const store = {
+	version: null as string | null, // The version of Lic that created this state
 
 	// The currently loaded LDraw model, as returned from LDParse
-	model: null, // Not in state because it is saved separately, and not affected by undo / redo
-	setModel(model: Model) {
+	model: null as Model | null, // Not in state because it is saved separately, and not affected by undo / redo
+	setModel(model: Model): void {
 		store.model = model;
 		LDRender.setModel(model);
 		store.state.licFilename = store.get.modelFilenameBase();
 	},
 	// Stores anything that must work with undo / redo, and all state that is saved to the binary .lic,
 	//  except static stuff in model, like part geometries
-	state: _.cloneDeep(emptyState),
-	replaceState(state: any) {
+	state: _.cloneDeep(emptyState) as StateInterface,
+	replaceState(state: any): void {
 		store.state = state;
 		cache.reset();
 	},
-	resetState() {
+	resetState(): void {
 		if (store.model) {
 			delete LDParse.partDictionary[store.model.filename];
 		}
@@ -78,7 +61,7 @@ const store: Store = {
 		store.state = _.cloneDeep(emptyState);
 		cache.reset();
 	},
-	load(content: SaveFileContent) {
+	load(content: SaveFileContent): void {
 		LDParse.setPartDictionary(content.partDictionary);
 		LDParse.setColorTable(content.colorTable);
 		store.model = LDParse.partDictionary[content.modelFilename];
@@ -86,17 +69,17 @@ const store: Store = {
 		LDRender.setRenderState(content.state.template.sceneRendering);
 		store.replaceState(content.state);
 	},
-	saveLocal() {
+	saveLocal(): void {
 		const content = getSaveContent();
 		console.log('Updating local storage'); // eslint-disable-line no-console
 		Storage.replace.model(content);
 	},
-	saveToFile(filename?: string, jsonIndent?: string | number) {
+	saveToFile(filename?: string, jsonIndent?: string | number): void {
 		const content = getSaveContent();
 		filename = (filename || store.state.licFilename || 'filename') + '.lic';
 		saveJSON(content, filename, jsonIndent);
 	},
-	saveTemplate(filename?: string, jsonIndent?: string | number) {
+	saveTemplate(filename?: string, jsonIndent?: string | number): void {
 		const content = {
 			version: packageInfo.version,
 			template: store.state.template,
@@ -108,6 +91,8 @@ const store: Store = {
 	get: Getters,
 	mutations: Mutations,
 };
+
+export type Store = typeof store;
 
 function getSaveContent(): SaveFileContent {
 	return {
@@ -124,5 +109,3 @@ function saveJSON(json: object, filename: string, jsonIndent?: string | number):
 	const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
 	saveAs(blob, filename);
 }
-
-export default store;

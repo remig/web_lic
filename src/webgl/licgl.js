@@ -4,7 +4,7 @@
 // Keep everthing fast, at the expense of some readability.
 
 import LDParse from '../ld_parse';
-import store from '../store';
+import { store } from '../store';
 import _ from '../util';
 import Arrows from './arrows';
 import condLineShaderSource from './condLineShader.glsl';

@@ -5,7 +5,7 @@ import { nextTick } from 'vue';
 import ContextMenu from './context_menu';
 import EventBus from './event_bus';
 import NavTree from './navtree';
-import store from './store';
+import { store } from './store';
 import * as UiOps from './ui_ops';
 import * as ReactiveState from './ui_reactive_state';
 import _ from './util';

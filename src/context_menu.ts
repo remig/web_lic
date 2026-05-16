@@ -12,7 +12,7 @@ import {
 } from './item_types';
 import LDParse from './ld_parse';
 import * as SelectionOps from './selection_ops';
-import store from './store';
+import { store } from './store';
 import { noTranslate, t } from './translations';
 import { isItemSpecificType, isStepParent } from './type_helpers';
 import * as UiOps from './ui_ops';

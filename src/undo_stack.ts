@@ -3,7 +3,7 @@
 import * as jsonpatch from 'fast-json-patch';
 
 import { type CSI, type PLIItem } from './item_types';
-import store from './store';
+import { store } from './store';
 import { noTranslate, t } from './translations';
 import _ from './util';
 

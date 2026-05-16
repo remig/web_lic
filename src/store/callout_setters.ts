@@ -7,45 +7,19 @@ import {
 	type Orientations,
 	type Positions,
 } from '../item_types';
-import store from '../store';
+import { store } from '../store';
 import _ from '../util';
 
-export interface CalloutMutationInterface {
+export const CalloutMutations = {
 	add({
 		parent,
-		position,
-		includeEmptyStep,
+		position = 'left',
+		includeEmptyStep = false,
 	}: {
 		parent: LookupItem;
 		position?: Positions;
 		includeEmptyStep?: boolean;
-	}): Callout;
-	delete({ callout, doLayout }: { callout: LookupItem; doLayout: boolean }): void;
-	addFirstStep({ callout, doLayout }: { callout: LookupItem; doLayout: boolean }): void;
-	addStep({
-		callout,
-		insertionIndex,
-		doLayout,
-	}: {
-		callout: LookupItem;
-		insertionIndex?: number;
-		doLayout?: boolean;
-	}): void;
-	layout({
-		callout,
-		layout,
-		position,
-		doLayout,
-	}: {
-		callout: LookupItem;
-		layout: Orientations;
-		position: Positions;
-		doLayout: boolean;
-	}): void;
-}
-
-export const CalloutMutations: CalloutMutationInterface = {
-	add({ parent, position = 'left', includeEmptyStep = false }) {
+	}): Callout {
 		const pageSize = store.state.template.page;
 		const callout = store.mutations.item.add<Callout>({
 			item: {
@@ -73,7 +47,7 @@ export const CalloutMutations: CalloutMutationInterface = {
 		store.mutations.calloutArrow.add({ parent: callout });
 		return callout;
 	},
-	delete({ callout, doLayout = false }) {
+	delete({ callout, doLayout = false }: { callout: LookupItem; doLayout: boolean }): void {
 		const item = store.get.callout(callout);
 		store.mutations.item.deleteChildList({ item, listType: 'calloutArrow' });
 		store.mutations.item.deleteChildList({ item, listType: 'step' });
@@ -82,7 +56,7 @@ export const CalloutMutations: CalloutMutationInterface = {
 			store.mutations.page.layout({ page: store.get.pageForItem(item) });
 		}
 	},
-	addFirstStep({ callout, doLayout = false }) {
+	addFirstStep({ callout, doLayout = false }: { callout: LookupItem; doLayout: boolean }): void {
 		const item = store.get.callout(callout);
 		if (item == null) {
 			throw 'Trying to add a first step to a non-existent callout';
@@ -97,7 +71,15 @@ export const CalloutMutations: CalloutMutationInterface = {
 			store.mutations.page.layout({ page: store.get.pageForItem(item) });
 		}
 	},
-	addStep({ callout, insertionIndex, doLayout = false }) {
+	addStep({
+		callout,
+		insertionIndex,
+		doLayout = false,
+	}: {
+		callout: LookupItem;
+		insertionIndex?: number;
+		doLayout?: boolean;
+	}): void {
 		const item = store.get.callout(callout);
 		if (item == null) {
 			throw 'Trying to add a step to a non-existent callout';
@@ -157,7 +139,17 @@ export const CalloutMutations: CalloutMutationInterface = {
 			store.mutations.page.layout({ page: store.get.pageForItem(callout) });
 		}
 	},
-	layout({ callout, layout, position, doLayout }) {
+	layout({
+		callout,
+		layout,
+		position,
+		doLayout,
+	}: {
+		callout: LookupItem;
+		layout: Orientations;
+		position: Positions;
+		doLayout: boolean;
+	}): void {
 		const item = store.get.callout(callout);
 		if (item) {
 			item.layout = layout || item.layout;
@@ -167,4 +159,4 @@ export const CalloutMutations: CalloutMutationInterface = {
 			}
 		}
 	},
-};
+} as const;

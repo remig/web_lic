@@ -15,7 +15,7 @@
 import { t } from '@/translations';
 import { ref } from 'vue';
 
-import store from '../../store';
+import { store } from '../../store';
 import LicSelect from '../base/LicSelect.vue';
 import FontPanel from './font.vue';
 import PanelBase from './panel_base.vue';
