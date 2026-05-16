@@ -46,7 +46,7 @@ export async function importModel(modelGenerator: () => Promise<any>) {
 
 	const partsPerStep = _.isEmpty(model.steps)
 		? _.clamp(Math.floor(LDParse.model.get.partCount(model) / 10), 1, 20)
-		: null;
+		: undefined;
 	const layoutChoices = await showImportModelDialog({
 		includePartsPerStep: partsPerStep != null,
 		partsPerStep,
@@ -54,7 +54,7 @@ export async function importModel(modelGenerator: () => Promise<any>) {
 	if (layoutChoices != null) {
 		// TODO: Add option to start new page for each submodel
 		store.mutations.pli.toggleVisibility({visible: layoutChoices.include.pli});
-		store.mutations.addInitialPages({partsPerStep: layoutChoices.partsPerStep ?? undefined});
+		store.mutations.addInitialPages({partsPerStep: layoutChoices.partsPerStep});
 		store.mutations.addInitialSubmodelImages();
 		if (layoutChoices.useMaxSteps) {
 			ReactiveState.busyText.value = t('dialog.busy_indicator.merging_steps');

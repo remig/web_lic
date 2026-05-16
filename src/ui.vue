@@ -19,7 +19,7 @@
 		<nav-bar
 			id="navMenu"
 			:menu-entry-list="navBarContent"
-			:filename="{name: filename, isDirty}"
+			:filename="filenameInfo"
 			@close-menus="closeMenus"
 		/>
 
@@ -53,7 +53,7 @@
 	</div>
 </template>
 
-<script>
+<script setup lang="ts">
 
 // TODO:
 // - Make all dialogs that affect page rendering moveable, so they can be moved to unobscure stuff
@@ -84,8 +84,8 @@
 // - No way to unstretch a stretched step
 // - Merging the first step of a submodel with the second step loses the submodel image
 
+import {ref, computed, onMounted} from 'vue';
 import Split from 'split.js';
-
 import _ from './util';
 import {t, getLocale, LanguageList} from './translations';
 import * as ReactiveState from './ui_reactive_state';
@@ -108,246 +108,201 @@ import GettingStartedPanel from './components/getting_started.vue';
 import PageView from './components/page_view.vue';
 import EventBus from './event_bus';
 
-const UI = {
-	components: {NavBar, NavTreeContainer, PopupMenu, TemplatePanel, GettingStartedPanel, PageView},
-	data() {
-		return {
-			disableLocalStorage: false, // allow tests to turn local storage off
-		};
-	},
-	methods: {
-		rightClick: SelectionOps.rightClick,
-		closeMenus: UiOps.closeMenus,
-		globalKeyPress(e, metaKeyDown) {
-			// console.log(this.metaKeyDown, e.key);
-			UiOps.closeMenus();
+const disableLocalStorage = ref(false);  // allow tests to turn local storage off
 
-			// Some components handle their own key presses via event bus
-			EventBus.emit('key-press', {key: e.key});
+const {currentPageId, selectedItemLookup, contextMenu, filename, statusText, busyText} = ReactiveState;
 
-			const selItem = this.selectedItemLookup;
-			if (e.key === 'Delete' || e.key === 'Backspace') {
-				if (selItem
-					&& !store.get.isTemplatePage(store.get.pageForItem(selItem))
-					&& store.mutations[selItem.type]
-					&& store.mutations[selItem.type].delete
-				) {
-					const opts = {doLayout: true};
-					opts[selItem.type] = selItem;
-					const undoText = t('action.edit.item.delete.undo_@mf',
-						{item: t('glossary.' + selItem.type.toLowerCase())});
-					try {
-						SelectionOps.clearSelected();
-						undoStack.commit(`${selItem.type}.delete`, opts, undoText);
-					} catch {
-						// TODO: Intentionally empty; need to change each store.mutation.foo.delete that
-						// throws an error if delete can't happen to just returning instead.
-					}
-				}
-			} else if (e.key.startsWith('Arrow')) {
-				if (selItem && store.get.isMoveable(selItem)) {
-					let dx = 0, dy = 0, dv = 1;
-					dv *= e.shiftKey ? 5 : 1;
-					dv *= e.ctrlKey ? 20 : 1;
-					if (e.key === 'ArrowUp') {
-						dy = -dv;
-					} else if (e.key === 'ArrowDown') {
-						dy = dv;
-					} else if (e.key === 'ArrowLeft') {
-						dx = -dv;
-					} else if (e.key === 'ArrowRight') {
-						dx = dv;
-					}
-					const item = store.get.lookupToItem(selItem);
-					if (item.type === 'point') {
-						const arrow = store.get.lookupToItem(item.parent);
-						if (arrow.points.indexOf(item.id) === 0) {
-							const newPos = {x: item.x + dx, y: item.y + dy};
-							const dt = _.geom.distance;
-							if (arrow.type === 'calloutArrow') {
-								// Special case: first point in callout arrow can't move away from callout
-								// TODO: doesn't prevent arrow base from coming off rounded callout corners
-								const callout = store.get.callout(arrow.parent.id);
-								if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-									if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
-										dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
-									} else {
-										dx = 0;  // Prevent movement from pulling arrow base off callout
-									}
-								} else {
-									if (dt(newPos.x, 0) < 2 || dt(newPos.x, callout.width) < 2) {
-										dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
-									} else {
-										dx = 0;  // Prevent movement from pulling arrow base off callout
-									}
-								}
+const isDirty = computed(() =>
+	ReactiveState.dirtyState.undoIndex !== ReactiveState.dirtyState.lastSaveIndex,
+);
+const navBarContent = computed<any[]>(() => Menu() as unknown as any[]);
+const isTemplatePageCurrent = computed(() =>
+	currentPageId.value == null ? false : store.get.isTemplatePage(currentPageId.value),
+);
+const filenameInfo = computed(() =>
+	({name: filename.value ?? '', isDirty: isDirty.value}),
+);
+
+const closeMenus = UiOps.closeMenus;
+const haveModel = UiOps.haveModel;
+const rightClick = SelectionOps.rightClick;
+
+function globalKeyPress(e: KeyboardEvent, metaKeyDown: boolean) {
+	// console.log(metaKeyDown, e.key);
+	UiOps.closeMenus();
+
+	// Some components handle their own key presses via event bus
+	EventBus.emit('key-press', {key: e.key});
+
+	const selItem = selectedItemLookup.value;
+	if (e.key === 'Delete' || e.key === 'Backspace') {
+		if (selItem
+			&& !store.get.isTemplatePage(store.get.pageForItem(selItem))
+			&& (store.mutations as any)[selItem.type]
+			&& (store.mutations as any)[selItem.type].delete
+		) {
+			const opts: Record<string, any> = {doLayout: true};
+			opts[selItem.type] = selItem;
+			const undoText = t('action.edit.item.delete.undo_@mf',
+				{item: t('glossary.' + selItem.type.toLowerCase())},
+			);
+			try {
+				SelectionOps.clearSelected();
+				undoStack.commit(`${selItem.type}.delete`, opts, undoText);
+			} catch {
+				// TODO: Intentionally empty; need to change each store.mutation.foo.delete that
+				// throws an error if delete can't happen to just returning instead.
+			}
+		}
+	} else if (e.key.startsWith('Arrow')) {
+		if (selItem && store.get.isMoveable(selItem)) {
+			let dx = 0, dy = 0, dv = 1;
+			dv *= e.shiftKey ? 5 : 1;
+			dv *= e.ctrlKey ? 20 : 1;
+			if (e.key === 'ArrowUp') {
+				dy = -dv;
+			} else if (e.key === 'ArrowDown') {
+				dy = dv;
+			} else if (e.key === 'ArrowLeft') {
+				dx = -dv;
+			} else if (e.key === 'ArrowRight') {
+				dx = dv;
+			}
+			const item = store.get.lookupToItem(selItem);
+			if (item?.type === 'point') {
+				const arrow = store.get.lookupToItem((item as any).parent);
+				if (arrow != null && (arrow as any).points.indexOf(item.id) === 0) {
+					const newPos = {x: item.x + dx, y: item.y + dy};
+					const dt = _.geom.distance;
+					if (arrow.type === 'calloutArrow') {
+						// Special case: first point in callout arrow can't move away from callout
+						// TODO: doesn't prevent arrow base from coming off rounded callout corners
+						const callout = store.get.callout(arrow.parent.id);
+						if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+							if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
+								dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
+							} else {
+								dx = 0;  // Prevent movement from pulling arrow base off callout
+							}
+						} else {
+							if (dt(newPos.x, 0) < 2 || dt(newPos.x, callout.width) < 2) {
+								dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
+							} else {
+								dx = 0;  // Prevent movement from pulling arrow base off callout
 							}
 						}
 					}
-
-					if (dx !== 0 || dy !== 0) {
-						const undoText = t('action.edit.item.move.undo_@mf',
-							{item: t('glossary.' + selItem.type.toLowerCase())},
-						);
-						undoStack.commit('item.reposition', {item, dx, dy}, undoText);
-					}
-				}
-			} else {
-				// Check if key is a menu shortcut
-				const menu = this.navBarContent;
-				const key = ((e.ctrlKey || metaKeyDown) ? 'ctrl+' : '') + e.key;
-				for (let i = 0; i < menu.length; i++) {
-					for (let j = 0; j < menu[i].children.length; j++) {
-						const entry = menu[i].children[j];
-						if (entry.shortcut === key) {
-							entry.cb();
-						}
-					}
-				}
-			}
-		},
-		haveModel: UiOps.haveModel,
-	},
-	computed: {
-		currentPageId: {
-			get() {
-				return ReactiveState.currentPageId.value;
-			},
-			set(v) {
-				ReactiveState.currentPageId.value = v;
-			},
-		},
-		selectedItemLookup: {
-			get() {
-				return ReactiveState.selectedItemLookup.value;
-			},
-			set(v) {
-				ReactiveState.selectedItemLookup.value = v;
-			},
-		},
-		contextMenu: {
-			get() {
-				return ReactiveState.contextMenu.value;
-			},
-			set(v) {
-				ReactiveState.contextMenu.value = v;
-			},
-		},
-		filename: {
-			get() {
-				return ReactiveState.filename.value;
-			},
-			set(v) {
-				ReactiveState.filename.value = v;
-			},
-		},
-		statusText() {
-			return ReactiveState.statusText.value;
-		},
-		busyText() {
-			return ReactiveState.busyText.value;
-		},
-		isDirty() {
-			return ReactiveState.dirtyState.undoIndex !== ReactiveState.dirtyState.lastSaveIndex;
-		},
-		navBarContent() {
-			return Menu();
-		},
-		isTemplatePageCurrent() {
-			return (this.currentPageId == null)
-				? false
-				: store.get.isTemplatePage(this.currentPageId);
-		},
-	},
-	async mounted() {
-
-		// TODO: grey out progress bar when 'Model Import' dialog is visible; otherwise it's confusing
-		//		 if progress bar isn't at 100 but its done loading and waiting for user to click
-		// TODO: progress bar should never stop at less than 100; clear it when model is imported
-		// TODO: show template page always, even when no model loaded.
-		// 		This lets you import a model with the desired template already in place.
-		document.body.addEventListener('keyup', e => {
-			this.globalKeyPress(e, false);
-		});
-		document.body.addEventListener('keydown', e => {
-			if (e.metaKey && e.key !== 'Meta') {
-				this.globalKeyPress(e, true);
-			}
-		});
-		document.body.addEventListener('keydown', e => {
-			if ((e.key === 'PageDown' || e.key === 'PageUp'
-				|| e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey))
-				&& e.target.nodeName !== 'INPUT'
-			) {
-				e.preventDefault();
-			}
-		});
-
-		window.addEventListener('beforeunload', e => {
-
-			if (!this.disableLocalStorage) {
-				const splitStyle = document.getElementById('leftPane').style;
-				uiState.set('splitter', parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)[1]));
-
-				uiState.set('lastUsedVersion', packageInfo.version);
-
-				Storage.replace.ui(uiState.getCurrentState());
-
-				if (this && this.isDirty) {
-					const msg = 'You have unsaved changes. Leave anyway?';
-					e.returnValue = msg;
-					return msg;
 				}
 			}
 
-			return null;
-		});
+			if (dx !== 0 || dy !== 0) {
+				const undoText = t('action.edit.item.move.undo_@mf',
+					{item: t('glossary.' + selItem.type.toLowerCase())},
+				);
+				undoStack.commit('item.reposition', {item, dx, dy}, undoText);
+			}
+		}
+	} else {
+		// Check if key is a menu shortcut
+		const menu = navBarContent.value;
+		const key = ((e.ctrlKey || metaKeyDown) ? 'ctrl+' : '') + e.key;
+		for (let i = 0; i < menu.length; i++) {
+			for (let j = 0; j < menu[i].children.length; j++) {
+				const entry = menu[i].children[j];
+				if (entry.shortcut === key) {
+					entry.cb();
+				}
+			}
+		}
+	}
+}
 
-		EventBus.on('set-selected', item => {
-			SelectionOps.setSelected(item);
-		});
+onMounted(async() => {
 
-		EventBus.on('redraw-ui', props => {
-			UiOps.redrawUI(props.clearSelection);
-		});
+	// TODO: grey out progress bar when 'Model Import' dialog is visible; otherwise it's confusing
+	//		 if progress bar isn't at 100 but its done loading and waiting for user to click
+	// TODO: progress bar should never stop at less than 100; clear it when model is imported
+	// TODO: show template page always, even when no model loaded.
+	// 		This lets you import a model with the desired template already in place.
+	document.body.addEventListener('keyup', e => {
+		globalKeyPress(e, false);
+	});
+	document.body.addEventListener('keydown', e => {
+		if (e.metaKey && e.key !== 'Meta') {
+			globalKeyPress(e, true);
+		}
+	});
+	document.body.addEventListener('keydown', e => {
+		if ((e.key === 'PageDown' || e.key === 'PageUp'
+			|| e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey))
+			&& (e.target as HTMLElement)?.nodeName !== 'INPUT'
+		) {
+			e.preventDefault();
+		}
+	});
 
-		undoStack.onChange(() => {
-			ReactiveState.dirtyState.undoIndex = undoStack.getIndex();
-			UiOps.redrawUI();
-		});
+	window.addEventListener('beforeunload', e => {
 
-		// Enable splitter between tree and page view
-		const split = Storage.get.ui().splitter;
-		Split(['#leftPane', '#rightPane'], {
-			sizes: [split, 100 - split],
-			minSize: [100, store.state.template.page.width + 10],
-			direction: 'horizontal',
-			gutterSize: 5,
-			snapOffset: 0,
-		});
+		if (!disableLocalStorage.value) {
+			const splitStyle = document.getElementById('leftPane')!.style;
+			uiState.set('splitter', parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)![1]));
 
-		if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
-			await showWhatsNewDialog();
+			uiState.set('lastUsedVersion', packageInfo.version);
+
+			Storage.replace.ui(uiState.getCurrentState());
+
+			if (isDirty.value) {
+				const msg = 'You have unsaved changes. Leave anyway?';
+				e.returnValue = msg;
+				return msg;
+			}
 		}
 
-		if (getLocale() == null && LanguageList.length >= 2) {
-			await showLocaleChooserDialog();
-		}
+		return null;
+	});
 
-		LDParse.setCustomColorTable(Storage.get.customBrickColors());
+	EventBus.on('set-selected', item => {
+		SelectionOps.setSelected(item);
+	});
 
-		const localModel = Storage.get.model();
-		if (!_.isEmpty(localModel)) {
-			FileOps.openLicFileFromContent(localModel);
-		}
-	},
-};
+	EventBus.on('redraw-ui', props => {
+		UiOps.redrawUI(props.clearSelection);
+	});
 
-window.__lic = {  // store a global reference to these for easier testing
+	undoStack.onChange(() => {
+		ReactiveState.dirtyState.undoIndex = undoStack.getIndex();
+		UiOps.redrawUI();
+	});
+
+	// Enable splitter between tree and page view
+	const split = Storage.get.ui().splitter;
+	Split(['#leftPane', '#rightPane'], {
+		sizes: [split, 100 - split],
+		minSize: [100, store.state.template.page.width + 10],
+		direction: 'horizontal',
+		gutterSize: 5,
+		snapOffset: 0,
+	});
+
+	if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {
+		await showWhatsNewDialog();
+	}
+
+	if (getLocale() == null && LanguageList.length >= 2) {
+		await showLocaleChooserDialog();
+	}
+
+	LDParse.setCustomColorTable(Storage.get.customBrickColors());
+
+	const localModel = Storage.get.model();
+	if (!_.isEmpty(localModel)) {
+		FileOps.openLicFileFromContent(localModel);
+	}
+});
+
+(window as any).__lic = {  // store a global reference to these for easier testing
 	// TODO: only generate this in the debug build and in Cypress
 	_, store, undoStack, LDParse, Storage, uiState,
 };
-
-export default UI;
 
 </script>

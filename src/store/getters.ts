@@ -301,8 +301,10 @@ export const Getters: GetterInterface = {
 		return null;
 	},
 	isTemplatePage(pageLookup) {
-		const page = store.get.page(pageLookup);
-		return page.subtype === 'templatePage';
+		const page = typeof pageLookup === 'number'
+			? store.get.lookupToItem(pageLookup, 'page')
+			: store.get.lookupToItem(pageLookup);
+		return page != null && (page as any).subtype === 'templatePage';
 	},
 	firstBookPage(bookLookup: LookupItem) {
 		const book = store.get.book(bookLookup);

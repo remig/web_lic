@@ -307,8 +307,8 @@ const contextMenu = {
 					{page},
 					t('action.page.delete_this_blank_page.undo'),
 				);
-				SelectionOps.clearSelected();
 				SelectionOps.setCurrentPage(nextPage);
+				SelectionOps.clearSelected();
 			},
 		},
 	],

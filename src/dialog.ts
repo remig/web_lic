@@ -196,12 +196,12 @@ export function showPageLayoutDialog(
 
 
 interface ImportModelResult {
-	partsPerStep: number | null;
+	partsPerStep?: number;
 	stepsPerPage: number;
 	useMaxSteps: boolean;
 	include: {pli: boolean; partListPage: boolean; titlePage: boolean};
 }
-type ImportModelProps = {includePartsPerStep: boolean; partsPerStep: number | null};
+type ImportModelProps = {includePartsPerStep: boolean; partsPerStep?: number};
 
 export function showImportModelDialog(props: ImportModelProps): Promise<ImportModelResult | null> {
 	return mountDialog<ImportModelProps, ImportModelResult>(ImportModel, props);

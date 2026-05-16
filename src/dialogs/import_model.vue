@@ -67,13 +67,13 @@ import LicDropdown from '@/components/base/LicDropdown.vue';
 import uiState from '@/ui_state';
 
 interface ImportModelResult {
-	partsPerStep: number | null;
+	partsPerStep?: number;
 	stepsPerPage: number;
 	useMaxSteps: boolean;
 	include: {pli: boolean; partListPage: boolean; titlePage: boolean};
 }
 
-const props = defineProps<{includePartsPerStep: boolean; partsPerStep: number | null}>();
+const props = defineProps<{includePartsPerStep: boolean; partsPerStep?: number}>();
 const emit = defineEmits<{(e: 'ok', v: ImportModelResult): void; (e: 'cancel'): void}>();
 
 const includePartsPerStep = ref(props.includePartsPerStep);

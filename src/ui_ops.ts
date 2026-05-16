@@ -12,9 +12,9 @@ export function haveModel(): boolean {
 }
 
 export function clearState() {
+	ReactiveState.currentPageId.value = null;
 	SelectionOps.clearSelected();
 	ReactiveState.contextMenu.value = null;
-	ReactiveState.currentPageId.value = null;
 	ReactiveState.filename.value = null;
 	ReactiveState.statusText.value = '';
 	ReactiveState.updateProgress({clear: true});

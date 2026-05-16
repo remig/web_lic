@@ -255,6 +255,9 @@ export default defineComponent({
 				&& target.nodeName === 'CANVAS'
 			) {
 				const page = getPageForCanvas(target);
+				if (page == null) {
+					return;
+				}
 				const clickTarget = findClickTargetInPage(page, e.offsetX, e.offsetY);
 				if (clickTarget) {
 					SelectionOps.setSelected(clickTarget, page);
@@ -496,9 +499,9 @@ function getCanvasID(pageId: number): string {
 	return `pageCanvas_${pageId}`;
 }
 
-function getPageForCanvas(canvas: HTMLElement): Page {
+function getPageForCanvas(canvas: HTMLElement): Page | null {
 	const [, id] = canvas.id.split('_');
-	return store.get.page(parseInt(id, 10));
+	return store.get.lookupToItem(parseInt(id, 10), 'page') as Page | null;
 }
 
 function getCanvasForPage(pageId: number): HTMLElement | null {
