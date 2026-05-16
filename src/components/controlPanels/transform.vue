@@ -3,7 +3,7 @@
 <template>
 	<panel-base title="template.transform.title" style="--label-width: 80px">
 		<label class="label-input-row">
-			{{t('template.transform.scale')}}
+			{{ t('template.transform.scale') }}
 			<input
 				v-model.number="scale"
 				type="number"
@@ -12,7 +12,7 @@
 				step="0.1"
 				class="form-control"
 				@input="updateValues"
-			>
+			/>
 		</label>
 		<rotate-builder
 			:initial-rotation="rotation"
@@ -24,16 +24,15 @@
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {computed,ref} from 'vue';
+import { t } from '@/translations';
+import { computed, ref } from 'vue';
 
 import store from '../../store';
 import _ from '../../util';
 import RotateBuilder from '../rotate.vue';
 import PanelBase from './panel_base.vue';
 
-const props = defineProps<{templateEntry: string}>();
+const props = defineProps<{ templateEntry: string }>();
 const emit = defineEmits(['new-values']);
 
 const scale = ref(_.get(store.state.template, props.templateEntry).scale);
@@ -49,5 +48,4 @@ function updateValues(newRotation?: unknown) {
 	transform.scale = scale.value;
 	emit('new-values');
 }
-
 </script>

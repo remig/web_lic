@@ -1,16 +1,12 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="t('dialog.page_layout.title')"
-		width="400px"
-		class="pageLayoutDialog"
-	>
+	<LicDialog :title="t('dialog.page_layout.title')" width="400px" class="pageLayoutDialog">
 		<div class="flex-row panel-row">
-			<span class="page-layout-label">{{t('dialog.page_layout.rows')}}</span>
+			<span class="page-layout-label">{{ t('dialog.page_layout.rows') }}</span>
 			<label class="lic-checkbox">
-				<input v-model="autoRows" type="checkbox" @change="updateValues">
-				{{t('glossary.auto')}}
+				<input v-model="autoRows" type="checkbox" @change="updateValues" />
+				{{ t('glossary.auto') }}
 			</label>
 			<input
 				v-model.number="values.rows"
@@ -19,13 +15,13 @@
 				min="1"
 				class="form-control"
 				@input="updateValues"
-			>
+			/>
 		</div>
 		<div class="flex-row panel-row">
-			<span class="page-layout-label">{{t('dialog.page_layout.cols')}}</span>
+			<span class="page-layout-label">{{ t('dialog.page_layout.cols') }}</span>
 			<label class="lic-checkbox">
-				<input v-model="autoCols" type="checkbox" @change="updateValues">
-				{{t('glossary.auto')}}
+				<input v-model="autoCols" type="checkbox" @change="updateValues" />
+				{{ t('glossary.auto') }}
 			</label>
 			<input
 				v-model.number="values.cols"
@@ -34,10 +30,10 @@
 				min="1"
 				class="form-control"
 				@input="updateValues"
-			>
+			/>
 		</div>
 		<div class="flex-row panel-row">
-			<span class="page-layout-label">{{t('dialog.page_layout.orientation')}}</span>
+			<span class="page-layout-label">{{ t('dialog.page_layout.orientation') }}</span>
 			<label class="lic-radio">
 				<input
 					type="radio"
@@ -45,8 +41,8 @@
 					value="horizontal"
 					:checked="values.direction === 'horizontal'"
 					@change="setDirection('horizontal')"
-				>
-				{{t('dialog.page_layout.horizontal')}}
+				/>
+				{{ t('dialog.page_layout.horizontal') }}
 			</label>
 			<label class="lic-radio">
 				<input
@@ -55,8 +51,8 @@
 					value="vertical"
 					:checked="values.direction === 'vertical'"
 					@change="setDirection('vertical')"
-				>
-				{{t('dialog.page_layout.vertical')}}
+				/>
+				{{ t('dialog.page_layout.vertical') }}
 			</label>
 		</div>
 		<template #footer>
@@ -67,23 +63,26 @@
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {computed,reactive, ref} from 'vue';
+import { t } from '@/translations';
+import { computed, reactive, ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
 
-import {type GridLayout, type Orientations} from '../item_types';
+import { type GridLayout, type Orientations } from '../item_types';
 
-const props = defineProps<{initialLayout: GridLayout}>();
-const emit = defineEmits<{(e: 'update', v: GridLayout): void; (e: 'ok', v: GridLayout): void; (e: 'cancel'): void}>();
+const props = defineProps<{ initialLayout: GridLayout }>();
+const emit = defineEmits<{
+	(e: 'update', v: GridLayout): void;
+	(e: 'ok', v: GridLayout): void;
+	(e: 'cancel'): void;
+}>();
 
 const autoRows = ref(props.initialLayout.rows === 'auto');
 const autoCols = ref(props.initialLayout.cols === 'auto');
 const values = reactive({
-	rows: props.initialLayout.rows === 'auto' ? 1 : props.initialLayout.rows as number,
-	cols: props.initialLayout.cols === 'auto' ? 1 : props.initialLayout.cols as number,
+	rows: props.initialLayout.rows === 'auto' ? 1 : (props.initialLayout.rows as number),
+	cols: props.initialLayout.cols === 'auto' ? 1 : (props.initialLayout.cols as number),
 	direction: props.initialLayout.direction,
 });
 
@@ -109,11 +108,9 @@ function ok() {
 function cancel() {
 	emit('cancel');
 }
-
 </script>
 
 <style>
-
 .pageLayoutDialog {
 	input {
 		width: 90px;
@@ -124,5 +121,4 @@ function cancel() {
 	width: 80px;
 	flex-shrink: 0;
 }
-
 </style>

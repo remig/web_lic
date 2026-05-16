@@ -2,9 +2,9 @@
 
 import * as jsonpatch from 'fast-json-patch';
 
-import {type CSI, type PLIItem} from './item_types';
+import { type CSI, type PLIItem } from './item_types';
 import store from './store';
-import {noTranslate,t} from './translations';
+import { noTranslate, t } from './translations';
 import _ from './util';
 
 // stack is an array of state
@@ -15,17 +15,25 @@ import _ from './util';
 // TODO: check if previous undo stack entry has same text as newest one; if so, merge them (if sensical)
 
 interface UndoRedoAction {
-	root: any, op: string, path: string, value?: any
+	root: any;
+	op: string;
+	path: string;
+	value?: any;
 }
 
 interface ActionChange {
-	undo: UndoRedoAction[],
-	redo: UndoRedoAction[],
+	undo: UndoRedoAction[];
+	redo: UndoRedoAction[];
 }
 
 type ClearCacheTarget =
-	{type: 'csi', id?: number | null} | {type: 'pliItem', id?: number | null}
-	| CSI | PLIItem | 'csi' |'pliItem' | 'renderer';
+	| { type: 'csi'; id?: number | null }
+	| { type: 'pliItem'; id?: number | null }
+	| CSI
+	| PLIItem
+	| 'csi'
+	| 'pliItem'
+	| 'renderer';
 
 interface UndoStackEntry {
 	state: any;
@@ -49,12 +57,11 @@ const state: UndoState = {
 };
 
 interface MutationChange {
-	mutation: string,
-	opts: any,
+	mutation: string;
+	opts: any;
 }
 
 const api = {
-
 	onChange(onChangeCB: () => void) {
 		state.onChangeCB = onChangeCB;
 	},
@@ -75,10 +82,9 @@ const api = {
 		undoText: string,
 		clearCacheTargets?: ClearCacheTarget[] | null,
 	) {
-
 		let localChangeList: (MutationChange | ActionChange)[];
 		if (typeof changeList === 'string') {
-			localChangeList = [{mutation: changeList, opts}];
+			localChangeList = [{ mutation: changeList, opts }];
 		} else if (isAction(changeList)) {
 			localChangeList = [changeList];
 		} else {
@@ -88,7 +94,7 @@ const api = {
 		performClearCacheTargets(state.index - 1, state.index);
 
 		// We now have an array of mutation & action objects.  Apply it
-		localChangeList.forEach(change => {
+		localChangeList.forEach((change) => {
 			if (isMutation(change)) {
 				const mutation = _.get(store.mutations, change.mutation);
 				if (mutation) {
@@ -130,7 +136,7 @@ const api = {
 
 	// Copy the store's current state into the undoStack's initial base state
 	saveBaseState() {
-		state.stack = [{state: _.cloneDeep(store.state), undoText: null}];
+		state.stack = [{ state: _.cloneDeep(store.state), undoText: null }];
 		setIndex(state, 0);
 	},
 
@@ -170,10 +176,7 @@ const api = {
 
 	undoText() {
 		return noTranslate(
-			t(
-				'action.edit.undo.name_@c',
-				api.isUndoAvailable() ? state.stack[state.index].undoText : '',
-			),
+			t('action.edit.undo.name_@c', api.isUndoAvailable() ? state.stack[state.index].undoText : ''),
 		);
 	},
 
@@ -196,12 +199,11 @@ function isAction(change: any): change is ActionChange {
 }
 
 function performUndoRedoAction(undoOrRedo: 'undo' | 'redo', newIndex: number) {
-
 	const newStack = state.stack[newIndex];
 	const newState = _.cloneDeep(newStack.state);
 	store.replaceState(newState);
 
-	const actionStack = (undoOrRedo === 'undo') ? state.stack[state.index] : newStack;
+	const actionStack = undoOrRedo === 'undo' ? state.stack[state.index] : newStack;
 	(actionStack.actionList || []).forEach((action: any) => {
 		action[undoOrRedo].forEach((subAction: UndoRedoAction) => {
 			jsonpatch.applyOperation(subAction.root, subAction as any);
@@ -217,16 +219,18 @@ function performUndoRedoAction(undoOrRedo: 'undo' | 'redo', newIndex: number) {
 }
 
 function performClearCacheTargets(prevIndex: number, newIndex: number) {
-	const clearCacheTargets = [], stack = state.stack;
+	const clearCacheTargets = [],
+		stack = state.stack;
 	if (stack[prevIndex]?.clearCacheTargets) {
 		clearCacheTargets.push(...(stack[prevIndex].clearCacheTargets ?? []));
 	}
 	if (stack[newIndex]?.clearCacheTargets) {
 		clearCacheTargets.push(...(stack[newIndex].clearCacheTargets ?? []));
 	}
-	clearCacheTargets.forEach(item => {
+	clearCacheTargets.forEach((item) => {
 		if (typeof item === 'string') {
-			if (item === 'renderer') {  // Special case: refresh renderer settings
+			if (item === 'renderer') {
+				// Special case: refresh renderer settings
 				store.mutations.sceneRendering.refreshAll();
 			} else if (item === 'csi' || item === 'pliItem') {
 				store.mutations[item].markAllDirty();
@@ -235,7 +239,7 @@ function performClearCacheTargets(prevIndex: number, newIndex: number) {
 			// Some cache items were cloned from previous states;
 			// ensure we pull only the actual item from the current state
 			if (item.type != null && item.id != null) {
-				const localItemLookup = {type: item.type, id: item.id};
+				const localItemLookup = { type: item.type, id: item.id };
 				const localItem = store.get.lookupToItem(localItemLookup);
 				if (localItem?.type === 'csi' || localItem?.type === 'pliItem') {
 					localItem.isDirty = true;

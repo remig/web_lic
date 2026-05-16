@@ -1,41 +1,55 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import cache from '../cache';
-import {type Annotation, type AnnotationTypes, type LookupItem, type PointItem} from '../item_types';
+import {
+	type Annotation,
+	type AnnotationTypes,
+	type LookupItem,
+	type PointItem,
+} from '../item_types';
 import Layout from '../layout';
 import store from '../store';
 import _ from '../util';
 
 export interface AnnotationMutationInterface {
-	add(
-		{annotationType, properties, parent, x, y}
-		: {
-			annotationType: AnnotationTypes,
-			properties: any,
-			parent: LookupItem,
-			x: number, y: number
-		}
-	): Annotation
-	set(
-		{annotation, newProperties}
-		: {annotation: LookupItem, newProperties: any}
-	): void;
-	delete(
-		{annotation}
-		: {annotation: LookupItem}
-	): void;
+	add({
+		annotationType,
+		properties,
+		parent,
+		x,
+		y,
+	}: {
+		annotationType: AnnotationTypes;
+		properties: any;
+		parent: LookupItem;
+		x: number;
+		y: number;
+	}): Annotation;
+	set({ annotation, newProperties }: { annotation: LookupItem; newProperties: any }): void;
+	delete({ annotation }: { annotation: LookupItem }): void;
 }
 
 export const AnnotationMutations: AnnotationMutationInterface = {
-	add({annotationType, properties, parent, x, y}) {
-
-		const annotation = store.mutations.item.add<Annotation>({item: {
-			type: 'annotation', id: -1, parent,
-			annotationType, points: [],
-			color: '', font: '', text: '',
-			align: 'left', valign: 'top',
-			x: 0, y: 0, width: 0, height: 0,
-		}, parent});
+	add({ annotationType, properties, parent, x, y }) {
+		const annotation = store.mutations.item.add<Annotation>({
+			item: {
+				type: 'annotation',
+				id: -1,
+				parent,
+				annotationType,
+				points: [],
+				color: '',
+				font: '',
+				text: '',
+				align: 'left',
+				valign: 'top',
+				x: 0,
+				y: 0,
+				width: 0,
+				height: 0,
+			},
+			parent,
+		});
 
 		_.assign(annotation, properties);
 
@@ -53,15 +67,29 @@ export const AnnotationMutations: AnnotationMutationInterface = {
 			}
 		} else if (annotation.annotationType === 'arrow') {
 			annotation.points = [];
-			store.mutations.item.add<PointItem>({item: {
-				type: 'point', id: -1, parent: annotation,
-				x, y, relativeTo: null,
-			}, parent: annotation});
+			store.mutations.item.add<PointItem>({
+				item: {
+					type: 'point',
+					id: -1,
+					parent: annotation,
+					x,
+					y,
+					relativeTo: null,
+				},
+				parent: annotation,
+			});
 
-			store.mutations.item.add<PointItem>({item: {
-				type: 'point', id: -1, parent: annotation,
-				x: (x || 0) + 100, y, relativeTo: null,
-			}, parent: annotation});
+			store.mutations.item.add<PointItem>({
+				item: {
+					type: 'point',
+					id: -1,
+					parent: annotation,
+					x: (x || 0) + 100,
+					y,
+					relativeTo: null,
+				},
+				parent: annotation,
+			});
 		} else {
 			// image annotation width & height set by image load logic during first draw
 			annotation.x = x;
@@ -69,26 +97,26 @@ export const AnnotationMutations: AnnotationMutationInterface = {
 		}
 		return annotation;
 	},
-	set({annotation, newProperties}) {
+	set({ annotation, newProperties }) {
 		const item = store.get.annotation(annotation);
 		if (item) {
 			const props = newProperties || {};
 			if (item.annotationType === 'label') {
-				item.text = (props.text == null) ? item.text : props.text;
-				item.color = (props.color == null) ? item.color : props.color;
-				item.font = (props.font == null) ? item.font : props.font;
+				item.text = props.text == null ? item.text : props.text;
+				item.color = props.color == null ? item.color : props.color;
+				item.font = props.font == null ? item.font : props.font;
 				Layout.label(item);
 			}
 		}
 	},
-	delete({annotation}) {
+	delete({ annotation }) {
 		const item = store.get.annotation(annotation);
 		if (item) {
 			if (item.hasOwnProperty('points')) {
-				store.mutations.item.deleteChildList({item, listType: 'point'});
+				store.mutations.item.deleteChildList({ item, listType: 'point' });
 			}
-			cache.clear(item);  // Clear cached images, if any
-			store.mutations.item.delete({item});
+			cache.clear(item); // Clear cached images, if any
+			store.mutations.item.delete({ item });
 		}
 	},
 };

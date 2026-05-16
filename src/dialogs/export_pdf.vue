@@ -1,14 +1,10 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="t('dialog.export_hi_res_pdf.title')"
-		width="525px"
-		class="pdfExportDialog"
-	>
+	<LicDialog :title="t('dialog.export_hi_res_pdf.title')" width="525px" class="pdfExportDialog">
 		<div style="--label-width: 140px">
 			<div class="label-input-row">
-				{{t('dialog.export_hi_res_pdf.page_size')}}
+				{{ t('dialog.export_hi_res_pdf.page_size') }}
 				<div class="flex-row">
 					<input
 						ref="set_focus"
@@ -18,8 +14,8 @@
 						type="number"
 						class="form-control"
 						@input="updateWidth($event)"
-					>
-					<span>{{t("dialog.export_hi_res_pdf.by")}}</span>
+					/>
+					<span>{{ t('dialog.export_hi_res_pdf.by') }}</span>
 					<input
 						:value="pageSize.height"
 						min="0"
@@ -27,12 +23,12 @@
 						type="number"
 						class="form-control"
 						@input="updateHeight($event)"
-					>
+					/>
 					<LicSelect :value="newState.units" :options="unitOptions" @change="updateUnits" />
 				</div>
 			</div>
 			<div class="label-input-row">
-				{{t('dialog.export_hi_res_pdf.image_res')}}
+				{{ t('dialog.export_hi_res_pdf.image_res') }}
 				<div class="flex-row">
 					<input
 						v-model.number="newState.dpi"
@@ -40,8 +36,8 @@
 						max="1000"
 						type="number"
 						class="form-control"
-					>
-					<span>{{t("dialog.export_hi_res_pdf.dpi")}}</span>
+					/>
+					<span>{{ t('dialog.export_hi_res_pdf.dpi') }}</span>
 				</div>
 			</div>
 		</div>
@@ -53,29 +49,36 @@
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {reactive} from 'vue';
+import { t } from '@/translations';
+import { reactive } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
 import LicSelect from '@/components/base/LicSelect.vue';
 
 import uiState from '../ui_state';
-import _, {type UnitTypes} from '../util';
+import _, { type UnitTypes } from '../util';
 
 interface PdfExportResult {
 	dpi: number;
 	units: UnitTypes;
-	pageSize: {width: number; height: number};
+	pageSize: { width: number; height: number };
 }
 
-const props = defineProps<{pageSizeInPixels: {width: number; height: number}}>();
-const emit = defineEmits<{(e: 'ok', v: PdfExportResult): void; (e: 'cancel'): void}>();
+const props = defineProps<{
+	pageSizeInPixels: { width: number; height: number };
+}>();
+const emit = defineEmits<{
+	(e: 'ok', v: PdfExportResult): void;
+	(e: 'cancel'): void;
+}>();
 
-const unitOptions = ['point', 'mm', 'cm', 'in'].map(u => ({value: u, label: u}));
+const unitOptions = ['point', 'mm', 'cm', 'in'].map((u) => ({
+	value: u,
+	label: u,
+}));
 
-const newState = reactive(uiState.get('dialog.export.pdf'));  // dpi & units
+const newState = reactive(uiState.get('dialog.export.pdf')); // dpi & units
 const pageSize = reactive({
 	width: _.units.pixelsToUnits(props.pageSizeInPixels.width, newState.units),
 	height: _.units.pixelsToUnits(props.pageSizeInPixels.height, newState.units),
@@ -111,15 +114,12 @@ function ok() {
 		},
 	});
 }
-
 </script>
 
 <style>
-
 .pdfExportDialog {
 	input {
 		width: 95px;
 	}
 }
-
 </style>

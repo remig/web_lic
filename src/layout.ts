@@ -1,23 +1,36 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 import {
-type Annotation, 	type Box, type BoxedOffsetItem, type Callout, type CSI, type Directions, 	type GridLayout, type LookupItem, type Orientations,
-type Page, type PageSubtypes,
-type PLI, 	type PLIItem, type Point,
-type QuantityLabel, type Size,
-type Step, 	type SubmodelImage, } from './item_types';
+	type Annotation,
+	type Box,
+	type BoxedOffsetItem,
+	type Callout,
+	type CSI,
+	type Directions,
+	type GridLayout,
+	type LookupItem,
+	type Orientations,
+	type Page,
+	type PageSubtypes,
+	type PLI,
+	type PLIItem,
+	type Point,
+	type QuantityLabel,
+	type Size,
+	type Step,
+	type SubmodelImage,
+} from './item_types';
 import LDParse from './ld_parse';
 import store from './store';
-import {t} from './translations';
-import {isBox, isNotNull} from './type_helpers';
+import { t } from './translations';
+import { isBox, isNotNull } from './type_helpers';
 import _ from './util';
 
 const emptyCalloutSize = 50;
 const rotateIconAspectRatio = 0.94; // height / width
-const qtyLabelOffset = 5;  // TODO: this belongs in the template
+const qtyLabelOffset = 5; // TODO: this belongs in the template
 
 const Layout = {
-
 	book(item: LookupItem): void {
 		const book = store.get.book(item);
 		for (let i = 0; i < book.pages.length; i++) {
@@ -35,20 +48,18 @@ const Layout = {
 			return;
 		}
 		const csi = store.get.csi(step.csiID);
-		const box = {x: 0, y: 0, width: pageSize.width, height: pageSize.height};
-		store.mutations.step.layout({step, box});
+		const box = { x: 0, y: 0, width: pageSize.width, height: pageSize.height };
+		store.mutations.step.layout({ step, box });
 		step.width = csi.width + 40;
 		step.height = csi.height + 40;
 		step.x = (pageSize.width - step.width) / 2;
 		step.y = (pageSize.height - step.height) / 2;
 		csi.x = csi.y = 20;
 
-		const annotations = page.annotations
-			.map(store.get.annotation)
-			.filter(isNotNull);
+		const annotations = page.annotations.map(store.get.annotation).filter(isNotNull);
 
 		// TODO: If an annotation was changed / deleted, need to fix it before setting it
-		let titleAnnotation = annotations.find(a => a.meta.type === 'title-page-model-name');
+		let titleAnnotation = annotations.find((a) => a.meta.type === 'title-page-model-name');
 		if (titleAnnotation == null) {
 			titleAnnotation = store.mutations.titlePage.addTitleLabel(page);
 		}
@@ -56,19 +67,18 @@ const Layout = {
 		titleAnnotation.x = (pageSize.width - titleAnnotation.width) / 2;
 		titleAnnotation.y = (step.y - titleAnnotation.height) / 2;
 
-		let pageCountAnnotation = annotations.find(a => a.meta.type === 'title-page-page-count');
+		let pageCountAnnotation = annotations.find((a) => a.meta.type === 'title-page-page-count');
 		if (pageCountAnnotation == null) {
 			pageCountAnnotation = store.mutations.titlePage.addPageCountLabel(page);
 		}
 		Layout.label(pageCountAnnotation);
 		pageCountAnnotation.x = (pageSize.width - pageCountAnnotation.width) / 2;
-		pageCountAnnotation.y = step.y + step.height + ((step.y - pageCountAnnotation.height) / 2);
+		pageCountAnnotation.y = step.y + step.height + (step.y - pageCountAnnotation.height) / 2;
 
 		delete (page as any).needsLayout;
 	},
 
 	allInventoryPages(): void {
-
 		// If we already have multiple inventory pages, move all pliItems to the first page,
 		// then delete all but the first page and redo layout across entire part list,
 		// adding new pages back as necessary
@@ -80,17 +90,16 @@ const Layout = {
 				const pageToRemove = pages[i];
 				while (pageToRemove.pliItems.length) {
 					const id = pageToRemove.pliItems[0];
-					store.mutations.item.reparent(
-						{item: {type: 'pliItem', id}, newParent: firstPage},
-					);
+					store.mutations.item.reparent({
+						item: { type: 'pliItem', id },
+						newParent: firstPage,
+					});
 				}
-				store.mutations.inventoryPage.delete({page: pageToRemove});
+				store.mutations.inventoryPage.delete({ page: pageToRemove });
 			}
 		}
 
-		const allPLIItems = firstPage.pliItems
-			.map(store.get.pliItem)
-			.filter(isNotNull);
+		const allPLIItems = firstPage.pliItems.map(store.get.pliItem).filter(isNotNull);
 
 		Layout.page(firstPage);
 		let nextPage = firstPage;
@@ -98,7 +107,7 @@ const Layout = {
 			return !nextPage.pliItems.includes(item.id);
 		}
 		function reparent(item: PLIItem) {
-			store.mutations.item.reparent({item, newParent: nextPage});
+			store.mutations.item.reparent({ item, newParent: nextPage });
 		}
 		let unplacedPLIItems = allPLIItems.filter(unplaced);
 		while (unplacedPLIItems.length > 0) {
@@ -116,7 +125,6 @@ const Layout = {
 
 	// Lays out a single inventory page. Any pli items on the page that don't fit are ignored
 	inventoryPage(page: Page, box: Box): void {
-
 		// Start with a big list of unsorted pli items with no size or position info.
 		const pliItems = page.pliItems.map(store.get.pliItem);
 
@@ -124,7 +132,7 @@ const Layout = {
 		pliItems.forEach(Layout.pliItem);
 
 		// Sort pli items by color code, then sort within one color code by pli width
-		pliItems.sort(function(a, b) {
+		pliItems.sort(function (a, b) {
 			if (a.colorCode < b.colorCode) {
 				return -1;
 			} else if (a.colorCode > b.colorCode) {
@@ -140,10 +148,12 @@ const Layout = {
 			}
 			return 0;
 		});
-		page.pliItems = pliItems.map(el => el.id);  // Store sorted pliItem IDs back in the page
+		page.pliItems = pliItems.map((el) => el.id); // Store sorted pliItem IDs back in the page
 
 		const margin = (getMargin(store.state.template.page.innerMargin) + qtyLabelOffset) * 1.2;
-		let colWidth = 0, x = margin, y = margin;
+		let colWidth = 0;
+		let x = margin;
+		let y = margin;
 		let columns: PLIItem[][] = [[]];
 
 		box.width -= margin + margin;
@@ -155,7 +165,9 @@ const Layout = {
 		// If new column exceeds page width, store plis that don't fit and return them
 		for (let i = 0; i < pliItems.length; i++) {
 			const pliItem = pliItems[i];
-			if (y + pliItem.height > box.height) {  // Check if new item fits below current item
+			if (y + pliItem.height > box.height) {
+				// Check if new item fits below current item
+
 				x += colWidth + margin;
 				y = margin;
 				colWidth = 0;
@@ -178,19 +190,20 @@ const Layout = {
 
 		// Everything is in nice columns.
 		// Increase horizontal space between columns so they evenly fill the page width
-		columns = columns.filter(el => el.length);
+		columns = columns.filter((el) => el.length);
 		if (columns.length === 2) {
 			// Special case: For two columns, position 2nd in the middle of the page
 			if (columns[1][0].x < box.width / 2) {
-				columns[1].forEach(item => (item.x = box.width / 2));
+				columns[1].forEach((item) => (item.x = box.width / 2));
 			}
 		} else if (columns.length > 2) {
 			const lastCol = _.last(columns);
 			if (lastCol != null) {
-				const remainingSpace = box.width - lastCol[0].x - Math.max(...(lastCol.map(el => el.width)));
+				const remainingSpace =
+					box.width - lastCol[0].x - Math.max(...lastCol.map((el) => el.width));
 				const spaceToAdd = Math.max(0, remainingSpace / (columns.length - 1));
 				columns.forEach((col, idx) => {
-					col.forEach(item => {
+					col.forEach((item) => {
 						item.x += spaceToAdd * idx;
 					});
 				});
@@ -198,9 +211,9 @@ const Layout = {
 		}
 
 		// Increase vertical space between items in the same column so they evenly fill the page height
-		columns.forEach(col => {
+		columns.forEach((col) => {
 			if (col.length > 1) {
-				const lastItem = _.last(col) ?? {y: 0, height: 0};
+				const lastItem = _.last(col) ?? { y: 0, height: 0 };
 				const remainingSpace = box.height - lastItem.y - lastItem.height;
 				const spaceToAdd = Math.max(0, remainingSpace / (col.length - 1));
 				col.forEach((item, idx) => {
@@ -213,7 +226,6 @@ const Layout = {
 	},
 
 	page(page: Page, layout: Orientations | GridLayout = 'horizontal'): void {
-
 		if (page.subtype === 'titlePage') {
 			Layout.titlePage(page);
 			return;
@@ -229,12 +241,12 @@ const Layout = {
 			y: 0,
 		};
 
-		page.innerContentOffset = {x: borderWidth, y: borderWidth};
+		page.innerContentOffset = { x: borderWidth, y: borderWidth };
 
 		if (page.numberLabelID != null) {
 			Layout.pageNumber(page);
 			const lbl = store.get.numberLabel(page.numberLabelID);
-			pageSize.height -= lbl.height + (margin / 2);
+			pageSize.height -= lbl.height + margin / 2;
 		}
 
 		if (page.subtype === 'inventoryPage') {
@@ -262,13 +274,13 @@ const Layout = {
 				rows = layout.rows;
 				cols = layout.cols;
 			}
-			layoutDirection = layout.direction
-				|| (pageSize.width > pageSize.height ? 'horizontal' : 'vertical');
+			layoutDirection =
+				layout.direction || (pageSize.width > pageSize.height ? 'horizontal' : 'vertical');
 		}
 		const colSize = Math.floor(pageSize.width / cols);
 		const rowSize = Math.floor(pageSize.height / rows);
 
-		const box = {x: 0, y: 0, width: colSize, height: rowSize};
+		const box = { x: 0, y: 0, width: colSize, height: rowSize };
 
 		for (let i = 0; i < stepCount; i++) {
 			if (layoutDirection === 'vertical') {
@@ -282,9 +294,9 @@ const Layout = {
 			Layout.step(step, box);
 		}
 
-		if (stepCount < (rows * cols)) {
+		if (stepCount < rows * cols) {
 			// Have fewer steps than fit in the grid; expand steps in last row / col to fill empty cell
-			const emptySlots = (rows * cols) - stepCount;
+			const emptySlots = rows * cols - stepCount;
 			if (layoutDirection === 'vertical') {
 				const stepsInLastCol = rows - emptySlots;
 				box.width = colSize;
@@ -292,7 +304,7 @@ const Layout = {
 				box.x = (cols - 1) * colSize;
 				for (let i = 0; i < stepsInLastCol; i++) {
 					box.y = box.height * i;
-					const stepIndex = ((cols - 1) * rows) + i;
+					const stepIndex = (cols - 1) * rows + i;
 					const step = store.get.step(page.steps[stepIndex]);
 					Layout.step(step, box);
 				}
@@ -303,7 +315,7 @@ const Layout = {
 				box.y = (rows - 1) * rowSize;
 				for (let i = 0; i < stepsInLastRow; i++) {
 					box.x = box.width * i;
-					const stepIndex = ((rows - 1) * cols) + i;
+					const stepIndex = (rows - 1) * cols + i;
 					const step = store.get.step(page.steps[stepIndex]);
 					Layout.step(step, box);
 				}
@@ -311,9 +323,8 @@ const Layout = {
 		}
 
 		page.layout = layout;
-		page.actualLayout = (rows > 1 || cols > 1)
-			? {rows, cols, direction: layoutDirection}
-			: 'horizontal';
+		page.actualLayout =
+			rows > 1 || cols > 1 ? { rows, cols, direction: layoutDirection } : 'horizontal';
 		Layout.dividers(page, layoutDirection, rows, cols, pageSize);
 
 		// if (store.state.plisVisible) {
@@ -357,12 +368,11 @@ const Layout = {
 	},
 
 	step(step: Step, box: Box, pageMargin?: number): void {
-
-		const csi = (step.csiID == null) ? null : store.get.csi(step.csiID);
+		const csi = step.csiID == null ? null : store.get.csi(step.csiID);
 
 		if (step.stretchedPages.length) {
 			const pageWidth: number = store.state.template.page.width;
-			box.width *= (step.stretchedPages.length + 1);
+			box.width *= step.stretchedPages.length + 1;
 			step.stretchedPages.forEach((pageID, idx) => {
 				const page = store.get.page(pageID);
 				if (page.stretchedStep != null) {
@@ -372,10 +382,11 @@ const Layout = {
 		}
 
 		// Starting with a pre-defined box, layout everything in this step inside it
-		const template = (step.parent.type === 'callout')
-			? store.state.template.callout.step
-			: store.state.template.step;
-		pageMargin = (pageMargin == null) ? getMargin(store.state.template.page.innerMargin) : pageMargin;
+		const template =
+			step.parent.type === 'callout'
+				? store.state.template.callout.step
+				: store.state.template.step;
+		pageMargin = pageMargin == null ? getMargin(store.state.template.page.innerMargin) : pageMargin;
 		const margin = getMargin(template.innerMargin);
 
 		// Position step in parent coordinates
@@ -390,13 +401,13 @@ const Layout = {
 		box.width = step.width;
 		box.height = step.height;
 
-		step.submodelImages.forEach(submodelImageID => {
+		step.submodelImages.forEach((submodelImageID) => {
 			const submodelImage = store.get.submodelImage(submodelImageID);
 			Layout.submodelImage(submodelImage, box);
 			_.geom.moveBoxEdge(box, 'top', submodelImage.height + margin);
 		});
 
-		const pli = (step.pliID != null && store.state.plisVisible) ? store.get.pli(step.pliID) : null;
+		const pli = step.pliID != null && store.state.plisVisible ? store.get.pli(step.pliID) : null;
 		if (pli) {
 			Layout.pli(pli);
 			pli.y = box.y;
@@ -413,7 +424,7 @@ const Layout = {
 			_.geom.moveBoxEdge(box, 'top', lbl.height + margin);
 		}
 
-		step.callouts.forEach(calloutID => {
+		step.callouts.forEach((calloutID) => {
 			const callout = store.get.callout(calloutID);
 			Layout.callout(callout, box);
 			if (callout.position === 'left') {
@@ -434,7 +445,7 @@ const Layout = {
 		}
 
 		// Layout callout arrows after CSI because arrow tip position depends on CSI layout
-		step.callouts.forEach(calloutID => {
+		step.callouts.forEach((calloutID) => {
 			const callout = store.get.callout(calloutID);
 			Layout.calloutArrow(callout);
 		});
@@ -457,8 +468,11 @@ const Layout = {
 			// Ensure icon doesn't overlap step label
 			if (step.numberLabelID != null) {
 				const stepLabel = store.get.numberLabel(step.numberLabelID);
-				if (icon.y >= stepLabel.y && icon.y <= stepLabel.y + stepLabel.height + margin
-					&& icon.x >= stepLabel.x && icon.x <= stepLabel.x + stepLabel.width + margin
+				if (
+					icon.y >= stepLabel.y &&
+					icon.y <= stepLabel.y + stepLabel.height + margin &&
+					icon.x >= stepLabel.x &&
+					icon.x <= stepLabel.x + stepLabel.width + margin
 				) {
 					icon.y = stepLabel.y + stepLabel.height + margin;
 				}
@@ -467,18 +481,19 @@ const Layout = {
 
 		if (store.get.stepHasSubmodel(step)) {
 			const tagName = `submodel_arrow_step_${step.id}`;
-			let annotation = store.state.annotations.find(a => a.tagName === tagName);
+			let annotation = store.state.annotations.find((a) => a.tagName === tagName);
 			if (store.state.template.pli.includeSubmodels) {
 				if (annotation) {
-					store.mutations.annotation.delete({annotation});
+					store.mutations.annotation.delete({ annotation });
 				}
 			} else if (csi != null) {
 				if (annotation == null) {
 					annotation = store.mutations.annotation.add({
 						annotationType: 'arrow',
-						properties: {direction: 'right', tagName},
+						properties: { direction: 'right', tagName },
 						parent: step,
-						x: 0, y: 0,
+						x: 0,
+						y: 0,
 					});
 				}
 				if (annotation == null) {
@@ -491,28 +506,30 @@ const Layout = {
 					// The Step that places submodel is on same page as the step that completes submodel
 					// Place arrow right of step and add points to make it look like a divider
 					while (annotation.points.length < 4) {
-						store.mutations.calloutArrow.addPoint({arrow: annotation});
+						store.mutations.calloutArrow.addPoint({ arrow: annotation });
 					}
-					base.relativeTo = {type: 'step', id: prevStep.id};
+					base.relativeTo = { type: 'step', id: prevStep.id };
 					base.x = step.width;
 					base.y = 0;
 
 					const p1 = store.get.point(annotation.points[1]);
-					p1.relativeTo = {type: 'step', id: prevStep.id};
+					p1.relativeTo = { type: 'step', id: prevStep.id };
 					p1.x = step.width;
 					p1.y = step.height;
 
 					const p2 = store.get.point(annotation.points[2]);
-					p2.relativeTo = {type: 'step', id: prevStep.id};
+					p2.relativeTo = { type: 'step', id: prevStep.id };
 					p2.x = step.width;
-					p2.y = csi.y + (csi.height / 2);
+					p2.y = csi.y + csi.height / 2;
 				} else {
 					// The Step that places submodel is on the page after the step that completes submodel
 					// Start arrow on extreme left of page, ignoring page margins
 					while (annotation.points.length > 2) {
-						store.mutations.item.delete({item: {type: 'point', id: annotation.points[2]}});
+						store.mutations.item.delete({
+							item: { type: 'point', id: annotation.points[2] },
+						});
 					}
-					base.relativeTo = {type: 'page', id: step.parent.id};
+					base.relativeTo = { type: 'page', id: step.parent.id };
 					base.y = store.get.coords.pointToPage(0, csi.height / 2, csi).y;
 					base.x = 0;
 				}
@@ -520,7 +537,7 @@ const Layout = {
 				const lastIdx = _.last(annotation.points);
 				if (lastIdx != null) {
 					const tip = store.get.point(lastIdx);
-					tip.relativeTo = {type: 'csi', id: csi.id};
+					tip.relativeTo = { type: 'csi', id: csi.id };
 					tip.x = -_.geom.arrow().head.length - 10;
 					tip.y = csi.height / 2;
 				}
@@ -529,7 +546,6 @@ const Layout = {
 	},
 
 	submodelImage(submodelImage: SubmodelImage, box: Box): void {
-
 		// TODO: can only shrink multiple submodels in one step so much, might need to lay out horizontally
 		// TODO: make submodel boxes the same size as PLI boxes if new 'make PLIs same size' option is checked
 		// TODO: check if page's step falls off page with chosen submodel size; if so, shrink submodel
@@ -542,15 +558,16 @@ const Layout = {
 		const part = LDParse.model.get.abstractPart(submodelImage.modelFilename);
 
 		let csiSize;
-		csi.isDirty = true;  // TODO: is this necessary?
-		if (csi.scale != null) {  // If user chose a manual scale factor, respect it
+		csi.isDirty = true; // TODO: is this necessary?
+		if (csi.scale != null) {
+			// If user chose a manual scale factor, respect it
 			csiSize = store.render.pli(part.colorCode, part.filename, csi);
 		} else {
 			csi.autoScale = template.csi.scale;
 			csiSize = store.render.pli(part.colorCode, part.filename, csi);
 			if (csiSize != null && csiSize.height > box.height * template.maxHeight) {
-				csi.autoScale = (csi.autoScale ?? 1) * (box.height * template.maxHeight) / csiSize.height;
-				csi.isDirty = true;  // This is necessary because we just rendered it; this forces re-render
+				csi.autoScale = ((csi.autoScale ?? 1) * (box.height * template.maxHeight)) / csiSize.height;
+				csi.isDirty = true; // This is necessary because we just rendered it; this forces re-render
 				csiSize = store.render.pli(part.colorCode, part.filename, csi);
 			} else {
 				csi.autoScale = null;
@@ -565,7 +582,7 @@ const Layout = {
 		csi.height = csiSize.height;
 
 		const borderWidth = template.border.width;
-		submodelImage.innerContentOffset = {x: borderWidth, y: borderWidth};
+		submodelImage.innerContentOffset = { x: borderWidth, y: borderWidth };
 
 		submodelImage.x = box.x;
 		submodelImage.y = box.y;
@@ -587,25 +604,27 @@ const Layout = {
 		// Draw CSI centered in box
 		const step = store.get.parent(csi) as Step;
 		const localModel = LDParse.model.get.abstractPart(step.model.filename);
-		const csiSize = store.render.csi(localModel, step, csi) || {width: 0, height: 0};
-		csi.x = box.x + ((box.width - csiSize.width) / 2);
-		csi.y = box.y + ((box.height - csiSize.height) / 2);
+		const csiSize = store.render.csi(localModel, step, csi) || {
+			width: 0,
+			height: 0,
+		};
+		csi.x = box.x + (box.width - csiSize.width) / 2;
+		csi.y = box.y + (box.height - csiSize.height) / 2;
 		csi.width = csiSize.width;
 		csi.height = csiSize.height;
 	},
 
 	pli(pli: PLI): void {
-
 		// TOOD: if generated PLI is too big (say, > 30% of page), auto shrink the big items
 		let pliItems = pli.pliItems;
 		if (!store.state.template.pli.includeSubmodels) {
-			pliItems = pliItems.filter(id => {
-				return !store.get.pliItemIsSubmodel({id, type: 'pliItem'});
+			pliItems = pliItems.filter((id) => {
+				return !store.get.pliItemIsSubmodel({ id, type: 'pliItem' });
 			});
 		}
 
 		const borderWidth: number = store.state.template.pli.border.width;
-		pli.innerContentOffset = {x: borderWidth, y: borderWidth};
+		pli.innerContentOffset = { x: borderWidth, y: borderWidth };
 
 		pli.borderOffset.x = pli.borderOffset.y = 0;
 		if (_.isEmpty(pliItems)) {
@@ -614,12 +633,12 @@ const Layout = {
 		}
 
 		const margin = getMargin(store.state.template.pli.innerMargin);
-		let maxHeight = 0, left = margin + qtyLabelOffset;
+		let maxHeight = 0;
+		let left = margin + qtyLabelOffset;
 
 		// aw = attr(a, 'width'), ah = attr(a, 'height')
 		//pliItems.sort((a, b) => ((aw(b) * ah(b)) - (aw(a) * a(a))))
 		for (let i = 0; i < pliItems.length; i++) {
-
 			const pliItem = store.get.pliItem(pliItems[i]);
 			Layout.pliItem(pliItem);
 			pliItem.x = left;
@@ -628,10 +647,7 @@ const Layout = {
 			left += pliItem.width + margin;
 			if (pliItem.quantityLabelID != null) {
 				const quantityLabel = store.get.quantityLabel(pliItem.quantityLabelID);
-				maxHeight = Math.max(
-					maxHeight,
-					pliItem.height - qtyLabelOffset + quantityLabel.height,
-				);
+				maxHeight = Math.max(maxHeight, pliItem.height - qtyLabelOffset + quantityLabel.height);
 			}
 		}
 
@@ -664,19 +680,19 @@ const Layout = {
 		// TODO: add horizontal / vertical layout options to callout
 		const borderWidth = store.state.template.callout.border.width;
 		const margin = getMargin(store.state.template.callout.innerMargin);
-		const calloutBox = {x: 0, y: 0, width: 0, height: margin};
+		const calloutBox = { x: 0, y: 0, width: 0, height: margin };
 		const pos = callout.position;
-		const isOnSide = (pos === 'left' || pos === 'right');
+		const isOnSide = pos === 'left' || pos === 'right';
 
 		callout.borderOffset.x = callout.borderOffset.y = 0;
-		const stepSizes = callout.steps.map(stepID => {
+		const stepSizes = callout.steps.map((stepID) => {
 			const step = store.get.step(stepID);
-			return {step, ...(measureStep(step))};
+			return { step, ...measureStep(step) };
 		});
 
 		if (callout.layout === 'horizontal') {
-			const maxCalloutWidth = isOnSide ? box.width * 0.75 : box.width;  // TODO: consider CSI width
-			const tallestStep = Math.max(...stepSizes.map(el => el.height));
+			const maxCalloutWidth = isOnSide ? box.width * 0.75 : box.width; // TODO: consider CSI width
+			const tallestStep = Math.max(...stepSizes.map((el) => el.height));
 			const stepBox: Box = {
 				x: margin,
 				y: margin,
@@ -685,10 +701,10 @@ const Layout = {
 			};
 			calloutBox.height = margin + tallestStep + margin;
 
-			const rows: {step: Step, box: Box}[][] = [[]];
+			const rows: { step: Step; box: Box }[][] = [[]];
 			stepSizes.forEach((entry, idx) => {
 				const stepWidth = borderWidth + stepBox.x + entry.width + margin + borderWidth;
-				if (idx > 0 && (stepWidth > maxCalloutWidth)) {
+				if (idx > 0 && stepWidth > maxCalloutWidth) {
 					// Adding this step to the right will make the box too wide; wrap to next row
 					// TODO: this often puts 3 steps on one row and the 4th on a new row.  Looks bad.
 					rows.push([]);
@@ -697,7 +713,10 @@ const Layout = {
 					calloutBox.height += tallestStep + margin;
 				}
 				stepBox.width = entry.width;
-				rows[rows.length - 1].push({step: entry.step, box: _.cloneDeep(stepBox)});
+				rows[rows.length - 1].push({
+					step: entry.step,
+					box: _.cloneDeep(stepBox),
+				});
 				Layout.step(entry.step, stepBox, 0);
 				stepBox.x += stepBox.width + margin;
 				calloutBox.width = Math.max(calloutBox.width, stepBox.x);
@@ -705,14 +724,14 @@ const Layout = {
 
 			// Increase vertical space between each row so all rows align nicely
 			const cols = _.unzip(rows);
-			cols.forEach(col => {
-				col = col.filter(el => el);
-				const maxX = Math.max(...col.map(c => c.box.x));
-				col.forEach(el => (el.step.x = maxX));
+			cols.forEach((col) => {
+				col = col.filter((el) => el);
+				const maxX = Math.max(...col.map((c) => c.box.x));
+				col.forEach((el) => (el.step.x = maxX));
 			});
 		} else {
-			const maxCalloutHeight = isOnSide ? box.height : box.height * 0.5;  // TODO: consider CSI height
-			const widestStep = Math.max(...stepSizes.map(el => el.width));
+			const maxCalloutHeight = isOnSide ? box.height : box.height * 0.5; // TODO: consider CSI height
+			const widestStep = Math.max(...stepSizes.map((el) => el.width));
 			const stepBox: Box = {
 				x: margin,
 				y: margin,
@@ -721,10 +740,10 @@ const Layout = {
 			};
 			calloutBox.width = margin + widestStep + margin;
 
-			const columns: {step: Step, box: Box}[][] = [[]];
+			const columns: { step: Step; box: Box }[][] = [[]];
 			stepSizes.forEach((entry, idx) => {
 				const stepWidth = borderWidth + stepBox.y + entry.height + margin + borderWidth;
-				if (idx > 0 && (stepWidth > maxCalloutHeight)) {
+				if (idx > 0 && stepWidth > maxCalloutHeight) {
 					// Adding this step to the bottom of the box makes the box too tall; wrap to next column
 					columns.push([]);
 					stepBox.y = margin;
@@ -743,37 +762,38 @@ const Layout = {
 
 			// Increase vertical space between each row so all rows align nicely
 			const rows = _.unzip(columns);
-			rows.forEach(row => {
-				row = row.filter(el => el);
-				const maxY = Math.max(...row.map(c => c.box.y));
-				row.forEach(el => (el.step.y = maxY));
+			rows.forEach((row) => {
+				row = row.filter((el) => el);
+				const maxY = Math.max(...row.map((c) => c.box.y));
+				row.forEach((el) => (el.step.y = maxY));
 			});
 		}
 
-		callout.innerContentOffset = {x: borderWidth, y: borderWidth};
+		callout.innerContentOffset = { x: borderWidth, y: borderWidth };
 		callout.width = borderWidth + calloutBox.width + borderWidth;
 		callout.height = borderWidth + calloutBox.height + borderWidth;
 		if (isOnSide) {
-			callout.x = (pos === 'left') ? box.x : box.x + box.width - callout.width;
-			callout.y = box.y + ((box.height - callout.height) / 2);  // Center callout vertically
+			callout.x = pos === 'left' ? box.x : box.x + box.width - callout.width;
+			callout.y = box.y + (box.height - callout.height) / 2; // Center callout vertically
 		} else {
-			callout.x = box.x + ((box.width - callout.width) / 2);  // Center callout horizontall
-			callout.y = (pos === 'top') ? box.y : box.y + box.height - callout.height;
+			callout.x = box.x + (box.width - callout.width) / 2; // Center callout horizontall
+			callout.y = pos === 'top' ? box.y : box.y + box.height - callout.height;
 		}
 	},
 
 	calloutArrow(callout: Callout): void {
-
 		const arrow = store.get.calloutArrow(callout.calloutArrows[0]);
 
 		// Delete all but first callout arrow
 		while (callout.calloutArrows.length > 1) {
-			store.mutations.item.delete({item: {type: 'calloutArrow', id: callout.calloutArrows[1]}});
+			store.mutations.item.delete({
+				item: { type: 'calloutArrow', id: callout.calloutArrows[1] },
+			});
 		}
 
 		// Delete all but first & last point in first arrow
 		const calloutPos = callout.position;
-		const isOnSide = (calloutPos === 'left' || calloutPos === 'right');
+		const isOnSide = calloutPos === 'left' || calloutPos === 'right';
 		arrow.direction = {
 			left: 'right' as Directions,
 			top: 'down' as Directions,
@@ -782,7 +802,9 @@ const Layout = {
 		}[calloutPos];
 
 		while (arrow.points.length > 2) {
-			store.mutations.item.delete({item: {type: 'point', id: arrow.points[1]}});
+			store.mutations.item.delete({
+				item: { type: 'point', id: arrow.points[1] },
+			});
 		}
 
 		// Coordinates for first point (base) are relative to the *callout*
@@ -790,9 +812,9 @@ const Layout = {
 		let lastStep;
 		if (callout.steps.length > 1) {
 			const lastStepId = _.last(callout.steps);
-			lastStep = (lastStepId == null) ? null : store.get.step(lastStepId);
+			lastStep = lastStepId == null ? null : store.get.step(lastStepId);
 			const margin = getMargin(store.state.template.callout.step.innerMargin);
-			if (lastStep != null && (callout.height - margin - lastStep.height - margin < 10)) {
+			if (lastStep != null && callout.height - margin - lastStep.height - margin < 10) {
 				// If last step is nearly as tall as the callout, center to callout
 				// This avoids off-by-a-few-pixel arrow draw issues
 				lastStep = null;
@@ -800,36 +822,38 @@ const Layout = {
 		}
 
 		const p1 = store.get.point(arrow.points[0]);
-		p1.relativeTo = {type: 'callout', id: callout.id};
+		p1.relativeTo = { type: 'callout', id: callout.id };
 		if (isOnSide) {
-			p1.x = (calloutPos === 'left') ? callout.borderOffset.x + callout.width : 0;
-			p1.y = (lastStep == null)
-				? callout.borderOffset.y + callout.height / 2
-				: lastStep.y + (lastStep.height / 2);
+			p1.x = calloutPos === 'left' ? callout.borderOffset.x + callout.width : 0;
+			p1.y =
+				lastStep == null
+					? callout.borderOffset.y + callout.height / 2
+					: lastStep.y + lastStep.height / 2;
 		} else {
-			p1.x = (lastStep == null)
-				? callout.borderOffset.x + callout.width / 2
-				: lastStep.x + (lastStep.width / 2);
-			p1.y = (calloutPos === 'top') ? callout.borderOffset.y + callout.height : 0;
+			p1.x =
+				lastStep == null
+					? callout.borderOffset.x + callout.width / 2
+					: lastStep.x + lastStep.width / 2;
+			p1.y = calloutPos === 'top' ? callout.borderOffset.y + callout.height : 0;
 		}
 
 		// Coordinates for last point (tip) are relative to the *CSI*
 		// TODO: try to position arrow tip centered to inserted part bounding box instead of overall CSI box
 		const p2 = store.get.point(arrow.points[1]);
 		const step = store.get.step(callout.parent.id);
-		const csi = (step?.csiID == null) ? null : store.get.csi(step.csiID);
+		const csi = step?.csiID == null ? null : store.get.csi(step.csiID);
 
 		if (csi != null) {
 			// p2 is arrow's base; move it to the left to make space for the arrow head
 			const arrowSize = _.geom.arrow().head.length;
-			p2.relativeTo = {type: 'csi', id: csi.id};
+			p2.relativeTo = { type: 'csi', id: csi.id };
 
 			if (isOnSide) {
-				p2.x = (calloutPos === 'left') ? -arrowSize : csi.width + arrowSize;
+				p2.x = calloutPos === 'left' ? -arrowSize : csi.width + arrowSize;
 				p2.y = csi.height / 2;
 			} else {
 				p2.x = csi.width / 2;
-				p2.y = (calloutPos === 'top') ? -arrowSize : csi.height + arrowSize;
+				p2.y = calloutPos === 'top' ? -arrowSize : csi.height + arrowSize;
 			}
 		}
 	},
@@ -847,15 +871,15 @@ const Layout = {
 		const colSize = Math.floor(stepBox.width / cols);
 		const rowSize = Math.floor(stepBox.height / rows);
 
-		const box = {x: stepBox.x, y: stepBox.y, width: colSize, height: rowSize};
+		const box = { x: stepBox.x, y: stepBox.y, width: colSize, height: rowSize };
 
 		for (let i = 0; i < stepCount; i++) {
 			if (layout === 'vertical') {
-				box.x = stepBox.x + (colSize * Math.floor(i / rows));
-				box.y = stepBox.y + (rowSize * (i % rows));
+				box.x = stepBox.x + colSize * Math.floor(i / rows);
+				box.y = stepBox.y + rowSize * (i % rows);
 			} else {
-				box.x = stepBox.x + (colSize * (i % cols));
-				box.y = stepBox.y + (rowSize * Math.floor(i / cols));
+				box.x = stepBox.x + colSize * (i % cols);
+				box.y = stepBox.y + rowSize * Math.floor(i / cols);
 			}
 			const innerStep = store.get.step(step.steps[i]);
 			Layout.step(innerStep, box);
@@ -874,15 +898,20 @@ const Layout = {
 		const x = margin + csi.x + csi.width + 30;
 		store.mutations.divider.add({
 			parent: page,
-			p1: {x, y: margin},
-			p2: {x, y: box.height - margin},
+			p1: { x, y: margin },
+			p2: { x, y: box.height - margin },
 		});
 	},
 
-	dividers(target: Page | Step, layoutDirection: Orientations, rows: number, cols: number, box: Box): void {
-
+	dividers(
+		target: Page | Step,
+		layoutDirection: Orientations,
+		rows: number,
+		cols: number,
+		box: Box,
+	): void {
 		// Delete any dividers already on the target, then re-add new ones in the right places
-		store.mutations.item.deleteChildList({item: target, listType: 'divider'});
+		store.mutations.item.deleteChildList({ item: target, listType: 'divider' });
 
 		if (target.type === 'page' && target.subtype === 'templatePage') {
 			const page = store.get.page(target);
@@ -901,16 +930,16 @@ const Layout = {
 			for (let i = 1; i < rows; i++) {
 				store.mutations.divider.add({
 					parent: target,
-					p1: {x: x + margin, y: y + (rowSize * i)},
-					p2: {x: x + box.width - margin, y: y + (rowSize * i)},
+					p1: { x: x + margin, y: y + rowSize * i },
+					p2: { x: x + box.width - margin, y: y + rowSize * i },
 				});
 			}
 		} else {
 			for (let i = 1; i < cols; i++) {
 				store.mutations.divider.add({
 					parent: target,
-					p1: {x: x + (colSize * i), y: y + margin},
-					p2: {x: x + (colSize * i), y: y + box.height - margin},
+					p1: { x: x + colSize * i, y: y + margin },
+					p2: { x: x + colSize * i, y: y + box.height - margin },
 				});
 			}
 		}
@@ -929,32 +958,30 @@ const Layout = {
 	},
 
 	async mergeSteps(stepsToMerge: Step[], progressCallback: (s: string) => void): Promise<void> {
-
 		async function mergeOneStep() {
-			return new Promise<void>(resolve => window.setTimeout(() => {
-				const step = stepsToMerge[0];
-				const originalPage = store.get.pageForItem(step);
-				const prevPage = store.get.prevBasicPage(originalPage);
-				if (prevPage != null) {
+			return new Promise<void>((resolve) =>
+				window.setTimeout(() => {
+					const step = stepsToMerge[0];
+					const originalPage = store.get.pageForItem(step);
+					const prevPage = store.get.prevBasicPage(originalPage);
+					if (prevPage != null) {
+						// TODO: use moveToPage, since we know what page to move to
+						store.mutations.step.moveToPreviousPage({ step });
 
-					// TODO: use moveToPage, since we know what page to move to
-					store.mutations.step.moveToPreviousPage({step});
-
-					const stepsOverlap = prevPage.steps.some(isStepTooSmall);
-					if (stepsOverlap) {
-						// Not enough room; move step back then start filling the next page
-						store.mutations.step.moveToNextPage({step});
-					} else {
-						// Step fits; delete the now-empty page the step moved from
-						store.mutations.page.delete({page: originalPage});
+						const stepsOverlap = prevPage.steps.some(isStepTooSmall);
+						if (stepsOverlap) {
+							// Not enough room; move step back then start filling the next page
+							store.mutations.step.moveToNextPage({ step });
+						} else {
+							// Step fits; delete the now-empty page the step moved from
+							store.mutations.page.delete({ page: originalPage });
+						}
 					}
-				}
-				progressCallback(
-					t('glossary.step_count_@c', stepsToMerge[0].number),
-				);
-				_.pullAt(stepsToMerge, 0);
-				resolve();
-			}, 100));
+					progressCallback(t('glossary.step_count_@c', stepsToMerge[0].number));
+					_.pullAt(stepsToMerge, 0);
+					resolve();
+				}, 100),
+			);
 		}
 
 		// Starting with one step per page, move adjacent steps to previous page until page is full-ish
@@ -969,7 +996,7 @@ const Layout = {
 			const borderWidth = template.border ? template.border.width : 0;
 			const margin = getMargin(template.innerMargin);
 			const bbox = _.geom.bbox(boxes);
-			item.borderOffset = item.borderOffset || {x: 0, y: 0};
+			item.borderOffset = item.borderOffset || { x: 0, y: 0 };
 			item.borderOffset.x = bbox.x - item.x - margin;
 			item.borderOffset.y = bbox.y - item.y - margin;
 			item.width = borderWidth + margin + bbox.width + margin + borderWidth;
@@ -980,7 +1007,7 @@ const Layout = {
 			const step = store.get.step(item);
 			const children = store.get.stepChildren(step);
 			const boxes: Box[] = [];
-			children.forEach(child => {
+			children.forEach((child) => {
 				if (isBox(child)) {
 					boxes.push(child);
 				}
@@ -988,13 +1015,13 @@ const Layout = {
 			if (boxes.length === 1) {
 				const margin = getMargin(store.state.template.step.innerMargin);
 				boxes[0] = {
-					x: boxes[0].x - (margin / 2),
-					y: boxes[0].y - (margin / 2),
+					x: boxes[0].x - margin / 2,
+					y: boxes[0].y - margin / 2,
 					width: boxes[0].width + margin,
 					height: boxes[0].height + margin,
 				};
 			}
-			const bbox = _.geom.bbox(boxes);  // bbox of all children in step coordinates
+			const bbox = _.geom.bbox(boxes); // bbox of all children in step coordinates
 			step.x += bbox.x;
 			step.y += bbox.y;
 			step.width = bbox.width;
@@ -1008,11 +1035,13 @@ const Layout = {
 		pli(item: LookupItem): void {
 			const boxes: Box[] = [];
 			const pli = store.get.pli(item);
-			pli.pliItems.forEach(itemID => {
+			pli.pliItems.forEach((itemID) => {
 				const pliItem = store.get.pliItem(itemID);
 				boxes.push({
-					x: pli.x + pliItem.x, y: pli.y + pliItem.y,
-					width: pliItem.width, height: pliItem.height,
+					x: pli.x + pliItem.x,
+					y: pli.y + pliItem.y,
+					width: pliItem.width,
+					height: pliItem.height,
 				});
 				if (pliItem.quantityLabelID != null) {
 					const qtyLabel = store.get.quantityLabel(pliItem.quantityLabelID);
@@ -1037,7 +1066,7 @@ const Layout = {
 		callout(item: LookupItem): void {
 			const callout = store.get.callout(item);
 			const boxes: Box[] = [];
-			callout.steps.forEach(itemID => {
+			callout.steps.forEach((itemID) => {
 				const step = store.get.step(itemID);
 				if (step != null) {
 					boxes.push({
@@ -1064,8 +1093,7 @@ const Layout = {
 
 // This is only used for 'inside-out' type layouts, which are only used in callouts for now
 function measureStep(step: Step) {
-
-	const box = {width: 0, height: 0};
+	const box = { width: 0, height: 0 };
 	const template = store.state.template;
 	const margin = getMargin(template.step.innerMargin);
 
@@ -1080,13 +1108,13 @@ function measureStep(step: Step) {
 		const localModel = LDParse.model.get.abstractPart(step.model.filename);
 		const csiSize = store.render.csi(localModel, step, csi);
 		if (csiSize != null) {
-			box.width += (box.width === 0) ? csiSize.width : csiSize.width + margin;
-			box.height += (box.height === 0) ? csiSize.height : csiSize.height + margin;
+			box.width += box.width === 0 ? csiSize.width : csiSize.width + margin;
+			box.height += box.height === 0 ? csiSize.height : csiSize.height + margin;
 		}
 	}
 	if (step.rotateIconID != null) {
 		const size = template.rotateIcon.size;
-		box.width += (box.width === 0) ? size : size + margin;
+		box.width += box.width === 0 ? size : size + margin;
 		box.height += size;
 	}
 
@@ -1099,7 +1127,7 @@ function measureStep(step: Step) {
 
 	if (box.width < 1 && box.height < 1) {
 		const emptyStepSize = emptyCalloutSize - margin;
-		return {width: emptyStepSize, height: emptyStepSize};
+		return { width: emptyStepSize, height: emptyStepSize };
 	}
 
 	return box;
@@ -1116,10 +1144,10 @@ function isStepTooSmall(stepID: number) {
 		return false;
 	}
 	const csi = store.get.csi(step.csiID);
-	const pli = (store.state.plisVisible && step.pliID != null) ? store.get.pli(step.pliID) : null;
+	const pli = store.state.plisVisible && step.pliID != null ? store.get.pli(step.pliID) : null;
 	const pliHeight = pli ? pli.height : 0;
-	const submodelSpace = {width: 0, height: 0};
-	step.submodelImages.forEach(submodelImageID => {
+	const submodelSpace = { width: 0, height: 0 };
+	step.submodelImages.forEach((submodelImageID) => {
 		const submodelImage = store.get.submodelImage(submodelImageID);
 		submodelSpace.width = Math.max(submodelImage.width * 1.05, submodelSpace.width);
 		submodelSpace.height += submodelImage.height;
@@ -1141,26 +1169,28 @@ function isStepTooSmall(stepID: number) {
 // TODO: this duplicates a lot of step layout logic, badly. eg: it doesn't push content below step numbers
 function _alignStepContent(page: Page) {
 	const margin = getMargin(store.state.template.step.innerMargin);
-	const steps = page.steps.map(stepID => store.get.step(stepID));
-	if (steps.length < 2 || typeof page.actualLayout !== 'object'
-		|| page.actualLayout.direction !== 'horizontal'
-		|| page.actualLayout.cols === 'auto'
+	const steps = page.steps.map((stepID) => store.get.step(stepID));
+	if (
+		steps.length < 2 ||
+		typeof page.actualLayout !== 'object' ||
+		page.actualLayout.direction !== 'horizontal' ||
+		page.actualLayout.cols === 'auto'
 	) {
-		return;  // only align step content across horizontally laid out pages with multiple steps
+		return; // only align step content across horizontally laid out pages with multiple steps
 	}
 	const stepsByRow = _.chunk(steps, page.actualLayout.cols);
-	stepsByRow.forEach(stepList => {
+	stepsByRow.forEach((stepList) => {
 		// Don't adjust steps with submodel images here
-		stepList = stepList.filter(el => !el.submodelImages.length);
+		stepList = stepList.filter((el) => !el.submodelImages.length);
 		const tallestPLIHeight = Math.max(
-			...stepList.map(step => {
+			...stepList.map((step) => {
 				if (step.pliID != null) {
-					return (store.get.pli(step.pliID)).height;
+					return store.get.pli(step.pliID).height;
 				}
 				return 0;
 			}),
 		);
-		stepList.forEach(step => {
+		stepList.forEach((step) => {
 			if (step.csiID != null) {
 				const csi = store.get.csi(step.csiID);
 				csi.y = (step.height + tallestPLIHeight - csi.height) / 2;

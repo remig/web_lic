@@ -3,7 +3,7 @@
 <template>
 	<div
 		id="rightSubPane"
-		:class="{singleEntry: !isScrollingView}"
+		:class="{ singleEntry: !isScrollingView }"
 		@mousedown="mouseDown"
 		@mousemove="mouseMove"
 		@mouseup="mouseUp"
@@ -13,19 +13,22 @@
 			v-if="pageGroups.length"
 			class="pageViewContainer"
 			:style="{
-				width: isFacingView ? (pageSize.width * 2 + 70) + 'px' : pageSize.width + 'px',
+				width: isFacingView ? pageSize.width * 2 + 70 + 'px' : pageSize.width + 'px',
 				height: isScrollingView ? undefined : pageSize.height + 'px',
 			}"
 		>
-			<div v-if="isScrollingView" :style="{height: scrollPaddingHeight + 'px'}" />
+			<div v-if="isScrollingView" :style="{ height: scrollPaddingHeight + 'px' }" />
 			<div v-for="(group, gi) in pageGroups" :key="gi">
 				<div
 					v-for="entry in group"
 					:key="entry.pageId != null ? entry.pageId : 'null-' + entry.idx"
-					:style="{position: 'relative', display: isFacingView ? 'inline' : undefined}"
+					:style="{
+						position: 'relative',
+						display: isFacingView ? 'inline' : undefined,
+					}"
 				>
 					<div
-						:class="['pageContainer', {oddNumberedPage: isFacingView && entry.idx % 2 !== 0}]"
+						:class="['pageContainer', { oddNumberedPage: isFacingView && entry.idx % 2 !== 0 }]"
 						:style="{
 							marginTop: isScrollingView ? multiPagePadding + 'px' : undefined,
 							marginBottom: isScrollingView ? multiPagePadding + 'px' : undefined,
@@ -48,56 +51,66 @@
 								:ref="guideRef(guideId)"
 								:key="guideId"
 								:page-size="pageSize"
-								:offset="{left: 0, top: 0}"
+								:offset="{ left: 0, top: 0 }"
 								v-bind="guideProps"
 							/>
 						</div>
 					</div>
 					<div
 						v-if="entry.pageId != null && !isTemplatePage(entry.pageId)"
-						:class="['pageLockBtn', {locked: pageLockStatus[entry.pageId]}]"
+						:class="['pageLockBtn', { locked: pageLockStatus[entry.pageId] }]"
 						@click="togglePageLock(entry.pageId)"
 					>
 						<i :class="['fas', pageLockStatus[entry.pageId] ? 'fa-lock' : 'fa-lock-open']" />
 					</div>
 				</div>
 			</div>
-			<div v-if="isScrollingView" :style="{height: scrollPaddingHeight + 'px'}" />
+			<div v-if="isScrollingView" :style="{ height: scrollPaddingHeight + 'px' }" />
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import {computed, nextTick, onBeforeUnmount,onMounted, ref, watch} from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-import {Draw} from '../draw';
+import { Draw } from '../draw';
 import EventBus from '../event_bus';
 import {
-type Box,
-type GuideInterface,
-	type ItemTypeNames, type ItemTypes, 	type LookupItem, type Page, type Point, type Size, type Step, } from '../item_types';
+	type Box,
+	type GuideInterface,
+	type ItemTypeNames,
+	type ItemTypes,
+	type LookupItem,
+	type Page,
+	type Point,
+	type Size,
+	type Step,
+} from '../item_types';
 import * as SelectionOps from '../selection_ops';
 import store from '../store';
-import {t} from '../translations';
-import {currentPageId as currentPageIdRef,selectedItemLookup} from '../ui_reactive_state';
+import { t } from '../translations';
+import { currentPageId as currentPageIdRef, selectedItemLookup } from '../ui_reactive_state';
 import uiState from '../ui_state';
 import undoStack from '../undo_stack';
 import _ from '../util';
 import Guide from './guide.vue';
 
-type MouseDragItem = {
-	type: 'guide';
-	guide: InstanceType<typeof Guide>;
-	moved: boolean;
-	x: number;
-	y: number;
-} | {
-	type: 'item';
-	item: ItemTypes;
-	moved: boolean;
-	x: number;
-	y: number;
-} | null;
+type MouseDragItem =
+	| {
+			type: 'guide';
+			guide: InstanceType<typeof Guide>;
+			moved: boolean;
+			x: number;
+			y: number;
+	  }
+	| {
+			type: 'item';
+			item: ItemTypes;
+			moved: boolean;
+			x: number;
+			y: number;
+	  }
+	| null;
 
 const multiPagePadding = 15;
 
@@ -131,14 +144,17 @@ function guideRef(id: number) {
 const selectedItem = computed(() => selectedItemLookup.value);
 const currentPageId = computed(() => currentPageIdRef.value);
 
-const isFacingView = computed(() =>
-	facingPage.value
-	&& (currentPageId.value == null || !store.get.isTemplatePage(currentPageId.value)),
+const isFacingView = computed(
+	() =>
+		facingPage.value &&
+		(currentPageId.value == null || !store.get.isTemplatePage(currentPageId.value)),
 );
 
-const isScrollingView = computed(() =>
-	scroll.value && pageCount.value > 1
-	&& (currentPageId.value == null || !store.get.isTemplatePage(currentPageId.value)),
+const isScrollingView = computed(
+	() =>
+		scroll.value &&
+		pageCount.value > 1 &&
+		(currentPageId.value == null || !store.get.isTemplatePage(currentPageId.value)),
 );
 
 const pageIDsToDraw = computed((): (number | null)[] => {
@@ -160,16 +176,16 @@ const pageIDsToDraw = computed((): (number | null)[] => {
 	return [];
 });
 
-const pageGroups = computed((): {pageId: number | null; idx: number}[][] => {
+const pageGroups = computed((): { pageId: number | null; idx: number }[][] => {
 	const ids = pageIDsToDraw.value;
 	if (isFacingView.value && isScrollingView.value) {
-		const result: {pageId: number | null; idx: number}[][] = [];
+		const result: { pageId: number | null; idx: number }[][] = [];
 		for (let i = 0; i < ids.length; i += 2) {
-			result.push(ids.slice(i, i + 2).map((pageId, j) => ({pageId, idx: i + j})));
+			result.push(ids.slice(i, i + 2).map((pageId, j) => ({ pageId, idx: i + j })));
 		}
 		return result;
 	}
-	return ids.map((pageId, idx) => [{pageId, idx}]);
+	return ids.map((pageId, idx) => [{ pageId, idx }]);
 });
 
 const scrollPaddingHeight = computed(() => getPageOffset() - multiPagePadding);
@@ -244,7 +260,7 @@ function mouseDown(e: MouseEvent) {
 	if (target.nodeName !== 'CANVAS' && !target.className.includes('guide')) {
 		return;
 	}
-	mouseDownPt = {x: e.offsetX, y: e.offsetY};
+	mouseDownPt = { x: e.offsetX, y: e.offsetY };
 	if (target.className.includes('guide') && target.dataset.id != null) {
 		mouseDragItem = {
 			type: 'guide',
@@ -256,8 +272,10 @@ function mouseDown(e: MouseEvent) {
 	} else if (selectedItem.value) {
 		const item = store.get.lookupToItem(selectedItem.value);
 		const page = getPageForCanvas(target);
-		if (item && store.get.isMoveable(item)
-			&& inHighlightBox(e.offsetX, e.offsetY, item, pageSize.value, page)
+		if (
+			item &&
+			store.get.isMoveable(item) &&
+			inHighlightBox(e.offsetX, e.offsetY, item, pageSize.value, page)
 		) {
 			mouseDragItem = {
 				type: 'item',
@@ -275,8 +293,9 @@ function mouseMove(e: MouseEvent) {
 		return;
 	}
 	const target: HTMLElement = e.target as HTMLElement;
-	if (mouseDragItem == null
-		|| (target.nodeName !== 'CANVAS' && !target.className.includes('guide'))
+	if (
+		mouseDragItem == null ||
+		(target.nodeName !== 'CANVAS' && !target.className.includes('guide'))
 	) {
 		return;
 	}
@@ -285,15 +304,12 @@ function mouseMove(e: MouseEvent) {
 	if (dx === 0 && dy === 0) {
 		return;
 	}
-	const up = {x: e.offsetX, y: e.offsetY};
+	const up = { x: e.offsetX, y: e.offsetY };
 	if (mouseDragItem.type === 'guide') {
 		mouseDragItem.guide.moveBy(dx, dy);
-	} else if (mouseDownPt
-		&& _.geom.distance(mouseDownPt, up) > 5
-		&& mouseDragItem.type === 'item'
-	) {
+	} else if (mouseDownPt && _.geom.distance(mouseDownPt, up) > 5 && mouseDragItem.type === 'item') {
 		// TODO: Update parent bounding boxes for children like CSI, submodel, etc
-		store.mutations.item.reposition({item: mouseDragItem.item, dx, dy});
+		store.mutations.item.reposition({ item: mouseDragItem.item, dx, dy });
 		mouseDragItem.moved = true;
 		drawVisiblePages();
 	}
@@ -306,9 +322,10 @@ function mouseUp(e: MouseEvent) {
 		return;
 	}
 	const target: HTMLElement = e.target as HTMLElement;
-	if (mouseDownPt
-		&& (mouseDragItem == null || !mouseDragItem.moved)
-		&& target.nodeName === 'CANVAS'
+	if (
+		mouseDownPt &&
+		(mouseDragItem == null || !mouseDragItem.moved) &&
+		target.nodeName === 'CANVAS'
 	) {
 		const page = getPageForCanvas(target);
 		if (page == null) {
@@ -324,7 +341,7 @@ function mouseUp(e: MouseEvent) {
 		mouseDragItem.guide.savePosition();
 	} else if (mouseDragItem?.type === 'item' && mouseDragItem.moved) {
 		const item = t('glossary.' + mouseDragItem.item.type.toLowerCase());
-		const undoText = t('action.edit.item.move.undo_@mf', {item});
+		const undoText = t('action.edit.item.move.undo_@mf', { item });
 		undoStack.commit('', null, undoText);
 	} else if (target.nodeName !== 'CANVAS') {
 		SelectionOps.clearSelected();
@@ -337,7 +354,7 @@ function pageUp() {
 	if (currentPageId.value == null) {
 		return;
 	}
-	let prevPage = store.get.prevPage({type: 'page', id: currentPageId.value});
+	let prevPage = store.get.prevPage({ type: 'page', id: currentPageId.value });
 	if (isFacingView.value) {
 		const page = store.get.page(currentPageId.value);
 		if (!_.isEven(page.number) && prevPage != null) {
@@ -357,7 +374,7 @@ function pageDown() {
 	if (currentPageId.value == null) {
 		return;
 	}
-	let nextPage = store.get.nextPage({type: 'page', id: currentPageId.value});
+	let nextPage = store.get.nextPage({ type: 'page', id: currentPageId.value });
 	if (isFacingView.value) {
 		const page = store.get.page(currentPageId.value);
 		if (nextPage != null && page.number > 0 && _.isEven(page.number)) {
@@ -373,7 +390,7 @@ function pageDown() {
 	}
 }
 
-function handleKeyPress({key}: {key: string}) {
+function handleKeyPress({ key }: { key: string }) {
 	if (key === 'PageDown') {
 		pageDown();
 	} else if (key === 'PageUp') {
@@ -396,7 +413,7 @@ function scrollToPage(pageId: number) {
 		if (!container) {
 			return;
 		}
-		const dy = ((container.offsetHeight - canvas.offsetHeight) / 2) - multiPagePadding;
+		const dy = (container.offsetHeight - canvas.offsetHeight) / 2 - multiPagePadding;
 		// TODO: this parent element lookup is hideously fragile and hideous
 		let newScroll: number;
 		if (isFacingView.value) {
@@ -415,7 +432,7 @@ function scrollToPage(pageId: number) {
 	});
 }
 
-function scrollToPageHandler({pageId}: {pageId: number}) {
+function scrollToPageHandler({ pageId }: { pageId: number }) {
 	scrollToPage(pageId);
 }
 
@@ -427,28 +444,27 @@ function drawVisiblePages() {
 	}
 	const containerHeight = container.offsetHeight;
 	const containerTop = container.parentElement?.offsetTop ?? 0;
-	document.querySelectorAll<HTMLCanvasElement>('canvas[id^="pageCanvas"]')
-		.forEach(canvas => {
-			const box = canvas.getBoundingClientRect();
-			const y = box.y - containerTop;
-			if (y < containerHeight && (y + box.height) > 0) {
-				drawPage(canvas);
-			}
-		});
+	document.querySelectorAll<HTMLCanvasElement>('canvas[id^="pageCanvas"]').forEach((canvas) => {
+		const box = canvas.getBoundingClientRect();
+		const y = box.y - containerTop;
+		if (y < containerHeight && y + box.height > 0) {
+			drawPage(canvas);
+		}
+	});
 }
 
 function drawPage(canvas: HTMLCanvasElement) {
 	const page = getPageForCanvas(canvas);
 	if (page != null) {
-		Draw.page(page, canvas, {selectedItem: selectedItem.value});
+		Draw.page(page, canvas, { selectedItem: selectedItem.value });
 	}
 }
 
-function setPageView({facingPage: fp = false, scroll: sc = false}) {
+function setPageView({ facingPage: fp = false, scroll: sc = false }) {
 	SelectionOps.clearSelected();
 	facingPage.value = fp;
 	scroll.value = sc;
-	uiState.set('pageView', {facingPage: fp, scroll: sc});
+	uiState.set('pageView', { facingPage: fp, scroll: sc });
 	if (sc && currentPageId.value) {
 		scrollToPage(currentPageId.value);
 	} else {
@@ -495,10 +511,10 @@ function getPairedPages(pageId: number | null): (number | null)[] {
 
 function setPageLocked(pageId: number): (locked?: boolean) => void {
 	if (pageId == null) {
-		return function() {};
+		return function () {};
 	}
-	return function(locked) {
-		const opts = {page: {type: 'page', id: pageId}, locked};
+	return function (locked) {
+		const opts = { page: { type: 'page', id: pageId }, locked };
 		undoStack.commit('page.setLocked', opts, locked ? 'Lock Page' : 'Unlock Page');
 	};
 }
@@ -522,10 +538,7 @@ function inBox(x: number, y: number, box: Box | null): boolean {
 	if (box == null) {
 		return false;
 	}
-	return (x > box.x)
-		&& (x < (box.x + box.width))
-		&& (y > box.y)
-		&& (y < (box.y + box.height));
+	return x > box.x && x < box.x + box.width && y > box.y && y < box.y + box.height;
 }
 
 function inHighlightBox(
@@ -548,7 +561,6 @@ function inTargetBox(x: number, y: number, item: LookupItem): boolean {
 // TODO: stepChildren is a good start; need to make stepChildren recursively return all ancestors,
 // and check them all automatically here
 function findClickTargetInStep(step: Step, mx: number, my: number): ItemTypes | null {
-
 	if (step.csiID != null) {
 		const csi = store.get.csi(step.csiID);
 		for (let i = 0; i < csi.annotations.length; i++) {
@@ -674,7 +686,7 @@ function findClickTargetInPage(page: Page, mx: number, my: number): ItemTypes | 
 
 		let box = _.geom.bbox([divider.p1, divider.p2]);
 		box = _.geom.expandBox(box, 8, 8);
-		if (inTargetBox(mx, my, {...divider, ...box})) {
+		if (inTargetBox(mx, my, { ...divider, ...box })) {
 			return divider;
 		}
 	}

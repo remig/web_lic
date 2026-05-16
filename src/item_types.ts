@@ -1,10 +1,16 @@
 export type Directions = 'up' | 'right' | 'down' | 'left';
 export type Positions = 'top' | 'right' | 'bottom' | 'left';
-export type Orientations = 'horizontal' | 'vertical'
+export type Orientations = 'horizontal' | 'vertical';
 export type Anchors =
-	'top_left' | 'top' | 'top_right'
-	| 'left' | 'center' | 'right'
-	| 'bottom_left' | 'bottom' | 'bottom_right';
+	| 'top_left'
+	| 'top'
+	| 'top_right'
+	| 'left'
+	| 'center'
+	| 'right'
+	| 'bottom_left'
+	| 'bottom'
+	| 'bottom_right';
 
 export type LDrawColorCode = number;
 
@@ -35,7 +41,7 @@ export interface Model {
 	parentStepID?: number;
 }
 
-export type PartDictionary = {[key: string]: AbstractPart | Model};
+export type PartDictionary = { [key: string]: AbstractPart | Model };
 
 export interface StepModel {
 	filename: string;
@@ -94,9 +100,23 @@ export interface DisplacedPart {
 export type AnnotationTypes = 'label' | 'arrow' | 'stairStepArrow' | 'image';
 
 export type ItemTypeNames =
-	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
-	| 'numberLabel'| 'page' | 'part' | 'pli' | 'pliItem' | 'point'
-	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodel' | 'submodelImage';
+	| 'annotation'
+	| 'book'
+	| 'callout'
+	| 'calloutArrow'
+	| 'csi'
+	| 'divider'
+	| 'numberLabel'
+	| 'page'
+	| 'part'
+	| 'pli'
+	| 'pliItem'
+	| 'point'
+	| 'quantityLabel'
+	| 'rotateIcon'
+	| 'step'
+	| 'submodel'
+	| 'submodelImage';
 
 export interface LookupItem {
 	id: number;
@@ -109,8 +129,7 @@ export interface Item extends LookupItem {
 
 export interface PointedItem extends Item, Point {}
 
-export interface BoxedItem extends Item, Box {
-}
+export interface BoxedItem extends Item, Box {}
 
 export interface BoxedOffsetItem extends Item, Box {
 	borderOffset: Point;
@@ -156,7 +175,7 @@ export interface Annotation extends BoxedItem, Alignment, PointListItem {
 	font: string;
 	text: string;
 	tagName?: string;
-	meta?: any;  // TODO: use tagName instead
+	meta?: any; // TODO: use tagName instead
 	src?: string | null;
 	direction?: Directions | null;
 	border?: Border | null;
@@ -199,7 +218,7 @@ export interface NumberLabel extends BoxedItem, Alignment {
 	type: 'numberLabel';
 }
 
-export type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
+export type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage';
 
 export interface GridLayout {
 	rows: number | 'auto';
@@ -298,16 +317,30 @@ export interface ImageTemplate {
 }
 
 export type ItemTypes =
-	Annotation | Book | Callout | CalloutArrow | CSI | Divider
-	| NumberLabel | Page | PartItem | PLI | PLIItem | PointItem
-	| QuantityLabel | RotateIcon | Step | SubmodelItem | SubmodelImage;
+	| Annotation
+	| Book
+	| Callout
+	| CalloutArrow
+	| CSI
+	| Divider
+	| NumberLabel
+	| Page
+	| PartItem
+	| PLI
+	| PLIItem
+	| PointItem
+	| QuantityLabel
+	| RotateIcon
+	| Step
+	| SubmodelItem
+	| SubmodelImage;
 
-export interface BaseTemplate { }
+export interface BaseTemplate {}
 
 export interface PageTemplate extends BaseTemplate {
 	width: number;
 	height: number;
-	sizePreset: {format: string; orientation: string} | null;
+	sizePreset: { format: string; orientation: string } | null;
 	innerMargin: number;
 	numberLabel: {
 		font: string;
@@ -374,7 +407,6 @@ export interface CalloutTemplate extends BaseTemplate {
 }
 
 export interface Template {
-
 	page: PageTemplate;
 	step: StepTemplate;
 	submodelImage: SubmodelTemplate;
@@ -423,7 +455,7 @@ export interface StateInterface {
 	numberLabels: NumberLabel[];
 	pages: Page[];
 	pliItems: PLIItem[];
-	pliTransforms: {[key: string]: PLITransform};  // key should be LDrawPartFilename but that doesn't work...
+	pliTransforms: { [key: string]: PLITransform }; // key should be LDrawPartFilename but that doesn't work...
 	plis: PLI[];
 	plisVisible: boolean;
 	points: Point[];

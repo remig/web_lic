@@ -1,14 +1,10 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="t('dialog.export_hi_res_png.title')"
-		width="450px"
-		class="pngExportDialog"
-	>
+	<LicDialog :title="t('dialog.export_hi_res_png.title')" width="450px" class="pngExportDialog">
 		<div style="--label-width: 100px">
 			<label class="label-input-row">
-				{{t('dialog.export_hi_res_png.scale')}}
+				{{ t('dialog.export_hi_res_png.scale') }}
 				<input
 					ref="set_focus"
 					v-model.number="scale"
@@ -18,17 +14,17 @@
 					type="number"
 					class="form-control"
 					@input="updateScale"
-				>
+				/>
 			</label>
 			<div class="label-input-row">
 				<span />
 				<label class="lic-checkbox">
-					<input v-model="maintainPrintSize" type="checkbox">
-					{{t("dialog.export_hi_res_png.maintain_print_size")}}
+					<input v-model="maintainPrintSize" type="checkbox" />
+					{{ t('dialog.export_hi_res_png.maintain_print_size') }}
 				</label>
 			</div>
 			<label class="label-input-row">
-				{{t('dialog.export_hi_res_png.dpi')}}
+				{{ t('dialog.export_hi_res_png.dpi') }}
 				<input
 					v-model.number="dpi"
 					min="0"
@@ -36,7 +32,7 @@
 					type="number"
 					class="form-control"
 					@input="updateDPI"
-				>
+				/>
 			</label>
 			<div class="panel-row">
 				<div>
@@ -53,9 +49,8 @@
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {computed,ref} from 'vue';
+import { t } from '@/translations';
+import { computed, ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
@@ -68,8 +63,13 @@ interface PngExportResult {
 	dpi: number;
 }
 
-const props = defineProps<{pageSizeInPixels: {width: number; height: number}}>();
-const emit = defineEmits<{(e: 'ok', v: PngExportResult): void; (e: 'cancel'): void}>();
+const props = defineProps<{
+	pageSizeInPixels: { width: number; height: number };
+}>();
+const emit = defineEmits<{
+	(e: 'ok', v: PngExportResult): void;
+	(e: 'cancel'): void;
+}>();
 
 const pageSize = ref(_.clone(props.pageSizeInPixels));
 const scale = ref(uiState.get('dialog.export.images.scale'));
@@ -112,7 +112,6 @@ function ok() {
 	uiState.get('dialog.export.images').scale = scale.value;
 	uiState.get('dialog.export.images').dpi = dpi.value;
 	uiState.get('dialog.export.images').maintainPrintSize = maintainPrintSize.value;
-	emit('ok', {scale: scale.value, dpi: dpi.value});
+	emit('ok', { scale: scale.value, dpi: dpi.value });
 }
-
 </script>

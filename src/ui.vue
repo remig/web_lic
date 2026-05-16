@@ -2,16 +2,14 @@
 
 <template>
 	<div id="container" @click="closeMenus()">
-		<div v-cloak id="busyOverlay" :class="{hidden: busyText === ''}">
+		<div v-cloak id="busyOverlay" :class="{ hidden: busyText === '' }">
 			<!--<div id="busyText">{{busyText}}<div id="spinner"></div></div>-->
 			<div id="busyContainer">
 				<div class="busyText">
-					{{busyText}}
+					{{ busyText }}
 				</div>
 				<div class="progress">
-					<div id="progressbar" class="progress-bar" role="progressbar" style="width: 0%">
-						0%
-					</div>
+					<div id="progressbar" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
 				</div>
 			</div>
 		</div>
@@ -48,13 +46,12 @@
 		/>
 
 		<div v-cloak id="statusBar">
-			{{statusText}}
+			{{ statusText }}
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-
 // TODO:
 // - Make all dialogs that affect page rendering moveable, so they can be moved to unobscure stuff
 // - add 'culled' versions of popular parts, with their inside bits removed
@@ -85,7 +82,7 @@
 // - Merging the first step of a submodel with the second step loses the submodel image
 
 import Split from 'split.js';
-import {computed, onMounted,ref} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import GettingStartedPanel from './components/getting_started.vue';
 import NavBar from './components/nav_bar.vue';
@@ -95,7 +92,7 @@ import PopupMenu from './components/popup_menu.vue';
 import TemplatePanel from './components/template_panel.vue';
 
 import packageInfo from '../package.json';
-import {showLocaleChooserDialog, showWhatsNewDialog} from './dialog';
+import { showLocaleChooserDialog, showWhatsNewDialog } from './dialog';
 import EventBus from './event_bus';
 import * as FileOps from './file_ops';
 import LDParse from './ld_parse';
@@ -103,27 +100,29 @@ import Menu from './menu';
 import * as SelectionOps from './selection_ops';
 import Storage from './storage';
 import store from './store';
-import {getLocale, LanguageList,t} from './translations';
+import { getLocale, LanguageList, t } from './translations';
 import * as UiOps from './ui_ops';
 import * as ReactiveState from './ui_reactive_state';
 import uiState from './ui_state';
 import undoStack from './undo_stack';
 import _ from './util';
 
-const disableLocalStorage = ref(false);  // allow tests to turn local storage off
+const disableLocalStorage = ref(false); // allow tests to turn local storage off
 
-const {currentPageId, selectedItemLookup, contextMenu, filename, statusText, busyText} = ReactiveState;
+const { currentPageId, selectedItemLookup, contextMenu, filename, statusText, busyText } =
+	ReactiveState;
 
-const isDirty = computed(() =>
-	ReactiveState.dirtyState.undoIndex !== ReactiveState.dirtyState.lastSaveIndex,
+const isDirty = computed(
+	() => ReactiveState.dirtyState.undoIndex !== ReactiveState.dirtyState.lastSaveIndex,
 );
 const navBarContent = computed<any[]>(() => Menu() as unknown as any[]);
 const isTemplatePageCurrent = computed(() =>
 	currentPageId.value == null ? false : store.get.isTemplatePage(currentPageId.value),
 );
-const filenameInfo = computed(() =>
-	({name: filename.value ?? '', isDirty: isDirty.value}),
-);
+const filenameInfo = computed(() => ({
+	name: filename.value ?? '',
+	isDirty: isDirty.value,
+}));
 
 const closeMenus = UiOps.closeMenus;
 const haveModel = UiOps.haveModel;
@@ -134,20 +133,21 @@ function globalKeyPress(e: KeyboardEvent, metaKeyDown: boolean) {
 	UiOps.closeMenus();
 
 	// Some components handle their own key presses via event bus
-	EventBus.emit('key-press', {key: e.key});
+	EventBus.emit('key-press', { key: e.key });
 
 	const selItem = selectedItemLookup.value;
 	if (e.key === 'Delete' || e.key === 'Backspace') {
-		if (selItem
-			&& !store.get.isTemplatePage(store.get.pageForItem(selItem))
-			&& (store.mutations as any)[selItem.type]
-			&& (store.mutations as any)[selItem.type].delete
+		if (
+			selItem &&
+			!store.get.isTemplatePage(store.get.pageForItem(selItem)) &&
+			(store.mutations as any)[selItem.type] &&
+			(store.mutations as any)[selItem.type].delete
 		) {
-			const opts: Record<string, any> = {doLayout: true};
+			const opts: Record<string, any> = { doLayout: true };
 			opts[selItem.type] = selItem;
-			const undoText = t('action.edit.item.delete.undo_@mf',
-				{item: t('glossary.' + selItem.type.toLowerCase())},
-			);
+			const undoText = t('action.edit.item.delete.undo_@mf', {
+				item: t('glossary.' + selItem.type.toLowerCase()),
+			});
 			try {
 				SelectionOps.clearSelected();
 				undoStack.commit(`${selItem.type}.delete`, opts, undoText);
@@ -158,7 +158,9 @@ function globalKeyPress(e: KeyboardEvent, metaKeyDown: boolean) {
 		}
 	} else if (e.key.startsWith('Arrow')) {
 		if (selItem && store.get.isMoveable(selItem)) {
-			let dx = 0, dy = 0, dv = 1;
+			let dx = 0;
+			let dy = 0;
+			let dv = 1;
 			dv *= e.shiftKey ? 5 : 1;
 			dv *= e.ctrlKey ? 20 : 1;
 			if (e.key === 'ArrowUp') {
@@ -174,7 +176,7 @@ function globalKeyPress(e: KeyboardEvent, metaKeyDown: boolean) {
 			if (item?.type === 'point') {
 				const arrow = store.get.lookupToItem((item as any).parent);
 				if (arrow != null && (arrow as any).points.indexOf(item.id) === 0) {
-					const newPos = {x: item.x + dx, y: item.y + dy};
+					const newPos = { x: item.x + dx, y: item.y + dy };
 					const dt = _.geom.distance;
 					if (arrow.type === 'calloutArrow') {
 						// Special case: first point in callout arrow can't move away from callout
@@ -184,13 +186,13 @@ function globalKeyPress(e: KeyboardEvent, metaKeyDown: boolean) {
 							if (dt(newPos.y, 0) < 2 || dt(newPos.y, callout.height) < 2) {
 								dx = Math.min(callout.width - item.x, Math.max(dx, -item.x));
 							} else {
-								dx = 0;  // Prevent movement from pulling arrow base off callout
+								dx = 0; // Prevent movement from pulling arrow base off callout
 							}
 						} else {
 							if (dt(newPos.x, 0) < 2 || dt(newPos.x, callout.width) < 2) {
 								dy = Math.min(callout.height - item.y, Math.max(dy, -item.y));
 							} else {
-								dx = 0;  // Prevent movement from pulling arrow base off callout
+								dx = 0; // Prevent movement from pulling arrow base off callout
 							}
 						}
 					}
@@ -198,16 +200,16 @@ function globalKeyPress(e: KeyboardEvent, metaKeyDown: boolean) {
 			}
 
 			if (dx !== 0 || dy !== 0) {
-				const undoText = t('action.edit.item.move.undo_@mf',
-					{item: t('glossary.' + selItem.type.toLowerCase())},
-				);
-				undoStack.commit('item.reposition', {item, dx, dy}, undoText);
+				const undoText = t('action.edit.item.move.undo_@mf', {
+					item: t('glossary.' + selItem.type.toLowerCase()),
+				});
+				undoStack.commit('item.reposition', { item, dx, dy }, undoText);
 			}
 		}
 	} else {
 		// Check if key is a menu shortcut
 		const menu = navBarContent.value;
-		const key = ((e.ctrlKey || metaKeyDown) ? 'ctrl+' : '') + e.key;
+		const key = (e.ctrlKey || metaKeyDown ? 'ctrl+' : '') + e.key;
 		for (let i = 0; i < menu.length; i++) {
 			for (let j = 0; j < menu[i].children.length; j++) {
 				const entry = menu[i].children[j];
@@ -219,32 +221,33 @@ function globalKeyPress(e: KeyboardEvent, metaKeyDown: boolean) {
 	}
 }
 
-onMounted(async() => {
-
+onMounted(async () => {
 	// TODO: grey out progress bar when 'Model Import' dialog is visible; otherwise it's confusing
 	//		 if progress bar isn't at 100 but its done loading and waiting for user to click
 	// TODO: progress bar should never stop at less than 100; clear it when model is imported
 	// TODO: show template page always, even when no model loaded.
 	// 		This lets you import a model with the desired template already in place.
-	document.body.addEventListener('keyup', e => {
+	document.body.addEventListener('keyup', (e) => {
 		globalKeyPress(e, false);
 	});
-	document.body.addEventListener('keydown', e => {
+	document.body.addEventListener('keydown', (e) => {
 		if (e.metaKey && e.key !== 'Meta') {
 			globalKeyPress(e, true);
 		}
 	});
-	document.body.addEventListener('keydown', e => {
-		if ((e.key === 'PageDown' || e.key === 'PageUp'
-			|| e.key.startsWith('Arrow') || (e.key === 's' && e.ctrlKey))
-			&& (e.target as HTMLElement)?.nodeName !== 'INPUT'
+	document.body.addEventListener('keydown', (e) => {
+		if (
+			(e.key === 'PageDown' ||
+				e.key === 'PageUp' ||
+				e.key.startsWith('Arrow') ||
+				(e.key === 's' && e.ctrlKey)) &&
+			(e.target as HTMLElement)?.nodeName !== 'INPUT'
 		) {
 			e.preventDefault();
 		}
 	});
 
-	window.addEventListener('beforeunload', e => {
-
+	window.addEventListener('beforeunload', (e) => {
 		if (!disableLocalStorage.value) {
 			const splitStyle = document.getElementById('leftPane')!.style;
 			uiState.set('splitter', parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)![1]));
@@ -263,11 +266,11 @@ onMounted(async() => {
 		return null;
 	});
 
-	EventBus.on('set-selected', item => {
+	EventBus.on('set-selected', (item) => {
 		SelectionOps.setSelected(item);
 	});
 
-	EventBus.on('redraw-ui', props => {
+	EventBus.on('redraw-ui', (props) => {
 		UiOps.redrawUI(props.clearSelection);
 	});
 
@@ -302,9 +305,14 @@ onMounted(async() => {
 	}
 });
 
-(window as any).__lic = {  // store a global reference to these for easier testing
+(window as any).__lic = {
+	// store a global reference to these for easier testing
 	// TODO: only generate this in the debug build and in Cypress
-	_, store, undoStack, LDParse, Storage, uiState,
+	_,
+	store,
+	undoStack,
+	LDParse,
+	Storage,
+	uiState,
 };
-
 </script>

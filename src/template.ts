@@ -1,12 +1,14 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
-import {type Template} from './item_types';
+import { type Template } from './item_types';
 
 const part1 = {
-	colorCode: 1, filename: '3001.dat',
+	colorCode: 1,
+	filename: '3001.dat',
 	matrix: [0, 0, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0],
 };
 const part2 = {
-	colorCode: 4, filename: '3003.dat',
+	colorCode: 4,
+	filename: '3003.dat',
 	matrix: [0, -24, 20, 1, 0, 0, 0, 1, 0, 0, 0, 1],
 };
 const model = {
@@ -20,12 +22,12 @@ const template: Template = {
 	page: {
 		width: 900,
 		height: 700,
-		sizePreset: null,  // {format, orientation}, formats defined in page_template.vue: pageSizeLookups
+		sizePreset: null, // {format, orientation}, formats defined in page_template.vue: pageSizeLookups
 		innerMargin: 0.025,
 		numberLabel: {
 			font: 'bold 18pt Helvetica',
 			color: '#000000',
-			position: 'right',  // One of "right', "left", "even-right", "even-left"
+			position: 'right', // One of "right', "left", "even-right", "even-left"
 		},
 		fill: {
 			color: '#ffffff',
@@ -66,7 +68,7 @@ const template: Template = {
 	},
 	submodelImage: {
 		innerMargin: 0.017,
-		maxHeight: 0.3,  // as a percentage of page height
+		maxHeight: 0.3, // as a percentage of page height
 		csi: {
 			scale: 1,
 			rotation: [],
@@ -155,8 +157,8 @@ const template: Template = {
 		zoom: 0,
 		edgeWidth: 4,
 		rotation: [
-			{axis: 'x', angle: 36},
-			{axis: 'y', angle: 50},
+			{ axis: 'x', angle: 36 },
+			{ axis: 'y', angle: 50 },
 		],
 	},
 	useBlackStudFaces: true,

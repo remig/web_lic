@@ -1,13 +1,16 @@
 /* Web Lic - Copyright (C) 2026 Remi Gagne */
 
 <script setup lang="ts">
-import {onMounted,ref} from 'vue';
+import { onMounted, ref } from 'vue';
 
-const props = withDefaults(defineProps<{
-	title?: string;
-	modal?: boolean;
-	width?: string;
-}>(), {modal: false});
+const props = withDefaults(
+	defineProps<{
+		title?: string;
+		modal?: boolean;
+		width?: string;
+	}>(),
+	{ modal: false },
+);
 
 const el = ref<HTMLDialogElement | null>(null);
 
@@ -21,9 +24,9 @@ onMounted(() => {
 </script>
 
 <template>
-	<dialog ref="el" :style="props.width ? {width: props.width} : {}">
+	<dialog ref="el" :style="props.width ? { width: props.width } : {}">
 		<header v-if="props.title" class="header">
-			{{props.title}}
+			{{ props.title }}
 		</header>
 		<div class="body">
 			<slot />
@@ -35,7 +38,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
 dialog {
 	position: fixed;
 	top: 16%;
@@ -61,12 +63,11 @@ dialog {
 }
 
 .footer {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    gap: 8px;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	gap: 8px;
 	padding: 12px 20px;
 	border-top: 1px solid #ebeef5;
 }
-
 </style>

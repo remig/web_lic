@@ -7,12 +7,12 @@ export default function openFileHandler(
 ) {
 	const input = document.getElementById('openFileChooser') as HTMLInputElement;
 	if (input) {
-		input.onchange = function(e: Event) {
+		input.onchange = function (e: Event) {
 			const target = e.target as HTMLInputElement;
 			const file = target?.files?.[0];
 			if (target && file) {
 				const reader = new FileReader();
-				reader.onload = (filename => {
+				reader.onload = ((filename) => {
 					return (evt: ProgressEvent) => {
 						callback((evt.target as FileReader).result, filename);
 					};

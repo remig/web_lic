@@ -19,8 +19,8 @@
 						value="horizontal"
 						:checked="sizePreset.orientation === 'horizontal'"
 						@change="updateOrientation('horizontal')"
-					>
-					{{t('template.page.orientation.landscape')}}
+					/>
+					{{ t('template.page.orientation.landscape') }}
 				</label>
 				<label class="lic-radio">
 					<input
@@ -30,12 +30,12 @@
 						value="vertical"
 						:checked="sizePreset.orientation === 'vertical'"
 						@change="updateOrientation('vertical')"
-					>
-					{{t('template.page.orientation.portrait')}}
+					/>
+					{{ t('template.page.orientation.portrait') }}
 				</label>
 			</div>
 			<label class="label-input-row">
-				{{t('template.page.width')}}
+				{{ t('template.page.width') }}
 				<input
 					v-model.number="width"
 					:disabled="!haveCustomFormat"
@@ -43,10 +43,10 @@
 					min="0"
 					class="form-control"
 					@input="updateValues"
-				>
+				/>
 			</label>
 			<label class="label-input-row">
-				{{t('template.page.height')}}
+				{{ t('template.page.height') }}
 				<input
 					v-model.number="height"
 					:disabled="!haveCustomFormat"
@@ -54,7 +54,7 @@
 					min="0"
 					class="form-control"
 					@input="updateValues"
-				>
+				/>
 			</label>
 			<div class="panel-row">
 				<label class="lic-checkbox">
@@ -63,8 +63,12 @@
 						type="checkbox"
 						:disabled="!haveCustomFormat"
 						@change="changeAspectRatio"
-					>
-					{{t("template.page.aspect_ratio_@mf", {aspect_ratio: aspectRatio.toFixed(2)})}}
+					/>
+					{{
+						t('template.page.aspect_ratio_@mf', {
+							aspect_ratio: aspectRatio.toFixed(2),
+						})
+					}}
 				</label>
 			</div>
 			<div class="panel-row">
@@ -73,25 +77,18 @@
 				<div v-html="t('template.page.inch_size_@mf', printedSize('in'))" />
 			</div>
 		</panel-base>
-		<fill-panel
-			template-entry="page"
-			@new-values="newValues"
-		/>
-		<border-panel
-			template-entry="page"
-			@new-values="newValues"
-		/>
+		<fill-panel template-entry="page" @new-values="newValues" />
+		<border-panel template-entry="page" @new-values="newValues" />
 	</div>
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {computed,ref} from 'vue';
+import { t } from '@/translations';
+import { computed, ref } from 'vue';
 
 import EventBus from '../../event_bus';
 import store from '../../store';
-import _, {type UnitTypes} from '../../util';
+import _, { type UnitTypes } from '../../util';
 import LicSelect from '../base/LicSelect.vue';
 import BorderPanel from './border.vue';
 import FillPanel from './fill.vue';
@@ -108,8 +105,11 @@ const pageSizeLookups: Record<string, [number, number]> = {
 };
 
 const pageFormatOptions = [
-	{value: 'custom', label: t('template.page.formats.custom')},
-	...Object.keys(pageSizeLookups).map(key => ({value: key, label: t(`template.page.formats.${key}`)})),
+	{ value: 'custom', label: t('template.page.formats.custom') },
+	...Object.keys(pageSizeLookups).map((key) => ({
+		value: key,
+		label: t(`template.page.formats.${key}`),
+	})),
 ];
 
 const template = store.state.template.page;
@@ -186,18 +186,16 @@ function updateValues() {
 		haveChange = true;
 	}
 	if (!_.isEqual(page.sizePreset, sizePreset.value)) {
-		page.sizePreset = {...sizePreset.value};
+		page.sizePreset = { ...sizePreset.value };
 		haveChange = true;
 	}
 	if (haveChange) {
 		newValues();
 	}
 }
-
 </script>
 
 <style>
-
 .pageSizeInfo {
 	margin-top: 15px;
 }
@@ -206,5 +204,4 @@ function updateValues() {
 	line-height: unset;
 	color: #606266;
 }
-
 </style>

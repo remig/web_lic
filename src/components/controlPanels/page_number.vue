@@ -7,17 +7,13 @@
 				<LicSelect v-model="position" :options="positionOptions" @change="updatePosition" />
 			</div>
 		</panel-base>
-		<font-panel
-			template-entry="page.numberLabel"
-			@new-values="newValues"
-		/>
+		<font-panel template-entry="page.numberLabel" @new-values="newValues" />
 	</div>
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {ref} from 'vue';
+import { t } from '@/translations';
+import { ref } from 'vue';
 
 import store from '../../store';
 import LicSelect from '../base/LicSelect.vue';
@@ -32,7 +28,7 @@ import PanelBase from './panel_base.vue';
 const emit = defineEmits(['new-values']);
 
 const position = ref(store.state.template.page.numberLabel.position);
-const positionOptions = ['right', 'left', 'even-left', 'even-right'].map(p => ({
+const positionOptions = ['right', 'left', 'even-left', 'even-right'].map((p) => ({
 	value: p,
 	label: t('template.page_number.positions.' + p),
 }));
@@ -45,5 +41,4 @@ function updatePosition(newPosition: 'right' | 'left' | 'even-right' | 'even-lef
 	store.state.template.page.numberLabel.position = position.value = newPosition;
 	newValues();
 }
-
 </script>

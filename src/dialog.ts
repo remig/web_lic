@@ -1,5 +1,5 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
-import {createApp} from 'vue';
+import { createApp } from 'vue';
 
 import LocaleChooser from './components/translate.vue';
 
@@ -22,17 +22,17 @@ import StringChooser from './dialogs/string_chooser.vue';
 import StyleVue from './dialogs/style.vue';
 import TransformPart from './dialogs/transform_part.vue';
 import WhatsNew from './dialogs/whats_new.vue';
-import {type Anchors, type GridLayout,type Rotation} from './item_types';
-import {type UnitTypes} from './util';
+import { type Anchors, type GridLayout, type Rotation } from './item_types';
+import { type UnitTypes } from './util';
 
-type ExtraOn = {[event: string]: ((...args: any[]) => void) | undefined};
+type ExtraOn = { [event: string]: ((...args: any[]) => void) | undefined };
 
 function mountDialog<Props extends object, Result>(
 	Component: any,
 	props: Props,
 	extraOn?: ExtraOn,
 ): Promise<Result | null> {
-	return new Promise(resolve => {
+	return new Promise((resolve) => {
 		const el = document.createElement('div');
 		document.body.appendChild(el);
 		const eventProps: Record<string, any> = {};
@@ -70,7 +70,12 @@ export const showAboutLicDialog = makeSimpleDialog(AboutLic);
 export const showBrickColorDialog = makeSimpleDialog(BrickColors);
 export const showGridDialog = makeSimpleDialog(GridDialog);
 
-type StringChooserProps = {title: string; label: string; initialValue?: string | null; width?: string};
+type StringChooserProps = {
+	title: string;
+	label: string;
+	initialValue?: string | null;
+	width?: string;
+};
 
 export function showStringChooserDialog(props: StringChooserProps): Promise<string | null> {
 	return mountDialog<StringChooserProps, string>(StringChooser, props);
@@ -89,7 +94,7 @@ interface NumberChooserProps {
 
 export function showNumberChooserDialog(
 	props: NumberChooserProps,
-	callbacks?: {onUpdate?: (val: number) => void; onCancel?: () => void},
+	callbacks?: { onUpdate?: (val: number) => void; onCancel?: () => void },
 ): Promise<number | null> {
 	return mountDialog<NumberChooserProps, number>(NumberChooser, props, {
 		update: callbacks?.onUpdate,
@@ -117,13 +122,20 @@ interface DisplacePartValues {
 }
 
 export function showDisplacePartDialog(
-	props: {initialValues: DisplacePartValues},
-	callbacks?: {onUpdate?: (vals: DisplacePartValues) => void; onCancel?: () => void},
+	props: { initialValues: DisplacePartValues },
+	callbacks?: {
+		onUpdate?: (vals: DisplacePartValues) => void;
+		onCancel?: () => void;
+	},
 ): Promise<DisplacePartValues | null> {
-	return mountDialog<{initialValues: DisplacePartValues}, DisplacePartValues>(DisplacePart, props, {
-		update: callbacks?.onUpdate,
-		cancel: callbacks?.onCancel,
-	});
+	return mountDialog<{ initialValues: DisplacePartValues }, DisplacePartValues>(
+		DisplacePart,
+		props,
+		{
+			update: callbacks?.onUpdate,
+			cancel: callbacks?.onCancel,
+		},
+	);
 }
 
 interface RotatePartImageProps {
@@ -133,11 +145,18 @@ interface RotatePartImageProps {
 	showRotateIconCheckbox?: boolean;
 }
 
-interface RotatePartImageResult {title: string; addRotateIcon: boolean; rotation: Rotation[];}
+interface RotatePartImageResult {
+	title: string;
+	addRotateIcon: boolean;
+	rotation: Rotation[];
+}
 
 export function showRotatePartImageDialog(
 	props: RotatePartImageProps,
-	callbacks?: {onUpdate?: (vals: RotatePartImageResult) => void; onCancel?: () => void},
+	callbacks?: {
+		onUpdate?: (vals: RotatePartImageResult) => void;
+		onCancel?: () => void;
+	},
 ): Promise<RotatePartImageResult | null> {
 	return mountDialog<RotatePartImageProps, RotatePartImageResult>(RotatePartImage, props, {
 		update: callbacks?.onUpdate,
@@ -146,13 +165,16 @@ export function showRotatePartImageDialog(
 }
 
 interface TransformValues {
-	rotation: {x: number; y: number; z: number};
-	position: {x: number; y: number; z: number};
+	rotation: { x: number; y: number; z: number };
+	position: { x: number; y: number; z: number };
 }
 
 export function showTransformPartDialog(
 	props: TransformValues,
-	callbacks?: {onUpdate?: (vals: TransformValues) => void; onCancel?: () => void},
+	callbacks?: {
+		onUpdate?: (vals: TransformValues) => void;
+		onCancel?: () => void;
+	},
 ): Promise<TransformValues | null> {
 	return mountDialog<TransformValues, TransformValues>(TransformPart, props, {
 		update: callbacks?.onUpdate,
@@ -163,51 +185,58 @@ export function showTransformPartDialog(
 interface PdfExportResult {
 	dpi: number;
 	units: UnitTypes;
-	pageSize: {width: number; height: number};
+	pageSize: { width: number; height: number };
 }
 
-type ExportDialogProps = {pageSizeInPixels: {width: number; height: number}};
+type ExportDialogProps = {
+	pageSizeInPixels: { width: number; height: number };
+};
 
 export function showPdfExportDialog(props: ExportDialogProps): Promise<PdfExportResult | null> {
 	return mountDialog<ExportDialogProps, PdfExportResult>(ExportPdf, props);
 }
 
-interface PngExportResult {scale: number; dpi: number;}
+interface PngExportResult {
+	scale: number;
+	dpi: number;
+}
 
 export function showPngExportDialog(props: ExportDialogProps): Promise<PngExportResult | null> {
 	return mountDialog<ExportDialogProps, PngExportResult>(ExportPng, props);
 }
 
-interface StyleResult {text: string; font: string; color: string;}
-type StyleProps = {title: string; text: string; color: string; font: string};
+interface StyleResult {
+	text: string;
+	font: string;
+	color: string;
+}
+type StyleProps = { title: string; text: string; color: string; font: string };
 
 export function showStyleDialog(props: StyleProps): Promise<StyleResult | null> {
 	return mountDialog<StyleProps, StyleResult>(StyleVue, props);
 }
 
 export function showPageLayoutDialog(
-	props: {initialLayout: GridLayout},
-	callbacks?: {onUpdate?: (vals: GridLayout) => void; onCancel?: () => void},
+	props: { initialLayout: GridLayout },
+	callbacks?: { onUpdate?: (vals: GridLayout) => void; onCancel?: () => void },
 ): Promise<GridLayout | null> {
-	return mountDialog<{initialLayout: GridLayout}, GridLayout>(PageLayout, props, {
+	return mountDialog<{ initialLayout: GridLayout }, GridLayout>(PageLayout, props, {
 		update: callbacks?.onUpdate,
 		cancel: callbacks?.onCancel,
 	});
 }
 
-
 interface ImportModelResult {
 	partsPerStep?: number;
 	stepsPerPage: number;
 	useMaxSteps: boolean;
-	include: {pli: boolean; partListPage: boolean; titlePage: boolean};
+	include: { pli: boolean; partListPage: boolean; titlePage: boolean };
 }
-type ImportModelProps = {includePartsPerStep: boolean; partsPerStep?: number};
+type ImportModelProps = { includePartsPerStep: boolean; partsPerStep?: number };
 
 export function showImportModelDialog(props: ImportModelProps): Promise<ImportModelResult | null> {
 	return mountDialog<ImportModelProps, ImportModelResult>(ImportModel, props);
 }
-
 
 interface ResizeImageInfo {
 	filename: string;
@@ -225,11 +254,14 @@ interface ResizeImageInfo {
 	pageWidth: number;
 	pageHeight: number;
 }
-type ResizeImageProps = {initialImageInfo: ResizeImageInfo};
+type ResizeImageProps = { initialImageInfo: ResizeImageInfo };
 
 export function showResizeImageDialog(
 	props: ResizeImageProps,
-	callbacks?: {onUpdate?: (v: ResizeImageInfo) => void; onCancel?: () => void},
+	callbacks?: {
+		onUpdate?: (v: ResizeImageInfo) => void;
+		onCancel?: () => void;
+	},
 ): Promise<ResizeImageInfo | null> {
 	return mountDialog<ResizeImageProps, ResizeImageInfo>(ResizeImage, props, {
 		update: callbacks?.onUpdate,

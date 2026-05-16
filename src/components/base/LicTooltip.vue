@@ -10,14 +10,15 @@
 </template>
 
 <script setup lang="ts">
-
-import {ref} from 'vue';
+import { ref } from 'vue';
 
 const visible = ref(false);
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 function onEnter() {
-	timer = setTimeout(() => {visible.value = true;}, 500);
+	timer = setTimeout(() => {
+		visible.value = true;
+	}, 500);
 }
 
 function onLeave() {
@@ -27,11 +28,9 @@ function onLeave() {
 	}
 	visible.value = false;
 }
-
 </script>
 
 <style>
-
 .lic-tooltip {
 	position: relative;
 	display: inline-block;
@@ -53,7 +52,8 @@ function onLeave() {
 	width: max-content;
 	white-space: nowrap;
 
-	&::before, &::after {
+	&::before,
+	&::after {
 		content: '';
 		position: absolute;
 		top: 50%;
@@ -72,5 +72,4 @@ function onLeave() {
 		right: calc(100% - 1px);
 	}
 }
-
 </style>

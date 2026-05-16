@@ -7,18 +7,9 @@
 			<LicButton icon="fas fa-compress" @click="collapse" />
 			<LicDropdown :label="t('nav_tree.show')">
 				<template v-for="(el, idx) in checkedElements">
-					<div
-						v-if="el.name === 'divider'"
-						:key="`divider_${idx}`"
-						class="lic-dropdown-divider"
-					/>
-					<div
-						v-else
-						:key="`item_${idx}`"
-						class="lic-dropdown-item"
-						@click="checkItem(el)"
-					>
-						{{t(el.name)}}
+					<div v-if="el.name === 'divider'" :key="`divider_${idx}`" class="lic-dropdown-divider" />
+					<div v-else :key="`item_${idx}`" class="lic-dropdown-item" @click="checkItem(el)">
+						{{ t(el.name) }}
 						<i v-if="el.checked" class="fas fa-check" />
 					</div>
 				</template>
@@ -29,10 +20,9 @@
 </template>
 
 <script setup lang="ts">
-
 import EventBus from '@/event_bus';
-import {t} from '@/translations';
-import {getCurrentInstance, onMounted, onUnmounted,ref} from 'vue';
+import { t } from '@/translations';
+import { getCurrentInstance, onMounted, onUnmounted, ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDropdown from '@/components/base/LicDropdown.vue';
@@ -44,29 +34,61 @@ import uiState from '../ui_state';
 
 const instance = getCurrentInstance();
 
-const treeElementList: {name: string; value?: string; checked?: boolean; child?: boolean}[] = [
-	{name: 'nav_tree.all', value: 'all', checked: true},
-	{name: 'nav_tree.page_step_part', value: 'page_step_part', checked: false},
-	{name: 'divider'},
-	{name: 'nav_tree.steps', value: 'step', checked: true, child: true},
-	{name: 'nav_tree.submodel_images', value: 'submodelImage', checked: true, child: true},
-	{name: 'nav_tree.csis', value: 'csi', checked: true, child: true},
-	{name: 'nav_tree.parts', value: 'part', checked: true, child: true},
-	{name: 'nav_tree.plis', value: 'pli', checked: true, child: true},
-	{name: 'nav_tree.pli_items', value: 'pliItem', checked: true, child: true},
-	{name: 'nav_tree.callouts', value: 'callout', checked: true, child: true},
-	{name: 'nav_tree.callout_arrows', value: 'calloutArrow', checked: true, child: true},
-	{name: 'nav_tree.annotations', value: 'annotation', checked: true, child: true},
-	{name: 'nav_tree.number_labels', value: 'numberLabel', checked: true, child: true},
-	{name: 'nav_tree.quantity_labels', value: 'quantityLabel', checked: true, child: true},
-	{name: 'nav_tree.dividers', value: 'divider', checked: true, child: true},
-	{name: 'divider'},
-	{name: 'nav_tree.group_parts', value: 'group_parts', checked: false},
+const treeElementList: {
+	name: string;
+	value?: string;
+	checked?: boolean;
+	child?: boolean;
+}[] = [
+	{ name: 'nav_tree.all', value: 'all', checked: true },
+	{ name: 'nav_tree.page_step_part', value: 'page_step_part', checked: false },
+	{ name: 'divider' },
+	{ name: 'nav_tree.steps', value: 'step', checked: true, child: true },
+	{
+		name: 'nav_tree.submodel_images',
+		value: 'submodelImage',
+		checked: true,
+		child: true,
+	},
+	{ name: 'nav_tree.csis', value: 'csi', checked: true, child: true },
+	{ name: 'nav_tree.parts', value: 'part', checked: true, child: true },
+	{ name: 'nav_tree.plis', value: 'pli', checked: true, child: true },
+	{ name: 'nav_tree.pli_items', value: 'pliItem', checked: true, child: true },
+	{ name: 'nav_tree.callouts', value: 'callout', checked: true, child: true },
+	{
+		name: 'nav_tree.callout_arrows',
+		value: 'calloutArrow',
+		checked: true,
+		child: true,
+	},
+	{
+		name: 'nav_tree.annotations',
+		value: 'annotation',
+		checked: true,
+		child: true,
+	},
+	{
+		name: 'nav_tree.number_labels',
+		value: 'numberLabel',
+		checked: true,
+		child: true,
+	},
+	{
+		name: 'nav_tree.quantity_labels',
+		value: 'quantityLabel',
+		checked: true,
+		child: true,
+	},
+	{ name: 'nav_tree.dividers', value: 'divider', checked: true, child: true },
+	{ name: 'divider' },
+	{ name: 'nav_tree.group_parts', value: 'group_parts', checked: false },
 ];
 
 const savedCheckedItems = uiState.get('navTree.checkedItems');
 if (savedCheckedItems) {
-	treeElementList.forEach(el => {el.checked = savedCheckedItems[el.value as string];});
+	treeElementList.forEach((el) => {
+		el.checked = savedCheckedItems[el.value as string];
+	});
 }
 
 const checkedElements = ref(treeElementList);
@@ -78,17 +100,17 @@ function forceUpdate() {
 
 function updateCheckState() {
 	const checkedItemList = checkedElements.value
-		.filter(el => !el.checked && el.child)
-		.map(el => el.value)
+		.filter((el) => !el.checked && el.child)
+		.map((el) => el.value)
 		.filter((v): v is string => v != null);
 	NavTree.setInvisibleNodeTypes(checkedItemList);
-	checkedElements.value.forEach(el => {
+	checkedElements.value.forEach((el) => {
 		uiState.set('navTree.checkedItems.' + el.value, el.checked);
 	});
 }
 
 function checkAll() {
-	checkedElements.value.forEach(el => {
+	checkedElements.value.forEach((el) => {
 		if ('child' in el || el.value === 'all') {
 			el.checked = true;
 		} else if (el.value === 'page_step_part') {
@@ -99,9 +121,12 @@ function checkAll() {
 }
 
 function checkPageStepParts() {
-	checkedElements.value.forEach(el => {
-		if (el.value === 'step' || el.value === 'csi'
-			|| el.value === 'part' || el.value === 'page_step_part'
+	checkedElements.value.forEach((el) => {
+		if (
+			el.value === 'step' ||
+			el.value === 'csi' ||
+			el.value === 'part' ||
+			el.value === 'page_step_part'
 		) {
 			el.checked = true;
 		} else if ('child' in el || el.value === 'all') {
@@ -111,7 +136,7 @@ function checkPageStepParts() {
 	updateCheckState();
 }
 
-function checkItem(item: {value?: string; checked?: boolean} | null) {
+function checkItem(item: { value?: string; checked?: boolean } | null) {
 	if (!item) {
 		return;
 	}
@@ -128,7 +153,7 @@ function checkItem(item: {value?: string; checked?: boolean} | null) {
 		} else {
 			checkAll();
 		}
-	// } else if (item.name === 'Group Parts By Type') {
+		// } else if (item.name === 'Group Parts By Type') {
 	} else {
 		updateCheckState();
 	}
@@ -152,12 +177,10 @@ onUnmounted(() => {
 	EventBus.off('force-update', forceUpdate);
 });
 
-defineExpose({forceUpdate});
-
+defineExpose({ forceUpdate });
 </script>
 
 <style>
-
 #tree {
 	height: 100%;
 	display: flex;
@@ -170,7 +193,7 @@ defineExpose({forceUpdate});
 	justify-content: flex-end;
 	padding: 10px;
 	min-width: 110px;
-	border-bottom: 1px solid #AAA;
+	border-bottom: 1px solid #aaa;
 }
 
 .treeButtons button {
@@ -197,7 +220,7 @@ defineExpose({forceUpdate});
 
 .treeChildren .treeParent {
 	position: relative;
-	left: -13px;  /* treeIcon 10px width + 3px right margin */
+	left: -13px; /* treeIcon 10px width + 3px right margin */
 	white-space: nowrap;
 }
 
@@ -225,5 +248,4 @@ defineExpose({forceUpdate});
 .treeSelected {
 	border: 2px dashed #2eb9ce;
 }
-
 </style>

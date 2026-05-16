@@ -8,7 +8,7 @@
 					<i class="fas fa-times fa-lg" />
 				</a>
 			</div>
-			<h4>{{t('dialog.welcome.title')}}</h4>
+			<h4>{{ t('dialog.welcome.title') }}</h4>
 		</div>
 		<ul class="list-group" data-testid="get-started-list">
 			<li class="list-group-item">
@@ -18,19 +18,19 @@
 					@click.prevent="FileOps.importCustomModel"
 				>
 					<i class="far fa-edit fa-2x fa-pull-left" />
-					{{t('dialog.welcome.import')}}
+					{{ t('dialog.welcome.import') }}
 				</a>
 			</li>
 			<li class="list-group-item">
 				<a class="lineLink" data-testid="get-started-open" @click.prevent="FileOps.openLicFile">
 					<i class="far fa-save fa-2x fa-pull-left" />
-					{{t('dialog.welcome.open')}}
+					{{ t('dialog.welcome.open') }}
 				</a>
 			</li>
 			<li class="list-group-item">
 				<span class="lineLink">
 					<i class="fas fa-file-upload fa-2x fa-pull-left" />
-					{{t('dialog.welcome.test')}}
+					{{ t('dialog.welcome.test') }}
 				</span>
 				<ul class="list-inline">
 					<li v-for="entry in demoModels" :key="entry.id">
@@ -38,7 +38,7 @@
 							:data-testid="`import-${entry.id}`"
 							@click.prevent="FileOps.importBuiltInModel(entry.fn)"
 						>
-							{{t('dialog.welcome.models.' + entry.id)}}
+							{{ t('dialog.welcome.models.' + entry.id) }}
 						</a>
 					</li>
 				</ul>
@@ -46,7 +46,7 @@
 			<li class="list-group-item">
 				<a class="lineLink" data-testid="get-started-learn" @click.prevent="showAboutLicDialog">
 					<i class="fas fa-question-circle fa-2x fa-pull-left" />
-					{{t('dialog.welcome.learn')}}
+					{{ t('dialog.welcome.learn') }}
 				</a>
 			</li>
 		</ul>
@@ -54,31 +54,28 @@
 </template>
 
 <script setup lang="ts">
+import { t } from '@/translations';
 
-import {t} from '@/translations';
-
-import {showAboutLicDialog} from '../dialog';
+import { showAboutLicDialog } from '../dialog';
 import * as FileOps from '../file_ops';
 
 const demoModels = [
-	{id: 'trivial', fn: 'trivial_model.ldr'},
-	{id: 'alligator', fn: '20015 - Alligator.mpd'},
-	{id: 'xwing', fn: '7140 - X-Wing Fighter.mpd'},
+	{ id: 'trivial', fn: 'trivial_model.ldr' },
+	{ id: 'alligator', fn: '20015 - Alligator.mpd' },
+	{ id: 'xwing', fn: '7140 - X-Wing Fighter.mpd' },
 ];
 
 function hideMessage() {
 	document.querySelector('.gettingStarted')?.classList.add('hidden');
 }
-
 </script>
 
 <style>
-
 .gettingStarted {
 	margin: 50px;
-	background-color: #FFF;
+	background-color: #fff;
 	width: 100%;
-	box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
+	box-shadow: 3px 3px 1px 0px rgba(0, 0, 0, 0.5);
 	font-size: 15px;
 }
 
@@ -100,11 +97,15 @@ function hideMessage() {
 }
 
 .close {
-	margin-top: .5em;
-	opacity: .8;
+	margin-top: 0.5em;
+	opacity: 0.8;
 }
 
-.fa.fa-pull-left, .fab.fa-pull-left, .fal.fa-pull-left, .far.fa-pull-left, .fas.fa-pull-left {
+.fa.fa-pull-left,
+.fab.fa-pull-left,
+.fal.fa-pull-left,
+.far.fa-pull-left,
+.fas.fa-pull-left {
 	margin-top: -0.05em;
 	margin-right: 0.6em;
 }
@@ -114,8 +115,7 @@ function hideMessage() {
 }
 
 .list-inline > li {
-    padding-right: 15px;
-    padding-left: 15px;
+	padding-right: 15px;
+	padding-left: 15px;
 }
-
 </style>

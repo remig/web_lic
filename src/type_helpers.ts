@@ -2,17 +2,39 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import {
-type Annotation, type BaseTemplate,
-type Book, type Box,
-type Callout,
-	type CalloutArrow, type CSI, type Divider, 	type Item, type ItemTypeNames, type LookupItem, type NumberLabel, type Page, type PartItem, type PLI, type PLIItem, type Point,
-	type PointItem, 	type PointListItem, type QuantityLabel, type QuantityLabelParent, type RotateIcon,
-type Size, type Step, type StepParent, type SubmodelImage, 	type SubmodelItem, 	type Template,
+	type Annotation,
+	type BaseTemplate,
+	type Book,
+	type Box,
+	type Callout,
+	type CalloutArrow,
+	type CSI,
+	type Divider,
+	type Item,
+	type ItemTypeNames,
+	type LookupItem,
+	type NumberLabel,
+	type Page,
+	type PartItem,
+	type PLI,
+	type PLIItem,
+	type Point,
+	type PointItem,
+	type PointListItem,
+	type QuantityLabel,
+	type QuantityLabelParent,
+	type RotateIcon,
+	type Size,
+	type Step,
+	type StepParent,
+	type SubmodelImage,
+	type SubmodelItem,
+	type Template,
 } from './item_types';
 import defaultTemplate from './template';
 
 export function hasProperty<T extends Item>(item: Item | null, prop: string): item is T {
-	return (item != null) && item.hasOwnProperty(prop);
+	return item != null && item.hasOwnProperty(prop);
 }
 
 type Lookup = Item | LookupItem | null;
@@ -36,27 +58,27 @@ export function isItemSpecificType(item: Lookup, itemType: 'submodel'): item is 
 export function isItemSpecificType(item: Lookup, itemType: 'submodelImage'): item is SubmodelImage;
 export function isItemSpecificType(item: Lookup, itemType: ItemTypeNames): item is LookupItem;
 export function isItemSpecificType(item: Lookup, itemType: ItemTypeNames): item is LookupItem {
-	return (item != null) && item.type === itemType;
+	return item != null && item.type === itemType;
 }
 
 export function isSize(s: any): s is Size {
-	return (s && s.width != null && s.height != null);
+	return s && s.width != null && s.height != null;
 }
 
 export function isPoint(p: any): p is Point {
-	return (p && p.x != null && p.y != null);
+	return p && p.x != null && p.y != null;
 }
 
 export function isBox(b: any): b is Box {
-	return (b && b.x != null && b.y != null && b.width != null && b.height != null);
+	return b && b.x != null && b.y != null && b.width != null && b.height != null;
 }
 
 export function isPointItem(p: any): p is PointItem {
-	return (p && p.relativeTo != null);
+	return p && p.relativeTo != null;
 }
 
 export function isPointListItem(p: any): p is PointListItem {
-	return (p && Array.isArray(p.points));
+	return p && Array.isArray(p.points);
 }
 
 export function isStepParent(t: any): t is StepParent {

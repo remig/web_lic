@@ -1,14 +1,10 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="t('dialog.resize_image.title')"
-		width="500px"
-		class="resizeImageDialog"
-	>
-		<div>{{bodyText}}</div>
+	<LicDialog :title="t('dialog.resize_image.title')" width="500px" class="resizeImageDialog">
+		<div>{{ bodyText }}</div>
 		<div v-if="imageInfo.dpi > 96">
-			{{t('dialog.resize_image.high_dpi_@mf', {dpi: imageInfo.dpi})}}
+			{{ t('dialog.resize_image.high_dpi_@mf', { dpi: imageInfo.dpi }) }}
 		</div>
 		<div>
 			<div class="flex-row">
@@ -17,43 +13,45 @@
 						type="radio"
 						name="preserveSize"
 						:checked="!imageInfo.preserveSize"
-						@change="imageInfo.preserveSize = false; updateValues()"
-					>
-					{{resizeText}}
+						@change="
+							imageInfo.preserveSize = false;
+							updateValues();
+						"
+					/>
+					{{ resizeText }}
 				</label>
 				<label class="lic-radio">
 					<input
 						type="radio"
 						name="preserveSize"
 						:checked="imageInfo.preserveSize"
-						@change="imageInfo.preserveSize = true; updateValues()"
-					>
-					{{t('dialog.resize_image.do_nothing')}}
+						@change="
+							imageInfo.preserveSize = true;
+							updateValues();
+						"
+					/>
+					{{ t('dialog.resize_image.do_nothing') }}
 				</label>
 			</div>
 		</div>
 		<div v-if="needAspectRatioUI">
 			<label class="lic-checkbox">
-				<input
-					v-model="imageInfo.preserveAspectRatio"
-					type="checkbox"
-					@change="updateValues"
-				>
-				{{t('dialog.resize_image.preserve_aspect_ratio')}}
+				<input v-model="imageInfo.preserveAspectRatio" type="checkbox" @change="updateValues" />
+				{{ t('dialog.resize_image.preserve_aspect_ratio') }}
 			</label>
 		</div>
 		<div v-if="needPositionUI" class="position-picker">
 			<div>
-				{{t('dialog.resize_image.anchor_text')}}
+				{{ t('dialog.resize_image.anchor_text') }}
 			</div>
 			<div class="anchor-grid">
 				<div
 					v-for="pos in anchorPositions"
 					:key="pos.value"
-					:class="['anchor-cell', {selected: imageInfo.anchorPosition === pos.value}]"
+					:class="['anchor-cell', { selected: imageInfo.anchorPosition === pos.value }]"
 					@click="selectAnchor(pos.value)"
 				>
-					{{pos.label}}
+					{{ pos.label }}
 				</div>
 			</div>
 		</div>
@@ -65,38 +63,40 @@
 </template>
 
 <script setup lang="ts">
-
-import {type Anchors} from '@/item_types';
-import {t} from '@/translations';
-import {computed,ref} from 'vue';
+import { type Anchors } from '@/item_types';
+import { t } from '@/translations';
+import { computed, ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
 
 import _ from '../util';
 
-const anchorOffsets: Record<Anchors, {x: number; y: number}> = {
-	top_left: {x: 0, y: 0},
-	top: {x: 0.5, y: 0},
-	top_right: {x: 1, y: 0},
-	left: {x: 0, y: 0.5},
-	center: {x: 0.5, y: 0.5},
-	right: {x: 1, y: 0.5},
-	bottom_left: {x: 0, y: 1},
-	bottom: {x: 0.5, y: 1},
-	bottom_right: {x: 1, y: 1},
+const anchorOffsets: Record<Anchors, { x: number; y: number }> = {
+	top_left: { x: 0, y: 0 },
+	top: { x: 0.5, y: 0 },
+	top_right: { x: 1, y: 0 },
+	left: { x: 0, y: 0.5 },
+	center: { x: 0.5, y: 0.5 },
+	right: { x: 1, y: 0.5 },
+	bottom_left: { x: 0, y: 1 },
+	bottom: { x: 0.5, y: 1 },
+	bottom_right: { x: 1, y: 1 },
 } as const;
 
-const anchorPositions: {value: Anchors; label: string}[] = [
-	{value: 'top_left', label: t('dialog.resize_image.anchors.top_left')},
-	{value: 'top', label: t('dialog.resize_image.anchors.top')},
-	{value: 'top_right', label: t('dialog.resize_image.anchors.top_right')},
-	{value: 'left', label: t('dialog.resize_image.anchors.left')},
-	{value: 'center', label: t('dialog.resize_image.anchors.center')},
-	{value: 'right', label: t('dialog.resize_image.anchors.right')},
-	{value: 'bottom_left', label: t('dialog.resize_image.anchors.bottom_left')},
-	{value: 'bottom', label: t('dialog.resize_image.anchors.bottom')},
-	{value: 'bottom_right', label: t('dialog.resize_image.anchors.bottom_right')},
+const anchorPositions: { value: Anchors; label: string }[] = [
+	{ value: 'top_left', label: t('dialog.resize_image.anchors.top_left') },
+	{ value: 'top', label: t('dialog.resize_image.anchors.top') },
+	{ value: 'top_right', label: t('dialog.resize_image.anchors.top_right') },
+	{ value: 'left', label: t('dialog.resize_image.anchors.left') },
+	{ value: 'center', label: t('dialog.resize_image.anchors.center') },
+	{ value: 'right', label: t('dialog.resize_image.anchors.right') },
+	{ value: 'bottom_left', label: t('dialog.resize_image.anchors.bottom_left') },
+	{ value: 'bottom', label: t('dialog.resize_image.anchors.bottom') },
+	{
+		value: 'bottom_right',
+		label: t('dialog.resize_image.anchors.bottom_right'),
+	},
 ] as const;
 
 interface ResizeImageInfo {
@@ -116,10 +116,14 @@ interface ResizeImageInfo {
 	pageHeight: number;
 }
 
-const props = defineProps<{initialImageInfo: ResizeImageInfo}>();
-const emit = defineEmits<{(e: 'update', v: ResizeImageInfo): void; (e: 'ok', v: ResizeImageInfo): void; (e: 'cancel'): void}>();
+const props = defineProps<{ initialImageInfo: ResizeImageInfo }>();
+const emit = defineEmits<{
+	(e: 'update', v: ResizeImageInfo): void;
+	(e: 'ok', v: ResizeImageInfo): void;
+	(e: 'cancel'): void;
+}>();
 
-const imageInfo = ref({...props.initialImageInfo});
+const imageInfo = ref({ ...props.initialImageInfo });
 updateImageInfo();
 
 const aspectRatiosMatch = computed(() => {
@@ -144,9 +148,7 @@ const resizeText = computed(() =>
 	t(`dialog.resize_image.${isImageTooBig.value ? 'shrink' : 'stretch'}`),
 );
 
-const needAspectRatioUI = computed(() =>
-	!imageInfo.value.preserveSize && !aspectRatiosMatch.value,
-);
+const needAspectRatioUI = computed(() => !imageInfo.value.preserveSize && !aspectRatiosMatch.value);
 
 const needPositionUI = computed(() => {
 	const info = imageInfo.value;
@@ -161,10 +163,10 @@ function updateImageInfo() {
 	} else {
 		if (info.preserveAspectRatio) {
 			const aspectRatio = info.originalWidth / info.originalHeight;
-			const dw = info.pageWidth - (info.pageWidth / aspectRatio);
+			const dw = info.pageWidth - info.pageWidth / aspectRatio;
 			let scaleBy = 'height';
 			if (info.originalWidth < info.pageWidth) {
-				if ((info.originalHeight < info.pageHeight) && (dw > 0)) {
+				if (info.originalHeight < info.pageHeight && dw > 0) {
 					scaleBy = 'width';
 				}
 			} else {
@@ -191,8 +193,8 @@ function updateImageInfo() {
 	info.width = Math.round(info.width);
 	info.height = Math.round(info.height);
 	const anchorOffset = anchorOffsets[info.anchorPosition];
-	info.x = Math.round((info.pageWidth * anchorOffset.x) - (info.width * anchorOffset.x));
-	info.y = Math.round((info.pageHeight * anchorOffset.y) - (info.height * anchorOffset.y));
+	info.x = Math.round(info.pageWidth * anchorOffset.x - info.width * anchorOffset.x);
+	info.y = Math.round(info.pageHeight * anchorOffset.y - info.height * anchorOffset.y);
 }
 
 function selectAnchor(pos: Anchors) {
@@ -213,11 +215,9 @@ function ok() {
 function cancel() {
 	emit('cancel');
 }
-
 </script>
 
 <style>
-
 .resizeImageDialog {
 	.body > div {
 		display: inline-block;
@@ -251,5 +251,4 @@ function cancel() {
 		color: #fff;
 	}
 }
-
 </style>

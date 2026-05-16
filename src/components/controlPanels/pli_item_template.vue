@@ -5,13 +5,12 @@
 </template>
 
 <script setup lang="ts">
-
-import {getCurrentInstance} from 'vue';
+import { getCurrentInstance } from 'vue';
 
 import store from '../../store';
 import TransformPanel from './transform.vue';
 
-const props = defineProps<{selectedItem: any}>();
+const props = defineProps<{ selectedItem: any }>();
 const emit = defineEmits(['new-values']);
 
 const instance = getCurrentInstance();
@@ -26,6 +25,5 @@ function newValues() {
 	emit('new-values', 'pliitem');
 }
 
-defineExpose({apply});
-
+defineExpose({ apply });
 </script>

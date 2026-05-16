@@ -1,14 +1,10 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="t('dialog.multi_book.title')"
-		:width="dialogWidth"
-		class="multiBookDialog"
-	>
+	<LicDialog :title="t('dialog.multi_book.title')" :width="dialogWidth" class="multiBookDialog">
 		<div>
 			<span>
-				{{t('dialog.multi_book.split_count')}}
+				{{ t('dialog.multi_book.split_count') }}
 			</span>
 			<input
 				v-model.number="bookCount"
@@ -17,14 +13,14 @@
 				class="form-control"
 				data-testid="multi-book-book-count"
 				@input="updateBookCount"
-			>
+			/>
 		</div>
 		<div>
 			<table class="book-split-table">
 				<thead>
 					<tr>
 						<th v-for="book in bookDivisions" :key="`book_${book.bookNumber}`">
-							{{t('dialog.multi_book.book_n_@c', book.bookNumber)}}
+							{{ t('dialog.multi_book.book_n_@c', book.bookNumber) }}
 						</th>
 					</tr>
 				</thead>
@@ -32,23 +28,23 @@
 					<tr>
 						<td v-for="(book, idx) in bookDivisions" :key="`page_${book.pages.start}`">
 							<template v-if="idx === bookDivisions.length - 1">
-								{{t('dialog.multi_book.pages_n_@mf', book.pages)}}
+								{{ t('dialog.multi_book.pages_n_@mf', book.pages) }}
 							</template>
 							<template v-else>
-								{{t('dialog.multi_book.pages_n_start_@c', book.pages.start)}}
+								{{ t('dialog.multi_book.pages_n_start_@c', book.pages.start) }}
 								<input
 									v-model.number="book.pages.end"
 									:min="book.pages.start"
 									type="number"
 									class="form-control page-number-input"
 									@input="updatePageStart"
-								>
+								/>
 							</template>
 						</td>
 					</tr>
 					<tr>
 						<td v-for="book in bookDivisions" :key="`step_${book.steps.start}`">
-							{{t('dialog.multi_book.steps_n_@mf', book.steps)}}
+							{{ t('dialog.multi_book.steps_n_@mf', book.steps) }}
 						</td>
 					</tr>
 				</tbody>
@@ -57,12 +53,16 @@
 
 		<div class="form-row">
 			<label class="lic-checkbox check-row">
-				<input v-model="includeTitlePages" type="checkbox" data-testid="multi-book-title-pages">
-				{{t('dialog.multi_book.include_title_page')}}
+				<input v-model="includeTitlePages" type="checkbox" data-testid="multi-book-title-pages" />
+				{{ t('dialog.multi_book.include_title_page') }}
 			</label>
 			<label class="lic-checkbox">
-				<input v-model="noSplitSubmodels" type="checkbox" data-testid="multi-book-no-split-submodels">
-				{{t('dialog.multi_book.split_submodels')}}
+				<input
+					v-model="noSplitSubmodels"
+					type="checkbox"
+					data-testid="multi-book-no-split-submodels"
+				/>
+				{{ t('dialog.multi_book.split_submodels') }}
 			</label>
 		</div>
 
@@ -79,8 +79,8 @@
 						:checked="firstPageNumber === 'start_page_1'"
 						data-testid="multi-book-page-start-1"
 						@change="firstPageNumber = 'start_page_1'"
-					>
-					{{t('dialog.multi_book.page_numbering.start_page_1.text')}}
+					/>
+					{{ t('dialog.multi_book.page_numbering.start_page_1.text') }}
 				</label>
 			</LicTooltip>
 			<LicTooltip>
@@ -95,8 +95,8 @@
 						:checked="firstPageNumber === 'preserve_page_count'"
 						data-testid="multi-book-page-start-old"
 						@change="firstPageNumber = 'preserve_page_count'"
-					>
-					{{t('dialog.multi_book.page_numbering.preserve_page_count.text')}}
+					/>
+					{{ t('dialog.multi_book.page_numbering.preserve_page_count.text') }}
 				</label>
 			</LicTooltip>
 		</div>
@@ -114,8 +114,8 @@
 						:checked="fileSplit === 'one_file'"
 						data-testid="multi-book-one-lic-file"
 						@change="fileSplit = 'one_file'"
-					>
-					{{t('dialog.multi_book.file_split.one_file.text')}}
+					/>
+					{{ t('dialog.multi_book.file_split.one_file.text') }}
 				</label>
 			</LicTooltip>
 			<LicTooltip>
@@ -130,8 +130,8 @@
 						:checked="fileSplit === 'separate_files'"
 						data-testid="multi-book-many-lic-files"
 						@change="fileSplit = 'separate_files'"
-					>
-					{{t('dialog.multi_book.file_split.separate_files.text')}}
+					/>
+					{{ t('dialog.multi_book.file_split.separate_files.text') }}
 				</label>
 			</LicTooltip>
 		</div>
@@ -143,9 +143,8 @@
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {computed,ref} from 'vue';
+import { t } from '@/translations';
+import { computed, ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
@@ -163,9 +162,12 @@ interface MultiBookResult {
 	fileSplit: string;
 }
 
-const emit = defineEmits<{(e: 'ok', v: MultiBookResult): void; (e: 'cancel'): void}>();
+const emit = defineEmits<{
+	(e: 'ok', v: MultiBookResult): void;
+	(e: 'cancel'): void;
+}>();
 
-function pageSpreadToStepSpread(pageSpread: {start: number; end: number}) {
+function pageSpreadToStepSpread(pageSpread: { start: number; end: number }) {
 	if (pageSpread.start === pageSpread.end) {
 		const page = store.get.itemByNumber('page', pageSpread.start) as any;
 		const startStep = store.get.step(page.steps[0]);
@@ -192,7 +194,7 @@ function pageSpreadToStepSpread(pageSpread: {start: number; end: number}) {
 	}
 	const endStep = store.get.step(_.last(endPage.steps) as any);
 
-	return {start: (startStep as any).number, end: (endStep as any).number};
+	return { start: (startStep as any).number, end: (endStep as any).number };
 }
 
 // Can't split in the middle of a sub model, and can't split between
@@ -208,7 +210,7 @@ function isPageSplitValid(pageNumber: number) {
 	const nextPage = store.get.nextPage(page) as any;
 	const firstStep = store.get.step(nextPage.steps[0]) as any;
 	if (lastStep.model.parentStepID === firstStep.model.parentStepID) {
-		return false;  // split steps are in same submodel
+		return false; // split steps are in same submodel
 	}
 	// Check if last step is the last step in the submodel, and next step places it in its parent
 	if (lastStep.model.parentStepID === firstStep.id) {
@@ -217,17 +219,21 @@ function isPageSplitValid(pageNumber: number) {
 	return true;
 }
 
-function calculateBookSplits(bookCountVal: number, pageCountVal: number, noSplitSubmodelsVal: boolean) {
+function calculateBookSplits(
+	bookCountVal: number,
+	pageCountVal: number,
+	noSplitSubmodelsVal: boolean,
+) {
 	const bookDivisionsResult: any[] = [];
 	const pagesPerBook = Math.ceil(pageCountVal / bookCountVal);
 
 	for (let i = 0; i < bookCountVal; i++) {
 		const pages = {
-			start: (i * pagesPerBook) + 1,
-			end: Math.min(((i + 1) * pagesPerBook), pageCountVal),
+			start: i * pagesPerBook + 1,
+			end: Math.min((i + 1) * pagesPerBook, pageCountVal),
 		};
 		const steps = pageSpreadToStepSpread(pages);
-		bookDivisionsResult.push({bookNumber: i + 1, pages, steps});
+		bookDivisionsResult.push({ bookNumber: i + 1, pages, steps });
 	}
 	_.last(bookDivisionsResult).pages.end = pageCountVal;
 
@@ -247,11 +253,12 @@ function calculateBookSplits(bookCountVal: number, pageCountVal: number, noSplit
 			const lastPageNumber = (store.get.lastPage() as any).number;
 
 			const pageSplitNumber = division.pages.end;
-			let split = 0, newPageSplit = pageSplitNumber + splitOffset(split);
+			let split = 0,
+				newPageSplit = pageSplitNumber + splitOffset(split);
 			while (
-				(newPageSplit >= firstValidPage)
-				&& (newPageSplit <= lastPageNumber)
-				&& !isPageSplitValid(newPageSplit)
+				newPageSplit >= firstValidPage &&
+				newPageSplit <= lastPageNumber &&
+				!isPageSplitValid(newPageSplit)
 			) {
 				split += 1;
 				newPageSplit = pageSplitNumber + splitOffset(split);
@@ -290,7 +297,7 @@ function calculateBookSplits(bookCountVal: number, pageCountVal: number, noSplit
 		}
 	}
 
-	return bookDivisionsResult.filter(division => !division.isInvalid);
+	return bookDivisionsResult.filter((division) => !division.isInvalid);
 }
 
 const pageCount = store.get.pageCount();
@@ -300,7 +307,7 @@ const includeTitlePages = ref(true);
 const noSplitSubmodels = ref(true);
 // firstPageNumber: start_page_1 or preserve_page_count
 const firstPageNumber = ref(uiState.get('dialog.multiBook.firstPageNumber'));
-const fileSplit = ref('one_file');  // or separate_files
+const fileSplit = ref('one_file'); // or separate_files
 
 const dialogWidth = computed(() => Math.max(450, bookDivisions.value.length * 150) + 'px');
 
@@ -333,11 +340,9 @@ function ok() {
 function cancel() {
 	emit('cancel');
 }
-
 </script>
 
 <style>
-
 .multiBookDialog {
 	.body > div {
 		display: inline-block;
@@ -375,5 +380,4 @@ function cancel() {
 		margin-bottom: 10px;
 	}
 }
-
 </style>

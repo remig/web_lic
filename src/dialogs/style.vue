@@ -1,25 +1,17 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="title"
-		class="styleDialog"
-		width="500px"
-	>
+	<LicDialog :title="title" class="styleDialog" width="500px">
 		<div style="--label-width: 80px">
 			<label class="label-input-row">
-				{{t('dialog.style.label_text')}}
+				{{ t('dialog.style.label_text') }}
 				<textarea v-model="text" rows="2" class="form-control" />
 			</label>
 			<div class="label-input-row">
-				{{t('glossary.font')}}
+				{{ t('glossary.font') }}
 				<div class="flex-row">
 					<LicSelectFontName v-model="family" />
-					<button
-						type="button"
-						:class="['lic-toggle-btn', { active: bold }]"
-						@click="bold = !bold"
-					>
+					<button type="button" :class="['lic-toggle-btn', { active: bold }]" @click="bold = !bold">
 						<strong>B</strong>
 					</button>
 					<button
@@ -32,16 +24,11 @@
 				</div>
 			</div>
 			<label class="label-input-row">
-				{{t('glossary.font_size')}}
-				<input
-					v-model.number="size"
-					type="number"
-					min="0"
-					class="form-control size-input"
-				>
+				{{ t('glossary.font_size') }}
+				<input v-model.number="size" type="number" min="0" class="form-control size-input" />
 			</label>
 			<div class="label-input-row">
-				{{t('glossary.color')}}
+				{{ t('glossary.color') }}
 				<LicColorPicker v-model="color" show-alpha />
 			</div>
 		</div>
@@ -53,9 +40,8 @@
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {ref} from 'vue';
+import { t } from '@/translations';
+import { ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicColorPicker from '@/components/base/LicColorPicker.vue';
@@ -70,8 +56,16 @@ interface StyleResult {
 	color: string;
 }
 
-const props = defineProps<{title: string; text: string; color: string; font: string}>();
-const emit = defineEmits<{(e: 'ok', v: StyleResult): void; (e: 'cancel'): void}>();
+const props = defineProps<{
+	title: string;
+	text: string;
+	color: string;
+	font: string;
+}>();
+const emit = defineEmits<{
+	(e: 'ok', v: StyleResult): void;
+	(e: 'cancel'): void;
+}>();
 
 const fontParts = _.fontToFontParts(props.font);
 const text = ref(props.text);
@@ -84,24 +78,22 @@ const italic = ref(fontParts.fontStyle === 'italic');
 function ok() {
 	emit('ok', {
 		text: text.value,
-		font: _.fontPartsToFont({
-			fontSize: size.value + 'pt',
-			fontFamily: family.value,
-			fontWeight: bold.value ? 'bold' : '',
-			fontStyle: italic.value ? 'italic' : '',
-		}) ?? '',
+		font:
+			_.fontPartsToFont({
+				fontSize: size.value + 'pt',
+				fontFamily: family.value,
+				fontWeight: bold.value ? 'bold' : '',
+				fontStyle: italic.value ? 'italic' : '',
+			}) ?? '',
 		color: color.value,
 	});
 }
-
 </script>
 
 <style>
-
 .styleDialog {
 	.size-input {
 		width: 75px;
 	}
 }
-
 </style>

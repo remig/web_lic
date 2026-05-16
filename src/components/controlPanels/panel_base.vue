@@ -2,7 +2,7 @@
 
 <template>
 	<div class="panel-template">
-		<h5>{{t(title)}}</h5>
+		<h5>{{ t(title) }}</h5>
 		<div class="panel-body">
 			<slot />
 		</div>
@@ -10,9 +10,7 @@
 </template>
 
 <script setup lang="ts">
+import { t } from '@/translations';
 
-import {t} from '@/translations';
-
-defineProps<{title: string}>();
-
+defineProps<{ title: string }>();
 </script>

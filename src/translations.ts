@@ -60,7 +60,8 @@ function __tr(locale: string, key: string, args: any[]) {
 }
 
 function translateLink(text: string, link: string) {
-	const email = '<a href="mailto:lic@bugeyedmonkeys.com" target="_blank">lic@bugeyedmonkeys.com</a>';
+	const email =
+		'<a href="mailto:lic@bugeyedmonkeys.com" target="_blank">lic@bugeyedmonkeys.com</a>';
 	return text
 		.replace('$email{}', email)
 		.replace('$link{', `<a href="${link}" target="_blank">`)
@@ -68,9 +69,8 @@ function translateLink(text: string, link: string) {
 }
 
 function translate(key: string, ...args: any[]): string {
-
 	if (key.startsWith(noTranslateKey)) {
-		return key.replace(noTranslateKey, '');  // Don't translate these already translated strings
+		return key.replace(noTranslateKey, ''); // Don't translate these already translated strings
 	}
 
 	if (key.startsWith('ctrl+')) {
@@ -82,11 +82,12 @@ function translate(key: string, ...args: any[]): string {
 		try {
 			res = __tr(currentLocale, key, args);
 		} catch {
-			console.log(`Locale ${currentLocale} missing translation key: ${key}`);  // eslint-disable-line no-console
+			console.log(`Locale ${currentLocale} missing translation key: ${key}`); // eslint-disable-line no-console
 			res = null;
 		}
 	}
-	if (res == null) {  // If anything goes wrong with the non-english lookup, fallback to english
+	if (res == null) {
+		// If anything goes wrong with the non-english lookup, fallback to english
 		try {
 			res = __tr('en', key, args);
 		} catch {
@@ -121,10 +122,4 @@ function noTranslate(str: string) {
 
 restoreLanguage();
 
-export {
-	getLocale,
-	LanguageList,
-	noTranslate,
-	setLocale,
-	translate as t,
-};
+export { getLocale, LanguageList, noTranslate, setLocale, translate as t };

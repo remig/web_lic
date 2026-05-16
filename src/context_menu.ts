@@ -3,13 +3,18 @@
 import * as DialogManager from './dialog';
 import openFileHandler from './file_uploader';
 import {
-type CSI,
-type Directions, 	type LookupItem, type Page, type Rotation, type Step, } from './item_types';
+	type CSI,
+	type Directions,
+	type LookupItem,
+	type Page,
+	type Rotation,
+	type Step,
+} from './item_types';
 import LDParse from './ld_parse';
 import * as SelectionOps from './selection_ops';
 import store from './store';
-import {noTranslate,t} from './translations';
-import {isItemSpecificType, isStepParent} from './type_helpers';
+import { noTranslate, t } from './translations';
+import { isItemSpecificType, isStepParent } from './type_helpers';
 import * as UiOps from './ui_ops';
 import * as ReactiveState from './ui_reactive_state';
 import undoStack from './undo_stack';
@@ -17,7 +22,7 @@ import _ from './util';
 import LicGL from './webgl/licgl';
 
 interface ContextMenuSeparator {
-	text: 'separator'
+	text: 'separator';
 }
 
 interface ContextMenuEntryInterface {
@@ -27,7 +32,7 @@ interface ContextMenuEntryInterface {
 	enabled?: (selectedItem: LookupItem) => boolean;
 	shown?: (selectedItem: LookupItem) => boolean;
 	children?: ContextMenuEntry;
-	selectedItem?: LookupItem;  // TODO: Is this necessary
+	selectedItem?: LookupItem; // TODO: Is this necessary
 }
 
 function isSeparator(
@@ -37,18 +42,25 @@ function isSeparator(
 }
 
 type ContextMenuEntry =
-	(ContextMenuSeparator | ContextMenuEntryInterface)[]
+	| (ContextMenuSeparator | ContextMenuEntryInterface)[]
 	| ((selectedItem: LookupItem) => (ContextMenuSeparator | ContextMenuEntryInterface)[]);
 
 type DisplaceDirection = 'up' | 'down' | 'left' | 'right' | 'forward' | 'backward' | null;
-const displaceDirections =
-	['up', 'down', 'left', 'right', 'forward', 'backward', null] as DisplaceDirection[];
+const displaceDirections = [
+	'up',
+	'down',
+	'left',
+	'right',
+	'forward',
+	'backward',
+	null,
+] as DisplaceDirection[];
 
 const arrowDirections = ['up', 'right', 'down', 'left'] as Directions[];
 
-
 const clampScale = (() => {
-	const min = 0.0001, max = 20;
+	const min = 0.0001;
+	const max = 20;
 	function clamp(v: number) {
 		return _.clamp(v || 0, min, max);
 	}
@@ -69,7 +81,7 @@ const annotationMenu: ContextMenuEntryInterface = {
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				const opts = {
 					annotationType: 'label',
-					properties: {text: t('action.annotation.add.label.initial_text')},
+					properties: { text: t('action.annotation.add.label.initial_text') },
 					parent: selectedItem,
 					...pos,
 				};
@@ -94,7 +106,10 @@ const annotationMenu: ContextMenuEntryInterface = {
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
 				const opts = {
 					annotationType: 'arrow',
-					properties: {direction: 'right', border: {color: 'black', width: 2}},
+					properties: {
+						direction: 'right',
+						border: { color: 'black', width: 2 },
+					},
 					parent: selectedItem,
 					...pos,
 				};
@@ -107,10 +122,10 @@ const annotationMenu: ContextMenuEntryInterface = {
 			cb(selectedItem) {
 				const clickPos = UiOps.pageCoordsToCanvasCoords(ReactiveState.lastRightClickPos);
 				const pos = store.get.coords.pageToItem(clickPos, selectedItem);
-				openFileHandler('.png', 'dataURL', src => {
+				openFileHandler('.png', 'dataURL', (src) => {
 					const opts = {
 						annotationType: 'image',
-						properties: {src},
+						properties: { src },
 						parent: selectedItem,
 						...pos,
 					};
@@ -127,7 +142,7 @@ const contextMenu = {
 			text: 'action.layout.redo_layout.name',
 			id: 'title_page_layout_cmenu',
 			cb(selectedItem: LookupItem) {
-				undoStack.commit('page.layout', {page: selectedItem}, t(this.text));
+				undoStack.commit('page.layout', { page: selectedItem }, t(this.text));
 			},
 		},
 		annotationMenu,
@@ -139,7 +154,7 @@ const contextMenu = {
 			text: 'action.layout.redo_layout.name',
 			id: 'inventory_page_layout_cmenu',
 			cb(selectedItem: LookupItem) {
-				undoStack.commit('page.layout', {page: selectedItem}, t(this.text));
+				undoStack.commit('page.layout', { page: selectedItem }, t(this.text));
 			},
 		},
 		annotationMenu,
@@ -155,7 +170,7 @@ const contextMenu = {
 					text: 'action.layout.redo_layout.name',
 					id: 'page_redo_layout_cmenu',
 					cb(selectedItem: LookupItem) {
-						undoStack.commit('page.layout', {page: selectedItem}, t(this.text));
+						undoStack.commit('page.layout', { page: selectedItem }, t(this.text));
 					},
 				},
 				{
@@ -168,7 +183,7 @@ const contextMenu = {
 					cb(selectedItem: LookupItem) {
 						undoStack.commit(
 							'page.layout',
-							{page: selectedItem, layout: 'vertical'},
+							{ page: selectedItem, layout: 'vertical' },
 							t('action.layout.vertical.undo'),
 						);
 					},
@@ -181,7 +196,7 @@ const contextMenu = {
 						return page?.layout !== 'horizontal';
 					},
 					cb(selectedItem: LookupItem) {
-						const opts = {page: selectedItem, layout: 'horizontal'};
+						const opts = { page: selectedItem, layout: 'horizontal' };
 						undoStack.commit('page.layout', opts, t('action.layout.horizontal.undo'));
 					},
 				},
@@ -196,18 +211,23 @@ const contextMenu = {
 						SelectionOps.clearSelected();
 						UiOps.redrawUI(true);
 
-						const initialLayout = typeof originalLayout === 'string'
-							? {rows: 'auto' as const, cols: 'auto' as const, direction: originalLayout}
-							: originalLayout;
+						const initialLayout =
+							typeof originalLayout === 'string'
+								? {
+										rows: 'auto' as const,
+										cols: 'auto' as const,
+										direction: originalLayout,
+									}
+								: originalLayout;
 						const result = await DialogManager.showPageLayoutDialog(
-							{initialLayout},
+							{ initialLayout },
 							{
-								onUpdate: newValues => {
-									store.mutations.page.layout({page, layout: newValues});
+								onUpdate: (newValues) => {
+									store.mutations.page.layout({ page, layout: newValues });
 									UiOps.redrawUI(true);
 								},
 								onCancel: () => {
-									store.mutations.page.layout({page, layout: originalLayout});
+									store.mutations.page.layout({ page, layout: originalLayout });
 									UiOps.redrawUI(true);
 								},
 							},
@@ -215,7 +235,7 @@ const contextMenu = {
 						if (result != null) {
 							undoStack.commit(
 								'page.layout',
-								{page, layout: result},
+								{ page, layout: result },
 								t('action.layout.by_row_and_column.undo'),
 							);
 						}
@@ -223,7 +243,7 @@ const contextMenu = {
 				},
 			],
 		},
-		{text: 'separator'},
+		{ text: 'separator' },
 		{
 			text: 'action.page.prepend_blank_page.name',
 			id: 'page_prepend_blank_cmenu',
@@ -254,7 +274,7 @@ const contextMenu = {
 				);
 			},
 		},
-		{text: 'separator'},
+		{ text: 'separator' },
 		{
 			text: 'action.page.hide_step_separators.name',
 			id: 'page_hide_seps_cmenu',
@@ -281,7 +301,8 @@ const contextMenu = {
 				const opts = {
 					dest,
 					stepNumber: prevStep == null ? 0 : prevStep.number + 1,
-					doLayout: true, renumber: true,
+					doLayout: true,
+					renumber: true,
 					model: _.cloneDeep(prevStep?.model),
 					insertionIndex: prevStep == null ? 0 : store.state.steps.indexOf(prevStep) + 1,
 				};
@@ -301,11 +322,7 @@ const contextMenu = {
 				const nextPage = store.get.isLastBasicPage(page)
 					? store.get.prevPage(page)
 					: store.get.nextPage(page);
-				undoStack.commit(
-					'page.delete',
-					{page},
-					t('action.page.delete_this_blank_page.undo'),
-				);
+				undoStack.commit('page.delete', { page }, t('action.page.delete_this_blank_page.undo'));
 				SelectionOps.setCurrentPage(nextPage);
 				SelectionOps.clearSelected();
 			},
@@ -329,7 +346,11 @@ const contextMenu = {
 						return step.subStepLayout !== 'vertical';
 					},
 					cb(selectedItem: LookupItem) {
-						const opts = {step: selectedItem, layout: 'vertical', doLayout: true};
+						const opts = {
+							step: selectedItem,
+							layout: 'vertical',
+							doLayout: true,
+						};
 						undoStack.commit('step.setSubStepLayout', opts, t('action.layout.vertical.undo'));
 					},
 				},
@@ -341,7 +362,11 @@ const contextMenu = {
 						return step.subStepLayout !== 'horizontal';
 					},
 					cb(selectedItem: LookupItem) {
-						const opts = {step: selectedItem, layout: 'horizontal', doLayout: true};
+						const opts = {
+							step: selectedItem,
+							layout: 'horizontal',
+							doLayout: true,
+						};
 						undoStack.commit('step.setSubStepLayout', opts, t('action.layout.horizontal.undo'));
 					},
 				},
@@ -355,22 +380,23 @@ const contextMenu = {
 						SelectionOps.clearSelected();
 						UiOps.redrawUI(true);
 
-						const initialLayout = typeof originalLayout === 'string'
-							? {rows: 2, cols: 2, direction: originalLayout}
-							: {
-								rows: originalLayout.rows,
-								cols: originalLayout.cols,
-								direction: originalLayout.direction || 'vertical' as const,
-							};
+						const initialLayout =
+							typeof originalLayout === 'string'
+								? { rows: 2, cols: 2, direction: originalLayout }
+								: {
+										rows: originalLayout.rows,
+										cols: originalLayout.cols,
+										direction: originalLayout.direction || ('vertical' as const),
+									};
 						const result = await DialogManager.showPageLayoutDialog(
-							{initialLayout},
+							{ initialLayout },
 							{
-								onUpdate: newValues => {
-									store.mutations.page.layout({page, layout: newValues});
+								onUpdate: (newValues) => {
+									store.mutations.page.layout({ page, layout: newValues });
 									UiOps.redrawUI(true);
 								},
 								onCancel: () => {
-									store.mutations.page.layout({page, layout: originalLayout});
+									store.mutations.page.layout({ page, layout: originalLayout });
 									UiOps.redrawUI(true);
 								},
 							},
@@ -378,7 +404,7 @@ const contextMenu = {
 						if (result != null) {
 							undoStack.commit(
 								'page.layout',
-								{page, layout: result},
+								{ page, layout: result },
 								t('action.layout.by_row_and_column.undo_step'),
 							);
 						}
@@ -394,7 +420,7 @@ const contextMenu = {
 				return !step.steps.length;
 			},
 			cb(selectedItem: LookupItem) {
-				undoStack.commit('step.addCallout', {step: selectedItem}, t(this.text));
+				undoStack.commit('step.addCallout', { step: selectedItem }, t(this.text));
 			},
 		},
 		{
@@ -409,7 +435,7 @@ const contextMenu = {
 				return false;
 			},
 			cb(selectedItem: LookupItem) {
-				undoStack.commit('step.addSubStep', {step: selectedItem, doLayout: true}, t(this.text));
+				undoStack.commit('step.addSubStep', { step: selectedItem, doLayout: true }, t(this.text));
 			},
 		},
 		{
@@ -418,7 +444,7 @@ const contextMenu = {
 			enabled(selectedItem: LookupItem) {
 				const step = store.get.step(selectedItem);
 				if (step.parent.type !== 'page') {
-					return false;  // Only stretch basic page steps
+					return false; // Only stretch basic page steps
 				}
 				const page = store.get.pageForItem(selectedItem);
 				const nextPage = store.get.nextBasicPage(page);
@@ -433,7 +459,7 @@ const contextMenu = {
 					page = store.get.pageForItem(selectedItem);
 				}
 				const stretchToPage = store.get.nextBasicPage(page);
-				const opts = {step: selectedItem, stretchToPage, doLayout: true};
+				const opts = { step: selectedItem, stretchToPage, doLayout: true };
 				undoStack.commit('step.stretchToPage', opts, t(this.text));
 			},
 		},
@@ -448,9 +474,9 @@ const contextMenu = {
 					shown(selectedItem: LookupItem) {
 						const page = store.get.pageForItem(selectedItem);
 						if (store.get.isFirstBasicPage(page) || store.get.isTitlePage(page)) {
-							return false;  // Previous page doesn't exist
+							return false; // Previous page doesn't exist
 						} else if (page.steps.indexOf(selectedItem.id) !== 0) {
-							return false;  // Can only move first step on a page to the previous page
+							return false; // Can only move first step on a page to the previous page
 						}
 						return true;
 					},
@@ -460,7 +486,7 @@ const contextMenu = {
 					cb(selectedItem: LookupItem) {
 						undoStack.commit(
 							'step.moveToPreviousPage',
-							{step: selectedItem},
+							{ step: selectedItem },
 							t('action.step.move_to.previous_page.undo'),
 						);
 					},
@@ -471,9 +497,9 @@ const contextMenu = {
 					shown(selectedItem: LookupItem) {
 						const page = store.get.pageForItem(selectedItem);
 						if (store.get.isLastBasicPage(page) || store.get.isTitlePage(page)) {
-							return false;  // Next page doesn't exist
+							return false; // Next page doesn't exist
 						} else if (page.steps.indexOf(selectedItem.id) !== page.steps.length - 1) {
-							return false;  // Can only move last step on a page to the next page
+							return false; // Can only move last step on a page to the next page
 						}
 						return true;
 					},
@@ -483,7 +509,7 @@ const contextMenu = {
 					cb(selectedItem: LookupItem) {
 						undoStack.commit(
 							'step.moveToNextPage',
-							{step: selectedItem},
+							{ step: selectedItem },
 							t('action.step.move_to.next_page.undo'),
 						);
 					},
@@ -507,7 +533,7 @@ const contextMenu = {
 						const destStep = store.get.prevStep(selectedItem, true);
 						undoStack.commit(
 							'step.mergeWithStep',
-							{srcStep, destStep},
+							{ srcStep, destStep },
 							t('action.step.merge_with.previous_step.undo'),
 						);
 						SelectionOps.clearSelected();
@@ -524,7 +550,7 @@ const contextMenu = {
 						const destStep = store.get.nextStep(selectedItem, true);
 						undoStack.commit(
 							'step.mergeWithStep',
-							{srcStep, destStep},
+							{ srcStep, destStep },
 							t('action.step.merge_with.next_step.undo'),
 						);
 						SelectionOps.clearSelected();
@@ -539,20 +565,20 @@ const contextMenu = {
 			shown(selectedItem: LookupItem) {
 				const step = store.get.step(selectedItem);
 				if (step.parent.type === 'callout' && store.get.callout(step).steps.length < 2) {
-					return false;  // Can't delete first step in a callout
+					return false; // Can't delete first step in a callout
 				}
 				return _.isEmpty(step.parts);
 			},
 			cb(selectedItem: LookupItem) {
-				undoStack.commit('step.delete', {step: selectedItem, doLayout: true}, t(this.text));
+				undoStack.commit('step.delete', { step: selectedItem, doLayout: true }, t(this.text));
 				SelectionOps.clearSelected();
 			},
 		},
-		{text: 'separator'},
+		{ text: 'separator' },
 		{
 			text: 'action.step.prepend_blank_step.name',
 			id: 'step_prepend_cmenu',
-			enabled: enableIfUnlocked,  // TODO: disable this if previous step is in a different submodel
+			enabled: enableIfUnlocked, // TODO: disable this if previous step is in a different submodel
 			cb(selectedItem: LookupItem) {
 				const step = store.get.step(selectedItem.id);
 				const dest = store.get.parent(step);
@@ -605,7 +631,7 @@ const contextMenu = {
 				}
 			},
 		},
-		{text: 'separator'},
+		{ text: 'separator' },
 		{
 			text: 'action.rotate_icon.add.name',
 			id: 'step_add_rotate_cmenu',
@@ -616,7 +642,7 @@ const contextMenu = {
 				const step = store.get.step(selectedItem.id);
 				undoStack.commit(
 					'step.toggleRotateIcon',
-					{step, display: true, doLayout: true},
+					{ step, display: true, doLayout: true },
 					t(this.text),
 				);
 			},
@@ -631,7 +657,7 @@ const contextMenu = {
 				const step = store.get.step(selectedItem.id);
 				undoStack.commit(
 					'step.toggleRotateIcon',
-					{step, display: false, doLayout: true},
+					{ step, display: false, doLayout: true },
 					t(this.text),
 				);
 			},
@@ -670,14 +696,11 @@ const contextMenu = {
 					id: 'csi_rotate_up_cmenu',
 					cb(selectedItem: LookupItem) {
 						const csi = selectedItem;
-						const rotation = [{axis: 'z', angle: 180}];
-						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
-						undoStack.commit(
-							'csi.rotate',
-							opts,
-							t('action.csi.rotate.flip_upside_down.undo'),
-							[{type: 'csi', id: csi.id}],
-						);
+						const rotation = [{ axis: 'z', angle: 180 }];
+						const opts = { csi, rotation, addRotateIcon: true, doLayout: true };
+						undoStack.commit('csi.rotate', opts, t('action.csi.rotate.flip_upside_down.undo'), [
+							{ type: 'csi', id: csi.id },
+						]);
 					},
 				},
 				{
@@ -685,14 +708,11 @@ const contextMenu = {
 					id: 'csi_rotate_front_cmenu',
 					cb(selectedItem: LookupItem) {
 						const csi = selectedItem;
-						const rotation = [{axis: 'y', angle: 180}];
-						const opts = {csi, rotation, addRotateIcon: true, doLayout: true};
-						undoStack.commit(
-							'csi.rotate',
-							opts,
-							t('action.csi.rotate.rotate_front_to_back.undo'),
-							[{type: 'csi', id: csi.id}],
-						);
+						const rotation = [{ axis: 'y', angle: 180 }];
+						const opts = { csi, rotation, addRotateIcon: true, doLayout: true };
+						undoStack.commit('csi.rotate', opts, t('action.csi.rotate.rotate_front_to_back.undo'), [
+							{ type: 'csi', id: csi.id },
+						]);
 					},
 				},
 				{
@@ -718,7 +738,7 @@ const contextMenu = {
 									: true,
 							},
 							{
-								onUpdate: newValues => {
+								onUpdate: (newValues) => {
 									csi.rotation = newValues.rotation;
 									csi.isDirty = true;
 									UiOps.redrawUI(true);
@@ -733,7 +753,7 @@ const contextMenu = {
 						if (result != null) {
 							undoStack.commit(
 								'csi.rotate',
-								{csi, ..._.cloneDeep(result), doLayout: true},
+								{ csi, ..._.cloneDeep(result), doLayout: true },
 								t('action.csi.rotate.custom_rotation.undo'),
 								[csi],
 							);
@@ -750,14 +770,14 @@ const contextMenu = {
 					cb(selectedItem: LookupItem) {
 						const csi = selectedItem;
 						const opts = {
-							csi, rotation: null, addRotateIcon: false, doLayout: true,
+							csi,
+							rotation: null,
+							addRotateIcon: false,
+							doLayout: true,
 						};
-						undoStack.commit(
-							'csi.rotate',
-							opts,
-							t('action.csi.rotate.remove_rotation.undo'),
-							[{type: 'csi', id: csi.id}],
-						);
+						undoStack.commit('csi.rotate', opts, t('action.csi.rotate.remove_rotation.undo'), [
+							{ type: 'csi', id: csi.id },
+						]);
 					},
 				},
 			],
@@ -789,7 +809,7 @@ const contextMenu = {
 						min: 0,
 					},
 					{
-						onUpdate: updateValue => {
+						onUpdate: (updateValue) => {
 							let csi: CSI;
 							let nextStep: Step | null = step;
 							for (let i = 0; i < updateValue; i++) {
@@ -799,9 +819,7 @@ const contextMenu = {
 								if (nextStep?.csiID) {
 									csi = store.get.csi(nextStep.csiID);
 									if (originalRotations[csi.id] == null) {
-										originalRotations[csi.id] = (csi.rotation == null)
-											? 'none'
-											: csi.rotation;
+										originalRotations[csi.id] = csi.rotation == null ? 'none' : csi.rotation;
 									}
 									csi.isDirty = true;
 									csi.rotation = rotation;
@@ -813,7 +831,7 @@ const contextMenu = {
 							originalRotations.forEach((rot, csiID) => {
 								const csi = store.get.csi(csiID);
 								if (csi) {
-									csi.rotation = (rot === 'none') ? null : rot;
+									csi.rotation = rot === 'none' ? null : rot;
 									csi.isDirty = true;
 								}
 							});
@@ -822,14 +840,14 @@ const contextMenu = {
 					},
 				);
 				if (newValue != null) {
-					const csiList: ({type: 'csi', id: number})[] = originalRotations
-						.filter(el => el != null)
+					const csiList: { type: 'csi'; id: number }[] = originalRotations
+						.filter((el) => el != null)
 						.map((_unused, id) => {
-							return {type: 'csi', id};
+							return { type: 'csi', id };
 						});
 					undoStack.commit(
 						'step.copyRotation',
-						{step, rotation, nextXSteps: newValue},
+						{ step, rotation, nextXSteps: newValue },
 						t('action.csi.copy_rotation_to_next_steps.undo'),
 						csiList,
 					);
@@ -860,7 +878,7 @@ const contextMenu = {
 						step: 0.1,
 					},
 					{
-						onUpdate: updateValue => {
+						onUpdate: (updateValue) => {
 							csi.scale = clampScale(updateValue);
 							csi.isDirty = true;
 							UiOps.redrawUI(true);
@@ -875,7 +893,7 @@ const contextMenu = {
 				if (newValue != null) {
 					undoStack.commit(
 						'csi.scale',
-						{csi, scale: newValue, doLayout: true},
+						{ csi, scale: newValue, doLayout: true },
 						t('action.csi.scale.undo'),
 						[csi],
 					);
@@ -893,13 +911,13 @@ const contextMenu = {
 				const csi = store.get.csi(selectedItem.id);
 				undoStack.commit(
 					'csi.scale',
-					{csi, scale: null, doLayout: true},
+					{ csi, scale: null, doLayout: true },
 					t('action.csi.remove_scale.undo'),
 					[csi],
 				);
 			},
 		},
-		{text: 'separator'},
+		{ text: 'separator' },
 		{
 			text: 'action.csi.select_part.name',
 			id: 'csi_select_part_cmenu',
@@ -913,14 +931,18 @@ const contextMenu = {
 			children(selectedItem: LookupItem) {
 				const step = store.get.parent(selectedItem);
 				if (step != null && isItemSpecificType(step, 'step')) {
-					return (step.parts || []).map(partID => {
+					return (step.parts || []).map((partID) => {
 						const part = LDParse.model.get.partFromID(partID, step.model.filename);
 						const abstractPart = LDParse.partDictionary[part.filename];
 						return {
 							id: 'select_part_' + partID + '_cmenu',
 							text: noTranslate(abstractPart.name),
 							cb() {
-								SelectionOps.setSelected({type: 'part', id: partID, stepID: step.id});
+								SelectionOps.setSelected({
+									type: 'part',
+									id: partID,
+									stepID: step.id,
+								});
 							},
 						};
 					});
@@ -957,7 +979,7 @@ const contextMenu = {
 						showRotateIconCheckbox: false,
 					},
 					{
-						onUpdate: newValues => {
+						onUpdate: (newValues) => {
 							store.mutations.pliTransform.rotate(filename, newValues.rotation);
 							store.mutations.pliItem.markAllDirty(filename);
 							UiOps.redrawUI(true);
@@ -970,15 +992,16 @@ const contextMenu = {
 					},
 				);
 				if (result != null) {
-					const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-					const changes = dirtyItems.map(item => {
+					const dirtyItems = store.state.pliItems.filter((item) => item.filename === filename);
+					const changes = dirtyItems.map((item) => {
 						return {
 							mutation: 'page.layout',
-							opts: {page: store.get.pageForItem(item)},
+							opts: { page: store.get.pageForItem(item) },
 						};
 					});
 					undoStack.commit(
-						changes, null,
+						changes,
+						null,
 						t('action.pli_item.rotate_part_list_image.undo'),
 						dirtyItems,
 					);
@@ -996,15 +1019,16 @@ const contextMenu = {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				store.mutations.pliTransform.rotate(filename, null);
-				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-				const changes = dirtyItems.map(item => {
+				const dirtyItems = store.state.pliItems.filter((item) => item.filename === filename);
+				const changes = dirtyItems.map((item) => {
 					return {
 						mutation: 'page.layout',
-						opts: {page: store.get.pageForItem(item)},
+						opts: { page: store.get.pageForItem(item) },
 					};
 				});
 				undoStack.commit(
-					changes, null,
+					changes,
+					null,
 					t('action.pli_item.remove_part_list_image_rotate.undo'),
 					dirtyItems,
 				);
@@ -1027,7 +1051,7 @@ const contextMenu = {
 						step: 0.1,
 					},
 					{
-						onUpdate: updateValue => {
+						onUpdate: (updateValue) => {
 							const scale = clampScale(updateValue);
 							store.mutations.pliTransform.scale(filename, scale);
 							store.mutations.pliItem.markAllDirty(filename);
@@ -1041,15 +1065,16 @@ const contextMenu = {
 					},
 				);
 				if (newValue != null) {
-					const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-					const changes = dirtyItems.map(item => {
+					const dirtyItems = store.state.pliItems.filter((item) => item.filename === filename);
+					const changes = dirtyItems.map((item) => {
 						return {
 							mutation: 'page.layout',
-							opts: {page: store.get.pageForItem(item)},
+							opts: { page: store.get.pageForItem(item) },
 						};
 					});
 					undoStack.commit(
-						changes, null,
+						changes,
+						null,
 						t('action.pli_item.scale_part_list_image.undo'),
 						dirtyItems,
 					);
@@ -1067,15 +1092,16 @@ const contextMenu = {
 				const pliItem = store.get.pliItem(selectedItem.id);
 				const filename = pliItem.filename;
 				store.mutations.pliTransform.scale(filename, null);
-				const dirtyItems = store.state.pliItems.filter(item => item.filename === filename);
-				const changes = dirtyItems.map(item => {
+				const dirtyItems = store.state.pliItems.filter((item) => item.filename === filename);
+				const changes = dirtyItems.map((item) => {
 					return {
 						mutation: 'page.layout',
-						opts: {page: store.get.pageForItem(item)},
+						opts: { page: store.get.pageForItem(item) },
 					};
 				});
 				undoStack.commit(
-					changes, null,
+					changes,
+					null,
 					t('action.pli_item.remove_part_list_image_scale.undo'),
 					dirtyItems,
 				);
@@ -1102,7 +1128,7 @@ const contextMenu = {
 								if (newValue != null) {
 									undoStack.commit(
 										'pliItem.changeQuantity',
-										{pliItem, quantity: newValue},
+										{ pliItem, quantity: newValue },
 										t('action.quantity_label.change_count.undo'),
 									);
 								}
@@ -1119,7 +1145,7 @@ const contextMenu = {
 			id: 'rotate_icon_delete_cmenu',
 			cb(selectedItem: LookupItem) {
 				const rotateIcon = selectedItem;
-				undoStack.commit('rotateIcon.delete', {rotateIcon}, t(this.text));
+				undoStack.commit('rotateIcon.delete', { rotateIcon }, t(this.text));
 			},
 		},
 	],
@@ -1129,7 +1155,7 @@ const contextMenu = {
 			id: 'annotation_delete_cmenu',
 			cb(selectedItem) {
 				const annotation = selectedItem;
-				undoStack.commit('annotation.delete', {annotation}, t('action.annotation.delete.undo'));
+				undoStack.commit('annotation.delete', { annotation }, t('action.annotation.delete.undo'));
 				SelectionOps.clearSelected();
 			},
 		};
@@ -1152,7 +1178,7 @@ const contextMenu = {
 				if (result != null) {
 					undoStack.commit(
 						'annotation.set',
-						{annotation, newProperties: result},
+						{ annotation, newProperties: result },
 						t('action.annotation.change_text_and_style.undo'),
 					);
 				}
@@ -1174,28 +1200,24 @@ const contextMenu = {
 		{
 			text: 'action.callout.position.name',
 			id: 'callout_position_cmenu',
-			children: ['top', 'right', 'bottom', 'left'].map(position => {
+			children: ['top', 'right', 'bottom', 'left'].map((position) => {
 				return {
 					text: 'action.callout.position.' + position + '.name',
 					id: 'callout_position' + position + '_cmenu',
-					shown: (function(pos) {
-						return function(selectedItem: LookupItem) {
+					shown: (function (pos) {
+						return function (selectedItem: LookupItem) {
 							const callout = store.get.callout(selectedItem);
 							return callout?.position !== pos;
 						};
 					})(position),
-					cb: (function(pos) {
-						return function(selectedItem: LookupItem) {
+					cb: (function (pos) {
+						return function (selectedItem: LookupItem) {
 							const opts = {
 								callout: selectedItem,
 								position: pos,
 								doLayout: true,
 							};
-							undoStack.commit(
-								'callout.layout',
-								opts,
-								t('action.callout.position.undo'),
-							);
+							undoStack.commit('callout.layout', opts, t('action.callout.position.undo'));
 						};
 					})(position),
 				};
@@ -1213,7 +1235,11 @@ const contextMenu = {
 						return callout.layout !== 'horizontal';
 					},
 					cb(selectedItem: LookupItem) {
-						const opts = {callout: selectedItem, layout: 'horizontal', doLayout: true};
+						const opts = {
+							callout: selectedItem,
+							layout: 'horizontal',
+							doLayout: true,
+						};
 						undoStack.commit('callout.layout', opts, t('action.callout.layout.horizontal.undo'));
 					},
 				},
@@ -1230,10 +1256,7 @@ const contextMenu = {
 							layout: 'vertical',
 							doLayout: true,
 						};
-						undoStack.commit(
-							'callout.layout',
-							opts, t('action.callout.layout.vertical.undo'),
-						);
+						undoStack.commit('callout.layout', opts, t('action.callout.layout.vertical.undo'));
 					},
 				},
 			],
@@ -1242,7 +1265,11 @@ const contextMenu = {
 			text: 'action.callout.add_step.name',
 			id: 'callout_add_step_cmenu',
 			cb(selectedItem: LookupItem) {
-				undoStack.commit('callout.addStep', {callout: selectedItem, doLayout: true}, t(this.text));
+				undoStack.commit(
+					'callout.addStep',
+					{ callout: selectedItem, doLayout: true },
+					t(this.text),
+				);
 			},
 		},
 		{
@@ -1260,7 +1287,7 @@ const contextMenu = {
 			},
 			cb(selectedItem: LookupItem) {
 				SelectionOps.clearSelected();
-				undoStack.commit('callout.delete', {callout: selectedItem, doLayout: true}, t(this.text));
+				undoStack.commit('callout.delete', { callout: selectedItem, doLayout: true }, t(this.text));
 			},
 		},
 	],
@@ -1272,14 +1299,19 @@ const contextMenu = {
 				const arrow = store.get.calloutArrow(selectedItem);
 				return arrow.points.map((pointID, idx) => {
 					return {
-						text: (idx === 0)
-							? 'action.callout_arrow.select_point.base.name'
-							: (idx === arrow.points.length - 1)
-								? 'action.callout_arrow.select_point.tip.name'
-								: noTranslate(t('action.callout_arrow.select_point.point.name_@mf', {idx})),
+						text:
+							idx === 0
+								? 'action.callout_arrow.select_point.base.name'
+								: idx === arrow.points.length - 1
+									? 'action.callout_arrow.select_point.tip.name'
+									: noTranslate(
+											t('action.callout_arrow.select_point.point.name_@mf', {
+												idx,
+											}),
+										),
 						id: 'arrow_select_point_' + pointID + '_cmenu',
 						cb() {
-							SelectionOps.setSelected({type: 'point', id: pointID});
+							SelectionOps.setSelected({ type: 'point', id: pointID });
 						},
 					};
 				});
@@ -1291,8 +1323,11 @@ const contextMenu = {
 			cb(selectedItem: LookupItem) {
 				const arrow = store.get.calloutArrow(selectedItem);
 				const newPointIdx = Math.ceil(arrow.points.length / 2);
-				undoStack.commit('calloutArrow.addPoint', {arrow}, t(this.text));
-				SelectionOps.setSelected({type: 'point', id: arrow.points[newPointIdx]});
+				undoStack.commit('calloutArrow.addPoint', { arrow }, t(this.text));
+				SelectionOps.setSelected({
+					type: 'point',
+					id: arrow.points[newPointIdx],
+				});
 			},
 		},
 		{
@@ -1303,7 +1338,7 @@ const contextMenu = {
 		{
 			text: 'action.callout_arrow.rotate_tip.name',
 			id: 'arrow_rotate_tip_cmenu',
-			children: arrowDirections.map(direction => {
+			children: arrowDirections.map((direction) => {
 				return {
 					text: 'action.callout_arrow.rotate_tip.' + direction + '.name',
 					id: 'arrow_rotate_tip_' + direction + '_cmenu',
@@ -1321,7 +1356,7 @@ const contextMenu = {
 				const divider = store.get.divider(selectedItem);
 				const bbox = _.geom.bbox([divider.p1, divider.p2]);
 				// TODO: store divider orientation in divider itself
-				const originalSize = (bbox.height === 0) ? bbox.width : bbox.height;
+				const originalSize = bbox.height === 0 ? bbox.width : bbox.height;
 
 				const newValue = await DialogManager.showNumberChooserDialog(
 					{
@@ -1332,12 +1367,18 @@ const contextMenu = {
 						step: 1,
 					},
 					{
-						onUpdate: updateValue => {
-							store.mutations.divider.setLength({divider, newLength: updateValue});
+						onUpdate: (updateValue) => {
+							store.mutations.divider.setLength({
+								divider,
+								newLength: updateValue,
+							});
 							UiOps.drawCurrentPage();
 						},
 						onCancel: () => {
-							store.mutations.divider.setLength({divider, newLength: originalSize});
+							store.mutations.divider.setLength({
+								divider,
+								newLength: originalSize,
+							});
 							UiOps.drawCurrentPage();
 						},
 					},
@@ -1351,7 +1392,11 @@ const contextMenu = {
 			text: 'action.divider.delete.name',
 			id: 'divider_delete_cmenu',
 			cb(selectedItem: LookupItem) {
-				undoStack.commit('divider.delete', {divider: selectedItem}, t('action.divider.delete.undo'));
+				undoStack.commit(
+					'divider.delete',
+					{ divider: selectedItem },
+					t('action.divider.delete.undo'),
+				);
 				SelectionOps.clearSelected();
 			},
 		},
@@ -1371,7 +1416,7 @@ const contextMenu = {
 			cb(selectedItem: LookupItem) {
 				undoStack.commit(
 					'item.delete',
-					{item: selectedItem},
+					{ item: selectedItem },
 					t('action.callout_arrow.delete_point.undo'),
 				);
 				SelectionOps.clearSelected();
@@ -1397,12 +1442,16 @@ const contextMenu = {
 			cb(selectedItem: LookupItem) {
 				if (isItemSpecificType(selectedItem, 'submodel')) {
 					const step = store.get.step(selectedItem.stepID);
-					const destStep = {type: 'step', id: step.model.parentStepID};
-					const opts = {modelFilename: selectedItem.filename, destStep, doLayout: true};
+					const destStep = { type: 'step', id: step.model.parentStepID };
+					const opts = {
+						modelFilename: selectedItem.filename,
+						destStep,
+						doLayout: true,
+					};
 					undoStack.commit('submodel.convertToCallout', opts, t(this.text));
 					SelectionOps.clearSelected();
 					if (destStep.id != null) {
-						SelectionOps.setCurrentPage(store.get.pageForItem({type: 'step', id: destStep.id}));
+						SelectionOps.setCurrentPage(store.get.pageForItem({ type: 'step', id: destStep.id }));
 					}
 				}
 			},
@@ -1412,11 +1461,12 @@ const contextMenu = {
 		{
 			text: 'action.part.displace_part.name',
 			id: 'part_displace_cmenu',
-			children: displaceDirections.map(direction => {
+			children: displaceDirections.map((direction) => {
 				return {
-					text: direction == null
-						? 'action.part.displace_part.none.name'
-						: 'action.part.displace_part.' + direction + '.name',
+					text:
+						direction == null
+							? 'action.part.displace_part.none.name'
+							: 'action.part.displace_part.' + direction + '.name',
 					id: 'part_displace_' + direction + '_cmenu',
 					shown: showDisplacement(direction),
 					cb: displacePart(direction),
@@ -1430,7 +1480,7 @@ const contextMenu = {
 				if (isItemSpecificType(selectedItem, 'part')) {
 					const step = store.get.step(selectedItem.stepID);
 					if (step.displacedParts) {
-						return step.displacedParts.some(p => p.partID === selectedItem.id);
+						return step.displacedParts.some((p) => p.partID === selectedItem.id);
 					}
 				}
 				return false;
@@ -1444,7 +1494,7 @@ const contextMenu = {
 					return;
 				}
 				const csi = store.get.csi(step.csiID);
-				const match = step.displacedParts.find(p => p.partID === selectedItem.id);
+				const match = step.displacedParts.find((p) => p.partID === selectedItem.id);
 				if (match == null) {
 					return;
 				}
@@ -1458,9 +1508,9 @@ const contextMenu = {
 
 				SelectionOps.clearSelected();
 				const finalValues = await DialogManager.showDisplacePartDialog(
-					{initialValues: displacement},
+					{ initialValues: displacement },
 					{
-						onUpdate: newValues => {
+						onUpdate: (newValues) => {
 							Object.assign(match, newValues);
 							csi.isDirty = true;
 							UiOps.redrawUI(true);
@@ -1473,8 +1523,11 @@ const contextMenu = {
 					},
 				);
 				if (finalValues != null) {
-					undoStack.commit('part.displace', {step, ...finalValues},
-						t('action.part.adjust_displacement.undo'));
+					undoStack.commit(
+						'part.displace',
+						{ step, ...finalValues },
+						t('action.part.adjust_displacement.undo'),
+					);
 				}
 			},
 		},
@@ -1493,7 +1546,10 @@ const contextMenu = {
 					id: 'part_move_prev_cmenu',
 					shown(selectedItem: LookupItem) {
 						if (isItemSpecificType(selectedItem, 'part')) {
-							const step = store.get.step({type: 'step', id: selectedItem.stepID});
+							const step = store.get.step({
+								type: 'step',
+								id: selectedItem.stepID,
+							});
 							return store.get.prevStep(step) != null;
 						}
 						return false;
@@ -1507,11 +1563,11 @@ const contextMenu = {
 						const destStep = store.get.prevStep(srcStep);
 						undoStack.commit(
 							'part.moveToStep',
-							{partID: selectedItem.id, srcStep, destStep, doLayout: true},
+							{ partID: selectedItem.id, srcStep, destStep, doLayout: true },
 							t('action.part.move_part_to.previous_step.undo'),
 							[
-								{type: 'csi', id: srcStep?.csiID},
-								{type: 'csi', id: destStep?.csiID},
+								{ type: 'csi', id: srcStep?.csiID },
+								{ type: 'csi', id: destStep?.csiID },
 							],
 						);
 					},
@@ -1535,11 +1591,11 @@ const contextMenu = {
 						const destStep = store.get.nextStep(srcStep);
 						undoStack.commit(
 							'part.moveToStep',
-							{partID: selectedItem.id, srcStep, destStep, doLayout: true},
+							{ partID: selectedItem.id, srcStep, destStep, doLayout: true },
 							t('action.part.move_part_to.next_step.undo'),
 							[
-								{type: 'csi', id: srcStep?.csiID},
-								{type: 'csi', id: destStep?.csiID},
+								{ type: 'csi', id: srcStep?.csiID },
+								{ type: 'csi', id: destStep?.csiID },
 							],
 						);
 					},
@@ -1566,9 +1622,9 @@ const contextMenu = {
 				const targetStep = lastStep ? store.get.step(lastStep) : null;
 				undoStack.commit(
 					'part.addToCallout',
-					{partID: selectedItem.id, step, callout, doLayout: true},
+					{ partID: selectedItem.id, step, callout, doLayout: true },
 					t('action.part.add_part_to_callout.undo'),
-					[{type: 'csi', id: targetStep?.csiID}],
+					[{ type: 'csi', id: targetStep?.csiID }],
 				);
 			},
 		},
@@ -1587,7 +1643,7 @@ const contextMenu = {
 					return [];
 				}
 				const step = store.get.step(selectedItem.stepID);
-				return step.callouts.map(calloutID => {
+				return step.callouts.map((calloutID) => {
 					const callout = store.get.callout(calloutID);
 					const lastStep = _.last(callout.steps);
 					const targetStep = lastStep ? store.get.step(lastStep) : null;
@@ -1597,9 +1653,9 @@ const contextMenu = {
 						cb() {
 							undoStack.commit(
 								'part.addToCallout',
-								{partID: selectedItem.id, step, callout, doLayout: true},
+								{ partID: selectedItem.id, step, callout, doLayout: true },
 								t('action.part.add_part_to_callout.undo'),
-								[{type: 'csi', id: targetStep?.csiID}],
+								[{ type: 'csi', id: targetStep?.csiID }],
 							);
 						},
 					};
@@ -1622,7 +1678,7 @@ const contextMenu = {
 					SelectionOps.clearSelected();
 					undoStack.commit(
 						'part.removeFromCallout',
-						{partID: selectedItem.id, step},
+						{ partID: selectedItem.id, step },
 						t('action.part.remove_part_from_callout.undo'),
 					);
 				}
@@ -1631,7 +1687,9 @@ const contextMenu = {
 		{
 			text: 'action.part.remove_from_pli.name',
 			id: 'part_remove_from_pli_cmenu',
-			enabled() {return false;},
+			enabled() {
+				return false;
+			},
 			cb() {},
 		},
 		{
@@ -1654,9 +1712,9 @@ const contextMenu = {
 						const originalMatrix = _.cloneDeep(part.matrix);
 						const transform = LicGL.decomposeLDMatrix(part.matrix);
 						const result = await DialogManager.showTransformPartDialog(
-							{rotation: transform.rotation, position: transform.position},
+							{ rotation: transform.rotation, position: transform.position },
 							{
-								onUpdate: newTransform => {
+								onUpdate: (newTransform) => {
 									part.matrix = LicGL.composeLDMatrix(newTransform);
 									csi.isDirty = true;
 									UiOps.redrawUI(true);
@@ -1678,7 +1736,7 @@ const contextMenu = {
 							});
 							const page = store.get.pageForItem(step);
 							undoStack.commit(
-								[action, {mutation: 'page.layout', opts: {page}}],
+								[action, { mutation: 'page.layout', opts: { page } }],
 								null,
 								t('action.part.change_part.position_and_rotation.undo'),
 								['csi'],
@@ -1694,36 +1752,37 @@ const contextMenu = {
 						if (newColorCode == null || !isItemSpecificType(selectedItem, 'part')) {
 							return;
 						}
-						const step = store.get.step({type: 'step', id: selectedItem.stepID});
-						const pli = {type: 'pli', id: step.pliID};
+						const step = store.get.step({
+							type: 'step',
+							id: selectedItem.stepID,
+						});
+						const pli = { type: 'pli', id: step.pliID };
 						const action = LDParse.getAction.partColor({
 							filename: step.model.filename,
 							partID: selectedItem.id,
 							color: newColorCode,
 						});
-						const change = [
-							action,
-							{mutation: 'pli.syncContent', opts: {pli, doLayout: true}},
-						];
+						const change = [action, { mutation: 'pli.syncContent', opts: { pli, doLayout: true } }];
 						if (store.get.inventoryPages().length) {
 							const part = store.get.part(selectedItem.id, step);
-							change.push({mutation: 'inventoryPage.removePart', opts: {
-								filename: part.filename,
-								colorCode: part.colorCode,
-								doLayout: false,
-							}});
-							change.push({mutation: 'inventoryPage.addPart', opts: {
-								filename: part.filename,
-								colorCode: newColorCode,
-								doLayout: true,
-							}});
+							change.push({
+								mutation: 'inventoryPage.removePart',
+								opts: {
+									filename: part.filename,
+									colorCode: part.colorCode,
+									doLayout: false,
+								},
+							});
+							change.push({
+								mutation: 'inventoryPage.addPart',
+								opts: {
+									filename: part.filename,
+									colorCode: newColorCode,
+									doLayout: true,
+								},
+							});
 						}
-						undoStack.commit(
-							change,
-							null,
-							t('dialog.ld_color_picker.action'),
-							['csi', 'pliItem'],
-						);
+						undoStack.commit(change, null, t('dialog.ld_color_picker.action'), ['csi', 'pliItem']);
 					},
 				},
 				{
@@ -1746,7 +1805,7 @@ const contextMenu = {
 						}
 						store.mutations.csi.markAllDirty();
 						const step = store.get.step(selectedItem.stepID);
-						const pli = {type: 'pli', id: step.pliID};
+						const pli = { type: 'pli', id: step.pliID };
 						const newFilename = abstractPart.filename;
 						const change = [
 							LDParse.getAction.filename({
@@ -1754,13 +1813,11 @@ const contextMenu = {
 								partID: selectedItem.id,
 								newFilename,
 							}),
-							{mutation: 'pli.syncContent', opts: {pli, doLayout: true}},
+							{ mutation: 'pli.syncContent', opts: { pli, doLayout: true } },
 						];
-						undoStack.commit(
-							change, null,
-							t('action.part.change_part.to_different_part.undo'),
-							['csi'],
-						);
+						undoStack.commit(change, null, t('action.part.change_part.to_different_part.undo'), [
+							'csi',
+						]);
 					},
 				},
 				{
@@ -1773,14 +1830,14 @@ const contextMenu = {
 							const part = _.cloneDeep(store.get.part(selectedItem.id, step));
 							const partID = LDParse.partDictionary[filename].parts.length;
 							const changes = [
-								LDParse.getAction.addPart({filename, part}),
-								{mutation: 'step.addPart', opts: {step, partID}},
-								{mutation: 'inventoryPage.addPart', opts: {part, doLayout: true}},
+								LDParse.getAction.addPart({ filename, part }),
+								{ mutation: 'step.addPart', opts: { step, partID } },
+								{
+									mutation: 'inventoryPage.addPart',
+									opts: { part, doLayout: true },
+								},
 							];
-							undoStack.commit(
-								changes, null,
-								t('action.part.change_part.duplicate.undo'), ['csi'],
-							);
+							undoStack.commit(changes, null, t('action.part.change_part.duplicate.undo'), ['csi']);
 						}
 					},
 				},
@@ -1795,10 +1852,11 @@ const contextMenu = {
 								filename: step.model.filename,
 								partID,
 							});
-							const opts = {step, partID, doLayout: true};
-							const mutation = {mutation: 'part.delete', opts};
-							undoStack.commit([mutation, action], null,
-								t('action.part.change_part.delete.undo'), ['csi']);
+							const opts = { step, partID, doLayout: true };
+							const mutation = { mutation: 'part.delete', opts };
+							undoStack.commit([mutation, action], null, t('action.part.change_part.delete.undo'), [
+								'csi',
+							]);
 							SelectionOps.clearSelected();
 						}
 					},
@@ -1823,7 +1881,7 @@ function rotateArrowTip(direction: Directions) {
 		const arrow = store.get.lookupToItem(selectedItem);
 		undoStack.commit(
 			'calloutArrow.rotateTip',
-			{arrow, direction},
+			{ arrow, direction },
 			t('action.callout_arrow.rotate_tip.undo'),
 		);
 	};
@@ -1835,9 +1893,9 @@ function showDisplacement(direction: DisplaceDirection) {
 			const step = store.get.step(selectedItem.stepID);
 			if (step.displacedParts) {
 				if (direction == null) {
-					return step.displacedParts.some(p => p.partID === selectedItem.id);
+					return step.displacedParts.some((p) => p.partID === selectedItem.id);
 				}
-				return step.displacedParts.every(p => {
+				return step.displacedParts.every((p) => {
 					return p.partID !== selectedItem.id || p.direction !== direction;
 				});
 			}
@@ -1852,15 +1910,16 @@ function displacePart(direction: DisplaceDirection) {
 		if (isItemSpecificType(selectedItem, 'part')) {
 			const step = store.get.step(selectedItem.stepID);
 			if (step.csiID != null) {
-				const dirTr = direction == null
-					? 'action.part.displace_part.none.name'
-					: `action.part.displace_part.${direction}.name`;
+				const dirTr =
+					direction == null
+						? 'action.part.displace_part.none.name'
+						: `action.part.displace_part.${direction}.name`;
 				const directionName = t(dirTr);
 				undoStack.commit(
 					'part.displace',
-					{partID: selectedItem.id, step, direction},
-					t('action.part.displace_part.undo_@mf', {direction: directionName}),
-					[{type: 'csi', id: step.csiID}],
+					{ partID: selectedItem.id, step, direction },
+					t('action.part.displace_part.undo_@mf', { direction: directionName }),
+					[{ type: 'csi', id: step.csiID }],
 				);
 			}
 		}
@@ -1880,9 +1939,8 @@ function filterMenu(
 			if (entry.shown && !entry.shown(selectedItem)) {
 				deleteIndex = true;
 			} else if (entry.children) {
-				const children = (typeof entry.children === 'function')
-					? entry.children(selectedItem)
-					: entry.children;
+				const children =
+					typeof entry.children === 'function' ? entry.children(selectedItem) : entry.children;
 				filterMenu(children, selectedItem);
 				if (!children.length) {
 					deleteIndex = true;
@@ -1907,7 +1965,6 @@ function enableIfUnlocked(selectedItem: LookupItem) {
 }
 
 export default function ContextMenu(selectedItem: LookupItem) {
-
 	let subtype;
 	if (selectedItem.type === 'page') {
 		subtype = store.get.page(selectedItem).subtype;
@@ -1918,19 +1975,21 @@ export default function ContextMenu(selectedItem: LookupItem) {
 		return null;
 	}
 	const tempMenu = contextMenu[clickedType];
-	const menu = (typeof tempMenu === 'function') ? tempMenu(selectedItem) : tempMenu;
+	const menu = typeof tempMenu === 'function' ? tempMenu(selectedItem) : tempMenu;
 
 	if (!Array.isArray(menu)) {
 		return null;
 	}
 
-	const fullMenu = menu.map(menuEntry => {  // Super cheap clone of menu, so we don't destroy the original
+	const fullMenu = menu.map((menuEntry) => {
+		// Super cheap clone of menu, so we don't destroy the original
 		if (!isSeparator(menuEntry) && 'children' in menuEntry && menuEntry.children) {
 			const res: any = _.clone(menuEntry);
 			if (!isSeparator(res)) {
-				res.children = (typeof menuEntry.children === 'function')
-					? menuEntry.children(selectedItem)
-					: menuEntry.children;
+				res.children =
+					typeof menuEntry.children === 'function'
+						? menuEntry.children(selectedItem)
+						: menuEntry.children;
 				res.children = [...res.children];
 			}
 			return res;
@@ -1942,9 +2001,9 @@ export default function ContextMenu(selectedItem: LookupItem) {
 
 	if (fullMenu && fullMenu.length) {
 		// Copy item type to each menu entry; saves typing them all out everywhere above
-		menu.forEach(menuEntry => {
+		menu.forEach((menuEntry) => {
 			if (!isSeparator(menuEntry)) {
-				(menuEntry as any).selectedItem = selectedItem;  // TODO: Is this necessary
+				(menuEntry as any).selectedItem = selectedItem; // TODO: Is this necessary
 			}
 		});
 		return menu;

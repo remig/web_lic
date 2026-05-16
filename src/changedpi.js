@@ -4,7 +4,7 @@ function createPngDataTable() {
 	for (let n = 0; n < 256; n++) {
 		let c = n;
 		for (let k = 0; k < 8; k++) {
-			c = (c & 1) ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+			c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
 		}
 		crcTable[n] = c;
 	}
@@ -19,7 +19,7 @@ function calcCrc(buf) {
 		pngDataTable = createPngDataTable();
 	}
 	for (let n = 0; n < buf.length; n++) {
-		c = pngDataTable[(c ^ buf[n]) & 0xFF] ^ (c >>> 8);
+		c = pngDataTable[(c ^ buf[n]) & 0xff] ^ (c >>> 8);
 	}
 	return c ^ -1;
 }
@@ -47,13 +47,13 @@ export function changeDpiBlob(blob, dpi) {
 	// 33 bytes are ok for pngs and jpegs
 	// to contain the information.
 	const headerChunk = blob.slice(0, 33);
-	return new Promise(resolve => {
+	return new Promise((resolve) => {
 		const fileReader = new FileReader();
 		fileReader.onload = () => {
 			const dataArray = new Uint8Array(fileReader.result);
 			const tail = blob.slice(33);
 			const changedArray = changeDpiOnArray(dataArray, dpi, blob.type);
-			resolve(new Blob([changedArray, tail], {type: blob.type}));
+			resolve(new Blob([changedArray, tail], { type: blob.type }));
 		};
 		fileReader.readAsArrayBuffer(headerChunk);
 	});
@@ -74,12 +74,12 @@ export function changeDpiDataUrl(base64Image, dpi) {
 			headerLength = Math.ceil((b64Index + 28) / 3) * 4;
 			overwritepHYs = true;
 		} else {
-			headerLength = 33 / 3 * 4;
+			headerLength = (33 / 3) * 4;
 		}
 	}
 	if (format.indexOf(JPEG) !== -1) {
 		type = JPEG;
-		headerLength = 18 / 3 * 4;
+		headerLength = (18 / 3) * 4;
 	}
 	// 33 bytes are ok for pngs and jpegs
 	// to contain the information.
@@ -106,7 +106,7 @@ export function readDpi(base64Image) {
 		if (b64Index >= 0) {
 			headerLength = Math.ceil((b64Index + 28) / 3) * 4;
 		} else {
-			headerLength = 33 / 3 * 4;
+			headerLength = (33 / 3) * 4;
 		}
 	}
 	// 33 bytes are ok for pngs and jpegs
@@ -137,9 +137,13 @@ function searchStartOfPhys(data) {
 	// we check from the end since we cut the string in proximity of the header
 	// the header is within 21 bytes from the end.
 	for (let i = length; i >= 4; i--) {
-		if (data[i - 4] === 9 && data[i - 3] === _P &&
-      data[i - 2] === _H && data[i - 1] === _Y &&
-      data[i] === _S) {
+		if (
+			data[i - 4] === 9 &&
+			data[i - 3] === _P &&
+			data[i - 2] === _H &&
+			data[i - 1] === _Y &&
+			data[i] === _S
+		) {
 			return i - 3;
 		}
 	}
@@ -150,10 +154,10 @@ function readDpiOnArray(dataArray) {
 	const startingIndex = searchStartOfPhys(dataArray) + 4;
 	if (dataArray[startingIndex + 8] === 1) {
 		let dpi =
-			(dataArray[startingIndex + 0] << 24)
-			+ (dataArray[startingIndex + 1] << 16)
-			+ (dataArray[startingIndex + 2] << 8)
-			+ (dataArray[startingIndex + 3]);
+			(dataArray[startingIndex + 0] << 24) +
+			(dataArray[startingIndex + 1] << 16) +
+			(dataArray[startingIndex + 2] << 8) +
+			dataArray[startingIndex + 3];
 		dpi /= 39.3701;
 		return dpi;
 	}

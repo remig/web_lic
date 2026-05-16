@@ -1,29 +1,37 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import {type LookupItem, type Part, type PLI} from '../item_types';
+import { type LookupItem, type Part, type PLI } from '../item_types';
 import store from '../store';
 
 export interface PLIMutationInterface {
-	add({parent}: {parent: LookupItem}): void;
-	delete({pli, deleteItems}: {pli: LookupItem, deleteItems: boolean}): void;
-	empty({pli}: {pli:LookupItem}): void;
-	addPart({pli, part}: {pli: LookupItem, part: Part}): void;
-	removePart({pli, part}: {pli: LookupItem, part: Part}): void;
-	toggleVisibility({visible}: {visible: boolean}): void;
-	syncContent({pli, doLayout}: {pli: LookupItem, doLayout?: boolean}): void;
+	add({ parent }: { parent: LookupItem }): void;
+	delete({ pli, deleteItems }: { pli: LookupItem; deleteItems: boolean }): void;
+	empty({ pli }: { pli: LookupItem }): void;
+	addPart({ pli, part }: { pli: LookupItem; part: Part }): void;
+	removePart({ pli, part }: { pli: LookupItem; part: Part }): void;
+	toggleVisibility({ visible }: { visible: boolean }): void;
+	syncContent({ pli, doLayout }: { pli: LookupItem; doLayout?: boolean }): void;
 }
 
 export const PLIMutations: PLIMutationInterface = {
-	add({parent}) {
-		return store.mutations.item.add<PLI>({item: {
-			type: 'pli', id: -1, parent,
-			pliItems: [],
-			x: 0, y: 0, width: 0, height: 0,
-			innerContentOffset: {x: 0, y: 0},
-			borderOffset: {x: 0, y: 0},
-		}, parent});
+	add({ parent }) {
+		return store.mutations.item.add<PLI>({
+			item: {
+				type: 'pli',
+				id: -1,
+				parent,
+				pliItems: [],
+				x: 0,
+				y: 0,
+				width: 0,
+				height: 0,
+				innerContentOffset: { x: 0, y: 0 },
+				borderOffset: { x: 0, y: 0 },
+			},
+			parent,
+		});
 	},
-	delete({pli, deleteItems = false}) {
+	delete({ pli, deleteItems = false }) {
 		const item = store.get.pli(pli);
 		if (item == null) {
 			return;
@@ -31,14 +39,15 @@ export const PLIMutations: PLIMutationInterface = {
 		if (!deleteItems && item.pliItems && item.pliItems.length) {
 			throw 'Cannot delete a PLI with items';
 		}
-		store.mutations.item.deleteChildList({item, listType: 'pliItem'});
-		store.mutations.item.delete({item});
+		store.mutations.item.deleteChildList({ item, listType: 'pliItem' });
+		store.mutations.item.delete({ item });
 	},
-	empty({pli}) {
+	empty({ pli }) {
 		const item = store.get.pli(pli);
-		store.mutations.item.deleteChildList({item, listType: 'pliItem'});
+		store.mutations.item.deleteChildList({ item, listType: 'pliItem' });
 	},
-	addPart({pli, part}) {  // part = {filename, color}
+	addPart({ pli, part }) {
+		// part = {filename, color}
 		const item = store.get.pli(pli);
 		if (item == null || part == null || part.colorCode == null) {
 			return;
@@ -54,7 +63,8 @@ export const PLIMutations: PLIMutationInterface = {
 			});
 		}
 	},
-	removePart({pli, part}) {  // part = {filename, color}
+	removePart({ pli, part }) {
+		// part = {filename, color}
 		const item = store.get.pli(pli);
 		if (item == null) {
 			return;
@@ -62,17 +72,17 @@ export const PLIMutations: PLIMutationInterface = {
 		const pliItem = store.get.matchingPLIItem(item, part);
 		if (pliItem) {
 			if (pliItem.quantity === 1) {
-				store.mutations.pliItem.delete({pliItem});
+				store.mutations.pliItem.delete({ pliItem });
 			} else {
 				pliItem.quantity--;
 			}
 		}
 	},
-	toggleVisibility({visible}) {
+	toggleVisibility({ visible }) {
 		store.state.plisVisible = visible;
 		store.mutations.page.markAllDirty();
 	},
-	syncContent({pli, doLayout}) {
+	syncContent({ pli, doLayout }) {
 		// Ensure the list of children pliItems matches the content of the parent step
 		// Slow but simple solution: delete all pliItems then re-add one for each part
 		const item = store.get.lookupToItem(pli);
@@ -84,10 +94,10 @@ export const PLIMutations: PLIMutationInterface = {
 			return;
 		}
 		const parts = store.get.partsInStep(step);
-		store.mutations.pli.empty({pli: item});
-		parts.forEach(part => store.mutations.pli.addPart({pli: item, part}));
+		store.mutations.pli.empty({ pli: item });
+		parts.forEach((part) => store.mutations.pli.addPart({ pli: item, part }));
 		if (doLayout) {
-			store.mutations.page.layout({page: store.get.pageForItem(item)});
+			store.mutations.page.layout({ page: store.get.pageForItem(item) });
 		}
 	},
 };

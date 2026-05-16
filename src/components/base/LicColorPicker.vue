@@ -2,11 +2,7 @@
 
 <template>
 	<div ref="containerRef" class="lic-color-picker">
-		<button
-			type="button"
-			class="lic-color-swatch"
-			@click="togglePicker"
-		>
+		<button type="button" class="lic-color-swatch" @click="togglePicker">
 			<span class="swatch-inner" :style="swatchStyle" />
 		</button>
 		<div v-if="isOpen" class="lic-color-popup" :style="popupStyle">
@@ -20,9 +16,8 @@
 </template>
 
 <script setup lang="ts">
-
-import {computed, onUnmounted,ref} from 'vue';
-import {ChromePicker} from 'vue-color';
+import { computed, onUnmounted, ref } from 'vue';
+import { ChromePicker } from 'vue-color';
 
 import 'vue-color/vue2/style.css';
 
@@ -30,17 +25,20 @@ const POPUP_W = 225;
 const POPUP_H = 290;
 const GAP = 4;
 
-const props = withDefaults(defineProps<{
-	modelValue?: string | null;
-	value?: string | null;
-	showAlpha?: boolean;
-}>(), {showAlpha: false});
+const props = withDefaults(
+	defineProps<{
+		modelValue?: string | null;
+		value?: string | null;
+		showAlpha?: boolean;
+	}>(),
+	{ showAlpha: false },
+);
 
 const emit = defineEmits(['update:modelValue', 'input', 'change']);
 
 const isOpen = ref(false);
 const containerRef = ref<HTMLElement | null>(null);
-const popupStyle = ref({top: '0px', left: '0px'});
+const popupStyle = ref({ top: '0px', left: '0px' });
 
 const currentColor = computed(() => props.modelValue ?? props.value ?? null);
 
@@ -55,7 +53,7 @@ const swatchStyle = computed(() => {
 			backgroundPosition: '0 0, 4px 4px',
 		};
 	}
-	return {backgroundColor: currentColor.value};
+	return { backgroundColor: currentColor.value };
 });
 
 function calcPopupStyle() {
@@ -75,7 +73,7 @@ function calcPopupStyle() {
 	}
 	top = Math.max(GAP, top);
 
-	popupStyle.value = {top: `${top}px`, left: `${left}px`};
+	popupStyle.value = { top: `${top}px`, left: `${left}px` };
 }
 
 function onInput(newColor: string) {
@@ -109,11 +107,9 @@ function togglePicker() {
 onUnmounted(() => {
 	document.removeEventListener('mousedown', onOutsideClick);
 });
-
 </script>
 
 <style>
-
 .lic-color-picker {
 	display: inline-block;
 	position: relative;
@@ -143,5 +139,4 @@ onUnmounted(() => {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 	border-radius: 4px;
 }
-
 </style>

@@ -1,26 +1,26 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {type ColorTableEntry} from './item_types';
+import { type ColorTableEntry } from './item_types';
 import uiState from './ui_state';
 
 enum StorageKeys {
 	model = 'lic_model',
 	ui = 'ui_defaults',
 	customFonts = 'custom_fonts',
-	customBrickColors = 'custom_brick_colors'
+	customBrickColors = 'custom_brick_colors',
 }
 
 interface ColorTable {
-	[k: number]: ColorTableEntry
+	[k: number]: ColorTableEntry;
 }
 
 interface API {
 	initialize(defaultState: object): void;
 	get: {
-		model(): any,
-		ui: any,
-		customFonts: any,
-		customBrickColors(): ColorTable
+		model(): any;
+		ui: any;
+		customFonts: any;
+		customBrickColors(): ColorTable;
 	};
 	replace: any;
 	clear: any;
@@ -39,14 +39,16 @@ const api: API = {
 		ui: createGet(StorageKeys.ui),
 		customFonts() {
 			const res = localStorage.getItem(StorageKeys.customFonts);
-			if (res == null) {  // If key is totally null, save and return an empty array instead
+			if (res == null) {
+				// If key is totally null, save and return an empty array instead
 				return api.replace.customFonts([]);
 			}
 			return JSON.parse(res);
 		},
 		customBrickColors() {
 			const res = localStorage.getItem(StorageKeys.customBrickColors);
-			if (res == null) {  // If key is totally null, save and return an empty array instead
+			if (res == null) {
+				// If key is totally null, save and return an empty array instead
 				return api.replace.customBrickColors({});
 			}
 			return JSON.parse(res);
@@ -63,7 +65,7 @@ const api: API = {
 		model: createClear(StorageKeys.model),
 		customFonts: createClear(StorageKeys.customFonts),
 		customBrickColors: createClear(StorageKeys.customBrickColors),
-		ui: function() {
+		ui: function () {
 			// Don't leave local storage UI state empty; copy default UI state back to local storage.
 			api.replace.ui(uiState.getDefaultState());
 			uiState.resetUIState();
@@ -83,7 +85,7 @@ function createGet(k: StorageKeys) {
 
 // Replace entire object in cache with passed in object
 function createReplace(k: StorageKeys) {
-	return function(json: object) {
+	return function (json: object) {
 		try {
 			localStorage.setItem(k, JSON.stringify(json));
 		} catch (e) {
@@ -97,7 +99,7 @@ function createReplace(k: StorageKeys) {
 }
 
 function createClear(k: StorageKeys) {
-	return function() {
+	return function () {
 		localStorage.removeItem(k);
 	};
 }

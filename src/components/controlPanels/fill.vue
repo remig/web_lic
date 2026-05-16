@@ -3,29 +3,20 @@
 <template>
 	<panel-base :title="title" class="fillTemplate" style="--label-width: 80px">
 		<div class="label-input-row">
-			{{t('glossary.color')}}
+			{{ t('glossary.color') }}
 			<LicColorPicker v-model="color" show-alpha @change="updateValues" />
 		</div>
 		<div v-if="gradient != null" class="label-input-row">
-			{{t('template.fill.gradient')}}
+			{{ t('template.fill.gradient') }}
 			<span>NYI</span>
 		</div>
 		<div v-if="imageFilename != null" class="label-input-row">
-			{{t('template.fill.image')}}
+			{{ t('template.fill.image') }}
 			<div class="flex-row">
-				<LicButton
-					v-if="imageFilename"
-					icon="fas fa-image"
-					class="tight"
-					@click="pickImage"
-				>
-					{{truncatedImageName}}
+				<LicButton v-if="imageFilename" icon="fas fa-image" class="tight" @click="pickImage">
+					{{ truncatedImageName }}
 				</LicButton>
-				<LicButton
-					v-else
-					icon="fas fa-image"
-					@click="pickImage"
-				/>
+				<LicButton v-else icon="fas fa-image" @click="pickImage" />
 				<LicButton
 					v-if="imageFilename"
 					type="text"
@@ -39,45 +30,50 @@
 </template>
 
 <script setup lang="ts">
-
-import {computed,ref} from 'vue';
+import { computed, ref } from 'vue';
 
 import cache from '../../cache';
-import {readDpi} from '../../changedpi';
-import {showResizeImageDialog} from '../../dialog';
+import { readDpi } from '../../changedpi';
+import { showResizeImageDialog } from '../../dialog';
 import openFileHandler from '../../file_uploader';
 import store from '../../store';
-import {t} from '../../translations';
+import { t } from '../../translations';
 import _ from '../../util';
 import LicButton from '../base/LicButton.vue';
 import LicColorPicker from '../base/LicColorPicker.vue';
 import PanelBase from './panel_base.vue';
 
-const props = withDefaults(defineProps<{
-	templateEntry: string;
-	title?: string;
-}>(), {
-	title: 'template.fill.title',
-});
+const props = withDefaults(
+	defineProps<{
+		templateEntry: string;
+		title?: string;
+	}>(),
+	{
+		title: 'template.fill.title',
+	},
+);
 
-const emit = defineEmits<{(e: 'new-values', val: {type: string; noLayout: boolean}): void}>();
+const emit = defineEmits<{
+	(e: 'new-values', val: { type: string; noLayout: boolean }): void;
+}>();
 
 const fillTemplate = () => _.get(store.state.template, props.templateEntry).fill;
 
 const color = ref(fillTemplate().color);
 const gradient = ref(fillTemplate().gradient);
-const imageFilename = ref(fillTemplate().image == null ? null : fillTemplate().image.filename || '');
+const imageFilename = ref(
+	fillTemplate().image == null ? null : fillTemplate().image.filename || '',
+);
 
 const truncatedImageName = computed(() => {
 	const fn = imageFilename.value as string;
-	return (fn.length > 12) ? fn.substring(0, 5) + '...png' : fn;
+	return fn.length > 12 ? fn.substring(0, 5) + '...png' : fn;
 });
 
 function updateValues() {
 	fillTemplate().color = color.value;
-	emit('new-values', {type: props.templateEntry, noLayout: true});
+	emit('new-values', { type: props.templateEntry, noLayout: true });
 }
-
 
 function removeImage() {
 	imageFilename.value = fillTemplate().image = '';
@@ -99,7 +95,7 @@ function pickImage() {
 		imageFilename.value = filename;
 
 		const image = new Image();
-		image.onload = async() => {
+		image.onload = async () => {
 			if (props.templateEntry === 'page') {
 				if (image.width !== template.width || image.height !== template.height) {
 					const imgInfo = template.fill.image;
@@ -142,11 +138,9 @@ function pickImage() {
 		image.src = src as string;
 	});
 }
-
 </script>
 
 <style>
-
 .lic-btn.tight {
 	padding: 9px;
 	max-width: 110px;
@@ -157,5 +151,4 @@ function pickImage() {
 	border: none;
 	padding: 0;
 }
-
 </style>

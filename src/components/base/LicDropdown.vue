@@ -4,7 +4,7 @@
 	<div ref="containerRef" class="lic-dropdown">
 		<LicButton @click="toggle">
 			<slot name="trigger">
-				{{label}}
+				{{ label }}
 			</slot>
 		</LicButton>
 		<div v-if="isOpen" class="lic-dropdown-menu" :style="menuStyle">
@@ -14,16 +14,15 @@
 </template>
 
 <script setup lang="ts">
-
-import {onUnmounted,ref} from 'vue';
+import { onUnmounted, ref } from 'vue';
 
 import LicButton from './LicButton.vue';
 
-defineProps<{label: string}>();
+defineProps<{ label: string }>();
 
 const isOpen = ref(false);
 const containerRef = ref<HTMLElement | null>(null);
-const menuStyle = ref({top: '0px', left: '0px'});
+const menuStyle = ref({ top: '0px', left: '0px' });
 
 function calcMenuStyle() {
 	const rect = containerRef.value!.getBoundingClientRect();
@@ -59,12 +58,10 @@ function onOutsideClick(e: MouseEvent) {
 
 onUnmounted(() => document.removeEventListener('mousedown', onOutsideClick));
 
-defineExpose({close});
-
+defineExpose({ close });
 </script>
 
 <style>
-
 .lic-dropdown {
 	display: inline-block;
 	position: relative;
@@ -102,5 +99,4 @@ defineExpose({close});
 	border: none;
 	border-top: 1px solid #ebeef5;
 }
-
 </style>

@@ -2,7 +2,7 @@
 
 <template>
 	<div class="container" @click.stop>
-		<h4>{{title()}}</h4>
+		<h4>{{ title() }}</h4>
 		<div class="panel-group">
 			<component
 				:is="currentTemplatePanel"
@@ -16,10 +16,17 @@
 </template>
 
 <script setup lang="ts">
-
 import EventBus from '@/event_bus';
-import {t} from '@/translations';
-import {getCurrentInstance, nextTick, onBeforeUnmount, onMounted, onUnmounted,ref, watch} from 'vue';
+import { t } from '@/translations';
+import {
+	getCurrentInstance,
+	nextTick,
+	onBeforeUnmount,
+	onMounted,
+	onUnmounted,
+	ref,
+	watch,
+} from 'vue';
 
 import store from '../store';
 import * as UiOps from '../ui_ops';
@@ -35,7 +42,7 @@ import pliItemTemplatePanel from './controlPanels/pli_item_template.vue';
 import pliTemplatePanel from './controlPanels/pli_template.vue';
 import rotateIconTemplatePanel from './controlPanels/rotate_icon_template.vue';
 
-const props = defineProps<{selectedItem: any;}>();
+const props = defineProps<{ selectedItem: any }>();
 
 const instance = getCurrentInstance();
 const currentTemplateRef = ref<any>(null);
@@ -63,7 +70,7 @@ const componentLookup: any = {
 		page: [pageNumberTemplatePanel, ''],
 		step: {
 			callout: [fontPanel, 'callout.step.numberLabel'],
-			'default': [fontPanel, 'step.numberLabel'],
+			default: [fontPanel, 'step.numberLabel'],
 		},
 	},
 	quantityLabel: {
@@ -101,7 +108,7 @@ function title() {
 }
 
 function newValues(opts: any) {
-	lastEdit.value = (typeof opts === 'string') ? {type: opts} : opts;
+	lastEdit.value = typeof opts === 'string' ? { type: opts } : opts;
 	if (!opts.noLayout) {
 		store.get.templatePage().needsLayout = true;
 	}
@@ -120,7 +127,7 @@ function applyChanges() {
 			}
 			const parts: string[] = lastEdit.value.type.split('.');
 			const item = t('glossary.' + (_.last(parts) || '').toLowerCase());
-			const undoText = t('action.edit.template.change.undo_@mf', {item});
+			const undoText = t('action.edit.template.change.undo_@mf', { item });
 			undoStack.commit('', null, undoText);
 		}
 		lastEdit.value = null;
@@ -129,7 +136,7 @@ function applyChanges() {
 
 function applyDirtyAction(entryType: string) {
 	const item = t('glossary.' + entryType.toLowerCase());
-	const undoText = t('action.edit.template.change.undo_@mf', {item});
+	const undoText = t('action.edit.template.change.undo_@mf', { item });
 	undoStack.commit('', null, undoText, [entryType, 'page'] as any);
 }
 
@@ -154,10 +161,13 @@ function forceUpdate() {
 	}
 }
 
-watch(() => props.selectedItem, () => {
-	applyChanges();
-	setCurrentTemplate();
-});
+watch(
+	() => props.selectedItem,
+	() => {
+		applyChanges();
+		setCurrentTemplate();
+	},
+);
 
 onBeforeUnmount(() => {
 	// Catch changes if user switches from template panel directly to nav tree or new page via keyboard
@@ -176,6 +186,5 @@ onUnmounted(() => {
 	EventBus.off('force-update', forceUpdate);
 });
 
-defineExpose({forceUpdate, applyDirtyAction});
-
+defineExpose({ forceUpdate, applyDirtyAction });
 </script>

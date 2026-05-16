@@ -1,16 +1,8 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="title"
-		width="400px"
-		class="rotatePartImageDialog"
-	>
-		<rotate-builder
-			:initial-rotation="rotation"
-			title=""
-			@new-values="updateValues"
-		/>
+	<LicDialog :title="title" width="400px" class="rotatePartImageDialog">
+		<rotate-builder :initial-rotation="rotation" title="" @new-values="updateValues" />
 		<div v-if="showRotateIconCheckbox" class="panel-row">
 			<label class="lic-checkbox">
 				<input
@@ -18,8 +10,8 @@
 					type="checkbox"
 					data-testid="rotate-add-icon"
 					@change="emit('update', currentData())"
-				>
-				{{t('dialog.rotate_part_image.add_rotate_icon')}}
+				/>
+				{{ t('dialog.rotate_part_image.add_rotate_icon') }}
 			</label>
 		</div>
 		<template #footer>
@@ -30,10 +22,9 @@
 </template>
 
 <script setup lang="ts">
-
-import {type Rotation} from '@/item_types';
-import {t} from '@/translations';
-import {ref} from 'vue';
+import { type Rotation } from '@/item_types';
+import { t } from '@/translations';
+import { ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
@@ -51,7 +42,11 @@ const props = defineProps<{
 	addRotateIcon?: boolean;
 	showRotateIconCheckbox?: boolean;
 }>();
-const emit = defineEmits<{(e: 'update', v: RotateResult): void; (e: 'ok', v: RotateResult): void; (e: 'cancel'): void}>();
+const emit = defineEmits<{
+	(e: 'update', v: RotateResult): void;
+	(e: 'ok', v: RotateResult): void;
+	(e: 'cancel'): void;
+}>();
 
 const addRotateIcon = ref(props.addRotateIcon ?? true);
 const showRotateIconCheckbox = ref(props.showRotateIconCheckbox ?? true);
@@ -77,10 +72,6 @@ function ok() {
 function cancel() {
 	emit('cancel');
 }
-
 </script>
 
-<style>
-
-
-</style>
+<style></style>

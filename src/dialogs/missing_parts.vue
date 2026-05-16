@@ -1,34 +1,27 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="t('dialog.missing_parts.title')"
-		class="missingPartsDialog"
-		width="550px"
-	>
-		<div
-			class="subheading"
-			v-html="t('dialog.missing_parts.subtitle')"
-		/>
+	<LicDialog :title="t('dialog.missing_parts.title')" class="missingPartsDialog" width="550px">
+		<div class="subheading" v-html="t('dialog.missing_parts.subtitle')" />
 		<table class="missingPartsTable">
 			<tbody>
 				<tr v-for="(value, filename) in missingPartsData" :key="filename" class="missingPartRow">
 					<td>
 						<i v-if="value.uploaded" class="fas fa-check" />
-						{{filename}}
+						{{ filename }}
 					</td>
-					<td>{{partCount(value.count)}}</td>
+					<td>{{ partCount(value.count) }}</td>
 					<td>
 						<LicTooltip v-if="showSendButton(filename)">
 							<template #content>
 								<div v-html="t('dialog.missing_parts.send_to_remote.tooltip')" />
 							</template>
 							<LicButton @click="sendToRemote(filename)">
-								{{t("dialog.missing_parts.send_to_remote.title")}}
+								{{ t('dialog.missing_parts.send_to_remote.title') }}
 							</LicButton>
 						</LicTooltip>
 						<LicButton v-else-if="!value.uploaded" @click="upload(filename)">
-							{{t("glossary.import")}}
+							{{ t('glossary.import') }}
 						</LicButton>
 					</td>
 				</tr>
@@ -36,16 +29,15 @@
 		</table>
 		<template #footer>
 			<LicButton type="primary" @click="ok">
-				{{okText}}
+				{{ okText }}
 			</LicButton>
 		</template>
 	</LicDialog>
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {computed,ref} from 'vue';
+import { t } from '@/translations';
+import { computed, ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
@@ -55,9 +47,9 @@ import openFileHandler from '../file_uploader';
 import LDParse from '../ld_parse';
 import _ from '../util';
 
-const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
+const emit = defineEmits<{ (e: 'ok'): void; (e: 'cancel'): void }>();
 
-type PartEntry = {uploaded: boolean; count: number};
+type PartEntry = { uploaded: boolean; count: number };
 type MissingPartsData = Record<string, PartEntry>;
 type LoadedContent = Record<string, string | null>;
 
@@ -65,7 +57,7 @@ function buildMissingPartsTable(): MissingPartsData {
 	const missingParts = _.cloneDeep(LDParse.missingParts);
 	const result: MissingPartsData = {};
 	_.forOwn(missingParts, (value: number, key: string) => {
-		result[key] = {uploaded: false, count: value};
+		result[key] = { uploaded: false, count: value };
 	});
 	return result;
 }
@@ -74,21 +66,22 @@ const enablePartSend = window.location.host.toLowerCase().includes('bugeyedmonke
 const missingPartsData = ref<MissingPartsData>(buildMissingPartsTable());
 const loadedPartContent = ref<LoadedContent>({});
 
-const stillHaveMissingParts = computed(() => _.some(missingPartsData.value, p => !p.uploaded));
+const stillHaveMissingParts = computed(() => _.some(missingPartsData.value, (p) => !p.uploaded));
 
-const okText = computed(() => stillHaveMissingParts.value
-	? t('dialog.missing_parts.proceed')
-	: t('dialog.ok'),
+const okText = computed(() =>
+	stillHaveMissingParts.value ? t('dialog.missing_parts.proceed') : t('dialog.ok'),
 );
 
 function partCount(count: number) {
-	return t('dialog.missing_parts.used_@mf', {count});
+	return t('dialog.missing_parts.used_@mf', { count });
 }
 
 function showSendButton(filename: string) {
-	return missingPartsData.value[filename].uploaded
-		&& enablePartSend
-		&& loadedPartContent.value[filename] != null;
+	return (
+		missingPartsData.value[filename].uploaded &&
+		enablePartSend &&
+		loadedPartContent.value[filename] != null
+	);
 }
 
 function ok() {
@@ -101,11 +94,17 @@ function ok() {
 function upload(filename: string) {
 	openFileHandler('.dat, .ldr, .mpd', 'text', (content: string | ArrayBuffer | null) => {
 		LDParse.loadPartContent(content as string).then(() => {
-			loadedPartContent.value = {...loadedPartContent.value, [filename]: content as string | null};
+			loadedPartContent.value = {
+				...loadedPartContent.value,
+				[filename]: content as string | null,
+			};
 			missingPartsData.value[filename].uploaded = true;
 			_.each(LDParse.missingParts, (count: number, fn: string) => {
 				if (!(fn in missingPartsData.value)) {
-					missingPartsData.value = {...missingPartsData.value, [fn]: {uploaded: false, count}};
+					missingPartsData.value = {
+						...missingPartsData.value,
+						[fn]: { uploaded: false, count },
+					};
 				}
 			});
 		});
@@ -117,19 +116,18 @@ function sendToRemote(filename: string) {
 		const xhr = new XMLHttpRequest();
 		xhr.open('POST', 'http://bugeyedmonkeys.com/lic/upload_part.php', true);
 		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-		const content = `&content=filename: ${filename}\n`
-			+ '------------------------------\n'
-			+ `${loadedPartContent.value[filename]}\n`
-			+ '------------------------------';
+		const content =
+			`&content=filename: ${filename}\n` +
+			'------------------------------\n' +
+			`${loadedPartContent.value[filename]}\n` +
+			'------------------------------';
 		xhr.send(content);
 	}
 	loadedPartContent.value[filename] = null;
 }
-
 </script>
 
 <style>
-
 .missingPartsDialog {
 	.subheading {
 		padding-bottom: 20px;
@@ -171,5 +169,4 @@ function sendToRemote(filename: string) {
 		width: 200px;
 	}
 }
-
 </style>

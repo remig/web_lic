@@ -2,19 +2,19 @@
 
 import mitt from 'mitt';
 
-import type {LookupItem} from './item_types';
+import type { LookupItem } from './item_types';
 
 type Events = {
-    'draw-current-page': void;
-    'force-update': void;
-    'hide-menus': void;
-    'key-press': {key: string};
+	'draw-current-page': void;
+	'force-update': void;
+	'hide-menus': void;
+	'key-press': { key: string };
 	'page-resize': void;
-	'redraw-ui': {clearSelection?: boolean};
-    'scroll-to-page': {pageId: number};
-    'set-page-view': {facingPage: boolean, scroll: boolean};
+	'redraw-ui': { clearSelection?: boolean };
+	'scroll-to-page': { pageId: number };
+	'set-page-view': { facingPage: boolean; scroll: boolean };
 	'set-selected': LookupItem;
-    'show-menu': {e: MouseEvent};
+	'show-menu': { e: MouseEvent };
 };
 
 const EventBus = mitt<Events>();

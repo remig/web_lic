@@ -1,9 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {nextTick} from 'vue';
+import { nextTick } from 'vue';
 
 import EventBus from './event_bus';
-import {Point} from './item_types';
+import { Point } from './item_types';
 import * as SelectionOps from './selection_ops';
 import store from './store';
 import * as ReactiveState from './ui_reactive_state';
@@ -18,7 +18,7 @@ export function clearState() {
 	ReactiveState.contextMenu.value = null;
 	ReactiveState.filename.value = null;
 	ReactiveState.statusText.value = '';
-	ReactiveState.updateProgress({clear: true});
+	ReactiveState.updateProgress({ clear: true });
 	ReactiveState.dirtyState.undoIndex = 0;
 	ReactiveState.dirtyState.lastSaveIndex = 0;
 	forceUIUpdate();
@@ -63,11 +63,11 @@ function getCanvasForPage(pageId: number): HTMLElement | null {
 
 export function pageCoordsToCanvasCoords(point: Point): Point {
 	if (ReactiveState.currentPageId.value == null) {
-		return {x: 0, y: 0};
+		return { x: 0, y: 0 };
 	}
 	const canvas = getCanvasForPage(ReactiveState.currentPageId.value);
 	if (canvas == null) {
-		return {x: 0, y: 0};
+		return { x: 0, y: 0 };
 	}
 	const box = canvas.getBoundingClientRect();
 	return {

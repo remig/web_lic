@@ -2,14 +2,8 @@
 
 <template>
 	<div>
-		<fill-panel
-			template-entry="rotateIcon"
-			@new-values="newValues"
-		/>
-		<border-panel
-			template-entry="rotateIcon"
-			@new-values="newValues"
-		/>
+		<fill-panel template-entry="rotateIcon" @new-values="newValues" />
+		<border-panel template-entry="rotateIcon" @new-values="newValues" />
 		<border-panel
 			template-entry="rotateIcon.arrow"
 			title="glossary.arrow"
@@ -19,7 +13,6 @@
 </template>
 
 <script setup lang="ts">
-
 import BorderPanel from './border.vue';
 import FillPanel from './fill.vue';
 
@@ -28,5 +21,4 @@ const emit = defineEmits(['new-values']);
 function newValues() {
 	emit('new-values', 'rotateicon');
 }
-
 </script>

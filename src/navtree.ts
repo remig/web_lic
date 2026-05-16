@@ -2,12 +2,16 @@
 
 import EventBus from './event_bus';
 import {
-type AbstractPart, 	type ItemTypeNames, type ItemTypes, type LookupItem, type PartItem,
+	type AbstractPart,
+	type ItemTypeNames,
+	type ItemTypes,
+	type LookupItem,
+	type PartItem,
 } from './item_types';
 import LDParse from './ld_parse';
 import store from './store';
-import {t} from './translations';
-import {isQuantityLabelParent} from './type_helpers';
+import { t } from './translations';
+import { isQuantityLabelParent } from './type_helpers';
 import uiState from './ui_state';
 import _ from './util';
 
@@ -16,15 +20,17 @@ let invisibleNodeTypes: Set<string>;
 let expandedNodes: Set<string>;
 
 (function loadUIState() {
-
 	expandedNodes = new Set(uiState.get('navTree.expandedNodes'));
 
 	invisibleNodeTypes = new Set();
-	const checkedItems: {[key: string]: boolean} = uiState.get('navTree.checkedItems');
+	const checkedItems: { [key: string]: boolean } = uiState.get('navTree.checkedItems');
 	for (const key in checkedItems) {
-		if (checkedItems.hasOwnProperty(key)
-			&& !checkedItems[key]
-			&& key !== 'all' && key !== 'group_parts' && key !== 'page_step_parts'
+		if (
+			checkedItems.hasOwnProperty(key) &&
+			!checkedItems[key] &&
+			key !== 'all' &&
+			key !== 'group_parts' &&
+			key !== 'page_step_parts'
 		) {
 			invisibleNodeTypes.add(key);
 		}
@@ -34,7 +40,7 @@ let expandedNodes: Set<string>;
 function nodeIdToItem(nodeId: string): any {
 	const id = nodeId.split('_');
 	const type = id[1] as ItemTypeNames;
-	const res: any = {type, id: parseInt(id[2], 10)};
+	const res: any = { type, id: parseInt(id[2], 10) };
 	if (id.length > 3) {
 		res.stepID = parseInt(id[3], 10);
 	}
@@ -49,7 +55,7 @@ function nicePartName(filename: string): string {
 	if (part == null || !part.name) {
 		return 'Unknown Part';
 	} else if (part.isSubModel) {
-		return part.name.replace(/\.(mpd|ldr)/ig, '');
+		return part.name.replace(/\.(mpd|ldr)/gi, '');
 	}
 	return part.name.replace(' x ', 'x');
 }
@@ -82,7 +88,7 @@ function getItemText(itemType: ItemTypes): string {
 		}
 		return t('glossary.' + itemType.subtype.toLowerCase());
 	} else if (itemType.type === 'step') {
-		return (itemType.number == null)
+		return itemType.number == null
 			? t('glossary.step')
 			: t('glossary.step_count_@c', itemType.number);
 	} else if (itemType.type === 'submodel') {
@@ -113,15 +119,14 @@ function getItemText(itemType: ItemTypes): string {
 }
 
 function getChildItems(item: ItemTypes): ItemTypes[] {
-
 	let children = store.get.children(item);
 
 	// Special case: draw step parts as children of CSI
 	if (item.type === 'csi') {
 		const parent = store.get.parent(item);
 		if (parent?.type === 'step') {
-			const parts = parent.parts.map(id => {
-				return {type: 'part', id, stepID: parent.id, parent} as PartItem;
+			const parts = parent.parts.map((id) => {
+				return { type: 'part', id, stepID: parent.id, parent } as PartItem;
 			});
 			children = children.concat(parts);
 		}
@@ -193,12 +198,11 @@ function handleClick(e: MouseEvent): void {
 }
 
 function createTree(): void {
-
 	const root = document.createElement('ul');
 	root.addEventListener('click', handleClick);
 
 	const items = store.get.topLevelTreeNodes();
-	items.forEach(item => {
+	items.forEach((item) => {
 		const child = createNode(item);
 		if (child) {
 			root.appendChild(child);
@@ -213,29 +217,31 @@ function createTree(): void {
 }
 
 function createNode(item: ItemTypes): HTMLLIElement | null {
-
 	if (invisibleNodeTypes.has(item.type)) {
 		return null;
 	}
 	const container = document.createElement('li');
 	const children = getChildItems(item);
-	const childNodes = children.map(createNode)
-		.filter((node): node is HTMLLIElement => node != null);
+	const childNodes = children.map(createNode).filter((node): node is HTMLLIElement => node != null);
 
-	const textNode = _.dom.createElement('span', {
-		id: 'treeRow_' + getItemId(item),
-		'class': 'treeText',
-	}, null, getItemText(item));
+	const textNode = _.dom.createElement(
+		'span',
+		{
+			id: 'treeRow_' + getItemId(item),
+			class: 'treeText',
+		},
+		null,
+		getItemText(item),
+	);
 
 	if (childNodes.length) {
-
 		const id = 'treeParent_' + getItemId(item);
-		const div = _.dom.createElement('div', {id, 'class': 'treeParent'}, container);
-		_.dom.createElement('i', {'class': 'treeIcon fas fa-lg fa-caret-right'}, div);
+		const div = _.dom.createElement('div', { id, class: 'treeParent' }, container);
+		_.dom.createElement('i', { class: 'treeIcon fas fa-lg fa-caret-right' }, div);
 		div.appendChild(textNode);
 
-		const childContainer = _.dom.createElement('ul', {'class': 'treeChildren hidden'}, div);
-		childNodes.forEach(childNode => {
+		const childContainer = _.dom.createElement('ul', { class: 'treeChildren hidden' }, div);
+		childNodes.forEach((childNode) => {
 			childContainer.appendChild(childNode);
 		});
 
@@ -248,10 +254,7 @@ function createNode(item: ItemTypes): HTMLLIElement | null {
 	return container;
 }
 
-function expandToLevel(
-	node: Element, level: number, currentLevel: number,
-): void {
-
+function expandToLevel(node: Element, level: number, currentLevel: number): void {
 	if (node.classList.contains('treeParent')) {
 		expandNode(node);
 	}
@@ -290,7 +293,7 @@ interface API {
 	clearSelected(): void;
 	expandToLevel(level: number): void;
 	collapseAll(): void;
-	setInvisibleNodeTypes(newTypes: (string)[]): void;
+	setInvisibleNodeTypes(newTypes: string[]): void;
 }
 
 const api: API = {

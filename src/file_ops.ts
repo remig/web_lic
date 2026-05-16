@@ -1,15 +1,15 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import {nextTick} from 'vue';
+import { nextTick } from 'vue';
 
 import backwardCompat from './backward_compat';
-import {showImportModelDialog,showMissingPartsDialog, showStringChooserDialog} from './dialog';
+import { showImportModelDialog, showMissingPartsDialog, showStringChooserDialog } from './dialog';
 import openFileHandler from './file_uploader';
 import LDParse from './ld_parse';
 import * as SelectionOps from './selection_ops';
 import Storage from './storage';
 import store from './store';
-import {t} from './translations';
+import { t } from './translations';
 import * as UiOps from './ui_ops';
 import * as ReactiveState from './ui_reactive_state';
 import undoStack from './undo_stack';
@@ -21,7 +21,9 @@ export function importBuiltInModel(url: string) {
 
 export function importCustomModel() {
 	openFileHandler('.ldr, .mpd', 'text', (content, fn) => {
-		importModel(() => LDParse.loadModelContent(content as string, fn, ReactiveState.updateProgress));
+		importModel(() =>
+			LDParse.loadModelContent(content as string, fn, ReactiveState.updateProgress),
+		);
 	});
 }
 
@@ -31,7 +33,7 @@ export async function importModel(modelGenerator: () => Promise<any>) {
 		closeModel();
 	}
 
-	await LDParse.loadLDConfig();  // Forcefully reload color table, to clear previous color table
+	await LDParse.loadLDConfig(); // Forcefully reload color table, to clear previous color table
 
 	ReactiveState.busyText.value = t('dialog.busy_indicator.loading_model');
 	const model = await modelGenerator();
@@ -54,8 +56,12 @@ export async function importModel(modelGenerator: () => Promise<any>) {
 	});
 	if (layoutChoices != null) {
 		// TODO: Add option to start new page for each submodel
-		store.mutations.pli.toggleVisibility({visible: layoutChoices.include.pli});
-		store.mutations.addInitialPages({partsPerStep: layoutChoices.partsPerStep});
+		store.mutations.pli.toggleVisibility({
+			visible: layoutChoices.include.pli,
+		});
+		store.mutations.addInitialPages({
+			partsPerStep: layoutChoices.partsPerStep,
+		});
 		store.mutations.addInitialSubmodelImages();
 		if (layoutChoices.useMaxSteps) {
 			ReactiveState.busyText.value = t('dialog.busy_indicator.merging_steps');
@@ -75,17 +81,20 @@ export async function importModel(modelGenerator: () => Promise<any>) {
 		undoStack.saveBaseState();
 		UiOps.forceUIUpdate();
 
-		ReactiveState.updateProgress({clear: true});
+		ReactiveState.updateProgress({ clear: true });
 		const time = _.formatTime(start, Date.now());
 		const fn = store.get.modelFilename();
-		const msg = t('action.file.import_model.success_message_@mf', {filename: fn, time});
+		const msg = t('action.file.import_model.success_message_@mf', {
+			filename: fn,
+			time,
+		});
 		ReactiveState.statusText.value = msg;
 		nextTick(UiOps.drawCurrentPage);
 	}
 }
 
 export function openLicFile() {
-	openFileHandler('.lic', 'text', content => openLicFileFromContent(content as string));
+	openFileHandler('.lic', 'text', (content) => openLicFileFromContent(content as string));
 }
 
 export function openLicFileFromContent(rawContent: string | object) {
@@ -106,7 +115,10 @@ export function openLicFileFromContent(rawContent: string | object) {
 	SelectionOps.clearSelected();
 	const time = _.formatTime(start, Date.now());
 	const fn = store.model!.filename;
-	ReactiveState.statusText.value = t('action.file.open_lic.success_message_@mf', {filename: fn, time});
+	ReactiveState.statusText.value = t('action.file.open_lic.success_message_@mf', {
+		filename: fn,
+		time,
+	});
 	nextTick(() => {
 		UiOps.forceUIUpdate();
 		UiOps.drawCurrentPage();
@@ -127,7 +139,7 @@ export async function saveAs() {
 	if (newString == null) {
 		return;
 	}
-	const fn = newString.replace(/[^a-zA-Z0-9 _]/ig, '').replace(/li[ct]$/ig, '');
+	const fn = newString.replace(/[^a-zA-Z0-9 _]/gi, '').replace(/li[ct]$/gi, '');
 	ReactiveState.filename.value = store.state.licFilename = fn;
 	save();
 }
@@ -145,7 +157,7 @@ export async function saveTemplateAs() {
 	if (newString == null) {
 		return;
 	}
-	const fn = newString.replace(/[^a-zA-Z0-9 _]/ig, '').replace(/li[ct]$/ig, '');
+	const fn = newString.replace(/[^a-zA-Z0-9 _]/gi, '').replace(/li[ct]$/gi, '');
 	saveTemplate(fn);
 }
 
@@ -154,7 +166,9 @@ export function importTemplate() {
 		const content = JSON.parse(result as string);
 		backwardCompat.fixLicTemplate(content);
 		undoStack.commit('templatePage.load', content, 'Load Template', ['page'] as any);
-		ReactiveState.statusText.value = t('action.file.template.load.success_message_@mf', {filename: fn});
+		ReactiveState.statusText.value = t('action.file.template.load.success_message_@mf', {
+			filename: fn,
+		});
 		nextTick(() => {
 			UiOps.forceUIUpdate();
 			UiOps.drawCurrentPage();

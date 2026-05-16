@@ -9,16 +9,22 @@
 			<button
 				type="button"
 				:class="['lic-toggle-btn', { active: bold }]"
-				@click="bold = !bold; updateValues()"
+				@click="
+					bold = !bold;
+					updateValues();
+				"
 			>
-				<strong>{{t('template.font.bold_character')}}</strong>
+				<strong>{{ t('template.font.bold_character') }}</strong>
 			</button>
 			<button
 				type="button"
 				:class="['lic-toggle-btn', { active: italic }]"
-				@click="italic = !italic; updateValues()"
+				@click="
+					italic = !italic;
+					updateValues();
+				"
 			>
-				<em>{{t('template.font.italic_character')}}</em>
+				<em>{{ t('template.font.italic_character') }}</em>
 			</button>
 			<!-- <button
 				type="button"
@@ -29,26 +35,25 @@
 			</button> -->
 		</div>
 		<label class="label-input-row">
-			{{t('glossary.size')}}
+			{{ t('glossary.size') }}
 			<input
 				v-model.number="size"
 				type="number"
 				min="0"
 				class="form-control"
 				@input="updateValues"
-			>
+			/>
 		</label>
 		<div class="label-input-row">
-			{{t('glossary.color')}}
+			{{ t('glossary.color') }}
 			<LicColorPicker v-model="color" show-alpha @change="updateValues" />
 		</div>
 	</panel-base>
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {ref} from 'vue';
+import { t } from '@/translations';
+import { ref } from 'vue';
 
 import store from '../../store';
 import _ from '../../util';
@@ -58,7 +63,7 @@ import PanelBase from './panel_base.vue';
 
 // TODO: support underlining fonts in general
 
-const props = defineProps<{templateEntry: string}>();
+const props = defineProps<{ templateEntry: string }>();
 const emit = defineEmits(['new-values']);
 
 const template = _.get(store.state.template, props.templateEntry);
@@ -72,9 +77,13 @@ const color = ref(template.color);
 
 function updateValues() {
 	const tpl = _.get(store.state.template, props.templateEntry);
-	tpl.font = _.fontString({size: size.value, family: family.value, bold: bold.value, italic: italic.value});
+	tpl.font = _.fontString({
+		size: size.value,
+		family: family.value,
+		bold: bold.value,
+		italic: italic.value,
+	});
 	tpl.color = color.value;
 	emit('new-values', props.templateEntry);
 }
-
 </script>

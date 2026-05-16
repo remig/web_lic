@@ -1,16 +1,16 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {saveAs} from 'file-saver';
+import { saveAs } from 'file-saver';
 
 import packageInfo from '../package.json';
 import cache from './cache';
-import {type Model, type SaveFileContent,type StateInterface} from './item_types';
+import { type Model, type SaveFileContent, type StateInterface } from './item_types';
 import LDParse from './ld_parse';
 import LDRender from './ld_render';
 import Storage from './storage';
-import {GetterInterface, Getters} from './store/getters';
-import {MutationInterface, Mutations} from './store/mutations';
-import {Renderer,RendererInterface} from './store/render';
+import { GetterInterface, Getters } from './store/getters';
+import { MutationInterface, Mutations } from './store/mutations';
+import { Renderer, RendererInterface } from './store/render';
 import defaultTemplate from './template';
 import _ from './util';
 
@@ -21,7 +21,7 @@ const emptyState = {
 	callouts: [],
 	csis: [],
 	dividers: [],
-	licFilename: null,  // user-visible filename (without extension) used to load / save lic file
+	licFilename: null, // user-visible filename (without extension) used to load / save lic file
 	numberLabels: [],
 	pages: [],
 	pliItems: [],
@@ -54,11 +54,10 @@ export interface Store {
 }
 
 const store: Store = {
-
-	version: null,  // The version of Lic that created this state
+	version: null, // The version of Lic that created this state
 
 	// The currently loaded LDraw model, as returned from LDParse
-	model: null,  // Not in state because it is saved separately, and not affected by undo / redo
+	model: null, // Not in state because it is saved separately, and not affected by undo / redo
 	setModel(model: Model) {
 		store.model = model;
 		LDRender.setModel(model);
@@ -89,7 +88,7 @@ const store: Store = {
 	},
 	saveLocal() {
 		const content = getSaveContent();
-		console.log('Updating local storage');  // eslint-disable-line no-console
+		console.log('Updating local storage'); // eslint-disable-line no-console
 		Storage.replace.model(content);
 	},
 	saveToFile(filename?: string, jsonIndent?: string | number) {
@@ -122,7 +121,7 @@ function getSaveContent(): SaveFileContent {
 
 function saveJSON(json: object, filename: string, jsonIndent?: string | number): void {
 	const content = JSON.stringify(json, null, jsonIndent);
-	const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+	const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
 	saveAs(blob, filename);
 }
 

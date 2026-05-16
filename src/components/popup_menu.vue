@@ -10,20 +10,15 @@
 		>
 			<a
 				v-if="entry.text !== 'separator'"
-				:class="['clickable', {'shortcut-parent': entry.shortcut}]"
+				:class="['clickable', { 'shortcut-parent': entry.shortcut }]"
 				data-toggle="dropdown"
 				@click="triggerMenu(entry, $event)"
 			>
-				<span
-					class="menu-text"
-				>
-					{{t(resolveProperty(entry.text))}}
+				<span class="menu-text">
+					{{ t(resolveProperty(entry.text)) }}
 				</span>
-				<span
-					v-if="entry.shortcut"
-					class="menu-text shortcut small"
-				>
-					{{t(entry.shortcut)}}
+				<span v-if="entry.shortcut" class="menu-text shortcut small">
+					{{ t(entry.shortcut) }}
 				</span>
 			</a>
 			<popup-menu
@@ -38,23 +33,22 @@
 <script lang="ts">
 // TODO: Add checkbox to 'selected' menu entries, like the currently selected view entry
 // TODO: selectedItem = '' means ignore selectedItem entirely, which is ugly as hell
-export default {name: 'PopupMenu'};
+export default { name: 'PopupMenu' };
 </script>
 
 <script setup lang="ts">
-
 import EventBus from '@/event_bus';
-import {t} from '@/translations';
-import {getCurrentInstance, nextTick, onMounted, onUnmounted} from 'vue';
+import { t } from '@/translations';
+import { getCurrentInstance, nextTick, onMounted, onUnmounted } from 'vue';
 
 import _ from '../util';
 
-const props = defineProps<{menuEntries?: any[] | null; selectedItem: any}>();
+const props = defineProps<{ menuEntries?: any[] | null; selectedItem: any }>();
 
 const instance = getCurrentInstance();
 
 function hideSubMenus() {
-	document.querySelectorAll('.dropdown-submenu.open').forEach(el => {
+	document.querySelectorAll('.dropdown-submenu.open').forEach((el) => {
 		el.classList.remove('open');
 	});
 }
@@ -65,7 +59,7 @@ function forceUpdate() {
 }
 
 function resolveProperty(p: any) {
-	return (typeof p === 'function') ? p(props.selectedItem) : p;
+	return typeof p === 'function' ? p(props.selectedItem) : p;
 }
 
 function toggleSubMenu(e: MouseEvent) {
@@ -110,7 +104,7 @@ function position(e: MouseEvent) {
 	menu.style.top = Math.min(e.pageY, doc.clientHeight - menu.clientHeight - 10) + 'px';
 }
 
-function show({e}: {e: MouseEvent}) {
+function show({ e }: { e: MouseEvent }) {
 	const menu = document.getElementById('contextMenu')!;
 	menu.style.outlineStyle = 'none';
 	menu.style.display = 'block';
@@ -127,14 +121,13 @@ function entryClasses(entry: any) {
 	return {
 		divider: entry.text === 'separator',
 		'dropdown-submenu': entry.children,
-		disabled: entry.enabled && props.selectedItem != null
-			? !entry.enabled(props.selectedItem)
-			: false,
+		disabled:
+			entry.enabled && props.selectedItem != null ? !entry.enabled(props.selectedItem) : false,
 	};
 }
 
 function visibleMenuEntries() {
-	return (props.menuEntries || []).filter(entry => {
+	return (props.menuEntries || []).filter((entry) => {
 		if (props.selectedItem == null) {
 			return false;
 		} else if (entry.selectedItem && entry.selectedItem.type !== props.selectedItem.type) {
@@ -145,7 +138,7 @@ function visibleMenuEntries() {
 			if (typeof entry.children === 'function') {
 				return !_.isEmpty(entry.children(props.selectedItem));
 			}
-			return entry.children.some((el: any) => el.shown ? el.shown(props.selectedItem) : true);
+			return entry.children.some((el: any) => (el.shown ? el.shown(props.selectedItem) : true));
 		}
 		return true;
 	});
@@ -163,6 +156,5 @@ onUnmounted(() => {
 	EventBus.off('force-update', forceUpdate);
 });
 
-defineExpose({show, hide, forceUpdate});
-
+defineExpose({ show, hide, forceUpdate });
 </script>

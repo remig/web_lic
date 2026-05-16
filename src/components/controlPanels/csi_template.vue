@@ -2,10 +2,7 @@
 
 <template>
 	<div>
-		<transform-panel
-			:template-entry="templateEntry"
-			@new-values="newValues"
-		/>
+		<transform-panel :template-entry="templateEntry" @new-values="newValues" />
 		<fill-panel
 			title="template.csi.displacement_arrow_color"
 			template-entry="step.csi.displacementArrow"
@@ -16,14 +13,13 @@
 </template>
 
 <script setup lang="ts">
-
-import {getCurrentInstance} from 'vue';
+import { getCurrentInstance } from 'vue';
 
 import store from '../../store';
 import FillPanel from './fill.vue';
 import TransformPanel from './transform.vue';
 
-const props = defineProps<{selectedItem: any; templateEntry: string}>();
+const props = defineProps<{ selectedItem: any; templateEntry: string }>();
 const emit = defineEmits(['new-values']);
 
 const instance = getCurrentInstance();
@@ -39,9 +35,8 @@ function newArrowStyle() {
 
 function newValues() {
 	store.get.csi(props.selectedItem).isDirty = true;
-	emit('new-values', {type: 'csi', noLayout: true});
+	emit('new-values', { type: 'csi', noLayout: true });
 }
 
-defineExpose({apply});
-
+defineExpose({ apply });
 </script>

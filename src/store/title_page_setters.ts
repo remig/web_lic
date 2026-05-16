@@ -1,17 +1,15 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-import {t} from '@/translations';
+import { t } from '@/translations';
 
-import {type Annotation, type Book, type Page} from '../item_types';
+import { type Annotation, type Book, type Page } from '../item_types';
 import LDParse from '../ld_parse';
 import store from '../store';
 
 function addOneTitlePage(parent?: Book) {
 	let insertionIndex = 1;
 	if (parent) {
-		insertionIndex = store.state.pages.findIndex(
-			(page: Page) => page.id === parent.pages[0],
-		);
+		insertionIndex = store.state.pages.findIndex((page: Page) => page.id === parent.pages[0]);
 	}
 	const page = store.mutations.page.add({
 		subtype: 'titlePage',
@@ -30,7 +28,7 @@ function addOneTitlePage(parent?: Book) {
 	}
 	store.mutations.page.renumber();
 
-	const step = store.mutations.step.add({dest: page});
+	const step = store.mutations.step.add({ dest: page });
 	if (store && store.model && store.model.filename) {
 		step.model.filename = store.model.filename;
 	}
@@ -49,7 +47,6 @@ export interface TitlePageMutationInterface {
 }
 
 export const TitlePageMutations: TitlePageMutationInterface = {
-
 	add() {
 		if (store.state.books.length > 1) {
 			store.state.books.forEach(addOneTitlePage);
@@ -62,8 +59,8 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 			.map(store.get.page)
 			.filter((page) => page != null && page.subtype === 'titlePage')
 			.forEach((page) => {
-				store.mutations.item.deleteChildList({item: page, listType: 'step'});
-				store.mutations.page.delete({page});
+				store.mutations.item.deleteChildList({ item: page, listType: 'step' });
+				store.mutations.page.delete({ page });
 			});
 	},
 	addTitleLabel(page) {
@@ -76,7 +73,9 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 					type: 'title-page-model-name',
 				},
 			},
-			parent: page, x: 0, y: 0,
+			parent: page,
+			x: 0,
+			y: 0,
 		});
 	},
 	setPageCountLabels(parent) {
@@ -84,12 +83,12 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 		const titlePage = store.get.titlePage();
 		if (titlePage) {
 			const annotations = titlePage.annotations.map(store.get.annotation);
-			const annotation = annotations.find(a => {
-				return (a == null) ? false : a.meta.type === 'title-page-page-count';
+			const annotation = annotations.find((a) => {
+				return a == null ? false : a.meta.type === 'title-page-page-count';
 			});
 			if (annotation != null) {
 				const partCount = LDParse.model.get.partCount(store.model);
-				const pageCount = store.get.pageCount();  // TODO: count only pages in the current book
+				const pageCount = store.get.pageCount(); // TODO: count only pages in the current book
 				let text;
 				if (parent) {
 					const parentBook = store.get.book(parent);
@@ -97,16 +96,19 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 						throw 'Trying to find a nice annotation for a non-existent Book';
 					}
 					const bookNumber = parentBook.number;
-					text = t('title_page.book_model_info_@mf', {bookNumber, partCount, pageCount});
+					text = t('title_page.book_model_info_@mf', {
+						bookNumber,
+						partCount,
+						pageCount,
+					});
 				} else {
-					text = t('title_page.model_info_@mf', {partCount, pageCount});
+					text = t('title_page.model_info_@mf', { partCount, pageCount });
 				}
-				store.mutations.annotation.set({annotation, newProperties: {text}});
+				store.mutations.annotation.set({ annotation, newProperties: { text } });
 			}
 		}
 	},
 	addPageCountLabel(page, parent) {
-
 		const annotation = store.mutations.annotation.add({
 			annotationType: 'label',
 			properties: {
@@ -116,7 +118,9 @@ export const TitlePageMutations: TitlePageMutationInterface = {
 					type: 'title-page-page-count',
 				},
 			},
-			parent: page, x: 0, y: 0,
+			parent: page,
+			x: 0,
+			y: 0,
 		});
 
 		store.mutations.titlePage.setPageCountLabels(parent);

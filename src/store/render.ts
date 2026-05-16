@@ -1,11 +1,11 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {type CSI, type ItemTypes, type PLIItem, type Step} from '../item_types';
+import { type CSI, type ItemTypes, type PLIItem, type Step } from '../item_types';
 import LDRender from '../ld_render';
 import store from '../store';
 
-const canvasCache = (function() {
-	let cache: {[key: string]: HTMLCanvasElement} = {};
+const canvasCache = (function () {
+	let cache: { [key: string]: HTMLCanvasElement } = {};
 	const transientCanvas = document.createElement('canvas');
 	return {
 		create(domId: string) {
@@ -43,23 +43,20 @@ function getCSIScale(csi: CSI) {
 	if (scale == null) {
 		scale = store.get.templateForItem(csi).scale;
 	}
-	return (scale === 1) ? null : scale;
+	return scale === 1 ? null : scale;
 }
 
 function getPLIItemRotation(item: PLIItem) {
 	const transform = store.get.pliTransform(item.filename);
-	const rot = (transform.rotation == null)
-		? store.get.templateForItem(item).rotation
-		: transform.rotation;
+	const rot =
+		transform.rotation == null ? store.get.templateForItem(item).rotation : transform.rotation;
 	return rot?.length ? rot : null;
 }
 
 function getPLIItemScale(item: PLIItem) {
 	const transform = store.get.pliTransform(item.filename);
-	const scale = (transform.scale == null)
-		? store.get.templateForItem(item).scale
-		: transform.scale;
-	return (scale === 1) ? null : scale;
+	const scale = transform.scale == null ? store.get.templateForItem(item).scale : transform.scale;
+	return scale === 1 ? null : scale;
 }
 
 export interface RenderResult {
@@ -72,16 +69,27 @@ export interface RenderResult {
 
 export interface RendererInterface {
 	csi(
-		localModel: any, step: Step, csi: CSI, selectedPartIDs?: number[] | null,
-		hiResScale?: number, bypassCache?: boolean
+		localModel: any,
+		step: Step,
+		csi: CSI,
+		selectedPartIDs?: number[] | null,
+		hiResScale?: number,
+		bypassCache?: boolean,
 	): RenderResult | null;
 	csiWithSelection(
-		localModel: any, step: Step, csi: CSI, selectedPartIDs?: number[] | null,
-		hiResScale?: number, bypassCache?: boolean
+		localModel: any,
+		step: Step,
+		csi: CSI,
+		selectedPartIDs?: number[] | null,
+		hiResScale?: number,
+		bypassCache?: boolean,
 	): RenderResult | null;
 	pli(
-		colorCode: number, filename: string, item: CSI | PLIItem,
-		hiResScale?: number, bypassCache?: boolean
+		colorCode: number,
+		filename: string,
+		item: CSI | PLIItem,
+		hiResScale?: number,
+		bypassCache?: boolean,
 	): RenderResult | null;
 	clearCanvasCache(): void;
 	removeCanvas(item: ItemTypes): void;
@@ -89,9 +97,7 @@ export interface RendererInterface {
 }
 
 export const Renderer: RendererInterface = {
-
 	csi(localModel, step, csi, selectedPartIDs, hiResScale = 1, bypassCache = false) {
-
 		if (csi.domID == null) {
 			csi.domID = `CSI_${step.csiID}`;
 			csi.isDirty = true;
@@ -119,7 +125,13 @@ export const Renderer: RendererInterface = {
 			LDRender.renderModel(localModel, container, config);
 			delete (csi as any).isDirty;
 		}
-		return {width: container.width, height: container.height, dx: 0, dy: 0, container};
+		return {
+			width: container.width,
+			height: container.height,
+			dx: 0,
+			dy: 0,
+			container,
+		};
 	},
 	csiWithSelection(localModel, step, csi, selectedPartIDs) {
 		const config = {
@@ -143,15 +155,14 @@ export const Renderer: RendererInterface = {
 		};
 	},
 	pli(colorCode, filename, item, hiResScale = 1, bypassCache) {
-
 		if (item.domID == null) {
 			item.domID = `PLI_${filename}_${colorCode}`;
 			item.isDirty = true;
 		}
 		let container = canvasCache.get(item.domID, bypassCache);
 		if (item.isDirty || container == null || bypassCache) {
-			const zoom = (item.type === 'csi') ? getCSIScale(item) : getPLIItemScale(item);
-			const rotation = (item.type === 'csi') ? getCSIRotation(item) : getPLIItemRotation(item);
+			const zoom = item.type === 'csi' ? getCSIScale(item) : getPLIItemScale(item);
+			const rotation = item.type === 'csi' ? getCSIRotation(item) : getPLIItemRotation(item);
 			const config = {
 				size: hiResScale * 1000,
 				zoom,
@@ -162,7 +173,7 @@ export const Renderer: RendererInterface = {
 			LDRender.renderPart(colorCode, filename, container, config);
 			delete (item as any).isDirty;
 		}
-		return {width: container.width, height: container.height, container};
+		return { width: container.width, height: container.height, container };
 	},
 	clearCanvasCache() {
 		canvasCache.clear();
@@ -177,22 +188,23 @@ export const Renderer: RendererInterface = {
 		}
 	},
 	adjustCameraZoom() {
-
 		if (store.model == null) {
 			return;
 		}
 
 		// Render the main model; if it's too big to fit in the default view, zoom out until it fits
-		const size = 1000, maxSize = size - 150, zoomStep = 20;
-		const config = {size, resizeContainer: true};
+		const size = 1000;
+		const maxSize = size - 150;
+		const zoomStep = 20;
+		const config = { size, resizeContainer: true };
 		const container = canvasCache.get();
 		let zoom = 0;
 
 		let res = LDRender.renderPart(0, store.model.filename, container, config);
 
-		while (res && (zoom > -500) && LDRender.imageOutOfBounds(res, maxSize)) {
+		while (res && zoom > -500 && LDRender.imageOutOfBounds(res, maxSize)) {
 			zoom -= zoomStep;
-			LDRender.setRenderState({zoom});
+			LDRender.setRenderState({ zoom });
 			res = LDRender.renderPart(0, store.model.filename, container, config);
 		}
 		store.state.template.sceneRendering.zoom = zoom;

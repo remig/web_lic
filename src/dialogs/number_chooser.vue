@@ -1,12 +1,9 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="title"
-		:width="width ?? '500px'"
-	>
+	<LicDialog :title="title" :width="width ?? '500px'">
 		<div class="label-input-row">
-			{{label}}
+			{{ label }}
 			<div>
 				<input
 					ref="set_focus"
@@ -17,7 +14,7 @@
 					type="number"
 					class="form-control"
 					@input="updateValues"
-				>
+				/>
 				<div v-if="bodyText" style="margin-top: 15px" v-html="bodyText" />
 			</div>
 		</div>
@@ -29,10 +26,9 @@
 </template>
 
 <script setup lang="ts">
-
 // TODO: Need to implement my own better looking number input, with nice scroll buttons.
 
-import {ref} from 'vue';
+import { ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
@@ -47,7 +43,11 @@ const props = defineProps<{
 	bodyText?: string;
 	width?: string;
 }>();
-const emit = defineEmits<{(e: 'update', value: number): void; (e: 'ok', value: number): void; (e: 'cancel'): void}>();
+const emit = defineEmits<{
+	(e: 'update', value: number): void;
+	(e: 'ok', value: number): void;
+	(e: 'cancel'): void;
+}>();
 
 const currentValue = ref(props.initialValue ?? 0);
 
@@ -62,8 +62,6 @@ function ok() {
 function cancel() {
 	emit('cancel');
 }
-
 </script>
 
-<style>
-</style>
+<style></style>

@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
-let stateCache: {[key: string]: any} = {};
-import {type LookupItem} from './item_types';
+let stateCache: { [key: string]: any } = {};
+import { type LookupItem } from './item_types';
 
 interface Cache {
 	get(item: string | LookupItem, key: string, defaultValue?: any): any;
@@ -19,8 +19,12 @@ const cacheAPI: Cache = {
 			if (stateCache[item] && stateCache[item][key]) {
 				return stateCache[item][key];
 			}
-		} else if (item && item.type && item.id != null
-			&& stateCache[item.type] && stateCache[item.type][item.id]
+		} else if (
+			item &&
+			item.type &&
+			item.id != null &&
+			stateCache[item.type] &&
+			stateCache[item.type][item.id]
 		) {
 			return stateCache[item.type][item.id][key];
 		}

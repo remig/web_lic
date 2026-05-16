@@ -1,22 +1,19 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="t('dialog.brick_colors.title')"
-		width="500px"
-	>
+	<LicDialog :title="t('dialog.brick_colors.title')" width="500px">
 		<table class="brickColorTable">
 			<thead>
 				<tr>
-					<th>{{t('dialog.brick_colors.ld_code')}}</th>
-					<th style="text-align: left;">
-						{{t('dialog.brick_colors.name')}}
+					<th>{{ t('dialog.brick_colors.ld_code') }}</th>
+					<th style="text-align: left">
+						{{ t('dialog.brick_colors.name') }}
 					</th>
 					<th>
-						{{t('glossary.color')}}
+						{{ t('glossary.color') }}
 					</th>
 					<th>
-						{{t('dialog.brick_colors.edge_color')}}
+						{{ t('dialog.brick_colors.edge_color') }}
 					</th>
 				</tr>
 			</thead>
@@ -25,9 +22,9 @@
 			<table class="brickColorTable">
 				<tbody>
 					<tr v-for="row in colorData" :key="row.id" class="brickColorRow">
-						<td>{{row.id}}</td>
-						<td style="text-align: left;">
-							{{_.startCase(row.name)}}
+						<td>{{ row.id }}</td>
+						<td style="text-align: left">
+							{{ _.startCase(row.name) }}
 						</td>
 						<td>
 							<LicColorPicker v-model="row.color" />
@@ -48,9 +45,8 @@
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {ref} from 'vue';
+import { t } from '@/translations';
+import { ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicColorPicker from '@/components/base/LicColorPicker.vue';
@@ -58,13 +54,13 @@ import LicDialog from '@/components/base/LicDialog.vue';
 
 import backwardCompat from '../backward_compat';
 import EventBus from '../event_bus';
-import {type ColorTableEntry,type LDrawColorCode} from '../item_types';
+import { type ColorTableEntry, type LDrawColorCode } from '../item_types';
 import LDParse from '../ld_parse';
 import Storage from '../storage';
 import store from '../store';
 import _ from '../util';
 
-const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
+const emit = defineEmits<{ (e: 'ok'): void; (e: 'cancel'): void }>();
 
 const customColors = Storage.get.customBrickColors();
 
@@ -102,7 +98,7 @@ function applyChange() {
 }
 
 function ok() {
-	colorData.value.forEach(el => {
+	colorData.value.forEach((el) => {
 		const ldColor = LDParse.colorTable[el.id];
 		let customColor = customColors[el.id];
 		if (ldColor.color === el.color && customColor) {
@@ -128,17 +124,15 @@ function ok() {
 }
 
 function reset() {
-	colorData.value.forEach(el => {
+	colorData.value.forEach((el) => {
 		const entry = LDParse.colorTable[el.id];
 		el.color = entry.color;
 		el.edge = entry.edge;
 	});
 }
-
 </script>
 
 <style>
-
 .brickColorTable {
 	table-layout: fixed;
 	width: 440px;
@@ -182,5 +176,4 @@ function reset() {
 	height: 34px;
 	margin-bottom: -4px;
 }
-
 </style>

@@ -5,15 +5,16 @@
 		ref="el"
 		:data-id="`guide-${id}`"
 		:class="['guide', orientation === 'vertical' ? 'guide-vertical' : 'guide-horizontal']"
-		:style="orientation === 'vertical'
-			? {left: position + 'px', height: (pageSize.height + 20) + 'px'}
-			: {top: position + 'px', width: (pageSize.width + 20) + 'px'}"
+		:style="
+			orientation === 'vertical'
+				? { left: position + 'px', height: pageSize.height + 20 + 'px' }
+				: { top: position + 'px', width: pageSize.width + 20 + 'px' }
+		"
 	/>
 </template>
 
 <script setup lang="ts">
-
-import {ref} from 'vue';
+import { ref } from 'vue';
 
 import uiState from '../ui_state';
 import undoStack from '../undo_stack';
@@ -22,7 +23,7 @@ import _ from '../util';
 const props = defineProps<{
 	position: number;
 	orientation: string;
-	pageSize: {width: number; height: number};
+	pageSize: { width: number; height: number };
 	id: number;
 }>();
 
@@ -33,31 +34,29 @@ function moveBy(dx: number, dy: number) {
 	if (props.orientation === 'vertical') {
 		let left = parseFloat(el.value!.style.left) + dx;
 		left = _.clamp(left, 0, props.pageSize.width);
-		document.querySelectorAll(`[data-id="guide-${props.id}"]`).forEach(guideEl => {
+		document.querySelectorAll(`[data-id="guide-${props.id}"]`).forEach((guideEl) => {
 			(guideEl as HTMLElement).style.left = left + 'px';
 		});
 	} else {
 		let top = parseFloat(el.value!.style.top) + dy;
 		top = _.clamp(top, 0, props.pageSize.height);
-		document.querySelectorAll(`[data-id="guide-${props.id}"]`).forEach(guideEl => {
+		document.querySelectorAll(`[data-id="guide-${props.id}"]`).forEach((guideEl) => {
 			(guideEl as HTMLElement).style.top = top + 'px';
 		});
 	}
 }
 
 function savePosition() {
-	const attr = (props.orientation === 'vertical') ? 'left' : 'top';
+	const attr = props.orientation === 'vertical' ? 'left' : 'top';
 	const position = parseFloat(el.value!.style[attr]);
 	const change = uiState.mutations.guides.setPosition(props.id, position);
 	undoStack.commit(change, null, 'Move Guide');
 }
 
-defineExpose({moveBy, savePosition});
-
+defineExpose({ moveBy, savePosition });
 </script>
 
 <style>
-
 .guide {
 	position: absolute;
 }
@@ -75,5 +74,4 @@ defineExpose({moveBy, savePosition});
 	height: 1px;
 	cursor: n-resize;
 }
-
 </style>

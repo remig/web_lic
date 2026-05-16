@@ -4,36 +4,32 @@
 	<LicDropdown ref="dropdownRef" :label="selectedLabel">
 		<template #trigger>
 			<span class="lic-select-trigger-content">
-				<span class="lic-select-current">{{selectedLabel}}</span>
-				<span
-					v-for="opt in options"
-					:key="opt.value"
-					class="lic-select-sizer"
-					aria-hidden="true"
-				>{{opt.label}}</span>
+				<span class="lic-select-current">{{ selectedLabel }}</span>
+				<span v-for="opt in options" :key="opt.value" class="lic-select-sizer" aria-hidden="true">{{
+					opt.label
+				}}</span>
 			</span>
 		</template>
 		<div
 			v-for="opt in options"
 			:key="opt.value"
-			:class="['lic-dropdown-item', {selected: opt.value === currentValue}]"
+			:class="['lic-dropdown-item', { selected: opt.value === currentValue }]"
 			@click="select(opt.value)"
 		>
-			{{opt.label}}
+			{{ opt.label }}
 		</div>
 	</LicDropdown>
 </template>
 
 <script setup lang="ts">
-
-import {computed,ref} from 'vue';
+import { computed, ref } from 'vue';
 
 import LicDropdown from './LicDropdown.vue';
 
 const props = defineProps<{
 	modelValue?: string;
 	value?: string;
-	options: {value: string; label: string}[];
+	options: { value: string; label: string }[];
 }>();
 
 const emit = defineEmits(['update:modelValue', 'input', 'change']);
@@ -42,8 +38,8 @@ const dropdownRef = ref<InstanceType<typeof LicDropdown> | null>(null);
 
 const currentValue = computed(() => props.modelValue ?? props.value ?? '');
 
-const selectedLabel = computed(() =>
-	props.options.find(o => o.value === currentValue.value)?.label ?? currentValue.value,
+const selectedLabel = computed(
+	() => props.options.find((o) => o.value === currentValue.value)?.label ?? currentValue.value,
 );
 
 function select(value: string) {
@@ -52,11 +48,9 @@ function select(value: string) {
 	emit('change', value);
 	dropdownRef.value?.close();
 }
-
 </script>
 
 <style>
-
 .lic-dropdown-item.selected {
 	font-weight: bold;
 }
@@ -72,5 +66,4 @@ function select(value: string) {
 		visibility: hidden;
 	}
 }
-
 </style>

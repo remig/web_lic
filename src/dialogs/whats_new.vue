@@ -1,32 +1,28 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="t('dialog.whats_new.title')"
-		class="whatsNewDialog"
-		width="700px"
-	>
+	<LicDialog :title="t('dialog.whats_new.title')" class="whatsNewDialog" width="700px">
 		<div v-for="(entry, eID) in content" :key="`entry_${eID}`" class="oneEntry">
 			<h4>
-				{{t('dialog.whats_new.version')}}
-				<strong>{{entry.version}}</strong>
-				<span class="date">{{niceDate(entry.date)}}</span>
+				{{ t('dialog.whats_new.version') }}
+				<strong>{{ entry.version }}</strong>
+				<span class="date">{{ niceDate(entry.date) }}</span>
 			</h4>
 			<div class="innerContent">
 				<h5 v-if="entry.features && entry.features.length">
-					{{t('dialog.whats_new.features')}}
+					{{ t('dialog.whats_new.features') }}
 				</h5>
 				<ul>
 					<li v-for="(feature, fID) in entry.features" :key="`feature_${eID}_${fID}`">
-						{{feature}}
+						{{ feature }}
 					</li>
 				</ul>
 				<h5 v-if="entry.bug_fixes && entry.bug_fixes.length">
-					{{t('dialog.whats_new.bug_fixes')}}
+					{{ t('dialog.whats_new.bug_fixes') }}
 				</h5>
 				<ul>
 					<li v-for="(bug, bID) in entry.bug_fixes" :key="`feature_${eID}_${bID}`">
-						{{bug}}
+						{{ bug }}
 					</li>
 				</ul>
 			</div>
@@ -38,33 +34,34 @@
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {onMounted,ref} from 'vue';
+import { t } from '@/translations';
+import { onMounted, ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
 
-const emit = defineEmits<{(e: 'ok'): void; (e: 'cancel'): void}>();
+const emit = defineEmits<{ (e: 'ok'): void; (e: 'cancel'): void }>();
 
 const content = ref<any[]>([]);
 
 function niceDate(date: string) {
-	const opts: Intl.DateTimeFormatOptions = {month: 'long', day: 'numeric', year: 'numeric'};
+	const opts: Intl.DateTimeFormatOptions = {
+		month: 'long',
+		day: 'numeric',
+		year: 'numeric',
+	};
 	return new Date(date).toLocaleDateString('en-us', opts);
 }
 
-onMounted(async() => {
+onMounted(async () => {
 	const res = await fetch('whats_new.json');
 	if (res && res.ok) {
 		content.value = await res.json();
 	}
 });
-
 </script>
 
 <style>
-
 .whatsNewDialog {
 	strong {
 		padding-right: 5px;
@@ -96,5 +93,4 @@ onMounted(async() => {
 		padding: 5px 0 0 15px;
 	}
 }
-
 </style>

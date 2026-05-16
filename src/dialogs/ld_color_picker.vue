@@ -1,20 +1,16 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog
-		:title="t('dialog.ld_color_picker.title')"
-		class="ldColorPickerDialog"
-		width="500px"
-	>
+	<LicDialog :title="t('dialog.ld_color_picker.title')" class="ldColorPickerDialog" width="500px">
 		<table class="el-table brickColorTable">
 			<thead>
 				<tr>
-					<th>{{t('dialog.ld_color_picker.ld_code')}}</th>
-					<th style="text-align: left;">
-						{{t('dialog.ld_color_picker.name')}}
+					<th>{{ t('dialog.ld_color_picker.ld_code') }}</th>
+					<th style="text-align: left">
+						{{ t('dialog.ld_color_picker.name') }}
 					</th>
-					<th style="text-align: left;">
-						{{t('dialog.ld_color_picker.choose')}}
+					<th style="text-align: left">
+						{{ t('dialog.ld_color_picker.choose') }}
 					</th>
 				</tr>
 			</thead>
@@ -23,13 +19,13 @@
 			<table class="el-table brickColorTable">
 				<tbody>
 					<tr v-for="row in colorData" :key="row.id" class="brickColorRow">
-						<td>{{row.id}}</td>
-						<td style="text-align: left;">
-							{{_.startCase(row.name)}}
+						<td>{{ row.id }}</td>
+						<td style="text-align: left">
+							{{ _.startCase(row.name) }}
 						</td>
 						<td>
 							<div class="swatch" @click="pick(row.id)">
-								<div :style="{'background-color': row.color}" class="inner_swatch" />
+								<div :style="{ 'background-color': row.color }" class="inner_swatch" />
 							</div>
 						</td>
 					</tr>
@@ -43,9 +39,8 @@
 </template>
 
 <script setup lang="ts">
-
-import {t} from '@/translations';
-import {ref} from 'vue';
+import { t } from '@/translations';
+import { ref } from 'vue';
 
 import LicButton from '@/components/base/LicButton.vue';
 import LicDialog from '@/components/base/LicDialog.vue';
@@ -54,12 +49,15 @@ import LDParse from '../ld_parse';
 import Storage from '../storage';
 import _ from '../util';
 
-const emit = defineEmits<{(e: 'ok', colorCode: number): void; (e: 'cancel'): void}>();
+const emit = defineEmits<{
+	(e: 'ok', colorCode: number): void;
+	(e: 'cancel'): void;
+}>();
 
 const customColors = Storage.get.customBrickColors();
 
 function buildColorTable() {
-	const colors: {id: number; name: string; color: string; edge: string}[] = [];
+	const colors: { id: number; name: string; color: string; edge: string }[] = [];
 	_.forOwn(LDParse.colorTable, (v, k) => {
 		if (v.color < 0 || v.edge < 0) {
 			return;
@@ -81,11 +79,9 @@ const colorData = ref(buildColorTable());
 function pick(colorCode: number) {
 	emit('ok', colorCode);
 }
-
 </script>
 
 <style>
-
 .ldColorPickerDialog {
 	table-layout: fixed;
 }
@@ -134,5 +130,4 @@ function pick(colorCode: number) {
 	text-align: center;
 	overflow: hidden;
 }
-
 </style>

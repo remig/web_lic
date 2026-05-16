@@ -1,19 +1,17 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import {type LookupItem, type Model,type Part, type PLIItem} from '../item_types';
+import { type LookupItem, type Model, type Part, type PLIItem } from '../item_types';
 import Layout from '../layout';
 import LDParse from '../ld_parse';
 import store from '../store';
-import {isItemSpecificType} from '../type_helpers';
+import { isItemSpecificType } from '../type_helpers';
 import _ from '../util';
 
 function findPLIItem(filename: string, colorCode: number): PLIItem | undefined {
-	return store.state.pliItems.find(pliItem => {
+	return store.state.pliItems.find((pliItem) => {
 		if (pliItem.filename === filename && pliItem.colorCode === colorCode) {
 			const parent = store.get.parent(pliItem);
-			if (isItemSpecificType(parent, 'page')
-				&& parent.subtype === 'inventoryPage'
-			) {
+			if (isItemSpecificType(parent, 'page') && parent.subtype === 'inventoryPage') {
 				return true;
 			}
 		}
@@ -23,16 +21,30 @@ function findPLIItem(filename: string, colorCode: number): PLIItem | undefined {
 
 export interface InventoryPageMutationInterface {
 	add(): void;
-	delete({page}: {page: LookupItem}): void;
+	delete({ page }: { page: LookupItem }): void;
 	deleteAll(): void;
-	addPart(
-		{filename, colorCode, part, doLayout}
-		: {filename?: string, colorCode?: number, part?: Part, doLayout: boolean}
-	): void;
-	removePart(
-		{filename, colorCode, part, doLayout}
-		: {filename?: string, colorCode?: number, part: Part, doLayout?: boolean}
-	): void;
+	addPart({
+		filename,
+		colorCode,
+		part,
+		doLayout,
+	}: {
+		filename?: string;
+		colorCode?: number;
+		part?: Part;
+		doLayout: boolean;
+	}): void;
+	removePart({
+		filename,
+		colorCode,
+		part,
+		doLayout,
+	}: {
+		filename?: string;
+		colorCode?: number;
+		part: Part;
+		doLayout?: boolean;
+	}): void;
 }
 
 interface PartListEntry {
@@ -40,7 +52,8 @@ interface PartListEntry {
 }
 
 export const InventoryPageMutations: InventoryPageMutationInterface = {
-	add() {  // Add as many inventory pages as needed to fit all parts
+	add() {
+		// Add as many inventory pages as needed to fit all parts
 		if (store.model == null) {
 			return;
 		}
@@ -50,57 +63,60 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 			subtype: 'inventoryPage',
 			pageNumber: lastPage ? lastPage.number + 1 : 0,
 		});
-		const itemList: PartListEntry[] = [];  // index: colorCode, value: {filename: quantity}}
+		const itemList: PartListEntry[] = []; // index: colorCode, value: {filename: quantity}}
 
 		function buildPartList(model: Model) {
-			(model.parts || []).forEach((
-				{filename, colorCode}
-				: {filename: string, colorCode: number},
-			) => {
-				if (LDParse.model.isSubmodel(filename)) {
-					buildPartList(LDParse.model.get.abstractPart(filename));
-				} else {
-					if (itemList[colorCode] && itemList[colorCode][filename]) {
-						itemList[colorCode][filename]++;
+			(model.parts || []).forEach(
+				({ filename, colorCode }: { filename: string; colorCode: number }) => {
+					if (LDParse.model.isSubmodel(filename)) {
+						buildPartList(LDParse.model.get.abstractPart(filename));
 					} else {
-						itemList[colorCode] = itemList[colorCode] || {};
-						itemList[colorCode][filename] = 1;
+						if (itemList[colorCode] && itemList[colorCode][filename]) {
+							itemList[colorCode][filename]++;
+						} else {
+							itemList[colorCode] = itemList[colorCode] || {};
+							itemList[colorCode][filename] = 1;
+						}
 					}
-				}
-			});
+				},
+			);
 		}
 
 		buildPartList(store.model);
 
 		itemList.forEach((partList, colorCode) => {
 			_.forOwn(partList, (quantity, filename) => {
-				store.mutations.pliItem.add({parent: page, filename, colorCode, quantity});
+				store.mutations.pliItem.add({
+					parent: page,
+					filename,
+					colorCode,
+					quantity,
+				});
 			});
 		});
 
 		Layout.allInventoryPages();
 	},
-	delete({page}) {
+	delete({ page }) {
 		const item = store.get.page(page);
 		if (item == null) {
 			return;
 		}
 		if (item.numberLabelID != null) {
-			store.mutations.item.delete(
-				{item: store.get.numberLabel(item.numberLabelID)},
-			);
+			store.mutations.item.delete({
+				item: store.get.numberLabel(item.numberLabelID),
+			});
 		}
-		store.mutations.item.deleteChildList({item, listType: 'pliItem'});
-		store.mutations.item.delete({item});
+		store.mutations.item.deleteChildList({ item, listType: 'pliItem' });
+		store.mutations.item.delete({ item });
 	},
 	deleteAll() {
 		const pages = store.get.inventoryPages() || [];
-		pages.forEach(page => {
-			store.mutations.inventoryPage.delete({page});
+		pages.forEach((page) => {
+			store.mutations.inventoryPage.delete({ page });
 		});
 	},
-	addPart({filename, colorCode, part, doLayout = false}) {
-
+	addPart({ filename, colorCode, part, doLayout = false }) {
 		const page = store.get.inventoryPages()[0];
 		if (page == null) {
 			return;
@@ -132,11 +148,10 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 		}
 		if (doLayout) {
 			// Only need to layout first page; layout logic will recreate the rest
-			store.mutations.page.layout({page});
+			store.mutations.page.layout({ page });
 		}
 	},
-	removePart({filename, colorCode, part, doLayout = false}) {
-
+	removePart({ filename, colorCode, part, doLayout = false }) {
 		const page = store.get.inventoryPages()[0];
 		if (page == null) {
 			return;
@@ -157,7 +172,7 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 		const pliItem = findPLIItem(localFilename, localColorCode);
 		if (pliItem) {
 			if (pliItem.quantity === 1) {
-				store.mutations.pliItem.delete({pliItem});
+				store.mutations.pliItem.delete({ pliItem });
 			} else {
 				pliItem.quantity--;
 			}
@@ -165,7 +180,7 @@ export const InventoryPageMutations: InventoryPageMutationInterface = {
 
 		if (doLayout) {
 			// Only need to layout first page; layout logic will recreate the rest
-			store.mutations.page.layout({page});
+			store.mutations.page.layout({ page });
 		}
 	},
 };

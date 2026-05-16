@@ -6,7 +6,6 @@ import twgl from './twgl';
 // Arrow geometry has base at (0, 0, 0), pointing straight down along Y, facing forward along Z
 // Arrows are drawwn in two parts: the tip and the base, which can be stretched to any length
 function createArrowBuffers(gl) {
-
 	const arrowDimensions = {
 		head: {
 			length: 26,
@@ -22,6 +21,7 @@ function createArrowBuffers(gl) {
 	const body = arrowDimensions.body;
 	const bodyLength = 1;
 
+	// prettier-ignore
 	const vertices = [
 		0, bodyLength - head.insetDepth + head.length, 0,   // 0 tip
 		-head.width, bodyLength - head.insetDepth, 0,  // 1 left arrow end
@@ -59,8 +59,7 @@ function createArrowBuffers(gl) {
 	};
 }
 
-function getArrowPosition(partBox, modelView, {direction, arrowOffset = 0}) {
-
+function getArrowPosition(partBox, modelView, { direction, arrowOffset = 0 }) {
 	const min = twgl.m4.transformPoint(modelView, partBox.min);
 	const max = twgl.m4.transformPoint(modelView, partBox.max);
 
@@ -86,8 +85,7 @@ function getArrowPosition(partBox, modelView, {direction, arrowOffset = 0}) {
 	return twgl.m4.translation([x, y, z]);
 }
 
-function getArrowRotation({direction, arrowRotation = 0}) {
-
+function getArrowRotation({ direction, arrowRotation = 0 }) {
 	let rx, ry, rz;
 	if (direction === 'left') {
 		rz = -90;

@@ -2,8 +2,11 @@
 
 import {
 	type ItemTypeNames,
-	type Page, 	type Rotation, 	type SaveFileContent,
-	type StateInterface, type Template,
+	type Page,
+	type Rotation,
+	type SaveFileContent,
+	type StateInterface,
+	type Template,
 } from './item_types';
 import defaultTemplate from './template';
 import _ from './util';
@@ -15,19 +18,18 @@ import _ from './util';
 function fixOldRotation(oldRotation: any) {
 	const newRotation: Rotation[] = [];
 	if (oldRotation.x) {
-		newRotation.push({axis: 'x', angle: oldRotation.x});
+		newRotation.push({ axis: 'x', angle: oldRotation.x });
 	}
 	if (oldRotation.y) {
-		newRotation.push({axis: 'y', angle: oldRotation.y});
+		newRotation.push({ axis: 'y', angle: oldRotation.y });
 	}
 	if (oldRotation.z) {
-		newRotation.push({axis: 'z', angle: oldRotation.z});
+		newRotation.push({ axis: 'z', angle: oldRotation.z });
 	}
 	return newRotation;
 }
 
 function fixOldTemplate(template: Template) {
-
 	if (template.pliItem.rotation != null) {
 		template.pliItem.rotation = fixOldRotation(template.pliItem.rotation);
 	}
@@ -53,8 +55,8 @@ function fixOldTemplate(template: Template) {
 	if (template.sceneRendering.rotation == null) {
 		template.sceneRendering.rotation = [
 			// These are the camera rotations used in older versions of lic.
-			{axis: 'x', angle: 26.33},
-			{axis: 'y', angle: 45},
+			{ axis: 'x', angle: 26.33 },
+			{ axis: 'y', angle: 45 },
 		];
 	}
 	template.useBlackStudFaces = true;
@@ -102,18 +104,17 @@ function fixState(state: any) {
 }
 
 function fixOldState(state: StateInterface) {
-
 	if (state.pliTransforms == null) {
 		state.pliTransforms = {};
 	}
 
-	state.pages.forEach(page => {
+	state.pages.forEach((page) => {
 		if (page.pliItems == null) {
 			page.pliItems = [];
 		}
 	});
 
-	state.steps.forEach(step => {
+	state.steps.forEach((step) => {
 		if (step.stretchedPages == null) {
 			step.stretchedPages = [];
 		}
@@ -130,7 +131,7 @@ function fixOldState(state: StateInterface) {
 		}
 	});
 
-	state.csis.forEach(csi => {
+	state.csis.forEach((csi) => {
 		if (csi.annotations == null) {
 			csi.annotations = [];
 		}
@@ -139,22 +140,21 @@ function fixOldState(state: StateInterface) {
 		}
 	});
 
-	state.callouts.forEach(callout => {
+	state.callouts.forEach((callout) => {
 		if (!callout.hasOwnProperty('borderOffset')) {
-			callout.borderOffset = {x: 0, y: 0};
+			callout.borderOffset = { x: 0, y: 0 };
 		}
 		if (!callout.hasOwnProperty('position')) {
 			callout.position = 'left';
 		}
 	});
 
-	state.pliItems.forEach(pliItem => {
+	state.pliItems.forEach((pliItem) => {
 		delete (pliItem as any).partNumbers;
 	});
 }
 
 function fixColorTable(colorTable: any) {
-
 	for (const colorCode in colorTable) {
 		if (colorTable.hasOwnProperty(colorCode)) {
 			const entry = colorTable[colorCode];
@@ -165,8 +165,8 @@ function fixColorTable(colorTable: any) {
 				delete entry.edge;
 			}
 			if (typeof entry.color === 'number') {
-				entry.color = '#' + (entry.color).toString(16).padStart(6, '0');
-				entry.edge = '#' + (entry.edge).toString(16).padStart(6, '0');
+				entry.color = '#' + entry.color.toString(16).padStart(6, '0');
+				entry.edge = '#' + entry.edge.toString(16).padStart(6, '0');
 			}
 			if (entry.rgba == null && entry.color != null) {
 				entry.rgba = _.color.toVec4(entry.color, entry.alpha);
@@ -180,7 +180,6 @@ function fixColorTable(colorTable: any) {
 }
 
 function fixOldPartDictionary(partDictionary: any) {
-
 	for (const partFn in partDictionary) {
 		if (partDictionary.hasOwnProperty(partFn)) {
 			const part = partDictionary[partFn];
@@ -202,11 +201,11 @@ function fixOldPartDictionary(partDictionary: any) {
 					part.primitives = part.primitives.map((p: any) => {
 						if (p.colorCode === -1 || p.shape === 'line' || p.shape === 'condline') {
 							if (p.shape === 'condline') {
-								return {p: p.points, cp: p.conditionalPoints};
+								return { p: p.points, cp: p.conditionalPoints };
 							}
 							return p.points;
 						}
-						return {p: p.points, c: p.colorCode};
+						return { p: p.points, c: p.colorCode };
 					});
 				} else {
 					delete part.primitives;
@@ -217,21 +216,20 @@ function fixOldPartDictionary(partDictionary: any) {
 }
 
 function changeItemId(item: any, newId: number, state: any) {
-
 	function fixChildList(listType: string) {
 		(item[listType] || []).forEach((itemId: number) => {
-			state[listType]
-				.find((child: any) => child.id === itemId)
-				.parent = {type: item.type, id: newId};
+			state[listType].find((child: any) => child.id === itemId).parent = {
+				type: item.type,
+				id: newId,
+			};
 		});
 	}
 
 	function fixChild(childType: ItemTypeNames) {
 		if (item[childType + 'ID'] != null) {
-			const child: any = state[childType + 's']
-				.find((el: any) => el.id === item[childType + 'ID']);
+			const child: any = state[childType + 's'].find((el: any) => el.id === item[childType + 'ID']);
 			if (child) {
-				child.parent = {type: item.type, id: newId};
+				child.parent = { type: item.type, id: newId };
 			}
 		}
 	}
@@ -258,9 +256,7 @@ function fixLicTemplate(content: any) {
 }
 
 function fixLicSaveFile(content: SaveFileContent) {
-
 	if (isOld(content)) {
-
 		if (_.isEmpty(content.state.licFilename)) {
 			content.state.licFilename = content.modelFilename.split('.')[0];
 		}
@@ -274,4 +270,4 @@ function fixLicSaveFile(content: SaveFileContent) {
 	fixState(content.state);
 }
 
-export default {fixLicSaveFile, fixLicTemplate, fixColorTable};
+export default { fixLicSaveFile, fixLicTemplate, fixColorTable };

@@ -1,9 +1,14 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 import {
-type Book,
-type GridLayout, 	type LookupItem, 	type NumberLabel,
-type Orientations, type Page, type PageSubtypes, } from '../item_types';
+	type Book,
+	type GridLayout,
+	type LookupItem,
+	type NumberLabel,
+	type Orientations,
+	type Page,
+	type PageSubtypes,
+} from '../item_types';
 import Layout from '../layout';
 import store from '../store';
 import uiState from '../ui_state';
@@ -11,36 +16,59 @@ import _ from '../util';
 
 export interface PageMutationInterface {
 	add({
-		pageNumber, subtype, doNotRenumber,
-		parent, insertionIndex, parentInsertionIndex,
+		pageNumber,
+		subtype,
+		doNotRenumber,
+		parent,
+		insertionIndex,
+		parentInsertionIndex,
 	}: {
-		pageNumber?: number | 'id', subtype?: PageSubtypes, doNotRenumber?: boolean,
-		parent?: LookupItem, insertionIndex?: number, parentInsertionIndex?: number,
+		pageNumber?: number | 'id';
+		subtype?: PageSubtypes;
+		doNotRenumber?: boolean;
+		parent?: LookupItem;
+		insertionIndex?: number;
+		parentInsertionIndex?: number;
 	}): Page;
 	delete({
-		page, doNotRenumber, deleteSteps,
+		page,
+		doNotRenumber,
+		deleteSteps,
 	}: {
-		page: LookupItem, doNotRenumber?: boolean, deleteSteps?: boolean
+		page: LookupItem;
+		doNotRenumber?: boolean;
+		deleteSteps?: boolean;
 	}): void;
-	setLocked({page, locked}: {page: LookupItem, locked: boolean}): void;
+	setLocked({ page, locked }: { page: LookupItem; locked: boolean }): void;
 	renumber(): void;
 	markAllDirty(): void;
-	layout({page, layout}: {page: LookupItem, layout?: Orientations | GridLayout}): void;
+	layout({ page, layout }: { page: LookupItem; layout?: Orientations | GridLayout }): void;
 }
 
 export const PageMutations: PageMutationInterface = {
 	add({
-		pageNumber, subtype = 'page', doNotRenumber = false,
-		parent = null, insertionIndex = -1, parentInsertionIndex = -1,
+		pageNumber,
+		subtype = 'page',
+		doNotRenumber = false,
+		parent = null,
+		insertionIndex = -1,
+		parentInsertionIndex = -1,
 	}) {
 		const pageSize = store.state.template.page;
 		const page = store.mutations.item.add<Page>({
 			item: {
-				type: 'page', id: -1, parent: parent || {type: 'book', id: -1},
+				type: 'page',
+				id: -1,
+				parent: parent || { type: 'book', id: -1 },
 				subtype: subtype,
-				steps: [], dividers: [], annotations: [], pliItems: [],
-				needsLayout: true, locked: false, stretchedStep: null,
-				innerContentOffset: {x: 0, y: 0},
+				steps: [],
+				dividers: [],
+				annotations: [],
+				pliItems: [],
+				needsLayout: true,
+				locked: false,
+				stretchedStep: null,
+				innerContentOffset: { x: 0, y: 0 },
 				number: -1,
 				numberLabelID: null,
 				layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
@@ -50,18 +78,28 @@ export const PageMutations: PageMutationInterface = {
 			parentInsertionIndex,
 		});
 
-		if (pageNumber === 'id') {  // Special flag to say 'use page ID as page number'
+		if (pageNumber === 'id') {
+			// Special flag to say 'use page ID as page number'
 			page.number = page.id;
 		} else if (typeof pageNumber === 'number') {
 			page.number = pageNumber;
 		}
 
 		if (pageNumber != null) {
-			store.mutations.item.add<NumberLabel>({item: {
-				type: 'numberLabel', id: -1, parent: page,
-				align: 'right', valign: 'bottom',
-				x: 0, y: 0, width: 0, height: 0,
-			}, parent: page});
+			store.mutations.item.add<NumberLabel>({
+				item: {
+					type: 'numberLabel',
+					id: -1,
+					parent: page,
+					align: 'right',
+					valign: 'bottom',
+					x: 0,
+					y: 0,
+					width: 0,
+					height: 0,
+				},
+				parent: page,
+			});
 		}
 
 		if (!doNotRenumber) {
@@ -72,7 +110,7 @@ export const PageMutations: PageMutationInterface = {
 
 		return page;
 	},
-	delete({page, doNotRenumber = false, deleteSteps = false}) {
+	delete({ page, doNotRenumber = false, deleteSteps = false }) {
 		const item = store.get.page(page);
 		if (item == null) {
 			return;
@@ -81,7 +119,7 @@ export const PageMutations: PageMutationInterface = {
 			if (deleteSteps) {
 				while (item.steps.length) {
 					store.mutations.step.delete({
-						step: {type: 'step', id: item.steps[0]},
+						step: { type: 'step', id: item.steps[0] },
 						doNotRenumber,
 						deleteParts: true,
 					});
@@ -91,17 +129,19 @@ export const PageMutations: PageMutationInterface = {
 			}
 		}
 		if (item.numberLabelID != null) {
-			store.mutations.item.delete({item: store.get.numberLabel(item.numberLabelID)});
+			store.mutations.item.delete({
+				item: store.get.numberLabel(item.numberLabelID),
+			});
 		}
-		store.mutations.item.deleteChildList({item, listType: 'divider'});
-		store.mutations.item.deleteChildList({item, listType: 'annotation'});
-		store.mutations.item.delete({item});
+		store.mutations.item.deleteChildList({ item, listType: 'divider' });
+		store.mutations.item.deleteChildList({ item, listType: 'annotation' });
+		store.mutations.item.delete({ item });
 		if (!doNotRenumber) {
 			store.mutations.page.renumber();
 		}
 		store.mutations.titlePage.setPageCountLabels();
 	},
-	setLocked({page, locked}) {
+	setLocked({ page, locked }) {
 		const item = store.get.page(page);
 		if (item) {
 			item.locked = locked;
@@ -110,7 +150,7 @@ export const PageMutations: PageMutationInterface = {
 	renumber() {
 		if (store.state.books.length) {
 			const firstPageNumber = uiState.get('dialog.multiBook.firstPageNumber');
-			store.state.books.forEach(book => {
+			store.state.books.forEach((book) => {
 				const pages = book.pages.map(store.get.page);
 				if (firstPageNumber === 'start_page_1') {
 					store.mutations.renumber(pages, 1);
@@ -134,9 +174,10 @@ export const PageMutations: PageMutationInterface = {
 		}
 	},
 	markAllDirty() {
-		store.state.pages.forEach(page => (page.needsLayout = true));
+		store.state.pages.forEach((page) => (page.needsLayout = true));
 	},
-	layout({page, layout}) {  // layout = 'horizontal' or 'vertical' or {rows, cols, direction}
+	layout({ page, layout }) {
+		// layout = 'horizontal' or 'vertical' or {rows, cols, direction}
 		const item = store.get.page(page);
 		if (item != null && !item.locked) {
 			Layout.page(item, layout || item.layout);
