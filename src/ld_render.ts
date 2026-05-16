@@ -6,6 +6,7 @@ import _ from './util';
 import LicGL from './webgl/licgl';
 
 const measurementCanvas = document.createElement('canvas');
+const measurementCtx = measurementCanvas.getContext('2d', { willReadFrequently: true });
 const renderState = {
 	zoom: 500,
 	lineThickness: 0.0015,
@@ -178,13 +179,11 @@ function contextBoundingBox(data: Uint8ClampedArray, w: number, h: number) {
 
 function getCanvasBounds(canvas: HTMLCanvasElement, size: number) {
 	measurementCanvas.width = measurementCanvas.height = size;
-	const ctx = measurementCanvas.getContext('2d');
-	if (ctx == null) {
+	if (measurementCtx == null) {
 		return null;
 	}
-
-	ctx.drawImage(canvas, 0, 0);
-	const data = ctx.getImageData(0, 0, size, size);
+	measurementCtx.drawImage(canvas, 0, 0);
+	const data = measurementCtx.getImageData(0, 0, size, size);
 	return contextBoundingBox(data.data, size, size);
 }
 

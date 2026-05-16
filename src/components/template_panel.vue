@@ -25,6 +25,7 @@ import {
 	onMounted,
 	onUnmounted,
 	ref,
+	shallowRef,
 	watch,
 } from 'vue';
 
@@ -46,7 +47,7 @@ const props = defineProps<{ selectedItem: any }>();
 
 const instance = getCurrentInstance();
 const currentTemplateRef = ref<any>(null);
-const currentTemplatePanel = ref<any>(null);
+const currentTemplatePanel = shallowRef<any>(null);
 const templateEntry = ref<string | null>(null);
 const lastEdit = ref<any>(null);
 

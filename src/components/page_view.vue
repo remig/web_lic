@@ -24,7 +24,8 @@
 					:key="entry.pageId != null ? entry.pageId : 'null-' + entry.idx"
 					:style="{
 						position: 'relative',
-						display: isFacingView ? 'inline' : undefined,
+						display: isFacingView ? 'inline-block' : undefined,
+						verticalAlign: isFacingView ? 'top' : undefined,
 					}"
 				>
 					<div
@@ -184,6 +185,9 @@ const pageGroups = computed((): { pageId: number | null; idx: number }[][] => {
 			result.push(ids.slice(i, i + 2).map((pageId, j) => ({ pageId, idx: i + j })));
 		}
 		return result;
+	}
+	if (isFacingView.value) {
+		return [ids.map((pageId, idx) => ({ pageId, idx }))];
 	}
 	return ids.map((pageId, idx) => [{ pageId, idx }]);
 });

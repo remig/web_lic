@@ -22,19 +22,22 @@
 		/>
 
 		<div class="mainBody" @contextmenu.stop.prevent="rightClick($event)">
-			<div id="leftPane" class="split split-horizontal">
-				<nav-tree-container />
-			</div>
-
-			<div id="rightPane" class="split split-horizontal">
-				<page-view />
-				<getting-started-panel v-if="!haveModel() && !isTemplatePageCurrent" />
-				<template-panel
-					v-if="isTemplatePageCurrent"
-					id="templatePanelContainer"
-					:selected-item="selectedItemLookup"
-				/>
-			</div>
+			<split-view v-model="splitPercent" :min-left="100" :min-right="rightMinWidth">
+				<template #left>
+					<nav-tree-container />
+				</template>
+				<template #right>
+					<div id="rightPane">
+						<page-view />
+						<getting-started-panel v-if="showGettingStarted" />
+						<template-panel
+							v-if="isTemplatePageCurrent"
+							id="templatePanelContainer"
+							:selected-item="selectedItemLookup"
+						/>
+					</div>
+				</template>
+			</split-view>
 		</div>
 
 		<popup-menu
@@ -81,9 +84,9 @@
 // - No way to unstretch a stretched step
 // - Merging the first step of a submodel with the second step loses the submodel image
 
-import Split from 'split.js';
 import { computed, onMounted, ref } from 'vue';
 
+import SplitView from './components/base/SplitView.vue';
 import GettingStartedPanel from './components/getting_started.vue';
 import NavBar from './components/nav_bar.vue';
 import NavTreeContainer from './components/nav_tree_container.vue';
@@ -125,8 +128,12 @@ const filenameInfo = computed(() => ({
 }));
 
 const closeMenus = UiOps.closeMenus;
-const haveModel = UiOps.haveModel;
 const rightClick = SelectionOps.rightClick;
+
+const showGettingStarted = computed(() => filename.value == null && !isTemplatePageCurrent.value);
+
+const splitPercent = ref(Storage.get.ui().splitter);
+const rightMinWidth = computed(() => store.state.template.page.width + 10);
 
 function globalKeyPress(e: KeyboardEvent, metaKeyDown: boolean) {
 	// console.log(metaKeyDown, e.key);
@@ -249,8 +256,7 @@ onMounted(async () => {
 
 	window.addEventListener('beforeunload', (e) => {
 		if (!disableLocalStorage.value) {
-			const splitStyle = document.getElementById('leftPane')!.style;
-			uiState.set('splitter', parseFloat(splitStyle.width.match(/calc\(([0-9.]*)%/)![1]));
+			uiState.set('splitter', splitPercent.value);
 
 			uiState.set('lastUsedVersion', packageInfo.version);
 
@@ -277,16 +283,6 @@ onMounted(async () => {
 	undoStack.onChange(() => {
 		ReactiveState.dirtyState.undoIndex = undoStack.getIndex();
 		UiOps.redrawUI();
-	});
-
-	// Enable splitter between tree and page view
-	const split = Storage.get.ui().splitter;
-	Split(['#leftPane', '#rightPane'], {
-		sizes: [split, 100 - split],
-		minSize: [100, store.state.template.page.width + 10],
-		direction: 'horizontal',
-		gutterSize: 5,
-		snapOffset: 0,
 	});
 
 	if (_.version.isOldVersion(uiState.get('lastUsedVersion'), packageInfo.version)) {

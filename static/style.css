@@ -124,37 +124,9 @@ label {
 	webkit-box-shadow: unset;
 }
 
-/*
-.modal-backdrop.in {
-	opacity: 0;
-}
-*/
-
 .dialog-fade-enter-active,
 .dialog-fade-leave-active {
 	animation: unset;
-}
-
-/* Splitter stuff */
-.gutter.gutter-horizontal {
-	cursor: ew-resize;
-}
-
-.split {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-}
-
-.gutter.gutter-horizontal {
-	background-color: #777;
-}
-
-.split,
-.gutter.gutter-horizontal {
-	height: 100%;
-	float: left;
-	position: relative;
 }
 
 /* Loader overlay */
@@ -224,6 +196,7 @@ ul {
 #rightPane {
 	background-color: #bbb;
 	display: flex;
+	height: 100%;
 	overflow: hidden;
 }
 
