@@ -377,9 +377,9 @@ function parseColorCode(code) {
 	return code === 16 || code === 24 ? null : code;
 }
 
-async function parsePart(abstractPartParent, line) {
+async function parsePart(abstractPartParent, line, progressCallback) {
 	const filename = line.slice(14).join(' ');
-	await loadPart(filename);
+	await loadPart(filename, null, progressCallback, true);
 	const newPart = {
 		filename,
 		matrix: parseFloatList(line.slice(2, 14)),
@@ -502,7 +502,7 @@ async function lineListToAbstractPart(filename, lineList, progressCallback) {
 	for (let i = 0; i < lineList.length; i++) {
 		const line = lineList[i];
 		if (line && line[0] in lineParsers) {
-			await lineParsers[line[0]](abstractPart, line);
+			await lineParsers[line[0]](abstractPart, line, progressCallback);
 			if (progressCallback && line[0] === '1') {
 				progressCallback();
 			}
@@ -544,7 +544,7 @@ async function loadSubModels(lineList, progressCallback) {
 	return null;
 }
 
-async function loadPart(fn, content, progressCallback) {
+async function loadPart(fn, content, progressCallback, isRecursive = false) {
 	let part;
 	if (fn && fn in api.partDictionary) {
 		return api.partDictionary[fn];
@@ -580,14 +580,17 @@ async function loadPart(fn, content, progressCallback) {
 			api.missingParts[fn] = 1;
 			return null; // No content, nothing to create
 		}
-		if (progressCallback) {
+		// Only set the progress total on the top-level load; recursive calls are library parts
+		// whose internal structure was already counted in the top-level partCount.
+		if (progressCallback && !isRecursive) {
 			progressCallback({ stepCount: partCount });
 		}
+		const cb = isRecursive ? null : progressCallback;
 		if (!fn || fn.endsWith('mpd')) {
-			part = await loadSubModels(lineList, progressCallback);
+			part = await loadSubModels(lineList, cb);
 		}
 		if (part == null) {
-			part = await lineListToAbstractPart(fn, lineList, progressCallback);
+			part = await lineListToAbstractPart(fn, lineList, cb);
 		}
 	}
 
