@@ -37,6 +37,9 @@
 				</li>
 			</template>
 			<li>
+				<lic-button label="Hello" @click.stop="showHello" />
+			</li>
+			<li>
 				<a
 					class="clickable"
 					@click.prevent.stop="showAbout"
@@ -53,6 +56,7 @@
 import _ from '../util';
 import packageInfo from '../../package.json';
 import DialogManager from '../dialog';
+import {DialogService} from './lit_widgets/dialogs/dialog_service';
 import PopupMenu from './popup_menu.vue';
 
 export default {
@@ -62,6 +66,9 @@ export default {
 		forceUpdate() {
 			this.$forceUpdate();
 			this.$children.forEach(el => el.forceUpdate());
+		},
+		showHello() {
+			DialogService.create('hello-world', 'Hello World').open();
 		},
 		showAbout() {
 			DialogManager('aboutLicDialog');

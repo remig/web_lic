@@ -14,27 +14,15 @@
 			<label class="el-form-item__label">NYI</label>
 		</el-form-item>
 		<el-form-item v-if="imageFilename != null" :label="tr('template.fill.image')">
-			<el-button
+			<lic-button
 				v-if="imageFilename"
-				icon="el-icon-picture-outline"
+				icon="fas fa-image"
 				class="tight"
-				@click="pickImage"
-			>
-				{{truncatedImageName}}
-			</el-button>
-			<el-button
-				v-else
-				icon="el-icon-picture-outline"
+				:label="truncatedImageName"
 				@click="pickImage"
 			/>
-			<el-button
-				v-if="imageFilename"
-				type="text"
-				class="template-close"
-				icon="el-icon-close"
-				size="small"
-				@click="removeImage"
-			/>
+			<lic-button v-else icon="fas fa-image" @click="pickImage" />
+			<lic-button v-if="imageFilename" icon="fas fa-times" @click="removeImage" />
 		</el-form-item>
 	</panel-base>
 </template>
@@ -135,7 +123,7 @@ export default {
 
 <style>
 
-.el-button.tight {
+.tight {
 	padding: 9px;
 	max-width: 110px;
 	overflow: hidden;

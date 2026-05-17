@@ -13,3 +13,7 @@ declare module 'vue/types/vue' {
 declare module 'element-ui/lib/locale/lang/en' {}
 
 declare module '*.css' {}
+declare module '*.css?inline' {
+	const content: string;
+	export default content;
+}

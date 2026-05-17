@@ -1,0 +1,35 @@
+:host {
+	display: contents;
+}
+
+dialog {
+	border: none;
+	border-radius: 4px;
+	padding: 0;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+dialog::backdrop {
+	background: rgba(0, 0, 0, 0.5);
+}
+
+.lic-dialog-header {
+	padding: 16px 20px;
+	border-bottom: 1px solid #e8e8e8;
+}
+
+.lic-dialog-title {
+	font-size: 16px;
+	font-weight: 500;
+	color: #303133;
+}
+
+.lic-dialog-body {
+	padding: 20px;
+}
+
+.lic-dialog-footer {
+	padding: 10px 20px;
+	text-align: right;
+	border-top: 1px solid #e8e8e8;
+}

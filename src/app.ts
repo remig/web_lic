@@ -4,6 +4,8 @@ import locale from 'element-ui/lib/locale/lang/en';
 // import 'element-ui/lib/theme-chalk/index.css';  // TODO: Make this work
 import './components/element_extensions';
 import './components/lit_widgets/lic_button';
+import './components/lit_widgets/dialogs/dialog_base';
+import './components/lit_widgets/dialogs/lic_hello_dialog';
 
 import UI from './ui.vue';
 import _ from './util';

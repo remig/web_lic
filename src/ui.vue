@@ -61,6 +61,7 @@
 		/>
 
 		<dialog-manager />
+		<lic-hello-dialog />
 
 		<div v-cloak id="statusBar">
 			{{statusText}}

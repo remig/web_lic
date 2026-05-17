@@ -16,20 +16,23 @@
 					<i v-if="value.uploaded" class="fas fa-check" />
 					{{filename}}
 				</td>
-				<td>{{partCount(value.count)}}</td>
+				<td>{{tr('dialog.missing_parts.used_@mf', {count: value.count})}}</td>
 				<td>
 					<licTooltip v-if="showSendButton(filename)">
 						<div
 							slot="content"
 							v-html="tr('dialog.missing_parts.send_to_remote.tooltip')"
 						/>
-						<el-button @click="sendToRemote(filename)">
-							{{tr("dialog.missing_parts.send_to_remote.title")}}
-						</el-button>
+						<lic-button
+							:label="tr('dialog.missing_parts.send_to_remote.title')"
+							@click="sendToRemote(filename)"
+						/>
 					</licTooltip>
-					<el-button v-else-if="!value.uploaded" @click="upload(filename)">
-						{{tr("glossary.import")}}
-					</el-button>
+					<lic-button
+						v-else-if="!value.uploaded"
+						:label="tr('glossary.import')"
+						@click="upload(filename)"
+					/>
 				</td>
 			</tr>
 		</table>
@@ -95,9 +98,6 @@ export default {
 			}
 			this.loadedPartContent[filename] = null;
 			this.$forceUpdate();
-		},
-		partCount(count) {
-			return this.tr('dialog.missing_parts.used_@mf', {count});
 		},
 		showSendButton(filename) {
 			return this.missingPartsData[filename].uploaded
