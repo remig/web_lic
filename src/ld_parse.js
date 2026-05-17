@@ -1,13 +1,26 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from './util';
+import _ from "./util";
 
-const blackColor = {name: 'Black', color: '#05131D', edge: '#595959', alpha: 0};
+// import rawWeightData from './weights.json';
+
+// const weightData = {};
+// for (let i = 0; i < rawWeightData.length; i += 2) {
+// 	weightData[rawWeightData[i]] = rawWeightData[i + 1];
+// }
+
+const blackColor = {
+	name: "Black",
+	color: "#05131D",
+	edge: "#595959",
+	alpha: 0,
+};
 
 const api = {
-
 	// Path to load LDraw parts via HTTP. Either absolute or relative to current page.
-	LDrawPath: '../ldraw/',
+	LDrawPath: "../ldraw/",
+
+	weightData: {},
 
 	// Load the specified url via AJAX and return an abstractPart representing the content of url.
 	async loadRemotePart(url, progressCallback) {
@@ -16,10 +29,9 @@ const api = {
 	// Create an abstractPart from the specified 'content' of an LDraw part file
 	// Treat loaded content as a final model: set its filename appropriately and fix bad color codes
 	async loadModelContent(content, fn, progressCallback) {
-
 		function fixPartColors(part) {
 			if (part.parts) {
-				part.parts.forEach(innerPart => {
+				part.parts.forEach((innerPart) => {
 					if (!(innerPart.colorCode in api.colorTable)) {
 						innerPart.colorCode = 0;
 					}
@@ -39,29 +51,30 @@ const api = {
 		// Force all base parts with invalid colors to be black instead of undefined and render badly
 		fixPartColors(part);
 		Object.values(api.partDictionary)
-			.filter(innerPart => innerPart && innerPart.isSubModel)
+			.filter((innerPart) => innerPart && innerPart.isSubModel)
 			.forEach(fixPartColors);
 
 		return part;
 	},
 	// Create an abstractPart from the specified 'content' of an LDraw part file
-	async loadPartContent(content, progressCallback) {
-		return await loadPart(null, content, progressCallback);
+	async loadPartContent(filename, content, progressCallback) {
+		return await loadPart(filename, content, progressCallback);
 	},
-	async loadLDConfig(url = api.LDrawPath + 'LDConfig.ldr') {
+	async loadLDConfig(url = api.LDrawPath + "LDConfig.ldr") {
 		let content = await fetch(url);
 		if (!content || !content.ok) {
 			return {};
 		}
-		content = await content.text() || '';
+		content = (await content.text()) || "";
 		const colors = {};
-		const lineList = content.split('\n');
+		const lineList = content.split("\n");
 		for (let i = 0; i < lineList.length; i++) {
-			const line = lineList[i].trim().replace(/\s\s+/g, ' ').split(' ');
-			if (line && line[1] === '!COLOUR') {
+			const line = lineList[i].trim().replace(/\s\s+/g, " ").split(" ");
+			if (line && line[1] === "!COLOUR") {
 				const alpha = line[10] ? parseInt(line[10], 10) : 0;
-				colors[line[4]] = {  // TODO: handle color modifiers like 'CHROME', 'METAL', 'LUMINANCE', etc
-					name: line[2].split('').join(''),  // Force garbage collection
+				colors[line[4]] = {
+					// TODO: handle color modifiers like 'CHROME', 'METAL', 'LUMINANCE', etc
+					name: line[2].split("").join(""), // Force garbage collection
 					color: line[6],
 					edge: line[8],
 					alpha,
@@ -80,7 +93,7 @@ const api = {
 	setPartDictionary(dict) {
 		api.partDictionary = dict;
 	},
-	missingParts: {},  // key: filename of part that failed to load, value: count of that part in model
+	missingParts: {}, // key: filename of part that failed to load, value: count of that part in model
 
 	studFaceColorCode: 987,
 
@@ -99,33 +112,40 @@ const api = {
 
 	// colorID: an LDraw color to lookup
 	// type: either 'color' or 'edge'
-	getColor(colorCode, type = 'color') {
+	getColor(colorCode, type = "color") {
 		if (colorCode == null) {
 			return null;
-		} else if (colorCode in api.customColorTable && api.customColorTable[colorCode][type]) {
+		} else if (
+			colorCode in api.customColorTable &&
+			api.customColorTable[colorCode][type]
+		) {
 			return api.customColorTable[colorCode][type];
 		} else if (colorCode in api.colorTable) {
 			return api.colorTable[colorCode][type];
 		} else if (
-			typeof colorCode === 'string' && colorCode.startsWith('#')
-			&& (type === 'color' || type === 'name')
+			typeof colorCode === "string" &&
+			colorCode.startsWith("#") &&
+			(type === "color" || type === "name")
 		) {
 			return colorCode;
 		}
-		return blackColor[type || 'color'];  // Treat any unrecognized colors as black
+		return blackColor[type || "color"]; // Treat any unrecognized colors as black
 	},
 
 	isValidColor(colorCode) {
-		return typeof colorCode === 'string' || (typeof colorCode === 'number' && colorCode >= 0);
+		return (
+			typeof colorCode === "string" ||
+			(typeof colorCode === "number" && colorCode >= 0)
+		);
 	},
 
-	model: {  // All 'model' arguments below are abstractParts
+	model: {
+		// All 'model' arguments below are abstractParts
 		isSubmodel(filename) {
 			return api.partDictionary[filename].isSubModel;
 		},
 		removeMissingParts() {
 			function removeOnePartFromPart(part, missingFilename) {
-
 				const indicesToDelete = [];
 				part.parts.forEach((innerPart, idx) => {
 					if (innerPart.filename === missingFilename) {
@@ -133,7 +153,7 @@ const api = {
 					}
 				});
 				indicesToDelete.reverse();
-				indicesToDelete.forEach(idx => {
+				indicesToDelete.forEach((idx) => {
 					removeOnePart(part, idx);
 				});
 			}
@@ -141,9 +161,9 @@ const api = {
 			function removeOnePart(part, partIdxToRemove) {
 				part.parts.splice(partIdxToRemove, 1);
 				if (part.steps) {
-					part.steps.forEach(step => {
+					part.steps.forEach((step) => {
 						const newParts = [];
-						step.parts.forEach(partId => {
+						step.parts.forEach((partId) => {
 							if (partId < partIdxToRemove) {
 								newParts.push(partId);
 							} else if (partId > partIdxToRemove) {
@@ -152,12 +172,12 @@ const api = {
 						});
 						step.parts = newParts;
 					});
-					part.steps = part.steps.filter(step => step.parts.length);
+					part.steps = part.steps.filter((step) => step.parts.length);
 				}
 			}
 
-			Object.keys(api.missingParts).forEach(missingFilename => {
-				Object.values(api.partDictionary).forEach(part => {
+			Object.keys(api.missingParts).forEach((missingFilename) => {
+				Object.values(api.partDictionary).forEach((part) => {
 					if (part.parts && part.parts.length) {
 						removeOnePartFromPart(part, missingFilename);
 					}
@@ -168,9 +188,12 @@ const api = {
 		get: {
 			// Return the total number of parts in this model, including parts in submodels
 			partCount(model) {
-
 				function helper(localModel) {
-					if (!localModel || !Array.isArray(localModel.parts) || localModel.parts.length <= 0) {
+					if (
+						!localModel ||
+						!Array.isArray(localModel.parts) ||
+						localModel.parts.length <= 0
+					) {
 						return 0;
 					}
 					return localModel.parts.reduce((acc, p) => {
@@ -183,6 +206,10 @@ const api = {
 				}
 				return helper(model);
 			},
+			partWeight(filename) {
+				// return api.weightData[filename.replace(/\..*$/, '')];
+				return api.partDictionary[filename].weight;
+			},
 			abstractPart(filename) {
 				return api.partDictionary[filename];
 			},
@@ -191,10 +218,12 @@ const api = {
 			},
 			// Return an array of abstractParts, one for each submodel in this model.
 			submodels(model) {
-				return (model.parts || []).map(p => {
-					p = api.partDictionary[p.filename];
-					return p.isSubModel ? p : null;
-				}).filter(p => p != null);
+				return (model.parts || [])
+					.map((p) => {
+						p = api.partDictionary[p.filename];
+						return p.isSubModel ? p : null;
+					})
+					.filter((p) => p != null);
 			},
 		},
 	},
@@ -202,64 +231,75 @@ const api = {
 	// Instead, they return an object with two arrays of JSON-patch operations;
 	// 'redo' performs perform the action, 'undo' will undo the action.
 	getAction: {
-		partColor(opts) {  // opts: {filename, partID, color}
-			return actionBuilder(opts.filename, opts.partID, 'colorCode', opts.color);
+		partColor(opts) {
+			// opts: {filename, partID, color}
+			return actionBuilder(opts.filename, opts.partID, "colorCode", opts.color);
 		},
-		matrix(opts) {  // opts: {filename, partID, matrix}
-			return actionBuilder(opts.filename, opts.partID, 'matrix', opts.matrix);
+		matrix(opts) {
+			// opts: {filename, partID, matrix}
+			return actionBuilder(opts.filename, opts.partID, "matrix", opts.matrix);
 		},
-		filename(opts) { // opts: {filename, partID, newFilename}
-			return actionBuilder(opts.filename, opts.partID, 'filename', opts.newFilename);
+		filename(opts) {
+			// opts: {filename, partID, newFilename}
+			return actionBuilder(
+				opts.filename,
+				opts.partID,
+				"filename",
+				opts.newFilename
+			);
 		},
-		addPart(opts) {  // opts: {filename, part}
+		addPart(opts) {
+			// opts: {filename, part}
 			const root = api.partDictionary;
 			const idx = root[opts.filename].parts.length;
 			const path = `/${opts.filename}/parts/${idx}`;
 			return {
-				redo: [{root, op: 'add', path, value: opts.part}],
-				undo: [{root, op: 'remove', path}],
+				redo: [{ root, op: "add", path, value: opts.part }],
+				undo: [{ root, op: "remove", path }],
 			};
 		},
-		removePart(opts) {  // opts: {filename, partID}
+		removePart(opts) {
+			// opts: {filename, partID}
 			const root = api.partDictionary;
 			const part = root[opts.filename].parts[opts.partID];
 			const path = `/${opts.filename}/parts/${opts.partID}`;
 			return {
-				redo: [{root, op: 'remove', path}],
-				undo: [{root, op: 'add', path, value: part}],
+				redo: [{ root, op: "remove", path }],
+				undo: [{ root, op: "add", path, value: part }],
 			};
 		},
 	},
 };
 
 function actionBuilder(filename, partID, property, newValue) {
-	const root = api.partDictionary, op = 'replace';
+	const root = api.partDictionary;
+	const op = "replace";
 	const originalValue = root[filename].parts[partID][property];
 	const path = `/${filename}/parts/${partID}/${property}`;
 	return {
-		redo: [{root, op, path, value: newValue}],
-		undo: [{root, op, path, value: originalValue}],
+		redo: [{ root, op, path, value: newValue }],
+		undo: [{ root, op, path, value: originalValue }],
 	};
 }
 
 async function requestPart(fn) {
-	if (!fn || typeof fn !== 'string') {
-		return '';
+	if (!fn || typeof fn !== "string") {
+		return "";
 	}
-	fn = fn.replace(/\\/g, '/').toLowerCase();
-	const qualifiedFn = fn.startsWith('./') ? fn : api.LDrawPath + 'parts/' + fn;
+	fn = fn.replace(/\\/g, "/").toLowerCase();
+	const qualifiedFn = fn.startsWith("./") ? fn : api.LDrawPath + "parts/" + fn;
 
-	let resp = await fetch(qualifiedFn);  // flat LDraw file layout should alwyas end up here
+	let resp = await fetch(qualifiedFn); // flat LDraw file layout should alwyas end up here
 
 	if (resp == null || !resp.ok) {
 		// Support non-flat LDraw file layouts.  Try to guess 'parts' vs 'p' folder to minimize requests
 		let pathsToTry;
-		if (fn.startsWith('8/') || fn.startsWith('48/')) {
-			pathsToTry = ['p/', 'parts/', 'constraints/', 'models/'];
-		} else if (fn.endsWith('mpd') || fn.endsWith('ldr')) {
-			pathsToTry = ['models/', 'parts/', 'p/', 'constraints/'];
+		if (fn.startsWith("8/") || fn.startsWith("48/")) {
+			pathsToTry = ["p/", "parts/", "constraints/", "models/"];
+		} else if (fn.endsWith("mpd") || fn.endsWith("ldr")) {
+			pathsToTry = ["models/", "parts/", "p/", "constraints/"];
 		} else {
-			pathsToTry = ['parts/', 'p/', 'constraints/', 'models/'];
+			pathsToTry = ["parts/", "p/", "constraints/", "models/"];
 		}
 
 		for (let i = 0; i < pathsToTry.length; i++) {
@@ -270,10 +310,37 @@ async function requestPart(fn) {
 	}
 
 	if (resp == null || !resp.ok) {
-		console.log(`   *** FAILED TO LOAD: ${fn}`);  // eslint-disable-line no-console
+		console.log(`   *** FAILED TO LOAD: ${fn}`);
 		return null;
 	}
 	return await resp.text();
+}
+
+export function sumPartWeight(abstractPart) {
+	return abstractPart.parts.reduce(
+		(acc, p) => acc + (api.model.get.partWeight(p.filename) ?? 0),
+		0
+	);
+}
+
+export function centerOfMass(abstractPart) {
+	if (abstractPart.weight === 0) {
+		return [0, 0, 0];
+	}
+	let mx = 0,
+		my = 0,
+		mz = 0;
+	for (const part of abstractPart.parts) {
+		const partWeight = api.model.get.partWeight(part.filename);
+		mx += partWeight * part.matrix[0];
+		my += partWeight * part.matrix[1];
+		mz += partWeight * part.matrix[2];
+	}
+	return [
+		mx / abstractPart.weight,
+		my / abstractPart.weight,
+		mz / abstractPart.weight,
+	];
 }
 
 // key: submodel filename, value: lineList to be loaded
@@ -282,9 +349,13 @@ const unloadedSubModels = {};
 function forceBlack(colorCode, abstractPartName, partName) {
 	partName = String(partName).toLowerCase();
 	abstractPartName = String(abstractPartName).toLowerCase();
-	if (partName === '4-4cyli.dat') {
-		if (abstractPartName === 'stud.dat' || abstractPartName === 'stud2.dat' ||
-				abstractPartName === 'stud2a.dat' || abstractPartName === 'stod3.dat') {
+	if (partName === "4-4cyli.dat") {
+		if (
+			abstractPartName === "stud.dat" ||
+			abstractPartName === "stud2.dat" ||
+			abstractPartName === "stud2a.dat" ||
+			abstractPartName === "stod3.dat"
+		) {
 			return api.studFaceColorCode;
 		}
 	}
@@ -301,22 +372,22 @@ function parseFloatList(a) {
 
 function parseComment(abstractPart, line) {
 	const command = line[1];
-	if (command === 'FILE') {
+	if (command === "FILE") {
 		// NYI
-	} else if (command === 'ROTSTEP' || command === 'STEP') {
+	} else if (command === "ROTSTEP" || command === "STEP") {
 		parseStep(abstractPart, command, line);
-	} else if (command === '!LEOCAD') {
+	} else if (command === "!LEOCAD") {
 		// LeoCAD annotation
 		if (line.length >= 4) {
 			const annotationKey1 = line[2];
 			const annotationKey2 = line[3];
-			const annotationValue = line.slice(4).join(' ');
-			if (annotationKey1 === 'MODEL') {
+			const annotationValue = line.slice(4).join(" ");
+			if (annotationKey1 === "MODEL") {
 				switch (annotationKey2) {
-					case 'AUTHOR':
+					case "AUTHOR":
 						abstractPart.author = annotationValue;
 						break;
-					case 'DESCRIPTION':
+					case "DESCRIPTION":
 						abstractPart.description = annotationValue;
 						break;
 				}
@@ -335,7 +406,7 @@ function parseStep(abstractPart, command, line) {
 	if (abstractPart.parts) {
 		// store the rotation data
 		let rotation = null;
-		if (command === 'ROTSTEP') {
+		if (command === "ROTSTEP") {
 			rotation = {
 				x: parseFloat(line[2]),
 				y: parseFloat(line[3]),
@@ -344,7 +415,8 @@ function parseStep(abstractPart, command, line) {
 			};
 		}
 		abstractPart.steps.push({
-			parts: abstractPart.parts.slice(abstractPart.steps.lastPart)
+			parts: abstractPart.parts
+				.slice(abstractPart.steps.lastPart)
 				.map((v, i) => i + abstractPart.steps.lastPart),
 			rotation: rotation,
 		});
@@ -353,15 +425,15 @@ function parseStep(abstractPart, command, line) {
 }
 
 function parseColorCode(code) {
-	if (typeof code === 'string' && code.includes('x')) {
-		return '#' + code.slice(-6);
+	if (typeof code === "string" && code.includes("x")) {
+		return "#" + code.slice(-6);
 	}
 	code = parseInt(code, 10);
-	return (code === 16 || code === 24) ? null : code;
+	return code === 16 || code === 24 ? null : code;
 }
 
 async function parsePart(abstractPartParent, line) {
-	const filename = line.slice(14).join(' ');
+	const filename = line.slice(14).join(" ");
 	await loadPart(filename);
 	const newPart = {
 		filename,
@@ -389,19 +461,29 @@ function parseLine(abstractPart, line) {
 		abstractPart.primitives = [];
 	}
 	abstractPart.primitives.push([
-		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
-		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
+		parseFloat(line[2]),
+		parseFloat(line[3]),
+		parseFloat(line[4]),
+		parseFloat(line[5]),
+		parseFloat(line[6]),
+		parseFloat(line[7]),
 	]);
 }
 
 function parseTriangle(abstractPart, line) {
 	let points = [
-		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
-		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
-		parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
+		parseFloat(line[2]),
+		parseFloat(line[3]),
+		parseFloat(line[4]),
+		parseFloat(line[5]),
+		parseFloat(line[6]),
+		parseFloat(line[7]),
+		parseFloat(line[8]),
+		parseFloat(line[9]),
+		parseFloat(line[10]),
 	];
 	if (parseColorCode(line[1]) != null) {
-		points = {p: points, c: parseColorCode(line[1])};
+		points = { p: points, c: parseColorCode(line[1]) };
 	}
 	if (!abstractPart.primitives) {
 		abstractPart.primitives = [];
@@ -411,13 +493,21 @@ function parseTriangle(abstractPart, line) {
 
 function parseQuad(abstractPart, line) {
 	let points = [
-		parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
-		parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
-		parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
-		parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13]),
+		parseFloat(line[2]),
+		parseFloat(line[3]),
+		parseFloat(line[4]),
+		parseFloat(line[5]),
+		parseFloat(line[6]),
+		parseFloat(line[7]),
+		parseFloat(line[8]),
+		parseFloat(line[9]),
+		parseFloat(line[10]),
+		parseFloat(line[11]),
+		parseFloat(line[12]),
+		parseFloat(line[13]),
 	];
 	if (parseColorCode(line[1]) != null) {
-		points = {p: points, c: parseColorCode(line[1])};
+		points = { p: points, c: parseColorCode(line[1]) };
 	}
 	if (!abstractPart.primitives) {
 		abstractPart.primitives = [];
@@ -431,12 +521,20 @@ function parseCondLine(abstractPart, line) {
 	}
 	abstractPart.primitives.push({
 		p: [
-			parseFloat(line[2]), parseFloat(line[3]), parseFloat(line[4]),
-			parseFloat(line[5]), parseFloat(line[6]), parseFloat(line[7]),
+			parseFloat(line[2]),
+			parseFloat(line[3]),
+			parseFloat(line[4]),
+			parseFloat(line[5]),
+			parseFloat(line[6]),
+			parseFloat(line[7]),
 		],
 		cp: [
-			parseFloat(line[8]), parseFloat(line[9]), parseFloat(line[10]),
-			parseFloat(line[11]), parseFloat(line[12]), parseFloat(line[13]),
+			parseFloat(line[8]),
+			parseFloat(line[9]),
+			parseFloat(line[10]),
+			parseFloat(line[11]),
+			parseFloat(line[12]),
+			parseFloat(line[13]),
 		],
 	});
 }
@@ -451,22 +549,28 @@ const lineParsers = {
 };
 
 async function lineListToAbstractPart(filename, lineList, progressCallback) {
-	if (filename && filename.includes('/')) {  // Need only final filename, not the path to it
-		filename = filename.slice(filename.lastIndexOf('/') + 1);
+	if (filename && filename.includes("/")) {
+		// Need only final filename, not the path to it
+		filename = filename.slice(filename.lastIndexOf("/") + 1);
 	}
-	const abstractPart = {filename, name: ''};  // optional: 'primitives', 'parts'
+	const abstractPart = { filename, name: "" }; // optional: 'primitives', 'parts'
 
 	// First line in any LDraw file is assumed to be the part / main model's colloquial name
-	// TODO: if first line is some variant of 'untitled', and if a subsequent line is 0 Name: foo, use foo
-	if (lineList[0] && lineList[0][0] === '0') {
-		if (lineList[0][1] === 'FILE') {
-			abstractPart.name = lineList[0].slice(2).join(' ');
+	if (lineList[0] && lineList[0][0] === "0") {
+		if (lineList[0][1] === "FILE") {
+			abstractPart.name = lineList[0].slice(2).join(" ");
 		} else {
-			abstractPart.name = lineList[0].slice(1).join(' ');
-			abstractPart.name = abstractPart.name.replace(/^Name:\s*/ig, '');  // Trim leading 'Name: '
+			abstractPart.name = lineList[0].slice(1).join(" ");
+			abstractPart.name = abstractPart.name.replace(/^Name:\s*/gi, ""); // Trim leading 'Name: '
 		}
 	}
-	if (!filename && lineList[1] && lineList[1][0] === '0' && lineList[1][1] === 'Name:' && lineList[1][2]) {
+	if (
+		!filename &&
+		lineList[1] &&
+		lineList[1][0] === "0" &&
+		lineList[1][1] === "Name:" &&
+		lineList[1][2]
+	) {
 		// If we don't have a filename but line 2 includes 'Name', use it
 		abstractPart.filename = lineList[1][2];
 	}
@@ -474,11 +578,26 @@ async function lineListToAbstractPart(filename, lineList, progressCallback) {
 		const line = lineList[i];
 		if (line && line[0] in lineParsers) {
 			await lineParsers[line[0]](abstractPart, line);
-			if (progressCallback && line[0] === '1') {
+			if (progressCallback && line[0] === "1") {
 				progressCallback();
 			}
 		}
 	}
+
+	/*
+	const partName = filename.replace(/\..*$/, '');
+	if (partName in api.weightData) {
+		abstractPart.weight = api.weightData[partName];
+		abstractPart.centerOfMass = [0, 0, 0];
+	} else if (abstractPart.parts) {
+		abstractPart.weight = sumPartWeight(abstractPart);
+		abstractPart.centerOfMass = centerOfMass(abstractPart);
+	} else {
+		abstractPart.weight = 0;
+	}
+
+	console.log(`part: ${filename}, weight: ${abstractPart.weight}, com: ${abstractPart.centerOfMass}`);
+*/
 	return abstractPart;
 }
 
@@ -487,20 +606,20 @@ async function loadSubModels(lineList, progressCallback) {
 	let lastFileLine, i, partName;
 	for (i = 0; i < lineList.length; i++) {
 		const line = lineList[i];
-		if (line && line[0] === '0' && line[1] === 'FILE') {
+		if (line && line[0] === "0" && line[1] === "FILE") {
 			if (lastFileLine != null) {
-				models.push({start: lastFileLine, end: i - 1});
+				models.push({ start: lastFileLine, end: i - 1 });
 			}
 			lastFileLine = i;
 		}
 	}
 	if (lastFileLine != null) {
-		models.push({start: lastFileLine, end: i - 1});
+		models.push({ start: lastFileLine, end: i - 1 });
 	}
 	if (models.length) {
 		for (i = 1; i < models.length; i++) {
 			const model = models[i];
-			partName = lineList[model.start].slice(2).join(' ').toLowerCase();
+			partName = lineList[model.start].slice(2).join(" ").toLowerCase();
 			if (partName in api.partDictionary) {
 				// If we already have a submodel with this name, delete and reload it,
 				// as it came from a previous, likely unrelated, model.
@@ -508,7 +627,7 @@ async function loadSubModels(lineList, progressCallback) {
 			}
 			unloadedSubModels[partName] = lineList.slice(model.start, model.end + 1);
 		}
-		partName = lineList[models[0].start].slice(2).join(' ');
+		partName = lineList[models[0].start].slice(2).join(" ");
 		const lines = lineList.slice(models[0].start, models[0].end + 1);
 		return await lineListToAbstractPart(partName, lines, progressCallback);
 	}
@@ -519,12 +638,16 @@ async function loadPart(fn, content, progressCallback) {
 	let part;
 	if (fn && fn in api.partDictionary) {
 		return api.partDictionary[fn];
-	} else if (fn && fn in api.missingParts) {
+	} else if (!content && fn && fn in api.missingParts) {
 		api.missingParts[fn] += 1;
 		return null;
 	} else if (fn && fn.toLowerCase() in unloadedSubModels) {
 		const fnLower = fn.toLowerCase();
-		part = await lineListToAbstractPart(fn, unloadedSubModels[fnLower], progressCallback);
+		part = await lineListToAbstractPart(
+			fn,
+			unloadedSubModels[fnLower],
+			progressCallback
+		);
 		part.isSubModel = true;
 		delete unloadedSubModels[fnLower];
 	} else {
@@ -535,25 +658,26 @@ async function loadPart(fn, content, progressCallback) {
 			api.missingParts[fn] = 1;
 			return null;
 		}
-		const lineList = [], tmpList = content.split('\n');
+		const lineList = [],
+			tmpList = content.split("\n");
 		let partCount = 0;
 		for (let i = 0; i < tmpList.length; i++) {
-			const line = tmpList[i].trim().replace(/\s\s+/g, ' ').split(' ');
+			const line = tmpList[i].trim().replace(/\s\s+/g, " ").split(" ");
 			if (line && line.length > 1) {
 				lineList.push(line);
-				if (line[0] === '1') {
+				if (line[0] === "1") {
 					partCount++;
 				}
 			}
 		}
 		if (lineList.length < 1) {
 			api.missingParts[fn] = 1;
-			return null;  // No content, nothing to create
+			return null; // No content, nothing to create
 		}
 		if (progressCallback) {
-			progressCallback({stepCount: partCount});
+			progressCallback({ stepCount: partCount });
 		}
-		if (!fn || fn.endsWith('mpd')) {
+		if (!fn || fn.endsWith("mpd")) {
 			part = await loadSubModels(lineList, progressCallback);
 		}
 		if (part == null) {
@@ -569,8 +693,10 @@ async function loadPart(fn, content, progressCallback) {
 		// Check if any parts were left out of the last step; add them to a new step if so.
 		// This happens often when a model / submodel does not end with a 'STEP 0' command.
 		if (part.steps.lastPart < part.parts.length) {
-			const skippedParts = part.parts.map((el, idx) => idx).slice(part.steps.lastPart);
-			part.steps.push({parts: skippedParts});
+			const skippedParts = part.parts
+				.map((el, idx) => idx)
+				.slice(part.steps.lastPart);
+			part.steps.push({ parts: skippedParts });
 		}
 		delete part.steps.lastPart;
 	}

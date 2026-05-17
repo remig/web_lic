@@ -4,29 +4,28 @@
  * see: http://github.com/greggman/twgl.js for details
  */
 
-const twgl = (function() {
-
+const twgl = (function () {
 	function floatSetter(gl, location) {
-		return function(v) {
+		return function (v) {
 			gl.uniform1f(location, v);
 		};
 	}
 
 	function floatVec4Setter(gl, location) {
-		return function(v) {
+		return function (v) {
 			gl.uniform4fv(location, v);
 		};
 	}
 
 	function floatMat4Setter(gl, location) {
-		return function(v) {
+		return function (v) {
 			gl.uniformMatrix4fv(location, false, v);
 		};
 	}
 
 	const FLOAT = 0x1406;
-	const FLOAT_VEC4 = 0x8B52;
-	const FLOAT_MAT4 = 0x8B5C;
+	const FLOAT_VEC4 = 0x8b52;
+	const FLOAT_MAT4 = 0x8b5c;
 
 	const typeMap = {};
 	typeMap[FLOAT] = floatSetter;
@@ -39,13 +38,16 @@ const twgl = (function() {
 	}
 
 	function createUniformSetters(gl, program) {
-
 		const uniformSetters = {};
 		const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
 		for (let i = 0; i < numUniforms; ++i) {
 			const uniformInfo = gl.getActiveUniform(program, i);
-			uniformSetters[uniformInfo.name] = createUniformSetter(gl, program, uniformInfo);
+			uniformSetters[uniformInfo.name] = createUniformSetter(
+				gl,
+				program,
+				uniformInfo
+			);
 		}
 		return uniformSetters;
 	}
@@ -78,7 +80,7 @@ const twgl = (function() {
 		gl.compileShader(shader);
 		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
 			gl.deleteShader(shader);
-			throw 'Failed to compile shader';
+			throw "Failed to compile shader";
 		}
 		return shader;
 	}
@@ -93,7 +95,7 @@ const twgl = (function() {
 		gl.linkProgram(program);
 		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 			gl.deleteProgram(program);
-			throw 'Failed to link program';
+			throw "Failed to link program";
 		}
 		return program;
 	}
@@ -108,8 +110,7 @@ const twgl = (function() {
 	};
 })();
 
-const v3 = twgl.v3 = (function() {
-
+const v3 = (twgl.v3 = (function () {
 	let VecType = Float32Array;
 
 	function setDefaultType(ctor) {
@@ -193,7 +194,7 @@ const v3 = twgl.v3 = (function() {
 	}
 
 	function dot(a, b) {
-		return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]);
+		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 	}
 
 	function length(v) {
@@ -280,11 +281,9 @@ const v3 = twgl.v3 = (function() {
 		setDefaultType,
 		subtract,
 	};
+})());
 
-})();
-
-twgl.m4 = (function() {
-
+twgl.m4 = (function () {
 	let MatType = Float32Array;
 
 	const tempV3a = v3.create();
@@ -478,14 +477,26 @@ twgl.m4 = (function() {
 		const tmp_22 = m00 * m11;
 		const tmp_23 = m10 * m01;
 
-		const t0 = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) -
-        (tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
-		const t1 = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) -
-        (tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
-		const t2 = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) -
-        (tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
-		const t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
-        (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
+		const t0 =
+			tmp_0 * m11 +
+			tmp_3 * m21 +
+			tmp_4 * m31 -
+			(tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
+		const t1 =
+			tmp_1 * m01 +
+			tmp_6 * m21 +
+			tmp_9 * m31 -
+			(tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
+		const t2 =
+			tmp_2 * m01 +
+			tmp_7 * m11 +
+			tmp_10 * m31 -
+			(tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
+		const t3 =
+			tmp_5 * m01 +
+			tmp_8 * m11 +
+			tmp_11 * m21 -
+			(tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
 
 		const d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
 
@@ -493,30 +504,78 @@ twgl.m4 = (function() {
 		dst[1] = d * t1;
 		dst[2] = d * t2;
 		dst[3] = d * t3;
-		dst[4] = d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) -
-            (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30));
-		dst[5] = d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) -
-            (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30));
-		dst[6] = d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) -
-            (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30));
-		dst[7] = d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) -
-            (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20));
-		dst[8] = d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) -
-            (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33));
-		dst[9] = d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) -
-            (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33));
-		dst[10] = d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) -
-            (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33));
-		dst[11] = d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) -
-            (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23));
-		dst[12] = d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) -
-            (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22));
-		dst[13] = d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) -
-            (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02));
-		dst[14] = d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) -
-            (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12));
-		dst[15] = d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) -
-            (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02));
+		dst[4] =
+			d *
+			(tmp_1 * m10 +
+				tmp_2 * m20 +
+				tmp_5 * m30 -
+				(tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30));
+		dst[5] =
+			d *
+			(tmp_0 * m00 +
+				tmp_7 * m20 +
+				tmp_8 * m30 -
+				(tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30));
+		dst[6] =
+			d *
+			(tmp_3 * m00 +
+				tmp_6 * m10 +
+				tmp_11 * m30 -
+				(tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30));
+		dst[7] =
+			d *
+			(tmp_4 * m00 +
+				tmp_9 * m10 +
+				tmp_10 * m20 -
+				(tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20));
+		dst[8] =
+			d *
+			(tmp_12 * m13 +
+				tmp_15 * m23 +
+				tmp_16 * m33 -
+				(tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33));
+		dst[9] =
+			d *
+			(tmp_13 * m03 +
+				tmp_18 * m23 +
+				tmp_21 * m33 -
+				(tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33));
+		dst[10] =
+			d *
+			(tmp_14 * m03 +
+				tmp_19 * m13 +
+				tmp_22 * m33 -
+				(tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33));
+		dst[11] =
+			d *
+			(tmp_17 * m03 +
+				tmp_20 * m13 +
+				tmp_23 * m23 -
+				(tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23));
+		dst[12] =
+			d *
+			(tmp_14 * m22 +
+				tmp_17 * m32 +
+				tmp_13 * m12 -
+				(tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22));
+		dst[13] =
+			d *
+			(tmp_20 * m32 +
+				tmp_12 * m02 +
+				tmp_19 * m22 -
+				(tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02));
+		dst[14] =
+			d *
+			(tmp_18 * m12 +
+				tmp_23 * m32 +
+				tmp_15 * m02 -
+				(tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12));
+		dst[15] =
+			d *
+			(tmp_22 * m22 +
+				tmp_16 * m02 +
+				tmp_21 * m12 -
+				(tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02));
 
 		return dst;
 	}
@@ -686,16 +745,16 @@ twgl.m4 = (function() {
 	function frustum(left, right, bottom, top, near, far, dst) {
 		dst = dst || new MatType(16);
 
-		const dx = (right - left);
-		const dy = (top - bottom);
-		const dz = (near - far);
+		const dx = right - left;
+		const dy = top - bottom;
+		const dz = near - far;
 
-		dst[0] = 2 * near / dx;
+		dst[0] = (2 * near) / dx;
 		dst[1] = 0;
 		dst[2] = 0;
 		dst[3] = 0;
 		dst[4] = 0;
-		dst[5] = 2 * near / dy;
+		dst[5] = (2 * near) / dy;
 		dst[6] = 0;
 		dst[7] = 0;
 		dst[8] = (left + right) / dx;
@@ -704,7 +763,7 @@ twgl.m4 = (function() {
 		dst[11] = -1;
 		dst[12] = 0;
 		dst[13] = 0;
-		dst[14] = near * far / dz;
+		dst[14] = (near * far) / dz;
 		dst[15] = 0;
 
 		return dst;
@@ -717,8 +776,7 @@ twgl.m4 = (function() {
 		const yAxis = tempV3b;
 		const zAxis = tempV3c;
 
-		v3.normalize(
-			v3.subtract(eye, target, zAxis), zAxis);
+		v3.normalize(v3.subtract(eye, target, zAxis), zAxis);
 		v3.normalize(v3.cross(up, zAxis, xAxis), xAxis);
 		v3.normalize(v3.cross(zAxis, xAxis, yAxis), yAxis);
 
@@ -1129,18 +1187,18 @@ twgl.m4 = (function() {
 		const v1 = v[1];
 		const v2 = v[2];
 
-		dst[0] = v0 * m[0 * 4 + 0];
-		dst[1] = v0 * m[0 * 4 + 1];
-		dst[2] = v0 * m[0 * 4 + 2];
-		dst[3] = v0 * m[0 * 4 + 3];
-		dst[4] = v1 * m[1 * 4 + 0];
-		dst[5] = v1 * m[1 * 4 + 1];
-		dst[6] = v1 * m[1 * 4 + 2];
-		dst[7] = v1 * m[1 * 4 + 3];
-		dst[8] = v2 * m[2 * 4 + 0];
-		dst[9] = v2 * m[2 * 4 + 1];
-		dst[10] = v2 * m[2 * 4 + 2];
-		dst[11] = v2 * m[2 * 4 + 3];
+		dst[0] = v0 * m[0];
+		dst[1] = v0 * m[1];
+		dst[2] = v0 * m[2];
+		dst[3] = v0 * m[3];
+		dst[4] = v1 * m[4];
+		dst[5] = v1 * m[5];
+		dst[6] = v1 * m[6];
+		dst[7] = v1 * m[7];
+		dst[8] = v2 * m[8];
+		dst[9] = v2 * m[9];
+		dst[10] = v2 * m[10];
+		dst[11] = v2 * m[11];
 
 		if (m !== dst) {
 			dst[12] = m[12];
@@ -1157,11 +1215,27 @@ twgl.m4 = (function() {
 		const v0 = v[0];
 		const v1 = v[1];
 		const v2 = v[2];
-		const d = v0 * m[0 * 4 + 3] + v1 * m[1 * 4 + 3] + v2 * m[2 * 4 + 3] + m[3 * 4 + 3];
+		const d =
+			v0 * m[0 * 4 + 3] + v1 * m[1 * 4 + 3] + v2 * m[2 * 4 + 3] + m[3 * 4 + 3];
 
-		dst[0] = (v0 * m[0 * 4 + 0] + v1 * m[1 * 4 + 0] + v2 * m[2 * 4 + 0] + m[3 * 4 + 0]) / d;
-		dst[1] = (v0 * m[0 * 4 + 1] + v1 * m[1 * 4 + 1] + v2 * m[2 * 4 + 1] + m[3 * 4 + 1]) / d;
-		dst[2] = (v0 * m[0 * 4 + 2] + v1 * m[1 * 4 + 2] + v2 * m[2 * 4 + 2] + m[3 * 4 + 2]) / d;
+		dst[0] =
+			(v0 * m[0 * 4 + 0] +
+				v1 * m[1 * 4 + 0] +
+				v2 * m[2 * 4 + 0] +
+				m[3 * 4 + 0]) /
+			d;
+		dst[1] =
+			(v0 * m[0 * 4 + 1] +
+				v1 * m[1 * 4 + 1] +
+				v2 * m[2 * 4 + 1] +
+				m[3 * 4 + 1]) /
+			d;
+		dst[2] =
+			(v0 * m[0 * 4 + 2] +
+				v1 * m[1 * 4 + 2] +
+				v2 * m[2 * 4 + 2] +
+				m[3 * 4 + 2]) /
+			d;
 
 		return dst;
 	}

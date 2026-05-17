@@ -1,42 +1,73 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from '../util';
-import store from '../store';
-import {isPointListItem} from '../type_helpers';
-import {type PointItem, type LookupItem, type CalloutArrow, type Directions} from '../item_types';
+import {
+	type CalloutArrow,
+	type Directions,
+	type LookupItem,
+	type PointItem,
+} from "../item_types";
+import store from "../store";
+import { isPointListItem } from "../type_helpers";
+import _ from "../util";
 
 export interface CalloutArrowMutationInterface {
-	add({parent}: {parent: LookupItem}): CalloutArrow;
-	delete({calloutArrow}: {calloutArrow: CalloutArrow}): void;
-	addPoint({arrow}: {arrow: LookupItem}): void;
-	rotateTip({arrow, direction}: {arrow: CalloutArrow, direction: Directions}): void;
+	add({ parent }: { parent: LookupItem }): CalloutArrow;
+	delete({ calloutArrow }: { calloutArrow: CalloutArrow }): void;
+	addPoint({ arrow }: { arrow: LookupItem }): void;
+	rotateTip({
+		arrow,
+		direction,
+	}: {
+		arrow: CalloutArrow;
+		direction: Directions;
+	}): void;
 }
 
 export const CalloutArrowMutations: CalloutArrowMutationInterface = {
-	add({parent}) {
-		const arrow = store.mutations.item.add<CalloutArrow>({item: {
-			type: 'calloutArrow', id: -1, parent,
-			points: [], direction: 'right',
-		}, parent});
+	add({ parent }) {
+		const arrow = store.mutations.item.add<CalloutArrow>({
+			item: {
+				type: "calloutArrow",
+				id: -1,
+				parent,
+				points: [],
+				direction: "right",
+			},
+			parent,
+		});
 
-		store.mutations.item.add<PointItem>({item: {
-			type: 'point', id: -1, parent: arrow,
-			x: 0, y: 0, relativeTo: null,
-		}, parent: arrow});
+		store.mutations.item.add<PointItem>({
+			item: {
+				type: "point",
+				id: -1,
+				parent: arrow,
+				x: 0,
+				y: 0,
+				relativeTo: null,
+			},
+			parent: arrow,
+		});
 
-		store.mutations.item.add<PointItem>({item: {
-			type: 'point', id: -1, parent: arrow,
-			x: 0, y: 0, relativeTo: null,
-		}, parent: arrow});
+		store.mutations.item.add<PointItem>({
+			item: {
+				type: "point",
+				id: -1,
+				parent: arrow,
+				x: 0,
+				y: 0,
+				relativeTo: null,
+			},
+			parent: arrow,
+		});
 
 		return arrow;
 	},
-	delete({calloutArrow}) {
+	delete({ calloutArrow }) {
 		const item = calloutArrow;
-		store.mutations.item.deleteChildList({item, listType: 'point'});
-		store.mutations.item.delete({item});
+		store.mutations.item.deleteChildList({ item, listType: "point" });
+		store.mutations.item.delete({ item });
 	},
-	addPoint({arrow}) {
+	addPoint({ arrow }) {
 		const arrowItem = store.get.lookupToItem(arrow);
 		if (arrowItem == null || !isPointListItem(arrowItem)) {
 			return;
@@ -52,14 +83,17 @@ export const CalloutArrowMutations: CalloutArrowMutationInterface = {
 		const pageMidpoint = store.get.coords.pageToItem(midpoint, p1.relativeTo);
 		store.mutations.item.add<PointItem>({
 			item: {
-				type: 'point', id: -1, parent: arrowItem,
-				relativeTo: p1.relativeTo, ...pageMidpoint,
+				type: "point",
+				id: -1,
+				parent: arrowItem,
+				relativeTo: p1.relativeTo,
+				...pageMidpoint,
 			},
 			parent: arrowItem,
 			parentInsertionIndex,
 		});
 	},
-	rotateTip({arrow, direction}) {
+	rotateTip({ arrow, direction }) {
 		const item = store.get.calloutArrow(arrow);
 		if (item != null) {
 			item.direction = direction;

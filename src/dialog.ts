@@ -1,29 +1,49 @@
-/* eslint-disable no-redeclare */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
-import Vue, {VNode} from 'vue';
-import {type Anchors, type Rotation, type GridLayout} from './item_types';
 
-type DialogEvent = 'ok' | 'cancel' | 'update';
-export interface DialogInterface {
-	$on(event: DialogEvent, cb: any): void;
-	show(app?: any): void;
+import { type Anchors, type GridLayout, type Rotation } from "./item_types";
+
+// ── Public dialog-state shape ──────────────────────────────────────────────
+
+export interface ActiveDialogState {
+	name: string;
+	props: Record<string, any>;
+	callbacks: Record<string, Function>;
+	resolve: () => void;
 }
 
-// Can't export type information from a vue file, so must
-// declare each dialog's property interface here. Ugh.
-interface LocaleChooserDialog extends DialogInterface {
-	visible: boolean;
+// ── Module-level singletons (set by DialogProvider on mount) ───────────────
+
+let setActiveDialogFn: ((d: ActiveDialogState | null) => void) | null = null;
+let dialogOkFn: (() => void) | null = null;
+let dialogCancelFn: (() => void) | null = null;
+
+export function registerDialogProvider(
+	setFn: (d: ActiveDialogState | null) => void
+): void {
+	setActiveDialogFn = setFn;
 }
 
-interface StringChooserDialog extends DialogInterface {
+/** Called by DialogProvider after it builds the ok/cancel handlers. */
+export function setActiveDialogActions(
+	ok: (() => void) | null,
+	cancel: (() => void) | null
+): void {
+	dialogOkFn = ok;
+	dialogCancelFn = cancel;
+}
+
+// ── TypeScript interfaces for each dialog's props/callbacks ───────────────
+
+interface StringChooserDialog {
 	newString: string;
 	title: string;
 	label: string;
 	width: string;
-	$on(event: 'ok', cb: (filename: string) => void): void;
+	$on(event: "ok", cb: (s: string) => void): void;
 }
 
-interface NumberChooserDialog extends DialogInterface {
+interface NumberChooserDialog {
 	value: number | null;
 	title: string;
 	label: string;
@@ -32,13 +52,13 @@ interface NumberChooserDialog extends DialogInterface {
 	min: number;
 	max: number;
 	step: number;
-	$on(event: 'update', cb: (newValue: number) => void): void;
-	$on(event: 'ok', cb: (newValue: number) => void): void;
-	$on(event: 'cancel', cb: () => void): void;
+	$on(event: "update", cb: (v: number) => void): void;
+	$on(event: "ok", cb: (v: number) => void): void;
+	$on(event: "cancel", cb: () => void): void;
 }
 
-interface LdColorPickerDialog extends DialogInterface {
-	$on(event: 'ok', cb: (newColorCode: number) => void): void;
+interface LdColorPickerDialog {
+	$on(event: "ok", cb: (colorCode: number) => void): void;
 }
 
 interface DisplacePartValues {
@@ -48,10 +68,10 @@ interface DisplacePartValues {
 	arrowRotation: number;
 }
 
-interface DisplacePartDialog extends DialogInterface {
-	values: DisplacePartValues,
-	$on(event: 'update', cb: (newValues: DisplacePartValues) => void): void;
-	$on(event: 'ok' | 'cancel', cb: () => void): void;
+interface DisplacePartDialog {
+	values: DisplacePartValues;
+	$on(event: "update", cb: (v: DisplacePartValues) => void): void;
+	$on(event: "ok" | "cancel", cb: () => void): void;
 }
 
 interface RotatePartImageValues {
@@ -62,33 +82,34 @@ interface RotatePartImageValues {
 	rotation: Rotation[] | null;
 }
 
-interface RotatePartImageDialog extends RotatePartImageValues, DialogInterface {
-	$on(event: 'update', cb: (newValues: RotatePartImageValues) => void): void;
-	$on(event: 'ok', cb: (newValues: RotatePartImageValues) => void): void;
-	$on(event: 'cancel', cb: () => void): void;
+interface RotatePartImageDialog extends RotatePartImageValues {
+	$on(event: "update", cb: (v: RotatePartImageValues) => void): void;
+	$on(event: "ok", cb: (v: RotatePartImageValues) => void): void;
+	$on(event: "cancel", cb: () => void): void;
 }
 
 interface TransformPartProps {
 	title: string;
-	rotation: {x: number, y: number, z: number};
-	position: {x: number, y: number, z: number};
+	rotation: { x: number; y: number; z: number };
+	position: { x: number; y: number; z: number };
 	addRotateIcon: boolean;
 	showRotateIconCheckbox: boolean;
 }
 
-interface TransformPartDialog extends DialogInterface, TransformPartProps {
-	$on(event: 'update', cb: (newTransform: TransformPartProps) => void): void;
-	$on(event: 'ok', cb: (newTransform: TransformPartProps) => void): void;
-	$on(event: 'cancel', cb: () => void): void;
+interface TransformPartDialog extends TransformPartProps {
+	$on(event: "update", cb: (v: TransformPartProps) => void): void;
+	$on(event: "ok", cb: (v: TransformPartProps) => void): void;
+	$on(event: "cancel", cb: () => void): void;
 }
 
-interface PageLayoutDialog extends DialogInterface {
+interface PageLayoutDialog {
 	autoRows: boolean;
 	autoCols: boolean;
 	values: GridLayout;
-	$on(event: 'update', cb: (newValues: GridLayout) => void): void;
-	$on(event: 'ok', cb: (newValues: GridLayout) => void): void;
-	$on(event: 'cancel', cb: () => void): void;
+	$on(event: "update", cb: (v: GridLayout) => void): void;
+	$on(event: "ok", cb: (v: GridLayout) => void): void;
+	$on(event: "cancel", cb: () => void): void;
+	show(arg?: any): void;
 }
 
 interface StyleDialogProps {
@@ -97,22 +118,18 @@ interface StyleDialogProps {
 	font: string;
 }
 
-interface StyleDialog extends StyleDialogProps, DialogInterface {
+interface StyleDialog extends StyleDialogProps {
 	title: string;
 	family: string;
 	size: string;
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
-	$on(event: 'ok', cb: (newProperties: StyleDialogProps) => void): void;
+	$on(event: "ok", cb: (v: StyleDialogProps) => void): void;
+	show(arg?: any): void;
 }
 
-interface ImportModelDialog extends DialogInterface {
-	includePartsPerStep: boolean;
-	newState: any;
-}
-
-interface ResizeImageDialog extends DialogInterface {
+interface ResizeImageDialog {
 	imageInfo: {
 		filename: string;
 		src: string;
@@ -128,189 +145,98 @@ interface ResizeImageDialog extends DialogInterface {
 		anchorPosition: Anchors;
 		pageWidth: number;
 		pageHeight: number;
-	},
+	};
+	$on(event: string, cb: Function): void;
 }
 
-// TODO: set focus to correct UI widget when showing each dialog
-// TODO: make dialogs draggable, so they can be moved out of the way & see stuff behind them
-let component: any;
+// ── DialogProxy - what callers receive in the setup callback ───────────────
 
-interface DialogProps {
-	visible: boolean;
-	currentDialog: any;
-	outstandingImport: any;
-	resolve: any;
+interface DialogProxy {
+	$on(event: string, cb: Function): void;
+	show(arg?: any): void;
+	[key: string]: any;
 }
 
-type DialogNames =
-	'localeChooserDialog' | 'stringChooserDialog' | 'numberChooserDialog'
-	| 'missingPartsDialog' | 'sceneRenderingDialog' | 'ldColorPickerDialog' | 'displacePartDialog'
-	| 'rotatePartImageDialog' | 'transformPartDialog' | 'pageLayoutDialog' | 'brickColorDialog'
-	| 'gridDialog' | 'pdfExportDialog' | 'pngExportDialog' | 'styleDialog' | 'importModelDialog'
-	| 'whatsNewDialog' | 'aboutLicDialog' | 'resizeImageDialog' | 'multiBookDialog';
+// ── Main openDialog() overloads ────────────────────────────────────────────
 
-Vue.component('DialogManager', {
-	components: {
-		localeChooserDialog: () => import(
-			/* webpackChunkName: "localeChooserDialog" */
-			'./components/translate.vue'
-		),
-		stringChooserDialog: () => import(
-			/* webpackChunkName: "stringChooserDialog" */
-			'./dialogs/string_chooser.vue'
-		),
-		numberChooserDialog: () => import(
-			/* webpackChunkName: "numberChooserDialog" */
-			'./dialogs/number_chooser.vue'
-		),
-		missingPartsDialog: () => import(
-			/* webpackChunkName: "missingPartsDialog" */
-			'./dialogs/missing_parts.vue'
-		),
-		sceneRenderingDialog: () => import(
-			/* webpackChunkName: "sceneRenderingDialog" */
-			'./dialogs/scene_rendering.vue'
-		),
-		ldColorPickerDialog: () => import(
-			/* webpackChunkName: "ldColorPickerDialog" */
-			'./dialogs/ld_color_picker.vue'
-		),
-		displacePartDialog: () => import(
-			/* webpackChunkName: "displacePartDialog" */
-			'./dialogs/displace_part.vue'
-		),
-		rotatePartImageDialog: () => import(
-			/* webpackChunkName: "rotatePartImageDialog" */
-			'./dialogs/rotate_part_image.vue'
-		),
-		transformPartDialog: () => import(
-			/* webpackChunkName: "transformPartDialog" */
-			'./dialogs/transform_part.vue'
-		),
-		pageLayoutDialog: () => import(
-			/* webpackChunkName: "pageLayoutDialog" */
-			'./dialogs/page_layout.vue'
-		),
-		brickColorDialog: () => import(
-			/* webpackChunkName: "brickColorDialog" */
-			'./dialogs/brick_colors.vue'
-		),
-		gridDialog: () => import(
-			/* webpackChunkName: "gridDialog" */
-			'./dialogs/grid_dialog.vue'
-		),
-		pdfExportDialog: () => import(
-			/* webpackChunkName: "pdfExportDialog" */
-			'./dialogs/export_pdf.vue'
-		),
-		pngExportDialog: () => import(
-			/* webpackChunkName: "pngExportDialog" */
-			'./dialogs/export_png.vue'
-		),
-		styleDialog: () => import(
-			/* webpackChunkName: "styleDialog" */
-			'./dialogs/style.vue'
-		),
-		importModelDialog: () => import(
-			/* webpackChunkName: "importModelDialog" */
-			'./dialogs/import_model.vue'
-		),
-		whatsNewDialog: () => import(
-			/* webpackChunkName: "whatsNewDialog" */
-			'./dialogs/whats_new.vue'
-		),
-		aboutLicDialog: () => import(
-			/* webpackChunkName: "aboutLicDialog" */
-			'./dialogs/about_lic.vue'
-		),
-		resizeImageDialog: () => import(
-			/* webpackChunkName: "resizeImageDialog" */
-			'./dialogs/resize_image.vue'
-		),
-		multiBookDialog: () => import(
-			/* webpackChunkName: "multiBookDialog" */
-			'./dialogs/multi_book.vue'
-		),
-	},
-	data(): DialogProps {
-		return {
-			visible: false,
-			currentDialog: null,
-			outstandingImport: null,
-			resolve: null,
-		};
-	},
-	render(createElement): VNode {
-		return this.visible
-			? createElement(this.currentDialog, {ref: 'currentDialog', tag: 'component'})
-			: createElement();
-	},
-	updated() {
-		Vue.nextTick(() => {
-			if (this.$refs && this.$refs.currentDialog) {
-				const dlg: any = this.$refs.currentDialog;
-				if (typeof this.outstandingImport === 'function') {
-					this.outstandingImport(dlg);
-					this.outstandingImport = null;
-				}
-				if (dlg.$refs && dlg.$refs.set_focus) {
-					dlg.$refs.set_focus.focus();
-				}
-				dlg.$on('close', () => {
-					this.visible = false;
-					this.resolve();
-				});
-			}
-		});
-	},
-	mounted() {
-		component = this;
-	},
-});
+function openDialog(
+	name: "stringChooserDialog",
+	cb?: (d: StringChooserDialog) => void
+): Promise<void>;
+function openDialog(
+	name: "numberChooserDialog",
+	cb?: (d: NumberChooserDialog) => void
+): Promise<void>;
+function openDialog(
+	name: "ldColorPickerDialog",
+	cb?: (d: LdColorPickerDialog) => void
+): Promise<void>;
+function openDialog(
+	name: "displacePartDialog",
+	cb?: (d: DisplacePartDialog) => void
+): Promise<void>;
+function openDialog(
+	name: "rotatePartImageDialog",
+	cb?: (d: RotatePartImageDialog) => void
+): Promise<void>;
+function openDialog(
+	name: "transformPartDialog",
+	cb?: (d: TransformPartDialog) => void
+): Promise<void>;
+function openDialog(
+	name: "pageLayoutDialog",
+	cb?: (d: PageLayoutDialog) => void
+): Promise<void>;
+function openDialog(
+	name: "styleDialog",
+	cb?: (d: StyleDialog) => void
+): Promise<void>;
+function openDialog(
+	name: "resizeImageDialog",
+	cb?: (d: ResizeImageDialog) => void
+): Promise<void>;
+function openDialog(name: string, cb?: (d: any) => void): Promise<void>;
 
-/* eslint-disable max-len */
-function setDialog(dialogName: 'localeChooserDialog', cb?: (dialog: LocaleChooserDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'stringChooserDialog', cb?: (dialog: StringChooserDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'numberChooserDialog', cb?: (dialog: NumberChooserDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'ldColorPickerDialog', cb?: (dialog: LdColorPickerDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'displacePartDialog', cb?: (dialog: DisplacePartDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'rotatePartImageDialog', cb?: (dialog: RotatePartImageDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'transformPartDialog', cb?: (dialog: TransformPartDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'pageLayoutDialog', cb?: (dialog: PageLayoutDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'styleDialog', cb?: (dialog: StyleDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'importModelDialog', cb?: (dialog: ImportModelDialog) => void): Promise<unknown>;
-function setDialog(dialogName: 'resizeImageDialog', cb?: (dialog: ResizeImageDialog) => void): Promise<unknown>;
-function setDialog(dialogName: DialogNames, cb?: (dialog: DialogInterface) => void): Promise<unknown>;
-function setDialog(dialogName: DialogNames, cb?: (dialog: any) => any) {
-/* eslint-enable max-len */
-	component.currentDialog = null;  // This forces Vue to re-render a dialog if it was just opened
-	component.outstandingImport = cb;
-	return new Promise(resolve => {
-		Vue.nextTick(() => {
-			component.currentDialog = dialogName;
-			component.resolve = resolve;
-			component.visible = true;
-		});
+function openDialog(name: string, cb?: (d: any) => void): Promise<void> {
+	return new Promise<void>((resolve) => {
+		const callbacks: Record<string, Function> = {};
+		const props: Record<string, any> = {};
+
+		const proxy: DialogProxy = new Proxy({} as any, {
+			get(_t, prop: string) {
+				if (prop === "$on") {
+					return (event: string, handler: Function) => {
+						callbacks[event] = handler;
+					};
+				}
+				if (prop === "show") {
+					// Callers: dialog.show(arg) → stored as _showArg prop
+					return (arg?: any) => {
+						props._showArg = arg ?? true;
+					};
+				}
+				return props[prop];
+			},
+			set(_t, prop: string, value: any) {
+				props[prop] = value;
+				return true;
+			},
+		}) as DialogProxy;
+
+		if (cb) {
+			cb(proxy);
+		}
+
+		setActiveDialogFn?.({ name, props, callbacks, resolve });
 	});
 }
 
-setDialog.ok = function() {
-	if (component.visible && component.$refs.currentDialog) {
-		if (typeof component.$refs.currentDialog.ok === 'function') {
-			component.$refs.currentDialog.ok();
-		} else if (typeof component.$refs.currentDialog.cancel === 'function') {
-			component.$refs.currentDialog.cancel();
-		}
-	}
+openDialog.ok = function (): void {
+	dialogOkFn?.();
 };
 
-setDialog.cancel = function() {
-	if (component.visible
-		&& component.$refs.currentDialog
-		&& typeof component.$refs.currentDialog.cancel === 'function'
-	) {
-		component.$refs.currentDialog.cancel();
-	}
+openDialog.cancel = function (): void {
+	dialogCancelFn?.();
 };
 
-export default setDialog;
+export default openDialog;

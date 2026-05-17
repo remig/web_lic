@@ -1,11 +1,13 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-html, body {
+html,
+body {
 	width: 100%;
 	height: 100%;
 	overflow-x: hidden;
 }
 
+div#app,
 div#container {
 	width: 100%;
 	height: 100%;
@@ -51,8 +53,23 @@ div#container {
 	pointer-events: none;
 }
 
-label {
+label,
+.form-label {
 	margin-bottom: unset;
+	color: #606266;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	text-align: right;
+	vertical-align: middle;
+	font-size: 14px;
+	line-height: 34px;
+	padding: 0 12px 0 0;
+}
+
+hr {
+	margin-top: 8px;
+	margin-bottom: 8px;
+	border-top: 1px solid #dedede;
 }
 
 .shortcut {
@@ -97,11 +114,11 @@ label {
 	border-width: 5px 0 5px 5px;
 	border-left-color: #cccccc;
 	margin-top: 5px;
-	margin-right:-10px;
+	margin-right: -10px;
 }
 
 .dropdown-submenu:hover > a:after {
-	border-left-color:#555;
+	border-left-color: #555;
 }
 
 .progress {
@@ -118,6 +135,8 @@ label {
 }
 
 .form-control {
+	height: 32px;
+	box-sizing: border-box;
 	box-shadow: unset;
 	webkit-box-shadow: unset;
 }
@@ -128,9 +147,127 @@ label {
 }
 */
 
+/* basic components */
+
+.button {
+	height: 32px;
+	font-size: 14px;
+	color: #fff;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background-color: #409eff;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	&:hover {
+		background-color: #66b1ff;
+		border-color: #66b1ff;
+		color: #fff;
+	}
+
+	&.fullWidth {
+		width: 100%;
+	}
+
+	&.wide {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	&.text {
+		border: none;
+		background-color: transparent;
+		color: #606266;
+	}
+
+	&.outlined {
+		background-color: #fff;
+		color: #606266;
+	}
+
+	&.outlined:hover {
+		color: #409eff;
+		border-color: #c6e2ff;
+		background-color: #ecf5ff;
+	}
+}
+
+/* Apply lost Vue Element stuff */
+
+.form-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.form-dropdown {
+	& > div.MuiSelect-select {
+		height: 32px;
+		font-size: 14px;
+		color: #606266;
+		box-sizing: border-box;
+		padding: 8.5px 14px;
+	}
+}
+
+.MuiDialogContent-root {
+	padding-top: 20px !important;
+}
+
+.MuiDialogTitle-root {
+	font-size: 18px !important;
+	font-weight: bold !important;
+	color: #606266;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.MuiDialogActions-root {
+	border-top: 1px solid #e5e5e5;
+	padding: 24px 20px !important;
+}
+
+.MuiMenuItem-root {
+	font-size: 14px !important;
+	color: #606266 !important;
+}
+
+.color-picker-button {
+	width: 40px;
+	padding: 1px 4px;
+}
+
+.el-radio {
+	& > span.MuiTypography-root {
+		line-height: 30px;
+		color: #606266;
+		font-size: 14px;
+	}
+}
+
+.el-checkbox {
+	margin: 0 !important;
+
+	& svg.MuiSvgIcon-root {
+		font-size: 18px;
+	}
+
+	& > span.MuiButtonBase-root {
+		padding: 0;
+	}
+
+	& > span.MuiTypography-root {
+		color: #606266;
+		display: inline-block;
+		padding-left: 10px;
+		line-height: 19px;
+		font-size: 14px;
+	}
+}
+
 /* Overwrite Vue Element stuff */
 
-.el-checkbox__input.is-checked+.el-checkbox__label {
+.el-checkbox__input.is-checked + .el-checkbox__label {
 	color: #606266;
 }
 
@@ -138,12 +275,13 @@ label {
 	transition: unset;
 }
 
-.el-checkbox__inner, .el-checkbox__inner::after {
+.el-checkbox__inner,
+.el-checkbox__inner::after {
 	transition: unset;
 }
 
 .el-checkbox__inner {
-	border-color: #409EFF;
+	border-color: #409eff;
 }
 
 .wrap-checkbox > .el-checkbox__label {
@@ -158,7 +296,8 @@ label {
 	height: unset;
 }
 
-.el-color-picker__trigger, .el-color-picker__mask {
+.el-color-picker__trigger,
+.el-color-picker__mask {
 	display: block;
 	border-color: #ccc;
 	width: 34px;
@@ -170,7 +309,7 @@ label {
 	padding: 9px 20px;
 }
 
-.el-button+.el-button {
+.el-button + .el-button {
 	margin-left: unset;
 }
 
@@ -249,14 +388,18 @@ label {
 	line-height: 34px;
 }
 
-.dialog-fade-enter-active, .dialog-fade-leave-active {
+.dialog-fade-enter-active,
+.dialog-fade-leave-active {
 	animation: unset;
 }
 
-.el-zoom-in-center-enter-active, .el-zoom-in-center-leave-active,
-.el-zoom-in-top-enter-active, .el-zoom-in-top-leave-active,
+.el-zoom-in-center-enter-active,
+.el-zoom-in-center-leave-active,
+.el-zoom-in-top-enter-active,
+.el-zoom-in-top-leave-active,
 .el-zoom-in-bottom-enter-active .el-zoom-in-bottom-leave-active,
-.el-zoom-in-left-enter-active, .el-zoom-in-left-leave-active {
+.el-zoom-in-left-enter-active,
+.el-zoom-in-left-leave-active {
 	transition: unset;
 }
 
@@ -275,7 +418,8 @@ label {
 	background-color: #777;
 }
 
-.split, .gutter.gutter-horizontal {
+.split,
+.gutter.gutter-horizontal {
 	height: 100%;
 	float: left;
 	position: relative;
@@ -301,11 +445,14 @@ label {
 	background: white;
 	padding: 20px;
 	border-radius: 5px;
-	box-shadow: 0 5px 15px rgba(0,0,0,.5);
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
 .busyText {
-	font: 18pt Helvetica;
+	font:
+		18pt Helvetica,
+		Arial,
+		sans-serif;
 }
 
 #spinner {
@@ -321,11 +468,17 @@ label {
 }
 
 @keyframes spin {
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(360deg); }
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
 }
 
-.clickable, .selectable {
+.clickable,
+.selectable {
 	cursor: pointer;
 }
 
@@ -335,7 +488,10 @@ ul {
 }
 
 .mainBody {
-	height: calc(100% - 38px - 25px); /* 38 = height of menu bar, 25 = height of status bar */
+	height: calc(100% - 38px - 25px);
+	/* 38 = height of menu bar, 25 = height of status bar */
+	overflow: hidden;
+	/* contain floated split panes */
 }
 
 #rightPane {
@@ -375,8 +531,8 @@ ul {
 }
 
 .pageCanvas {
-	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgAQMAAABJtOi3AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMjHxIGmVAAAABlBMVEX09PT///+farO/AAAAFElEQVQI12NgYPj/n4GKBHVNYwAA7b0/wfSyzYsAAAAASUVORK5CYII=');
-	box-shadow: 3px 3px 1px 0px rgba(0,0,0,0.5);
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgAQMAAABJtOi3AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMjHxIGmVAAAABlBMVEX09PT///+farO/AAAAFElEQVQI12NgYPj/n4GKBHVNYwAA7b0/wfSyzYsAAAAASUVORK5CYII=");
+	box-shadow: 3px 3px 1px 0px rgba(0, 0, 0, 0.5);
 }
 
 .pageGuideContainer {
@@ -403,14 +559,6 @@ ul {
 	position: absolute;
 	margin-left: 7px;
 	bottom: 10px;
-}
-
-.fontStyleButton .el-checkbox-button__inner {
-	width: 34px;
-	height: 34px;
-	padding: 9px 0;
-	border: 1px solid rgb(204, 204, 204) !important;
-	border-radius: 4px !important;
 }
 
 /* Rotate Element's switch from horizontal to vertical */
@@ -446,19 +594,10 @@ ul {
 	width: 100%;
 	height: 25px;
 	padding: 5px 0px 0px 15px;
-	font: 10pt Helvetica;
-}
-
-#contextMenu {
-	position: absolute;
-	left: 300px;
-	top: 50px;
-	display: none;
-}
-
-#contextMenu > ul {
-	display: block;
-	position: relative;
+	font:
+		10pt Helvetica,
+		Arial,
+		sans-serif;
 }
 
 [v-cloak] {
@@ -508,7 +647,7 @@ ul {
 }
 
 .panel-template .panel-body {
-	padding: 0 0 0 10px;
+	padding: 0 10px;
 }
 
 .panel-template h5 {
@@ -531,29 +670,546 @@ ul {
 	font-weight: 800;
 }
 
+/* Template Panel: page size info */
+
+.pageSizeInfo {
+	margin-top: 15px;
+}
+
+.pageSizeInfo > div {
+	line-height: unset;
+	color: #606266;
+}
+
+/* Getting Started panel */
+
+.gettingStarted {
+	margin: 50px;
+	background-color: #fff;
+	width: 100%;
+	box-shadow: 3px 3px 1px 0px rgba(0, 0, 0, 0.5);
+	font-size: 15px;
+}
+
+.gettingStarted a {
+	cursor: pointer;
+}
+
+.lineLink {
+	color: #777;
+}
+
+.list-group-item ul {
+	list-style-type: disc;
+	margin: 1.75em 1.75em 0;
+}
+
+.list-group-item {
+	padding: 2em;
+}
+
+.close {
+	margin-top: 0.5em;
+	opacity: 0.8;
+}
+
+.fa.fa-pull-left,
+.fab.fa-pull-left,
+.fal.fa-pull-left,
+.far.fa-pull-left,
+.fas.fa-pull-left {
+	margin-top: -0.05em;
+	margin-right: 0.6em;
+}
+
+.fa-2x {
+	font-size: 1.5em;
+}
+
+.list-inline > li {
+	padding-right: 15px;
+	padding-left: 15px;
+}
+
+/* Guide */
+
+.guide {
+	position: absolute;
+}
+
+.guide-vertical {
+	border-right: 1px solid black;
+	top: -10px;
+	width: 1px;
+	cursor: e-resize;
+}
+
+.guide-horizontal {
+	border-top: 1px solid black;
+	left: -10px;
+	height: 1px;
+	cursor: n-resize;
+}
+
+/* Rotate dialog */
+
+.rotationListBox {
+	border: 1px solid #e5e5e5;
+	border-radius: 4px;
+	padding: 15px 0 10px 15px;
+	margin-bottom: 10px;
+}
+
+/* Dialogs */
+
+.aboutLicDialog div {
+	line-height: 25px;
+}
+
+.brickColorTable {
+	table-layout: fixed;
+	width: 440px;
+}
+
+.brickColorTable td:nth-of-type(1),
+.brickColorTable th:nth-of-type(1) {
+	width: 110px;
+}
+
+.brickColorTable td:nth-of-type(2),
+.brickColorTable th:nth-of-type(2) {
+	width: 160px;
+}
+
+.brickColorTable td:nth-of-type(3),
+.brickColorTable th:nth-of-type(3) {
+	width: 60px;
+}
+
+.brickColorTable td:nth-of-type(4),
+.brickColorTable th:nth-of-type(4) {
+	width: 110px;
+}
+
+.brickColorDialog .el-dialog__body,
+.ldColorPickerDialog .el-dialog__body,
+.missingPartsDialog .el-dialog__body {
+	max-height: 70vh;
+}
+
+.brickColorTableScroll {
+	max-height: 65vh;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+
+.brickColorDialog .el-table th,
+.brickColorDialog .el-table td,
+.ldColorPickerDialog .el-table th,
+.ldColorPickerDialog .el-table td {
+	padding: 5px 0;
+	text-align: center;
+	overflow: hidden;
+}
+
+.brickColorDialog .el-color-picker {
+	display: inline-block;
+	height: 34px;
+	margin-bottom: -4px;
+}
+
+.ldColorPickerDialog {
+	table-layout: fixed;
+}
+
+.ldColorPickerDialog td:nth-of-type(1),
+.ldColorPickerDialog th:nth-of-type(1) {
+	width: 100px;
+}
+
+.ldColorPickerDialog td:nth-of-type(2),
+.ldColorPickerDialog th:nth-of-type(2) {
+	width: 140px;
+}
+
+.ldColorPickerDialog td:nth-of-type(3),
+.ldColorPickerDialog th:nth-of-type(3) {
+	width: 50px;
+}
+
+.ldColorPickerDialog .swatch {
+	width: 30px;
+	height: 30px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 3px;
+	margin-left: 20px;
+	cursor: pointer;
+}
+
+.ldColorPickerDialog .inner_swatch {
+	width: 100%;
+	height: 100%;
+	border: 1px solid #999;
+	border-radius: 2px;
+}
+
+.ldColorPickerDialog .el-color-picker {
+	height: 34px;
+}
+
+.displacePartDialog input {
+	width: 90px;
+}
+
+.pdfExportDialog input {
+	display: inline;
+	width: 95px;
+	margin: 0 5px;
+}
+
+.fontNameDialog .el-form-item__label {
+	line-height: 20px;
+}
+
+.fontNameDisplay {
+	line-height: 15px;
+}
+
+.gridDialog input {
+	display: inline;
+	width: 80px;
+}
+
+.gridInlineLabel {
+	margin-right: 10px;
+}
+
+.gridInlineLabel2 {
+	margin: 0 10px;
+}
+
+.gridAutoChecbox {
+	margin-right: 15px;
+}
+
+.importModelDialog .el-dialog__body {
+	padding: 0;
+}
+
+.importModelDialog .el-row {
+	margin: 20px;
+}
+
+.importModelDialog .el-checkbox + .el-checkbox {
+	margin-left: 15px;
+}
+
+.importModelDialog .el-dropdown {
+	font-size: 14px;
+	padding: 6px 12px;
+}
+
+.importModelDialog input {
+	display: inline;
+	width: 80px;
+	margin: 0 20px 0 10px;
+}
+
+.importModelDialog input.parts-per-step {
+	margin: 0 5px;
+}
+
+.includeDropDown {
+	min-width: 320px;
+}
+
+.includeDropDown i {
+	padding-top: 8px;
+}
+
+.missingPartsDialog .subheading {
+	padding-bottom: 20px;
+	border-bottom: 1px solid #ddd;
+	margin-bottom: 20px;
+}
+
+.missingPartsTable {
+	table-layout: fixed;
+	width: 100%;
+}
+
+.missingPartsTable tr {
+	height: 50px;
+}
+
+.missingPartsTable td {
+	text-align: center;
+}
+
+.missingPartsTable i {
+	color: #00c700;
+	margin-right: 10px;
+}
+
+.missingPartsTable td:nth-of-type(1) {
+	text-align: right;
+}
+
+.missingPartsTable td:nth-of-type(2) {
+	width: 125px;
+}
+
+.missingPartsTable td:nth-of-type(3) {
+	width: 200px;
+}
+
+.multiBookDialog .el-dialog__body > div {
+	display: inline-block;
+	margin: 12px;
+	width: 100%;
+}
+
+.multiBookDialog input {
+	display: inline-block;
+	width: 75px;
+	height: 30px;
+	margin-left: 10px;
+}
+
+.multiBookDialog .book-split-table {
+	width: 100%;
+	text-align: center;
+}
+
+.multiBookDialog th {
+	text-align: center;
+}
+
+.multiBookDialog .el-radio {
+	margin-bottom: 10px;
+}
+
+.multiBookDialog .page-number-input {
+	margin-left: 0;
+	width: 56px;
+	padding: 6px;
+}
+
+.multiBookDialog .check-row {
+	margin-bottom: 10px;
+}
+
+.number_chooser_input {
+	display: flex;
+}
+
+.number_chooser_input .el-form-item__content {
+	display: inline-block;
+	padding-top: 3px;
+	flex-grow: 1;
+}
+
+.pageLayoutDialog input {
+	width: 90px;
+}
+
+.resizeImageDialog .el-dialog__body > div {
+	display: inline-block;
+	margin: 10px;
+}
+
+.resizeImageDialog .anchor-table {
+	margin-top: 5px;
+}
+
+.resizeImageDialog .anchor-table td {
+	width: 33%;
+	border: 1px solid #c7c7c7;
+}
+
+.resizeImageDialog .el-radio-button {
+	width: 100%;
+}
+
+.resizeImageDialog .el-radio-button__inner {
+	padding: 6px 12px;
+	width: 100%;
+	border: 0 !important;
+	border-radius: 0 !important;
+}
+
+.rotatePartImageDialog .el-checkbox {
+	font-weight: 700;
+}
+
+.sceneRenderingInput {
+	width: 95px;
+}
+
+.string_chooser_input {
+	display: flex;
+}
+
+.string_chooser_input .el-form-item__content {
+	display: inline-block;
+	padding-top: 3px;
+	flex-grow: 1;
+}
+
+.styleDialog .size-input {
+	width: 75px;
+}
+
+.transformPartDialog input {
+	width: 80px;
+}
+
+.whatsNewDialog strong {
+	padding-right: 5px;
+}
+
+.whatsNewDialog ul {
+	padding-left: 35px;
+}
+
+.whatsNewDialog li {
+	padding: 5px;
+}
+
+.whatsNewDialog .el-dialog__body {
+	padding-top: 10px;
+	max-height: 40vh;
+	overflow-y: auto;
+}
+
+.whatsNewDialog .date {
+	font-size: 85%;
+}
+
+.whatsNewDialog .oneEntry {
+	padding-top: 5px;
+}
+
+.whatsNewDialog .innerContent {
+	padding: 5px 0 0 15px;
+}
+
+/* Control panel: fill */
+
+.el-button.tight {
+	padding: 9px;
+	max-width: 110px;
+	overflow: hidden;
+}
+
+/* Nav Tree */
+
+#tree {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.treeButtons {
+	display: flex;
+	flex-direction: row;
+	justify-content: right;
+	padding: 10px;
+	min-width: 110px;
+	border-bottom: 1px solid #aaa;
+
+	& > button {
+		font-size: 10pt;
+		margin-right: 6px;
+	}
+}
+
+.treeShowHideDropdown {
+	min-width: 190px;
+}
+
+.treeScroll {
+	flex: 1;
+	overflow-y: auto;
+	padding: 10px 0 50px 10px;
+	margin: 0;
+}
+
+.treeScroll ul {
+	list-style: none;
+	list-style-type: none;
+}
+
+.treeParent .treeChildren {
+	margin-left: 30px;
+}
+
+.treeChildren .treeParent {
+	position: relative;
+	left: -13px;
+	/* treeIcon 10px width + 3px right margin */
+	white-space: nowrap;
+}
+
+.treeIcon {
+	display: inline-block;
+	margin-right: 3px;
+	width: 10px;
+	font-size: 1.25em;
+	vertical-align: 1px;
+	cursor: pointer;
+}
+
+.treeText {
+	font:
+		9pt Helvetica,
+		Arial,
+		sans-serif;
+	white-space: nowrap;
+	overflow: hidden;
+	position: relative;
+	bottom: 4px;
+	width: 100%;
+	padding: 0 2px;
+	border: 2px solid white;
+	cursor: pointer;
+}
+
+.treeSelected {
+	border: 2px dashed #2eb9ce;
+}
+
 /* Margin/Padding */
 
 .marginT05 {
 	margin-top: 5px;
 }
+
 .marginT10 {
 	margin-top: 10px;
 }
+
 .marginT15 {
 	margin-top: 15px;
 }
+
 .marginT20 {
 	margin-top: 20px;
 }
+
 .marginB05 {
 	margin-bottom: 5px;
 }
+
 .marginB10 {
 	margin-bottom: 10px;
 }
+
 .marginB15 {
 	margin-bottom: 15px;
 }
+
 .marginB20 {
 	margin-bottom: 20px;
 }
@@ -561,24 +1217,31 @@ ul {
 .paddingT05 {
 	padding-top: 5px;
 }
+
 .paddingT10 {
 	padding-top: 10px;
 }
+
 .paddingT15 {
 	padding-top: 15px;
 }
+
 .paddingT20 {
 	padding-top: 20px;
 }
+
 .paddingB05 {
 	padding-bottom: 5px;
 }
+
 .paddingB10 {
 	padding-bottom: 10px;
 }
+
 .paddingB15 {
 	padding-bottom: 15px;
 }
+
 .paddingB20 {
 	padding-bottom: 20px;
 }

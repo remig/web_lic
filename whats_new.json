@@ -1,5 +1,12 @@
 [
 	{
+		"version": "0.50.0",
+		"date": "June 29, 2020",
+		"features": [
+			"Rewrote most of the internal guts to be simpler and easier to maintain going forward."
+		]
+	},
+	{
 		"version": "0.48.0",
 		"date": "November 5, 2019",
 		"features": [

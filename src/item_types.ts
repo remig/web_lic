@@ -1,10 +1,16 @@
-export type Directions = 'up' | 'right' | 'down' | 'left';
-export type Positions = 'top' | 'right' | 'bottom' | 'left';
-export type Orientations = 'horizontal' | 'vertical'
+export type Directions = "up" | "right" | "down" | "left";
+export type Positions = "top" | "right" | "bottom" | "left";
+export type Orientations = "horizontal" | "vertical";
 export type Anchors =
-	'top_left' | 'top' | 'top_right'
-	| 'left' | 'center' | 'right'
-	| 'bottom_left' | 'bottom' | 'bottom_right';
+	| "top_left"
+	| "top"
+	| "top_right"
+	| "left"
+	| "center"
+	| "right"
+	| "bottom_left"
+	| "bottom"
+	| "bottom_right";
 
 export type LDrawColorCode = number;
 
@@ -35,7 +41,7 @@ export interface Model {
 	parentStepID?: number;
 }
 
-export type PartDictionary = {[key: string]: AbstractPart | Model};
+export type PartDictionary = { [key: string]: AbstractPart | Model };
 
 export interface StepModel {
 	filename: string;
@@ -68,7 +74,7 @@ export interface Border {
 export interface Box extends Point, Size {}
 
 export interface Rotation {
-	axis: 'x' | 'y' | 'z';
+	axis: "x" | "y" | "z";
 	angle: number;
 }
 
@@ -78,8 +84,8 @@ export interface PLITransform {
 }
 
 export interface Alignment {
-	align: 'left' | 'right';
-	valign: 'top' | 'bottom';
+	align: "left" | "right";
+	valign: "top" | "bottom";
 }
 
 export interface DisplacedPart {
@@ -91,12 +97,26 @@ export interface DisplacedPart {
 	partDistance?: number;
 }
 
-export type AnnotationTypes = 'label' | 'arrow' | 'stairStepArrow' | 'image';
+export type AnnotationTypes = "label" | "arrow" | "stairStepArrow" | "image";
 
 export type ItemTypeNames =
-	'annotation' | 'book' | 'callout' | 'calloutArrow' | 'csi' | 'divider'
-	| 'numberLabel'| 'page' | 'part' | 'pli' | 'pliItem' | 'point'
-	| 'quantityLabel' | 'rotateIcon' | 'step' | 'submodel' | 'submodelImage';
+	| "annotation"
+	| "book"
+	| "callout"
+	| "calloutArrow"
+	| "csi"
+	| "divider"
+	| "numberLabel"
+	| "page"
+	| "part"
+	| "pli"
+	| "pliItem"
+	| "point"
+	| "quantityLabel"
+	| "rotateIcon"
+	| "step"
+	| "submodel"
+	| "submodelImage";
 
 export interface LookupItem {
 	id: number;
@@ -109,8 +129,7 @@ export interface Item extends LookupItem {
 
 export interface PointedItem extends Item, Point {}
 
-export interface BoxedItem extends Item, Box {
-}
+export interface BoxedItem extends Item, Box {}
 
 export interface BoxedOffsetItem extends Item, Box {
 	borderOffset: Point;
@@ -139,48 +158,48 @@ export interface PointListItem extends Item {
 }
 
 export interface PartItem extends Item {
-	type: 'part';
+	type: "part";
 	stepID: number;
 }
 
 export interface SubmodelItem extends Item {
-	type: 'submodel';
+	type: "submodel";
 	stepID: number;
 	filename: string;
 }
 
 export interface Annotation extends BoxedItem, Alignment, PointListItem {
-	type: 'annotation';
+	type: "annotation";
 	annotationType: AnnotationTypes;
 	color: string;
 	font: string;
 	text: string;
 	tagName?: string;
-	meta?: any;  // TODO: use tagName instead
+	meta?: any; // TODO: use tagName instead
 	src?: string | null;
 	direction?: Directions | null;
 	border?: Border | null;
 }
 
 export interface Book extends NumberedItem {
-	type: 'book';
+	type: "book";
 	pages: number[];
 }
 
 export interface CalloutArrow extends PointListItem {
-	type: 'calloutArrow';
+	type: "calloutArrow";
 	direction: Directions;
 }
 
 export interface Callout extends BoxedOffsetItem, StepParent {
-	type: 'callout';
+	type: "callout";
 	calloutArrows: number[];
 	layout: Orientations;
 	position: Positions;
 }
 
 export interface CSI extends BoxedItem {
-	type: 'csi';
+	type: "csi";
 	annotations: number[];
 	autoScale: number | null;
 	domID: string | null;
@@ -190,25 +209,29 @@ export interface CSI extends BoxedItem {
 }
 
 export interface Divider extends Item {
-	type: 'divider';
+	type: "divider";
 	p1: Point;
 	p2: Point;
 }
 
 export interface NumberLabel extends BoxedItem, Alignment {
-	type: 'numberLabel';
+	type: "numberLabel";
 }
 
-export type PageSubtypes = 'templatePage' | 'page' | 'titlePage' | 'inventoryPage'
+export type PageSubtypes =
+	| "templatePage"
+	| "page"
+	| "titlePage"
+	| "inventoryPage";
 
 export interface GridLayout {
-	rows: number | 'auto';
-	cols: number | 'auto';
+	rows: number | "auto";
+	cols: number | "auto";
 	direction: Orientations;
 }
 
 export interface Page extends PLIItemParent, NumberedItem, StepParent {
-	type: 'page';
+	type: "page";
 	subtype: PageSubtypes;
 	annotations: number[];
 	dividers: number[];
@@ -226,11 +249,11 @@ export interface Page extends PLIItemParent, NumberedItem, StepParent {
 }
 
 export interface PLI extends BoxedOffsetItem, PLIItemParent {
-	type: 'pli';
+	type: "pli";
 }
 
 export interface PLIItem extends BoxedItem, QuantityLabelParent {
-	type: 'pliItem';
+	type: "pliItem";
 	domID: string | null;
 	filename: string;
 	colorCode: number;
@@ -238,21 +261,21 @@ export interface PLIItem extends BoxedItem, QuantityLabelParent {
 }
 
 export interface PointItem extends PointedItem {
-	type: 'point';
+	type: "point";
 	relativeTo: LookupItem | null;
 }
 
 export interface QuantityLabel extends BoxedItem, Alignment {
-	type: 'quantityLabel';
+	type: "quantityLabel";
 }
 
 export interface RotateIcon extends BoxedItem {
-	type: 'rotateIcon';
+	type: "rotateIcon";
 	scale: number;
 }
 
 export interface Step extends NumberedItem, BoxedItem {
-	type: 'step';
+	type: "step";
 	annotations: number[];
 	callouts: number[];
 	csiID: number | null;
@@ -265,13 +288,13 @@ export interface Step extends NumberedItem, BoxedItem {
 	rotateIconID: number | null;
 	steps: number[];
 	stretchedPages: number[];
-	subStepLayout: 'horizontal' | 'vertical';
+	subStepLayout: "horizontal" | "vertical";
 	submodelImages: number[];
 	prevBookParts: number[] | null;
 }
 
 export interface SubmodelImage extends BoxedOffsetItem, QuantityLabelParent {
-	type: 'submodelImage';
+	type: "submodelImage";
 	csiID: number | null;
 	modelFilename: string;
 }
@@ -298,13 +321,25 @@ export interface ImageTemplate {
 }
 
 export type ItemTypes =
-	Annotation | Book | Callout | CalloutArrow | CSI | Divider
-	| NumberLabel | Page | PartItem | PLI | PLIItem | PointItem
-	| QuantityLabel | RotateIcon | Step | SubmodelItem | SubmodelImage;
+	| Annotation
+	| Book
+	| Callout
+	| CalloutArrow
+	| CSI
+	| Divider
+	| NumberLabel
+	| Page
+	| PartItem
+	| PLI
+	| PLIItem
+	| PointItem
+	| QuantityLabel
+	| RotateIcon
+	| Step
+	| SubmodelItem
+	| SubmodelImage;
 
-export interface BaseTemplate { }
-
-export interface PageTemplate extends BaseTemplate {
+export interface PageTemplate {
 	width: number;
 	height: number;
 	sizePreset: null;
@@ -312,7 +347,7 @@ export interface PageTemplate extends BaseTemplate {
 	numberLabel: {
 		font: string;
 		color: string;
-		position: 'right' | 'left' | 'even-right' | 'even-left';
+		position: "right" | "left" | "even-right" | "even-left";
 	};
 	fill: {
 		color: string;
@@ -322,7 +357,7 @@ export interface PageTemplate extends BaseTemplate {
 	border: RoundBorderTemplate;
 }
 
-export interface StepTemplate extends BaseTemplate {
+export interface StepTemplate {
 	innerMargin: number;
 	csi: {
 		scale: number;
@@ -335,7 +370,7 @@ export interface StepTemplate extends BaseTemplate {
 	numberLabel: LabelTemplate;
 }
 
-export interface SubmodelTemplate extends BaseTemplate {
+export interface SubmodelTemplate {
 	innerMargin: number;
 	maxHeight: number;
 	csi: {
@@ -347,20 +382,20 @@ export interface SubmodelTemplate extends BaseTemplate {
 	quantityLabel: LabelTemplate;
 }
 
-export interface PLITemplate extends BaseTemplate {
+export interface PLITemplate {
 	innerMargin: number;
 	includeSubmodels: boolean;
 	fill: FillTemplate;
 	border: RoundBorderTemplate;
 }
 
-export interface PLIItemTemplate extends BaseTemplate {
+export interface PLIItemTemplate {
 	scale: number;
 	rotation: Rotation[];
 	quantityLabel: LabelTemplate;
 }
 
-export interface CalloutTemplate extends BaseTemplate {
+export interface CalloutTemplate {
 	innerMargin: number;
 	fill: FillTemplate;
 	border: RoundBorderTemplate;
@@ -374,7 +409,6 @@ export interface CalloutTemplate extends BaseTemplate {
 }
 
 export interface Template {
-
 	page: PageTemplate;
 	step: StepTemplate;
 	submodelImage: SubmodelTemplate;
@@ -408,7 +442,7 @@ export interface Template {
 export type TemplateTypeNames = keyof Template;
 
 export interface GuideInterface {
-	orientation: 'horizontal' | 'vertical';
+	orientation: "horizontal" | "vertical";
 	position: number;
 }
 
@@ -423,7 +457,7 @@ export interface StateInterface {
 	numberLabels: NumberLabel[];
 	pages: Page[];
 	pliItems: PLIItem[];
-	pliTransforms: {[key: string]: PLITransform};  // key should be LDrawPartFilename but that doesn't work...
+	pliTransforms: { [key: string]: PLITransform }; // key should be LDrawPartFilename but that doesn't work...
 	plis: PLI[];
 	plisVisible: boolean;
 	points: Point[];

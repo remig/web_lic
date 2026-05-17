@@ -1,17 +1,19 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
-import {type Template} from './item_types';
+import { type Template } from "./item_types";
 
 const part1 = {
-	colorCode: 1, filename: '3001.dat',
+	colorCode: 1,
+	filename: "3001.dat",
 	matrix: [0, 0, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0],
 };
 const part2 = {
-	colorCode: 4, filename: '3003.dat',
+	colorCode: 4,
+	filename: "3003.dat",
 	matrix: [0, -24, 20, 1, 0, 0, 0, 1, 0, 0, 0, 1],
 };
 const model = {
-	filename: 'templateModel.ldr',
-	name: 'templateModel.ldr',
+	filename: "templateModel.ldr",
+	name: "templateModel.ldr",
 	parts: [part1, part2],
 };
 
@@ -20,27 +22,27 @@ const template: Template = {
 	page: {
 		width: 900,
 		height: 700,
-		sizePreset: null,  // {format, orientation}, formats defined in page_template.vue: pageSizeLookups
+		sizePreset: null, // {format, orientation}, formats defined in page_template.vue: pageSizeLookups
 		innerMargin: 0.025,
 		numberLabel: {
-			font: 'bold 18pt Helvetica',
-			color: '#000000',
-			position: 'right',  // One of "right', "left", "even-right", "even-left"
+			font: "bold 18pt Helvetica",
+			color: "#000000",
+			position: "right", // One of "right', "left", "even-right", "even-left"
 		},
 		fill: {
-			color: '#ffffff',
-			gradient: '',
+			color: "#ffffff",
+			gradient: "",
 			image: {
 				x: 0,
 				y: 0,
 				width: 0,
 				height: 0,
-				src: '',
+				src: "",
 			},
 		},
 		border: {
 			width: 0,
-			color: '#000000',
+			color: "#000000",
 			cornerRadius: 0,
 		},
 	},
@@ -51,7 +53,7 @@ const template: Template = {
 			rotation: [],
 			displacementArrow: {
 				fill: {
-					color: '#ff0000',
+					color: "#ff0000",
 				},
 				border: {
 					width: 0,
@@ -60,13 +62,13 @@ const template: Template = {
 			},
 		},
 		numberLabel: {
-			font: 'bold 22pt Helvetica',
-			color: '#000000',
+			font: "bold 22pt Helvetica",
+			color: "#000000",
 		},
 	},
 	submodelImage: {
 		innerMargin: 0.017,
-		maxHeight: 0.3,  // as a percentage of page height
+		maxHeight: 0.3, // as a percentage of page height
 		csi: {
 			scale: 1,
 			rotation: [],
@@ -76,12 +78,12 @@ const template: Template = {
 		},
 		border: {
 			width: 2,
-			color: '#000000',
+			color: "#000000",
 			cornerRadius: 10,
 		},
 		quantityLabel: {
-			font: 'bold 18pt Helvetica',
-			color: '#000000',
+			font: "bold 18pt Helvetica",
+			color: "#000000",
 		},
 	},
 	pli: {
@@ -92,7 +94,7 @@ const template: Template = {
 		},
 		border: {
 			width: 2,
-			color: '#000000',
+			color: "#000000",
 			cornerRadius: 10,
 		},
 	},
@@ -100,8 +102,8 @@ const template: Template = {
 		scale: 1,
 		rotation: [],
 		quantityLabel: {
-			font: 'bold 10pt Helvetica',
-			color: '#000000',
+			font: "bold 10pt Helvetica",
+			color: "#000000",
 		},
 	},
 	callout: {
@@ -111,27 +113,27 @@ const template: Template = {
 		},
 		border: {
 			width: 2,
-			color: '#000000',
+			color: "#000000",
 			cornerRadius: 10,
 		},
 		arrow: {
 			border: {
 				width: 2,
-				color: '#000000',
+				color: "#000000",
 			},
 		},
 		step: {
 			innerMargin: 0.02,
 			numberLabel: {
-				font: 'bold 18pt Helvetica',
-				color: '#000000',
+				font: "bold 18pt Helvetica",
+				color: "#000000",
 			},
 		},
 	},
 	divider: {
 		border: {
 			width: 2,
-			color: '#000000',
+			color: "#000000",
 		},
 	},
 	rotateIcon: {
@@ -141,13 +143,13 @@ const template: Template = {
 		},
 		border: {
 			width: 2,
-			color: '#000000',
+			color: "#000000",
 			cornerRadius: 10,
 		},
 		arrow: {
 			border: {
 				width: 3,
-				color: '#000000',
+				color: "#000000",
 			},
 		},
 	},
@@ -155,8 +157,8 @@ const template: Template = {
 		zoom: 0,
 		edgeWidth: 4,
 		rotation: [
-			{axis: 'x', angle: 36},
-			{axis: 'y', angle: 50},
+			{ axis: "x", angle: 36 },
+			{ axis: "y", angle: 50 },
 		],
 	},
 	useBlackStudFaces: true,

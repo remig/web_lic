@@ -1,277 +1,277 @@
 {
-    "glossary": {
-        "font": "Schriftart",
-        "font_size": "Schriftgröße",
-        "color": "Farbe",
-        "size": "Größe",
-        "auto": "Automatisch",
-        "upload": "Upload",
-        "import": "Importieren",
-        "x": "X",
-        "y": "Y",
-        "z": "Z",
-        "top": "Oben",
-        "bottom": "Unten",
-        "left": "Links",
-        "right": "Rechts",
-        "page": "Seite",
-        "page_count_@c": "Seite ${0}",
-        "submodelimage": "Untermodellbild",
-        "step": "Schritt",
-        "step_count_@c": "Schritt ${0}",
-        "csi": "Schrittbild",
-        "pli": "Teileliste",
-        "pliitem": "Teil der Teileliste",
-        "quantitylabel": "Anzahl Text",
-        "quantitylabel_count_@c": "Anzahl Text x${0}",
-        "calloutarrow": "Callout Pfeil",
-        "numberlabel": "Nummer Text",
-        "rotateicon": "Rotationszeichen",
-        "templatepage": "Vorlage",
-        "titlepage": "Titelseite",
-        "inventorypage": "Teileübersicht",
-        "inventorypage_count_@c": "Teileübersicht ${0}",
-        "divider": "Trennlinie",
-        "annotation": "Objekt",
-        "callout": "Callout",
-        "ctrl": "Strg",
+	"glossary": {
+		"font": "Schriftart",
+		"font_size": "Schriftgröße",
+		"color": "Farbe",
+		"size": "Größe",
+		"auto": "Automatisch",
+		"upload": "Upload",
+		"import": "Importieren",
+		"x": "X",
+		"y": "Y",
+		"z": "Z",
+		"top": "Oben",
+		"bottom": "Unten",
+		"left": "Links",
+		"right": "Rechts",
+		"page": "Seite",
+		"page_count_@c": "Seite ${0}",
+		"submodelimage": "Untermodellbild",
+		"step": "Schritt",
+		"step_count_@c": "Schritt ${0}",
+		"csi": "Schrittbild",
+		"pli": "Teileliste",
+		"pliitem": "Teil der Teileliste",
+		"quantitylabel": "Anzahl Text",
+		"quantitylabel_count_@c": "Anzahl Text x${0}",
+		"calloutarrow": "Callout Pfeil",
+		"numberlabel": "Nummer Text",
+		"rotateicon": "Rotationszeichen",
+		"templatepage": "Vorlage",
+		"titlepage": "Titelseite",
+		"inventorypage": "Teileübersicht",
+		"inventorypage_count_@c": "Teileübersicht ${0}",
+		"divider": "Trennlinie",
+		"annotation": "Objekt",
+		"callout": "Callout",
+		"ctrl": "Strg",
 		"arrow": "Pfeil",
 		"point": "Punkt"
-    },
+	},
 	"action": {
-        "file": {
-            "name": "Datei",
-            "open_lic": {
-                "name": "Lic Datei öffnen...",
-                "success_message_@mf": "\"${filename}\" erfolgreich geöffnet (${time})"
-            },
-            "open_lic_recent": {
-                "name": "Zuletzt verwendet (NYI)"
-            },
-            "close": {
-                "name": "Schließen"
-            },
-            "save": {
-                "name": "Speichern"
-            },
-            "save_as": {
-                "name": "Speichern unter..."
-            },
-            "import_model": {
-                "name": "Modell importieren...",
-                "success_message_@mf": "\"${filename}\" erfolgreich geladen (${time})"
-            },
-            "import_builtin_model": {
-                "name": "Integriertes Modell laden...",
-                "models": {
-                    "trivial": "Einfaches Modell",
-                    "alligator": "Creator Alligator",
-                    "xwing": "X-Wing",
-                    "lab": "Mobile Lab"
-                }
-            },
-            "template": {
-                "name": "Vorlage",
-                "save": {
-                    "name": "Speichern"
-                },
-                "save_as": {
-                    "name": "Speichern unter..."
-                },
-                "load": {
-                    "name": "Laden",
-                    "success_message_@mf": "\"${filename}\" Vorlage erfolgreich geöffnet"
-                },
-                "load_builtin": {
-                    "name": "Lade integrierte Vorlage (NYI)"
-                },
-                "reset": {
-                    "name": "Zurücksetzen",
-                    "undo": "Vorlage zurücksetzen"
-                }
-            },
-            "set_language": {
-                "name": "Sprache"
-            },
-            "clear_cache": {
-                "name": "Cache leeren",
-                "model": {
-                    "name": "Aktuelle Anleitung"
-                },
-                "ui": {
-                    "name": "UI Einstellungen"
-                },
-                "everything": {
-                    "name": "Alles"
-                }
-            }
-        },
-        "edit": {
-            "name": "Bearbeiten",
-            "undo": {
-                "name_@c": "Rückgängig: ${text}"
-            },
-            "redo": {
-                "name_@c": "Wiederherstellen: ${text}"
-            },
-            "title_page": {
-                "add": {
-                    "name": "Titelseite hinzufügen"
-                },
-                "remove": {
-                    "name": "Titelseite entfernen"
-                }
-            },
-            "pli": {
-                "show": {
-                    "name": "PLIs anzeigen"
-                },
-                "hide": {
-                    "name": "PLIs verstecken"
-                }
-            },
-            "inventory_page": {
-                "add": {
-                    "name": "Teileübersicht hinzufügen"
-                },
-                "remove": {
-                    "name": "Teileübersicht entfernen"
-                }
-            },
-            "snap": {
-                "name": "Einrasten (NYI)"
-            },
-            "scene_rendering": {
-                "name": "3D Teile Rendering..."
-            },
-            "brick_colors": {
-                "name": "Steinfarben..."
-            },
-            "template": {
-                "change": {
-                    "undo_@mf": "${item} der Vorlage ändern"
-                }
-            },
-            "item": {
-                "move": {
-                    "undo_@mf": "${item} bewegen"
-                },
-                "delete": {
-                    "undo_@mf": "${item} löschen"
-                }
-            }
-        },
-        "view": {
-            "name": "Ansicht",
-            "show_pages": {
-                "name": "Seiten anzeigen",
-                "one": {
-                    "name": "Einzelne Seite"
-                },
-                "two" : {
-                    "name": "Doppeleite"
-                },
-                "one_scroll": {
-                    "name": "Einzelne Seite fortlaufend"
-                },
-                "two_scroll": {
-                    "name": "Doppelseite fortlaufend"
-                }
-            },
-            "zoom": {
-                "name": "Zoom (NYI)",
-                "full": {
-                    "name": "100%"
-                },
-                "fit": {
-                    "name": "Einpassen"
-                },
-                "in": {
-                    "name": "Vergrößern"
-                },
-                "out": {
-                    "name": "Verkleinern"
-                }
-            },
-            "grid": {
-                "name": "Gitter",
-                "show": {
-                    "name": "Anzeigen",
-                    "undo": "Gitter anzeigen"
-                },
-                "hide": {
-                    "name": "Ausblenden",
-                    "undo": "Gitter verbergen"
-                },
-                "customize": {
-                    "name": "Anpassen"
-                }
-            },
-            "guides": {
-                "name": "Hilfslinien",
-                "add_horizontal": {
-                    "name": "Horizontale Hilfslinie hinzufügen",
-                    "undo": "Hilfslinie hinzufügen"
-                },
-                "add_vertical": {
-                    "name": "Vertikale Hilfslinie hinzufügen",
-                    "undo": "Hilfslinie hinzufügen"
-                },
-                "remove": {
-                    "name": "Hilfslinien entfernen",
-                    "undo": "Hilfslinien entfernen"
-                }
-            }
-        },
-        "export": {
-            "name": "Exportieren",
-            "pdf": {
-                "name": "PDF",
-                "success_message_@mf": "PDF erfolgreich erstellt (${time})"
-            },
-            "hi_res_pdf": {
-                "name": "Hochauflösendes PDF..."
-            },
-            "png": {
-                "name": "PNG Bilder",
-                "success_message_@mf": "PNG Zip erfolgreich erstellt (${time})"
-            },
-            "hi_res_png": {
-                "name": "Hochauflösende PNG Bilder..."
-            }
-        },
-        "annotation": {
-            "add": {
-                "name": "Objekt hinzufügen",
-                "label": {
-                    "name": "Text",
-                    "undo": "Text hinzufügen",
-                    "initial_text": "Neuer Text"
-                },
-                "line": {
-                    "name": "Linie (NYI)"
-                },
-                "circle": {
-                    "name": "Kreis (NYI)"
-                },
-                "arrow": {
-                    "name": "Pfeil",
-                    "undo": "Pfeil hinzufügen"
-                },
-                "image": {
-                    "name": "Bild",
-                    "undo": "Bild hinzufügen"
-                }
-            },
-            "delete": {
-                "name": "Löschen",
-                "undo": "Objekt löschen"
-            },
-            "change_text_and_style": {
-                "name": "Text & Stil ändern...",
-                "undo": "Objekt anpassen"
-            }
-        },
+		"file": {
+			"name": "Datei",
+			"open_lic": {
+				"name": "Lic Datei öffnen...",
+				"success_message_@mf": "\"${filename}\" erfolgreich geöffnet (${time})"
+			},
+			"open_lic_recent": {
+				"name": "Zuletzt verwendet (NYI)"
+			},
+			"close": {
+				"name": "Schließen"
+			},
+			"save": {
+				"name": "Speichern"
+			},
+			"save_as": {
+				"name": "Speichern unter..."
+			},
+			"import_model": {
+				"name": "Modell importieren...",
+				"success_message_@mf": "\"${filename}\" erfolgreich geladen (${time})"
+			},
+			"import_builtin_model": {
+				"name": "Integriertes Modell laden...",
+				"models": {
+					"trivial": "Einfaches Modell",
+					"alligator": "Creator Alligator",
+					"xwing": "X-Wing",
+					"lab": "Mobile Lab"
+				}
+			},
+			"template": {
+				"name": "Vorlage",
+				"save": {
+					"name": "Speichern"
+				},
+				"save_as": {
+					"name": "Speichern unter..."
+				},
+				"load": {
+					"name": "Laden",
+					"success_message_@mf": "\"${filename}\" Vorlage erfolgreich geöffnet"
+				},
+				"load_builtin": {
+					"name": "Lade integrierte Vorlage (NYI)"
+				},
+				"reset": {
+					"name": "Zurücksetzen",
+					"undo": "Vorlage zurücksetzen"
+				}
+			},
+			"set_language": {
+				"name": "Sprache"
+			},
+			"clear_cache": {
+				"name": "Cache leeren",
+				"model": {
+					"name": "Aktuelle Anleitung"
+				},
+				"ui": {
+					"name": "UI Einstellungen"
+				},
+				"everything": {
+					"name": "Alles"
+				}
+			}
+		},
+		"edit": {
+			"name": "Bearbeiten",
+			"undo": {
+				"name_@c": "Rückgängig: ${text}"
+			},
+			"redo": {
+				"name_@c": "Wiederherstellen: ${text}"
+			},
+			"title_page": {
+				"add": {
+					"name": "Titelseite hinzufügen"
+				},
+				"remove": {
+					"name": "Titelseite entfernen"
+				}
+			},
+			"pli": {
+				"show": {
+					"name": "PLIs anzeigen"
+				},
+				"hide": {
+					"name": "PLIs verstecken"
+				}
+			},
+			"inventory_page": {
+				"add": {
+					"name": "Teileübersicht hinzufügen"
+				},
+				"remove": {
+					"name": "Teileübersicht entfernen"
+				}
+			},
+			"snap": {
+				"name": "Einrasten (NYI)"
+			},
+			"scene_rendering": {
+				"name": "3D Teile Rendering..."
+			},
+			"brick_colors": {
+				"name": "Steinfarben..."
+			},
+			"template": {
+				"change": {
+					"undo_@mf": "${item} der Vorlage ändern"
+				}
+			},
+			"item": {
+				"move": {
+					"undo_@mf": "${item} bewegen"
+				},
+				"delete": {
+					"undo_@mf": "${item} löschen"
+				}
+			}
+		},
+		"view": {
+			"name": "Ansicht",
+			"show_pages": {
+				"name": "Seiten anzeigen",
+				"one": {
+					"name": "Einzelne Seite"
+				},
+				"two": {
+					"name": "Doppeleite"
+				},
+				"one_scroll": {
+					"name": "Einzelne Seite fortlaufend"
+				},
+				"two_scroll": {
+					"name": "Doppelseite fortlaufend"
+				}
+			},
+			"zoom": {
+				"name": "Zoom (NYI)",
+				"full": {
+					"name": "100%"
+				},
+				"fit": {
+					"name": "Einpassen"
+				},
+				"in": {
+					"name": "Vergrößern"
+				},
+				"out": {
+					"name": "Verkleinern"
+				}
+			},
+			"grid": {
+				"name": "Gitter",
+				"show": {
+					"name": "Anzeigen",
+					"undo": "Gitter anzeigen"
+				},
+				"hide": {
+					"name": "Ausblenden",
+					"undo": "Gitter verbergen"
+				},
+				"customize": {
+					"name": "Anpassen"
+				}
+			},
+			"guides": {
+				"name": "Hilfslinien",
+				"add_horizontal": {
+					"name": "Horizontale Hilfslinie hinzufügen",
+					"undo": "Hilfslinie hinzufügen"
+				},
+				"add_vertical": {
+					"name": "Vertikale Hilfslinie hinzufügen",
+					"undo": "Hilfslinie hinzufügen"
+				},
+				"remove": {
+					"name": "Hilfslinien entfernen",
+					"undo": "Hilfslinien entfernen"
+				}
+			}
+		},
+		"export": {
+			"name": "Exportieren",
+			"pdf": {
+				"name": "PDF",
+				"success_message_@mf": "PDF erfolgreich erstellt (${time})"
+			},
+			"hi_res_pdf": {
+				"name": "Hochauflösendes PDF..."
+			},
+			"png": {
+				"name": "PNG Bilder",
+				"success_message_@mf": "PNG Zip erfolgreich erstellt (${time})"
+			},
+			"hi_res_png": {
+				"name": "Hochauflösende PNG Bilder..."
+			}
+		},
+		"annotation": {
+			"add": {
+				"name": "Objekt hinzufügen",
+				"label": {
+					"name": "Text",
+					"undo": "Text hinzufügen",
+					"initial_text": "Neuer Text"
+				},
+				"line": {
+					"name": "Linie (NYI)"
+				},
+				"circle": {
+					"name": "Kreis (NYI)"
+				},
+				"arrow": {
+					"name": "Pfeil",
+					"undo": "Pfeil hinzufügen"
+				},
+				"image": {
+					"name": "Bild",
+					"undo": "Bild hinzufügen"
+				}
+			},
+			"delete": {
+				"name": "Löschen",
+				"undo": "Objekt löschen"
+			},
+			"change_text_and_style": {
+				"name": "Text & Stil ändern...",
+				"undo": "Objekt anpassen"
+			}
+		},
 		"layout": {
 			"name": "Anordnung",
 			"vertical": {
@@ -287,182 +287,182 @@
 				"undo": "Seite in Zeilen und Spalten anordnen",
 				"undo_step": "Schritt in Zeilen und Spalten anordnen"
 			},
-            "redo_layout": {
-                "name": "Neu anordnen"
-            }
-        },
-        "page": {
-            "prepend_blank_page": {
-                "name": "Leere Seite vor dieser einfügen"
-            },
-            "append_blank_page": {
-                "name": "Leere Seite nach dieser einfügen"
-            },
-            "hide_step_separators": {
-                "name": "Schritttrenner verstecken (NYI)"
-            },
-            "add_blank_step": {
-                "name": "Leeren Schritt hinzufügen"
-            },
-            "delete_this_blank_page": {
-                "name": "Diese leere Seite löschen",
-                "undo": "Seite löschen"
-            }
-        },
-        "step": {
-            "add_callout": {
-                "name": "Callout hinzufügen"
-            },
-            "divide_into_sub_steps": {
-                "name": "In Unterschritte unterteilen"
-            },
-            "stretch_to_next_page": {
-                "name": "Schritt auf nächste Seite ausdehnen"
-            },
-            "move_to": {
-                "name": "Schritt verschieben auf...",
-                "previous_page": {
-                    "name": "Vorherige Seite",
-                    "undo": "Schritt auf vorherige Seite verschieben"
-                },
-                "next_page": {
-                    "name": "Nächste Seite",
-                    "undo": "Schritt auf nächste Seite verschieben"
-                }
-            },
-            "merge_with": {
-                "name": "Schritt zusammenführen mit...",
-                "previous_step": {
-                    "name": "Vorherigem Schritt",
-                    "undo": "Schritt mit vorherigem Schritt zusammenführen"
-                },
-                "next_step": {
-                    "name": "Nächstem Schritt",
-                    "undo": "Schritt mit nächstem Schritt zusammenführen"
-                }
-            },
-            "delete_empty_step": {
-                "name": "Leeren Schritt löschen"
-            },
-            "prepend_blank_step": {
-                "name": "Leeren Schritt vor diesem einfügen"
-            },
-            "append_blank_step": {
-                "name": "Leeren Schritt nach diesem einfügen"
-            }
-        },
-        "rotate_icon": {
-            "add": {
-                "name": "Rotationszeichen hinzufügen"
-            },
-            "delete": {
-                "name": "Rotationszeichen entfernen"
-            }
-        },
-        "page_number": {
-            "change_number": {
-                "name": "Seitenzahl ändern (NYI)"
-            }
-        },
-        "step_number": {
-            "change_number": {
-                "name": "Schrittnummer ändern (NYI)"
-            }
-        },
-        "csi": {
-            "rotate": {
-                "name": "Rotation des Schrittbildes",
-                "flip_upside_down": {
-                    "name": "Tausche oben und unten",
-                    "undo": "Im Schrittbild oben und unten vertauschen"
-                },
-                "rotate_front_to_back": {
-                    "name": "Tausche vorne und hinten",
-                    "undo": "Im Schrittbild vorne und hinten vertauschen"
-                },
-                "custom_rotation": {
-                    "name": "Andere Ausrichtung...",
-                    "undo": "Schrittbild rotieren"
-                },
-                "remove_rotation": {
-                    "name": "Rotation entfernen",
-                    "undo": "Rotation des Schrittbildes entfernen"
-                }
-            },
-            "copy_rotation_to_next_steps": {
-                "name": "Rotation auf folgende Schritte übertragen...",
-                "undo": "Rotation des Schrittbildes übertragen"
-            },
-            "scale": {
-                "name": "Skalierung ändern",
-                "undo": "Skalierung des Schrittbildes ändern"
-            },
-            "remove_scale": {
-                "name": "Skalierung entfernen",
-                "undo": "Skalierung des Schrittbildes entfernen"
-            },
-            "select_part": {
-                "name": "Teil auswählen"
-            },
-            "add_new_part": {
-                "name": "Neues Teil hinzufügen (NYI)"
-            }
-        },
-        "pli_item": {
-            "rotate_part_list_image": {
-                "name": "Rotation ändern...",
-                "undo": "Teilelistenbild rotieren"
-            },
-            "scale_part_list_image": {
-                "name": "Skalierung ändern...",
-                "undo": "Teilelistenbild skalieren"
-            },
-            "remove_part_list_image_scale": {
-                "name": "Skalierung entfernen",
-                "undo": "Skalierung des Teilelistenbildes entfernen"
-            }
-        },
-        "quantity_label": {
-            "change_count": {
-                "name": "Anzahl ändern",
-                "undo": "Anzahl eines Teils ändern"
-            }
-        },
-        "callout": {
-            "position": {
-                "name": "Position",
-                "undo": "Callout positionieren",
-                "top": {
-                    "name": "Oben"
-                },
-                "bottom": {
-                    "name": "Unten"
-                },
-                "right": {
-                    "name": "Rechts"
-                },
-                "left": {
-                    "name": "Links"
-                }
-            },
-            "layout": {
-                "name": "Anordnung",
-                "vertical": {
-                    "name": "Vertikal",
-                    "undo": "Vertikal anordnen"
-                },
-                "horizontal": {
-                    "name": "Horizontal",
-                    "undo": "Horizontal anordnen"
-                }
-            },
-            "add_step": {
-                "name": "Schritt hinzufügen"
-            },
-            "delete_empty_callout": {
-                "name": "Leeren Callout löschen"
-            }
-        },
+			"redo_layout": {
+				"name": "Neu anordnen"
+			}
+		},
+		"page": {
+			"prepend_blank_page": {
+				"name": "Leere Seite vor dieser einfügen"
+			},
+			"append_blank_page": {
+				"name": "Leere Seite nach dieser einfügen"
+			},
+			"hide_step_separators": {
+				"name": "Schritttrenner verstecken (NYI)"
+			},
+			"add_blank_step": {
+				"name": "Leeren Schritt hinzufügen"
+			},
+			"delete_this_blank_page": {
+				"name": "Diese leere Seite löschen",
+				"undo": "Seite löschen"
+			}
+		},
+		"step": {
+			"add_callout": {
+				"name": "Callout hinzufügen"
+			},
+			"divide_into_sub_steps": {
+				"name": "In Unterschritte unterteilen"
+			},
+			"stretch_to_next_page": {
+				"name": "Schritt auf nächste Seite ausdehnen"
+			},
+			"move_to": {
+				"name": "Schritt verschieben auf...",
+				"previous_page": {
+					"name": "Vorherige Seite",
+					"undo": "Schritt auf vorherige Seite verschieben"
+				},
+				"next_page": {
+					"name": "Nächste Seite",
+					"undo": "Schritt auf nächste Seite verschieben"
+				}
+			},
+			"merge_with": {
+				"name": "Schritt zusammenführen mit...",
+				"previous_step": {
+					"name": "Vorherigem Schritt",
+					"undo": "Schritt mit vorherigem Schritt zusammenführen"
+				},
+				"next_step": {
+					"name": "Nächstem Schritt",
+					"undo": "Schritt mit nächstem Schritt zusammenführen"
+				}
+			},
+			"delete_empty_step": {
+				"name": "Leeren Schritt löschen"
+			},
+			"prepend_blank_step": {
+				"name": "Leeren Schritt vor diesem einfügen"
+			},
+			"append_blank_step": {
+				"name": "Leeren Schritt nach diesem einfügen"
+			}
+		},
+		"rotate_icon": {
+			"add": {
+				"name": "Rotationszeichen hinzufügen"
+			},
+			"delete": {
+				"name": "Rotationszeichen entfernen"
+			}
+		},
+		"page_number": {
+			"change_number": {
+				"name": "Seitenzahl ändern (NYI)"
+			}
+		},
+		"step_number": {
+			"change_number": {
+				"name": "Schrittnummer ändern (NYI)"
+			}
+		},
+		"csi": {
+			"rotate": {
+				"name": "Rotation des Schrittbildes",
+				"flip_upside_down": {
+					"name": "Tausche oben und unten",
+					"undo": "Im Schrittbild oben und unten vertauschen"
+				},
+				"rotate_front_to_back": {
+					"name": "Tausche vorne und hinten",
+					"undo": "Im Schrittbild vorne und hinten vertauschen"
+				},
+				"custom_rotation": {
+					"name": "Andere Ausrichtung...",
+					"undo": "Schrittbild rotieren"
+				},
+				"remove_rotation": {
+					"name": "Rotation entfernen",
+					"undo": "Rotation des Schrittbildes entfernen"
+				}
+			},
+			"copy_rotation_to_next_steps": {
+				"name": "Rotation auf folgende Schritte übertragen...",
+				"undo": "Rotation des Schrittbildes übertragen"
+			},
+			"scale": {
+				"name": "Skalierung ändern",
+				"undo": "Skalierung des Schrittbildes ändern"
+			},
+			"remove_scale": {
+				"name": "Skalierung entfernen",
+				"undo": "Skalierung des Schrittbildes entfernen"
+			},
+			"select_part": {
+				"name": "Teil auswählen"
+			},
+			"add_new_part": {
+				"name": "Neues Teil hinzufügen (NYI)"
+			}
+		},
+		"pli_item": {
+			"rotate_part_list_image": {
+				"name": "Rotation ändern...",
+				"undo": "Teilelistenbild rotieren"
+			},
+			"scale_part_list_image": {
+				"name": "Skalierung ändern...",
+				"undo": "Teilelistenbild skalieren"
+			},
+			"remove_part_list_image_scale": {
+				"name": "Skalierung entfernen",
+				"undo": "Skalierung des Teilelistenbildes entfernen"
+			}
+		},
+		"quantity_label": {
+			"change_count": {
+				"name": "Anzahl ändern",
+				"undo": "Anzahl eines Teils ändern"
+			}
+		},
+		"callout": {
+			"position": {
+				"name": "Position",
+				"undo": "Callout positionieren",
+				"top": {
+					"name": "Oben"
+				},
+				"bottom": {
+					"name": "Unten"
+				},
+				"right": {
+					"name": "Rechts"
+				},
+				"left": {
+					"name": "Links"
+				}
+			},
+			"layout": {
+				"name": "Anordnung",
+				"vertical": {
+					"name": "Vertikal",
+					"undo": "Vertikal anordnen"
+				},
+				"horizontal": {
+					"name": "Horizontal",
+					"undo": "Horizontal anordnen"
+				}
+			},
+			"add_step": {
+				"name": "Schritt hinzufügen"
+			},
+			"delete_empty_callout": {
+				"name": "Leeren Callout löschen"
+			}
+		},
 		"callout_arrow": {
 			"select_point": {
 				"name": "Punkt auswählen...",
@@ -503,104 +503,104 @@
 				}
 			}
 		},
-        "divider": {
-            "resize": {
-                "name": "Größe ändern",
-                "undo": "Länge der Trennlinie anpassen"
-            },
-            "delete": {
-                "name": "Löschen",
-                "undo": "Trennlinie löschen"
-            }
-        },
-        "submodel": {
-            "convert_to_callout": {
-                "name": "In Callout umwandeln"
-            }
-        },
-        "part": {
-            "displace_part": {
-                "name": "Teil versetzen...",
-                "undo_@mf": "Teil versetzen ${direction}",
-                "up": {
-                    "name": "Hoch"
-                },
-                "down": {
-                    "name": "Runter"
-                },
-                "left": {
-                    "name": "Links"
-                },
-                "right": {
-                    "name": "Rechts"
-                },
-                "forward": {
-                    "name": "Vorwärts"
-                },
-                "backward": {
-                    "name": "Rückwärts"
-                },
-                "none": {
-                    "name": "Ohne"
-                }
-            },
-            "adjust_displacement": {
-                "name": "Versetzung anpassen",
-                "undo": "Versetzung anpassen"
-            },
-            "remove_displacement": {
-                "name": "Versetzung entfernen"
-            },
-            "move_part_to": {
-                "name": "Teil verschieben...",
-                "previous_step": {
-                    "name": "Vorheriger Schritt",
-                    "undo": "Teil in den vorherigen Schritt verschieben"
-                },
-                "next_step": {
-                    "name": "Nächster Schritt",
-                    "undo": "Teil in den nächsten Schritt verschieben"
-                }
-            },
-            "add_part_to_callout": {
-                "name": "Zu Callout hinzufügen",
-                "undo": "Teil zu Callout hinzufügen"
-            },
-            "remove_part_from_callout": {
-                "name": "Aus Callout entfernen",
-                "undo": "Teil aus Callout entfernen"
-            },
-            "remove_from_pli": {
-                "name": "Aus Teileliste entfernen (NYI)"
-            },
-            "change_part": {
-                "name": "Anpassen",
-                "position_and_rotation": {
-                    "name": "Position und Rotation ändern",
-                    "undo": "Teilposition und -rotation ändern"
-                },
-                "color": {
-                    "name": "Farbe ändern"
-                },
-                "to_different_part": {
-                    "name": "Ersetzen durch anderes Teil",
-                    "undo": "Teil durch ein anderes ersetzen"
-                },
-                "duplicate": {
-                    "name": "Duplizieren",
-                    "undo": "Teil duplizieren"
-                },
-                "delete": {
-                    "name": "Löschen",
-                    "undo": "Teil löschen"
-                }
-            }
-        }
-    },
+		"divider": {
+			"resize": {
+				"name": "Größe ändern",
+				"undo": "Länge der Trennlinie anpassen"
+			},
+			"delete": {
+				"name": "Löschen",
+				"undo": "Trennlinie löschen"
+			}
+		},
+		"submodel": {
+			"convert_to_callout": {
+				"name": "In Callout umwandeln"
+			}
+		},
+		"part": {
+			"displace_part": {
+				"name": "Teil versetzen...",
+				"undo_@mf": "Teil versetzen ${direction}",
+				"up": {
+					"name": "Hoch"
+				},
+				"down": {
+					"name": "Runter"
+				},
+				"left": {
+					"name": "Links"
+				},
+				"right": {
+					"name": "Rechts"
+				},
+				"forward": {
+					"name": "Vorwärts"
+				},
+				"backward": {
+					"name": "Rückwärts"
+				},
+				"none": {
+					"name": "Ohne"
+				}
+			},
+			"adjust_displacement": {
+				"name": "Versetzung anpassen",
+				"undo": "Versetzung anpassen"
+			},
+			"remove_displacement": {
+				"name": "Versetzung entfernen"
+			},
+			"move_part_to": {
+				"name": "Teil verschieben...",
+				"previous_step": {
+					"name": "Vorheriger Schritt",
+					"undo": "Teil in den vorherigen Schritt verschieben"
+				},
+				"next_step": {
+					"name": "Nächster Schritt",
+					"undo": "Teil in den nächsten Schritt verschieben"
+				}
+			},
+			"add_part_to_callout": {
+				"name": "Zu Callout hinzufügen",
+				"undo": "Teil zu Callout hinzufügen"
+			},
+			"remove_part_from_callout": {
+				"name": "Aus Callout entfernen",
+				"undo": "Teil aus Callout entfernen"
+			},
+			"remove_from_pli": {
+				"name": "Aus Teileliste entfernen (NYI)"
+			},
+			"change_part": {
+				"name": "Anpassen",
+				"position_and_rotation": {
+					"name": "Position und Rotation ändern",
+					"undo": "Teilposition und -rotation ändern"
+				},
+				"color": {
+					"name": "Farbe ändern"
+				},
+				"to_different_part": {
+					"name": "Ersetzen durch anderes Teil",
+					"undo": "Teil durch ein anderes ersetzen"
+				},
+				"duplicate": {
+					"name": "Duplizieren",
+					"undo": "Teil duplizieren"
+				},
+				"delete": {
+					"name": "Löschen",
+					"undo": "Teil löschen"
+				}
+			}
+		}
+	},
 	"dialog": {
-        "ok": "Ok",
-        "cancel": "Abbrechen",
-        "reset": "Zurücksetzen",
+		"ok": "Ok",
+		"cancel": "Abbrechen",
+		"reset": "Zurücksetzen",
 		"import_model": {
 			"title": "Modell importieren",
 			"parts_per_step_1": "Im Modell sind keine Schritte vorhanden. Erzeuge Schritte mit",
@@ -725,29 +725,29 @@
 			"title_csi": "Rotiere CSI",
 			"add_rotate_icon": "Rotationszeichen hinzufügen"
 		},
-        "copy_csi_rotation": {
-            "title": "Rotation übertragen",
-            "label": "Rotation übertragen auf nächste Schritte"
-        },
-        "scale_csi": {
-            "title": "Skalierung Schrittbild"
-        },
-        "scale_pli": {
-            "title": "Skalierung Teilelistenbild"
-        },
-        "change_part_count": {
-            "title": "Anzahl eines Teils ändern",
-            "label": "Neue Anzahl"
-        },
-        "style_annotation": {
-            "title": "Objekt anpassen"
-        },
-        "resize_page_divider": {
-            "title": "Länge der Trennlinie ändern"
-        },
+		"copy_csi_rotation": {
+			"title": "Rotation übertragen",
+			"label": "Rotation übertragen auf nächste Schritte"
+		},
+		"scale_csi": {
+			"title": "Skalierung Schrittbild"
+		},
+		"scale_pli": {
+			"title": "Skalierung Teilelistenbild"
+		},
+		"change_part_count": {
+			"title": "Anzahl eines Teils ändern",
+			"label": "Neue Anzahl"
+		},
+		"style_annotation": {
+			"title": "Objekt anpassen"
+		},
+		"resize_page_divider": {
+			"title": "Länge der Trennlinie ändern"
+		},
 		"busy_indicator": {
-            "loading_model": "Lade Modell",
-            "merging_steps": "Führe Schritte zusammen",
+			"loading_model": "Lade Modell",
+			"merging_steps": "Führe Schritte zusammen",
 			"generating_PDF": "Erzeuge PDF",
 			"generating_PNG": "Erzeuge PNG Zip"
 		}
@@ -804,9 +804,9 @@
 			"content": "Inhalt",
 			"include_submodels": "Teile von Untermodelen in PLI"
 		},
-        "csi": {
-            "displacement_arrow_color": "Versetzungpfeil Farbe"
-        },
+		"csi": {
+			"displacement_arrow_color": "Versetzungpfeil Farbe"
+		},
 		"page_number": {
 			"position": "Position",
 			"positions": {
@@ -817,23 +817,23 @@
 			}
 		}
 	},
-    "nav_tree": {
-        "show": "Zeige",
-        "all": "Alle",
-        "page_step_part": "Seiten, Schritte, Schrittbilder, Teile",
-        "steps": "Schritte",
-        "submodel_images": "Untermodellbilder",
-        "submodel_csi": "Untermodellschrittbilder",
-        "csis": "Schrittbilder",
-        "parts": "Teile",
-        "plis": "Teilelisten",
-        "pli_items": "Teilelistenbilder",
-        "callouts": "Callouts",
-        "callout_arrows": "Callout Pfeile",
-        "annotations": "Objekte",
-        "number_labels": "Zahlen",
-        "quantity_labels": "Anzahl",
-        "dividers": "Trenner",
-        "group_parts": "Teile nach Art gruppieren (NYI)"
-    }
+	"nav_tree": {
+		"show": "Zeige",
+		"all": "Alle",
+		"page_step_part": "Seiten, Schritte, Schrittbilder, Teile",
+		"steps": "Schritte",
+		"submodel_images": "Untermodellbilder",
+		"submodel_csi": "Untermodellschrittbilder",
+		"csis": "Schrittbilder",
+		"parts": "Teile",
+		"plis": "Teilelisten",
+		"pli_items": "Teilelistenbilder",
+		"callouts": "Callouts",
+		"callout_arrows": "Callout Pfeile",
+		"annotations": "Objekte",
+		"number_labels": "Zahlen",
+		"quantity_labels": "Anzahl",
+		"dividers": "Trenner",
+		"group_parts": "Teile nach Art gruppieren (NYI)"
+	}
 }

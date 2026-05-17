@@ -1,11 +1,11 @@
 module.exports = {
-	"env": {
-		"mocha": true
+	env: {
+		mocha: true,
 	},
-	"globals": {
-		"Cypress": "readonly",
-		"cy": "readonly",
-		"expect": "readonly",
-		"assert": "readonly"
-	}
+	globals: {
+		Cypress: "readonly",
+		cy: "readonly",
+		expect: "readonly",
+		assert: "readonly",
+	},
 };

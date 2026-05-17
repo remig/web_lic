@@ -1,75 +1,87 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import _ from './util';
-import Storage from './storage';
-import {type GuideInterface} from './item_types';
+import { type GuideInterface } from "./item_types";
+import Storage from "./storage";
+import _ from "./util";
 
 interface UIStateInterface {
 	locale: string | null;
 	lastUsedVersion: string | null;
 	dialog: {
 		importModel: {
-			stepsPerPage: number,
-			partsPerStep: number | null,
-			useMaxSteps: boolean,
-			firstPageNumber: number,
-			firstStepNumber: number,
-			addStepsForSubmodels: boolean,
+			stepsPerPage: number;
+			partsPerStep: number | null;
+			useMaxSteps: boolean;
+			firstPageNumber: number;
+			firstStepNumber: number;
+			addStepsForSubmodels: boolean;
 			include: {
-				titlePage: boolean,
-				pli: boolean,
-				partListPage: boolean,
-			},
-		},
-		'export': {
+				titlePage: boolean;
+				pli: boolean;
+				partListPage: boolean;
+			};
+		};
+		export: {
 			images: {
-				scale: number,
-				dpi: number,
-				maintainPrintSize: boolean,
-			},
+				scale: number;
+				dpi: number;
+				maintainPrintSize: boolean;
+			};
 			pdf: {
-				dpi: number,
-				units: 'point' | 'mm' | 'cm' | 'in',
-			},
-		},
+				dpi: number;
+				units: "point" | "mm" | "cm" | "in";
+			};
+		};
 		multiBook: {
-			firstPageNumber: 'start_page_1' | 'preserve_page_count'
-		},
-	},
-	template: null,
+			firstPageNumber: "start_page_1" | "preserve_page_count";
+		};
+	};
+	template: null;
 	navTree: {
-		expandedNodes: string[],
+		expandedNodes: string[];
 		checkedItems: {
-			all: boolean, page_step_part: boolean, group_parts: boolean,
-			step: boolean, submodelImage: boolean, csi: boolean, part: boolean,
-			pli: boolean, pliItem: boolean, callout: boolean, calloutArrow: boolean,
-			annotation: boolean, numberLabel: boolean, quantityLabel: boolean, divider: boolean,
-		},
-	},
+			all: boolean;
+			page_step_part: boolean;
+			group_parts: boolean;
+			step: boolean;
+			submodelImage: boolean;
+			csi: boolean;
+			part: boolean;
+			pli: boolean;
+			pliItem: boolean;
+			callout: boolean;
+			calloutArrow: boolean;
+			annotation: boolean;
+			numberLabel: boolean;
+			quantityLabel: boolean;
+			divider: boolean;
+		};
+	};
 	pageView: {
-		facingPage: boolean,
-		scroll: boolean,
-	},
-	zoom: number,
+		facingPage: boolean;
+		scroll: boolean;
+	};
+	zoom: number;
 	grid: {
-		enabled: boolean,
-		spacing: number,
+		enabled: boolean;
+		spacing: number;
 		offset: {
-			top: number,
-			left: number,
-		},
+			top: number;
+			left: number;
+		};
 		line: {
-			width: number,
-			color: string,
-			dash: string[],
-		},
-	},
-	splitter: number,
-	guides: GuideInterface[],
-	guideStyle: {  // NYI
-		width: number,
-		color: string,
-	},
+			width: number;
+			color: string;
+			dash: string[];
+		};
+	};
+	splitter: number;
+	guides: GuideInterface[];
+	guideStyle: {
+		// NYI
+		width: number;
+		color: string;
+	};
 }
 
 const defaultState: UIStateInterface = {
@@ -90,7 +102,7 @@ const defaultState: UIStateInterface = {
 				partListPage: true,
 			},
 		},
-		'export': {
+		export: {
 			images: {
 				scale: 1,
 				dpi: 96,
@@ -99,28 +111,39 @@ const defaultState: UIStateInterface = {
 			pdf: {
 				// Don't cache physical page size because it should initially match current pixel page size
 				dpi: 96,
-				units: 'point',  // One of 'point', 'mm', 'cm', 'in'
+				units: "point", // One of 'point', 'mm', 'cm', 'in'
 			},
 		},
 		multiBook: {
-			firstPageNumber: 'start_page_1',  // or preserve_page_count
+			firstPageNumber: "start_page_1", // or preserve_page_count
 		},
 	},
-	template: null,  // NYI
+	template: null, // NYI
 	navTree: {
 		expandedNodes: [],
 		checkedItems: {
-			all: true, page_step_part: false, group_parts: false,
-			step: true, submodelImage: true, csi: true, part: true,
-			pli: true, pliItem: true, callout: true, calloutArrow: true,
-			annotation: true, numberLabel: true, quantityLabel: true, divider: true,
+			all: true,
+			page_step_part: false,
+			group_parts: false,
+			step: true,
+			submodelImage: true,
+			csi: true,
+			part: true,
+			pli: true,
+			pliItem: true,
+			callout: true,
+			calloutArrow: true,
+			annotation: true,
+			numberLabel: true,
+			quantityLabel: true,
+			divider: true,
 		},
 	},
 	pageView: {
 		facingPage: false,
 		scroll: false,
 	},
-	zoom: 1,  // NYI
+	zoom: 1, // NYI
 	grid: {
 		enabled: false,
 		spacing: 100,
@@ -130,15 +153,16 @@ const defaultState: UIStateInterface = {
 		},
 		line: {
 			width: 1,
-			color: 'auto',
+			color: "auto",
 			dash: [],
 		},
 	},
 	splitter: 20,
 	guides: [],
-	guideStyle: {  // NYI
+	guideStyle: {
+		// NYI
 		width: 1,
-		color: 'black',
+		color: "black",
 	},
 };
 
@@ -171,10 +195,11 @@ const api = {
 		guides: {
 			setPosition(guideID: number, newPosition: number) {
 				const originalPosition = currentState.guides[guideID].position;
-				const path = `/${guideID}/position`, root = currentState.guides;
+				const path = `/${guideID}/position`,
+					root = currentState.guides;
 				return {
-					redo: [{root, op: 'replace', path, value: newPosition}],
-					undo: [{root, op: 'replace', path, value: originalPosition}],
+					redo: [{ root, op: "replace", path, value: newPosition }],
+					undo: [{ root, op: "replace", path, value: originalPosition }],
 				};
 			},
 		},

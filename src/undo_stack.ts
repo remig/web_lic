@@ -1,11 +1,12 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
-import * as jsonpatch from 'fast-json-patch';
+import * as jsonpatch from "fast-json-patch";
 
-import _ from './util';
-import store from './store';
-import {tr, noTranslate} from './translations';
-import {type CSI, type PLIItem} from './item_types';
+import EventBus from "./event_bus";
+import { type CSI, type PLIItem } from "./item_types";
+import store from "./store";
+import { noTranslate, tr } from "./translations";
+import _ from "./util";
 
 // stack is an array of state
 // undoStack[0] is the initial 'base' state (after model open / import) that cannot be undone
@@ -15,17 +16,25 @@ import {type CSI, type PLIItem} from './item_types';
 // TODO: check if previous undo stack entry has same text as newest one; if so, merge them (if sensical)
 
 interface UndoRedoAction {
-	root: any, op: string, path: string, value?: any
+	root: any;
+	op: string;
+	path: string;
+	value?: any;
 }
 
 interface ActionChange {
-	undo: UndoRedoAction[],
-	redo: UndoRedoAction[],
+	undo: UndoRedoAction[];
+	redo: UndoRedoAction[];
 }
 
 type ClearCacheTarget =
-	{type: 'csi', id?: number | null} | {type: 'pliItem', id?: number | null}
-	| CSI | PLIItem | 'csi' |'pliItem' | 'renderer';
+	| { type: "csi"; id?: number | null }
+	| { type: "pliItem"; id?: number | null }
+	| CSI
+	| PLIItem
+	| "csi"
+	| "pliItem"
+	| "renderer";
 
 interface UndoStackEntry {
 	state: any;
@@ -49,12 +58,15 @@ const state: UndoState = {
 };
 
 interface MutationChange {
-	mutation: string,
-	opts: any,
+	mutation: string;
+	opts: any;
 }
 
-const api = {
+EventBus.on("push-to-undo", ({ undoText, mutation, opts }) => {
+	api.commit(mutation, opts, undoText);
+});
 
+const api = {
 	onChange(onChangeCB: () => void) {
 		state.onChangeCB = onChangeCB;
 	},
@@ -73,12 +85,11 @@ const api = {
 		changeList: string | ActionChange | (MutationChange | ActionChange)[],
 		opts: any,
 		undoText: string,
-		clearCacheTargets?: ClearCacheTarget[] | null,
+		clearCacheTargets?: ClearCacheTarget[] | null
 	) {
-
 		let localChangeList: (MutationChange | ActionChange)[];
-		if (typeof changeList === 'string') {
-			localChangeList = [{mutation: changeList, opts}];
+		if (typeof changeList === "string") {
+			localChangeList = [{ mutation: changeList, opts }];
 		} else if (isAction(changeList)) {
 			localChangeList = [changeList];
 		} else {
@@ -88,7 +99,7 @@ const api = {
 		performClearCacheTargets(state.index - 1, state.index);
 
 		// We now have an array of mutation & action objects.  Apply it
-		localChangeList.forEach(change => {
+		localChangeList.forEach((change) => {
 			if (isMutation(change)) {
 				const mutation = _.get(store.mutations, change.mutation);
 				if (mutation) {
@@ -130,20 +141,20 @@ const api = {
 
 	// Copy the store's current state into the undoStack's initial base state
 	saveBaseState() {
-		state.stack = [{state: _.cloneDeep(store.state), undoText: null}];
+		state.stack = [{ state: _.cloneDeep(store.state), undoText: null }];
 		setIndex(state, 0);
 	},
 
 	// TODO: Need automatic way to navigate to and redraw whatever was most affected by undo / redo action
 	undo() {
 		if (api.isUndoAvailable()) {
-			performUndoRedoAction('undo', state.index - 1);
+			performUndoRedoAction("undo", state.index - 1);
 		}
 	},
 
 	redo() {
 		if (api.isRedoAvailable()) {
-			performUndoRedoAction('redo', state.index + 1);
+			performUndoRedoAction("redo", state.index + 1);
 		}
 	},
 
@@ -171,37 +182,44 @@ const api = {
 	undoText() {
 		return noTranslate(
 			tr(
-				'action.edit.undo.name_@c',
-				api.isUndoAvailable() ? state.stack[state.index].undoText : '',
-			),
+				"action.edit.undo.name_@c",
+				api.isUndoAvailable() ? state.stack[state.index].undoText : ""
+			)
 		);
 	},
 
 	redoText() {
 		return noTranslate(
 			tr(
-				'action.edit.redo.name_@c',
-				api.isRedoAvailable() ? state.stack[state.index + 1].undoText : '',
-			),
+				"action.edit.redo.name_@c",
+				api.isRedoAvailable() ? state.stack[state.index + 1].undoText : ""
+			)
 		);
 	},
 };
 
 function isMutation(change: any): change is MutationChange {
-	return change?.hasOwnProperty('mutation') || typeof change === 'string';
+	return (
+		typeof change === "string" ||
+		(change && Object.prototype.hasOwnProperty.call(change, "mutation"))
+	);
 }
 
 function isAction(change: any): change is ActionChange {
-	return change?.hasOwnProperty('undo') && change?.hasOwnProperty('redo');
+	return (
+		change &&
+		Object.prototype.hasOwnProperty.call(change, "undo") &&
+		Object.prototype.hasOwnProperty.call(change, "redo")
+	);
 }
 
-function performUndoRedoAction(undoOrRedo: 'undo' | 'redo', newIndex: number) {
-
+function performUndoRedoAction(undoOrRedo: "undo" | "redo", newIndex: number) {
 	const newStack = state.stack[newIndex];
 	const newState = _.cloneDeep(newStack.state);
 	store.replaceState(newState);
 
-	const actionStack = (undoOrRedo === 'undo') ? state.stack[state.index] : newStack;
+	const actionStack =
+		undoOrRedo === "undo" ? state.stack[state.index] : newStack;
 	(actionStack.actionList || []).forEach((action: any) => {
 		action[undoOrRedo].forEach((subAction: UndoRedoAction) => {
 			jsonpatch.applyOperation(subAction.root, subAction as any);
@@ -217,27 +235,29 @@ function performUndoRedoAction(undoOrRedo: 'undo' | 'redo', newIndex: number) {
 }
 
 function performClearCacheTargets(prevIndex: number, newIndex: number) {
-	const clearCacheTargets = [], stack = state.stack;
+	const clearCacheTargets = [],
+		stack = state.stack;
 	if (stack[prevIndex]?.clearCacheTargets) {
 		clearCacheTargets.push(...(stack[prevIndex].clearCacheTargets ?? []));
 	}
 	if (stack[newIndex]?.clearCacheTargets) {
 		clearCacheTargets.push(...(stack[newIndex].clearCacheTargets ?? []));
 	}
-	clearCacheTargets.forEach(item => {
-		if (typeof item === 'string') {
-			if (item === 'renderer') {  // Special case: refresh renderer settings
+	clearCacheTargets.forEach((item) => {
+		if (typeof item === "string") {
+			if (item === "renderer") {
+				// Special case: refresh renderer settings
 				store.mutations.sceneRendering.refreshAll();
-			} else if (item === 'csi' || item === 'pliItem') {
+			} else if (item === "csi" || item === "pliItem") {
 				store.mutations[item].markAllDirty();
 			}
 		} else {
 			// Some cache items were cloned from previous states;
 			// ensure we pull only the actual item from the current state
 			if (item.type != null && item.id != null) {
-				const localItemLookup = {type: item.type, id: item.id};
+				const localItemLookup = { type: item.type, id: item.id };
 				const localItem = store.get.lookupToItem(localItemLookup);
-				if (localItem?.type === 'csi' || localItem?.type === 'pliItem') {
+				if (localItem?.type === "csi" || localItem?.type === "pliItem") {
 					localItem.isDirty = true;
 				}
 			}
@@ -253,7 +273,7 @@ function setIndex(stack: UndoState, newIndex: number) {
 function setStateTimer() {
 	// Save the current state to local storage if we haven't saved it in the last 30 seconds
 	// Need 'typeof setTimeout' check to not crash in unit tests
-	if (typeof setTimeout === 'function' && state.localStorageTimer == null) {
+	if (typeof setTimeout === "function" && state.localStorageTimer == null) {
 		store.saveLocal();
 		state.localStorageTimer = setTimeout(() => {
 			state.localStorageTimer = null;
