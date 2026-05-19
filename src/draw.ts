@@ -14,6 +14,7 @@ import {
 	type PointItem,
 } from './item_types';
 import LDParse from './ld_parse';
+import type { SnapGuide } from './snap';
 import { store } from './store';
 import { isItemSpecificType, isPoint, isPointItem, isSize } from './type_helpers';
 import uiState from './ui_state';
@@ -24,6 +25,7 @@ interface DrawConfig {
 	selectedItem?: LookupItem | null;
 	noCache?: boolean;
 	noGrid?: boolean;
+	snapGuides?: SnapGuide[];
 }
 
 interface StyleInterface {
@@ -358,6 +360,10 @@ export const Draw: DrawInterface = {
 					drawHighlight(ctx, box);
 				}
 			}
+		}
+
+		if (config.snapGuides?.length) {
+			drawSnapGuides(ctx, config.snapGuides);
 		}
 	},
 };
@@ -738,6 +744,20 @@ function drawDividers(dividerList: number[], ctx: CanvasRenderingContext2D) {
 		ctx.lineTo(p2.x, p2.y);
 		ctx.stroke();
 	});
+}
+
+function drawSnapGuides(ctx: CanvasRenderingContext2D, guides: SnapGuide[]) {
+	ctx.save();
+	ctx.strokeStyle = '#f06020';
+	ctx.lineWidth = 1;
+	ctx.setLineDash([4, 2]);
+	for (const guide of guides) {
+		ctx.beginPath();
+		ctx.moveTo(guide.x1, guide.y1);
+		ctx.lineTo(guide.x2, guide.y2);
+		ctx.stroke();
+	}
+	ctx.restore();
 }
 
 function drawHighlight(ctx: CanvasRenderingContext2D, box: Box) {

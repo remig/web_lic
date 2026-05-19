@@ -5,6 +5,7 @@ import chunk from 'lodash/chunk';
 import clamp from 'lodash/clamp';
 import clone from 'lodash/clone';
 import cloneDeep from 'lodash/cloneDeep';
+import defaultsDeep from 'lodash/defaultsDeep';
 import difference from 'lodash/difference';
 import each from 'lodash/each';
 import forOwn from 'lodash/forOwn';
@@ -481,6 +482,7 @@ const api = {
 	},
 	assign,
 	chunk,
+	defaultsDeep,
 	clamp,
 	clone,
 	cloneDeep,

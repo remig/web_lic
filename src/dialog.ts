@@ -18,6 +18,7 @@ import PageLayout from './dialogs/page_layout.vue';
 import ResizeImage from './dialogs/resize_image.vue';
 import RotatePartImage from './dialogs/rotate_part_image.vue';
 import SceneRendering from './dialogs/scene_rendering.vue';
+import SnapDialog from './dialogs/snap_dialog.vue';
 import StringChooser from './dialogs/string_chooser.vue';
 import StyleVue from './dialogs/style.vue';
 import TransformPart from './dialogs/transform_part.vue';
@@ -69,6 +70,7 @@ export const showWhatsNewDialog = makeSimpleDialog(WhatsNew);
 export const showAboutLicDialog = makeSimpleDialog(AboutLic);
 export const showBrickColorDialog = makeSimpleDialog(BrickColors);
 export const showGridDialog = makeSimpleDialog(GridDialog);
+export const showSnapDialog = makeSimpleDialog(SnapDialog);
 
 type StringChooserProps = {
 	title: string;

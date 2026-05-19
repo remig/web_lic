@@ -35,10 +35,10 @@
         "annotation": "Objekt",
         "callout": "Callout",
         "ctrl": "Strg",
-		"arrow": "Pfeil",
-		"point": "Punkt"
+        "arrow": "Pfeil",
+        "point": "Punkt"
     },
-	"action": {
+    "action": {
         "file": {
             "name": "Datei",
             "open_lic": {
@@ -168,7 +168,7 @@
                 "one": {
                     "name": "Einzelne Seite"
                 },
-                "two" : {
+                "two": {
                     "name": "Doppeleite"
                 },
                 "one_scroll": {
@@ -272,21 +272,21 @@
                 "undo": "Objekt anpassen"
             }
         },
-		"layout": {
-			"name": "Anordnung",
-			"vertical": {
-				"name": "Vertikal",
-				"undo": "Vertikal anordnen"
-			},
-			"horizontal": {
-				"name": "Horizontal",
-				"undo": "Horizontal anordnen"
-			},
-			"by_row_and_column": {
-				"name": "In Zeilen und Spalten...",
-				"undo": "Seite in Zeilen und Spalten anordnen",
-				"undo_step": "Schritt in Zeilen und Spalten anordnen"
-			},
+        "layout": {
+            "name": "Anordnung",
+            "vertical": {
+                "name": "Vertikal",
+                "undo": "Vertikal anordnen"
+            },
+            "horizontal": {
+                "name": "Horizontal",
+                "undo": "Horizontal anordnen"
+            },
+            "by_row_and_column": {
+                "name": "In Zeilen und Spalten...",
+                "undo": "Seite in Zeilen und Spalten anordnen",
+                "undo_step": "Schritt in Zeilen und Spalten anordnen"
+            },
             "redo_layout": {
                 "name": "Neu anordnen"
             }
@@ -463,46 +463,46 @@
                 "name": "Leeren Callout löschen"
             }
         },
-		"callout_arrow": {
-			"select_point": {
-				"name": "Punkt auswählen...",
-				"base": {
-					"name": "Start"
-				},
-				"tip": {
-					"name": "Spitze"
-				},
-				"point": {
-					"name_@mf": "Punkt ${idx}"
-				}
-			},
-			"add_point": {
-				"name": "Punkt hinzufügen"
-			},
-			"delete_point": {
-				"name": "Löschen",
-				"undo": "Punkt löschen"
-			},
-			"add_tip": {
-				"name": "Pfeilspitze hinzufügen (NYI)"
-			},
-			"rotate_tip": {
-				"name": "Pfeilspitze rotieren...",
-				"undo": "Pfeilspitze rotieren",
-				"up": {
-					"name": "Hoch"
-				},
-				"right": {
-					"name": "Rechts"
-				},
-				"down": {
-					"name": "Unten"
-				},
-				"left": {
-					"name": "Links"
-				}
-			}
-		},
+        "callout_arrow": {
+            "select_point": {
+                "name": "Punkt auswählen...",
+                "base": {
+                    "name": "Start"
+                },
+                "tip": {
+                    "name": "Spitze"
+                },
+                "point": {
+                    "name_@mf": "Punkt ${idx}"
+                }
+            },
+            "add_point": {
+                "name": "Punkt hinzufügen"
+            },
+            "delete_point": {
+                "name": "Löschen",
+                "undo": "Punkt löschen"
+            },
+            "add_tip": {
+                "name": "Pfeilspitze hinzufügen (NYI)"
+            },
+            "rotate_tip": {
+                "name": "Pfeilspitze rotieren...",
+                "undo": "Pfeilspitze rotieren",
+                "up": {
+                    "name": "Hoch"
+                },
+                "right": {
+                    "name": "Rechts"
+                },
+                "down": {
+                    "name": "Unten"
+                },
+                "left": {
+                    "name": "Links"
+                }
+            }
+        },
         "divider": {
             "resize": {
                 "name": "Größe ändern",
@@ -597,134 +597,134 @@
             }
         }
     },
-	"dialog": {
+    "dialog": {
         "ok": "Ok",
         "cancel": "Abbrechen",
         "reset": "Zurücksetzen",
-		"import_model": {
-			"title": "Modell importieren",
-			"parts_per_step_1": "Im Modell sind keine Schritte vorhanden. Erzeuge Schritte mit",
-			"parts_per_step_2": "Teilen pro Schritt",
-			"steps_per_page": "Schritte pro Seite",
-			"use_max_steps": "Soviele wie möglich, solange es gut aussieht",
-			"include": {
-				"root": "Aufnehmen...",
-				"titlePage": "Titelseite",
-				"submodelBreakdown": "Untermodell / Teilebeutel (NYI)",
-				"pli": "Teilelisten in jedem Schritt",
-				"partListPage": "Teileübersicht"
-			}
-		},
-		"whats_new": {
-			"title": "Neuerungen",
-			"version": "Version",
-			"features": "Neue Funktionen",
-			"bug_fixes": "Behobene Fehler"
-		},
-		"custom_font": {
-			"title": "Benutzerdefinierte Schriftart",
-			"name_input": "Name der Schriftart auf dem System",
-			"sample_text": "Beispieltext",
-			"sample_characters": "abc ABC 0 1 2 3 4 5 6 7 8 9"
-		},
-		"grid": {
-			"title": "Gitter anpassen",
-			"enabled": "Anzeigen",
-			"spacing": "Gitterabstand",
-			"offset": "Starte Gitter bei",
-			"offset_top": "Oben",
-			"offset_left": "Links",
-			"line_style": "Linenstil",
-			"color": "Farbe",
-			"auto_color": "automatisch",
-			"width": "Breite",
-			"dash": "Gestrichelt"
-		},
-		"save_as": {
-			"title": "Speichern unter",
-			"fn": "Dateiname"
-		},
-		"save_template_as": {
-			"title": "Vorlage speichern unter",
-			"fn": "Dateiname"
-		},
-		"style": {
-			"title": "Stil",
-			"label_text": "Text"
-		},
-		"export_hi_res_pdf": {
-			"title": "Exportiere hochauflösendes PDF",
-			"page_size": "Seitengröße",
-			"by": "x",
-			"image_res": "Bildauflösung",
-			"dpi": "DPI"
-		},
-		"export_hi_res_png": {
-			"title": "Exportiere hochauflösendes PNGs",
-			"scale": "Skalierung",
-			"maintain_print_size": "Beachte Druckgröße",
-			"dpi": "DPI",
-			"size_@mf": "Bilder werden <strong>${width} x ${height}</strong> Pixel groß",
-			"print_size_@mf": "Bilder sollten auf <strong>${cm_width} x ${cm_height}</strong> cm (<strong>${in_width} x ${in_height}</strong> in) gedruckt werden"
-		},
-		"locale_chooser": {
-			"title": "Sprache wählen"
-		},
-		"brick_colors": {
-			"title": "Steinfarben",
-			"action": "Steinfarben ändern",
-			"ld_code": "LDraw Code",
-			"name": "Name",
-			"edge_color": "Kantenfarbe"
-		},
-		"ld_color_picker": {
-			"title": "Farbe auswählen",
-			"ld_code": "LDraw Code",
-			"name": "Name",
-			"choose": "Wählen",
-			"action": "Teilfarbe ändern"
-		},
-		"missing_parts": {
-			"title": "Fehlende Teile",
-			"subtitle": "Folgende Teile werden im Modell verwendet, sind aber nicht in Lic's Teileliste enthalten.<br>Hier können die Teile importiert werden, so eine Datendatei vorhanden ist.",
-			"proceed": "Fehlende Teile vom Modell entfernen und fortfahren",
-			"used_@mf": "${count} mal genutzt",
-			"send_to_remote": {
-				"title": "Mit Lic's Webseite teilen",
-				"tooltip": "Dieses Teil mit Lic's Webseite teilen,<br> damit andere Benutzer es ebenfalls verwenden können.<br>Nur einzlene Teile, nicht ganze Modelle ollten geteilt werden.<br />Dies ist völlig freiwillig."
-			}
-		},
-		"scene_rendering": {
-			"title": "3D Teile Rendering",
-			"undo": "Teil Rendering ändern",
-			"zoom": "Kamera Zoom",
-			"edge_width": "Strichstärke"
-		},
-		"transform_part": {
-			"title": "Teil transformieren",
-			"position": "Position",
-			"rotation": "Rotation"
-		},
-		"displace_part": {
-			"title": "Teil versetzen",
-			"part_distance": "Teilabstand",
-			"arrow_length": "Pfeillänge",
-			"arrow_distance": "Pfeilabstand",
-			"arrow_rotation": "Pfeilrotation"
-		},
-		"page_layout": {
-			"title": "Anordnung der Seite in Zeilen und Spalten",
-			"rows": "Zeilen",
-			"cols": "Spalten",
-			"orientation": "Orientierung",
-			"horizontal": "Horizontal",
-			"vertical": "Vertikal"
-		},
-		"rotate_part_image": {
-			"title_pli": "Bild der Teileliste rotieren",
-			"title_csi": "Rotiere CSI",
-			"add_rotate_icon": "Rotationszeichen hinzufügen"
-		},
+        "import_model": {
+            "title": "Modell importieren",
+            "parts_per_step_1": "Im Modell sind keine Schritte vorhanden. Erzeuge Schritte mit",
+            "parts_per_step_2": "Teilen pro Schritt",
+            "steps_per_page": "Schritte pro Seite",
+            "use_max_steps": "Soviele wie möglich, solange es gut aussieht",
+            "include": {
+                "root": "Aufnehmen...",
+                "titlePage": "Titelseite",
+                "submodelBreakdown": "Untermodell / Teilebeutel (NYI)",
+                "pli": "Teilelisten in jedem Schritt",
+                "partListPage": "Teileübersicht"
+            }
+        },
+        "whats_new": {
+            "title": "Neuerungen",
+            "version": "Version",
+            "features": "Neue Funktionen",
+            "bug_fixes": "Behobene Fehler"
+        },
+        "custom_font": {
+            "title": "Benutzerdefinierte Schriftart",
+            "name_input": "Name der Schriftart auf dem System",
+            "sample_text": "Beispieltext",
+            "sample_characters": "abc ABC 0 1 2 3 4 5 6 7 8 9"
+        },
+        "grid": {
+            "title": "Gitter anpassen",
+            "enabled": "Anzeigen",
+            "spacing": "Gitterabstand",
+            "offset": "Starte Gitter bei",
+            "offset_top": "Oben",
+            "offset_left": "Links",
+            "line_style": "Linenstil",
+            "color": "Farbe",
+            "auto_color": "automatisch",
+            "width": "Breite",
+            "dash": "Gestrichelt"
+        },
+        "save_as": {
+            "title": "Speichern unter",
+            "fn": "Dateiname"
+        },
+        "save_template_as": {
+            "title": "Vorlage speichern unter",
+            "fn": "Dateiname"
+        },
+        "style": {
+            "title": "Stil",
+            "label_text": "Text"
+        },
+        "export_hi_res_pdf": {
+            "title": "Exportiere hochauflösendes PDF",
+            "page_size": "Seitengröße",
+            "by": "x",
+            "image_res": "Bildauflösung",
+            "dpi": "DPI"
+        },
+        "export_hi_res_png": {
+            "title": "Exportiere hochauflösendes PNGs",
+            "scale": "Skalierung",
+            "maintain_print_size": "Beachte Druckgröße",
+            "dpi": "DPI",
+            "size_@mf": "Bilder werden <strong>${width} x ${height}</strong> Pixel groß",
+            "print_size_@mf": "Bilder sollten auf <strong>${cm_width} x ${cm_height}</strong> cm (<strong>${in_width} x ${in_height}</strong> in) gedruckt werden"
+        },
+        "locale_chooser": {
+            "title": "Sprache wählen"
+        },
+        "brick_colors": {
+            "title": "Steinfarben",
+            "action": "Steinfarben ändern",
+            "ld_code": "LDraw Code",
+            "name": "Name",
+            "edge_color": "Kantenfarbe"
+        },
+        "ld_color_picker": {
+            "title": "Farbe auswählen",
+            "ld_code": "LDraw Code",
+            "name": "Name",
+            "choose": "Wählen",
+            "action": "Teilfarbe ändern"
+        },
+        "missing_parts": {
+            "title": "Fehlende Teile",
+            "subtitle": "Folgende Teile werden im Modell verwendet, sind aber nicht in Lic's Teileliste enthalten.<br>Hier können die Teile importiert werden, so eine Datendatei vorhanden ist.",
+            "proceed": "Fehlende Teile vom Modell entfernen und fortfahren",
+            "used_@mf": "${count} mal genutzt",
+            "send_to_remote": {
+                "title": "Mit Lic's Webseite teilen",
+                "tooltip": "Dieses Teil mit Lic's Webseite teilen,<br> damit andere Benutzer es ebenfalls verwenden können.<br>Nur einzlene Teile, nicht ganze Modelle ollten geteilt werden.<br />Dies ist völlig freiwillig."
+            }
+        },
+        "scene_rendering": {
+            "title": "3D Teile Rendering",
+            "undo": "Teil Rendering ändern",
+            "zoom": "Kamera Zoom",
+            "edge_width": "Strichstärke"
+        },
+        "transform_part": {
+            "title": "Teil transformieren",
+            "position": "Position",
+            "rotation": "Rotation"
+        },
+        "displace_part": {
+            "title": "Teil versetzen",
+            "part_distance": "Teilabstand",
+            "arrow_length": "Pfeillänge",
+            "arrow_distance": "Pfeilabstand",
+            "arrow_rotation": "Pfeilrotation"
+        },
+        "page_layout": {
+            "title": "Anordnung der Seite in Zeilen und Spalten",
+            "rows": "Zeilen",
+            "cols": "Spalten",
+            "orientation": "Orientierung",
+            "horizontal": "Horizontal",
+            "vertical": "Vertikal"
+        },
+        "rotate_part_image": {
+            "title_pli": "Bild der Teileliste rotieren",
+            "title_csi": "Rotiere CSI",
+            "add_rotate_icon": "Rotationszeichen hinzufügen"
+        },
         "copy_csi_rotation": {
             "title": "Rotation übertragen",
             "label": "Rotation übertragen auf nächste Schritte"
@@ -745,78 +745,78 @@
         "resize_page_divider": {
             "title": "Länge der Trennlinie ändern"
         },
-		"busy_indicator": {
+        "busy_indicator": {
             "loading_model": "Lade Modell",
             "merging_steps": "Führe Schritte zusammen",
-			"generating_PDF": "Erzeuge PDF",
-			"generating_PNG": "Erzeuge PNG Zip"
-		}
-	},
-	"template": {
-		"select_page_item": "Element auswählen",
-		"page": {
-			"title": "Seitenformat",
-			"formats": {
-				"custom": "Individuell...",
-				"a3": "A3",
-				"a4": "A4",
-				"a5": "A5",
-				"letter": "Letter",
-				"gov-letter": "Gov. Letter",
-				"legal": "Legal",
-				"junior-legal": "Junior Legal"
-			},
-			"orientation": {
-				"landscape": "Quer",
-				"portrait": "Hoch"
-			},
-			"width": "Breite (px)",
-			"height": "Höhe (px)",
-			"aspect_ratio_@mf": "Seitenverhältnis beibehalten (${aspect_ratio})",
-			"printed_size": "Größe der gedruckten Seite",
-			"centimeter_size_@mf": "${width} x ${height} cm",
-			"inch_size_@mf": "${width} x ${height} in"
-		},
-		"fill": {
-			"title": "Hintergrund",
-			"gradient": "Farbverlauf",
-			"image": "Bild"
-		},
-		"border": {
-			"title": "Rahmen",
-			"line_width": "Strichstärke",
-			"corner_radius": "Eckradius",
-			"margin": "Abstand"
-		},
-		"font": {
-			"bold_character": "B",
-			"italic_character": "I",
-			"underline_character": "U"
-		},
-		"transform": {
-			"title": "Transformieren",
-			"rotate_x": "Rotatation X",
-			"rotate_y": "Y",
-			"rotate_z": "Z",
-			"scale": "Skalierung"
-		},
-		"pli": {
-			"content": "Inhalt",
-			"include_submodels": "Teile von Untermodelen in PLI"
-		},
+            "generating_PDF": "Erzeuge PDF",
+            "generating_PNG": "Erzeuge PNG Zip"
+        }
+    },
+    "template": {
+        "select_page_item": "Element auswählen",
+        "page": {
+            "title": "Seitenformat",
+            "formats": {
+                "custom": "Individuell...",
+                "a3": "A3",
+                "a4": "A4",
+                "a5": "A5",
+                "letter": "Letter",
+                "gov-letter": "Gov. Letter",
+                "legal": "Legal",
+                "junior-legal": "Junior Legal"
+            },
+            "orientation": {
+                "landscape": "Quer",
+                "portrait": "Hoch"
+            },
+            "width": "Breite (px)",
+            "height": "Höhe (px)",
+            "aspect_ratio_@mf": "Seitenverhältnis beibehalten (${aspect_ratio})",
+            "printed_size": "Größe der gedruckten Seite",
+            "centimeter_size_@mf": "${width} x ${height} cm",
+            "inch_size_@mf": "${width} x ${height} in"
+        },
+        "fill": {
+            "title": "Hintergrund",
+            "gradient": "Farbverlauf",
+            "image": "Bild"
+        },
+        "border": {
+            "title": "Rahmen",
+            "line_width": "Strichstärke",
+            "corner_radius": "Eckradius",
+            "margin": "Abstand"
+        },
+        "font": {
+            "bold_character": "B",
+            "italic_character": "I",
+            "underline_character": "U"
+        },
+        "transform": {
+            "title": "Transformieren",
+            "rotate_x": "Rotatation X",
+            "rotate_y": "Y",
+            "rotate_z": "Z",
+            "scale": "Skalierung"
+        },
+        "pli": {
+            "content": "Inhalt",
+            "include_submodels": "Teile von Untermodelen in PLI"
+        },
         "csi": {
             "displacement_arrow_color": "Versetzungpfeil Farbe"
         },
-		"page_number": {
-			"position": "Position",
-			"positions": {
-				"right": "Rechts",
-				"left": "Links",
-				"even-left": "Gerade links, Ungerade rechts",
-				"even-right": "Ungerade links, Gerade rechts"
-			}
-		}
-	},
+        "page_number": {
+            "position": "Position",
+            "positions": {
+                "right": "Rechts",
+                "left": "Links",
+                "even-left": "Gerade links, Ungerade rechts",
+                "even-right": "Ungerade links, Gerade rechts"
+            }
+        }
+    },
     "nav_tree": {
         "show": "Zeige",
         "all": "Alle",

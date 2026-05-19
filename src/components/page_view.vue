@@ -88,6 +88,7 @@ import {
 	type Step,
 } from '../item_types';
 import * as SelectionOps from '../selection_ops';
+import { computeSnap, type SnapGuide } from '../snap';
 import { store } from '../store';
 import { t } from '../translations';
 import { currentPageId as currentPageIdRef, selectedItemLookup } from '../ui_reactive_state';
@@ -107,6 +108,9 @@ type MouseDragItem =
 	| {
 			type: 'item';
 			item: ItemTypes;
+			page: Page;
+			rawX: number; // accumulated raw mouse position (no snap adjustment) for un-snap detection
+			rawY: number;
 			moved: boolean;
 			x: number;
 			y: number;
@@ -128,6 +132,7 @@ const guides = ref<GuideInterface[]>(uiState.get('guides') as GuideInterface[]);
 // Not reactive - only used in mouse event handlers, never read in the template
 let mouseDownPt: Point | null = null;
 let mouseDragItem: MouseDragItem = null;
+let activeSnapGuides: SnapGuide[] = [];
 
 // Guide instances collected via function-ref, keyed by 'guide-N' matching data-id
 const guideRefs: Record<string, InstanceType<typeof Guide>> = {};
@@ -278,12 +283,17 @@ function mouseDown(e: MouseEvent) {
 		const page = getPageForCanvas(target);
 		if (
 			item &&
+			page &&
 			store.get.isMoveable(item) &&
 			inHighlightBox(e.offsetX, e.offsetY, item, pageSize.value, page)
 		) {
+			const startBox = store.get.targetBox(item);
 			mouseDragItem = {
 				type: 'item',
 				item,
+				page,
+				rawX: startBox?.x ?? 0,
+				rawY: startBox?.y ?? 0,
 				moved: false,
 				x: e.screenX,
 				y: e.screenY,
@@ -313,7 +323,20 @@ function mouseMove(e: MouseEvent) {
 		mouseDragItem.guide.moveBy(dx, dy);
 	} else if (mouseDownPt && _.geom.distance(mouseDownPt, up) > 5 && mouseDragItem.type === 'item') {
 		// TODO: Update parent bounding boxes for children like CSI, submodel, etc
-		store.mutations.item.reposition({ item: mouseDragItem.item, dx, dy });
+		// Accumulate raw mouse movement so snap/unsnap is based on total travel, not per-frame delta.
+		// Without this, slow mouse movement keeps per-frame dx tiny, so the item stays stuck
+		// at the snap position even after the mouse has traveled well past it.
+		mouseDragItem.rawX += dx;
+		mouseDragItem.rawY += dy;
+		const currentBox = store.get.targetBox(mouseDragItem.item);
+		const dxToRaw = currentBox ? mouseDragItem.rawX - currentBox.x : dx;
+		const dyToRaw = currentBox ? mouseDragItem.rawY - currentBox.y : dy;
+		const snapEnabled = uiState.get('snap').enabled;
+		const snap = snapEnabled
+			? computeSnap(mouseDragItem.item, mouseDragItem.page, dxToRaw, dyToRaw)
+			: { dx: dxToRaw, dy: dyToRaw, guides: [] };
+		store.mutations.item.reposition({ item: mouseDragItem.item, dx: snap.dx, dy: snap.dy });
+		activeSnapGuides = snap.guides;
 		mouseDragItem.moved = true;
 		drawVisiblePages();
 	}
@@ -344,6 +367,8 @@ function mouseUp(e: MouseEvent) {
 	} else if (mouseDragItem?.type === 'guide') {
 		mouseDragItem.guide.savePosition();
 	} else if (mouseDragItem?.type === 'item' && mouseDragItem.moved) {
+		activeSnapGuides = [];
+		drawVisiblePages();
 		const item = t('glossary.' + mouseDragItem.item.type.toLowerCase());
 		const undoText = t('action.edit.item.move.undo_@mf', { item });
 		undoStack.commit('', null, undoText);
@@ -460,7 +485,7 @@ function drawVisiblePages() {
 function drawPage(canvas: HTMLCanvasElement) {
 	const page = getPageForCanvas(canvas);
 	if (page != null) {
-		Draw.page(page, canvas, { selectedItem: selectedItem.value });
+		Draw.page(page, canvas, { selectedItem: selectedItem.value, snapGuides: activeSnapGuides });
 	}
 }
 

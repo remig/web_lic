@@ -287,8 +287,7 @@ const menu = [
 			{
 				text: 'action.edit.snap.name',
 				id: 'edit_snap_menu',
-				enabled: () => false,
-				cb() {},
+				cb: DialogManager.showSnapDialog,
 			},
 			{
 				text: 'action.edit.scene_rendering.name',

@@ -75,6 +75,9 @@ interface UIStateInterface {
 			dash: string[];
 		};
 	};
+	snap: {
+		enabled: boolean;
+	};
 	splitter: number;
 	guides: GuideInterface[];
 	guideStyle: {
@@ -157,6 +160,9 @@ const defaultState: UIStateInterface = {
 			dash: [],
 		},
 	},
+	snap: {
+		enabled: true,
+	},
 	splitter: 20,
 	guides: [],
 	guideStyle: {
@@ -206,7 +212,9 @@ const api = {
 	},
 } as const;
 
-// Load UI state from storage just once here. uiState module itself keeps a copy for fast lookup everywhere
-api.setUIState(Storage.get.ui());
+// Load UI state from storage just once here. uiState module itself keeps a copy for fast lookup everywhere.
+// defaultsDeep fills in any keys added to defaultState that are missing from the stored state,
+// which happens whenever a user's localStorage is from an older version of the app.
+api.setUIState(_.defaultsDeep(Storage.get.ui(), defaultState));
 
 export default api;

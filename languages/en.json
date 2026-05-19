@@ -38,10 +38,10 @@
         "annotation": "Annotation",
         "callout": "Callout",
         "ctrl": "Ctrl",
-		"arrow": "Arrow",
-		"point": "Point"
+        "arrow": "Arrow",
+        "point": "Point"
     },
-	"action": {
+    "action": {
         "file": {
             "name": "File",
             "open_lic": {
@@ -119,9 +119,9 @@
             },
             "title_page": {
                 "add": {
-					"name": "Add Title Page",
-					"name_plural": "Add Title Pages"
-				},
+                    "name": "Add Title Page",
+                    "name_plural": "Add Title Pages"
+                },
                 "remove": {
                     "name": "Remove Title Page",
                     "name_plural": "Remove Title Pages"
@@ -148,7 +148,7 @@
                 "undo": "Divide into Books"
             },
             "snap": {
-                "name": "Snap To (NYI)"
+                "name": "Configure Snap"
             },
             "scene_rendering": {
                 "name": "3D Part Rendering..."
@@ -250,11 +250,11 @@
             }
         },
         "annotation": {
-			"types": {
-				"arrow": "Arrow Annotation",
-				"label": "Label Annotation",
-				"image": "Image Annotation"
-			},
+            "types": {
+                "arrow": "Arrow Annotation",
+                "label": "Label Annotation",
+                "image": "Image Annotation"
+            },
             "add": {
                 "name": "Add Annotation",
                 "label": {
@@ -286,21 +286,21 @@
                 "undo": "Change Annotation"
             }
         },
-		"layout": {
-			"name": "Layout",
-			"vertical": {
-				"name": "Vertical",
-				"undo": "Layout Vertical"
-			},
-			"horizontal": {
-				"name": "Horizontal",
-				"undo": "Layout Horizontal"
-			},
-			"by_row_and_column": {
-				"name": "By Row and Column...",
-				"undo": "Layout Page by Row and Column",
-				"undo_step": "Layout Step by Row and Column"
-			},
+        "layout": {
+            "name": "Layout",
+            "vertical": {
+                "name": "Vertical",
+                "undo": "Layout Vertical"
+            },
+            "horizontal": {
+                "name": "Horizontal",
+                "undo": "Layout Horizontal"
+            },
+            "by_row_and_column": {
+                "name": "By Row and Column...",
+                "undo": "Layout Page by Row and Column",
+                "undo_step": "Layout Step by Row and Column"
+            },
             "redo_layout": {
                 "name": "Redo Layout"
             }
@@ -531,230 +531,234 @@
                 "undo": "Remove Divider"
             }
         },
-		"submodel": {
-			"convert_to_callout": {
-				"name": "Convert to Callout"
-			}
-		},
-		"part": {
-			"displace_part": {
-				"name": "Displace Part...",
-				"undo_@mf": "Displace Part ${direction}",
-				"up": {
-					"name": "Up"
-				},
-				"down": {
-					"name": "Down"
-				},
-				"left": {
-					"name": "Left"
-				},
-				"right": {
-					"name": "Right"
-				},
-				"forward": {
-					"name": "Forward"
-				},
-				"backward": {
-					"name": "Backward"
-				},
-				"none": {
-					"name": "None"
-				}
-			},
-			"adjust_displacement": {
-				"name": "Adjust Displacement",
-				"undo": "Adjust Displaced Part"
-			},
-			"remove_displacement": {
-				"name": "Remove Displacement"
-			},
-			"move_part_to": {
-				"name": "Move Part to...",
-				"previous_step": {
-					"name": "Previous Step",
-					"undo": "Move Part to Previous Step"
-				},
-				"next_step": {
-					"name": "Next Step",
-					"undo": "Move Part to Next Step"
-				}
-			},
-			"add_part_to_callout": {
-				"name": "Add Part to Callout",
-				"undo": "Add Part to Callout"
-			},
-			"remove_part_from_callout": {
-				"name": "Remove Part from Callout",
-				"undo": "Remove Part from Callout"
-			},
-			"remove_from_pli": {
-				"name": "Remove from Part List (NYI)"
-			},
-			"change_part": {
-				"name": "Change Part",
-				"position_and_rotation": {
-					"name": "Change Position and Rotation",
-					"undo": "Change Part Transform"
-				},
-				"color": {
-					"name": "Change Color"
-				},
-				"to_different_part": {
-					"name": "Change to Different Part",
-					"undo": "Change Part Type"
-				},
-				"duplicate": {
-					"name": "Duplicate",
-					"undo": "Duplicate Part"
-				},
-				"delete": {
-					"name": "Delete",
-					"undo": "Delete Part"
-				}
-			}
-		}
-	},
-	"dialog": {
+        "submodel": {
+            "convert_to_callout": {
+                "name": "Convert to Callout"
+            }
+        },
+        "part": {
+            "displace_part": {
+                "name": "Displace Part...",
+                "undo_@mf": "Displace Part ${direction}",
+                "up": {
+                    "name": "Up"
+                },
+                "down": {
+                    "name": "Down"
+                },
+                "left": {
+                    "name": "Left"
+                },
+                "right": {
+                    "name": "Right"
+                },
+                "forward": {
+                    "name": "Forward"
+                },
+                "backward": {
+                    "name": "Backward"
+                },
+                "none": {
+                    "name": "None"
+                }
+            },
+            "adjust_displacement": {
+                "name": "Adjust Displacement",
+                "undo": "Adjust Displaced Part"
+            },
+            "remove_displacement": {
+                "name": "Remove Displacement"
+            },
+            "move_part_to": {
+                "name": "Move Part to...",
+                "previous_step": {
+                    "name": "Previous Step",
+                    "undo": "Move Part to Previous Step"
+                },
+                "next_step": {
+                    "name": "Next Step",
+                    "undo": "Move Part to Next Step"
+                }
+            },
+            "add_part_to_callout": {
+                "name": "Add Part to Callout",
+                "undo": "Add Part to Callout"
+            },
+            "remove_part_from_callout": {
+                "name": "Remove Part from Callout",
+                "undo": "Remove Part from Callout"
+            },
+            "remove_from_pli": {
+                "name": "Remove from Part List (NYI)"
+            },
+            "change_part": {
+                "name": "Change Part",
+                "position_and_rotation": {
+                    "name": "Change Position and Rotation",
+                    "undo": "Change Part Transform"
+                },
+                "color": {
+                    "name": "Change Color"
+                },
+                "to_different_part": {
+                    "name": "Change to Different Part",
+                    "undo": "Change Part Type"
+                },
+                "duplicate": {
+                    "name": "Duplicate",
+                    "undo": "Duplicate Part"
+                },
+                "delete": {
+                    "name": "Delete",
+                    "undo": "Delete Part"
+                }
+            }
+        }
+    },
+    "dialog": {
         "ok": "Ok",
         "cancel": "Cancel",
         "reset": "Reset",
-		"import_model": {
-			"title": "Import Model",
-			"parts_per_step_1": "Model has no Steps. Add Steps with",
-			"parts_per_step_2": "Parts Per Step",
-			"steps_per_page": "Steps per Page",
-			"use_max_steps": "As many as can fit nicely",
-			"include": {
-				"root": "Include...",
-				"titlePage": "Title Page",
-				"submodelBreakdown": "Sub Model / Part Bag Breakdown (NYI)",
-				"pli": "Part List in each Step",
-				"partListPage": "Part List Page"
-			}
-		},
-		"whats_new": {
-			"title": "What's New",
-			"version": "Version",
-			"features": "New Features",
-			"bug_fixes": "Bug Fixes"
-		},
-		"custom_font": {
-			"title": "Custom Font",
-			"name_input": "Enter the name of a font on your system",
-			"sample_text": "Sample Text",
-			"sample_characters": "abc ABC 0 1 2 3 4 5 6 7 8 9"
-		},
-		"grid": {
-			"title": "Change Grid",
-			"enabled": "Enabled",
-			"spacing": "Grid Spacing",
-			"offset": "Start Grid at",
-			"offset_top": "Top",
-			"offset_left": "Left",
-			"line_style": "Line Style",
-			"color": "Color",
-			"auto_color": "auto",
-			"width": "Width",
-			"dash": "Dash"
-		},
-		"save_as": {
-			"title": "Save As",
-			"fn": "Filename"
-		},
-		"save_template_as": {
-			"title": "Save Template As",
-			"fn": "Filename"
-		},
-		"style": {
-			"title": "Style",
-			"label_text": "Label Text"
-		},
-		"export_hi_res_pdf": {
-			"title": "Export Hi-Res PDF",
-			"page_size": "Physical Page Size",
-			"by": "x",
-			"image_res": "Image Resolution",
-			"dpi": "DPI"
-		},
-		"export_hi_res_png": {
-			"title": "Export Hi-Res PNGs",
-			"scale": "Scale By",
-			"maintain_print_size": "Maintain Print Size",
-			"dpi": "DPI",
-			"size_@mf": "Images will be <strong>${width} x ${height}</strong> pixels",
-			"print_size_@mf": "Images should print <strong>${cm_width} x ${cm_height}</strong> cm (<strong>${in_width} x ${in_height}</strong> in)"
-		},
-		"locale_chooser": {
-			"title": "Pick a Language"
-		},
-		"brick_colors": {
-			"title": "Brick Colors",
-			"action": "Change Brick Colors",
-			"ld_code": "LDraw Code",
-			"name": "Name",
-			"edge_color": "Edge Color"
-		},
-		"change_part": {
-			"title": "New Part Filename",
-			"label" : "Filename"
-		},
-		"ld_color_picker": {
-			"title": "Choose a Color",
-			"ld_code": "LDraw Code",
-			"name": "Name",
-			"choose": "Choose",
-			"action": "Change Part Color"
-		},
-		"missing_parts": {
-			"title": "Missing Parts",
-			"subtitle": "These parts are used in your model, but could not be found in Lic's part list.<br>You can import a copy of each part from your machine, if available.",
-			"proceed": "Remove Missing Parts from Model and Continue",
-			"used_@mf": "${count} Used",
-			"send_to_remote": {
-				"title": "Share to Lic's public site",
-				"tooltip": "Share this part with the Lic website,<br>so other users can use it too.<br>Share only basic parts, not full models.<br />Entirely optional."
-			}
-		},
-		"scene_rendering": {
-			"title": "3D Part Rendering",
-			"undo": "Change Part Rendering",
-			"zoom": "Camera Zoom",
-			"edge_width": "Part Edge Thickness",
-			"rotate_title": "Overall Model Rotation"
-		},
-		"transform_part": {
-			"title": "Transform Part",
-			"position": "Position",
-			"rotation": "Rotation"
-		},
-		"displace_part": {
-			"title": "Displace Part",
-			"part_distance": "Part Distance",
-			"arrow_length": "Arrow Length",
-			"arrow_distance": "Arrow Distance",
-			"arrow_rotation": "Arrow Rotation"
-		},
-		"page_layout": {
-			"title": "Layout Page by Rows and Columns",
-			"rows": "Rows",
-			"cols": "Columns",
-			"orientation": "Orientation",
-			"horizontal": "Horizontal",
-			"vertical": "Vertical"
-		},
-		"rotate_part_image": {
-			"title_pli": "Rotate Part List Image",
-			"title_csi": "Rotate Step Image",
-			"add_rotate_icon": "Include Rotation Icon"
-		},
+        "import_model": {
+            "title": "Import Model",
+            "parts_per_step_1": "Model has no Steps. Add Steps with",
+            "parts_per_step_2": "Parts Per Step",
+            "steps_per_page": "Steps per Page",
+            "use_max_steps": "As many as can fit nicely",
+            "include": {
+                "root": "Include...",
+                "titlePage": "Title Page",
+                "submodelBreakdown": "Sub Model / Part Bag Breakdown (NYI)",
+                "pli": "Part List in each Step",
+                "partListPage": "Part List Page"
+            }
+        },
+        "whats_new": {
+            "title": "What's New",
+            "version": "Version",
+            "features": "New Features",
+            "bug_fixes": "Bug Fixes"
+        },
+        "custom_font": {
+            "title": "Custom Font",
+            "name_input": "Enter the name of a font on your system",
+            "sample_text": "Sample Text",
+            "sample_characters": "abc ABC 0 1 2 3 4 5 6 7 8 9"
+        },
+        "grid": {
+            "title": "Change Grid",
+            "enabled": "Enabled",
+            "spacing": "Grid Spacing",
+            "offset": "Start Grid at",
+            "offset_top": "Top",
+            "offset_left": "Left",
+            "line_style": "Line Style",
+            "color": "Color",
+            "auto_color": "auto",
+            "width": "Width",
+            "dash": "Dash"
+        },
+        "snap": {
+            "title": "Configure Snap",
+            "enabled": "Enabled"
+        },
+        "save_as": {
+            "title": "Save As",
+            "fn": "Filename"
+        },
+        "save_template_as": {
+            "title": "Save Template As",
+            "fn": "Filename"
+        },
+        "style": {
+            "title": "Style",
+            "label_text": "Label Text"
+        },
+        "export_hi_res_pdf": {
+            "title": "Export Hi-Res PDF",
+            "page_size": "Physical Page Size",
+            "by": "x",
+            "image_res": "Image Resolution",
+            "dpi": "DPI"
+        },
+        "export_hi_res_png": {
+            "title": "Export Hi-Res PNGs",
+            "scale": "Scale By",
+            "maintain_print_size": "Maintain Print Size",
+            "dpi": "DPI",
+            "size_@mf": "Images will be <strong>${width} x ${height}</strong> pixels",
+            "print_size_@mf": "Images should print <strong>${cm_width} x ${cm_height}</strong> cm (<strong>${in_width} x ${in_height}</strong> in)"
+        },
+        "locale_chooser": {
+            "title": "Pick a Language"
+        },
+        "brick_colors": {
+            "title": "Brick Colors",
+            "action": "Change Brick Colors",
+            "ld_code": "LDraw Code",
+            "name": "Name",
+            "edge_color": "Edge Color"
+        },
+        "change_part": {
+            "title": "New Part Filename",
+            "label": "Filename"
+        },
+        "ld_color_picker": {
+            "title": "Choose a Color",
+            "ld_code": "LDraw Code",
+            "name": "Name",
+            "choose": "Choose",
+            "action": "Change Part Color"
+        },
+        "missing_parts": {
+            "title": "Missing Parts",
+            "subtitle": "These parts are used in your model, but could not be found in Lic's part list.<br>You can import a copy of each part from your machine, if available.",
+            "proceed": "Remove Missing Parts from Model and Continue",
+            "used_@mf": "${count} Used",
+            "send_to_remote": {
+                "title": "Share to Lic's public site",
+                "tooltip": "Share this part with the Lic website,<br>so other users can use it too.<br>Share only basic parts, not full models.<br />Entirely optional."
+            }
+        },
+        "scene_rendering": {
+            "title": "3D Part Rendering",
+            "undo": "Change Part Rendering",
+            "zoom": "Camera Zoom",
+            "edge_width": "Part Edge Thickness",
+            "rotate_title": "Overall Model Rotation"
+        },
+        "transform_part": {
+            "title": "Transform Part",
+            "position": "Position",
+            "rotation": "Rotation"
+        },
+        "displace_part": {
+            "title": "Displace Part",
+            "part_distance": "Part Distance",
+            "arrow_length": "Arrow Length",
+            "arrow_distance": "Arrow Distance",
+            "arrow_rotation": "Arrow Rotation"
+        },
+        "page_layout": {
+            "title": "Layout Page by Rows and Columns",
+            "rows": "Rows",
+            "cols": "Columns",
+            "orientation": "Orientation",
+            "horizontal": "Horizontal",
+            "vertical": "Vertical"
+        },
+        "rotate_part_image": {
+            "title_pli": "Rotate Part List Image",
+            "title_csi": "Rotate Step Image",
+            "add_rotate_icon": "Include Rotation Icon"
+        },
         "copy_csi_rotation": {
             "title": "Copy Rotation",
             "label": "Copy Rotation to Next Steps"
         },
         "scale_csi": {
-			"title": "Scale Step Image",
-			"label": "Scale By"
+            "title": "Scale Step Image",
+            "label": "Scale By"
         },
         "scale_pli": {
             "title": "Scale Part List Image"
@@ -763,169 +767,169 @@
             "title": "Change Part Count",
             "label": "New Count"
         },
-		"style_annotation": {
-			"title": "Style Annotation"
-		},
+        "style_annotation": {
+            "title": "Style Annotation"
+        },
         "resize_page_divider": {
             "title": "Resize Page Divider"
         },
-		"busy_indicator": {
-			"loading_model": "Loading Model",
-			"merging_steps": "Merging Steps",
-			"generating_PDF": "Generating PDF",
-			"generating_PNG": "Generating PNG Zip"
-		},
-		"about_lic": {
-			"title": "About Lic",
-			"version_@mf": "Version ${version}",
-			"free_@link": "Lic is totally free and $link{open source}.",
-			"read_more_@link": "Read more about Lic and how to get started $link{here}.",
-			"ldraw_@link": "Lic relies on the $link{LDraw Part Library} for all its brick geometry.",
-			"contact_@link": "Contact $email{} with questions or feature requests, or $link{open an issue}.",
-			"lang_@link": "If you know more than one language, please help other Lic users by translating Lic. $link{It's easy}!",
-			"thanks": "Special Thanks:",
-			"feedback": "Major feedback, bug hunting and moral support:",
-			"and": "and",
-			"german": "German Translation and translation code fixes:",
-			"french": "French Translation:",
-			"copyright": "Copyright © 2019"
-		},
-		"rotation": {
-			"title": "Rotations",
-			"axis": "Axis",
-			"angle": "Angle"
-		},
-		"welcome": {
-			"title": "Welcome to Lic",
-			"close_tooltip": "Hide this message",
-			"import": "Create a new Instruction book: Import a complete LDraw model",
-			"open": "Continue work on an existing Instruction Book: Open a previously saved Lic file",
-			"test": "Play with Lic, see what it can do: Import a sample LDraw model",
-			"models": {
-				"trivial": "Trivial little Model",
-				"alligator": "Creator Alligator",
-				"xwing": "Classic X-Wing"
-			},
-			"learn": "Learn more about Lic"
-		},
-		"resize_image": {
-			"title": "Resize Image",
-			"high_dpi_@mf": "This image's high resolution (${dpi} DPI) will be preserved, even if you shrink it to fit. This high resolution will be used if you export this instruction book at a high resolution.",
-			"preserve_aspect_ratio": "Preserve Image Aspect Ratio",
-			"too_big": "This image is bigger than the instructions page size.",
-			"too_small": "This image is smaller than the instruction page size.",
-			"do_nothing": "Preserve Image Size",
-			"shrink": "Shrink Image To Fit",
-			"stretch": "Stretch Image To Fit",
-			"anchor_text": "Image Position",
-			"anchors": {
-				"top_left": "Top Left",
-				"top": "Top",
-				"top_right": "Top Right",
-				"left": "Left",
-				"center": "Center",
-				"right": "Right",
-				"bottom_left": "Bottom Left",
-				"bottom": "Bottom",
-				"bottom_right": "Bottom Right"
-			}
-		},
-		"multi_book" : {
-			"title": "Multiple Books",
-			"split_count": "Divide Instructions into how many Books?",
-			"book_n_@c": "Book ${0}",
-			"pages_n_@mf": "Pages ${start} - ${end}",
-			"pages_n_start_@c": "Pages ${0} - ",
-			"steps_n_@mf": "Steps ${start} - ${end}",
-			"include_title_page": "Add Title Page to each Book",
-			"split_submodels": "Do not split Sub Models across Books",
-			"page_numbering": {
-				"start_page_1": {
-					"text": "Start each Book on Page 1",
-					"tooltip": "Use this if you plan to keep your<br/>final instructions as separate books"
-				},
-				"preserve_page_count": {
-					"text": "Preserve existing Page numbers across Books",
-					"tooltip": "Use this if you plan to recombine the final books back into<br/>one book, and are splitting for performance reasons"
-				}
-			},
-			"file_split": {
-				"one_file": {
-					"text": "Keep all books in one Lic file",
-					"tooltip": "Each book will be listed in the nav tree, and you can continue to move pages<br/>and steps from book to book. Lic file size and performance will remain unchanged.<br />Use this if performance is not a concern, and you just want to split up large<br/>instructions for easier reading and printing."
-				},
-				"separate_files": {
-					"text": "Split instructions into separate Lic files, one per book",
-					"tooltip": "With this, Lic will split your instruction book into separate Lic files, one<br />per book. Each Lic file will contain *only* the pages and steps for that book.<br />The first book will remain open in your browser, and your browser will download<br/>a zip file containing every book / Lic file. You will not be able to move pages or<br/>anything between books, so choose your book divisions carefully. Use this if<br/>you're having performance problems with large books."
-				}
-			}
-		}
-	},
-	"template": {
-		"select_page_item": "Select a Page Item",
-		"page": {
-			"title": "Page Size",
-			"formats": {
-				"custom": "Custom...",
-				"a3": "A3",
-				"a4": "A4",
-				"a5": "A5",
-				"letter": "Letter",
-				"gov-letter": "Gov. Letter",
-				"legal": "Legal",
-				"junior-legal": "Junior Legal"
-			},
-			"orientation": {
-				"landscape": "Landscape",
-				"portrait": "Portrait"
-			},
-			"width": "Width (px)",
-			"height": "Height (px)",
-			"aspect_ratio_@mf": "Maintain Aspect Ratio (${aspect_ratio})",
-			"printed_size": "Printed Page will be:",
-			"centimeter_size_@mf": "${width} x ${height} cm",
-			"inch_size_@mf": "${width} x ${height} in"
-		},
-		"fill": {
-			"title": "Fill",
-			"gradient": "Gradient",
-			"image": "Image"
-		},
-		"border": {
-			"title": "Border",
-			"line_width": "Line Width",
-			"corner_radius": "Corner Radius",
-			"margin": "Margin"
-		},
-		"font": {
-			"bold_character": "B",
-			"italic_character": "I",
-			"underline_character": "U"
-		},
-		"transform": {
-			"title": "Transform",
-			"rotate_x": "Rotate X",
-			"rotate_y": "Y",
-			"rotate_z": "Z",
-			"scale": "Scale"
-		},
-		"pli": {
-			"content": "Content",
-			"include_submodels": "Include Submodels in Part List"
-		},
+        "busy_indicator": {
+            "loading_model": "Loading Model",
+            "merging_steps": "Merging Steps",
+            "generating_PDF": "Generating PDF",
+            "generating_PNG": "Generating PNG Zip"
+        },
+        "about_lic": {
+            "title": "About Lic",
+            "version_@mf": "Version ${version}",
+            "free_@link": "Lic is totally free and $link{open source}.",
+            "read_more_@link": "Read more about Lic and how to get started $link{here}.",
+            "ldraw_@link": "Lic relies on the $link{LDraw Part Library} for all its brick geometry.",
+            "contact_@link": "Contact $email{} with questions or feature requests, or $link{open an issue}.",
+            "lang_@link": "If you know more than one language, please help other Lic users by translating Lic. $link{It's easy}!",
+            "thanks": "Special Thanks:",
+            "feedback": "Major feedback, bug hunting and moral support:",
+            "and": "and",
+            "german": "German Translation and translation code fixes:",
+            "french": "French Translation:",
+            "copyright": "Copyright © 2019"
+        },
+        "rotation": {
+            "title": "Rotations",
+            "axis": "Axis",
+            "angle": "Angle"
+        },
+        "welcome": {
+            "title": "Welcome to Lic",
+            "close_tooltip": "Hide this message",
+            "import": "Create a new Instruction book: Import a complete LDraw model",
+            "open": "Continue work on an existing Instruction Book: Open a previously saved Lic file",
+            "test": "Play with Lic, see what it can do: Import a sample LDraw model",
+            "models": {
+                "trivial": "Trivial little Model",
+                "alligator": "Creator Alligator",
+                "xwing": "Classic X-Wing"
+            },
+            "learn": "Learn more about Lic"
+        },
+        "resize_image": {
+            "title": "Resize Image",
+            "high_dpi_@mf": "This image's high resolution (${dpi} DPI) will be preserved, even if you shrink it to fit. This high resolution will be used if you export this instruction book at a high resolution.",
+            "preserve_aspect_ratio": "Preserve Image Aspect Ratio",
+            "too_big": "This image is bigger than the instructions page size.",
+            "too_small": "This image is smaller than the instruction page size.",
+            "do_nothing": "Preserve Image Size",
+            "shrink": "Shrink Image To Fit",
+            "stretch": "Stretch Image To Fit",
+            "anchor_text": "Image Position",
+            "anchors": {
+                "top_left": "Top Left",
+                "top": "Top",
+                "top_right": "Top Right",
+                "left": "Left",
+                "center": "Center",
+                "right": "Right",
+                "bottom_left": "Bottom Left",
+                "bottom": "Bottom",
+                "bottom_right": "Bottom Right"
+            }
+        },
+        "multi_book": {
+            "title": "Multiple Books",
+            "split_count": "Divide Instructions into how many Books?",
+            "book_n_@c": "Book ${0}",
+            "pages_n_@mf": "Pages ${start} - ${end}",
+            "pages_n_start_@c": "Pages ${0} - ",
+            "steps_n_@mf": "Steps ${start} - ${end}",
+            "include_title_page": "Add Title Page to each Book",
+            "split_submodels": "Do not split Sub Models across Books",
+            "page_numbering": {
+                "start_page_1": {
+                    "text": "Start each Book on Page 1",
+                    "tooltip": "Use this if you plan to keep your<br/>final instructions as separate books"
+                },
+                "preserve_page_count": {
+                    "text": "Preserve existing Page numbers across Books",
+                    "tooltip": "Use this if you plan to recombine the final books back into<br/>one book, and are splitting for performance reasons"
+                }
+            },
+            "file_split": {
+                "one_file": {
+                    "text": "Keep all books in one Lic file",
+                    "tooltip": "Each book will be listed in the nav tree, and you can continue to move pages<br/>and steps from book to book. Lic file size and performance will remain unchanged.<br />Use this if performance is not a concern, and you just want to split up large<br/>instructions for easier reading and printing."
+                },
+                "separate_files": {
+                    "text": "Split instructions into separate Lic files, one per book",
+                    "tooltip": "With this, Lic will split your instruction book into separate Lic files, one<br />per book. Each Lic file will contain *only* the pages and steps for that book.<br />The first book will remain open in your browser, and your browser will download<br/>a zip file containing every book / Lic file. You will not be able to move pages or<br/>anything between books, so choose your book divisions carefully. Use this if<br/>you're having performance problems with large books."
+                }
+            }
+        }
+    },
+    "template": {
+        "select_page_item": "Select a Page Item",
+        "page": {
+            "title": "Page Size",
+            "formats": {
+                "custom": "Custom...",
+                "a3": "A3",
+                "a4": "A4",
+                "a5": "A5",
+                "letter": "Letter",
+                "gov-letter": "Gov. Letter",
+                "legal": "Legal",
+                "junior-legal": "Junior Legal"
+            },
+            "orientation": {
+                "landscape": "Landscape",
+                "portrait": "Portrait"
+            },
+            "width": "Width (px)",
+            "height": "Height (px)",
+            "aspect_ratio_@mf": "Maintain Aspect Ratio (${aspect_ratio})",
+            "printed_size": "Printed Page will be:",
+            "centimeter_size_@mf": "${width} x ${height} cm",
+            "inch_size_@mf": "${width} x ${height} in"
+        },
+        "fill": {
+            "title": "Fill",
+            "gradient": "Gradient",
+            "image": "Image"
+        },
+        "border": {
+            "title": "Border",
+            "line_width": "Line Width",
+            "corner_radius": "Corner Radius",
+            "margin": "Margin"
+        },
+        "font": {
+            "bold_character": "B",
+            "italic_character": "I",
+            "underline_character": "U"
+        },
+        "transform": {
+            "title": "Transform",
+            "rotate_x": "Rotate X",
+            "rotate_y": "Y",
+            "rotate_z": "Z",
+            "scale": "Scale"
+        },
+        "pli": {
+            "content": "Content",
+            "include_submodels": "Include Submodels in Part List"
+        },
         "csi": {
             "displacement_arrow_color": "Displacement Arrow Color"
         },
-		"page_number": {
-			"position": "Position",
-			"positions": {
-				"right": "Right",
-				"left": "Left",
-				"even-left": "Even Left, Odd Right",
-				"even-right": "Odd Left, Even Right"
-			}
-		}
-	},
+        "page_number": {
+            "position": "Position",
+            "positions": {
+                "right": "Right",
+                "left": "Left",
+                "even-left": "Even Left, Odd Right",
+                "even-right": "Odd Left, Even Right"
+            }
+        }
+    },
     "nav_tree": {
         "show": "Show",
         "all": "All",
@@ -944,9 +948,9 @@
         "quantity_labels": "Quantity Labels",
         "dividers": "Dividers",
         "group_parts": "Group Parts By Type (NYI)"
-	},
-	"title_page": {
-		"model_info_@mf": "${partCount} Parts, ${pageCount} Pages",
-		"book_model_info_@mf": "Book ${bookNumber}, ${partCount} Parts, ${pageCount} Pages"
-	}
+    },
+    "title_page": {
+        "model_info_@mf": "${partCount} Parts, ${pageCount} Pages",
+        "book_model_info_@mf": "Book ${bookNumber}, ${partCount} Parts, ${pageCount} Pages"
+    }
 }
