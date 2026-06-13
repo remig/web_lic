@@ -48,6 +48,15 @@ npm run test        # cypress open
 - `src/file_ops.ts` - open/import/save file operations
 - `src/export.ts` - PDF and PNG export
 
+## Backward Compatibility
+
+Whenever you add or change a property that is persisted to disk - anything written during **File -> Save** (instruction book `.lic` files) or **File -> Template -> Save** (`.lic-template` files) - you must add a backward compatibility fix in `src/backward_compat.ts` so that older files still load correctly.
+
+- For **template properties** (`state.template.*` or standalone template files): add the fix to `fixTemplate()` (called unconditionally from both `fixLicTemplate` and `fixLicSaveFile`). If `fixTemplate` does not yet exist, create it following the same pattern as `fixState`.
+- For **state/store properties** (pages, steps, parts, etc.): add the fix to `fixState()` (already called unconditionally).
+- For properties only present in files older than version 0.45, use `fixOldTemplate()` / `fixOldState()` instead (gated by `isOld()`).
+- The typical fix is a null-check that defaults the missing field: `if (x == null) { x = defaultValue; }`
+
 ## Layout & Coordinate System
 
 - All item positions (`x`, `y`, `width`, `height`) are in **page-local pixels**, 1:1 with canvas pixels. No DPI scaling.

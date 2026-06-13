@@ -23,6 +23,7 @@ const template: Template = {
 		width: 900,
 		height: 700,
 		sizePreset: null, // {format, orientation}, formats defined in page_template.vue: pageSizeLookups
+		layout: { rows: 'auto', cols: 'auto', direction: 'horizontal' },
 		innerMargin: 0.025,
 		numberLabel: {
 			font: 'bold 18pt Helvetica',
@@ -100,7 +101,7 @@ const template: Template = {
 	},
 	pliItem: {
 		scale: 1,
-		rotation: [],
+		rotation: [{ axis: 'y', angle: -90 }],
 		quantityLabel: {
 			font: 'bold 10pt Helvetica',
 			color: '#000000',
@@ -157,8 +158,8 @@ const template: Template = {
 		zoom: 0,
 		edgeWidth: 4,
 		rotation: [
-			{ axis: 'x', angle: 36 },
-			{ axis: 'y', angle: 50 },
+			{ axis: 'x', angle: 30 },
+			{ axis: 'y', angle: 51 },
 		],
 	},
 	useBlackStudFaces: true,

@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.5.0",
+		"date": "May 5, 2026",
+		"features": [
+			"Migrate the entire app to a more modern application stack (Vue 2 -> 3, Webpack  -> Vite, JS -> TS, Element UI -> Native HTML)",
+			"Always include a Template Page, so the template can be adjusted before importing a model, and so the imported model is fully impacted by any template changes",
+			"New 'Snap' feature: if enabled, as boxes are dragged around the page, the UI draws little guides to help box edges snap to nearby edges. Enabled in Edit -> Snap",
+			"More options to position Callouts (select Callout -> right click -> Position"
+		]
+	},
+	{
 		"version": "0.48.0",
 		"date": "November 5, 2019",
 		"features": [

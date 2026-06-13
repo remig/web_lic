@@ -77,13 +77,31 @@
 				<div v-html="t('template.page.inch_size_@mf', printedSize('in'))" />
 			</div>
 		</panel-base>
+		<panel-base title="template.page.layout.title">
+			<div class="flex-row panel-row">
+				<div
+					class="layout-option"
+					:class="{ selected: pageLayoutDirection === 'horizontal' }"
+					@click="updatePageLayout('horizontal')"
+				>
+					{{ t('template.page.layout.horizontal') }}
+				</div>
+				<div
+					class="layout-option"
+					:class="{ selected: pageLayoutDirection === 'vertical' }"
+					@click="updatePageLayout('vertical')"
+				>
+					{{ t('template.page.layout.vertical') }}
+				</div>
+			</div>
+		</panel-base>
 		<fill-panel template-entry="page" @new-values="newValues" />
 		<border-panel template-entry="page" @new-values="newValues" />
 	</div>
 </template>
 
 <script setup lang="ts">
-import { Size } from '@/item_types';
+import { type Orientations, Size } from '@/item_types';
 import { t } from '@/translations';
 import { computed, ref } from 'vue';
 
@@ -123,6 +141,7 @@ const sizePreset = ref({
 });
 const aspectRatio = ref(template.width / template.height);
 const maintainAspectRatio = ref(true);
+const pageLayoutDirection = ref(template.layout.direction);
 
 const emit = defineEmits(['new-values']);
 
@@ -171,6 +190,12 @@ function updateOrientation(newOrientation: string) {
 	updateValues();
 }
 
+function updatePageLayout(direction: Orientations) {
+	pageLayoutDirection.value = direction;
+	store.mutations.templatePage.setPageLayout({ direction });
+	newValues();
+}
+
 function updateValues() {
 	const page = store.state.template.page;
 	let haveChange = false;
@@ -204,5 +229,30 @@ function updateValues() {
 .pageSizeInfo > div {
 	line-height: unset;
 	color: #606266;
+}
+
+.layout-option {
+	flex: 1;
+	padding: 4px 8px;
+	text-align: center;
+	cursor: pointer;
+	border: 1px solid #dcdfe6;
+	border-radius: 4px;
+	color: #606266;
+
+	& + .layout-option {
+		margin-left: 6px;
+	}
+
+	&.selected {
+		border-color: #409eff;
+		color: #409eff;
+		background-color: #ecf5ff;
+	}
+
+	&:hover:not(.selected) {
+		border-color: #c0c4cc;
+		color: #303133;
+	}
 }
 </style>

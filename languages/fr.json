@@ -770,6 +770,11 @@
                 "landscape": "Paysage",
                 "portrait": "Portrait"
             },
+            "layout": {
+                "title": "Mise en page",
+                "horizontal": "Horizontal",
+                "vertical": "Vertical"
+            },
             "width": "Largeur (px)",
             "height": "Hauteur (px)",
             "aspect_ratio_@mf": "Maintenir le rapport hauteur / largeur (${aspect_ratio})",

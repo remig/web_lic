@@ -178,7 +178,11 @@ const contextMenu = {
 					id: 'page_layout_v_cmenu',
 					shown(selectedItem: LookupItem) {
 						const page = store.get.page(selectedItem);
-						return page?.layout !== 'vertical';
+						if (!page) {
+							return false;
+						}
+						const dir = typeof page.layout === 'string' ? page.layout : page.layout.direction;
+						return dir !== 'vertical';
 					},
 					cb(selectedItem: LookupItem) {
 						undoStack.commit(
@@ -193,7 +197,11 @@ const contextMenu = {
 					id: 'page_layout_h_cmenu',
 					shown(selectedItem: LookupItem) {
 						const page = store.get.page(selectedItem);
-						return page?.layout !== 'horizontal';
+						if (!page) {
+							return false;
+						}
+						const dir = typeof page.layout === 'string' ? page.layout : page.layout.direction;
+						return dir !== 'horizontal';
 					},
 					cb(selectedItem: LookupItem) {
 						const opts = { page: selectedItem, layout: 'horizontal' };

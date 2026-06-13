@@ -770,6 +770,11 @@
                 "landscape": "Quer",
                 "portrait": "Hoch"
             },
+            "layout": {
+                "title": "Seitenlayout",
+                "horizontal": "Horizontal",
+                "vertical": "Vertikal"
+            },
             "width": "Breite (px)",
             "height": "Höhe (px)",
             "aspect_ratio_@mf": "Seitenverhältnis beibehalten (${aspect_ratio})",

@@ -1,5 +1,6 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
+import { type Orientations } from '../item_types';
 import LDParse from '../ld_parse';
 import { store } from '../store';
 import defaultTemplate from '../template';
@@ -79,5 +80,19 @@ export const TemplatePageMutations = {
 		store.state.template.page.width = width;
 		store.state.template.page.height = height;
 		store.mutations.page.markAllDirty();
+	},
+	setPageLayout({ direction }: { direction: Orientations }): void {
+		store.state.template.page.layout.direction = direction;
+		store.state.pages.forEach((page) => {
+			if (page.subtype === 'templatePage' || page.locked) {
+				return;
+			}
+			if (typeof page.layout === 'string') {
+				page.layout = direction;
+			} else {
+				page.layout.direction = direction;
+			}
+			page.needsLayout = true;
+		});
 	},
 } as const;

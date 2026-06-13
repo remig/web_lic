@@ -29,7 +29,7 @@ function fixOldRotation(oldRotation: any) {
 	return newRotation;
 }
 
-function fixOldTemplate(template: Template) {
+function fixTemplate(template: Template) {
 	if (template.pliItem.rotation != null) {
 		template.pliItem.rotation = fixOldRotation(template.pliItem.rotation);
 	}
@@ -60,6 +60,10 @@ function fixOldTemplate(template: Template) {
 		];
 	}
 	template.useBlackStudFaces = true;
+
+	if (template.page.layout == null) {
+		template.page.layout = _.cloneDeep(defaultTemplate.page.layout);
+	}
 }
 
 function fixState(state: any) {
@@ -250,9 +254,7 @@ function isOld(content: SaveFileContent) {
 }
 
 function fixLicTemplate(content: any) {
-	if (isOld(content)) {
-		fixOldTemplate(content.template);
-	}
+	fixTemplate(content.template);
 }
 
 function fixLicSaveFile(content: SaveFileContent) {
@@ -262,11 +264,11 @@ function fixLicSaveFile(content: SaveFileContent) {
 		}
 
 		fixOldState(content.state);
-		fixOldTemplate(content.state.template);
 		fixColorTable(content.colorTable);
 		fixOldPartDictionary(content.partDictionary);
 	}
 
+	fixTemplate(content.state.template);
 	fixState(content.state);
 }
 

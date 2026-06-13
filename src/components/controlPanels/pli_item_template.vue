@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<TransformPanel template-entry="pliItem" @new-values="newValues" />
+	<TransformPanel :template-entry="templateEntry" @new-values="newValues" />
 </template>
 
 <script setup lang="ts">
@@ -10,7 +10,7 @@ import { getCurrentInstance } from 'vue';
 import { store } from '../../store';
 import TransformPanel from './transform.vue';
 
-const props = defineProps<{ selectedItem: any }>();
+const props = defineProps<{ selectedItem: any; templateEntry: string }>();
 const emit = defineEmits(['new-values']);
 
 const instance = getCurrentInstance();

@@ -60,7 +60,7 @@ const componentLookup: any = {
 		step: [csiTemplatePanel, 'step.csi'],
 		submodelImage: [csiTemplatePanel, 'submodelImage.csi'],
 	},
-	pliItem: [pliItemTemplatePanel, ''],
+	pliItem: [pliItemTemplatePanel, 'pliItem'],
 	pli: [pliTemplatePanel, ''],
 	callout: [fillAndBorderTemplatePanel, 'callout'],
 	calloutArrow: [borderPanel, 'callout.arrow'],

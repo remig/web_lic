@@ -47,7 +47,7 @@ export const PageMutations = {
 				innerContentOffset: { x: 0, y: 0 },
 				number: -1,
 				numberLabelID: null,
-				layout: pageSize.width > pageSize.height ? 'horizontal' : 'vertical',
+				layout: { ...pageSize.layout },
 			},
 			parent,
 			insertionIndex,

@@ -341,6 +341,7 @@ export interface PageTemplate extends BaseTemplate {
 	width: number;
 	height: number;
 	sizePreset: { format: string; orientation: string } | null;
+	layout: GridLayout;
 	innerMargin: number;
 	numberLabel: {
 		font: string;

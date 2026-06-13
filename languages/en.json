@@ -883,6 +883,11 @@
                 "landscape": "Landscape",
                 "portrait": "Portrait"
             },
+            "layout": {
+                "title": "Page Layout",
+                "horizontal": "Horizontal",
+                "vertical": "Vertical"
+            },
             "width": "Width (px)",
             "height": "Height (px)",
             "aspect_ratio_@mf": "Maintain Aspect Ratio (${aspect_ratio})",
