@@ -6,6 +6,10 @@ dist
 lib
 test/errorShots
 test/chromeDownloads
+test-results
+playwright-report
+blob-report
+playwright/.cache
 .vscode/*
 *.sublime-project
 *.sublime-workspace

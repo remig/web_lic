@@ -25,7 +25,8 @@
 	},
 	"include": [
 		"./eslint.config.ts",
-		"./vite.config.ts"
+		"./vite.config.ts",
+		"./playwright.config.ts"
 	],
 	"exclude": [
 		"node_modules"

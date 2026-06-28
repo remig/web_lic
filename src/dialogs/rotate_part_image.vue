@@ -31,20 +31,23 @@ interface RotateResult {
 	rotation: Rotation[];
 }
 
-const props = defineProps<{
-	title: string;
-	rotation: Rotation[] | null;
-	addRotateIcon?: boolean;
-	showRotateIconCheckbox?: boolean;
-}>();
+const props = withDefaults(
+	defineProps<{
+		title: string;
+		rotation: Rotation[] | null;
+		addRotateIcon?: boolean;
+		showRotateIconCheckbox?: boolean;
+	}>(),
+	{ addRotateIcon: true, showRotateIconCheckbox: true },
+);
 const emit = defineEmits<{
 	(e: 'update', v: RotateResult): void;
 	(e: 'ok', v: RotateResult): void;
 	(e: 'cancel'): void;
 }>();
 
-const addRotateIcon = ref(props.addRotateIcon ?? true);
-const showRotateIconCheckbox = ref(props.showRotateIconCheckbox ?? true);
+const addRotateIcon = ref(props.addRotateIcon);
+const showRotateIconCheckbox = ref(props.showRotateIconCheckbox);
 const rotation = ref<Rotation[]>(props.rotation ?? []);
 
 function currentData(): RotateResult {
