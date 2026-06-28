@@ -1,7 +1,12 @@
 /* Web Lic - Copyright (C) 2018 Remi Gagne */
 
 <template>
-	<LicDialog :title="t('dialog.whats_new.title')" class="whatsNewDialog" width="700px">
+	<LicDialog
+		id="whats_new_dialog"
+		:title="t('dialog.whats_new.title')"
+		class="whatsNewDialog"
+		width="700px"
+	>
 		<div v-for="(entry, eID) in content" :key="`entry_${eID}`" class="oneEntry">
 			<h4>
 				{{ t('dialog.whats_new.version') }}

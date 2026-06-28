@@ -4,13 +4,8 @@
 	<LicDialog :title="title" width="400px" class="rotatePartImageDialog">
 		<rotate-builder :initial-rotation="rotation" title="" @new-values="updateValues" />
 		<div v-if="showRotateIconCheckbox" class="panel-row">
-			<label class="lic-checkbox">
-				<input
-					v-model="addRotateIcon"
-					type="checkbox"
-					data-testid="rotate-add-icon"
-					@change="emit('update', currentData())"
-				/>
+			<label class="lic-checkbox" data-testid="rotate-add-icon">
+				<input v-model="addRotateIcon" type="checkbox" @change="emit('update', currentData())" />
 				{{ t('dialog.rotate_part_image.add_rotate_icon') }}
 			</label>
 		</div>

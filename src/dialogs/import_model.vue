@@ -22,8 +22,8 @@
 				type="number"
 				class="form-control step-input"
 			/>
-			<label class="lic-checkbox">
-				<input v-model="newState.useMaxSteps" type="checkbox" data-testid="import-use-max-steps" />
+			<label class="lic-checkbox" data-testid="import-use-max-steps">
+				<input v-model="newState.useMaxSteps" type="checkbox" />
 				{{ t('dialog.import_model.use_max_steps') }}
 			</label>
 		</div>

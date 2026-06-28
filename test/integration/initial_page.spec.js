@@ -54,23 +54,23 @@ describe('Launch initial empty page', () => {
 		cy.get('.' + page.classes.dialog.footer).then(el => {
 			expect(el.position().top + el.outerHeight(true)).to.be.below(900);
 		});
-		cy.get(page.ids.dialog.whatsNew + ' .el-button')
+		cy.get(page.ids.dialog.whatsNew + ' button.lic-btn')
 			.click();
 		cy.get(page.ids.dialog.whatsNew).should('not.exist');
 	});
 
 	it('Language chooser dialog should show up with a few languages in it', () => {
-		cy.get('#whats_new_dialog .el-button').click();
+		cy.get('#whats_new_dialog button.lic-btn').click();
 		cy.get(page.ids.dialog.localeChooser.container).should('be.visible');
 		cy.get(page.ids.dialog.localeChooser.select).should('be.visible');
-		cy.get(page.ids.dialog.localeChooser.container + ' .el-button')
+		cy.get(page.ids.dialog.localeChooser.container + ' button.lic-btn.primary')
 			.click();
 		cy.get(page.ids.dialog.localeChooser.container).should('not.exist');
 	});
 
 	it('General page layout is right', () => {
-		cy.get('#whats_new_dialog .el-button').click();
-		cy.get('#locale_chooser_dialog .el-button').click();
+		cy.get('#whats_new_dialog button.lic-btn').click();
+		cy.get('#locale_chooser_dialog button.lic-btn.primary').click();
 		cy.get(page.ids.navbar).then(el => {
 			expect(el.outerWidth()).to.be.closeTo(1500, 2);
 			expect(el.outerHeight()).to.be.closeTo(38, 2);
@@ -90,8 +90,8 @@ describe('Launch initial empty page', () => {
 	});
 
 	it('Welcome box should exist with some content', () => {
-		cy.get('#whats_new_dialog .el-button').click();
-		cy.get('#locale_chooser_dialog .el-button').click();
+		cy.get('#whats_new_dialog button.lic-btn').click();
+		cy.get('#locale_chooser_dialog button.lic-btn.primary').click();
 		cy.get('.gettingStarted').then(el => {
 			expect(el.outerWidth()).to.be.closeTo(1100, 5);
 			expect(el.outerHeight()).to.be.closeTo(737, 5);
@@ -104,8 +104,8 @@ describe('Launch initial empty page', () => {
 
 	it('Menus should exist and be clickable, with appropriately enabled / disabled content', () => {
 
-		cy.get('#whats_new_dialog .el-button').click();
-		cy.get('#locale_chooser_dialog .el-button').click();
+		cy.get('#whats_new_dialog button.lic-btn').click();
+		cy.get('#locale_chooser_dialog button.lic-btn.primary').click();
 
 		cy.get(page.ids.filenameContainer).should('not.exist');
 		isMenuClosed(page.ids.menu.file);

@@ -12,7 +12,7 @@ export default {
 		rootContainer: '#container',
 		navbar: '#navMenu',
 		statusBar: '#statusBar',
-		leftPane: '#leftPane',
+		leftPane: '.split-pane-left',
 		tree: '#tree',
 		rightPane: '#rightPane',
 		pageCanvas: '#pageCanvas',
@@ -98,9 +98,9 @@ export default {
 			}
 		},
 		dialog: {
-			header: 'el-dialog__header',
-			body: 'el-dialog__body',
-			footer: 'el-dialog__footer'
+			header: 'header',
+			body: 'body',
+			footer: 'footer'
 		}
 	},
 	selectors: {

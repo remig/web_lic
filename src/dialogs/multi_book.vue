@@ -52,16 +52,12 @@
 		</div>
 
 		<div class="form-row">
-			<label class="lic-checkbox check-row">
-				<input v-model="includeTitlePages" type="checkbox" data-testid="multi-book-title-pages" />
+			<label class="lic-checkbox check-row" data-testid="multi-book-title-pages">
+				<input v-model="includeTitlePages" type="checkbox" />
 				{{ t('dialog.multi_book.include_title_page') }}
 			</label>
-			<label class="lic-checkbox">
-				<input
-					v-model="noSplitSubmodels"
-					type="checkbox"
-					data-testid="multi-book-no-split-submodels"
-				/>
+			<label class="lic-checkbox" data-testid="multi-book-no-split-submodels">
+				<input v-model="noSplitSubmodels" type="checkbox" />
 				{{ t('dialog.multi_book.split_submodels') }}
 			</label>
 		</div>
@@ -71,13 +67,12 @@
 				<template #content>
 					<div v-html="t('dialog.multi_book.page_numbering.start_page_1.tooltip')" />
 				</template>
-				<label class="lic-radio">
+				<label class="lic-radio" data-testid="multi-book-page-start-1">
 					<input
 						type="radio"
 						name="firstPageNumber"
 						value="start_page_1"
 						:checked="firstPageNumber === 'start_page_1'"
-						data-testid="multi-book-page-start-1"
 						@change="firstPageNumber = 'start_page_1'"
 					/>
 					{{ t('dialog.multi_book.page_numbering.start_page_1.text') }}
@@ -87,13 +82,12 @@
 				<template #content>
 					<div v-html="t('dialog.multi_book.page_numbering.preserve_page_count.tooltip')" />
 				</template>
-				<label class="lic-radio">
+				<label class="lic-radio" data-testid="multi-book-page-start-old">
 					<input
 						type="radio"
 						name="firstPageNumber"
 						value="preserve_page_count"
 						:checked="firstPageNumber === 'preserve_page_count'"
-						data-testid="multi-book-page-start-old"
 						@change="firstPageNumber = 'preserve_page_count'"
 					/>
 					{{ t('dialog.multi_book.page_numbering.preserve_page_count.text') }}
@@ -106,13 +100,12 @@
 				<template #content>
 					<div v-html="t('dialog.multi_book.file_split.one_file.tooltip')" />
 				</template>
-				<label class="lic-radio">
+				<label class="lic-radio" data-testid="multi-book-one-lic-file">
 					<input
 						type="radio"
 						name="fileSplit"
 						value="one_file"
 						:checked="fileSplit === 'one_file'"
-						data-testid="multi-book-one-lic-file"
 						@change="fileSplit = 'one_file'"
 					/>
 					{{ t('dialog.multi_book.file_split.one_file.text') }}
@@ -122,13 +115,12 @@
 				<template #content>
 					<div v-html="t('dialog.multi_book.file_split.separate_files.tooltip')" />
 				</template>
-				<label class="lic-radio">
+				<label class="lic-radio" data-testid="multi-book-many-lic-files">
 					<input
 						type="radio"
 						name="fileSplit"
 						value="separate_files"
 						:checked="fileSplit === 'separate_files'"
-						data-testid="multi-book-many-lic-files"
 						@change="fileSplit = 'separate_files'"
 					/>
 					{{ t('dialog.multi_book.file_split.separate_files.text') }}

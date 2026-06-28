@@ -34,8 +34,8 @@ Cypress.Commands.add('importXWing', importModel.bind(null, 'xwing'));
 Cypress.Commands.add('reloadLicPage', () => {
 	cy.clearLocalStorage();
 	cy.visit('http://localhost:8080');
-	cy.get('#whats_new_dialog .el-button').click();
-	cy.get('#locale_chooser_dialog .el-button').click();
+	cy.get('#whats_new_dialog button.lic-btn').click();
+	cy.get('#locale_chooser_dialog button.lic-btn.primary').click();
 	cy.queryLic(lic => {
 		lic.app.disableLocalStorage = true;
 	});

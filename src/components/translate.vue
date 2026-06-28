@@ -1,7 +1,7 @@
 /* Web Lic - Copyright (C) 2019 Remi Gagne */
 
 <template>
-	<LicDialog :title="t('dialog.locale_chooser.title')" width="400px">
+	<LicDialog id="locale_chooser_dialog" :title="t('dialog.locale_chooser.title')" width="400px">
 		<LicSelect
 			id="localeChooserSelect"
 			v-model="chosenLocaleCode"
