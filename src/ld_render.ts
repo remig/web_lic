@@ -2,6 +2,7 @@
 
 import { type Box } from './item_types';
 import LDParse from './ld_parse';
+import { t } from './translations';
 import _ from './util';
 import LicGL from './webgl/licgl';
 
@@ -78,6 +79,9 @@ const api: LDRenderInterface = {
 
 	setModel(model) {
 		LicGL.initialize();
+		if (!LicGL.isSupported()) {
+			throw new Error(t('errors.no_webgl2'));
+		}
 		LicGL.initModel(model);
 	},
 

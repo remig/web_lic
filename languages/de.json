@@ -840,5 +840,8 @@
         "quantity_labels": "Anzahl",
         "dividers": "Trenner",
         "group_parts": "Teile nach Art gruppieren (NYI)"
+    },
+    "errors": {
+        "no_webgl2": "Ihr Browser oder Ihre Grafikkarte wird von Lic nicht unterstützt"
     }
 }

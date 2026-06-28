@@ -957,5 +957,8 @@
     "title_page": {
         "model_info_@mf": "${partCount} Parts, ${pageCount} Pages",
         "book_model_info_@mf": "Book ${bookNumber}, ${partCount} Parts, ${pageCount} Pages"
+    },
+    "errors": {
+        "no_webgl2": "Your browser or graphics card is not supported by Lic"
     }
 }

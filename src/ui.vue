@@ -296,11 +296,16 @@ onMounted(async () => {
 	LDParse.setCustomColorTable(Storage.get.customBrickColors());
 
 	const localModel = Storage.get.model();
-	if (!_.isEmpty(localModel)) {
-		FileOps.openLicFileFromContent(localModel);
-	} else {
-		await FileOps.ensureTemplatePage();
-		UiOps.forceUIUpdate();
+	try {
+		if (!_.isEmpty(localModel)) {
+			FileOps.openLicFileFromContent(localModel);
+		} else {
+			await FileOps.ensureTemplatePage();
+			UiOps.forceUIUpdate();
+		}
+	} catch (e) {
+		ReactiveState.updateProgress({ clear: true });
+		statusText.value = e instanceof Error ? e.message : String(e);
 	}
 });
 
@@ -313,5 +318,19 @@ onMounted(async () => {
 	LDParse,
 	Storage,
 	uiState,
+	app: {
+		get disableLocalStorage() {
+			return disableLocalStorage.value;
+		},
+		set disableLocalStorage(v: boolean) {
+			disableLocalStorage.value = v;
+		},
+		get selectedItemLookup() {
+			return selectedItemLookup.value;
+		},
+		get currentPageId() {
+			return currentPageId.value;
+		},
+	},
 };
 </script>

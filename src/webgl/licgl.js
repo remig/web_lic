@@ -20,6 +20,7 @@ const arrowPartName = 'lic_displacement_arrow';
 const partBufferCache = {};
 let canvas, gl, programs; // global rendering targets used throughout this file
 let isInitialized = false;
+let currentModel = null; // tracked for WebGL context restoration
 
 // Given an abstract part, transform matrix and color code, generate a list of
 // drawble scene objects that will draw the part and any child parts.
@@ -606,6 +607,53 @@ function getPartDisplacement({ direction, partDistance = 60 }) {
 	}
 }
 
+function initGLPrograms() {
+	const faceShader = twgl.createShader(gl, faceShaderSource, gl.VERTEX_SHADER);
+	const lineShader = twgl.createShader(gl, lineShaderSource, gl.VERTEX_SHADER);
+	const condLineShader = twgl.createShader(gl, condLineShaderSource, gl.VERTEX_SHADER);
+	const fragShader = twgl.createShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+
+	const faceProgram = twgl.createProgram(gl, faceShader, fragShader, ['position']);
+	const lineProgram = twgl.createProgram(gl, lineShader, fragShader, [
+		'position',
+		'next',
+		'direction',
+		'order',
+	]);
+	const condLineProgram = twgl.createProgram(gl, condLineShader, fragShader, [
+		'position',
+		'next',
+		'direction',
+		'order',
+		'condPointA',
+		'condPointB',
+	]);
+
+	programs = {
+		faces: {
+			program: faceProgram,
+			uniformSetters: twgl.createUniformSetters(gl, faceProgram),
+		},
+		lines: {
+			program: lineProgram,
+			uniformSetters: twgl.createUniformSetters(gl, lineProgram),
+		},
+		condLines: {
+			program: condLineProgram,
+			uniformSetters: twgl.createUniformSetters(gl, condLineProgram),
+		},
+	};
+
+	// All GPU buffers are gone; clear cache so importPart recreates them
+	Object.keys(partBufferCache).forEach((key) => delete partBufferCache[key]);
+
+	partBufferCache[arrowPartName] = Arrows.createArrowBuffers(gl);
+	importPart(LDParse.partDictionary['templateModel.ldr']);
+	if (currentModel) {
+		importPart(currentModel);
+	}
+}
+
 export default {
 	initialize: function () {
 		if (isInitialized) {
@@ -614,51 +662,32 @@ export default {
 		isInitialized = true;
 		canvas = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
 		canvas.setAttribute('id', 'lic_gl_canvas');
-		gl = canvas.getContext('webgl2', { antialias: true, alpha: true });
-		// TODO: figure out why canvas has to be in the DOM to render anything into it
+		// Chrome requires the canvas to be in the DOM before getContext() will succeed
 		document.getElementById('offscreenCache').appendChild(canvas);
+		gl = canvas.getContext('webgl2', { antialias: true, alpha: true });
+		if (!gl) {
+			return;
+		}
 
-		const faceShader = twgl.createShader(gl, faceShaderSource, gl.VERTEX_SHADER);
-		const lineShader = twgl.createShader(gl, lineShaderSource, gl.VERTEX_SHADER);
-		const condLineShader = twgl.createShader(gl, condLineShaderSource, gl.VERTEX_SHADER);
-		const fragShader = twgl.createShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+		canvas.addEventListener('webglcontextlost', (e) => {
+			e.preventDefault();
+		});
+		canvas.addEventListener('webglcontextrestored', () => {
+			gl = canvas.getContext('webgl2', { antialias: true, alpha: true });
+			if (gl) {
+				initGLPrograms();
+			}
+		});
 
-		const faceProgram = twgl.createProgram(gl, faceShader, fragShader, ['position']);
-		const lineProgram = twgl.createProgram(gl, lineShader, fragShader, [
-			'position',
-			'next',
-			'direction',
-			'order',
-		]);
-		const condLineProgram = twgl.createProgram(gl, condLineShader, fragShader, [
-			'position',
-			'next',
-			'direction',
-			'order',
-			'condPointA',
-			'condPointB',
-		]);
-
-		programs = {
-			faces: {
-				program: faceProgram,
-				uniformSetters: twgl.createUniformSetters(gl, faceProgram),
-			},
-			lines: {
-				program: lineProgram,
-				uniformSetters: twgl.createUniformSetters(gl, lineProgram),
-			},
-			condLines: {
-				program: condLineProgram,
-				uniformSetters: twgl.createUniformSetters(gl, condLineProgram),
-			},
-		};
-
-		partBufferCache[arrowPartName] = Arrows.createArrowBuffers(gl);
-
-		importPart(LDParse.partDictionary['templateModel.ldr']);
+		initGLPrograms();
+	},
+	isSupported: function () {
+		return gl != null;
 	},
 	initModel: function (model) {
+		if (!gl) {
+			return;
+		}
 		if (model == null) {
 			// const url = './static/models/20015 - Alligator.mpd';
 			const url = './static/models/7140 - x-wing fighter.mpd';
@@ -666,9 +695,11 @@ export default {
 				// const model = LDParse.partDictionary['3004.dat'];
 				// const model = LDParse.partDictionary['20015 - Alligator.mpd'];
 				const localModel = LDParse.partDictionary['7140 - Main Model.ldr'];
+				currentModel = localModel;
 				importPart(localModel);
 			});
 		} else {
+			currentModel = model;
 			importPart(model);
 		}
 	},

@@ -840,5 +840,8 @@
         "quantity_labels": "Etiquettes des quantités",
         "dividers": "Séparateurs",
         "group_parts": "Grouper les pièces par type (Non encore implémenté)"
+    },
+    "errors": {
+        "no_webgl2": "Votre navigateur ou votre carte graphique n'est pas pris en charge par Lic"
     }
 }
